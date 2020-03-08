@@ -1,0 +1,104 @@
+<main class="main d-flex w-100">
+	<div class="container d-flex flex-column">
+		<div class="row h-100">
+			<div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+				<div class="d-table-cell align-middle">
+					<div class="text-center mt-3">
+						<a class="sidebar-brand h2" href="/">
+							<i class="align-middle" data-feather="box"></i>
+							<h1 class="h2">Empieza ahora</h1>
+							<p class="lead">
+								Registrate y se parte de nuestro equipo RedFlix.
+							</p>
+						</a>
+					</div>
+					<form action="/signup" method="POST">
+						<div class="card">
+							<div class="card-body">
+								<div id="smartwizard-arrows-primary" class="wizard wizard-primary mb-4">
+									<ul>
+										<li><a href="#arrows-primary-step-1">Paso 1<br /><small>Pin de
+													registro</small></a>
+										</li>
+										<li><a href="#arrows-primary-step-2">Step Title<br /><small>Step
+													description</small></a>
+										</li>
+									</ul>
+									<div>
+										<div id="arrows-primary-step-1" class="">
+											<div class="m-sm-4">
+												<div class="alert alert-danger alert-dismissible form-group"
+													role="alert" style="display: none;">
+													<div class="alert-message">s</div>
+												</div>
+												<div class="form-group">
+													<label>Id de registro</label>
+													<input class="form-control form-control-lg" id="pin" type="text"
+														name="pin" placeholder="Ingrese pin de registro" required />
+												</div>
+											</div>
+										</div>
+										<div id="arrows-primary-step-2" class="">
+											<div class="m-sm-4">
+												<div class="text-center mt-3">
+													<label>Registrate con</label>
+												</div>
+												<div class="text-center mt-3">
+													<a href="/auth/google" class="btn btn-dark"><i
+															class="align-middle fab fa-google"></i>
+														Google</a>
+													<a href="/auth/facebook" class="btn btn-facebook"><i
+															class="align-middle fab fa-facebook">
+														</i> Facebook</a>
+												</div>
+												<div class="text-center mt-3">
+													<label>!--O--¡</label>
+												</div>
+												<div class="form-group">
+													<label>Documento</label>
+													<input class="form-control form-control-lg" type="text"
+														name="document" placeholder="Ingrese numero de documento" required />
+												</div>
+												<div class="form-group">
+													<label>Nombre</label>
+													<input class="form-control form-control-lg" type="text"
+														name="fullname" placeholder="Ingrese su nombre completo" required />
+												</div>
+												<div class="form-group">
+													<label>Movil</label>
+													<input type="text" name="movil" class="form-control form-control-lg"
+														data-mask="000-000-0000"
+														placeholder="Ingrese su numero movil" required />
+												</div>
+												<div class="form-group">
+													<label>Email</label>
+													<input class="form-control form-control-lg" type="email"
+														name="username" placeholder="Ingrese email" required />
+												</div>
+												<div class="form-group">
+													<label>Contraseña</label>
+													<input class="form-control form-control-lg" type="password"
+														name="password" placeholder="cree su contraseña" required />
+													<small>
+														¿Ya tienes cuenta?<a href="/signin"> Iniciar Sesion</a>
+													</small>
+												</div>
+												<div class="text-center mt-3">
+													<!-- <a href="dashboard-default.html" class="btn btn-lg btn-primary">Sign up</a> -->
+													<button type="submit" id="login"
+														class="btn btn-lg btn-primary h">Registrarse</button>
+												</div>
+											</div>
+										</div>
+										<div id="arrows-primary-step-4" class="">
+											Step Content 4
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</form>
+				</div>
+			</div>
+		</div>
+</main>

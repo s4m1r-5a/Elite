@@ -1,0 +1,170 @@
+<main class="content">
+    <div class="container-fluid p-0">
+
+        <h1 class="h3 mb-3">Transacciones</h1>
+
+        <div class="row">
+            <div class="col-xl-4">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-actions float-right">
+                            <div class="dropdown show">
+                                <a href="#" data-toggle="dropdown" data-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-0">Estado de la transaccion</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row no-gutters">
+                            <div class="col-sm-3 col-xl-12 col-xxl-3 text-center">
+                                <img src="/img/avatars/avatar.jpg" width="64" height="64" class="rounded-circle mt-2"
+                                    alt="Angelica Ramos">
+                            </div>
+                            <div class="col-sm-9 col-xl-12 col-xxl-9">
+                                <strong>IUX</strong>
+                                <p>Todo lo que quieres ver cuando lo quieras y en un mismo lugar, no tienes que buscar
+                                    mas todo lo encuentras aqui.</p>
+                            </div>
+                        </div>
+
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <td id="iuxname">{{nombre}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Email</th>
+                                    <td id="iuxemail">{{buyerEmail}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Movil</th>
+                                    <td id="iuxmovil">{{movil}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Producto</th>
+                                    <td>{{transactionState}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Valor</th>
+                                    <td>{{transactionState}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Descripcion</th>
+                                    <td>{{transactionState}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Metodo de pago</th>
+                                    <td>{{transactionState}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Referencia de pago</th>
+                                    <td id="iuxref">{{referenceCode}}</td>
+                                </tr>
+                                <tr>
+                                    <th>Estado</th>
+                                    <td><span id="msg" class="badge badge-{{estado}}">{{msg}}</span></td>
+                                </tr>
+                                <tr>
+                                    <th>Transaccion</th>
+                                    <td>{{transactionState}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+
+                        <hr />
+
+                        <strong>Seguimiento</strong>
+
+                        <ul class="timeline mt-2 mb-0">
+                            <li class="timeline-item">
+                                <strong>Ingreso de usuario</strong>
+                                <span class="float-right text-muted text-sm">Exitoso</span>
+                                <p>Fue satisfactorio el ingreso de los datos del usuario...<p>
+                            </li>
+                            <li class="timeline-item">
+                                <strong>Redireccionamiento</strong>
+                                <span class="float-right text-muted text-sm">Exitoso</span>
+                                <p>El redireccionamiento se efectuo con correcto desempeño...</p>
+                            </li>
+                            <li class="timeline-item">
+                                <strong>Forma de pago</strong>
+                                <span class="float-right text-muted text-sm">Exitoso</span>
+                                <p>La seleccion de la forma de pago se ecfectua adecuadamente...</p>
+                            </li>
+                            <li class="timeline-item">
+                                <strong>Culminacion</strong>
+                                <span class="float-right text-muted text-sm">Exitoso</span>
+                                <p>Los datos se registraron de manera indicada...</p>
+                            </li>
+                        </ul>
+                        <div class="mt-auto">
+                            <input name="Submit" id="iriux" type="submit" class="btn btn-lg btn-primary"
+                                value="Inciar sesion en IUX">
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-xl-8">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-actions float-right">
+                            <div class="dropdown show">
+                                <a href="#" data-toggle="dropdown" data-display="static">
+                                    <i class="align-middle" data-feather="more-horizontal"></i>
+                                </a>
+
+                                <div class="dropdown-menu dropdown-menu-right">
+                                    <a class="dropdown-item" href="#">Action</a>
+                                    <a class="dropdown-item" href="#">Another action</a>
+                                    <a class="dropdown-item" href="#">Something else here</a>
+                                </div>
+                            </div>
+                        </div>
+                        <h5 class="card-title mb-0">Clients</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="container-fluid p-0">
+                            <div id="smartwizard-arrows-primary" class="wizard wizard-primary mb-4">
+                                <ul>
+                                    <li><a href="#arrows-primary-step-1">Step Title<br /><small>Step
+                                                description</small></a></li>
+                                    <li><a href="#arrows-primary-step-2">Step Title<br /><small>Step
+                                                description</small></a></li>
+                                    <li><a href="#arrows-primary-step-3">Step Title<br /><small>Step
+                                                description</small></a></li>
+                                    <li><a href="#arrows-primary-step-4">Step Title<br /><small>Step
+                                                description</small></a></li>
+                                </ul>
+
+                                <div>
+                                    <div id="arrows-primary-step-1" class="">
+                                        Step Content 1
+                                    </div>
+                                    <div id="arrows-primary-step-2" class="">
+                                        Step Content 2
+                                    </div>
+                                    <div id="arrows-primary-step-3" class="">
+                                        Step Content 3
+                                    </div>
+                                    <div id="arrows-primary-step-4" class="">
+                                        Step Content 4
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <input type="hidden" id="yave" value="{{llave}}">
+</main>

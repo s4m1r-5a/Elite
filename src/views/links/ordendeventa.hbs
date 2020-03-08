@@ -1,0 +1,221 @@
+<main id="imprimir" class="content">
+    <div class="card text-white">
+        <img src="/img/logoTq.svg" class="card-img" alt="...">
+        <div class="card-img-overlay">
+            <h5 class="card-title text-right">
+                <font size="5">FACTURA DE VENTA N° </font>
+                <font size="5">{{datosc.id}}</font>
+            </h5>
+            <br>
+            <input type="hidden" value="">
+            <h1 class="card-title text-right mt-1"><mark id="fechaFactura">{{ datosc.fecha }}</mark></h1>
+            <h1 class="card-title text-right">Santa Marta D.T.C.H Magdalena</h1>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-md-12 text-center">
+            <strong class="font-weight-bold ml-7">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;FACTURAR A:</strong>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-6">
+            <div class="card border-primary mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-12">
+                        <div class="card-body text-primary h4">
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="user"></i> <span
+                                    class="align-middle text-text font-weight-bold">AGENCIA OPERADORA DE VIAJES
+                                    TQ</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="credit-card"></i> <span
+                                    class="align-middle text-text">8668598-9</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="phone-call"></i> <span
+                                    class="align-middle card-text">+57 304-666-5396</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="mail"></i> <span
+                                    class="align-middle card-text">contabilidad@operadoradeviajestq.com</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="globe"></i> <span
+                                    class="align-middle card-text">www.operadoradeviajestq.com</span>
+                            </div>
+                            <p class="card-text"><small class="text-muted">CL 25 N°.32B-50 Santa Marta D.T.C.H.</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-6">
+            <div class="card border-primary h4 mb-3" style="max-width: 540px;">
+                <div class="row no-gutters">
+                    <div class="col-md-12">
+                        <div class="card-body text-primary  h4">
+                            {{#each client}}
+                            <div class="mb-2 font-weight-bold">
+                                <i class="align-middle mr-2" data-feather="user"></i> <span
+                                    class="text-muted text-uppercase">{{nombre}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="credit-card"></i> <span
+                                    class="align-middle text-muted">{{nit}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="phone-call"></i> <span
+                                    class="align-middle text-muted">{{telefono}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="mail"></i> <span
+                                    class="align-middle text-muted"> {{ email }} </span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="globe"></i>
+                                <span class="align-middle text-muted">{{ dominio }} </span>
+                            </div>
+                            <p class="card-text"><small class="text-muted">{{ direccion }}</small></p>
+                            {{/each}}
+                            <input type="hidden" id="fatr" value="{{datosc.reservas}}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card text-left">
+
+        <div class="card-body h3">
+            <table class="table table-sm display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>DESCRIPCIÓN DEL SERVICIO</th>
+                        <th class="text-right">TOTAL</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <th class="relacion"></th>
+                        <th class="text-right totales"></th>
+                    </tr>
+                    <tr>
+                        <th></th>
+                        <th></th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-footer mb-5">
+            <div class="h4 text-left mb-2">TOTAL EN PALABRAS:</div>
+            <div class="col-md-12 text-left">
+                <span class="text-primary h4" id="totalLetras"></span>
+            </div>
+        </div>
+    </div>
+
+    <div class="card-deck h4">
+        <div class="card">
+            <div class="card-body text-primary">
+                <p class="card-text">Cta de ahorros N° 517-917890-72 Bancolombia</p>
+                <p class="card-text">Cta de ahorros N° 0550116100125545 Davivienda</p>
+            </div>
+        </div>
+        <div class="card">
+            <div class="card-body">
+                <table id="ghd" class="table table-sm" style="width:100%">
+                    <tbody>
+                        <tr>
+                            <th>Subtotal</th>
+                            <th class="text-right totales"></th>
+                        </tr>
+                        <tr>
+                            <th>Tasa de impuesto</th>
+                            <th class="text-right">0%</th>
+                        </tr>
+                        <tr>
+                            <th>Impuesto</th>
+                            <th class="text-right">0%</th>
+                        </tr>
+                        <tr>
+                            <th>Descuento</th>
+                            <th class="text-right">0%</th>
+                        </tr>
+                        <tr>
+                            <th>TOTAL</th>
+                            <th class="text-right totales"></th>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <footer class="footer" style="">
+        <div class="mb-0 flo">
+            <div class="grid-block ml-5" style="background-image: url('/img/firma.png');
+                            text-align: center;
+                            height: 100%;
+                            width: 20%;">.
+                <hr>
+                .
+                <br>
+            </div>
+            <strong class=" ml-4">TOMAS EMILIO QUINTERO DEL RIO</strong><br>
+            <strong class=" ml-7">Autorizado por:</strong>
+        </div>
+
+        <hr>
+        <div class="footer-copyright text-center my-0">
+            Cualquier comentario o sugerencia en la factura, por favor comunicarse con nosotros a traves de los
+            medios expuestos al inicio de este documento.
+        </div>
+    </footer>
+
+    <div class="card text-left">
+        <div class="col-md-12 text-left">
+            <input type="hidden" id="vLetras" value="{{ datosc.total }}">
+            <input type="hidden" id="nservicios" value="{{ datosc.nreservas }}">
+        </div>
+        <div class="card-body h3">
+            <table id="tablaFactura" class="table table-sm table-hover display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Reserva</th>
+                        <th>Descripcíon</th>
+                        <th>Pax</th>
+                        <th>Fecha</th>
+                        <th>Partida</th>
+                        <th>Destino</th>
+                        <th>Vuelo</th>
+                        <th>Ida y vuelta</th>
+                        <th>Observaciones</th>
+                        <th>Pasajeros</th>
+                        <th>Grupo</th>
+                        <th class="text-right">Valor</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {{#each reserv}}
+                    <tr>
+                        <th>{{id}}</th>
+                        <th>{{title}}</th>
+                        <th>{{pax}}</th>
+                        <th>{{start}}</th>
+                        <th>{{partida}}</th>
+                        <th>{{destino}}</th>
+                        <th>{{vuelo}}</th>
+                        <th>{{idavuelta}}</th>
+                        <th>{{observaciones}}</th>
+                        <th>{{pasajeros}}</th>
+                        <th>{{grupo}}</th>
+                        <th class="text-right">{{valor}}</th>
+                    </tr>
+                    {{/each}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>

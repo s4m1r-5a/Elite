@@ -1,0 +1,70 @@
+<main class="main d-flex w-100">
+  <div class="container d-flex flex-column">
+    <div class="row h-100">
+      <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
+        <div class="d-table-cell align-middle">
+
+          <div class="text-center mt-4">
+            <h1 class="h2">Bienvenido de nuevo, Chris</h1>
+            <p class="lead">
+              Inicie sesión en su cuenta para continuar
+            </p>
+          </div>
+
+          <div class="card">
+            <div class="card-body">
+              <div class="m-sm-4">
+                <div class="text-center">
+                  <img src="img/avatars/avatar.svg" alt="Chris Wood" class="img-fluid" width="100"
+                    height="100" />
+                </div>
+                <form action="/signin" method="POST">
+                  <div class="text-center mt-3">
+                    <a href="/auth/google" class="btn btn-dark"><i class="align-middle fab fa-google"></i>
+                      Inicia con Google</a>
+                    <a href="/auth/facebook" class="btn btn-facebook"><i class="align-middle fab fa-facebook">
+                      </i> Inicia con Facebook</a>
+                  </div>
+                  <div class="text-center mt-3">
+                    <label>!--O--¡</label>
+                  </div>
+                  <div class="form-group">
+                    <label>Email</label>
+                    <input class="form-control form-control-lg" type="email" name="username"
+                      placeholder="Ingrese su email" />
+                  </div>
+                  <div class="form-group">
+                    <label>Password</label>
+                    <input class="form-control form-control-lg" type="password" id="password" name="password"
+                      placeholder="Digite su contraseña" />
+                    <small>
+                      <a href="/signup">¿Se te olvidó tu contraseña?</a>
+                    </small>
+                  </div>
+                  <div>
+                    <div class="custom-control custom-checkbox align-items-center">
+                      <input type="checkbox" class="custom-control-input" value="remember-me" name="remember-me"
+                        checked>
+                      <label class="custom-control-label text-small">Recuerdame la proxima vez</label>
+                    </div>
+                  </div>
+
+                  <div class="text-center mt-3">
+                    <!-- <a href="dashboard-default.html" class="btn btn-lg btn-primary">Iniciar sesión</a> -->
+                    <button type="submit" id="login" class="btn btn-lg btn-primary">Iniciar sesión</button>
+                  </div>
+                  <div class="text-center mt-3">
+                    <small>
+                      <a href="/signup">..!Registrate¡..</a>
+                    </small>
+                  </div>
+                </form>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</main>

@@ -1,0 +1,207 @@
+<input type="hidden" id="proyecto" value="">
+<input type="hidden" id="idproyecto" value="">
+<div class="container-fluid p-0">
+    <div class="row" id="cuadro2" style="display: none;">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-body">
+                    <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                        <a class="r atras"><i class="feather-lg mr-0" data-feather="arrow-left-circle"></i></a>
+                    </div>
+                    <div class="row no-gutters">
+                        <div class="col-sm-6 col-xl-6 col-xxl-6">
+                            <strong>Facturacion</strong>
+                            <ul class="timeline mt-2 mb-0">
+                                <li class="timeline-item">
+                                    <strong>Reserva a facturar</strong>
+                                    <span class="float-right text-muted text-sm facturas">30m ago</span>
+                                    <p id="facturas"></p>
+                                </li>
+                                <li class="timeline-item">
+                                    <strong>Totales</strong>
+                                    <span class="float-right text-muted text-sm"><span
+                                            class="badge badge-success total"></span></span>
+                                    <p class="clientes"></p>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <table id="datatable" class="table table-striped table-hover table-sm display nowrap"
+                        style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>MZ</th>
+                                <th>LT</th>
+                                <th>MT2</th>
+                                <th>ESTADO</th>
+                                <th>VALOR</th>
+                                <th>CUOTA I</th>
+                                <th style="width:5%;">DSCP</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="cuadro1">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <div id="carouselExampleIndicators" class="carousel slide" data-ride="carousel">
+                        <ol class="carousel-indicators">
+                            <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="1"></li>
+                            <li data-target="#carouselExampleIndicators" data-slide-to="2"></li>
+                        </ol>
+                        <div class="carousel-inner">
+                            <div class="carousel-item active">
+                                <img class="d-block w-100" src="/img/avatars/avatar.svg" height="200" alt="First slide">
+                            </div>
+                            <div class="carousel-item">
+                                <img class="d-block w-100" src="/img/avatars/avatar.svg" height="200"
+                                    alt="Second slide">
+                            </div>
+                            <div class="carousel-item">
+                                <img class="d-block w-100" src="/img/avatars/avatar.svg" height="200" alt="Third slide">
+                            </div>
+                        </div>
+                        <a class="carousel-control-prev" href="#carouselExampleIndicators" role="button"
+                            data-slide="prev">
+                            <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Previous</span>
+                        </a>
+                        <a class="carousel-control-next" href="#carouselExampleIndicators" role="button"
+                            data-slide="next">
+                            <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                            <span class="sr-only">Next</span>
+                        </a>
+                    </div>
+                    <h5 class="card-title">Facturas</h5>
+                    <h6 class="card-subtitle text-muted">Use contextual classes to color table rows
+                        or
+                        individual cells.</h6>
+                </div>
+                <div class="card-body">
+                    <table id="datatable2" class="table table-striped table-sm table-hover responsive">
+                        <thead>
+                            <tr>
+                                <th>Id</th>
+                                <th>Categoria</th>
+                                <th>Producto</th>
+                                <th>Fecha</th>
+                                <th>Porcentage</th>
+                                <th>MT2S</th>
+                                <th>Val MT2</th>
+                                <th>Total</th>
+                                <th>MZs</th>
+                                <th>Cantidad</th>
+                                <th>Estado</th>
+                                <th>Accion</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row" id="cuadro3" style="display: none;">
+        <div class="col-xl-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">PRODUCTOS</h5>
+                    <h6 class="card-subtitle text-muted">Productos y servicios Elite</h6>
+                    <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                        <a class="r atras"><i class="feather-lg mr-0" data-feather="arrow-left-circle"></i></a>
+                    </div>
+                </div>
+                <form action="/links/regispro" method="POST">
+                    <div class="card-body">
+                        <div class="row py-1">
+                            <div class="col-sm-12 mb-3 mb-md-0">
+                                <div class="card text-center h-100">
+                                    <div class="form-row categoria">
+                                        <div class="form-group col-md-5">
+                                            <select class="form-control" name="categoria">
+                                                <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
+                                                <option value="CONSTUCCION">CONSTUCCIÓN</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-7">
+                                            <input type="text" name="title" class="form-control text-uppercase"
+                                                placeholder="TITULO" style="text-align:center">
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="text" name="porcentage" class="form-control" value="4.75"
+                                                style="text-align:center" disabled>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="text" name="totalmtr2" class="form-control v" id="tmt2"
+                                                placeholder="TOTAL MT2" style="text-align:center" required>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="text" name="valmtr2" class="form-control v" id="vmt2"
+                                                placeholder="VALOR MT2" data-mask="000.000.000" data-mask-reverse="true"
+                                                data-mask-selectonfocus="true" style="text-align:center">
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="text" name="valproyect" class="form-control" id="valproyect"
+                                                placeholder="VAL. PROYECTO" style="text-align:center" disabled>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="number" name="mzs" class="form-control"
+                                                style="text-align:center" placeholder="MZ'S" style="text-align:center">
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="number" name="cantidad" class="form-control" id="lts"
+                                                style="text-align:center" placeholder="LT'S" style="text-align:center">
+                                        </div>
+                                        <div class="form-group col-md-5">
+                                            <select class="form-control" name="estado">
+                                                <option value="1">PROCESANDO</option>
+                                                <option value="7">ACTIVO</option>
+                                                <option value="10">VENDIDO</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <h5 id="ttl"></h5>
+                                    <br>
+                                    <div class="form-row datos" id="datosproducto"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="card-footer mb-4">
+                        <button type="submit" class="btn btn-primary float-right">Ingresar</button>
+                        <button type="reset" class="btn btn-danger float-right mr-1">Cancelar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="ModalConfir" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</h5>
+                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                    <a class="reditar" data-dismiss="modal" aria-label="Close">
+                        <i class="feather mr-0" data-feather="x"></i></a>
+                </div>
+            </div>
+            <div class="modal-body m-1">
+                <h2 class="text-center mb-3">Seguro desea eliminar esta factura?</h2>
+                <button class="btn btn-outline-danger float-center" id="btnDeletf" data-dismiss="modal"
+                    aria-label="Close">Si</button>
+                <button class="btn btn-outline-danger float-center" data-dismiss="modal" aria-label="Close">NO</button>
+            </div>
+        </div>
+    </div>
+</div>

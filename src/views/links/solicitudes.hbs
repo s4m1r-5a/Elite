@@ -1,0 +1,36 @@
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="card-title">Table with Buttons</h5>
+                <h6 class="card-subtitle text-muted">This extension provides a framework with common options that can be
+                    used with DataTables.</h6>
+                <div class="">
+                    <input type="text" class="form-control-no-border reditar" id="Date_search" data-toggle="tooltip"
+                        data-placement="top" data-container="body" title="Haz click para editar fecha"
+                        style="width: 300px; padding: 1px;">
+                </div>
+            </div>
+            <div class="card-body">
+                <input type="hidden" id="tu" value="{{user.id}}">
+                <table id="datatable" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th style="width:1%;">Id</th>
+                            <th style="width:2%;">Benefactor</th>
+                            <th style="width:2%;">Adquisidor</th>
+                            <th style="width:3%;">Fecha</th>
+                            <th style="width:2%;">Monto</th>
+                            <th style="width:1%;">Metodo</th>
+                            <th style="width:1%;">Solicitante</th>
+                            <th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>
+                            <th style="width:5%;" data-priority="1">Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>

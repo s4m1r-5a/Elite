@@ -1,0 +1,40 @@
+{
+  "name": "nodejs-mysql-notes",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^0.19.2",
+    "bcryptjs": "^2.4.3",
+    "body-parser": "^1.18.3",
+    "casperjs": "^1.1.4",
+    "connect-flash": "^0.1.1",
+    "crypto-js": "^3.1.9-1",
+    "express": "^4.16.4",
+    "express-handlebars": "^3.0.0",
+    "express-mysql-session": "^2.0.1",
+    "express-session": "^1.15.6",
+    "express-validator": "^5.3.0",
+    "moment": "^2.24.0",
+    "morgan": "^1.9.1",
+    "mysql": "^2.16.0",
+    "nodemailer": "^6.3.0",
+    "passport": "^0.4.0",
+    "passport-facebook": "^3.0.0",
+    "passport-google-oauth": "^2.0.0",
+    "passport-local": "^1.0.0",
+    "phantomjs": "^2.1.7",
+    "request": "^2.88.0",
+    "timeago.js": "^4.0.0-beta.1"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.7"
+  }
+}

@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width, shrink-to-fit=no">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
+  <meta name="description" content="Responsive Bootstrap 4 Admin &amp; Dashboard Template">
+  <meta name="author" content="Bootlab">
+  <title>GRUPO ELITE</title>
+  <link rel="preconnect" href="//fonts.gstatic.com/" crossorigin>
+  <link href="/css/stilos.css" rel="Stylesheet" id="linkestilo">
+
+  <!-- PICK ONE OF THE STYLES BELOW -->
+  <!-- <link href="css/classic.css" rel="stylesheet"> -->
+  <link href="/css/corporate.css" rel="stylesheet">
+  <!--<link href="/css/modern.css" rel="stylesheet">
+  <script src="//site.com/playerjs.js" type="text/javascript"></script>-->
+  <style type="text/css">
+    .controls {
+      margin-top: 1%;
+      border: 1px solid transparent;
+      border-radius: 2px 0 0 2px;
+      box-sizing: border-box;
+      -moz-box-sizing: border-box;
+      height: 25px;
+      outline: none;
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+    }
+
+    #origin-input,
+    #destination-input {
+      color: mediumblue;
+      font-family: Roboto;
+      font-size: 15px;
+      font-weight: 500;
+      margin-left: 12px;
+      padding: 0 11px 0 13px;
+      text-overflow: ellipsis;
+      width: 35%;
+    }
+
+    #origin-input:focus,
+    #destination-input:focus {
+      border-color: #4d90fe;
+    }
+
+
+    @media print {
+      #imprimir {
+        background-color: white;
+        height: 3508px;
+        width: 2480px;
+        position: fixed;
+        top: 0;
+        left: 0;
+        margin: 0;
+        padding: 15px;
+        font-size: 14px;
+        line-height: 18px;
+      }
+
+      .card-footer {
+        position: fixed;
+        /* Set the navbar to fixed position */
+        bottom: 0;
+        /* Position the navbar at the bottom of the page */
+        width: 100%;
+        /* Full width */
+      }
+    }
+
+    .zoom {
+      -webkit-transition: all .9s ease;
+      /* Safari y Chrome */
+      -moz-transition: all .9s ease;
+      /* Firefox */
+      -o-transition: all .9s ease;
+      /* IE 9 */
+      -ms-transition: all .9s ease;
+      /* Opera */
+      width: 100%;
+    }
+
+    .zoom:hover {
+      -webkit-transform: scale(1.25);
+      -moz-transform: scale(1.25);
+      -ms-transform: scale(1.25);
+      -o-transform: scale(1.25);
+      transform: scale(1.25);
+    }
+  </style>
+</head>
+
+<body>
+  <div class="wrapper">
+    {{>navigation}}
+    <div class="main">
+      {{>navigation2}}
+      {{{ body }}}
+      {{>footer}}
+    </div>
+  </div>
+  <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
+  <script src="/js/app.js"></script>
+  <script src="/js/scriptss.js"></script>
+  <script src="/js/playerjs.js"> </script>
+  <script src=" https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"> </script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
+  <!-- importo la libreria moments -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.0/moment.min.js"></script>
+  <!-- importo todos los idiomas -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.15.0/moment-with-locales.min.js"></script>  
+  {{>message}}
+</body>
+
+</html>

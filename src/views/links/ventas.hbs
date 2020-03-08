@@ -1,0 +1,585 @@
+<div class="modal fade" id="Modalventa" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">RedFlix</h5>
+                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                    <a class="r" data-dismiss="modal" aria-label="Close">
+                        <i class="feather mr-0" data-feather="x"></i></a>
+                </div>
+            </div>
+            <form action="/links/ventas" method="POST">
+                <div class="modal-body">
+                    <div class="media">
+                        <img src="/img/pp.jpg" width="60" height="60" class="rounded-circle mt-3 img"
+                            alt="Ashley Briggs">
+                        <div class="media-body">
+                            <div class="row justify-content-between mb-1">
+                                <div class="col-12 text-center">
+                                    <i class="feather-md text-primary mr-0" data-feather="phone"></i>
+                                </div>
+                                <div class="col-11 ml-3 mr-3">
+                                    <div class="mb-2">
+                                        <input class="form-control-no-border edi text-center movil" type="text"
+                                            placeholder="INGRESA EL MOVIL" name="movil" data-mask="000-000-0000"
+                                            autocomplete="off" style="width: 100%;" required>
+                                        <div class="progress progress-sm shadow-sm mb-0 reditarh"
+                                            style="display: none;">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                style="height: 20%; width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-12 text-center nom">
+                                    <i class="feather-md text-primary mr-0" data-feather="user"></i>
+                                </div>
+                                <div class="col-11 ml-3 mr-3 nom">
+                                    <div class="mb-2">
+                                        <input class="form-control-no-border edi text-uppercase text-center" type="text"
+                                            placeholder="Nombre completo" name="nombre" autocomplete="off"
+                                            style="width: 100%;" required>
+                                        <div class="progress progress-sm shadow-sm mb-0 reditarh"
+                                            style="display: none;">
+                                            <div class="progress-bar bg-primary" role="progressbar"
+                                                style="height: 20%; width: 100%"></div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <input type="hidden" name="user" class="user" value="">
+                                <input type="hidden" name="product" class="product" value="">
+                                <input type="hidden" name="prod" class="prod" value="">
+                                <input type="hidden" name="nompro" class="nompro" value="">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="reset" class="btn btn-sm btn-outline-danger" data-dismiss="modal"
+                        aria-label="Close">Cancelar</button>
+                    <button type="submit" class="btn btn-sm btn-outline-primary">Activar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+<main class="content">
+    <div class="container-fluid p-0">
+        <h1 class="text-center mb-1 text-primary">RedFlix</h1>
+
+        <div class="row">
+            <div class="col-md-12 col-xl-10 mx-auto">
+                <p class="lead text-center mb-4">Productos & Servicios</p>
+
+                <div class="row justify-content-center mt-3 mb-2">
+                    <div class="col-auto">
+                        <nav class="nav btn-group">
+                            <a href="#cd" class="btn btn-outline-primary active" data-toggle="tab">Contenido
+                                Digital</a>
+                            <a href="#transfer" class="btn btn-outline-primary" data-toggle="tab">Transferencias</a>
+                            <a href="#Soat" class="btn btn-outline-primary" data-toggle="tab">Soat</a>
+                            <a href="#otros" class="btn btn-outline-primary" data-toggle="tab">Otros</a>
+                        </nav>
+                    </div>
+                </div>
+                <div class="tab-content">
+                    <div class="tab-pane fade show active" id="cd">
+                        <div class="row py-4">
+                            <div class="col-sm-4 mb-3 mb-md-0">
+                                <div class="card flex-fill w-100">
+                                    <div class="card-header">
+                                        <div class="float-right">
+                                            <img src="https://cdn.worldvectorlogo.com/logos/netflix-2015-logo.svg"
+                                                width="60" height="60" class="rounded-circle mr-2" alt="Ashley Briggs">
+                                            <!--https://pmcdeadline2.files.wordpress.com/2019/02/newnetflixlogo.jpg?w=400-->
+                                        </div>
+                                        <h5 class="card-title mt-2">NETFLIX</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="media mb-2 netflix1">
+                                            <img src="https://logosmarcas.com/wp-content/uploads/2018/05/Netflix-S%C3%ADmbolo.png"
+                                                width="40" height="36" class="rounded-circle img" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$35.000.00</small>
+                                                <small class="text-muted">4 <strong>Pantallas</strong> 4K</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="2">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button id="netflix1"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2 netflix2">
+                                            <img src="https://logosmarcas.com/wp-content/uploads/2018/05/Netflix-S%C3%ADmbolo.png"
+                                                width="40" height="36" class="rounded-circle img" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$25.000.00</small>
+                                                <small class="text-muted">2 <strong>Pantallas</strong> 4K</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="6">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button id="netflix2"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2 netflix3">
+                                            <img src="https://logosmarcas.com/wp-content/uploads/2018/05/Netflix-S%C3%ADmbolo.png"
+                                                width="40" height="36" class="rounded-circle img img"
+                                                alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$95.000.00</small>
+                                                <small class="text-muted">4 <strong>Pantallas</strong> 4K</small><br>
+                                                <small class="text-muted">90 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="5">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button id="netflix3"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-3 mb-md-0">
+                                <div class="card flex-fill w-100">
+                                    <div class="card-header">
+                                        <div class="float-right">
+                                            <img src="/img/pp.jpg" width="60" height="60" class="rounded-circle mr-2"
+                                                alt="Ashley Briggs">
+                                            <!--https://pmcdeadline2.files.wordpress.com/2019/02/newnetflixlogo.jpg?w=400-->
+                                        </div>
+                                        <h5 class="card-title mt-2">IUX</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="media mb-2 iux1">
+                                            <img src="/img/pp.jpg" width="40" height="36"
+                                                class="rounded-circle mr-1 img" alt="Ashley Briggs">
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted"><strong>Pantallas</strong>
+                                                    ilimitadas</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="S1M 27">
+                                                <input type="hidden" name="prod" class="prod" value="IUX">
+                                                <input type="hidden" name="nompro" class="nompro" value="HD 30 Días">
+                                                <button id="iux1"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2 iux2">
+                                            <img src="/img/pp.jpg" width="40" height="36"
+                                                class="rounded-circle mr-1 img" alt="Ashley Briggs">
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$24.000.00</small>
+                                                <small class="text-muted"><strong>Pantallas</strong>
+                                                    ilimitadas</small><br>
+                                                <small class="text-muted">60 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="S1M 28">
+                                                <input type="hidden" name="prod" class="prod" value="IUX">
+                                                <input type="hidden" name="nompro" class="nompro" value="HD 60 Días">
+                                                <button id="iux2"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2 iux3">
+                                            <img src="/img/pp.jpg" width="40" height="36"
+                                                class="rounded-circle mr-1 img" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$70.000.00</small>
+                                                <small class="text-muted"><strong>Pantallas</strong>
+                                                    ilimitadas</small><br>
+                                                <small class="text-muted">180 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="S1M 29">
+                                                <input type="hidden" name="prod" class="prod" value="IUX">
+                                                <input type="hidden" name="nompro" class="nompro" value="HD 180 Días">
+                                                <button id="iux3"
+                                                    class="float-right btn btn-sm btn-outline-danger">Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-sm-4 mb-3 mb-md-0">
+                                <div class="card flex-fill w-100">
+                                    <div class="card-header">
+                                        <div class="float-right">
+                                            <img src="https://appsimplantadores.com/wp-content/uploads/2019/03/cluster-digital.png"
+                                                width="60" height="60" class="rounded-circle mr-2" alt="Ashley Briggs">
+                                        </div>
+                                        <h5 class="card-title mt-2">OTROS</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="media mb-2">
+                                            <img src="https://yt3.ggpht.com/a/AGF-l7_JX9krsuIXI2ZCUzOS-zKG5vOIJvFa21zdqA=s900-c-k-c0xffffffff-no-rj-mo"
+                                                width="36" height="36" class="rounded-circle mr-1" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted">3 <strong>Pantallas</strong> HD</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button
+                                                    class="float-right btn btn-sm btn-outline-primary" disabled>Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2">
+                                            <img src="https://reeoo.xnny.net/HBO%20GO-icon.png!icon512" width="36"
+                                                height="36" class="rounded-circle mr-1" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted">1 <strong>Pantalla</strong> HD</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button class="float-right btn btn-sm btn-outline-dark" disabled>Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2">
+                                            <img src="https://http2.mlstatic.com/fox-play-1-mes-compatible-smart-tv-D_NQ_NP_992130-MLA27316440751_052018-F.jpg"
+                                                width="36" height="36" class="rounded-circle mr-1" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted">1 <strong>Pantalla</strong> HD</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button
+                                                    class="float-right btn btn-sm btn-outline-warning" disabled>Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2">
+                                            <img src="https://images.vexels.com/media/users/3/137413/isolated/preview/4acb8e52632aa9b7c874b878eaf02bc4-icono-de-spotify-logo-by-vexels.png"
+                                                width="36" height="36" class="rounded-circle mr-1" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted">1 <strong>Pantalla</strong> HD</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button
+                                                    class="float-right btn btn-sm btn-outline-success" disabled>Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                        <div class="media mb-2">
+                                            <img src="https://asirtec.es/amedia/uploads/2018/05/youtube.png" width="36"
+                                                height="36" class="rounded-circle mr-1" alt="Ashley Briggs">
+                                            <!--<span class="display-4 text-primary">4K</span>-->
+                                            <div class="media-body">
+                                                <small class="float-right text-navy">$15.000.00</small>
+                                                <small class="text-muted">1 <strong>Pantalla</strong> HD</small><br>
+                                                <small class="text-muted">30 <strong>Días</strong></small>
+                                                <input type="hidden" name="product" class="product" value="">
+                                                <input type="hidden" name="prod" class="prod" value="NTFX">
+                                                <input type="hidden" name="nompro" class="nompro"
+                                                    value="4 Disp 4K 30 Días">
+                                                <button
+                                                    class="float-right btn btn-sm btn-outline-danger" disabled>Activa</button>
+                                            </div>
+                                        </div>
+                                        <hr />
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="Soat">
+                        <div class="row py-4">
+                            <div class="col-sm-12 mb-3 mb-md-0">
+                                <div class="card text-center h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <form>
+                                            <div class="form-row">
+                                                <div class="form-group col-md-2">
+                                                    <label for="inputCity">Placa</label>
+                                                    <div class="input-group">
+                                                        <input type="text" class="form-control" placeholder="Placa..."
+                                                            disabled>
+                                                        <span class="input-group-append">
+                                                            <button class="btn btn-secondary"
+                                                                type="button">Cotizar</button>
+                                                        </span>
+                                                    </div>
+                                                </div>
+                                                <h3 class="text-right">Proximamente estara habilitado.. Nos encontramos
+                                                    trabajando para brindarte la mejor experiencia</h3>
+                                            </div>
+                                            <br>
+                                            <div class="form-row">
+                                                <div class="form-group col-md-3">
+                                                    <select id="tipodoc" class="form-control">
+                                                        <option selected>Tipo de documento...</option>
+                                                        <option>Cedula de ciudadania</option>
+                                                        <option>Pasaporte</option>
+                                                        <option>Cedula de extrangeria</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <input type="text" class="form-control" id="documento"
+                                                        placeholder="Documento">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <input type="text" class="form-control" id="nombre"
+                                                        placeholder="Nombre completo">
+                                                </div>
+                                            </div>
+
+                                            <div class="form-row">
+                                                <div class="form-group col-md-2">
+                                                    <input type="text" class="form-control" id="inputEmail4"
+                                                        placeholder="Movil">
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <input type="email" class="form-control" id="inputEmail4"
+                                                        placeholder="Email">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <input type="text" class="form-control" id="inputAddress"
+                                                        placeholder="Direccion">
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div class="form-row">
+                                                <div class="form-group col-md-3">
+                                                    <label for="inputCity">Ciudad</label>
+                                                    <input type="text" class="form-control" id="inputCity">
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <label for="inputState">Departamento</label>
+                                                    <select id="inputState" class="form-control">
+                                                        <option selected>Choose...</option>
+                                                        <option>...</option>
+                                                    </select>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <label for="inputZip">Postal</label>
+                                                    <input type="text" class="form-control" id="inputZip">
+                                                </div>
+                                            </div>
+                                            <div class="form-group">
+                                                <label class="custom-control custom-checkbox m-0">
+                                                    <input type="checkbox" class="custom-control-input">
+                                                    <span class="custom-control-label">Check me out</span>
+                                                </label>
+                                            </div>
+                                            <button type="submit" class="btn btn-primary" disabled>Efectuar
+                                                soat</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="transfer">
+                        <div class="row py-4">
+                            <div class="col-sm-12 mb-3 mb-md-0">
+                                <div class="card text-center h-100">
+                                    <div class="card-body d-flex flex-column">
+                                        <form id="tranfer" action="/links/transferencia" method="POST">
+                                            <div class="form-row">
+                                                <div class="form-group col-md-12">
+                                                    <div class="text-left">Tranferencias a <strong class="h5"
+                                                            id="tiempotranf">Venezuela</strong></div>
+                                                </div>
+                                                <div class="form-group col-md-4">
+                                                    <div class="input-group">
+                                                        <div class="input-group-prepend">
+                                                            <button type="button"
+                                                                class="btn btn-secondary dropdown-toggle"
+                                                                data-toggle="dropdown">$CO - $Bs</button>
+                                                            <div class="dropdown-menu">
+                                                                <a class="dropdown-item" href="javascript:void(0)">$Bs -
+                                                                    $CO</a>
+                                                                <a class="dropdown-item" href="javascript:void(0)">$CO -
+                                                                    $Bs</a>
+                                                                <div role="separator" class="dropdown-divider"></div>
+                                                                <a class="dropdown-item" href="javascript:void(0)">mas
+                                                                    info.</a>
+                                                            </div>
+                                                        </div>
+                                                        <input type="text" class="form-control" name="monto" id="monto"
+                                                            placeholder="Monto" data-mask="000.000.000"
+                                                            data-mask-reverse="true" data-mask-selectonfocus="true">
+                                                    </div>
+                                                </div>
+                                                <div class="form-group col-md-2">
+                                                    <input type="text" class="form-control" name="cambio" id="cambio"
+                                                        placeholder="Cambio">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <div id="mensaje" class="text-right">Tasa del Día <strong class="h2"
+                                                            id="tasa">0.55</strong></div>
+                                                </div>
+                                            </div>
+                                            <div class="form-row remitente">
+                                                <input id="tasa" type="hidden" name="tasa" value="0.55">
+                                                <input id="remitente" type="hidden" name="remitente" value="">
+                                                <input id="idbanco" type="hidden" name="banco" value="">
+                                                <input id="utild1" type="hidden" name="utilidads" value="">
+                                                <input id="utild2" type="hidden" name="utilidads" value="">
+
+                                                <div class="form-group col-md-3">
+                                                    <input type="text" name="documento" class="form-control"
+                                                        id="docuremi" placeholder="Documento">
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <input type="text" name="nombre"
+                                                        class="form-control nombrev text-uppercase"
+                                                        placeholder="Nombre Completo">
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <input type="text" name="movil" class="form-control" id="movilremit"
+                                                        data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </div>
+                                            </div>
+                                            <br>
+                                            <div id="datosocultos"></div>
+                                            <div class="form-row">
+                                                <div class="form-group col-md-3">
+                                                    <input type="text" name="documento" class="form-control"
+                                                        id="docudest" placeholder="Documento" style="text-align:center"
+                                                        required>
+                                                </div>
+                                                <div class="form-group col-md-6">
+                                                    <select class="form-control select2" name="nombre" id="nomdest"
+                                                        data-toggle="select2"></select>
+                                                </div>
+                                                <div class="form-group col-md-3">
+                                                    <input type="text" name="movil" class="form-control" id="movildest"
+                                                        data-mask="000-000-0000" placeholder="Movil"
+                                                        style="text-align:center" required>
+                                                </div>
+                                                <div class="form-group col-md-5">
+                                                    <input type="text" class="form-control" name="cuenta" id="cuenta"
+                                                        data-mask="00000-00000-00000-00000" placeholder="Cuenta"
+                                                        style="text-align:center" required>
+                                                </div>
+                                                <div class="form-group col-md-5">
+                                                    <input type="text" class="form-control" name="banco" id="banco"
+                                                        placeholder="Banco">
+                                                </div>
+                                                <div class="form-group col-md-12">
+                                                    <div>Tiempo estmado de tranferencia </div><strong class="h5"
+                                                        id="tiempotranf">0 min</strong>
+                                                </div>
+                                            </div>
+                                            <button type="reset" class="btn btn-danger">Cancelar</button>
+                                            <button type="submit" class="btn btn-primary">Efectuar
+                                                Transferencia</button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="tab-pane fade" id="otros">
+                        <div class="row py-4">
+                            <div class="col-sm-12 mb-3 mb-md-0">
+                                <div class="card flex-fill w-100">
+                                    <div class="card-header">
+                                        <div class="float-right">
+                                            <img src="https://cdn.worldvectorlogo.com/logos/netflix-2015-logo.svg"
+                                                width="60" height="60" class="rounded-circle mr-2" alt="Ashley Briggs">
+                                            <!--https://pmcdeadline2.files.wordpress.com/2019/02/newnetflixlogo.jpg?w=400-->
+                                        </div>
+                                        <h5 class="card-title mt-2">REDFLIX</h5>
+                                    </div>
+                                    <div class="card-body">Nos enconttramos travajando para brindarte la mejor
+                                        esperiencia</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <hr />
+
+                <div class="text-center my-4">
+                    <h2>Frequently asked questions</h2>
+                </div>
+                <div class="row">
+                    <div class="col-md-5 col-sm-6 ml-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="h6 card-title">Do I need a credit card to sign up?</h5>
+                                <p class="mb-0">Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus,
+                                    sem
+                                    quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
+                                    blandit
+                                    vel, luctus pulvinar, hendrerit id, lorem.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-sm-6 mr-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="h6 card-title">Do you offer a free trial?</h5>
+                                <p class="mb-0">Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus,
+                                    sem
+                                    quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
+                                    blandit
+                                    vel, luctus pulvinar, hendrerit id, lorem.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-sm-6 ml-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="h6 card-title">What if I decide to cancel my plan?</h5>
+                                <p class="mb-0">Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus,
+                                    sem
+                                    quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
+                                    blandit
+                                    vel, luctus pulvinar, hendrerit id, lorem.</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-5 col-sm-6 mr-auto">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="h6 card-title">Can I cancel at anytime?</h5>
+                                <p class="mb-0">Etiam rhoncus. Maecenas tempus, tellus eget condimentum rhoncus,
+                                    sem
+                                    quam semper libero, sit amet adipiscing sem neque sed ipsum. Nam quam nunc,
+                                    blandit
+                                    vel, luctus pulvinar, hendrerit id, lorem.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
