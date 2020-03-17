@@ -69,7 +69,7 @@
                                         Expedición</th>
                                     <td>
                                         <input class="form-control-no-border edi" type="text"
-                                            placeholder="Fecha de nacimiento" id="er" autocomplete="off"
+                                            placeholder="Fecha de nacimiento" id="et" autocomplete="off"
                                             style="padding: 1px; width: 100%;">
                                     </td>
                                 </tr>
@@ -171,18 +171,19 @@
                         <h5 class="card-title mb-0">Forma de pago</h5>
                     </div>
                     <div class="card-body">
+                        {{#each proyecto}}
                         <div class="row">
                             <div class="col-12 col-lg-6">
                                 <table class="table table-sm my-2">
                                     <tbody>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="maximize"></i>
+                                            <th><i class="feather-md text-primary mr-0 mb-2"
+                                                    data-feather="maximize"></i>
                                                 MTr²
                                             </th>
                                             <td>
                                                 <input class="form-control-no-border edi" type="text" id="mtr"
-                                                    value="582.91" style="padding: 1px; width: 100%; text-align:center"
-                                                    disabled>
+                                                    value="{{mtr2}}" style="padding: 1px; width: 100%; text-align:center" disabled>
                                             </td>
                                         </tr>
                                         <tr>
@@ -190,8 +191,8 @@
                                                     data-feather="trending-up"></i>
                                                 Vr MTr²</th>
                                             <td>
-                                                <input class="form-control-no-border edi" type="text" id="vrmtr"
-                                                    value="100.000" style="padding: 1px; width: 100%; text-align:center"
+                                                <input class="form-control-no-border val" type="text" id="vrmtr"
+                                                    value="{{valmtr2}}" style="padding: 1px; width: 100%; text-align:center"
                                                     disabled>
                                             </td>
                                         </tr>
@@ -199,14 +200,14 @@
                                             <th><i class="feather-md text-primary mr-0 mb-2" data-feather="map-pin"></i>
                                                 Lote</th>
                                             <td>
-                                                <input class="form-control-no-border edi" type="text" id="vrlote"
-                                                    value="55.376.450"
+                                                <input class="form-control-no-border val" type="text" id="vrlote"
+                                                    value="{{valor}}"
                                                     style="padding: 1px; width: 100%; text-align:center" disabled>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2"
-                                                    data-feather="droplet"></i> N° Cuotas</th>
+                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="droplet"></i>
+                                                N° Cuotas</th>
                                             <td>
                                                 <select name="e" id="ncuotas"
                                                     class="form-control-no-border edi float-right"
@@ -219,7 +220,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="calendar"></i>
+                                            <th><i class="feather-md text-primary mr-0 mb-2"
+                                                    data-feather="calendar"></i>
                                                 Extraor</th>
                                             <td>
                                                 <select name="e" id="Emeses"
@@ -233,7 +235,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="dollar-sign"></i>
+                                            <th><i class="feather-md text-primary mr-0 mb-2"
+                                                    data-feather="dollar-sign"></i>
                                                 Extraor vr</th>
                                             <td>
                                                 <input class="form-control-no-border edi val" id="cuotaestrao"
@@ -254,24 +257,23 @@
                                                 Inicial
                                             </th>
                                             <td>
-                                                <input class="form-control-no-border" type="text" value="16.612.935"
-                                                    id="cuotainicial" style="padding: 1px; width: 100%; text-align:center"
-                                                    disabled>
+                                                <input class="form-control-no-border val" type="text" value="{{inicial}}"
+                                                    id="cuotainicial"
+                                                    style="padding: 1px; width: 100%; text-align:center" disabled>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2"
-                                                    data-feather="percent"></i>
+                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="percent"></i>
                                                 70%</th>
                                             <td>
-                                                <input class="form-control-no-border" type="text" value="38.763.515"
+                                                <input class="form-control-no-border" type="text" value=""
                                                     id="p70" style="padding: 1px; width: 100%; text-align:center"
                                                     disabled>
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2"
-                                                    data-feather="tag"></i> Cupon</th>
+                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="tag"></i>
+                                                Cupon</th>
                                             <td>
                                                 <input class="form-control-no-border edi" type="text"
                                                     placeholder="N° bono" id="bono"
@@ -279,8 +281,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2"
-                                                    data-feather="droplet"></i> Diferir</th>
+                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="droplet"></i>
+                                                Diferir</th>
                                             <td>
                                                 <select name="" id="diferinicial" class="form-control-no-border edi"
                                                     style="padding: 1px; width: 100%; text-align-last:center">
@@ -292,7 +294,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="trending-down"></i>
+                                            <th><i class="feather-md text-primary mr-0 mb-2"
+                                                    data-feather="trending-down"></i>
                                                 Dto</th>
                                             <td>
                                                 <input class="form-control-no-border" type="text" value="0%" id="dto"
@@ -300,8 +303,8 @@
                                             </td>
                                         </tr>
                                         <tr>
-                                            <th><i class="feather-md text-primary mr-0 mb-2"
-                                                    data-feather="pocket"></i> Ahorra</th>
+                                            <th><i class="feather-md text-primary mr-0 mb-2" data-feather="pocket"></i>
+                                                Ahorra</th>
                                             <td>
                                                 <input class="form-control-no-border float-right" type="text" value="$0"
                                                     id="ahorro" style="padding: 1px; width: 100%; text-align:center"
@@ -312,6 +315,7 @@
                                 </table>
                             </div>
                         </div>
+                        {{/each}}
                         <table id="datatables-clients" class="table table-sm table-striped" style="width:100%">
                             <thead>
                                 <tr>
@@ -364,7 +368,7 @@
                                         pasada esta fecha, la administración
                                         del proyecto no tiene ninguna responsabilidad por la reserva del inmueble y esta
                                         queda en libertad de venderlo a otra persona.
-                                    </p>                                    
+                                    </p>
                                 </div>
                                 <div class="tab-pane" id="colored-vertical-icon-tab-2" role="tabpanel">
                                     <h4 class="tab-title">Another one</h4>
@@ -372,7 +376,7 @@
                                         eget
                                         dolor tellus eget condimentum rhoncus. Aenean massa. Cum sociis natoque
                                         penatibus et magnis neque dis parturient montes, nascetur ridiculus mus. In enim
-                                        justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>                                    
+                                        justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
                                 </div>
                                 <div class="tab-pane" id="colored-vertical-icon-tab-3" role="tabpanel">
                                     <h4 class="tab-title">One more</h4>
@@ -380,7 +384,7 @@
                                         eget
                                         dolor tellus eget condimentum rhoncus. Aenean massa. Cum sociis natoque
                                         penatibus et magnis neque dis parturient montes, nascetur ridiculus mus. In enim
-                                        justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>                                    
+                                        justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
                                 </div>
                             </div>
                         </div>

@@ -1950,8 +1950,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         alert($('#proyecto').val())
         var data = $('#datatable').DataTable().row(this).data();
         $(this).toggleClass('selected');
-        $('#proyecto').val();   
-        $('#idproyecto').val(); 
+        $('#proyecto').val();
+        $('#idproyecto').val();
         var url = `/links/orden?id=${data.id}`;
         $(location).attr('href', url);
     });
@@ -1998,8 +1998,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $("#cuadro2").show("slow");
         $("#cuadro1").hide("slow");
         $("#cuadro3").hide("slow");
-        $('#proyecto').val(data.nombre);   
-        $('#idproyecto').val(data.id);     
+        $('#proyecto').val(data.nombre);
+        $('#idproyecto').val(data.id);
         if (recargada) {
             recargada = false;
             Dtas(data.id)
@@ -2113,7 +2113,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
     });
 };
 /////////////////////////////* ORDEN *////////////////////////////////////////////////////////////
-if (window.location == `${window.location.origin}/links/orden`) {
+//console.log(window.location)
+if (window.location.pathname == `/links/orden`) {
     $(document).ready(function () {
         // Datatables clients
         var groupColumn = 2;
@@ -2121,20 +2122,21 @@ if (window.location == `${window.location.origin}/links/orden`) {
         var h = 1;
         var fch = new Date();
         var fcha = moment(fch).format('YYYY-MM-DD');
-        var precio = parseFloat($('#vrlote').val().replace(/\./g, ''));
-        var inicial = parseFloat($('#cuotainicial').val().replace(/\./g, ''));
+        var precio = parseFloat($('#vrlote').cleanVal());
+        var inicial = parseFloat($('#cuotainicial').cleanVal());
         var cuota = parseFloat(precio) - parseFloat(inicial);
         var diferinicial = inicial / $('#diferinicial').val();
         var cuotaextrao, cut = 0, anos = $('#ncuotas').val() / 12;
         var oficial70 = '', oficial30 = '', bono = '', meses = 0;
+        $('#p70').val(Moneda(cuota));
         function Dt() {
             bono = '';
             $('#dto').val('0%');
             $('#ahorro').val('$0');
             oficial70 = '$' + $('#p70').val();
-            oficial30 = '$' + $('#cuotainicial').text();
-            precio = parseFloat($('#preciototal').text().replace(/\./g, ''));
-            inicial = parseFloat($('#cuotainicial').text().replace(/\./g, ''));
+            oficial30 = '$' + $('#cuotainicial').val();
+            precio = parseFloat($('#vrlote').cleanVal());
+            inicial = parseFloat($('#cuotainicial').cleanVal());
         };
 
         $('.edi').on('change', function () {
@@ -2143,7 +2145,7 @@ if (window.location == `${window.location.origin}/links/orden`) {
             meses = 0;
             if ($('#ahorro').val() === '$0') {
                 oficial70 = '$' + $('#p70').val();
-                oficial30 = '$' + $('#cuotainicial').text();
+                oficial30 = '$' + $('#cuotainicial').val();
             }
             if (u > 2) {
                 Dt();
