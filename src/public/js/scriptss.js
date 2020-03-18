@@ -55,6 +55,17 @@ let languag = {
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
 };*/
+$(".fechas").daterangepicker({
+    locale: {
+        'format': 'YYYY-MM-DD',
+        'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+        'firstDay': 1
+    },
+    singleDatePicker: true,
+    showDropdowns: true,
+    opens: "right",
+});
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -2138,7 +2149,13 @@ if (window.location.pathname == `/links/orden`) {
             precio = parseFloat($('#vrlote').cleanVal());
             inicial = parseFloat($('#cuotainicial').cleanVal());
         };
-
+        $('#AgregarCliente').click(function () {
+            $('.cliente2').show('slow');
+        });
+        $('.atras').click(function () {
+            $('.cliente2').hide('slow');
+            $('.cliente2 input').val('');
+        });
         $('.edi').on('change', function () {
             var i, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
                 mesesextra = '';
