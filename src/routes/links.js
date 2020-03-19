@@ -93,6 +93,18 @@ router.get('/orden', isLoggedIn, async (req, res) => {
     console.log({ proyecto })
     res.render('links/orden', { proyecto, id });
 });
+router.post('/orden', isLoggedIn, async (req, res) => {
+    console.log(req.body)
+    req.flash('success', 'Separación realizada exitosamente');
+    res.redirect('/links/reportes');
+});
+router.post('/codigo', isLoggedIn, async (req, res) => {
+    console.log(req.body)
+    const { movil } = req.body;
+    const codigo = ID2(5);
+    await sms('57' + movil, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
+    res.send(codigo);
+});
 router.get('/bono/:id', async (req, res) => {
     const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id)
     res.send(bono);
@@ -653,6 +665,15 @@ router.post('/edit/:id', async (req, res) => {
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(lon) {
     let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
+        code = "";
+    for (x = 0; x < lon; x++) {
+        let rand = Math.floor(Math.random() * chars.length);
+        code += chars.substr(rand, 1);
+    };
+    return code;
+};
+function ID2(lon) {
+    let chars = "1234567890",
         code = "";
     for (x = 0; x < lon; x++) {
         let rand = Math.floor(Math.random() * chars.length);

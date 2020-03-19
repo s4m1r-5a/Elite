@@ -2299,6 +2299,40 @@ if (window.location.pathname == `/links/orden`) {
             }
         })
     });
+    var opcion = 'no';
+    $('#enviodeorden').submit(function (e) {
+        if (opcion === 'no') {
+            e.preventDefault();
+            var datos = { movil: $('#movil').cleanVal() }
+            $.ajax({
+                url: '/links/codigo',
+                type: 'POST',
+                data: datos,
+                //async: false,
+                success: function (data) {
+                    $('#codigodeverificacion').val(data);
+                }
+            });
+            $('#modalorden').modal('toggle');
+        } else {
+            $('#enviodeorden input').prop('disabled', false);
+        }
+
+    })
+    $('#enviarorden').click(function () {
+        var code1 = $('#codigodeverificacion').val()
+        var code2 = $('#codeg').val()
+        if (code1 == code2) {
+            opcion = 'si';
+            $('#modalorden').modal('toggle');
+            $('#enviodeorden').submit();
+        } else {
+            $('#modalorden').modal('toggle');
+            SMSj('error', 'Codigo de confirmación incorrecto, intentelo nuevamente')
+        }
+
+    })
+
 };
 /////////////////////////////* SOLICITUDES *////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/solicitudes`) {
