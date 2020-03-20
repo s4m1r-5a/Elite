@@ -90,13 +90,51 @@ router.post('/movil', async (req, res) => {
 router.get('/orden', isLoggedIn, async (req, res) => {
     const { id } = req.query;
     const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
-    console.log({ proyecto })
+    console.log({ proyecto, id })
     res.render('links/orden', { proyecto, id });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
-    console.log(req.body)
+    const { nombres, documento, lugarde, lugardexpedicion, fechadexpedicion,
+        fechadenacimiento, EstadoCivil, email, movil, direccion, parentesco,
+        numerocuotaspryecto, extraordinariameses, lote, client, client2,
+        cuotaextraordinaria, cupon, inicialdiferida, ahorro } = req.body;
+    function Cliente(N) {
+        cliente = {
+            nombre: nombres[N],
+            documento: documento[N],
+            lugarexpedicion: lugarexpedicion[N],
+            fechaexpedicion: fechaexpedicion[N],
+            fechanacimiento: fechanacimiento[N],
+            estadocivil: estadocivil[N],
+            email: email[N],
+            movil: movil[N],
+            direccion: direccion[N],
+            parentesco: parentesco[N]
+        };
+    };
+    Cliente(0);
+    if (client) {
+        await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client]);
+    } else {
+        client = await pool.query('INSERT INTO clientes SET ? ', cliente);
+    }
+
+    if (documento[1]) {
+        Cliente(1);
+        if (client2) {
+            await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client2]);
+        } else {
+            client2 = await pool.query('INSERT INTO clientes SET ? ', cliente);
+        }
+    };
+    console.log(req.body);
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
+});
+router.get('/cel/:id', async (req, res) => {
+    const datos = await pool.query('SELECT * FROM clientes WHERE movil = ?', req.params.id)
+    console.log(datos)
+    res.send(datos);
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
     console.log(req.body)
@@ -114,9 +152,9 @@ router.post('/tabla/:id', async (req, res) => {
         var data = new Array();
         dataSet.data = data
         const { fcha, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra } = req.body;
-        v = N / 2;
-        j = Math.round(parseFloat(u) / 2)
-        console.log(v + ' ' + j)
+        var v = N / 2;
+        var j = Math.round(parseFloat(u) / 2);
+        var o = parseFloat(u) / 2;
         var y = 0;
         l = {
             n: 1,
@@ -132,7 +170,8 @@ router.post('/tabla/:id', async (req, res) => {
         dataSet.data.push(l);
 
         for (i = 1; i <= v; i++) {
-            y = j + i;
+            y = o < 1 ? j + i : u > 3 ? j + i + 2 : i + j + 1;
+
             if (i <= j) {
                 x = {
                     n: i,
@@ -140,10 +179,10 @@ router.post('/tabla/:id', async (req, res) => {
                     oficial: `<span class="badge badge-dark text-center text-uppercase">Inicial 30% ${oficial30}</span>`,
                     cuota: cuota30,
                     stado: '<span class="badge badge-primary">Pendiente</span>',
-                    n2: i > parseFloat(u) / 2 ? '' : i + j,
-                    fecha2: i > parseFloat(u) / 2 ? '' : moment(fcha).add(i + j, 'month').startOf('month'),
-                    cuota2: i > parseFloat(u) / 2 ? '' : cuota30,
-                    stado2: i > parseFloat(u) / 2 ? '' : '<span class="badge badge-primary">Pendiente</span>'
+                    n2: i > o ? '' : i + j,
+                    fecha2: i > o ? '' : moment(fcha).add(i + j, 'month').startOf('month'),
+                    cuota2: i > o ? '' : cuota30,
+                    stado2: i > o ? '' : '<span class="badge badge-primary">Pendiente</span>'
                 }
                 dataSet.data.push(x);
             };

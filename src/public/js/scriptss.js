@@ -2171,9 +2171,30 @@ if (window.location.pathname == `/links/orden`) {
             } else {
                 $('#bono').attr('disabled', false);
             }
+            if ($(this).hasClass("movil")) {
+                $.ajax({
+                    url: '/links/cel/' + $(this).cleanVal(),
+                    type: 'GET',
+                    async: false,
+                    success: function (data) {
+                        console.log(data)
+                        if (Array.isArray(data)) {
+                            console.log(data[0].nombre)
+                            $('.nombres').val(data[0].nombre);
+                            $('.documento').val(data[0].documento);
+                            $('.lugarexpedicion .u').val(data[0].lugarexpedicion);
+                            $('.espedida .u').val(data[0].fechaexpedicion);
+                            $('.nacido .u').val(data[0].fechanacimiento);
+                            $('.estadocivil .u').val(data[0].estadocivil);
+                            $('.email .u').val(data[0].email);
+                            $('.direccion .u').val(data[0].direccion);
+                            $('.parentesco .u').val(data[0].parentesco);
+                        }
+                    }
+                });
+            }
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
-                    alert('fgll')
                     $.ajax({
                         url: '/links/bono/' + $(this).val(),
                         type: 'GET',
