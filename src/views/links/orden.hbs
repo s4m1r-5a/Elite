@@ -5,8 +5,6 @@
         <div class="row">
             <form action="/links/orden" method="POST" id="enviodeorden">
                 <input type="hidden" id="lot" value="{{id}}" name="lote">
-                <input type="hidden" id="client" value="" name="client">
-                <input type="hidden" id="client2" value="" name="client2">
                 <div class="col-xl-12">
                     <div class="card">
                         <div class="card-header">
@@ -38,7 +36,8 @@
                             </div>
                         </div>
                         <div class="card-body">
-                            <div class="row">
+                            <div class="row" id="cliente1">
+                                <input type="hidden" class="client" value="" name="client">
                                 <div class="col-12 col-lg-6">
                                     <table class="table table-sm my-2">
                                         <tbody>
@@ -143,7 +142,7 @@
                                                     <input class="form-control-no-border edi movil u" type="tel"
                                                         data-mask="000-000-0000" placeholder="Numero celular"
                                                         autocomplete="off" style="padding: 1px; width: 100%;"
-                                                        name="movil" required>
+                                                        name="movil" id="movil" required>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -172,7 +171,8 @@
                                 </div>
                             </div>
                             <!--Cliente #2-->
-                            <div class="row cliente2" style="display: none;">
+                            <div class="row cliente2" id="cliente2" style="display: none;">
+                                <input type="hidden" class="client" value="" name="client">
                                 <div class="col-12 col-lg-12">
                                     <div class="d-inline-block float-right">
                                         <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
@@ -191,7 +191,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi text-uppercase nombres d"
                                                         type="text" placeholder="Nombre completo" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="nombres" required>
+                                                        style="padding: 1px; width: 100%;" name="nombres">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -202,7 +202,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi documento d" type="text"
                                                         placeholder="Documento de identidad" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="documento" required>
+                                                        style="padding: 1px; width: 100%;" name="documento">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -214,7 +214,7 @@
                                                     <input class="form-control-no-border edi lugarexpedicion d"
                                                         type="text" name="lugarexpedicion"
                                                         placeholder="Lugar de expedición del documento"
-                                                        autocomplete="off" style="padding: 1px; width: 100%;" required>
+                                                        autocomplete="off" style="padding: 1px; width: 100%;">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -225,8 +225,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi fechas espedida d"
                                                         type="text" placeholder="Fecha de expedición" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="fechaexpedicion"
-                                                        required>
+                                                        style="padding: 1px; width: 100%;" name="fechaexpedicion">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -237,8 +236,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi fechas nacido d"
                                                         type="text" placeholder="Fecha de nacimiento" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="fechanacimiento"
-                                                        required>
+                                                        style="padding: 1px; width: 100%;" name="fechanacimiento">
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -269,7 +267,7 @@
                                                 </th>
                                                 <td>
                                                     <select class="form-control-no-border edi estadocivil d"
-                                                        name="estadocivil" style="padding: 1px; width: 100%;" required>
+                                                        name="estadocivil" style="padding: 1px; width: 100%;">
                                                         <option value="">Situación sentimental?</option>
                                                         <option value="Casado(a)">Casado(a)</option>
                                                         <option value="Soltero(a)">Soltero(a)</option>
@@ -287,7 +285,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi text-lowercase email d"
                                                         type="email" placeholder="Correo electrónico" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="email" required>
+                                                        style="padding: 1px; width: 100%;" name="email">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -299,7 +297,7 @@
                                                     <input class="form-control-no-border edi movil d" type="tel"
                                                         data-mask="000-000-0000" placeholder="Numero celular"
                                                         autocomplete="off" style="padding: 1px; width: 100%;"
-                                                        name="movil" required>
+                                                        name="movil">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -310,7 +308,7 @@
                                                 <td>
                                                     <input class="form-control-no-border edi direccion d" type="text"
                                                         placeholder="Dirección de residencia" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="direccion" required>
+                                                        style="padding: 1px; width: 100%;" name="direccion">
                                                 </td>
                                             </tr>
                                         </tbody>

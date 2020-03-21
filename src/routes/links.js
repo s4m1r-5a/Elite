@@ -14,21 +14,21 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 //////////////////* PRODUCTOS */////////////////////
-router.get('/productos', Admins, (req, res) => {
+router.get('/productos', isLoggedIn, (req, res) => {
     res.render('links/productos');
 });
-router.post('/productos', Admins, async (req, res) => {
+router.post('/productos', isLoggedIn, async (req, res) => {
     const fila = await pool.query('SELECT * FROM productos');
     respuesta = { "data": fila };
     res.send(respuesta);
 });
-router.post('/productos/:id', Admins, async (req, res) => {
+router.post('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
     respuesta = { "data": fila };
     res.send(respuesta);
 });
-router.post('/regispro', Admins, async (req, res) => {
+router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial } = req.body;
     const produc = { categoria, nombre: title.toUpperCase(), porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado };
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
@@ -94,10 +94,11 @@ router.get('/orden', isLoggedIn, async (req, res) => {
     res.render('links/orden', { proyecto, id });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
-    const { nombres, documento, lugarde, lugardexpedicion, fechadexpedicion,
-        fechadenacimiento, EstadoCivil, email, movil, direccion, parentesco,
-        numerocuotaspryecto, extraordinariameses, lote, client, client2,
+    const { nombres, documento, lugarexpedicion, fechaexpedicion,
+        fechanacimiento, estadocivil, email, movil, direccion, parentesco,
+        numerocuotaspryecto, extraordinariameses, lote, client,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro } = req.body;
+    console.log(req.body)
     function Cliente(N) {
         cliente = {
             nombre: nombres[N],
@@ -107,27 +108,43 @@ router.post('/orden', isLoggedIn, async (req, res) => {
             fechanacimiento: fechanacimiento[N],
             estadocivil: estadocivil[N],
             email: email[N],
-            movil: movil[N],
+            movil: movil[N].replace(/-/g, ""),
             direccion: direccion[N],
-            parentesco: parentesco[N]
+            parentesco
         };
     };
     Cliente(0);
-    if (client) {
-        await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client]);
+    if (client[0]) {
+        await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[0]]);
     } else {
-        client = await pool.query('INSERT INTO clientes SET ? ', cliente);
+        clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
+        client[0] = clie.insertId
+
     }
 
     if (documento[1]) {
         Cliente(1);
-        if (client2) {
-            await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client2]);
+        if (client[1]) {
+            await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[1]]);
         } else {
-            client2 = await pool.query('INSERT INTO clientes SET ? ', cliente);
+            clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
+            client[1] = clie.insertId
         }
     };
-    console.log(req.body);
+    const separacion = {
+        lote,
+        cliente: client[0],
+        asesor: req.user.id,
+        numerocuotaspryecto,
+        extraordinariameses,
+        cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : '',
+        cupon,
+        inicialdiferida,
+        ahorro,
+    };
+    documento[1] ? separacion.cliente2 = client[1] : '';
+    await pool.query('INSERT INTO preventa SET ? ', separacion);
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1 }, lote]);
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
 });
@@ -137,10 +154,10 @@ router.get('/cel/:id', async (req, res) => {
     res.send(datos);
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
-    console.log(req.body)
     const { movil } = req.body;
     const codigo = ID2(5);
     await sms('57' + movil, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
+    console.log(codigo)
     res.send(codigo);
 });
 router.get('/bono/:id', async (req, res) => {
@@ -228,10 +245,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
 
-        d = req.user.admin > 0 ? '' : 'v.vendedor = ? AND';
+        d = req.user.admin > 0 ? '' : 'WHERE p.asesor = ?';
 
-        sql = `SELECT * FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE ${d} 
-        v.product != 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+        sql = `SELECT p.id, pt.nombre proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha 
+        FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
+        INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id ${d}`
 
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };

@@ -1204,68 +1204,54 @@ if (window.location.pathname == `/links/reportes`) {
         columns: [
             { data: "id" },
             {
-                data: "feclassNachadecompra",
+                data: "proyecto",
+                className: 'te'
+            },
+            {
+                data: "mz",
+                className: 'te'
+            },
+            {
+                data: "n",
+                className: 'te'
+            },
+            {
+                data: "estado",
                 className: 'te',
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "pin",
-                className: 'te'
-            },
-            {
-                data: "vendedor",
-                className: 'te'
-            },
-            {
-                data: "client",
-                className: 'te'
-            },
-            {
-                data: "cajero",
-                className: 'te'
-            },
-            {
-                data: "producto",
-                className: 'te'
-            },
-            {
-                data: "correo",
-                className: 'te'
-            },
-            {
-                data: "fechadeactivacion",
-                className: 'te',
-                render: function (data, method, row) {
-                    if (data) {
-                        return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
-                    } else {
-                        return ''
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                            break;
                     }
                 }
             },
             {
-                data: "fechadevencimiento",
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "documento",
+                className: 'te'
+            },
+            {
+                data: "fecha",
                 className: 'te',
                 render: function (data, method, row) {
-                    if (data) {
-                        return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
-                    } else {
-                        return ''
-                    }
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             {
-                data: "movildecompra",
-                className: 'te'
-            },
-            {
-                data: "anular",
-                className: 'te'
-            },
-            {
-                data: "descripcion",
+                data: "fullname",
                 className: 'te'
             }
         ]
@@ -1888,6 +1874,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     data: "estado",
                     render: function (data, method, row) {
                         switch (data) {
+                            case 1:
+                                return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                                break;
                             case 9:
                                 return `<span class="badge badge-pill badge-success">Disponible</span>`
                                 break;
@@ -1958,13 +1947,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
     }
     $('#datatable').on('click', 'tr', function () {
-        alert($('#proyecto').val())
         var data = $('#datatable').DataTable().row(this).data();
-        $(this).toggleClass('selected');
-        $('#proyecto').val();
-        $('#idproyecto').val();
-        var url = `/links/orden?id=${data.id}`;
-        $(location).attr('href', url);
+        if (data.estado === 9) {
+            $(this).toggleClass('selected');
+            $('#proyecto').val();
+            $('#idproyecto').val();
+            var url = `/links/orden?id=${data.id}`;
+            $(location).attr('href', url);
+        } else {
+            SMSj('info', 'Producto no disponible')
+        }
     });
     // Eliminar Productos
     $('#datatable2').on('click', '#eliminarFactura', function () {
@@ -2172,23 +2164,24 @@ if (window.location.pathname == `/links/orden`) {
                 $('#bono').attr('disabled', false);
             }
             if ($(this).hasClass("movil")) {
+                var card = $(this).parents('div.row').attr("id")
                 $.ajax({
                     url: '/links/cel/' + $(this).cleanVal(),
                     type: 'GET',
                     async: false,
                     success: function (data) {
                         console.log(data)
-                        if (Array.isArray(data)) {
-                            console.log(data[0].nombre)
-                            $('.nombres').val(data[0].nombre);
-                            $('.documento').val(data[0].documento);
-                            $('.lugarexpedicion .u').val(data[0].lugarexpedicion);
-                            $('.espedida .u').val(data[0].fechaexpedicion);
-                            $('.nacido .u').val(data[0].fechanacimiento);
-                            $('.estadocivil .u').val(data[0].estadocivil);
-                            $('.email .u').val(data[0].email);
-                            $('.direccion .u').val(data[0].direccion);
-                            $('.parentesco .u').val(data[0].parentesco);
+                        if (data.length > 0) {
+                            $(`#${card} .client`).val(data[0].id);
+                            $(`#${card} .nombres`).val(data[0].nombre);
+                            $(`#${card} .documento`).val(data[0].documento);
+                            $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
+                            $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
+                            $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
+                            $(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
+                            $(`#${card} .email`).val(data[0].email);
+                            $(`#${card} .direccion`).val(data[0].direccion);
+                            $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
                         }
                     }
                 });
@@ -2335,6 +2328,7 @@ if (window.location.pathname == `/links/orden`) {
                 }
             });
             $('#modalorden').modal('toggle');
+            $('#enviarorden').focus();
         } else {
             $('#enviodeorden input').prop('disabled', false);
         }
