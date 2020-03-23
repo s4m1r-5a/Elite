@@ -87,7 +87,7 @@ router.post('/movil', async (req, res) => {
     res.send(cliente);
 });
 //////////////* PAGOS *//////////////////////////////////
-router.get('/pagos', isLoggedIn, async (req, res) => {
+router.get('/pagos', async (req, res) => {
     /*const { id } = req.query;
     const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
     console.log({ proyecto, id })*/

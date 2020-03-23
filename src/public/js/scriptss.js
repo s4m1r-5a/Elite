@@ -1107,7 +1107,7 @@ if (window.location.pathname == `/links/pagos`) {
         useURLhash: false
     }).on("leaveStep", () => {
         let skdt;
-        if (!$('#IdCliente').val()) {
+        /*if (!$('#IdCliente').val()) {
             $.ajax({
                 url: '/links/pagos/' + $('#cedula').val(),
                 type: 'GET',
@@ -1146,7 +1146,8 @@ if (window.location.pathname == `/links/pagos`) {
 
         } else {
             return true;
-        }
+        }*/
+        return true;
     });
 }
 
