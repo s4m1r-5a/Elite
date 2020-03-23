@@ -699,7 +699,7 @@ router.post('/cliente', async (req, res) => {
         email: buyerEmail
     };
     let url = `https://iux.com.co/x/venta.php?name=${buyerFullName}&movil=${telephone}&email=${buyerEmail}&ref=cliente&actualiza=${actualizar}`;
-    request({
+    /*request({
         url,
         json: true
     }, async (error, res, body) => {
@@ -724,7 +724,8 @@ router.post('/cliente', async (req, res) => {
         } else {
             respuesta = `Todo bien`;
         }
-    });
+    });*/
+    respuesta = `Todo bien`;
     var saludo = async function () {
         if (respuesta !== "") {
             clearInterval(time);
@@ -748,7 +749,7 @@ router.post('/cliente', async (req, res) => {
             }
         }
     };
-    let time = setInterval(saludo, 500);
+    let time = setInterval(saludo, 10);
 });
 
 router.get('/', isLoggedIn, async (req, res) => {

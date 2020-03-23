@@ -221,14 +221,69 @@
                                                                     alt="PayU">
                                                                 <input type="image" class="y"
                                                                     src="https://www.nutecoweb.com/wp-content/uploads/2013/10/boton-paypal.png"
-                                                                    style="width: 170px;" name="submit"
-                                                                    alt="PayPal" disabled>
+                                                                    style="width: 170px;" name="submit" alt="PayPal"
+                                                                    disabled>
                                                             </div>
                                                         </div>
                                                     </div>
                                                     <div id="arrows-primary-step-4" class="">
                                                         <div class="m-sm-4">
+                                                            <!--<form method="post"
+                                            action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/">-->
+                                                            <form method="post" class="x" style="display: none;"
+                                                                action="https://checkout.payulatam.com/ppp-web-gateway-payu/">
+                                                                <li class="mb-4">
+                                                                    <!--<input name="merchantId" type="hidden" value="508029">
+                                                    <input name="accountId" type="hidden" value="512321">-->
+                                                                    <input name="merchantId" type="hidden"
+                                                                        value="825255">
+                                                                    <input name="accountId" type="hidden"
+                                                                        value="832520">
+                                                                    <input name="description" type="hidden"
+                                                                        value="Iux suscripción 1 mes">
+                                                                    <input name="referenceCode" type="hidden"
+                                                                        value="S1M">
+                                                                    <input name="amount" type="hidden" value="15000">
+                                                                    <input name="tax" type="hidden" value="0">
+                                                                    <input name="taxReturnBase" type="hidden" value="0">
+                                                                    <input name="currency" type="hidden" value="COP">
+                                                                    <input name="signature" type="hidden" value="">
+                                                                    <input name="test" type="hidden" value="0">
+                                                                    <input type="hidden" name="actualizar"
+                                                                        value="actualizar">
 
+                                                                    <!--<input name="responseUrl" type="hidden" value="http://localhost:3000/planes">
+                                                    <input name="confirmationUrl" type="hidden" value="http://localhost:3000/planes">-->
+                                                                    <input name="responseUrl" type="hidden"
+                                                                        value="https://redflixx.herokuapp.com/planes">
+                                                                    <input name="confirmationUrl" type="hidden"
+                                                                        value="https://redflixx.herokuapp.com/confir">
+                                                                </li>
+                                                                <li class="mb-4">
+                                                                    <input type="text" name="telephone"
+                                                                        class="form-control pagar" placeholder="Movil"
+                                                                        style="text-align:center" required>
+                                                                </li>
+                                                                <li class="mb-4">
+                                                                    <input type="text" name="buyerFullName"
+                                                                        class="form-control pagar"
+                                                                        placeholder="Nombre completo"
+                                                                        style="text-align:center;" required>
+                                                                </li>
+                                                                <li class="mb-4">
+                                                                    <input type="email" name="buyerEmail"
+                                                                        class="form-control pagar" placeholder="Email"
+                                                                        style="text-align:center;" required>
+                                                                </li>
+                                                                <div class="mt-auto">
+                                                                    <!--<input name="Submit" type="submit"
+                                                        class="btn btn-lg btn-outline-danger pagarpayu"
+                                                        value="Adquirir">-->
+                                                                    <a href="#"
+                                                                        class="btn btn-lg btn-outline-danger pagarp"
+                                                                        data-toggle="tab">Adquirir</a>
+                                                                </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
