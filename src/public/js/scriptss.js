@@ -1090,7 +1090,7 @@ if (window.location.pathname == `/links/pagos`) {
     var validationForm = $("#smartwizard");
     validationForm.smartWizard({
         theme: "arrows",
-        showStepURLhash: false,
+        showStepURLhash: true,
         lang: {
             next: 'Siguiente',
             previous: 'Atras'
@@ -1099,12 +1099,12 @@ if (window.location.pathname == `/links/pagos`) {
             toolbarPosition: 'bottom', // none, top, bottom, both
             toolbarButtonPosition: 'right', // left, right
             showNextButton: true, // show/hide a Next button
-            showPreviousButton: false // show/hide a Previous button
+            showPreviousButton: true // show/hide a Previous button
             //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
         },
-        autoAdjustHeight: false,
-        backButtonSupport: false,
-        useURLhash: false
+        autoAdjustHeight: true,
+        backButtonSupport: true,
+        useURLhash: true
     }).on("leaveStep", () => {
         let skdt;
         /*if (!$('#IdCliente').val()) {
