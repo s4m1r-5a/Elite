@@ -86,10 +86,72 @@ router.post('/movil', async (req, res) => {
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
     res.send(cliente);
 });
+//////////////* PAGOS *//////////////////////////////////
+router.get('/pagos', isLoggedIn, async (req, res) => {
+    /*const { id } = req.query;
+    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
+    console.log({ proyecto, id })*/
+    res.render('links/pagos');
+});
+router.get('/pagos/:id', async (req, res) => {
+    const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id)
+    if (cliente.length > 0) {
+        const d = await pool.query(`SELECT p.id, p.numerocuotaspryecto, p.extraordinariameses, p.cuotaextraordinaria, p.inicialdiferida, pd.n, pr.nombre, 
+        p.fecha, pd.valor, c.pin, c.descuento, c.estado FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
+        INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [cliente[0].id, cliente[0].id]);
+        if (d.length > 0) {
+            const { id, n, nombre, numerocuotaspryecto, extraordinariameses, cuotaextraordinaria, inicialdiferida, fecha, valor, pin, descuento, estado } = d[0]
+            const vr = valor
+            const ahorro = descuento > 0 ? valor * descuento / 100 : 0;
+            descuento > 0 ? valor = valor - ahorro : '';
+            const cuotainicial = valor * 30 / 100;
+            const proyecto = valor - cuotainicial;
+            var concepto, cuota, mora = 0, total;
+            function H() {
+                paquete = {
+                    id,
+                    cliente: cliente[0].nombre,
+                    idcliente: cliente[0].id,
+                    n,
+                    nombre,
+                    concepto,
+                    cuota,
+                    ahorro,
+                    vr,
+                    valor,
+                    descuento,
+                    mora,
+                    total,
+                    pin,
+                    estado
+                }
+            }
+            const a = await pool.query(`SELECT * FROM payu WHERE state_pol = 4 AND reference_sale = ?`, id);
+            if (a.length > 0) {
+                var j = cuotaextraordinaria ? parseFloat(numerocuotaspryecto.slice(-2, -1)) : 0;
+                var nxmes = extraordinariameses > 2 ? j * 2 : j;
+                var extraordinaria = cuotaextraordinaria * nxmes;
+                cuota = (proyecto - extraordinaria) / (numerocuotaspryecto - nxmes)
+                H();
+                res.send({ paquete, status: true });
+            } else {
+                concepto = 'Separacion';
+                cuota = '1000000'
+                total = cuota
+                H();
+                res.send({ paquete, status: true });
+            }
+        } else {
+            res.send({ paquete: 'Aun no se genera ninguna orden de separacion, comuniiquece con un asesor', status: false });
+        }
+    } else {
+        res.send({ paquete: 'No existe un registro con este numero de documeto, comuniiquece con un asesor', status: false });
+    }
+});
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
     const { id } = req.query;
-    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
+    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ? `, id);
     console.log({ proyecto, id })
     res.render('links/orden', { proyecto, id });
 });
@@ -119,7 +181,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     } else {
         clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
         client[0] = clie.insertId
-
     }
 
     if (documento[1]) {
@@ -134,17 +195,19 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const separacion = {
         lote,
         cliente: client[0],
+        cliente2: documento[1] ? client[1] : null,
         asesor: req.user.id,
         numerocuotaspryecto,
         extraordinariameses,
         cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : '',
-        cupon,
+        cupon: cupon ? cupon : 1,
         inicialdiferida,
-        ahorro,
+        ahorro: ahorro ? ahorro.replace(/\./g, '') : ''
     };
-    documento[1] ? separacion.cliente2 = client[1] : '';
-    await pool.query('INSERT INTO preventa SET ? ', separacion);
+    //documento[1] ? separacion.cliente2 = client[1] : '';
+    const h = await pool.query('INSERT INTO preventa SET ? ', separacion);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1 }, lote]);
+    cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
 });
@@ -193,7 +256,7 @@ router.post('/tabla/:id', async (req, res) => {
                 x = {
                     n: i,
                     fecha: moment(fcha).add(i, 'month').startOf('month'),
-                    oficial: `<span class="badge badge-dark text-center text-uppercase">Inicial 30% ${oficial30}</span>`,
+                    oficial: `< span class="badge badge-dark text-center text-uppercase" > Inicial 30 % ${oficial30}</span > `,
                     cuota: cuota30,
                     stado: '<span class="badge badge-primary">Pendiente</span>',
                     n2: i > o ? '' : i + j,
@@ -207,7 +270,7 @@ router.post('/tabla/:id', async (req, res) => {
             d = {
                 n: i,
                 fecha: moment(fcha).add(y, 'month').startOf('month'),
-                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto 70% ${oficial70}</span>`,
+                oficial: `< span class="badge badge-dark text-center text-uppercase" > Poyecto 70 % ${oficial70}</span > `,
                 cuota: cuota70,
                 stado: '<span class="badge badge-info">Pendiente</span>',
                 n2: v + i,
@@ -215,10 +278,10 @@ router.post('/tabla/:id', async (req, res) => {
                 cuota2: cuota70,
                 stado2: '<span class="badge badge-info">Pendiente</span>'
             };
-            d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota = `<mark>${extra}</mark>` : '';
-            d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota = `<mark>${extra}</mark>` : '';
-            d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota2 = `<mark>${extra}</mark>` : '';
-            d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota2 = `<mark>${extra}</mark>` : '';
+            d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota = `< mark > ${extra}</mark > ` : '';
+            d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota = `< mark > ${extra}</mark > ` : '';
+            d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota2 = `< mark > ${extra}</mark > ` : '';
+            d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota2 = `< mark > ${extra}</mark > ` : '';
             dataSet.data.push(d);
         };
         res.send(true);
@@ -236,7 +299,7 @@ router.put('/reportes', isLoggedIn, async (req, res) => {
     const venta = { correo, fechadeactivacion, fechadevencimiento }
     const cliente = await pool.query('SELECT * FROM clientes WHERE id = ?', client);
     const nombre = cliente[0].nombre.split(" ")
-    const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss}`
+    const msg = `${nombre[0]} tu usuario sera ${correo} clave ${clave}, ${smss} `
     sms('57' + movil, msg);
     await pool.query('UPDATE ventas set ? WHERE id = ?', [venta, id_venta]);
     res.send(true);
@@ -247,9 +310,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'WHERE p.asesor = ?';
 
-        sql = `SELECT p.id, pt.nombre proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha 
-        FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
-        INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id ${d}`
+        sql = `SELECT p.id, pt.nombre proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
+            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id ${ d} `
 
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
@@ -259,13 +322,13 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.id == 15 ? '' : 't.acreedor = ?  AND';
 
-        sql = `SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, 
-        t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga, 
-        r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t 
-        INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id 
-        INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id 
-        INNER JOIN estados e ON t.estado = e.id WHERE ${d} YEAR(t.fecha) = YEAR(CURDATE()) 
-        AND MONTH(t.fecha) BETWEEN 1 and 12`
+        sql = `SELECT t.id, u.fullname, us.id tu, us.fullname venefactor,
+                t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga,
+                    r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t
+            INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id
+            INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id
+            INNER JOIN estados e ON t.estado = e.id WHERE ${ d} YEAR(t.fecha) = YEAR(CURDATE())
+            AND MONTH(t.fecha) BETWEEN 1 and 12`
 
         const solicitudes = await pool.query(sql, req.user.id);
         respuesta = { "data": solicitudes };
@@ -275,11 +338,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.id == 15 ? '' : 'v.vendedor = ? AND';
 
-        sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud, 
-        t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto 
-        INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
-        WHERE ${d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE()) 
-        AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
+        sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud,
+                t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto
+            INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
+            WHERE ${ d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE())
+            AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
 
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
@@ -310,9 +373,9 @@ router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
 });
 router.post('/solicitudes', isLoggedIn, async (req, res) => {
-    const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo 
-    FROM transacciones t INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id INNER JOIN metodos m ON t.metodo = m.id 
-    INNER JOIN estados e ON t.estado = e.id WHERE t.remitente = ? OR t.acreedor = ?`, [req.user.id, req.user.id]);
+    const solicitudes = await pool.query(`SELECT t.id, u.fullname, us.id tu, us.fullname venefactor, t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo
+            FROM transacciones t INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id INNER JOIN metodos m ON t.metodo = m.id
+            INNER JOIN estados e ON t.estado = e.id WHERE t.remitente = ? OR t.acreedor = ? `, [req.user.id, req.user.id]);
     //YEAR(v.fechadecompra) = YEAR(CURDATE()) AND MONTH(v.fechadecompra) BETWEEN 1 AND 12
     respuesta = { "data": solicitudes };
     res.send(respuesta);
@@ -333,11 +396,11 @@ router.put('/solicitudes', isLoggedIn, async (req, res) => {
 router.post('/cuenta', isLoggedIn, async (req, res) => {
     const { desti, bank } = req.body;
     if (bank !== undefined) {
-        const banco = await pool.query(`SELECT * FROM bancos WHERE id_banco = ?`, bank);
+        const banco = await pool.query(`SELECT * FROM bancos WHERE id_banco = ? `, bank);
         console.log(bank)
         res.send(banco);
     } else {
-        const cuentas = await pool.query(`SELECT DISTINCT cuenta FROM transferencias WHERE destinatario = ?`, desti);
+        const cuentas = await pool.query(`SELECT DISTINCT cuenta FROM transferencias WHERE destinatario = ? `, desti);
         res.send(cuentas);
     }
 })
@@ -368,13 +431,13 @@ router.post('/cedulav', isLoggedIn, async (req, res) => {
             return datos
         });
     }
-    const documento = await pool.query(`SELECT DISTINCT * FROM clientes WHERE documento = ?`, cedula);
+    const documento = await pool.query(`SELECT DISTINCT * FROM clientes WHERE documento = ? `, cedula);
 
     if (documento.length && o != 1) {
         const dat = await pool.query(`SELECT * FROM transferencias t INNER JOIN clientes c ON t.destinatario = c.id WHERE t.remitente = ? GROUP BY t.destinatario`, documento[0].id);
         res.send([documento, dat]);
     } else if (documento.length && o == 1) {
-        const dato = await pool.query(`SELECT DISTINCT * FROM transferencias t INNER JOIN clientes c ON t.destinatario = c.id WHERE t.destinatario = ?`, documento[0].id);
+        const dato = await pool.query(`SELECT DISTINCT * FROM transferencias t INNER JOIN clientes c ON t.destinatario = c.id WHERE t.destinatario = ? `, documento[0].id);
         res.send([documento, dato]);
     } else {
         getCI(cedula)
@@ -455,7 +518,7 @@ router.post('/ventas', isLoggedIn, async (req, res) => {
                 venta2.fechadevencimiento = fech;
                 sms('57' + cel, `${nombr[0].toUpperCase()} tu actual membresia aun no vence, el dia ${fech} activaremos esta recarga que estas realizando, para mas info escribenos al 3012673944. RedFlix`);
             } else {
-                sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos. Si tenes alguna duda escríbenos al 3012673944 Whatsapp. RedFlix`);
+                sms('57' + cel, `${nombr[0].toUpperCase()} adquiriste ${prod} ${nompro} en el lapso del día recibirás  tus datos.Si tenes alguna duda escríbenos al 3012673944 Whatsapp.RedFlix`);
             }
             await pool.query('INSERT INTO ventas SET ? ', venta2);
             req.flash('success', 'Transacción realizada correctamente');
@@ -614,8 +677,8 @@ router.post('/id', async (req, res) => {
 ///////////////////////* */////////////////////////////////////////////////////////
 router.post('/canjear', async (req, res) => {
     const { pin } = req.body;
-    const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias 
-    FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE pin = ?`, pin);
+    const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias
+            FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE pin = ? `, pin);
     if (rows.length > 0 && rows[0].client === null) {
         res.send(rows);
     } else if (rows.length > 0 && rows[0].client !== null) {

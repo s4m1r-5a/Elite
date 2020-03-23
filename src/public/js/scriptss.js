@@ -1084,8 +1084,71 @@ if (window.location.pathname == `/tablero`) {
         ]
     });
 };
+//////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/pagos`) {
+    //alert('sajljsdlaj')
+    var validationForm = $("#smartwizard");
+    validationForm.smartWizard({
+        theme: "arrows",
+        showStepURLhash: false,
+        lang: {
+            next: 'Siguiente',
+            previous: 'Atras'
+        },
+        toolbarSettings: {
+            toolbarPosition: 'bottom', // none, top, bottom, both
+            toolbarButtonPosition: 'right', // left, right
+            showNextButton: true, // show/hide a Next button
+            showPreviousButton: false // show/hide a Previous button
+            //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+        },
+        autoAdjustHeight: false,
+        backButtonSupport: false,
+        useURLhash: false
+    }).on("leaveStep", () => {
+        let skdt;
+        if (!$('#IdCliente').val()) {
+            $.ajax({
+                url: '/links/pagos/' + $('#cedula').val(),
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    //alert(data)
+                    if (data.status) {
+                        console.log(data);
+                        $('#Cliente').html(data.paquete.cliente);
+                        $('#IdCliente').val(data.paquete.idcliente);
+                        $('#nombreproyecto').html(data.paquete.nombre);
+                        $('#Lote').html(data.paquete.n);
+                        $('#Cupon').html(data.paquete.pin);
+                        $('#Dto').html(data.paquete.descuento);
+                        $('#Ahorro').html(Moneda(data.paquete.ahorro));
+                        $('#Proyecto').html(Moneda(data.paquete.vr));
+                        $('#Proyecto-Dto').html(Moneda(data.paquete.valor));
+                        $('#Concepto').html(data.paquete.concepto);
+                        $('#Cuota').html(Moneda(data.paquete.cuota));
+                        $('#Mora').html(Moneda(data.paquete.mora));
+                        $('#Total').html(Moneda(data.paquete.total));
+                        $('#Proyec').val(Moneda(data.paquete.id));
+                        skdt = true;
+                    } else {
+                        $(".alert").show();
+                        $('.alert-message').html('<strong>Error!</strong> ' + data.paquete);
+                        setTimeout(function () {
+                            $(".alert").fadeOut(3000);
+                        }, 2000);
+                        skdt = false;
+                    }
+                }
+            });
 
+            return skdt;
 
+        } else {
+            return true;
+        }
+    });
+}
 
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
@@ -2197,11 +2260,14 @@ if (window.location.pathname == `/links/orden`) {
                                 var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
                                 if (fecha < new Date()) {
                                     SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                                    $('#bonoid').val('');
                                     Dt();
-                                } else if (data[0].cliente != null) {
-                                    SMSj('error', 'Este cupon ya le fue asignado a un cliente. Para mas informacion comuniquese con el asesor encargado');
+                                } else if (data[0].producto != null) {
+                                    SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
+                                    $('#bonoid').val('');
                                     Dt();
                                 } else {
+                                    $('#bonoid').val(data[0].id);
                                     inicial = inicial - (inicial * data[0].descuento / 100);
                                     precio = precio - (precio * data[0].descuento / 100);
                                     oficial30 = Moneda(Math.round(inicial));
@@ -2212,6 +2278,7 @@ if (window.location.pathname == `/links/orden`) {
                                 bono = data[0].pin;
                             } else {
                                 Dt();
+                                $('#bonoid').val('');
                                 SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
                             }
                         }
