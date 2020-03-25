@@ -112,6 +112,8 @@ router.get('/pagos/:id', async (req, res) => {
                     id,
                     cliente: cliente[0].nombre,
                     idcliente: cliente[0].id,
+                    movil: cliente[0].movil,
+                    email: cliente[0].email,
                     n,
                     nombre,
                     concepto,
@@ -147,6 +149,15 @@ router.get('/pagos/:id', async (req, res) => {
     } else {
         res.send({ paquete: 'No existe un registro con este numero de documeto, comuniiquece con un asesor', status: false });
     }
+});
+router.post('/pagos', async (req, res) => {
+    const { merchantId, amount, referenceCode } = req.body;
+    //var nombre = normalize(buyerFullName).toUpperCase();
+    //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
+    var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
+    var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
+    var hash = crypto.createHash('md5').update(key).digest("hex");
+    res.send(hash);
 });
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {

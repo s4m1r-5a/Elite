@@ -1107,7 +1107,7 @@ if (window.location.pathname == `/links/pagos`) {
         useURLhash: false
     }).on("leaveStep", () => {
         let skdt;
-        /*if (!$('#IdCliente').val()) {
+        if (!$('.Cliente').html()) {
             $.ajax({
                 url: '/links/pagos/' + $('#cedula').val(),
                 type: 'GET',
@@ -1116,10 +1116,11 @@ if (window.location.pathname == `/links/pagos`) {
                     //alert(data)
                     if (data.status) {
                         console.log(data);
-                        $('#Cliente').html(data.paquete.cliente);
-                        $('#IdCliente').val(data.paquete.idcliente);
-                        $('#nombreproyecto').html(data.paquete.nombre);
-                        $('#Lote').html(data.paquete.n);
+                        $('.Cliente').html(data.paquete.cliente);
+                        $('.Cliente').val(data.paquete.cliente);
+                        $('#Code').val(data.paquete.idcliente + '-' + data.paquete.id);
+                        $('.nombreproyecto').html(data.paquete.nombre);
+                        $('.Lote').html(data.paquete.n);
                         $('#Cupon').html(data.paquete.pin);
                         $('#Dto').html(data.paquete.descuento);
                         $('#Ahorro').html(Moneda(data.paquete.ahorro));
@@ -1128,8 +1129,11 @@ if (window.location.pathname == `/links/pagos`) {
                         $('#Concepto').html(data.paquete.concepto);
                         $('#Cuota').html(Moneda(data.paquete.cuota));
                         $('#Mora').html(Moneda(data.paquete.mora));
-                        $('#Total').html(Moneda(data.paquete.total));
-                        $('#Proyec').val(Moneda(data.paquete.id));
+                        $('.Total').html(Moneda(data.paquete.total));
+                        $('#Movil').val(data.paquete.movil);
+                        $('#Email').val(data.paquete.email);
+                        $('#Total').val(data.paquete.total);
+                        $('#Description').val(data.paquete.concepto + '-' + data.paquete.nombre + ' Lote: ' + data.paquete.n);
                         skdt = true;
                     } else {
                         $(".alert").show();
@@ -1146,8 +1150,26 @@ if (window.location.pathname == `/links/pagos`) {
 
         } else {
             return true;
-        }*/
-        return true;
+        }
+        //return true;
+    });
+    $('.Total2').change(function () {
+        alert('lkjdljhdjol')
+        var resul = $(this).val();
+        $('#Total').val(resul)
+    });
+    $('form').submit(function () {
+        $('input').prop('disabled', false);
+        var fd = $('form').serialize();
+        $.ajax({
+            url: '/links/pagos',
+            data: fd,
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                $('input[name="signature"]').val(data);
+            }
+        });
     });
 }
 

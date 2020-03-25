@@ -14,207 +14,202 @@
                     <div class="card">
                         <div class="card-body">
                             <div class="m-sm-4">
-                                <form action="/pagos" method="POST">
-                                    <div class="card">
-                                        <div class="card-body">
-                                            <div id="smartwizard" class="wizard wizard-primary mb-4">
-                                                <ul>
-                                                    <li><a href="#arrows-primary-step-1">Paso 1<br /><small>Pin de
-                                                                registro</small></a>
-                                                    </li>
-                                                    <li><a href="#arrows-primary-step-2">Step Title<br /><small>Step
-                                                                description</small></a>
-                                                    </li>
-                                                    <li><a href="#arrows-primary-step-3">Step Title<br /><small>Step
-                                                                description</small></a>
-                                                    </li>
-                                                    <li><a href="#arrows-primary-step-4">Step Title<br /><small>Step
-                                                                description</small></a>
-                                                    </li>
-                                                </ul>
-                                                <div>
-                                                    <div id="arrows-primary-step-1" class="">
-                                                        <div class="m-sm-4">
-                                                            <div class="alert alert-danger alert-dismissible form-group"
-                                                                role="alert" style="display: none;">
-                                                                <div class="alert-message">s</div>
-                                                            </div>
-                                                            <div class="form-group">
-                                                                <label>Documento</label>
-                                                                <input class="form-control form-control-lg" id="cedula"
-                                                                    type="text" name="pin"
-                                                                    placeholder="Ingrese pin de registro" required
-                                                                    autocomplete="off" />
-                                                            </div>
+                                <div class="card">
+                                    <div class="card-body">
+                                        <div id="smartwizard" class="wizard wizard-primary mb-4">
+                                            <ul>
+                                                <li><a href="#arrows-primary-step-1">Paso 1<br /><small>Pin de
+                                                            registro</small></a>
+                                                </li>
+                                                <li><a href="#arrows-primary-step-2">Step Title<br /><small>Step
+                                                            description</small></a>
+                                                </li>
+                                                <li><a href="#arrows-primary-step-3">Step Title<br /><small>Step
+                                                            description</small></a>
+                                                </li>
+                                                <li><a href="#arrows-primary-step-4">Step Title<br /><small>Step
+                                                            description</small></a>
+                                                </li>
+                                            </ul>
+                                            <div>
+                                                <div id="arrows-primary-step-1" class="">
+                                                    <div class="m-sm-4">
+                                                        <div class="alert alert-danger alert-dismissible form-group"
+                                                            role="alert" style="display: none;">
+                                                            <div class="alert-message">s</div>
+                                                        </div>
+                                                        <div class="form-group">
+                                                            <label>Documento</label>
+                                                            <input class="form-control form-control-lg" id="cedula"
+                                                                type="text" name="pin"
+                                                                placeholder="Ingrese pin de registro" required
+                                                                autocomplete="off" />
                                                         </div>
                                                     </div>
-                                                    <div id="arrows-primary-step-2" class="">
-                                                        <div class="m-sm-4">
-                                                            <table class="table table-sm my-2">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <th>
-                                                                            <i class="feather-lg"
-                                                                                data-feather="user"></i>
-                                                                        </th>
-                                                                        <td>
-                                                                            <span id="Cliente"></span>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th>
-                                                                            <i class="feather-lg"
-                                                                                data-feather="sun"></i>
-                                                                        </th>
-                                                                        <td>
-                                                                            <span id="nombreproyecto"></span> Lote:
-                                                                            <span id="Lote"></span>
-                                                                            <input type="hidden" id="Proyec">
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                            <div class="row" id="cliente1">
-                                                                <div class="col-12 col-lg-6">
-                                                                    <table class="table table-sm my-2">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="heart"></i>
-                                                                                    Cupon
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Cupon"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="mail"></i>
-                                                                                    Dto
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Dto"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="phone-call"></i>
-                                                                                    Ahorro
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Ahorro"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr class="mb-4">
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="map"></i>
-                                                                                    Proyecto Dto
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Proyecto-Dto"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
-                                                                <div class="col-12 col-lg-6">
-                                                                    <table class="table table-sm my-2">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="map"></i>
-                                                                                    Proyecto
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Proyecto"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="map"></i>
-                                                                                    Concepto
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Concepto"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="map"></i>
-                                                                                    Cuota
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Cuota"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="map"></i>
-                                                                                    Mora
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Mora"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                </div>
+                                                </div>
+                                                <div id="arrows-primary-step-2" class="">
+                                                    <div class="m-sm-4">
+                                                        <table class="table table-sm my-2">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-lg" data-feather="user"></i>
+                                                                    </th>
+                                                                    <td>
+                                                                        <span class="Cliente"></span>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-lg" data-feather="sun"></i>
+                                                                    </th>
+                                                                    <td>
+                                                                        <span class="nombreproyecto"></span> Lote:
+                                                                        <span class="Lote"></span>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <div class="row" id="cliente1">
+                                                            <div class="col-12 col-lg-6">
+                                                                <table class="table table-sm my-2">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="heart"></i>
+                                                                                Cupon
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Cupon"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="mail"></i>
+                                                                                Dto
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Dto"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="phone-call"></i>
+                                                                                Ahorro
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Ahorro"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr class="mb-4">
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Proyecto Dto
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Proyecto-Dto"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
                                                             </div>
-                                                            <table class="table table-sm my-2">
-                                                                <tbody>
-                                                                    <tr>
-                                                                        <th>
-                                                                            <i class="feather-md"
-                                                                                data-feather="dollar-sign"></i>
-                                                                            Total a Pagar
-                                                                        </th>
-                                                                        <td>
-                                                                            <div class="d-inline-block float-right">
-                                                                                <span id="Total"></span>
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                    <tr>
-                                                                        <th>
-                                                                            <i class="feather-md"
-                                                                                data-feather="dollar-sign"></i>
-                                                                            Otro Valor
-                                                                        </th>
-                                                                        <td>
-                                                                            <div class="d-inline-block float-right">
-                                                                                <input
-                                                                                    class="form-control-no-border edi direccion d text-right"
-                                                                                    type="text"
-                                                                                    placeholder="Ingrese aqui otro valor"
-                                                                                    autocomplete="off"
-                                                                                    style="padding: 1px; width: 100%;"
-                                                                                    name="direccion"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true">
-                                                                            </div>
-                                                                        </td>
-                                                                    </tr>
-                                                                </tbody>
-                                                            </table>
-                                                            <p>El monto a digitar en otro valor debe ser mayor
-                                                                al total
-                                                                a pagar. Para mas informacion comuniquese con
-                                                                nuestro
-                                                                servicio al cliente</p>
+                                                            <div class="col-12 col-lg-6">
+                                                                <table class="table table-sm my-2">
+                                                                    <tbody>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Proyecto
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Proyecto"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Concepto
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Concepto"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Cuota
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Cuota"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Mora
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Mora"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </table>
+                                                            </div>
                                                         </div>
+                                                        <table class="table table-sm my-2">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="dollar-sign"></i>
+                                                                        Total a Pagar
+                                                                    </th>
+                                                                    <td>
+                                                                        <div class="d-inline-block float-right">
+                                                                            <span class="Total"></span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="dollar-sign"></i>
+                                                                        Otro Valor
+                                                                    </th>
+                                                                    <td>
+                                                                        <div class="d-inline-block float-right">
+                                                                            <input
+                                                                                class="form-control-no-border edi direccion d text-right Total2"
+                                                                                type="text"
+                                                                                placeholder="Ingrese aqui otro valor"
+                                                                                autocomplete="off"
+                                                                                style="padding: 1px; width: 100%;"
+                                                                                name="direccion" data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true">
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <p>El monto a digitar en otro valor debe ser mayor
+                                                            al total
+                                                            a pagar. Para mas informacion comuniquese con
+                                                            nuestro
+                                                            servicio al cliente</p>
                                                     </div>
-                                                    <div id="arrows-primary-step-3" class="">
-                                                        <div class="m-sm-4">
-                                                            <!--<div class="mt-auto">
+                                                </div>
+                                                <div id="arrows-primary-step-3" class="">
+                                                    <div class="m-sm-4">
+                                                        <!--<div class="mt-auto">
                                                                 <input name=".x" class="y payu" type="image"
                                                                     src="http://www.payulatam.com/img-secure-2015/boton_pagar_mediano.png"
                                                                     alt="PayU">
@@ -224,170 +219,138 @@
                                                                     disabled>
                                                             </div>-->
 
-                                                            <div class="card">
-                                                                <div class="card-body border">
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="custom-radio" type="radio"
-                                                                            class="custom-control-input">
-                                                                        <span class="custom-control-label">PayPal</span>
-                                                                        <img src="/img/pagos/pagos15.png"
-                                                                            class="rounded" alt="Ashley"
-                                                                            style="width: 80%;">
-                                                                    </label>
-                                                                </div>
+                                                        <div class="card">
+                                                            <div class="card-body border">
+                                                                <label class="custom-control custom-radio">
+                                                                    <input name="custom-radio" type="radio"
+                                                                        class="custom-control-input">
+                                                                    <span class="custom-control-label">PayPal</span>
+                                                                    <img src="/img/pagos/pagos15.png" class="rounded"
+                                                                        alt="Ashley" style="width: 80%;">
+                                                                </label>
                                                             </div>
-                                                            <div class="card">
-                                                                <div class="card-body border">
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="custom-radio" type="radio"
-                                                                            class="custom-control-input">
-                                                                        <span class="custom-control-label">Payu</span>
-                                                                        <img src="/img/pagos/pagos.png" class="rounded"
-                                                                            alt="Ashley" style="width: 80%;">
-                                                                    </label>
-                                                                </div>
+                                                        </div>
+                                                        <div class="card">
+                                                            <div class="card-body border">
+                                                                <label class="custom-control custom-radio">
+                                                                    <input name="custom-radio" type="radio"
+                                                                        class="custom-control-input">
+                                                                    <span class="custom-control-label">Payu</span>
+                                                                    <img src="/img/pagos/pagos.png" class="rounded"
+                                                                        alt="Ashley" style="width: 80%;">
+                                                                </label>
                                                             </div>
-                                                            <div class="card">
-                                                                <div class="card-body border">
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="custom-radio" type="radio"
-                                                                            class="custom-control-input">
-                                                                        <span class="custom-control-label">Ofice</span>
-                                                                        <img src="/img/pagos/pagos16.png"
-                                                                            class="rounded" alt="Ashley"
-                                                                            style="width: 80%;">
-                                                                    </label>
-                                                                </div>
+                                                        </div>
+                                                        <div class="card">
+                                                            <div class="card-body border">
+                                                                <label class="custom-control custom-radio">
+                                                                    <input name="custom-radio" type="radio"
+                                                                        class="custom-control-input">
+                                                                    <span class="custom-control-label">Ofice</span>
+                                                                    <img src="/img/pagos/pagos16.png" class="rounded"
+                                                                        alt="Ashley" style="width: 80%;">
+                                                                </label>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    <div id="arrows-primary-step-4" class="">
-                                                        <div class="m-sm-4">
-                                                            <!--<form method="post"
+                                                </div>
+                                                <div id="arrows-primary-step-4" class="">
+                                                    <div class="m-sm-4">
+                                                        <!--<form method="post"
                                             action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/">-->
-                                                            <form method="post" class="x" style="display: none;"
-                                                                action="https://checkout.payulatam.com/ppp-web-gateway-payu/">
-                                                                <li class="mb-4">
-                                                                    <!--<input name="merchantId" type="hidden" value="508029">
+                                                        <form method="post"
+                                                            action="https://checkout.payulatam.com/ppp-web-gateway-payu/">
+                                                            <!--<input name="merchantId" type="hidden" value="508029">
                                                     <input name="accountId" type="hidden" value="512321">-->
-
-                                                                    <input type="hidden" id="IdCliente">
-                                                                    <table class="table table-sm my-2">
-                                                                        <tbody>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="user"></i>
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="Cliente"></span>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="sun"></i>
-                                                                                </th>
-                                                                                <td>
-                                                                                    <span id="nombreproyecto"></span>
-                                                                                    Lote:
-                                                                                    <span id="Lote"></span>
-                                                                                    <input type="hidden" id="Proyec">
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="dollar-sign"></i>
-                                                                                    Total a Pagar
-                                                                                </th>
-                                                                                <td>
-                                                                                    <div
-                                                                                        class="d-inline-block float-right">
-                                                                                        <span id="Total"></span>
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                            <tr>
-                                                                                <th>
-                                                                                    <i class="feather-md"
-                                                                                        data-feather="dollar-sign"></i>
-                                                                                    Otro Valor
-                                                                                </th>
-                                                                                <td>
-                                                                                    <div
-                                                                                        class="d-inline-block float-right">
-                                                                                        <input
-                                                                                            class="form-control-no-border edi direccion d text-right"
-                                                                                            type="text"
-                                                                                            placeholder="Ingrese aqui otro valor"
-                                                                                            autocomplete="off"
-                                                                                            style="padding: 1px; width: 100%;"
-                                                                                            name="direccion"
-                                                                                            data-mask="000.000.000"
-                                                                                            data-mask-reverse="true"
-                                                                                            data-mask-selectonfocus="true">
-                                                                                    </div>
-                                                                                </td>
-                                                                            </tr>
-                                                                        </tbody>
-                                                                    </table>
-                                                                    <input name="merchantId" type="hidden"
-                                                                        value="825255">
-                                                                    <input name="accountId" type="hidden"
-                                                                        value="832520">
-                                                                    <input name="description" type="hidden"
-                                                                        value="Iux suscripción 1 mes">
-                                                                    <input name="referenceCode" type="hidden"
-                                                                        value="S1M">
-                                                                    <input name="amount" type="hidden" value="15000">
-                                                                    <input name="tax" type="hidden" value="0">
-                                                                    <input name="taxReturnBase" type="hidden" value="0">
-                                                                    <input name="currency" type="hidden" value="COP">
-                                                                    <input name="signature" type="hidden" value="">
-                                                                    <input name="test" type="hidden" value="0">
-                                                                    <input type="hidden" name="actualizar"
-                                                                        value="actualizar">
-
-                                                                    <!--<input name="responseUrl" type="hidden" value="http://localhost:3000/planes">
-                                                    <input name="confirmationUrl" type="hidden" value="http://localhost:3000/planes">-->
-                                                                    <input name="responseUrl" type="hidden"
-                                                                        value="https://redflixx.herokuapp.com/planes">
-                                                                    <input name="confirmationUrl" type="hidden"
-                                                                        value="https://redflixx.herokuapp.com/confir">
-                                                                </li>
-                                                                <li class="mb-4">
-                                                                    <input type="text" name="telephone"
-                                                                        class="form-control pagar" placeholder="Movil"
-                                                                        style="text-align:center" required>
-                                                                </li>
-                                                                <li class="mb-4">
-                                                                    <input type="text" name="buyerFullName"
-                                                                        class="form-control pagar"
-                                                                        placeholder="Nombre completo"
-                                                                        style="text-align:center;" required>
-                                                                </li>
-                                                                <li class="mb-4">
-                                                                    <input type="email" name="buyerEmail"
-                                                                        class="form-control pagar" placeholder="Email"
-                                                                        style="text-align:center;" required>
-                                                                </li>
-                                                                <div class="mt-auto">
-                                                                    <!--<input name="Submit" type="submit"
-                                                        class="btn btn-lg btn-outline-danger pagarpayu"
-                                                        value="Adquirir">-->
-                                                                    <a href="#"
-                                                                        class="btn btn-lg btn-outline-danger pagarp"
-                                                                        data-toggle="tab">Adquirir</a>
-                                                                </div>
-                                                            </form>
-                                                        </div>
+                                                            <table class="table table-sm my-2">
+                                                                <tbody>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="user"></i>Nombre
+                                                                        </th>
+                                                                        <td>
+                                                                            <input type="text" name="buyerFullName"
+                                                                                class="form-control Cliente" disabled>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="user"></i>Movil
+                                                                        </th>
+                                                                        <td>
+                                                                            <input type="text" name="telephone"
+                                                                                class="form-control" id="Movil"
+                                                                                disabled>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="user"></i>Email
+                                                                        </th>
+                                                                        <td>
+                                                                            <input type="email" name="buyerEmail"
+                                                                                class="form-control" id="Email"
+                                                                                disabled>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="sun"></i>Concepto
+                                                                        </th>
+                                                                        <td>
+                                                                            <input type="text" name="description"
+                                                                                class="form-control" id="Description"
+                                                                                value="" disabled>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="dollar-sign"></i>
+                                                                            Valor
+                                                                        </th>
+                                                                        <td>
+                                                                            <div class="d-inline-block float-right">
+                                                                                <input type="text" name="amount"
+                                                                                    class="text-right Total" id="Total"
+                                                                                    disabled>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                </tbody>
+                                                            </table>
+                                                            <input name="merchantId" type="hidden" value="825255">
+                                                            <input name="accountId" type="hidden" value="832520">
+                                                            <input name="referenceCode" type="hidden" id="Code">
+                                                            <input name="tax" type="hidden" value="0">
+                                                            <input name="taxReturnBase" type="hidden" value="0">
+                                                            <input name="currency" type="hidden" value="COP">
+                                                            <input name="signature" type="hidden" value="">
+                                                            <input name="test" type="hidden" value="0">
+                                                            <input type="hidden" name="actualizar" value="actualizar">
+                                                            <input name="responseUrl" type="hidden"
+                                                                value="http://localhost:3000/links/pagos">
+                                                            <input name="confirmationUrl" type="hidden"
+                                                                value="http://localhost:3000/confir">
+                                                            <!--<input name="responseUrl" type="hidden"
+                                                                    value="https://redflixx.herokuapp.com/planes">
+                                                                <input name="confirmationUrl" type="hidden"
+                                                                    value="https://redflixx.herokuapp.com/confir">-->
+                                                            <div class="mt-auto">
+                                                                <input name="Submit" type="submit"
+                                                                    class="btn btn-lg btn-outline-danger" value="Pagar">
+                                                            </div>
+                                                        </form>
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
-                                </form>
+                                </div>
                             </div>
                         </div>
                     </div>
