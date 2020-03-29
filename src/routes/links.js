@@ -13,6 +13,19 @@ const moment = require('moment');
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
+router.get('/prueba', async (req, res) => {
+    const a = await pool.query(`SELECT * FROM preventa`);
+    if (a.length > 0) {
+        //var fec = a[0].transaction_date;
+        //var cuotai = cuotainicial / inicialdiferida
+
+        await a.map((c, i, a) => {
+            console.log(c.lote, i);
+        });
+
+        res.send(true);
+    }
+})
 //////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
     const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
@@ -113,7 +126,7 @@ router.get('/pagos/:id', async (req, res) => {
         p.fecha, pd.valor, c.pin, c.descuento, c.estado FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
         INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [cliente[0].id, cliente[0].id]);
         if (d.length > 0) {
-            const { id, n, nombre, numerocuotaspryecto, extraordinariameses, cuotaextraordinaria, inicialdiferida, fecha, valor, pin, descuento, estado } = d[0]
+            let { id, n, nombre, numerocuotaspryecto, extraordinariameses, cuotaextraordinaria, inicialdiferida, fecha, valor, pin, descuento, estado } = d[0]
             const vr = valor
             const ahorro = descuento > 0 ? valor * descuento / 100 : 0;
             descuento > 0 ? valor = valor - ahorro : '';
@@ -123,7 +136,7 @@ router.get('/pagos/:id', async (req, res) => {
             function H() {
                 paquete = {
                     id, cliente: cliente[0].nombre, idcliente: cliente[0].id, movil: cliente[0].movil, email: cliente[0].email,
-                    n, nombre, concepto, cuota, ahorro, vr, valor, descuento, mora, total, pin, estado
+                    n, nombre, concepto, cuota, ahorro, vr, valor, descuento, mora, total, pin, estado, asesor: req.user.id
                 }
             }
             const a = await pool.query(`SELECT * FROM payu WHERE state_pol = 4 AND reference_sale = ?`, id);
@@ -133,9 +146,10 @@ router.get('/pagos/:id', async (req, res) => {
 
                 await a.filter((c) => {
                     return c.description === 'INICIAL';
-                }).map((c) => {
-                    if (c.transaction_date > fecha || c.value < cuotai) {
-                        d
+                }).map((c, i, a) => {
+                    console.log(moment(fecha).add(i, 'month').format('YYYY-MM-DD'))
+                    if (moment(c.transaction_date).format('YYYY-MM-DD') > moment(fecha).add(i, 'month').format('YYYY-MM-DD') || c.value < cuotai) {
+                        console.log('se cumple la mora')
                     }
                 });
                 var j = cuotaextraordinaria ? parseFloat(numerocuotaspryecto.slice(-2, -1)) : 0;
@@ -161,8 +175,8 @@ router.get('/pagos/:id', async (req, res) => {
 router.post('/pagos', async (req, res) => {
     const { merchantId, amount, referenceCode } = req.body;
     //var nombre = normalize(buyerFullName).toUpperCase();
-    //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
-    var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
+    var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
+    //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
     res.send(hash);

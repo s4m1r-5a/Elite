@@ -1118,7 +1118,7 @@ if (window.location.pathname == `/links/pagos`) {
                         console.log(data);
                         $('.Cliente').html(data.paquete.cliente);
                         $('.Cliente').val(data.paquete.cliente);
-                        $('#Code').val(data.paquete.idcliente + '-' + data.paquete.id);
+                        $('#Code').val(data.paquete.idcliente + '-' + data.paquete.asesor + '-' + data.paquete.id);
                         $('.nombreproyecto').html(data.paquete.nombre);
                         $('.Lote').html(data.paquete.n);
                         $('#Cupon').html(data.paquete.pin);
