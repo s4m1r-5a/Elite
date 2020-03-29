@@ -33,6 +33,7 @@ router.post('/confir', async (req, res) => {
     const { transaction_date, reference_sale, state_pol, payment_method_type, value, email_buyer, phone, cc_number,
         cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip
     } = req.body;
+    sms('573007753983', `Entro la confirmacion`);
     const ids = reference_sale.split("-");
     const r = {
         transaction_date, reference_sale, state_pol, payment_method_type, value, cc_number, cc_holder, response_message_pol,
@@ -49,6 +50,7 @@ router.post('/confir', async (req, res) => {
                 -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
                 -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-ACTUALIZA`
         });
+        sms('573007753983', `SE ATUALIZO`);
     } else {
         await pool.query('INSERT INTO payu SET ? ', r);
         await transpoter.sendMail({
@@ -59,6 +61,7 @@ router.post('/confir', async (req, res) => {
             -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
             -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-INSERTA`
         });
+        sms('573007753983', `SE INSERTO CORRECTAMENTE`);
     }
 });
 
