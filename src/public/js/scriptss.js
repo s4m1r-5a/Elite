@@ -1772,6 +1772,15 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     );
     $(document).ready(function () {
+        $('.proveedor').change(function () {
+            if ($(this).val() === '0') {
+                $('#datosproveedor').show('slow');
+            } else {
+                $('#datosproveedor').hide('slow');
+                $('#datosproveedor input').val('');
+                $(`#datosproveedor select option[value='nada']`).attr("selected", true);
+            }
+        })
         $('a.atras').on('click', function () {
             $("#cuadro2").hide("slow");
             $("#cuadro3").hide("slow");
@@ -1833,6 +1842,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             };
             $('form').submit(function () {
                 $("input").prop('disabled', false);
+                $("#datosproveedor input").prop('disabled', true);
             })
         });
         $('#datosproducto').on('change', '.mt2', function () {

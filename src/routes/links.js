@@ -14,8 +14,10 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 //////////////////* PRODUCTOS */////////////////////
-router.get('/productos', isLoggedIn, (req, res) => {
-    res.render('links/productos');
+router.get('/productos', isLoggedIn, async (req, res) => {
+    const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
+    console.log(proveedores)
+    res.render('links/productos', { proveedores });
 });
 router.post('/productos', isLoggedIn, async (req, res) => {
     const fila = await pool.query('SELECT * FROM productos');
@@ -29,8 +31,22 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
-    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial } = req.body;
-    const produc = { categoria, nombre: title.toUpperCase(), porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado };
+    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
+        proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
+    const produc = { categoria, proveedor, nombre: title.toUpperCase(), porcentage, totalmtr2, valmtr2: valmtr2.replace(/\./g, ''), valproyect: valproyect.replace(/\./g, ''), mzs, cantidad, estado };
+    if (proveedor == '0') {
+        const proveedr = {
+            empresa: empresa.toUpperCase(),
+            nit, banco: banco.toUpperCase(),
+            cta, numero,
+            mail: mail.toLowerCase(),
+            direccion, tel,
+            web: web.toLowerCase()
+        }
+        const newprovee = await pool.query('INSERT INTO proveedores SET ? ', proveedr);
+        console.log(newprovee)
+        produc.proveedor = newprovee.insertId
+    }
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
     var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, estado, valor, inicial) VALUES ';
     await n.map((t, i) => {
@@ -88,9 +104,6 @@ router.post('/movil', async (req, res) => {
 });
 //////////////* PAGOS *//////////////////////////////////
 router.get('/pagos', async (req, res) => {
-    /*const { id } = req.query;
-    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
-    console.log({ proyecto, id })*/
     res.render('links/pagos');
 });
 router.get('/pagos/:id', async (req, res) => {
@@ -106,30 +119,25 @@ router.get('/pagos/:id', async (req, res) => {
             descuento > 0 ? valor = valor - ahorro : '';
             const cuotainicial = valor * 30 / 100;
             const proyecto = valor - cuotainicial;
-            var concepto, cuota, mora = 0, total;
+            var concepto, cuota, mora = 0, total, interes = 0;
             function H() {
                 paquete = {
-                    id,
-                    cliente: cliente[0].nombre,
-                    idcliente: cliente[0].id,
-                    movil: cliente[0].movil,
-                    email: cliente[0].email,
-                    n,
-                    nombre,
-                    concepto,
-                    cuota,
-                    ahorro,
-                    vr,
-                    valor,
-                    descuento,
-                    mora,
-                    total,
-                    pin,
-                    estado
+                    id, cliente: cliente[0].nombre, idcliente: cliente[0].id, movil: cliente[0].movil, email: cliente[0].email,
+                    n, nombre, concepto, cuota, ahorro, vr, valor, descuento, mora, total, pin, estado
                 }
             }
             const a = await pool.query(`SELECT * FROM payu WHERE state_pol = 4 AND reference_sale = ?`, id);
             if (a.length > 0) {
+                var fec = a[0].transaction_date;
+                var cuotai = cuotainicial / inicialdiferida
+
+                await a.filter((c) => {
+                    return c.description === 'INICIAL';
+                }).map((c) => {
+                    if (c.transaction_date > fecha || c.value < cuotai) {
+                        d
+                    }
+                });
                 var j = cuotaextraordinaria ? parseFloat(numerocuotaspryecto.slice(-2, -1)) : 0;
                 var nxmes = extraordinariameses > 2 ? j * 2 : j;
                 var extraordinaria = cuotaextraordinaria * nxmes;
@@ -171,7 +179,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro } = req.body;
-    console.log(req.body)
     function Cliente(N) {
         cliente = {
             nombre: nombres[N],
@@ -250,7 +257,7 @@ router.post('/tabla/:id', async (req, res) => {
         l = {
             n: 1,
             fecha: fcha,
-            oficial: '<span class="badge badge-dark text-center text-uppercase">Cuota Separacion $</span>',
+            oficial: '<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>',
             cuota: '1.000.000',
             stado: '<span class="badge badge-success">Pagada</span>',
             n2: '',
@@ -267,7 +274,7 @@ router.post('/tabla/:id', async (req, res) => {
                 x = {
                     n: i,
                     fecha: moment(fcha).add(i, 'month').startOf('month'),
-                    oficial: `< span class="badge badge-dark text-center text-uppercase" > Inicial 30 % ${oficial30}</span > `,
+                    oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
                     cuota: cuota30,
                     stado: '<span class="badge badge-primary">Pendiente</span>',
                     n2: i > o ? '' : i + j,
@@ -281,7 +288,7 @@ router.post('/tabla/:id', async (req, res) => {
             d = {
                 n: i,
                 fecha: moment(fcha).add(y, 'month').startOf('month'),
-                oficial: `< span class="badge badge-dark text-center text-uppercase" > Poyecto 70 % ${oficial70}</span > `,
+                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
                 cuota: cuota70,
                 stado: '<span class="badge badge-info">Pendiente</span>',
                 n2: v + i,

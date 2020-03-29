@@ -130,9 +130,17 @@
                                                 <option value="CONSTUCCION">CONSTUCCIÓN</option>
                                             </select>
                                         </div>
-                                        <div class="form-group col-md-7">
+                                        <div class="form-group col-md-6">
                                             <input type="text" name="title" class="form-control text-uppercase"
                                                 placeholder="TITULO" style="text-align:center">
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <select class="form-control proveedor" name="proveedor">
+                                                {{#each proveedores}}
+                                                <option value="{{id}}">{{empresa}}</option>
+                                                {{/each}}
+                                                <option value="0">OTRO</option>
+                                            </select>
                                         </div>
                                         <div class="form-group col-md-2">
                                             <input type="text" name="porcentage" class="form-control" value="4.75"
@@ -165,6 +173,75 @@
                                                 <option value="7">ACTIVO</option>
                                                 <option value="10">VENDIDO</option>
                                             </select>
+                                        </div>
+                                    </div>
+                                    <div class="form-row datos" id="datosproveedor" style="display: none;">
+                                        <div class="form-group col-md-12">
+                                            <h5>DATOS DEL PROVEEDOR</h5>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="text" name="empresa" class="form-control"
+                                                placeholder="Nombre Proveedor" style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="text" name="nit" class="form-control" placeholder="Digite Nit"
+                                                style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <select class="form-control" name="banco" disabled required>
+                                                <option value="nada">Selecione un Banco</option>
+                                                <option value="Banco Agrario de Colombia">Banco Agrario de Colombia
+                                                </option>
+                                                <option value="Banco AV Villas">Banco AV Villas</option>
+                                                <option value="Banco Caja Social">Banco Caja Social</option>
+                                                <option value="Banco de Occidente">Banco de Occidente</option>
+                                                <option value="Banco Popular">Banco Popular</option>
+                                                <option value="Banco Falabella">Banco Falabella</option>
+                                                <option value="Banco Finandina">Banco Finandina</option>
+                                                <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca</option>
+                                                <option value="Banco Santander">Banco Santander</option>
+                                                <option value="Banco de Occidente">Banco de Occidente</option>
+                                                <option value="Bancóldex">Bancóldex</option>
+                                                <option value="Bancolombia">Bancolombia</option>
+                                                <option value="BBVA Colombia">BBVA Colombia</option>
+                                                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                                                <option value="Citi Colombia">Citi Colombia</option>
+                                                <option value="Citibank">Citibank</option>
+                                                <option value="Colpatria">Colpatria</option>
+                                                <option value="Davivienda">Davivienda</option>
+                                                <option value="GNB Sudameris">GNB Sudameris</option>
+                                                <option value="Multibank S.A.">Multibank S.A.</option>
+                                                <option value="Mundo mujer">Mundo mujer</option>
+                                                <option value="Red Multibanca Colpatria">Red Multibanca Colpatria
+                                                </option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-1">
+                                            <select class="form-control" name="cta" disabled required>
+                                                <option value="nada">Tipo CTA.</option>
+                                                <option value="CTE">CTE</option>
+                                                <option value="AHO">AHO</option>
+                                            </select>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="text" name="numero" class="form-control" placeholder="# Cuenta"
+                                                style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="email" name="mail" class="form-control" placeholder="Email"
+                                                style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-4">
+                                            <input type="text" name="direccion" class="form-control"
+                                                placeholder="Dirreccion" style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-2">
+                                            <input type="text" name="tel" class="form-control"
+                                                placeholder="Telefono" style="text-align:center" disabled required>
+                                        </div>
+                                        <div class="form-group col-md-3">
+                                            <input type="url" name="web" class="form-control" placeholder="Sitio Web"
+                                                style="text-align:center" disabled>
                                         </div>
                                     </div>
                                     <br>
