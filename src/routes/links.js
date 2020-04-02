@@ -14,17 +14,20 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 router.get('/prueba', async (req, res) => {
-    const a = await pool.query(`SELECT * FROM preventa`);
-    if (a.length > 0) {
-        //var fec = a[0].transaction_date;
-        //var cuotai = cuotainicial / inicialdiferida
-
-        await a.map((c, i, a) => {
-            console.log(c.lote, i);
-        });
-
-        res.send(true);
-    }
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '573007753983',
+            "body": req.query
+        }
+    };
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
+    sms('573007753983', `Entro la confirmacion`);
+    res.send(true);
 })
 //////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
