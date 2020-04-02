@@ -9,6 +9,19 @@ const { registro, dataSet } = require('../keys');
 const request = require('request');
 const axios = require('axios');
 const moment = require('moment');
+const nodemailer = require('nodemailer')
+const transpoter = nodemailer.createTransport({
+    host: 'smtp.hostinger.co',
+    port: 587,
+    secure: false,
+    auth: {
+        user: 'suport@tqtravel.co',
+        pass: '123456789'
+    },
+    tls: {
+        rejectUnauthorized: false
+    }
+})
 
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -19,14 +32,19 @@ router.get('/prueba', async (req, res) => {
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
             "phone": '573007753983',
-            "body": req.query
+            "body": 'estamos bien'
         }
     };
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
-    sms('573007753983', `Entro la confirmacion`);
+    /*await transpoter.sendMail({
+        from: "'Suport' <suport@tqtravel.co>",
+        to: 's4m1r.5a@gmail.com',
+        subject: 'confirmacion de que si sirbe',
+        text: 'dfdjhfjdhfjjf'
+    });*/
     res.send(true);
 })
 //////////////////* PRODUCTOS */////////////////////
