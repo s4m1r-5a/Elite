@@ -124,41 +124,14 @@
                             <div class="col-sm-12 mb-3 mb-md-0">
                                 <div class="card text-center h-100">
                                     <div class="form-row categoria">
-                                        <div class="form-group col-md-5">
-                                            <select class="form-control" name="categoria">
-                                                <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
-                                                <option value="CONSTUCCION">CONSTUCCIÓN</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-6">
-                                            <input type="text" name="title" class="form-control text-uppercase"
-                                                placeholder="TITULO" style="text-align:center">
-                                        </div>
-                                        <div class="form-group col-md-4">
-                                            <select class="form-control proveedor" name="proveedor">
-                                                {{#each proveedores}}
-                                                <option value="{{id}}">{{empresa}}</option>
-                                                {{/each}}
-                                                <option value="0">OTRO</option>
-                                            </select>
-                                        </div>
+
                                         <div class="form-group col-md-2">
                                             <input type="text" name="porcentage" class="form-control" value="4.75"
                                                 style="text-align:center" disabled>
                                         </div>
-                                        <div class="form-group col-md-3">
-                                            <input type="text" name="totalmtr2" class="form-control v" id="tmt2"
-                                                placeholder="TOTAL MT2" style="text-align:center" required>
-                                        </div>
-                                        <div class="form-group col-md-3">
-                                            <input type="text" name="valmtr2" class="form-control v" id="vmt2"
-                                                placeholder="VALOR MT2" data-mask="000.000.000" data-mask-reverse="true"
-                                                data-mask-selectonfocus="true" style="text-align:center">
-                                        </div>
-                                        <div class="form-group col-md-3">
-                                            <input type="text" name="valproyect" class="form-control" id="valproyect"
-                                                placeholder="VAL. PROYECTO" style="text-align:center" disabled>
-                                        </div>
+
+
+
                                         <div class="form-group col-md-2">
                                             <input type="number" name="mzs" class="form-control"
                                                 style="text-align:center" placeholder="MZ'S" style="text-align:center">
@@ -181,7 +154,8 @@
                                         </div>
                                         <div class="form-group col-md-3">
                                             <input type="text" name="empresa" class="form-control"
-                                                placeholder="Nombre Proveedor" style="text-align:center" disabled required>
+                                                placeholder="Nombre Proveedor" style="text-align:center" disabled
+                                                required>
                                         </div>
                                         <div class="form-group col-md-2">
                                             <input type="text" name="nit" class="form-control" placeholder="Digite Nit"
@@ -236,8 +210,8 @@
                                                 placeholder="Dirreccion" style="text-align:center" disabled required>
                                         </div>
                                         <div class="form-group col-md-2">
-                                            <input type="text" name="tel" class="form-control"
-                                                placeholder="Telefono" style="text-align:center" disabled required>
+                                            <input type="text" name="tel" class="form-control" placeholder="Telefono"
+                                                style="text-align:center" disabled required>
                                         </div>
                                         <div class="form-group col-md-3">
                                             <input type="url" name="web" class="form-control" placeholder="Sitio Web"
@@ -252,14 +226,185 @@
                             </div>
                         </div>
                     </div>
-                    <div class="card-footer mb-4">
-                        <button type="submit" class="btn btn-primary float-right">Ingresar</button>
-                        <button type="reset" class="btn btn-danger float-right mr-1">Cancelar</button>
+                    <div class="row" id="cliente1">
+                        <input type="hidden" class="client" value="" name="client">
+                        <div class="col-12 col-lg-6">
+                            <table class="table table-sm my-2">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            <i class="feather-md" data-feather="user"></i>
+                                            PRODUCTO
+                                        </th>
+                                        <td>
+                                            <select class="form-control-no-border edi" name="categoria"
+                                                style="padding: 1px; width: 100%;" required>
+                                                <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
+                                                <option value="CONSTUCCION">CONSTUCCIÓN</option>
+                                            </select>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <i class="feather-md" data-feather="credit-card"></i>
+                                            NOMBRE PDO
+                                        </th>
+                                        <td>
+                                            <input class="form-control-no-border edi text-uppercase" type="text"
+                                                placeholder="NOMBRE DEL PROYECTO" autocomplete="off"
+                                                style="padding: 1px; width: 100%;" name="title" required>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <br>
+                                            <div class="text-center">
+                                                <h6>TOTAL MTR²</h6>
+                                            </div>
+                                            <div class="text-center">
+                                                <input class="form-control-no-border edi text-center v" type="text"
+                                                    name="totalmtr2" autocomplete="off" id="tmt2"
+                                                    placeholder="Digite total de mtr²" style="padding: 1px; width: 80%;"
+                                                    data-mask="000.000.000" data-mask-reverse="true"
+                                                    data-mask-selectonfocus="true" required>
+                                            </div>
+                                        </th>
+                                        <th>
+                                            <br>
+                                            <div class="text-center">
+                                                <h6>VALOR MTR²</h6>
+                                            </div>
+                                            <div class="text-center">
+                                                <input class="form-control-no-border edi text-center v" type="text"
+                                                    name="valmtr2" id="vmt2" autocomplete="off"
+                                                    placeholder="Digite el precio del mtr²"
+                                                    style="padding: 1px; width: 80%;" data-mask="000.000.000"
+                                                    data-mask-reverse="true" data-mask-selectonfocus="true" required>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <i class="feather-md" data-feather="map-pin"></i>
+                                            COSTE DEL PROYEYO
+                                        </th>
+                                        <td>
+                                            <div class="text-center">
+                                                <span
+                                                    class="badge badge-dark text-center text-md-center valproyect">$0.000.000.000</span>
+                                            </div>
+
+                                            <input type="hidden" name="valproyect" id="valproyect">
+                        </div>
+                        </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="calendar"></i> INICIO Y TERMINACÍON DEL
+                                PROYECTO
+                            </th>
+                            <td>
+                                <input type="hidden" name="fechanacimiento" required>
+                                <div id="reportrange" class="overflow-hidden form-control" name="fechanacimiento"
+                                    required>
+                                    <i class="far fa-calendar"></i>&nbsp;
+                                    <span></span> <i class="fas fa-caret-down"></i>
+                                </div>
+                            </td>
+                        </tr>
+                        </tbody>
+                        </table>
                     </div>
-                </form>
+                    <div class="col-12 col-lg-6">
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="heart"></i>
+                                        CUOTA INICIAL
+                                    </th>
+                                    <td>
+                                        <select class="form-control-no-border edi proveedor" name="proveedor"
+                                            style="padding: 1px; width: 100%;text-align:center;" required>
+                                            <option value="15">15%</option>
+                                            <option value="20">20%</option>
+                                            <option value="25">25%</option>
+                                            <option value="30">30%</option>
+                                            <option value="35">35%</option>
+                                            <option value="40">40%</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="heart"></i>
+                                        PROVEEDOR
+                                    </th>
+                                    <td>
+                                        <select class="form-control-no-border edi proveedor" name="proveedor"
+                                            style="padding: 1px; width: 100%;" required>
+                                            {{#each proveedores}}
+                                            <option value="{{id}}">{{empresa}}</option>
+                                            {{/each}}
+                                            <option value="0">OTRO</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="mail"></i>
+                                        Email
+                                    </th>
+                                    <td>
+                                        <input class="form-control-no-border edi text-lowercase email u" type="email"
+                                            placeholder="Correo electrónico" autocomplete="off"
+                                            style="padding: 1px; width: 100%;" name="email" required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="phone-call"></i>
+                                        Móvil
+                                    </th>
+                                    <td>
+                                        <input class="form-control-no-border edi movil u" type="tel"
+                                            data-mask="000-000-0000" placeholder="Numero celular" autocomplete="off"
+                                            style="padding: 1px; width: 100%;" name="movil" id="movil" required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="map"></i>
+                                        Dirección
+                                    </th>
+                                    <td>
+                                        <input class="form-control-no-border edi direccion u" type="text"
+                                            placeholder="Dirección de residencia" autocomplete="off"
+                                            style="padding: 1px; width: 100%;" name="direccion" required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="user-plus"></i>
+                                    </th>
+                                    <td>
+                                        <a class="btn btn-outline-dark btn-sm float-right mr-3" id="AgregarCliente"><i
+                                                class="fas fa-fw fa-user-plus"></i>
+                                            Agregar cliente</a>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
             </div>
+            <div class="card-footer mb-4">
+                <button type="submit" class="btn btn-primary float-right">Ingresar</button>
+                <button type="reset" class="btn btn-danger float-right mr-1">Cancelar</button>
+            </div>
+            </form>
         </div>
     </div>
+</div>
 </div>
 <!-- BEGIN primary modal -->
 <div class="modal fade" id="ModalConfir" tabindex="-1" role="dialog" aria-hidden="true">

@@ -1775,10 +1775,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $('.proveedor').change(function () {
             if ($(this).val() === '0') {
                 $('#datosproveedor').show('slow');
+                $("#datosproveedor input, #datosproveedor select").prop('disabled', false)
             } else {
                 $('#datosproveedor').hide('slow');
                 $('#datosproveedor input').val('');
                 $(`#datosproveedor select option[value='nada']`).attr("selected", true);
+                $("#datosproveedor input, #datosproveedor select").prop('disabled', true)
             }
         })
         $('a.atras').on('click', function () {
@@ -1788,11 +1790,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
         $('.v').change(function () {
             if ($('#tmt2').val() && $('#vmt2').val()) {
-                var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
-                $('#valproyect').val(Moneda(valor));
+                var valor = $('#tmt2').cleanVal() * $('#vmt2').cleanVal();
+                $('#valproyect').val(valor);
+                $('.valproyect').html('$' + Moneda(valor));
             }
         });
-
         $('#lts').change(function () {
             $('#ttl').text('DATOS DEL PRODUCTO');
             var val = $(this).val(), i = 1, e;
@@ -1841,8 +1843,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 i++;
             };
             $('form').submit(function () {
-                $("input").prop('disabled', false);
-                $("#datosproveedor input").prop('disabled', true);
+                //$("input").prop('disabled', false);
+                $("input, select").not("#datosproveedor input, #datosproveedor select").prop('disabled', false);
+                //$("#datosproveedor input[name='empresa']").val() ? $("#datosproveedor input").prop('disabled', false) : $("#datosproveedor input").prop('disabled', true);
             })
         });
         $('#datosproducto').on('change', '.mt2', function () {
@@ -1854,6 +1857,38 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 papi.next().children("input").val(Moneda(inicial));
             }
         });
+        var start = moment(), end = moment().add(2, 'year');
+        function cb(start, end) {
+            $("#reportrange span").html(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
+        }
+        $("#reportrange").daterangepicker({
+            locale: {
+                'format': 'YYYY/MM/DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            startDate: start,
+            endDate: end,
+            ranges: {
+                '6 Meses': [moment(), moment().add(5, 'month')],
+                '1 Año': [moment(), moment().add(1, 'year')],
+                '1 Año y medio': [moment(), moment().add(17, 'month')],
+                '2 Años': [moment(), moment().add(2, 'year')],
+                '2 Años y medio': [moment(), moment().add(29, 'month')],
+                '3 Años': [moment(), moment().add(3, 'year')],
+                '3 Años y medio': [moment(), moment().add(41, 'month')],
+                '4 Años': [moment(), moment().add(4, 'year')]
+            }
+        }, cb);
+        cb(start, end);
     });
 
     function Dtas(n) {

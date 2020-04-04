@@ -68,7 +68,8 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
         proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
     const produc = { categoria, proveedor, nombre: title.toUpperCase(), porcentage, totalmtr2, valmtr2: valmtr2.replace(/\./g, ''), valproyect: valproyect.replace(/\./g, ''), mzs, cantidad, estado };
-    if (proveedor == '0') {
+    console.log(req.body)
+    /*if (proveedor == '0') {
         const proveedr = {
             empresa: empresa.toUpperCase(),
             nit, banco: banco.toUpperCase(),
@@ -88,7 +89,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     });
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
-    res.redirect('/links/productos');
+    res.redirect('/links/productos');*/
 });
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
