@@ -1792,8 +1792,82 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($('#tmt2').val() && $('#vmt2').val()) {
                 var valor = $('#tmt2').cleanVal() * $('#vmt2').cleanVal();
                 $('#valproyect').val(valor);
-                $('.valproyect').html('$' + Moneda(valor));
+                $('.valproyect').html('$ ' + Moneda(valor));
             }
+        });
+        $('#mzs').change(function () {
+            //$('#ttl').text('DATOS DEL PRODUCTO');
+            var val = $(this).val(), i = 1, e;
+            $('#datosproducto table, #datosproducto2 table').each(function (index, element) {
+                e = index;
+                i++;
+            });
+            e + 1;
+            if (e > val) {
+                while (e != val) {
+                    if (e % 2 === 1) {
+                        $('#datosproducto table:last').remove();
+                    } else {
+                        $('#datosproducto2 table:last').remove();
+                    }
+                    e--;
+                };
+                $('#datosproducto table:last').remove();
+                $('#datosproducto2 table:last').remove();
+            }
+            var f = 0;
+            while (i <= val) {
+                f = i % 2;
+                if (f === 1) {
+                    $('#datosproducto').append(`
+                <table class="table table-sm my-2" id="${i}">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="text-left">                                    
+                                    <i class="feather-md" data-feather="heart"></i> MANZANA 
+                                    <input class="form-control-no-border text-uppercase text-center" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;" name="mdk">
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-left">
+                                    <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
+                                    <input class="form-control-no-border text-center" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="sfds">
+                               </div>
+                            </th>  
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>`);
+                } else if (f === 0) {
+                    $('#datosproducto2').append(`
+                <table class="table table-sm my-2" id="${i}">
+                    <thead>
+                        <tr>
+                            <th>
+                                <div class="text-left">                                    
+                                    <i class="feather-md" data-feather="heart"></i> MANZANA 
+                                    <input class="form-control-no-border text-uppercase text-center" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;" name="mdk">
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-left">
+                                    <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
+                                    <input class="form-control-no-border text-center" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="sfds">
+                               </div>
+                            </th>  
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>`);
+                }
+                i++;
+            };
+            $('form').submit(function () {
+                //$("input").prop('disabled', false);
+                $("input, select").not("#datosproveedor input, #datosproveedor select").prop('disabled', false);
+                //$("#datosproveedor input[name='empresa']").val() ? $("#datosproveedor input").prop('disabled', false) : $("#datosproveedor input").prop('disabled', true);
+            })
         });
         $('#lts').change(function () {
             $('#ttl').text('DATOS DEL PRODUCTO');
@@ -1818,8 +1892,44 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 $('#datosproducto div:last').remove();
                 $('#datosproducto div:last').remove();
             }
+            $('#datosproducto').append(`
+            <div class="col-12">
+                <table class="table table-sm my-2">
+                    <thead>
+                        <tr>
+                            <th><i class="feather-md" data-feather="heart"></i> MANZANA?</th>
+                            <th>
+                                <div class="text-center">
+                                    <input class="form-control-no-border" type="number" style="padding: 1px; width: 40%;background-color: #FFFFCC;" name="direccion">
+                               </div>   
+                            </th>
+                            <th><i class="feather-md" data-feather="heart"></i> LOTES?</th>
+                            <th>
+                                <div class="text-center">
+                                    <input class="form-control-no-border" type="number" placeholder="Dirección de residencia" style="padding: 1px; width: 40%;background-color: #FFFFCC;" name="direccion">
+                               </div>   
+                            </th>    
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>`
+            );
+
             while (i <= val) {
-                $('#datosproducto').append(`
+                $('#datosproducto tbody').append(`
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="heart"></i>
+                                        CUOTA INICIAL
+                                    </th>
+                                    <td>
+                                        <input class="form-control-no-border edi direccion u" type="text"
+                                        placeholder="Dirección de residencia" autocomplete="off"
+                                        style="padding: 1px; width: 100%;" name="direccion" required>
+                                    </td>
+                                </tr>
+
                     <div class="form-group col-md-1">
                         <input type="number" name="mz" class="form-control"
                         placeholder="MZ" style="text-align:center">
@@ -1897,8 +2007,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             buttons: ['pageLength',
                 {
                     text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                       </div>`,
+                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                </div>`,
                     attr: {
                         title: 'Fecha',
                         id: 'Date'
@@ -1907,8 +2017,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 },
                 {
                     text: `<div class="mb-0">
-                                <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Generar Factura</span>
-                           </div>`,
+                    <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Generar Factura</span>
+                </div>`,
                     attr: {
                         title: 'FacturaG',
                         id: 'factu'
@@ -2024,8 +2134,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     data: "valor",
                     render: $.fn.dataTable.render.number('.', '.', 2, '$')
                     /*render: function (data, method, row) {
-                        //return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                    }*/
+                    //return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }*/
                 },
                 {
                     data: "inicial",
@@ -2035,7 +2145,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             ]
         });
 
-        // Daterangepicker  
+        // Daterangepicker
         var start = moment().subtract(29, "days").startOf("hour");
         var end = moment().startOf("hour").add(32, "hour");
         $(".fech").daterangepicker({
@@ -2144,8 +2254,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         buttons: ['pageLength',
             {
                 text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
-                       </div>`,
+                    <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
+                </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'facturar'
@@ -2240,8 +2350,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             },
             {
                 defaultContent: `<a id="verFactura" class="ver"><i class="align-middle mr-1 far fa-fw fa-eye"></i></a>
-                            <a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>
-                            <a id="eliminarFactura" class="elim"><i class="align-middle mr-1 far fa-fw fa-trash-alt"></i></a>`
+                <a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>
+                <a id="eliminarFactura" class="elim"><i class="align-middle mr-1 far fa-fw fa-trash-alt"></i></a>`
             }
         ]
     });
@@ -2537,8 +2647,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         buttons: ['pageLength',
             {
                 text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                       </div>`,
+                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
@@ -2586,7 +2696,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             dataSrc: "data"
         },
         /*initComplete: function (settings, json, row) {
-            alert(row);
+                    alert(row);
         },*/
         columns: [
             { data: "id" },
@@ -2630,13 +2740,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             {
                 defaultContent: `<div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown" 
-                                     aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu"></div>
-                                </div>`
+                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">Acción</button>
+                    <div class="dropdown-menu"></div>
+                </div>`
             }
         ]
-    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");    
+    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
     table.on('click', '.btnaprobar', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
@@ -2645,14 +2755,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 case 'Procesando':
                     $(this).attr('data-toggle', "dropdown")
                     $(this).next().html(`<a class="dropdown-item">Aprobar</a>
-                    <a class="dropdown-item">Declinar</a>
-                    <a class="dropdown-item">Procesando</a>`);
+                <a class="dropdown-item">Declinar</a>
+                <a class="dropdown-item">Procesando</a>`);
                     break;
                 case 'Pendiente':
                     $(this).attr('data-toggle', "dropdown")
                     $(this).next().html(`<a class="dropdown-item">Aprobar</a>
-                    <a class="dropdown-item">Declinar</a>
-                    <a class="dropdown-item">Procesando</a>`);
+                <a class="dropdown-item">Declinar</a>
+                <a class="dropdown-item">Procesando</a>`);
                     break;
                 default:
                     $(this).removeAttr('data-toggle')
@@ -2698,7 +2808,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         })
     })
-    // Daterangepicker 
+    // Daterangepicker
     /*var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");*/
     $(".fech").daterangepicker({
