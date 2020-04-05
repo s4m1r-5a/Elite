@@ -2415,9 +2415,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
         order: [[1, "desc"]],
         columnDefs: [
             { responsivePriority: 1, targets: -1 },
-            { responsivePriority: 2, targets: 2 },
-            { responsivePriority: 3, targets: 6 },
-            { responsivePriority: 4, targets: 5 }
+            { responsivePriority: 2, targets: 3 },
+            { responsivePriority: 3, targets: 7 },
+            { responsivePriority: 4, targets: 6 }
         ],
         language: {
             "lengthMenu": "Mostrar 10 filas",
