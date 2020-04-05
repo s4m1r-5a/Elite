@@ -1855,6 +1855,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
+                                    <select class="form-control-no-border float-right" name="estado" style="padding: 1px; width: 80px;; background-color: #FFFFCC;" required>
+                                        <option>ESTADO</option>
+                                        <option value="15">INACTIVO</option>
+                                        <option value="7">ACTIVO</option>
+                                    </select>
                                </div>
                             </th>  
                         </tr>
@@ -1876,6 +1881,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
+                                    <select class="form-control-no-border float-right" name="estado" style="padding: 1px; width: 80px;; background-color: #FFFFCC;" required>
+                                        <option>ESTADO</option>
+                                        <option value="15">INACTIVO</option>
+                                        <option value="7">ACTIVO</option>
+                                    </select>
                                </div>
                             </th>  
                         </tr>
@@ -1979,8 +1989,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 i++;
             };
         });
-        $('form').submit(function () {
-            $('#lts').prop('disabled', false);
+        $('form').submit(function (e) {
+            var metroscuadrados = 0;
+            $('.mt2').each(function (index, element) {
+                metroscuadrados += parseFloat($(this).val())
+            });
+            if ($('#tmt2').cleanVal() != metroscuadrados) {
+                e.preventDefault()
+                SMSj('error', 'los datos no concuerdan con la totalidad de los metros cuadrados que se registro, rectifique e intentelo nuevamente')
+            } else {
+                $('#lts').prop('disabled', false);
+            }
         })
         $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
             if ($('#vmt2').val()) {
