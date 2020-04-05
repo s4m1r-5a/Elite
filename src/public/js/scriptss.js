@@ -1847,19 +1847,18 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         <tr>
                             <th>
                                 <div class="text-left">                                    
-                                    <i class="feather-md" data-feather="heart"></i> MANZANA 
+                                    MANZANA 
                                     <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
                                 </div>
                             </th>
                             <th>
                                 <div class="text-left">
-                                    <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
+                                    LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                                    <select class="form-control-no-border float-right" name="estado" style="padding: 1px; width: 80px;; background-color: #FFFFCC;" required>
-                                        <option>ESTADO</option>
-                                        <option value="15">INACTIVO</option>
-                                        <option value="7">ACTIVO</option>
-                                    </select>
+                                    <div class="custom-control custom-switch float-right">
+                                        <input type="checkbox" class="custom-control-input" name="estado">
+                                        <label class="custom-control-label"">inactivo</label>
+                                    </div>
                                </div>
                             </th>  
                         </tr>
@@ -1873,19 +1872,18 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         <tr>
                             <th>
                                 <div class="text-left">                                    
-                                    <i class="feather-md" data-feather="heart"></i> MANZANA 
+                                    MANZANA 
                                     <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
                                 </div>
                             </th>
                             <th>
                                 <div class="text-left">
-                                    <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
+                                    LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                                    <select class="form-control-no-border float-right" name="estado" style="padding: 1px; width: 80px;; background-color: #FFFFCC;" required>
-                                        <option>ESTADO</option>
-                                        <option value="15">INACTIVO</option>
-                                        <option value="7">ACTIVO</option>
-                                    </select>
+                                    <div class="custom-control custom-switch float-right">
+                                        <input type="checkbox" class="custom-control-input" name="estado">
+                                        <label class="custom-control-label"">inactivo</label>
+                                    </div>
                                </div>
                             </th>  
                         </tr>
