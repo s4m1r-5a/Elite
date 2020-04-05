@@ -1797,6 +1797,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 $('.valproyect').html('$ ' + Moneda(valor) + '.00');
             }
         });
+        $("form input:not(.edi)").on({
+            focus: function () {
+                this.select();
+            }
+        });
         $('#MANZANAS').change(function () {
             if ($(this).prop('checked')) {
                 $('#mzs').css({
@@ -1812,7 +1817,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 });
                 $('#sololotes tr').remove();
                 $('#sololotes2 tr').remove();
-                $('#mzs').focus()
+                $('#mzs').focus().select()
             } else {
                 $('#lts').css({
                     background: '#FFFFCC',
@@ -1894,7 +1899,24 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 i++;
             };
         });
+        $('#datosproducto, #datosproducto2').on('change', 'table .estado', function () {
+            var padre = $(this).parents('table').attr('id');
+            var abuelo = $(this).parents('table').parent().attr('id');
 
+            if ($(`#${abuelo} #${padre} .estado`).prop('checked')) {
+
+                $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
+                    $(this).val(7)
+                });
+
+            } else {
+
+                $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
+                    $(this).val(15)
+                });
+
+            }
+        });
         $('#datosproducto, #datosproducto2').on('change', 'table .lts', function () {
             var padre = $(this).parents('table').attr('id');
             var abuelo = $(this).parents('table').parent().attr('id');
@@ -1917,7 +1939,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $(`#${abuelo} #${padre} tbody`).append(`
                         <tr>
                             <th>
-                                <input type="hidden" name="mz" value="${$(`#${abuelo} #${padre} .mzs`).val()}"
+                                <input type="hidden" name="mz" value="${$(`#${abuelo} #${padre} .mzs`).val()}">
+                                <input type="hidden" class="estados" name="estado" value="${$(`#${abuelo} #${padre} .estado`).prop('checked') ? 7 : 15}">
                                 <div class="text-left">                                    
                                     <i class="feather-md" data-feather="heart"></i> LT 
                                     <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
@@ -1988,12 +2011,20 @@ if (window.location == `${window.location.origin}/links/productos`) {
             };
         });
         $('form').submit(function (e) {
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
             var metroscuadrados = 0;
             $('.mt2').each(function (index, element) {
                 metroscuadrados += parseFloat($(this).val())
             });
             if ($('#tmt2').cleanVal() != metroscuadrados) {
                 e.preventDefault()
+                $('#ModalEventos').one('shown.bs.modal', function () {
+                    $('#ModalEventos').modal('hide')
+                }).modal('show');
                 SMSj('error', 'los datos no concuerdan con la totalidad de los metros cuadrados que se registro, rectifique e intentelo nuevamente')
             } else {
                 $('#lts').prop('disabled', false);
