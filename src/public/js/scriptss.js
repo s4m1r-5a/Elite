@@ -1856,8 +1856,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
                                     <div class="custom-control custom-switch float-right">
-                                        <input type="checkbox" class="custom-control-input" name="estado">
-                                        <label class="custom-control-label"">inactivo</label>
+                                        <input type="checkbox" class="custom-control-input estado" id="estado${i}">
+                                        <label class="custom-control-label" for="estado${i}">.</label>
                                     </div>
                                </div>
                             </th>  
@@ -1881,8 +1881,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
                                     <div class="custom-control custom-switch float-right">
-                                        <input type="checkbox" class="custom-control-input" name="estado">
-                                        <label class="custom-control-label"">inactivo</label>
+                                        <input type="checkbox" class="custom-control-input estado" id="estado${i}">
+                                        <label class="custom-control-label" for="estado${i}">.</label>
                                     </div>
                                </div>
                             </th>  
