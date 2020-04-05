@@ -112,111 +112,15 @@
         <div class="col-xl-12">
             <div class="card">
                 <div class="card-header">
-                    <h5 class="card-title">PRODUCTOS</h5>
-                    <h6 class="card-subtitle text-muted">Productos y servicios Elite</h6>
+                    <h5 class="card-title">CREACION DE PRODUCTOS</h5>
+                    <h6 class="card-subtitle text-muted">Productos Elite</h6>
                     <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
                         <a class="r atras"><i class="feather-lg mr-0" data-feather="arrow-left-circle"></i></a>
                     </div>
                 </div>
                 <form action="/links/regispro" method="POST">
                     <div class="card-body">
-                        <div class="row py-2">
-                            <div class="col-sm-12 mb-3 mb-md-0">
-                                <div class="card text-center h-100">
-                                    <div class="form-row categoria">
-
-                                        <div class="form-group col-md-2">
-                                            <input type="text" name="porcentage" class="form-control" value="4.75"
-                                                style="text-align:center" disabled>
-                                        </div>
-
-
-
-
-                                        <div class="form-group col-md-5">
-                                            <select class="form-control" name="estado">
-                                                <option value="1">PROCESANDO</option>
-                                                <option value="7">ACTIVO</option>
-                                                <option value="10">VENDIDO</option>
-                                            </select>
-                                        </div>
-                                    </div>
-                                    <div class="form-row datos" id="datosproveedor" style="display: none;">
-                                        <div class="form-group col-md-12">
-                                            <h5>DATOS DEL PROVEEDOR</h5>
-                                        </div>
-                                        <div class="form-group col-md-3">
-                                            <input type="text" name="empresa" class="form-control"
-                                                placeholder="Nombre Proveedor" style="text-align:center" disabled
-                                                required>
-                                        </div>
-                                        <div class="form-group col-md-2">
-                                            <input type="text" name="nit" class="form-control" placeholder="Digite Nit"
-                                                style="text-align:center" disabled required>
-                                        </div>
-                                        <div class="form-group col-md-2">
-                                            <select class="form-control" name="banco" disabled required>
-                                                <option value="nada">Selecione un Banco</option>
-                                                <option value="Banco Agrario de Colombia">Banco Agrario de Colombia
-                                                </option>
-                                                <option value="Banco AV Villas">Banco AV Villas</option>
-                                                <option value="Banco Caja Social">Banco Caja Social</option>
-                                                <option value="Banco de Occidente">Banco de Occidente</option>
-                                                <option value="Banco Popular">Banco Popular</option>
-                                                <option value="Banco Falabella">Banco Falabella</option>
-                                                <option value="Banco Finandina">Banco Finandina</option>
-                                                <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca</option>
-                                                <option value="Banco Santander">Banco Santander</option>
-                                                <option value="Banco de Occidente">Banco de Occidente</option>
-                                                <option value="Bancóldex">Bancóldex</option>
-                                                <option value="Bancolombia">Bancolombia</option>
-                                                <option value="BBVA Colombia">BBVA Colombia</option>
-                                                <option value="Banco de Bogotá">Banco de Bogotá</option>
-                                                <option value="Citi Colombia">Citi Colombia</option>
-                                                <option value="Citibank">Citibank</option>
-                                                <option value="Colpatria">Colpatria</option>
-                                                <option value="Davivienda">Davivienda</option>
-                                                <option value="GNB Sudameris">GNB Sudameris</option>
-                                                <option value="Multibank S.A.">Multibank S.A.</option>
-                                                <option value="Mundo mujer">Mundo mujer</option>
-                                                <option value="Red Multibanca Colpatria">Red Multibanca Colpatria
-                                                </option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-1">
-                                            <select class="form-control" name="cta" disabled required>
-                                                <option value="nada">Tipo CTA.</option>
-                                                <option value="CTE">CTE</option>
-                                                <option value="AHO">AHO</option>
-                                            </select>
-                                        </div>
-                                        <div class="form-group col-md-2">
-                                            <input type="text" name="numero" class="form-control" placeholder="# Cuenta"
-                                                style="text-align:center" disabled required>
-                                        </div>
-                                        <div class="form-group col-md-2">
-                                            <input type="email" name="mail" class="form-control" placeholder="Email"
-                                                style="text-align:center" disabled required>
-                                        </div>
-                                        <div class="form-group col-md-4">
-                                            <input type="text" name="direccion" class="form-control"
-                                                placeholder="Dirreccion" style="text-align:center" disabled required>
-                                        </div>
-                                        <div class="form-group col-md-2">
-                                            <input type="text" name="tel" class="form-control" placeholder="Telefono"
-                                                style="text-align:center" disabled required>
-                                        </div>
-                                        <div class="form-group col-md-3">
-                                            <input type="url" name="web" class="form-control" placeholder="Sitio Web"
-                                                style="text-align:center" disabled>
-                                        </div>
-                                    </div>
-
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="row" id="cliente1">
+                        <div class="row">
                             <input type="hidden" class="client" value="" name="client">
                             <div class="col-12 col-lg-6">
                                 <table class="table table-sm my-2">
@@ -252,12 +156,12 @@
                                                     <h6>TOTAL MTR²</h6>
                                                 </div>
                                                 <div class="text-center">
-                                                    <input class="form-control-no-border edi text-center v" type="text"
+                                                    <input class="form-control-no-border text-center v" type="text"
                                                         name="totalmtr2" autocomplete="off" id="tmt2"
                                                         placeholder="Digite total de mtr²"
-                                                        style="padding: 1px; width: 80%;" data-mask="000.000.000"
-                                                        data-mask-reverse="true" data-mask-selectonfocus="true"
-                                                        required>
+                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" required>
                                                 </div>
                                             </th>
                                             <th>
@@ -266,12 +170,12 @@
                                                     <h6>VALOR MTR²</h6>
                                                 </div>
                                                 <div class="text-center">
-                                                    <input class="form-control-no-border edi text-center v" type="text"
+                                                    <input class="form-control-no-border text-center v" type="text"
                                                         name="valmtr2" id="vmt2" autocomplete="off"
                                                         placeholder="Digite el precio del mtr²"
-                                                        style="padding: 1px; width: 80%;" data-mask="000.000.000"
-                                                        data-mask-reverse="true" data-mask-selectonfocus="true"
-                                                        required>
+                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" required>
                                                 </div>
                                             </th>
                                         </tr>
@@ -290,19 +194,6 @@
 
                                             </td>
                                         </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="calendar"></i> INICIO Y TERMINACÍON
-                                            </th>
-                                            <td>
-                                                <input type="hidden" name="fechanacimiento" required>
-                                                <div id="reportrange" class="overflow-hidden form-control"
-                                                    name="fechanacimiento" required>
-                                                    <i class="far fa-calendar"></i>&nbsp;
-                                                    <span></span> <i class="fas fa-caret-down"></i>
-                                                </div>
-                                            </td>
-                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -311,11 +202,24 @@
                                     <tbody>
                                         <tr>
                                             <th>
+                                                <i class="feather-md" data-feather="calendar"></i> INICIO Y TERMINACÍON
+                                            </th>
+                                            <td>
+                                                <input type="hidden" id="inicio" name="inicio">
+                                                <input type="hidden" id="fin" name="fin">
+                                                <div id="reportrange" class="overflow-hidden form-control">
+                                                    <i class="far fa-calendar"></i>&nbsp;
+                                                    <span></span> <i class="fas fa-caret-down"></i>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
                                                 <i class="feather-md" data-feather="heart"></i>
                                                 CUOTA INICIAL
                                             </th>
                                             <td>
-                                                <select class="form-control-no-border edi proveedor" name="proveedor"
+                                                <select class="form-control-no-border edi proveedor" name="inicial"
                                                     style="padding: 1px; width: 100%;text-align:center;" required>
                                                     <option value="15">15%</option>
                                                     <option value="20">20%</option>
@@ -344,51 +248,178 @@
                                         <tr>
                                             <th>
                                                 <div class="custom-control custom-switch">
-                                                    <input type="checkbox" class="custom-control-input"
-                                                        id="customSwitch1" name="manzanas">
-                                                    <label class="custom-control-label"
-                                                        for="customSwitch1">MANZANAS</label>
+                                                    <input type="checkbox" class="custom-control-input" id="MANZANAS">
+                                                    <label class="custom-control-label" for="MANZANAS">MANZANAS</label>
                                                 </div>
                                             </th>
                                             <td>
-                                                <input class="form-control-no-border edi text-center" type="number"
-                                                    placeholder="# Manzanas" autocomplete="off" name="mzs" id="mzs"
-                                                    style="padding: 1px; width: 100%;" required>
+                                                <input class="form-control-no-border text-center float-right mr-2"
+                                                    type="text" placeholder="0" autocomplete="off" name="mzs" id="mzs"
+                                                    style="padding: 1px; width: 100px; background: #7f8c8d;" disabled>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="home"></i>
+                                                LOTES
+                                            </th>
+                                            <td>
+                                                <input class="form-control-no-border text-center float-right mr-2"
+                                                    type="text" id="lts" placeholder="0" autocomplete="off"
+                                                    style="padding: 1px; width: 100px; background-color: #FFFFCC;"
+                                                    name="cantidad" required>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                        <!--<div class="form-group col-md-1">
+                            <input type="number" name="mz" class="form-control" placeholder="MZ" style="text-align:center">
+                        </div>
+                        <div class="form-group col-md-4 inic">
+                            <input type="text" name="inicial" class="form-control" placeholder="CUOTA INICIAL" style="text-align:center" disabled>
+                        </div>-->
+
+                        <div class="row datos mt-3" id="datosproveedor" style="display: none;">
+                            <div class="col-12 text-center">
+                                <h2>DATOS PROVEEDOR</h2>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <table class="table table-sm my-2">
+                                    <tbody>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="user"></i>
+                                                <input class="form-control-no-border edi text-center text-uppercase"
+                                                    type="text" placeholder="NOMBRE DEL PROVEEDOR" autocomplete="off"
+                                                    style="padding: 1px; width: 80%;" name="empresa" disabled required>
+                                            </th>
+                                            <td>
+                                                <i class="feather-md" data-feather="credit-card"></i>
+                                                <input class="form-control-no-border edi text-center" type="text"
+                                                    placeholder="DIGITE EL NIT" autocomplete="off"
+                                                    style="padding: 1px; width: 80%;" name="nit" disabled required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <br>
+                                                <div class="text-center">
+                                                    <h6>BANCO</h6>
+                                                </div>
+                                                <div class="text-center">
+                                                    <select class="form-control-no-border edi" name="banco"
+                                                        style="padding: 1px; width: 80%;" disabled required>
+                                                        <option value="nada">SELECCIONE UN BANCO</option>
+                                                        <option value="Banco Agrario de Colombia">Banco Agrario de
+                                                            Colombia
+                                                        </option>
+                                                        <option value="Banco AV Villas">Banco AV Villas</option>
+                                                        <option value="Banco Caja Social">Banco Caja Social</option>
+                                                        <option value="Banco de Occidente">Banco de Occidente</option>
+                                                        <option value="Banco Popular">Banco Popular</option>
+                                                        <option value="Banco Falabella">Banco Falabella</option>
+                                                        <option value="Banco Finandina">Banco Finandina</option>
+                                                        <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca
+                                                        </option>
+                                                        <option value="Banco Santander">Banco Santander</option>
+                                                        <option value="Banco de Occidente">Banco de Occidente</option>
+                                                        <option value="Bancóldex">Bancóldex</option>
+                                                        <option value="Bancolombia">Bancolombia</option>
+                                                        <option value="BBVA Colombia">BBVA Colombia</option>
+                                                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                                                        <option value="Citi Colombia">Citi Colombia</option>
+                                                        <option value="Citibank">Citibank</option>
+                                                        <option value="Colpatria">Colpatria</option>
+                                                        <option value="Davivienda">Davivienda</option>
+                                                        <option value="GNB Sudameris">GNB Sudameris</option>
+                                                        <option value="Multibank S.A.">Multibank S.A.</option>
+                                                        <option value="Mundo mujer">Mundo mujer</option>
+                                                        <option value="Red Multibanca Colpatria">Red Multibanca
+                                                            Colpatria
+                                                        </option>
+                                                    </select>
+                                                </div>
+                                            </th>
+                                            <th>
+                                                <br>
+                                                <div class="text-center">
+                                                    <h6>TIPO DE CUENTA</h6>
+                                                </div>
+                                                <div class="text-center">
+                                                    <select class="form-control-no-border edi" name="cta"
+                                                        style="padding: 1px; width: 80%;" disabled required>
+                                                        <option value="nada">TIPO CTA.</option>
+                                                        <option value="CTE">CTE</option>
+                                                        <option value="AHO">AHO</option>
+                                                    </select>
+                                                </div>
+                                            </th>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                CUENTA
+                                            </th>
+                                            <td>
+                                                <input class="form-control-no-border edi text-center text-uppercase"
+                                                    type="text" placeholder="CUENTA" autocomplete="off"
+                                                    style="padding: 1px; width: 100%;" name="numero" disabled required>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <table class="table table-sm my-2">
+                                    <tbody>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                EMAIL
+                                            </th>
+                                            <td>
+                                                <input type="email" name="mail"
+                                                    class="form-control-no-border edi text-lowercase"
+                                                    placeholder="EMAIL" style="padding: 1px; width: 100%;" disabled
+                                                    required>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th>
                                                 <i class="feather-md" data-feather="phone-call"></i>
-                                                LOTES
+                                                MOVIL
                                             </th>
                                             <td>
-                                                <!--<input class="form-control-no-border edi movil u" type="tel" id="lts"
-                                                data-mask="000-000-0000" placeholder="Numero celular" autocomplete="off"
-                                                style="padding: 1px; width: 100%;" name="movil" id="movil" required>-->
-                                                <input class="form-control-no-border edi text-center" type="number"
-                                                    id="lts" placeholder="Numero de lotes" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="cantidad" required>
+                                                <input class="form-control-no-border edi text-lowercase" type="text"
+                                                    name="tel" autocomplete="off" placeholder="MOVIL"
+                                                    style="padding: 1px; width: 80%;" data-mask="000-000-0000" disabled
+                                                    required>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th>
-                                                <i class="feather-md" data-feather="map"></i>
-                                                Dirección
+                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                DIRECCION
                                             </th>
                                             <td>
-                                                <input class="form-control-no-border edi direccion u" type="text"
-                                                    placeholder="Dirección de residencia" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="direccion" required>
+                                                <input type="text" name="direccion"
+                                                    class="form-control-no-border edi text-lowercase"
+                                                    placeholder="DIRECCION" style="padding: 1px; width: 100%;" disabled
+                                                    required>
                                             </td>
                                         </tr>
                                         <tr>
                                             <th>
-                                                <i class="feather-md" data-feather="user-plus"></i>
+                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                WEB
                                             </th>
                                             <td>
-                                                <a class="btn btn-outline-dark btn-sm float-right mr-3"
-                                                    id="AgregarCliente"><i class="fas fa-fw fa-user-plus"></i>
-                                                    Agregar cliente</a>
+                                                <input type="url" name="web"
+                                                    class="form-control-no-border edi text-lowercase"
+                                                    placeholder="DOMINIO" style="padding: 1px; width: 100%;" disabled
+                                                    required>
                                             </td>
                                         </tr>
                                     </tbody>
@@ -396,10 +427,18 @@
                             </div>
                         </div>
                         <div class="row">
-                            <br>
-                            <br>
                             <div class="col-12 col-lg-6 datos" id="datosproducto"></div>
                             <div class="col-12 col-lg-6 datos" id="datosproducto2"></div>
+                            <div class="col-12 col-lg-6 datos" id="sololotes">
+                                <table class="table table-sm my-2">
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 col-lg-6 datos" id="sololotes2">
+                                <table class="table table-sm my-2">
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer mb-4">

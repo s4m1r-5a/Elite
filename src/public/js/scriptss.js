@@ -1,3 +1,5 @@
+//import { check } from "express-validator/check";
+
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
 function Moneda(valor) {
     valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
@@ -1792,68 +1794,88 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($('#tmt2').val() && $('#vmt2').val()) {
                 var valor = $('#tmt2').cleanVal() * $('#vmt2').cleanVal();
                 $('#valproyect').val(valor);
-                $('.valproyect').html('$ ' + Moneda(valor));
+                $('.valproyect').html('$ ' + Moneda(valor) + '.00');
+            }
+        });
+        $('#MANZANAS').change(function () {
+            if ($(this).prop('checked')) {
+                $('#mzs').css({
+                    background: '#FFFFCC',
+                    color: '#7f8c8d'
+                })
+                $('#mzs').prop('disabled', false);
+                $('#lts').val('');
+                $('#lts').prop('disabled', true);
+                $('#lts').css({
+                    background: '#7f8c8d',
+                    color: '#FFFFCC'
+                });
+                $('#sololotes tr').remove();
+                $('#sololotes2 tr').remove();
+                $('#mzs').focus()
+            } else {
+                $('#lts').css({
+                    background: '#FFFFCC',
+                    color: '#7f8c8d'
+                })
+                $('#lts').prop('disabled', false);
+                $('#lts').val('');
+                $('#mzs').val('');
+                $('#mzs').prop('disabled', true);
+                $('#mzs').css({
+                    background: '#7f8c8d',
+                    color: '#FFFFCC'
+                });
+                $('#datosproducto table').remove();
+                $('#datosproducto2 table').remove();
+                $('#lts').focus()
             }
         });
         $('#mzs').change(function () {
-            //$('#ttl').text('DATOS DEL PRODUCTO');
-            var val = $(this).val(), i = 1, e;
-            $('#datosproducto table, #datosproducto2 table').each(function (index, element) {
-                e = index;
-                i++;
-            });
-            e + 1;
-            if (e > val) {
-                while (e != val) {
-                    if (e % 2 === 1) {
-                        $('#datosproducto table:last').remove();
-                    } else {
-                        $('#datosproducto2 table:last').remove();
-                    }
-                    e--;
-                };
-                $('#datosproducto table:last').remove();
-                $('#datosproducto2 table:last').remove();
-            }
-            var f = 0;
+            var val = $(this).val(), i = 1;
+            $('#datosproducto table').remove();
+            $('#datosproducto2 table').remove();
+
+            /*$('#datosproducto table:last').remove();
+            $('#datosproducto2 table:last').remove();*/
+
             while (i <= val) {
-                f = i % 2;
-                if (f === 1) {
+                if (i % 2 === 1) {
                     $('#datosproducto').append(`
-                <table class="table table-sm my-2" id="${i}">
-                    <thead>
+                <table class="table table-sm my-2" id="tabla${i}">
+                    <thead style="background: #7f8c8d; color: #FFFFCC;">
                         <tr>
                             <th>
                                 <div class="text-left">                                    
                                     <i class="feather-md" data-feather="heart"></i> MANZANA 
-                                    <input class="form-control-no-border text-uppercase text-center" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;" name="mdk">
+                                    <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
                                 </div>
                             </th>
                             <th>
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
-                                    <input class="form-control-no-border text-center" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="sfds">
+                                    <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
                                </div>
                             </th>  
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>`);
-                } else if (f === 0) {
+                } else {
                     $('#datosproducto2').append(`
-                <table class="table table-sm my-2" id="${i}">
-                    <thead>
+                <table class="table table-sm my-2" id="tabla${i}">
+                    <thead style="background: #7f8c8d; color: #FFFFCC;">
                         <tr>
                             <th>
                                 <div class="text-left">                                    
                                     <i class="feather-md" data-feather="heart"></i> MANZANA 
-                                    <input class="form-control-no-border text-uppercase text-center" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;" name="mdk">
+                                    <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
                                 </div>
                             </th>
                             <th>
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> NUMERO DELOTES 
-                                    <input class="form-control-no-border text-center" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="sfds">
+                                    <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
                                </div>
                             </th>  
                         </tr>
@@ -1863,113 +1885,122 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
                 i++;
             };
-            $('form').submit(function () {
-                //$("input").prop('disabled', false);
-                $("input, select").not("#datosproveedor input, #datosproveedor select").prop('disabled', false);
-                //$("#datosproveedor input[name='empresa']").val() ? $("#datosproveedor input").prop('disabled', false) : $("#datosproveedor input").prop('disabled', true);
-            })
+        });
+
+        $('#datosproducto, #datosproducto2').on('change', 'table .lts', function () {
+            var padre = $(this).parents('table').attr('id');
+            var abuelo = $(this).parents('table').parent().attr('id');
+            if ($(`#${abuelo} #${padre} .mzs`).val()) {
+                var val = $(this).val(), i = 0, e;
+                if ($(`#${abuelo} #${padre} tr`).length > 0) {
+                    $(`#${abuelo} #${padre} tr`).each(function (index, element) {
+                        e = index;
+                        i++;
+                    });
+                }
+                e + 1;
+                if (e > val) {
+                    while (e != val) {
+                        $(`#${abuelo} #${padre} tr:last`).remove();
+                        e--;
+                    };
+                }
+                while (i <= val) {
+                    $(`#${abuelo} #${padre} tbody`).append(`
+                        <tr>
+                            <th>
+                                <input type="hidden" name="mz" value="${$(`#${abuelo} #${padre} .mzs`).val()}"
+                                <div class="text-left">                                    
+                                    <i class="feather-md" data-feather="heart"></i> LT 
+                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-left">
+                                    <i class="feather-md" data-feather="heart"></i> MT² 
+                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                    <input type="hidden" name="valor" value="">
+                               </div>
+                            </th>  
+                        </tr>
+                    `);
+                    i++;
+                };
+                $('#lts').val($('.lt').length);
+            } else {
+                SMSj('info', 'Debe establecer una "LETRA" a la mazana')
+            }
         });
         $('#lts').change(function () {
-            $('#ttl').text('DATOS DEL PRODUCTO');
             var val = $(this).val(), i = 1, e;
-            $('.lt').each(function (index, element) {
-                e = index;
-                i++;
-            });
-            e + 1;
-            if (e > val) {
-                while (e != val) {
-                    $('#datosproducto div:last').remove();
-                    $('#datosproducto div:last').remove();
-                    $('#datosproducto div:last').remove();
-                    $('#datosproducto div:last').remove();
-                    $('#datosproducto div:last').remove();
-                    e--;
-                };
-                $('#datosproducto div:last').remove();
-                $('#datosproducto div:last').remove();
-                $('#datosproducto div:last').remove();
-                $('#datosproducto div:last').remove();
-                $('#datosproducto div:last').remove();
-            }
-            $('#datosproducto').append(`
-            <div class="col-12">
-                <table class="table table-sm my-2">
-                    <thead>
-                        <tr>
-                            <th><i class="feather-md" data-feather="heart"></i> MANZANA?</th>
-                            <th>
-                                <div class="text-center">
-                                    <input class="form-control-no-border" type="number" style="padding: 1px; width: 40%;background-color: #FFFFCC;" name="direccion">
-                               </div>   
-                            </th>
-                            <th><i class="feather-md" data-feather="heart"></i> LOTES?</th>
-                            <th>
-                                <div class="text-center">
-                                    <input class="form-control-no-border" type="number" placeholder="Dirección de residencia" style="padding: 1px; width: 40%;background-color: #FFFFCC;" name="direccion">
-                               </div>   
-                            </th>    
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>`
-            );
-
+            $('#sololotes tr').remove();
+            $('#sololotes2 tr').remove();
             while (i <= val) {
-                $('#datosproducto tbody').append(`
-                                <tr>
-                                    <th>
-                                        <i class="feather-md" data-feather="heart"></i>
-                                        CUOTA INICIAL
-                                    </th>
-                                    <td>
-                                        <input class="form-control-no-border edi direccion u" type="text"
-                                        placeholder="Dirección de residencia" autocomplete="off"
-                                        style="padding: 1px; width: 100%;" name="direccion" required>
-                                    </td>
-                                </tr>
-
-                    <div class="form-group col-md-1">
-                        <input type="number" name="mz" class="form-control"
-                        placeholder="MZ" style="text-align:center">
-                    </div>
-                    <div class="form-group col-md-1">
-                        <input type="number" name="n" class="form-control lt" value="${i}"
-                        placeholder="LT" style="text-align:center" required>
-                    </div>
-                    <div class="form-group col-md-2">
-                        <input type="text" name="mtr2" class="form-control mt2"
-                        placeholder="MT2" style="text-align:center" required>
-                    </div>
-                    <div class="form-group col-md-4">
-                        <input type="text" name="valor" class="form-control" placeholder="VALOR DEL LOTE" 
-                        style="text-align:center" disabled>
-                    </div>
-                    <div class="form-group col-md-4 inic">
-                        <input type="text" name="inicial" class="form-control" placeholder="CUOTA INICIAL" 
-                        style="text-align:center" disabled>
-                    </div>`);
+                if (i % 2 === 1) {
+                    $('#sololotes tbody').append(`
+                        <tr>
+                            <th>
+                                <div class="text-left">                                    
+                                    <i class="feather-md" data-feather="heart"></i> LT 
+                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-left">
+                                    <i class="feather-md" data-feather="heart"></i> MT² 
+                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                    <input type="hidden" name="valor">
+                               </div>
+                            </th>  
+                        </tr>
+                    `);
+                } else {
+                    $('#sololotes2 tbody').append(`
+                        <tr>
+                            <th>
+                                <div class="text-left">                                    
+                                    <i class="feather-md" data-feather="heart"></i> LT 
+                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" disabled required>
+                                </div>
+                            </th>
+                            <th>
+                                <div class="text-left">
+                                    <i class="feather-md" data-feather="heart"></i> MT² 
+                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                    <input type="hidden" name="valor">
+                               </div>
+                            </th>  
+                        </tr>
+                    `);
+                }
                 i++;
             };
-            $('form').submit(function () {
-                //$("input").prop('disabled', false);
-                $("input, select").not("#datosproveedor input, #datosproveedor select").prop('disabled', false);
-                //$("#datosproveedor input[name='empresa']").val() ? $("#datosproveedor input").prop('disabled', false) : $("#datosproveedor input").prop('disabled', true);
-            })
         });
-        $('#datosproducto').on('change', '.mt2', function () {
+        $('form').submit(function () {
+            $('#lts').prop('disabled', false);
+        })
+        $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
             if ($('#vmt2').val()) {
                 var valor = $(this).val() * $('#vmt2').cleanVal();
-                var inicial = valor * 30 / 100;
-                var papi = $(this).parent().next();
-                papi.children("input").val(Moneda(valor));
-                papi.next().children("input").val(Moneda(inicial));
+                $(this).siblings('input[name="valor"]').val(valor);
+                $(this).next('span').html('$ ' + Moneda(valor) + '.00');
+            } else {
+                SMSj('info', 'Establezaca primero los valores del proyecto');
+                $(this).val('');
+                $('#vmt2').focus();
             }
         });
         var start = moment(), end = moment().add(2, 'year');
+        $('#inicio').val(start.format("YYYY-MM-DD"))
+        $('#fin').val(end.format("YYYY-MM-DD"))
+
         function cb(start, end) {
             $("#reportrange span").html(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
+            $('#inicio').val(start.format("YYYY-MM-DD"))
+            $('#fin').val(end.format("YYYY-MM-DD"))
         }
         $("#reportrange").daterangepicker({
             locale: {
@@ -2007,8 +2038,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             buttons: ['pageLength',
                 {
                     text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                </div>`,
+                                        <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                                    </div>`,
                     attr: {
                         title: 'Fecha',
                         id: 'Date'
@@ -2017,8 +2048,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 },
                 {
                     text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Generar Factura</span>
-                </div>`,
+                                        <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Generar Factura</span>
+                                    </div>`,
                     attr: {
                         title: 'FacturaG',
                         id: 'factu'
@@ -2134,8 +2165,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     data: "valor",
                     render: $.fn.dataTable.render.number('.', '.', 2, '$')
                     /*render: function (data, method, row) {
-                    //return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }*/
+                                        //return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                                    }*/
                 },
                 {
                     data: "inicial",
@@ -2254,8 +2285,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         buttons: ['pageLength',
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
-                </div>`,
+                                        <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
+                                    </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'facturar'
@@ -2350,8 +2381,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             },
             {
                 defaultContent: `<a id="verFactura" class="ver"><i class="align-middle mr-1 far fa-fw fa-eye"></i></a>
-                <a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>
-                <a id="eliminarFactura" class="elim"><i class="align-middle mr-1 far fa-fw fa-trash-alt"></i></a>`
+                                    <a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>
+                                    <a id="eliminarFactura" class="elim"><i class="align-middle mr-1 far fa-fw fa-trash-alt"></i></a>`
             }
         ]
     });
@@ -2647,8 +2678,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         buttons: ['pageLength',
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                </div>`,
+                                        <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                                    </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
@@ -2696,7 +2727,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             dataSrc: "data"
         },
         /*initComplete: function (settings, json, row) {
-                    alert(row);
+                                        alert(row);
         },*/
         columns: [
             { data: "id" },
@@ -2740,10 +2771,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             {
                 defaultContent: `<div class="btn-group btn-group-sm">
-                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">Acción</button>
-                    <div class="dropdown-menu"></div>
-                </div>`
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu"></div>
+                                    </div>`
             }
         ]
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
@@ -2755,14 +2786,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 case 'Procesando':
                     $(this).attr('data-toggle', "dropdown")
                     $(this).next().html(`<a class="dropdown-item">Aprobar</a>
-                <a class="dropdown-item">Declinar</a>
-                <a class="dropdown-item">Procesando</a>`);
+                                    <a class="dropdown-item">Declinar</a>
+                                    <a class="dropdown-item">Procesando</a>`);
                     break;
                 case 'Pendiente':
                     $(this).attr('data-toggle', "dropdown")
                     $(this).next().html(`<a class="dropdown-item">Aprobar</a>
-                <a class="dropdown-item">Declinar</a>
-                <a class="dropdown-item">Procesando</a>`);
+                                    <a class="dropdown-item">Declinar</a>
+                                    <a class="dropdown-item">Procesando</a>`);
                     break;
                 default:
                     $(this).removeAttr('data-toggle')
