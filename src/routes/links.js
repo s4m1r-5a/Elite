@@ -66,10 +66,16 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
-        proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
-    const produc = { categoria, proveedor, nombre: title.toUpperCase(), porcentage, totalmtr2, valmtr2: valmtr2.replace(/\./g, ''), valproyect: valproyect.replace(/\./g, ''), mzs, cantidad, estado };
+        separacion, incentivo, fecha, fechafin, proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
+    const produc = {
+        categoria, proveedor, nombre: title.toUpperCase(),
+        porcentage, totalmtr2: totalmtr2.length > 3 ? totalmtr2.replace(/\./g, '') : totalmtr2,
+        valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2, valproyect, mzs,
+        cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
+        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
+    };
     console.log(req.body)
-    /*if (proveedor == '0') {
+    if (proveedor == '0') {
         const proveedr = {
             empresa: empresa.toUpperCase(),
             nit, banco: banco.toUpperCase(),
@@ -85,11 +91,12 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
     var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, estado, valor, inicial) VALUES ';
     await n.map((t, i) => {
-        producdata += `(${datos.insertId}, ${mz[i] || 0}, ${t}, ${mtr2[i] || 0}, 9, ${valor[i].replace(/\./g, '')}, ${inicial[i].replace(/\./g, '')}),`;
+        producdata += `(${datos.insertId}, '${mz[i].toUpperCase() || 'no'}', ${t}, ${mtr2[i]}, ${estado[i]}, ${valor[i]}, ${inicial[i]}),`;
     });
+    console.log(producdata.slice(0, -1))
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
-    res.redirect('/links/productos');*/
+    res.redirect('/links/productos');
 });
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
@@ -338,6 +345,7 @@ router.post('/tabla/:id', async (req, res) => {
             d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota2 = `< mark > ${extra}</mark > ` : '';
             dataSet.data.push(d);
         };
+        console.log(dataSet)
         res.send(true);
     } else {
         res.send(dataSet);

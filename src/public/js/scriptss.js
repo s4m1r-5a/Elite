@@ -1751,6 +1751,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     });*/
 
     let recargada = true,
+        dataid = 0,
         total = 0,
         cliente = "";
     minDateFilter = "";
@@ -1906,7 +1907,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($(`#${abuelo} #${padre} .estado`).prop('checked')) {
 
                 $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
-                    $(this).val(7)
+                    $(this).val(9)
                 });
 
             } else {
@@ -1940,7 +1941,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         <tr>
                             <th>
                                 <input type="hidden" name="mz" value="${$(`#${abuelo} #${padre} .mzs`).val()}">
-                                <input type="hidden" class="estados" name="estado" value="${$(`#${abuelo} #${padre} .estado`).prop('checked') ? 7 : 15}">
+                                <input type="hidden" class="estados" name="estado" value="${$(`#${abuelo} #${padre} .estado`).prop('checked') ? 9 : 15}">
                                 <div class="text-left">                                    
                                     <i class="feather-md" data-feather="heart"></i> LT 
                                     <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
@@ -1952,6 +1953,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="hidden" name="valor" value="">
+                                    <input type="hidden" name="inicial" value="">
                                </div>
                             </th>  
                         </tr>
@@ -1983,6 +1985,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="hidden" name="valor">
+                                    <input type="hidden" name="inicial" value="">
                                </div>
                             </th>  
                         </tr>
@@ -2002,6 +2005,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="hidden" name="valor">
+                                    <input type="hidden" name="inicial" value="">
                                </div>
                             </th>  
                         </tr>
@@ -2033,7 +2037,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
             if ($('#vmt2').val()) {
                 var valor = $(this).val() * $('#vmt2').cleanVal();
+                var inicial = valor * 30 / 100;
                 $(this).siblings('input[name="valor"]').val(valor);
+                $(this).siblings('input[name="inicial"]').val(inicial);
                 $(this).next('span').html('$ ' + Moneda(valor) + '.00');
             } else {
                 SMSj('info', 'Establezaca primero los valores del proyecto');
@@ -2137,24 +2143,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     }
                 }
             ],
-            deferRender: true,
-            /*autoWidth: false,*/
-            paging: true,
-            search: {
-                regex: true,
-                caseInsensitive: false,
-            },
-            responsive: {
-                details: {
-                    type: 'column'
-                }
-            },
-            columnDefs: [{
-                className: 'control',
-                orderable: false,
-                targets: 0
-            }],
-            order: [[1, "desc"]],
             language: {
                 "lengthMenu": "Mostrar 10 filas",
                 "sProcessing": "Procesando...",
@@ -2186,9 +2174,19 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 dataSrc: "data"
             },
             columns: [
-                { data: "id" },
+                {
+                    className: 'control',
+                    orderable: true,
+                    data: null,
+                    defaultContent: ''
+                },
                 { data: "mz" },
-                { data: "n" },
+                {
+                    data: "n",
+                    render: function (data, method, row) {
+                        return `<span class="badge badge-dark text-center text-uppercase">${data}</span>`
+                    }
+                },
                 { data: "mtr2" },
                 {
                     data: "estado",
@@ -2206,22 +2204,63 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             case 12:
                                 return `<span class="badge badge-pill badge-secondary">Separado</span>`
                                 break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                                break;
                         }
                     }
                 },
                 {
                     data: "valor",
                     render: $.fn.dataTable.render.number('.', '.', 2, '$')
-                    /*render: function (data, method, row) {
-                                        //return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                                    }*/
                 },
                 {
                     data: "inicial",
                     render: $.fn.dataTable.render.number('.', '.', 0, '$')
                 },
                 { data: "descripcion" }
-            ]
+            ],
+            deferRender: true,
+            paging: true,
+            search: {
+                regex: true,
+                caseInsensitive: false,
+            },
+            responsive: {
+                details: {
+                    type: 'column'
+                }
+            },
+            initComplete: function (settings, json) {
+                //tableOrden.column(2).visible(true);
+                $('#ModalEventos').modal('hide')
+                $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+            },
+            columnDefs: [
+                { "visible": false, "targets": 1 }
+            ],
+            order: [[1, 'asc']],
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(1, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                                <td colspan="8">
+                                    <div class="text-center">
+                                        ${group != '0' ? 'MANZANA "' + group + '"' : ''}
+                                    </div>
+                                </td>
+                            </tr>`
+                        );
+
+                        last = group;
+                    }
+                });
+            }
         });
 
         // Daterangepicker
@@ -2315,17 +2354,35 @@ if (window.location == `${window.location.origin}/links/productos`) {
         })
     });
     // Ver Productos
-    $('#datatable2').on('click', '#verFactura', function () {
+    $('#datatable2').on('click', '.tu', function () {
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
+        fila.toggleClass('selected');
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
         $("#cuadro2").show("slow");
         $("#cuadro1").hide("slow");
         $("#cuadro3").hide("slow");
         $('#proyecto').val(data.nombre);
         $('#idproyecto').val(data.id);
+
         if (recargada) {
             recargada = false;
             Dtas(data.id)
+        } else if (data.id !== dataid) {
+            dataid = data.id;
+            $('#datatable').DataTable().ajax.url("/links/productos/" + data.id).load(function () {
+                $('#ModalEventos').modal('hide')
+                $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+            });
+        } else {
+            $('#ModalEventos').one('shown.bs.modal', function () {
+                $('#ModalEventos').modal('hide')
+            }).modal('show');
+            $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
         }
     });
     var table2 = $('#datatable2').DataTable({
@@ -2355,7 +2412,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
             caseInsensitive: false,
         },
         responsive: true,
-        order: [[0, "desc"]],
+        order: [[1, "desc"]],
+        columnDefs: [
+            { responsivePriority: 1, targets: -1 },
+            { responsivePriority: 2, targets: 2 },
+            { responsivePriority: 3, targets: 6 },
+            { responsivePriority: 4, targets: 5 }
+        ],
         language: {
             "lengthMenu": "Mostrar 10 filas",
             "sProcessing": "Procesando...",
@@ -2387,29 +2450,35 @@ if (window.location == `${window.location.origin}/links/productos`) {
             dataSrc: "data"
         },
         columns: [
-            { data: "id" },
-            { data: "categoria" },
-            { data: "nombre" },
             {
-                data: "fecha",
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
+            { data: "id", className: 'tu' },
+            { data: "categoria", className: 'tu' },
+            { data: "nombre", className: 'tu' },
+            {
+                data: "fecha", className: 'tu',
                 render: function (data, method, row) {
                     return moment.utc(data).format('ll') //pone la fecha en un formato entendible
                 }
             },
-            { data: "porcentage" },
-            { data: "totalmtr2" },
-            { data: "valmtr2" },
+            { data: "porcentage", className: 'tu' },
+            { data: "totalmtr2", className: 'tu' },
+            { data: "valmtr2", className: 'tu' },
             {
-                data: "valproyect",
+                data: "valproyect", className: 'tu',
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
                 /*render: function (data, method, row) {
                     return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }*/
             },
-            { data: "mzs" },
-            { data: "cantidad" },
+            { data: "mzs", className: 'tu' },
+            { data: "cantidad", className: 'tu' },
             {
-                data: "estado",
+                data: "estado", className: 'tu',
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
@@ -2428,9 +2497,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             },
             {
-                defaultContent: `<a id="verFactura" class="ver"><i class="align-middle mr-1 far fa-fw fa-eye"></i></a>
-                                    <a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>
-                                    <a id="eliminarFactura" class="elim"><i class="align-middle mr-1 far fa-fw fa-trash-alt"></i></a>`
+                className: 'editarp',
+                orderable: true,
+                defaultContent: `<a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>`
             }
         ]
     });
