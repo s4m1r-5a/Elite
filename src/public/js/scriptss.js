@@ -2337,23 +2337,61 @@ if (window.location == `${window.location.origin}/links/productos`) {
         })
     });
     // Editar Productos
-    $('#datatable2').on('click', '#eliminarFactura', function () {
+    $('#datatable2').on('click', '#editarFactura', function () {
+        /*$('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
-        var datos = { id: data.id, reservas: data.reservas };
-        $('#ModalConfir').modal('toggle');
-        $('#btnDeletf').on('click', function () {
-            $.ajax({
-                type: "POST",
-                url: '/links/eliminarfactura',
-                data: datos,
-                success: function (data) {
-                    fila.remove();
-                    SMSj('success', 'Factura eliminada correctamente')
-                }
-            })
-        })
+        var datos = { id: data.id };
+
+        $.ajax({
+            type: "POST",
+            url: '/links/eliminarfactura',
+            data: datos,
+            async: false,
+            success: function (data) {
+                $("#cuadro1").hide("slow");
+                $("#cuadro3").show("slow");
+            }
+        })*/
+        SMSj('info', 'Esta funcion no se encuentra aun habilitada')
     });
+    $('#datatable2').on('click', '.to button', function () {
+        var fila = $(this).parents('tr');
+        var data = $('#datatable2').DataTable().row(fila).data();
+
+        if ($(this).parent().prev().val().indexOf(",") > 0) {
+
+            var datos = { valor: $(this).parent().prev().cleanVal() };
+            $('#ModalConfir').modal('toggle');
+            $('#bt').on('click', function () {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+                $.ajax({
+                    type: "PUT",
+                    url: "/links/productos/" + data.id,
+                    data: datos,
+                    async: false,
+                    success: function (data) {
+                        $("#datatable2").DataTable().ajax.reload(function (json) {
+                            $('#ModalEventos').modal('hide')
+                            SMSj('success', 'Nuevo precio del metro cuadrador establecido correctamente')
+                            //$("#datatable").DataTable().ajax.reload();
+                        })
+                    }
+                })
+            })
+        } else {
+            SMSj('error', 'Debe digitar un precio antes de actualizar los datos')
+        }
+
+    })
     // Ver Productos
     $('#datatable2').on('click', '.tu', function () {
         var fila = $(this).parents('tr');
@@ -2387,8 +2425,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     });
     $('#datatable2').on('click', '.to', function () {
-        /*var fila = $(this).parents('tr');
-        var data = $('#datatable2').DataTable().row(fila).data();*/
         $(this).find('input').mask('000,000,000', { reverse: true });
         $(this).find('input').select()
     });
@@ -2478,7 +2514,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 data: "valmtr2", className: 'to',
                 render: function (data, method, row) {
                     return `<div class="input-group">
-                                <input type="text" class="class="form-control-no-border text-center edi"
+                                <input type="text" class="form-control-no-border text-center edi"
                                     autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
                                 <span class="input-group-append">
                                     <button class="btn btn-primary btn-sm"
