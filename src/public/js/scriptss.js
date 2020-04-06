@@ -2084,6 +2084,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         }, cb);
         cb(start, end);
+        
     });
 
     function Dtas(n) {
@@ -2385,13 +2386,20 @@ if (window.location == `${window.location.origin}/links/productos`) {
             $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
         }
     });
+    $('#datatable2').on('click', '.to', function () {
+        /*var fila = $(this).parents('tr');
+        var data = $('#datatable2').DataTable().row(fila).data();*/
+        $(this).find('input').mask('000,000,000', { reverse: true });
+        $(this).find('input').select()
+    });
+
     var table2 = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
             {
                 text: `<div class="mb-0">
-                                        <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
-                                    </div>`,
+                            <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
+                        </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'facturar'
@@ -2467,13 +2475,22 @@ if (window.location == `${window.location.origin}/links/productos`) {
             },
             { data: "porcentage", className: 'tu' },
             { data: "totalmtr2", className: 'tu' },
-            { data: "valmtr2", className: 'tu' },
+            {
+                data: "valmtr2", className: 'to',
+                render: function (data, method, row) {
+                    return `<div class="input-group">
+                                <input type="text" class="class="form-control-no-border text-center edi"
+                                    autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
+                                <span class="input-group-append">
+                                    <button class="btn btn-primary btn-sm"
+                                        type="button">ok</button>
+                                </span>
+                            </div>`
+                }
+            },
             {
                 data: "valproyect", className: 'tu',
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                /*render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }*/
             },
             { data: "mzs", className: 'tu' },
             { data: "cantidad", className: 'tu' },
