@@ -2572,9 +2572,11 @@ if (window.location.pathname == `/links/orden`) {
         var fechs = new Date($('#fechs').val());
         var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
         var h = 1;
-
-        if (months > 42) {
-            $('#ncuotas').html(`
+        var Meses = (extra) => {
+            months += extra
+            fechs = new Date(moment(fechs).add(extra, 'month'));
+            if (months > 42) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -2584,8 +2586,8 @@ if (window.location.pathname == `/links/orden`) {
             <option value="42">42 Cuotas</option>
             <option value="48">48 Cuotas</option>
             `)
-        } else if (months > 36) {
-            $('#ncuotas').html(`
+            } else if (months > 36) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -2595,8 +2597,8 @@ if (window.location.pathname == `/links/orden`) {
             <option value="42">42 Cuotas</option>
             `)
 
-        } else if (months > 30) {
-            $('#ncuotas').html(`
+            } else if (months > 30) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -2605,8 +2607,8 @@ if (window.location.pathname == `/links/orden`) {
             <option value="36">36 Cuotas</option>
             `)
 
-        } else if (months > 24) {
-            $('#ncuotas').html(`
+            } else if (months > 24) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -2614,38 +2616,42 @@ if (window.location.pathname == `/links/orden`) {
             <option value="30">30 Cuotas</option>
             `)
 
-        } else if (months > 18) {
-            $('#ncuotas').html(`
+            } else if (months > 18) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
             <option value="24">24 Cuotas</option>
             `)
 
-        } else if (months > 12) {
-            $('#ncuotas').html(`
+            } else if (months > 12) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
             `)
 
-        } else if (months > 6) {
-            $('#ncuotas').html(`
+            } else if (months > 6) {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             `)
 
-        } else {
-            $('#ncuotas').html(`
+            } else {
+                $('#ncuotas').html(`
             <option value="6">6 Cuotas</option>
             `)
 
+            };
         };
+        Meses(0)
         var dic = 0;
         var jun = 0;
-        var Años = () => {
-            var tiempo = (fechs.getFullYear() - fch.getFullYear());
-            var valfecha1 = fch.valueOf()
+        var Años = (inic, dia) => {
+            dia = dia - fch.getDate()
+            var tiempo = (fechs.getFullYear() - fch.getFullYear()) - 1;
+            var t1 = new Date(moment(fch).add(inic + 2, 'month').add(dia, 'days'))
+            var valfecha1 = t1.valueOf()
             var valfecha2 = fechs.valueOf()
             var q = 0;
             while (q <= tiempo) {
@@ -2659,11 +2665,32 @@ if (window.location.pathname == `/links/orden`) {
                     dic++;
                 }
                 q++
-                console.log(y)
             }
-
+            console.log(jun)
+            console.log(dic)
+            if (jun > 0 && dic > 0) {
+                $('#Emeses').html(`
+                    <option value="">Niguna</option>
+                    <option value="1">Junio</option>
+                    <option value="2">Diciembre</option>
+                    <option value="3">Jun & Dic</option>
+                `);
+            } else if (jun > 0 && dic === 0) {
+                $('#Emeses').html(`
+                    <option value="">Niguna</option>
+                    <option value="1">Junio</option>
+                `);
+            } else if (jun === 0 && dic > 0) {
+                $('#Emeses').html(`
+                    <option value="">Niguna</option>
+                    <option value="2">Diciembre</option>
+                `);
+            } else {
+                $('#Emeses').parents('tr').remove()
+                $('#cuotaestrao').parents('tr').remove()
+            }
         }
-        Años()
+        Años(15, 15)
         var fcha = moment(fch).format('YYYY-MM-DD');
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
@@ -2766,7 +2793,7 @@ if (window.location.pathname == `/links/orden`) {
                 }
             }
             cuota = Math.round(precio - inicial);
-            anos = $('#ncuotas').val() / 12
+            anos = $('#ncuotas').val() / 6
             if ($('#cuotaestrao').val() && $('#Emeses').val()) {
                 cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
                 $('#Emeses').val() < 3 ? cut = cuotaextrao * anos : cut = (cuotaextrao * 2) * anos;
