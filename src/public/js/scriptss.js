@@ -2392,11 +2392,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $(this).find('input').mask('000,000,000', { reverse: true });
         $(this).find('input').select()
     });
-    $('#ModalEventos').modal({
-        toggle: true,
-        backdrop: 'static',
-        keyboard: true,
-    });
     var table2 = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
