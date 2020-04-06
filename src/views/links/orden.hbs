@@ -339,6 +339,7 @@
                         </div>
                         <div class="card-body">
                             {{#each proyecto}}
+                            <input type="hidden" id="fechs" value="{{fechafin}}">
                             <div class="row">
                                 <div class="col-12 col-lg-6">
                                     <table class="table table-sm my-2">
@@ -386,10 +387,6 @@
                                                         class="form-control-no-border edi float-right"
                                                         style="padding: 1px; width: 100%; text-align-last:center"
                                                         required>
-                                                        <option value="12">12 Cuotas</option>
-                                                        <option value="24">24 Cuotas</option>
-                                                        <option value="36">36 Cuotas</option>
-                                                        <option value="48">48 Cuotas</option>
                                                     </select>
                                                 </td>
                                             </tr>

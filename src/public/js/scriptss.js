@@ -2307,6 +2307,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
     }
     $('#datatable').on('click', 'tr', function () {
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
         var data = $('#datatable').DataTable().row(this).data();
         if (data.estado === 9) {
             $(this).toggleClass('selected');
@@ -2315,6 +2320,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             var url = `/links/orden?id=${data.id}`;
             $(location).attr('href', url);
         } else {
+            $('#ModalEventos').modal('hide')
             SMSj('info', 'Producto no disponible')
         }
     });
@@ -2557,20 +2563,113 @@ if (window.location == `${window.location.origin}/links/productos`) {
     });
 };
 /////////////////////////////* ORDEN *////////////////////////////////////////////////////////////
-//console.log(window.location)
 if (window.location.pathname == `/links/orden`) {
     $(document).ready(function () {
         // Datatables clients
         var groupColumn = 2;
-        $('.val').mask('000.000.000', { reverse: true });
-        var h = 1;
         var fch = new Date();
+        $('.val').mask('000.000.000', { reverse: true });
+        var fechs = new Date($('#fechs').val());
+        var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
+        var h = 1;
+
+        if (months > 42) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            `)
+        } else if (months > 36) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            `)
+
+        } else if (months > 30) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            `)
+
+        } else if (months > 24) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            `)
+
+        } else if (months > 18) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            `)
+
+        } else if (months > 12) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            `)
+
+        } else if (months > 6) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            `)
+
+        } else {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            `)
+
+        };
+        var dic = 0;
+        var jun = 0;
+        var Años = () => {
+            var tiempo = (fechs.getFullYear() - fch.getFullYear());
+            var valfecha1 = fch.valueOf()
+            var valfecha2 = fechs.valueOf()
+            var q = 0;
+            while (q <= tiempo) {
+                t = fch.getFullYear() + q
+                y = new Date(t + '-06-01').valueOf()
+                p = new Date(t + '-12-01').valueOf()
+                if (y >= valfecha1 && y <= valfecha2) {
+                    jun++;
+                }
+                if (p >= valfecha1 && p <= valfecha2) {
+                    dic++;
+                }
+                q++
+                console.log(y)
+            }
+
+        }
+        Años()
         var fcha = moment(fch).format('YYYY-MM-DD');
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
         var cuota = parseFloat(precio) - parseFloat(inicial);
         var diferinicial = inicial / $('#diferinicial').val();
-        var cuotaextrao, cut = 0, anos = $('#ncuotas').val() / 12;
+        var cuotaextrao, cut = 0, anos = $('#ncuotas').val() / 6;
         var oficial70 = '', oficial30 = '', bono = '', meses = 0;
         $('#p70').val(Moneda(cuota));
         function Dt() {
