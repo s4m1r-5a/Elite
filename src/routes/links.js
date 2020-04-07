@@ -300,7 +300,8 @@ router.post('/tabla/:id', async (req, res) => {
         var data = new Array();
         dataSet.data = data
         const { fcha, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra } = req.body;
-        var v = N / 2;
+        var v = Math.round((parseFloat(N) - parseFloat(u)) / 2);
+        var p = (parseFloat(N) - parseFloat(u)) / 2
         var j = Math.round(parseFloat(u) / 2);
         var o = parseFloat(u) / 2;
         var y = 0;
@@ -341,18 +342,22 @@ router.post('/tabla/:id', async (req, res) => {
                 oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
                 cuota: cuota70,
                 stado: '<span class="badge badge-info">Pendiente</span>',
-                n2: v + i,
-                fecha2: moment(fcha).add(y + v, 'month').startOf('month'),
-                cuota2: cuota70,
-                stado2: '<span class="badge badge-info">Pendiente</span>'
+                n2: i > p ? '' : v + i,
+                fecha2: i > p ? '' : moment(fcha).add(y + v, 'month').startOf('month'),
+                cuota2: i > p ? '' : cuota70,
+                stado2: i > p ? '' : '<span class="badge badge-info">Pendiente</span>'
             };
-            d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota = `< mark > ${extra}</mark > ` : '';
-            d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota = `< mark > ${extra}</mark > ` : '';
-            d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota2 = `< mark > ${extra}</mark > ` : '';
-            d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota2 = `< mark > ${extra}</mark > ` : '';
+            d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota = `<mark> ${extra}</mark> ` : '';
+            d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota = `<mark> ${extra}</mark> ` : '';
+            if (d.fecha2) {
+                if (d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
+                    d.cuota2 = `<mark> ${extra}</mark>`
+                } else if (d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
+                    d.cuota2 = `<mark> ${extra}</mark>`
+                };
+            };
             dataSet.data.push(d);
         };
-        console.log(dataSet)
         res.send(true);
     } else {
         res.send(dataSet);

@@ -2234,8 +2234,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             },
             initComplete: function (settings, json) {
                 //tableOrden.column(2).visible(true);
-                $('#ModalEventos').modal('hide')
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+                $('#ModalEventos').modal('hide')
             },
             columnDefs: [
                 { "visible": false, "targets": 1 }
@@ -2647,50 +2647,77 @@ if (window.location.pathname == `/links/orden`) {
         Meses(0)
         var dic = 0;
         var jun = 0;
-        var Años = (inic, dia) => {
+        var Años = (inic, dia, month) => {
+            dic = 0;
+            jun = 0;
             dia = dia - fch.getDate()
-            var tiempo = (fechs.getFullYear() - fch.getFullYear()) - 1;
-            var t1 = new Date(moment(fch).add(inic + 2, 'month').add(dia, 'days'))
+            var t1 = new Date(moment(fch).add(inic, 'month').add(dia, 'days'))
+            var t2 = new Date(moment(fch).add(month, 'month').add(dia, 'days'))
             var valfecha1 = t1.valueOf()
-            var valfecha2 = fechs.valueOf()
+            var valfecha2 = t2.valueOf()
             var q = 0;
-            while (q <= tiempo) {
-                t = fch.getFullYear() + q
-                y = new Date(t + '-06-01').valueOf()
-                p = new Date(t + '-12-01').valueOf()
-                if (y >= valfecha1 && y <= valfecha2) {
-                    jun++;
-                }
-                if (p >= valfecha1 && p <= valfecha2) {
-                    dic++;
-                }
+            var t3
+            var data = new Array();
+
+            while (valfecha1 < valfecha2) {
+                valfecha1 = new Date(moment(fch).add(inic + q, 'month').add(dia, 'days')).valueOf()
+                t3 = new Date(moment(fch).add(inic + q, 'month').add(dia, 'days'))
+                data.push(t3)
                 q++
             }
-            console.log(jun)
-            console.log(dic)
+
+            data.filter((r) => {
+                return r.getMonth() === 5 || r.getMonth() === 11;
+            }).map((r) => {
+                r.getMonth() === 5 ? jun++ : dic++;
+            });
+
             if (jun > 0 && dic > 0) {
-                $('#Emeses').html(`
-                    <option value="">Niguna</option>
-                    <option value="1">Junio</option>
-                    <option value="2">Diciembre</option>
-                    <option value="3">Jun & Dic</option>
-                `);
+
+                if (!$('#Emeses option[value="1"]').length) {
+                    $('#Emeses').append(`                        
+                        <option value="1">Junio</option>
+                        <option value="2">Diciembre</option>
+                        <option value="3">Jun & Dic</option>
+                    `);
+                } else if (!$('#Emeses option[value="2"]').length) {
+                    $('#Emeses').append(`
+                        <option value="2">Diciembre</option>
+                        <option value="3">Jun & Dic</option>
+                    `);
+                }
+
             } else if (jun > 0 && dic === 0) {
-                $('#Emeses').html(`
-                    <option value="">Niguna</option>
-                    <option value="1">Junio</option>
-                `);
+
+                if (!$('#Emeses option[value="1"]').length) {
+                    $('#Emeses').append(`                        
+                        <option value="1">Junio</option>
+                    `);
+                }
+                $('#Emeses option[value="2"]') ? $('#Emeses option[value="2"]').remove() : '';
+                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
+
             } else if (jun === 0 && dic > 0) {
-                $('#Emeses').html(`
-                    <option value="">Niguna</option>
-                    <option value="2">Diciembre</option>
-                `);
+
+                if (!$('#Emeses').length) {
+                    alert('Debe actualizar la pagina')
+                } else if (!$('#Emeses option[value="2"]').length) {
+                    $('#Emeses').append(`
+                        <option value="2">Diciembre</option>
+                    `);
+                }
+                $('#Emeses option[value="1"]') ? $('#Emeses option[value="1"]').remove() : '';
+                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
+
             } else {
-                $('#Emeses').parents('tr').remove()
-                $('#cuotaestrao').parents('tr').remove()
+
+                $('#Emeses option[value="1"]') ? $('#Emeses option[value="1"]').remove() : '';
+                $('#Emeses option[value="2"]') ? $('#Emeses option[value="2"]').remove() : '';
+                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
             }
+
         }
-        Años(15, 15)
+        Años(2, 15, 6);
         var fcha = moment(fch).format('YYYY-MM-DD');
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
@@ -2719,6 +2746,7 @@ if (window.location.pathname == `/links/orden`) {
             var i, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
                 mesesextra = '';
             meses = 0;
+            Años(u, 15, N)
             if ($('#ahorro').val() === '$0') {
                 oficial70 = '$' + $('#p70').val();
                 oficial30 = '$' + $('#cuotainicial').val();
@@ -2793,19 +2821,35 @@ if (window.location.pathname == `/links/orden`) {
                 }
             }
             cuota = Math.round(precio - inicial);
-            anos = $('#ncuotas').val() / 6
+            //anos = $('#ncuotas').val() / 12
             if ($('#cuotaestrao').val() && $('#Emeses').val()) {
                 cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
-                $('#Emeses').val() < 3 ? cut = cuotaextrao * anos : cut = (cuotaextrao * 2) * anos;
+                $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
                 cuota = cuota - cut;
-                $('#Emeses').val() == 1 ? mesesextra = 6 : $('#Emeses').val() == 2 ? mesesextra = 12 : mesesextra = 2;
-                mesesextra < 6 ? meses = 2 * anos : meses = 1 * anos;
+
+                if ($('#Emeses').val() == 1) {
+                    mesesextra = 6
+                    meses = 1 * jun
+
+                } else if ($('#Emeses').val() == 2) {
+                    mesesextra = 12
+                    meses = 1 * dic
+
+                } else {
+                    mesesextra = 2
+                    meses = 2 * (jun + dic)
+
+                };
             } else {
                 //dddsd
             }
             //$('#cuota').val(Moneda(Math.round(cuota / $('#ncuotas').val())));
+            console.log(cuota)
+            console.log($('#ncuotas').val())
+            console.log(cuota / ($('#ncuotas').val() - u))
+
             recolecta = {
-                cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - meses))),
+                cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - u))),
                 cuota30: Moneda(Math.round((diferinicial - 1000000) / u)),
                 oficial30,
                 oficial70,
