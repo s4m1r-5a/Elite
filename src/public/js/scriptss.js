@@ -2717,7 +2717,7 @@ if (window.location.pathname == `/links/orden`) {
             }
 
         }
-        Años(2, 15, 6);
+        Años(2, 1, 6);
         var fcha = moment(fch).format('YYYY-MM-DD');
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
@@ -2744,9 +2744,9 @@ if (window.location.pathname == `/links/orden`) {
         });
         $('.edi').on('change', function () {
             var i, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
-                mesesextra = '';
+                mesesextra = '', D = parseFloat($('#dia').val());
             meses = 0;
-            Años(u, 15, N)
+            Años(u, D, N)
             if ($('#ahorro').val() === '$0') {
                 oficial70 = '$' + $('#p70').val();
                 oficial30 = '$' + $('#cuotainicial').val();
@@ -2825,31 +2825,29 @@ if (window.location.pathname == `/links/orden`) {
             if ($('#cuotaestrao').val() && $('#Emeses').val()) {
                 cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
                 $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
+                console.log(cuota)
                 cuota = cuota - cut;
+                console.log(cuota)
 
                 if ($('#Emeses').val() == 1) {
                     mesesextra = 6
-                    meses = 1 * jun
+                    meses = jun
 
                 } else if ($('#Emeses').val() == 2) {
                     mesesextra = 12
-                    meses = 1 * dic
+                    meses = dic
 
                 } else {
                     mesesextra = 2
-                    meses = 2 * (jun + dic)
+                    meses = jun + dic
 
                 };
             } else {
                 //dddsd
             }
-            //$('#cuota').val(Moneda(Math.round(cuota / $('#ncuotas').val())));
-            console.log(cuota)
-            console.log($('#ncuotas').val())
-            console.log(cuota / ($('#ncuotas').val() - u))
 
             recolecta = {
-                cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - u))),
+                cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - (meses + u)))),
                 cuota30: Moneda(Math.round((diferinicial - 1000000) / u)),
                 oficial30,
                 oficial70,
