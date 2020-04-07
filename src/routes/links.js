@@ -50,7 +50,6 @@ router.get('/prueba', async (req, res) => {
 //////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
     const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
-    console.log(proveedores)
     res.render('links/productos', { proveedores });
 });
 router.post('/productos', isLoggedIn, async (req, res) => {
@@ -67,7 +66,6 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
 router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
-    console.log(valor)
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id}`)
     res.send(respuesta);
 });
@@ -81,7 +79,6 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
         cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
     };
-    console.log(req.body)
     if (proveedor == '0') {
         const proveedr = {
             empresa: empresa.toUpperCase(),
@@ -92,7 +89,6 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
             web: web.toLowerCase()
         }
         const newprovee = await pool.query('INSERT INTO proveedores SET ? ', proveedr);
-        console.log(newprovee)
         produc.proveedor = newprovee.insertId
     }
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
@@ -100,7 +96,6 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     await n.map((t, i) => {
         producdata += `(${datos.insertId}, '${mz[i].toUpperCase() || 'no'}', ${t}, ${mtr2[i]}, ${estado[i]}, ${valor[i]}, ${inicial[i]}),`;
     });
-    console.log(producdata.slice(0, -1))
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
     res.redirect('/links/productos');
@@ -183,9 +178,7 @@ router.get('/pagos/:id', async (req, res) => {
                 await a.filter((c) => {
                     return c.description === 'INICIAL';
                 }).map((c, i, a) => {
-                    console.log(moment(fecha).add(i, 'month').format('YYYY-MM-DD'))
                     if (moment(c.transaction_date).format('YYYY-MM-DD') > moment(fecha).add(i, 'month').format('YYYY-MM-DD') || c.value < cuotai) {
-                        console.log('se cumple la mora')
                     }
                 });
                 var j = cuotaextraordinaria ? parseFloat(numerocuotaspryecto.slice(-2, -1)) : 0;
@@ -221,7 +214,6 @@ router.post('/pagos', async (req, res) => {
 router.get('/orden', isLoggedIn, async (req, res) => {
     const { id } = req.query;
     const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ? `, id);
-    console.log({ proyecto, id })
     res.render('links/orden', { proyecto, id });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
@@ -281,14 +273,12 @@ router.post('/orden', isLoggedIn, async (req, res) => {
 });
 router.get('/cel/:id', async (req, res) => {
     const datos = await pool.query('SELECT * FROM clientes WHERE movil = ?', req.params.id)
-    console.log(datos)
     res.send(datos);
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
     const { movil } = req.body;
     const codigo = ID2(5);
     await sms('57' + movil, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
-    console.log(codigo)
     res.send(codigo);
 });
 router.get('/bono/:id', async (req, res) => {
@@ -299,7 +289,7 @@ router.post('/tabla/:id', async (req, res) => {
     if (req.params.id == 1) {
         var data = new Array();
         dataSet.data = data
-        const { fcha, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra } = req.body;
+        const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra } = req.body;
         var v = Math.round((parseFloat(N) - parseFloat(u)) / 2);
         var p = (parseFloat(N) - parseFloat(u)) / 2
         var j = Math.round(parseFloat(u) / 2);
@@ -307,7 +297,7 @@ router.post('/tabla/:id', async (req, res) => {
         var y = 0;
         l = {
             n: 1,
-            fecha: fcha,
+            fecha: fcha2,
             oficial: '<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>',
             cuota: '1.000.000',
             stado: '<span class="badge badge-success">Pagada</span>',
@@ -324,12 +314,12 @@ router.post('/tabla/:id', async (req, res) => {
             if (i <= j) {
                 x = {
                     n: i,
-                    fecha: moment(fcha).add(i, 'month').startOf('month'),
+                    fecha: moment(fcha).add(i, 'month'),
                     oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
                     cuota: cuota30,
                     stado: '<span class="badge badge-primary">Pendiente</span>',
                     n2: i > o ? '' : i + j,
-                    fecha2: i > o ? '' : moment(fcha).add(i + j, 'month').startOf('month'),
+                    fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
                     cuota2: i > o ? '' : cuota30,
                     stado2: i > o ? '' : '<span class="badge badge-primary">Pendiente</span>'
                 }
@@ -338,12 +328,12 @@ router.post('/tabla/:id', async (req, res) => {
 
             d = {
                 n: i,
-                fecha: moment(fcha).add(y, 'month').startOf('month'),
+                fecha: moment(fcha).add(y, 'month'),
                 oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
                 cuota: cuota70,
                 stado: '<span class="badge badge-info">Pendiente</span>',
                 n2: i > p ? '' : v + i,
-                fecha2: i > p ? '' : moment(fcha).add(y + v, 'month').startOf('month'),
+                fecha2: i > p ? '' : moment(fcha).add(y + v, 'month'),
                 cuota2: i > p ? '' : cuota70,
                 stado2: i > p ? '' : '<span class="badge badge-info">Pendiente</span>'
             };
@@ -439,7 +429,6 @@ router.post('/soat', isLoggedIn, (req, res) => {
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
 
-        console.log('Success: ', body);
     });
 });
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
@@ -471,7 +460,6 @@ router.post('/cuenta', isLoggedIn, async (req, res) => {
     const { desti, bank } = req.body;
     if (bank !== undefined) {
         const banco = await pool.query(`SELECT * FROM bancos WHERE id_banco = ? `, bank);
-        console.log(bank)
         res.send(banco);
     } else {
         const cuentas = await pool.query(`SELECT DISTINCT cuenta FROM transferencias WHERE destinatario = ? `, desti);
@@ -526,7 +514,6 @@ router.get('/ventas', isLoggedIn, async (req, res) => {
     res.render('links/ventas');
 });
 router.post('/ventas', isLoggedIn, async (req, res) => {
-    console.log(req.body)
     const { prod, product, nombre, user, movil, nompro } = req.body;
     const result = await rango(req.user.id);
     const usua = await usuario(req.user.id);
@@ -778,7 +765,6 @@ router.post('/cliente', async (req, res) => {
         json: true
     }, async (error, res, body) => {
         if (error) {
-            console.error(error);
             return;
         }
 
@@ -1075,7 +1061,6 @@ async function Desendentes(id) {
     mapa = [reporte, reporte2, reporte3]
     if (reporte.length > 0) {
         await mapa.map((r) => {
-            console.log(r)
         });
 
         /*await reporte.filter((re) => {

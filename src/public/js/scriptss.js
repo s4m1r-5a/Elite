@@ -2565,7 +2565,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
 /////////////////////////////* ORDEN *////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden`) {
     $(document).ready(function () {
-        // Datatables clients
+        // Datatables clients        
         var groupColumn = 2;
         var fch = new Date();
         $('.val').mask('000.000.000', { reverse: true });
@@ -2647,6 +2647,7 @@ if (window.location.pathname == `/links/orden`) {
         Meses(0)
         var dic = 0;
         var jun = 0;
+        var fcha;
         var Años = (inic, dia, month) => {
             dic = 0;
             jun = 0;
@@ -2715,10 +2716,10 @@ if (window.location.pathname == `/links/orden`) {
                 $('#Emeses option[value="2"]') ? $('#Emeses option[value="2"]').remove() : '';
                 $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
             }
-
+            fcha = moment(new Date(moment(fch).add(dia, 'days'))).format('YYYY-MM-DD')
         }
         Años(2, 1, 6);
-        var fcha = moment(fch).format('YYYY-MM-DD');
+
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
         var cuota = parseFloat(precio) - parseFloat(inicial);
@@ -2765,7 +2766,6 @@ if (window.location.pathname == `/links/orden`) {
                     type: 'GET',
                     async: false,
                     success: function (data) {
-                        console.log(data)
                         if (data.length > 0) {
                             $(`#${card} .client`).val(data[0].id);
                             $(`#${card} .nombres`).val(data[0].nombre);
@@ -2825,9 +2825,7 @@ if (window.location.pathname == `/links/orden`) {
             if ($('#cuotaestrao').val() && $('#Emeses').val()) {
                 cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
                 $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
-                console.log(cuota)
                 cuota = cuota - cut;
-                console.log(cuota)
 
                 if ($('#Emeses').val() == 1) {
                     mesesextra = 6
@@ -2854,6 +2852,7 @@ if (window.location.pathname == `/links/orden`) {
                 N,
                 u,
                 fcha,
+                fcha2: moment(fch).format('YYYY-MM-DD'),
                 mesesextra,
                 extra: $('#cuotaestrao').val()
             }
