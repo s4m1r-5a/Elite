@@ -2881,7 +2881,7 @@ if (window.location.pathname == `/links/orden`) {
                         {
                             data: "fecha",
                             render: function (data, method, row) {
-                                return moment.utc(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                                return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
                             }
                         },
                         { data: "oficial" },
@@ -2891,7 +2891,7 @@ if (window.location.pathname == `/links/orden`) {
                         {
                             data: "fecha2",
                             render: function (data, method, row) {
-                                return data ? moment.utc(data).format('YYYY-MM-DD') : ''; //pone la fecha en un formato entendible
+                                return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`: '';
                             }
                         },
                         { data: "cuota2" },

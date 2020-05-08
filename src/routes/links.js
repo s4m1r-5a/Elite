@@ -278,6 +278,18 @@ router.get('/cel/:id', async (req, res) => {
 router.post('/codigo', isLoggedIn, async (req, res) => {
     const { movil } = req.body;
     const codigo = ID2(5);
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '57' + movil,
+            "body": `_*Grupo Elite* te da la Bienvenida, usa este codigo *${codigo}* para confirmar tu separacion_ \n\n_*GRUPO ELITE FICA RAÍZ*_`
+        }
+    };
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
     await sms('57' + movil, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
     res.send(codigo);
 });
@@ -313,37 +325,47 @@ router.post('/tabla/:id', async (req, res) => {
 
             if (i <= j) {
                 x = {
-                    n: i,
+                    n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                     fecha: moment(fcha).add(i, 'month'),
-                    oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
-                    cuota: cuota30,
-                    stado: '<span class="badge badge-primary">Pendiente</span>',
-                    n2: i > o ? '' : i + j,
+                    oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>
+                              <input value="INICIAL" type="hidden" name="tipo">`,
+                    cuota: cuota30 + `<input value="${cuota30}" type="hidden" name="cuota">`,
+                    stado: `<span class="badge badge-primary">Pendiente</span>
+                            <input value="3" type="hidden" name="estado">`,
+                    n2: i > o ? '' : `${i + j} <input value="${i + j}" type="hidden" name="ncuota">`,
                     fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
-                    cuota2: i > o ? '' : cuota30,
-                    stado2: i > o ? '' : '<span class="badge badge-primary">Pendiente</span>'
+                    cuota2: i > o ? '' : cuota30 + `<input value="${cuota30}" type="hidden" name="cuota">`,
+                    stado2: i > o ? '' : `<span class="badge badge-primary">Pendiente</span>
+                                          <input value="3" type="hidden" name="estado">`
                 }
                 dataSet.data.push(x);
             };
 
             d = {
-                n: i,
+                n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                 fecha: moment(fcha).add(y, 'month'),
-                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
-                cuota: cuota70,
-                stado: '<span class="badge badge-info">Pendiente</span>',
-                n2: i > p ? '' : v + i,
+                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>
+                          <input value="INICIAL" type="hidden" name="tipo">`,
+                cuota: cuota70 + `<input value="${cuota70}" type="hidden" name="cuota">`,
+                stado: `<span class="badge badge-info">Pendiente</span>
+                        <input value="3" type="hidden" name="estado">`,
+                n2: i > p ? '' : `${v + i} <input value="${v + i}" type="hidden" name="ncuota">`,
                 fecha2: i > p ? '' : moment(fcha).add(y + v, 'month'),
-                cuota2: i > p ? '' : cuota70,
-                stado2: i > p ? '' : '<span class="badge badge-info">Pendiente</span>'
+                cuota2: i > p ? '' : cuota70 + `<input value="${cuota70}" type="hidden" name="cuota">`,
+                stado2: i > p ? '' : `<span class="badge badge-primary">Pendiente</span>
+                                      <input value="3" type="hidden" name="estado">`
             };
-            d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2) ? d.cuota = `<mark> ${extra}</mark> ` : '';
-            d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2) ? d.cuota = `<mark> ${extra}</mark> ` : '';
+            
+            if (d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
+                d.cuota = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+            } else if (d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
+                d.cuota = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+            };
             if (d.fecha2) {
                 if (d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-                    d.cuota2 = `<mark> ${extra}</mark>`
+                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
                 } else if (d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
-                    d.cuota2 = `<mark> ${extra}</mark>`
+                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
                 };
             };
             dataSet.data.push(d);
