@@ -220,7 +220,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const { nombres, documento, lugarexpedicion, fechaexpedicion,
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client,
-        cuotaextraordinaria, cupon, inicialdiferida, ahorro } = req.body;
+        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, estado, ncuota, tipo } = req.body;
     function Cliente(N) {
         cliente = {
             nombre: nombres[N],
@@ -264,10 +264,19 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         inicialdiferida,
         ahorro: ahorro ? ahorro.replace(/\./g, '') : ''
     };
+    console.log(req.body)
     //documento[1] ? separacion.cliente2 = client[1] : '';
     const h = await pool.query('INSERT INTO preventa SET ? ', separacion);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1 }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
+
+
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fecha, cuota, estado) VALUES ';
+    await ncuota.map((t, i) => {
+        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
+    });
+    await pool.query(cuotas.slice(0, -1));
+
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
 });
@@ -308,11 +317,13 @@ router.post('/tabla/:id', async (req, res) => {
         var o = parseFloat(u) / 2;
         var y = 0;
         l = {
-            n: 1,
+            n: `1 <input value="1" type="hidden" name="ncuota">`,
             fecha: fcha2,
-            oficial: '<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>',
-            cuota: '1.000.000',
-            stado: '<span class="badge badge-success">Pagada</span>',
+            oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>`,
+            cuota: '1.000.000 <input value="1000000" type="hidden" name="cuota">',
+            stado: `<span class="badge badge-primary">Pendiente</span>
+                    <input value="3" type="hidden" name="estado">
+                    <input value="SEPARACION" type="hidden" name="tipo">`,
             n2: '',
             fecha2: '',
             cuota2: '',
@@ -327,14 +338,14 @@ router.post('/tabla/:id', async (req, res) => {
                 x = {
                     n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                     fecha: moment(fcha).add(i, 'month'),
-                    oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>
-                              <input value="INICIAL" type="hidden" name="tipo">`,
-                    cuota: cuota30 + `<input value="${cuota30}" type="hidden" name="cuota">`,
+                    oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
+                    cuota: cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
                     stado: `<span class="badge badge-primary">Pendiente</span>
-                            <input value="3" type="hidden" name="estado">`,
+                            <input value="3" type="hidden" name="estado">
+                            <input value="INICIAL" type="hidden" name="tipo">`,
                     n2: i > o ? '' : `${i + j} <input value="${i + j}" type="hidden" name="ncuota">`,
                     fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
-                    cuota2: i > o ? '' : cuota30 + `<input value="${cuota30}" type="hidden" name="cuota">`,
+                    cuota2: i > o ? '' : cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
                     stado2: i > o ? '' : `<span class="badge badge-primary">Pendiente</span>
                                           <input value="3" type="hidden" name="estado">`
                 }
@@ -344,18 +355,19 @@ router.post('/tabla/:id', async (req, res) => {
             d = {
                 n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                 fecha: moment(fcha).add(y, 'month'),
-                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>
-                          <input value="INICIAL" type="hidden" name="tipo">`,
-                cuota: cuota70 + `<input value="${cuota70}" type="hidden" name="cuota">`,
-                stado: `<span class="badge badge-info">Pendiente</span>
-                        <input value="3" type="hidden" name="estado">`,
+                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
+                cuota: cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
+                stado: `<span class="badge badge-primary">Pendiente</span>
+                        <input value="3" type="hidden" name="estado">
+                        <input value="FINANCIACION" type="hidden" name="tipo">`,
                 n2: i > p ? '' : `${v + i} <input value="${v + i}" type="hidden" name="ncuota">`,
                 fecha2: i > p ? '' : moment(fcha).add(y + v, 'month'),
-                cuota2: i > p ? '' : cuota70 + `<input value="${cuota70}" type="hidden" name="cuota">`,
+                cuota2: i > p ? '' : cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
                 stado2: i > p ? '' : `<span class="badge badge-primary">Pendiente</span>
-                                      <input value="3" type="hidden" name="estado">`
+                                      <input value="3" type="hidden" name="estado">
+                                      <input value="FINANCIACION" type="hidden" name="tipo">`
             };
-            
+
             if (d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
                 d.cuota = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
             } else if (d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
