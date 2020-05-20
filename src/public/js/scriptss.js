@@ -2360,36 +2360,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $("#cuadro3").show("slow");*/
 
 
-        var editor; // use a global for the submit and return data rendering in the examples
-
-        editor = new $.fn.dataTable.Editor({
-            ajax: "/links/productos/" + data.id,
-            table: "#datatabledit",
-            fields: [{
-                label: "First name:",
-                name: "first_name"
-            }, {
-                label: "Last name:",
-                name: "last_name"
-            }, {
-                label: "Position:",
-                name: "position"
-            }, {
-                label: "Office:",
-                name: "office"
-            }, {
-                label: "Extension:",
-                name: "extn"
-            }, {
-                label: "Start date:",
-                name: "start_date",
-                type: "datetime"
-            }, {
-                label: "Salary:",
-                name: "salary"
-            }
-            ]
-        });
 
 
 
@@ -2502,11 +2472,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     }
                 });
             }
-        });
-
-        // Activate an inline edit on click of a table cell
-        $('#datatabledit').on('click', 'tbody td:not(:first-child)', function (e) {
-            editor.inline(this);
         });
 
 
