@@ -1983,6 +1983,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> MT² 
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                    <input type="checkbox" class="float-right ml-1" name="estado" value="9" checked>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
@@ -1996,13 +1997,14 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             <th>
                                 <div class="text-left">                                    
                                     <i class="feather-md" data-feather="heart"></i> LT 
-                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" disabled required>
+                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
                                 </div>
                             </th>
                             <th>
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> MT² 
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                    <input type="checkbox" class="float-right ml-1" name="estado" value="9" checked>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
@@ -2344,7 +2346,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     });
     // Editar Productos
     $('#datatable2').on('click', '#editarFactura', function () {
-        /*$('#ModalEventos').modal({
+        $('#Modaledit').modal({
             toggle: true,
             backdrop: 'static',
             keyboard: true,
@@ -2353,16 +2355,207 @@ if (window.location == `${window.location.origin}/links/productos`) {
         var data = $('#datatable2').DataTable().row(fila).data();
         var datos = { id: data.id };
 
-        $.ajax({
-            type: "POST",
-            url: '/links/eliminarfactura',
-            data: datos,
-            async: false,
-            success: function (data) {
-                $("#cuadro1").hide("slow");
-                $("#cuadro3").show("slow");
+        /*$("#cuadro2").hide("slow");
+        $("#cuadro1").hide("slow");
+        $("#cuadro3").show("slow");*/
+
+
+        var editor; // use a global for the submit and return data rendering in the examples
+
+        editor = new $.fn.dataTable.Editor({
+            ajax: "/links/productos/" + data.id,
+            table: "#datatabledit",
+            fields: [{
+                label: "First name:",
+                name: "first_name"
+            }, {
+                label: "Last name:",
+                name: "last_name"
+            }, {
+                label: "Position:",
+                name: "position"
+            }, {
+                label: "Office:",
+                name: "office"
+            }, {
+                label: "Extension:",
+                name: "extn"
+            }, {
+                label: "Start date:",
+                name: "start_date",
+                type: "datetime"
+            }, {
+                label: "Salary:",
+                name: "salary"
             }
-        })*/
+            ]
+        });
+
+
+
+        $('#datatabledit').DataTable({
+            ajax: {
+                method: "POST",
+                url: "/links/productos/" + data.id,
+                dataSrc: "data"
+            },
+            columns: [
+                /*{
+                    className: 'control',
+                    orderable: true,
+                    data: null,
+                    defaultContent: ''
+                },*/
+                {
+                    data: null,
+                    defaultContent: '',
+                    className: 'select-checkbox',
+                    orderable: false
+                },
+                { data: "mz" },
+                {
+                    data: "n",
+                    render: function (data, method, row) {
+                        return `<span class="badge badge-dark text-center text-uppercase">${data}</span>`
+                    }
+                },
+                { data: "mtr2" },
+                {
+                    data: "estado",
+                    render: function (data, method, row) {
+                        switch (data) {
+                            case 1:
+                                return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                                break;
+                            case 9:
+                                return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                break;
+                            case 10:
+                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                                break;
+                            case 12:
+                                return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: "valor",
+                    render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                },
+                {
+                    data: "inicial",
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                { data: "descripcion" }
+            ],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },
+            buttons: [
+                { extend: "create", editor: editor },
+                { extend: "edit", editor: editor },
+                { extend: "remove", editor: editor }
+            ],
+            deferRender: true,
+            paging: true,
+            search: {
+                regex: true,
+                caseInsensitive: false,
+            },
+            responsive: {
+                details: {
+                    type: 'column'
+                }
+            },
+            initComplete: function (settings, json) {
+                //tableOrden.column(2).visible(true);
+                $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+                $('#ModalEventos').modal('hide')
+            },
+            columnDefs: [
+                { "visible": false, "targets": 1 }
+            ],
+            order: [[1, 'asc']],
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(1, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                                        <td colspan="8">
+                                            <div class="text-center">
+                                                ${group != '0' ? 'MANZANA "' + group + '"' : ''}
+                                            </div>
+                                        </td>
+                                    </tr>`
+                        );
+
+                        last = group;
+                    }
+                });
+            }
+        });
+
+        // Activate an inline edit on click of a table cell
+        $('#datatabledit').on('click', 'tbody td:not(:first-child)', function (e) {
+            editor.inline(this);
+        });
+
+
+
+
+
+
+
+
+
+
+
+
+        /*$('#example').DataTable({
+            dom: "Bfrtip",
+            ajax: "../php/staff.php",
+            order: [[1, 'asc']],
+            columns: [
+                {
+                    data: null,
+                    defaultContent: '',
+                    className: 'select-checkbox',
+                    orderable: false
+                },
+                { data: "first_name" },
+                { data: "last_name" },
+                { data: "position" },
+                { data: "office" },
+                { data: "start_date" },
+                { data: "salary", render: $.fn.dataTable.render.number(',', '.', 0, '$') }
+            ],
+            select: {
+                style: 'os',
+                selector: 'td:first-child'
+            },
+            buttons: [
+                { extend: "create", editor: editor },
+                { extend: "edit", editor: editor },
+                { extend: "remove", editor: editor }
+            ]
+        });*/
+
+
+
+
+
+
+
+
         SMSj('info', 'Esta funcion no se encuentra aun habilitada')
     });
     $('#datatable2').on('click', '.to button', function () {
@@ -2891,7 +3084,7 @@ if (window.location.pathname == `/links/orden`) {
                         {
                             data: "fecha2",
                             render: function (data, method, row) {
-                                return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`: '';
+                                return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
                             }
                         },
                         { data: "cuota2" },

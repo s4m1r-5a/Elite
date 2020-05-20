@@ -59,9 +59,17 @@ router.post('/productos', isLoggedIn, async (req, res) => {
 });
 router.post('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
-    respuesta = { "data": fila };
-    res.send(respuesta);
+    if (id === 'editarproyecto') {
+        console.log(req.body)
+        const { id } = req.body;
+        const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
+        respuesta = { "data": fila };
+        res.send(respuesta);
+    } else {
+        const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
+        respuesta = { "data": fila };
+        res.send(respuesta);
+    }
 });
 router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -93,8 +101,17 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     }
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
     var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, estado, valor, inicial) VALUES ';
+    console.log(req.body)
+    console.log(n)
     await n.map((t, i) => {
-        producdata += `(${datos.insertId}, '${mz[i].toUpperCase() || 'no'}', ${t}, ${mtr2[i]}, ${estado[i]}, ${valor[i]}, ${inicial[i]}),`;
+        console.log(datos.insertId)
+        console.log(mz ? mz[i].toUpperCase() : 'no')
+        console.log(t)
+        console.log(mtr2[i])
+        console.log(estado[i] === undefined ? 15 : estado[i])
+        console.log(valor[i])
+        console.log(inicial[i])
+        producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
     });
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
