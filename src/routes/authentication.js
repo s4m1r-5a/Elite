@@ -77,7 +77,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 router.get('/tablero', isLoggedIn, async (req, res) => {
-  const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
+  /*const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
   ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
   INNER JOIN users u ON v.vendedor = u.id
@@ -102,13 +102,13 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   links.desendente = link;
   console.log(links);
   //console.log(ambos);
-  res.render('tablero', { links });
-  //res.render('tablero')
+  res.render('tablero', { links });*/
+  res.render('tablero')
 });
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
 
-  if (a == 'table5') {
+  /*if (a == 'table5') {
 
     const links = await pool.query(`SELECT YEAR(v.fechadecompra) Año, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
     ELT(MONTH(v.fechadecompra), "Enero", "Febrero", "Marzo", "Abril", "Mayo", "Junio", "Julio", "Agosto", "Septiembre", "Octubre", "Noviembre", "Diciembre") Mes,
@@ -190,7 +190,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1`);
     res.send(reporte3);
     //AND YEAR(v.fechadecompra) = YEAR(CURDATE())
-  }
+  }*/
 });
 
 module.exports = router;
