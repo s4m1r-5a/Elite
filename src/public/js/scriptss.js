@@ -2546,9 +2546,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
             async: true,
             success: function (data) {
                 if (data) {
-                    $('#ModalEventos').modal('hide')
-                    SMSj('error', 'Proyecto eliminado correctamente')
-                    table2.draw()
+                    table2.ajax.reload(function (json) {
+                        table2.columns.adjust().draw();
+                        $('#ModalEventos').modal('hide')
+                        SMSj('error', 'Proyecto eliminado correctamente')
+                    })
                 }
             }
         })

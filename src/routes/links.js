@@ -60,7 +60,6 @@ router.post('/productos', isLoggedIn, async (req, res) => {
 router.post('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id === 'eliminar') {
-        console.log(req.body)
         const { id } = req.body;
         await pool.query('DELETE FROM productosd WHERE producto = ?', id);
         await pool.query('DELETE FROM productos WHERE id = ?', id);
