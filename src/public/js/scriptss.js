@@ -2326,203 +2326,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
             SMSj('info', 'Producto no disponible')
         }
     });
-    // Eliminar Productos
-    $('#datatable2').on('click', '#eliminarFactura', function () {
-        var fila = $(this).parents('tr');
-        var data = $('#datatable2').DataTable().row(fila).data();
-        var datos = { id: data.id, reservas: data.reservas };
-        $('#ModalConfir').modal('toggle');
-        $('#btnDeletf').on('click', function () {
-            $.ajax({
-                type: "POST",
-                url: '/links/eliminarfactura',
-                data: datos,
-                success: function (data) {
-                    fila.remove();
-                    SMSj('success', 'Factura eliminada correctamente')
-                }
-            })
-        })
-    });
-    // Editar Productos
-    $('#datatable2').on('click', '#editarFactura', function () {
-        $('#Modaledit').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-        var fila = $(this).parents('tr');
-        var data = $('#datatable2').DataTable().row(fila).data();
-        var datos = { id: data.id };
-
-        /*$("#cuadro2").hide("slow");
-        $("#cuadro1").hide("slow");
-        $("#cuadro3").show("slow");*/
-
-
-
-
-
-        $('#datatabledit').DataTable({
-            ajax: {
-                method: "POST",
-                url: "/links/productos/" + data.id,
-                dataSrc: "data"
-            },
-            columns: [
-                /*{
-                    className: 'control',
-                    orderable: true,
-                    data: null,
-                    defaultContent: ''
-                },*/
-                {
-                    data: null,
-                    defaultContent: '',
-                    className: 'select-checkbox',
-                    orderable: false
-                },
-                { data: "mz" },
-                {
-                    data: "n",
-                    render: function (data, method, row) {
-                        return `<span class="badge badge-dark text-center text-uppercase">${data}</span>`
-                    }
-                },
-                { data: "mtr2" },
-                {
-                    data: "estado",
-                    render: function (data, method, row) {
-                        switch (data) {
-                            case 1:
-                                return `<span class="badge badge-pill badge-info">En Proceso</span>`
-                                break;
-                            case 9:
-                                return `<span class="badge badge-pill badge-success">Disponible</span>`
-                                break;
-                            case 10:
-                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
-                                break;
-                            case 12:
-                                return `<span class="badge badge-pill badge-secondary">Separado</span>`
-                                break;
-                            case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
-                                break;
-                        }
-                    }
-                },
-                {
-                    data: "valor",
-                    render: $.fn.dataTable.render.number('.', '.', 2, '$')
-                },
-                {
-                    data: "inicial",
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                { data: "descripcion" }
-            ],
-            select: {
-                style: 'os',
-                selector: 'td:first-child'
-            },
-            buttons: [
-                { extend: "create", editor: editor },
-                { extend: "edit", editor: editor },
-                { extend: "remove", editor: editor }
-            ],
-            deferRender: true,
-            paging: true,
-            search: {
-                regex: true,
-                caseInsensitive: false,
-            },
-            responsive: {
-                details: {
-                    type: 'column'
-                }
-            },
-            initComplete: function (settings, json) {
-                //tableOrden.column(2).visible(true);
-                $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
-                $('#ModalEventos').modal('hide')
-            },
-            columnDefs: [
-                { "visible": false, "targets": 1 }
-            ],
-            order: [[1, 'asc']],
-            drawCallback: function (settings) {
-                var api = this.api();
-                var rows = api.rows({ page: 'current' }).nodes();
-                var last = null;
-
-                api.column(1, { page: 'current' }).data().each(function (group, i) {
-                    if (last !== group) {
-                        $(rows).eq(i).before(
-                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                                        <td colspan="8">
-                                            <div class="text-center">
-                                                ${group != '0' ? 'MANZANA "' + group + '"' : ''}
-                                            </div>
-                                        </td>
-                                    </tr>`
-                        );
-
-                        last = group;
-                    }
-                });
-            }
-        });
-
-
-
-
-
-
-
-
-
-
-
-
-        /*$('#example').DataTable({
-            dom: "Bfrtip",
-            ajax: "../php/staff.php",
-            order: [[1, 'asc']],
-            columns: [
-                {
-                    data: null,
-                    defaultContent: '',
-                    className: 'select-checkbox',
-                    orderable: false
-                },
-                { data: "first_name" },
-                { data: "last_name" },
-                { data: "position" },
-                { data: "office" },
-                { data: "start_date" },
-                { data: "salary", render: $.fn.dataTable.render.number(',', '.', 0, '$') }
-            ],
-            select: {
-                style: 'os',
-                selector: 'td:first-child'
-            },
-            buttons: [
-                { extend: "create", editor: editor },
-                { extend: "edit", editor: editor },
-                { extend: "remove", editor: editor }
-            ]
-        });*/
-
-
-
-
-
-
-
-
-        SMSj('info', 'Esta funcion no se encuentra aun habilitada')
-    });
     $('#datatable2').on('click', '.to button', function () {
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
@@ -2713,11 +2516,42 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             },
             {
-                className: 'editarp',
-                orderable: true,
-                defaultContent: `<a id="editarFactura" class="edit"><i class="align-middle mr-1 far fa-fw fa-edit"></i></a>`
+                className: 'restablecer',
+                orderable: false,
+                data: null,
+                defaultContent: `<div class="dropdown">
+                <button type="button" class="btn btn-sm btn-outline-dark dropdown-toggle" data-toggle="dropdown">Acción</button>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item estado">Hbilitar & Dbilitar</a>
+                        <a class="dropdown-item eliminar">Eliminar</a>
+                    </div>
+                </div>`
             }
         ]
+    });
+    table2.on('click', '.eliminar', function () {
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
+        var fila = $(this).parents('tr');
+        var data = table2.row(fila).data();
+        var datos = { id: data.id };
+
+        $.ajax({
+            type: 'POST',
+            url: '/links/productos/eliminar',
+            data: datos,
+            async: true,
+            success: function (data) {
+                if (data) {
+                    $('#ModalEventos').modal('hide')
+                    SMSj('error', 'Proyecto eliminado correctamente')
+                    table2.draw()
+                }
+            }
+        })
     });
 };
 /////////////////////////////* ORDEN *////////////////////////////////////////////////////////////
