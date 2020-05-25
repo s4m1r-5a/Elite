@@ -1539,217 +1539,6 @@ if (window.location.pathname == `/links/reportes`) {
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
-    /*minDateFilter = "";
-    maxDateFilter = "";
-    $.fn.dataTableExt.afnFiltering.push(
-        function (oSettings, aData, iDataIndex) {
-            if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[3]).getTime();
-            }
-            if (minDateFilter && !isNaN(minDateFilter)) {
-                if (aData._date < minDateFilter) {
-                    return false;
-                }
-            }
-            if (maxDateFilter && !isNaN(maxDateFilter)) {
-                if (aData._date > maxDateFilter) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    );
-    $(document).ready(function () {
-        $("#Date_search").html("");
-        $('a.toggle-vis').on('click', function (e) {
-            e.preventDefault();
-            // Get the column API object
-            var column = table.column($(this).attr('data-column'));
-            // Toggle the visibility
-            column.visible(!column.visible());
-        });
-
-    });
-    var Color = (val) => {
-        var elemen = $(`#t-${val}`);
-        if (elemen.hasClass('i')) {
-            elemen.css('background-color', 'transparent');
-            elemen.removeClass('.i');
-        } else {
-            elemen.css('background-color', '#FFFFCC');
-            elemen.addClass('i');
-        }
-    }
-    var table = $('#datatable').DataTable({
-        dom: 'Bfrtip',
-        lengthMenu: [
-            [10, 25, 50, -1],
-            ['10 filas', '25 filas', '50 filas', 'Ver todo']
-        ],
-        buttons: ['pageLength',
-            {
-                text: `Ocultar
-                <div class="dropdown-menu" x-placement="bottom-start" >
-                    <a class="toggle-vis dropdown-item" id="t-Pax" data-column="2" onclick='Color(this.innerText)'>Pax</a>
-                    <a class="toggle-vis dropdown-item" id="t-Partida" data-column="4" onclick='Color(this.innerText)'>Partida</a>
-                    <a class="toggle-vis dropdown-item" id="t-Destino" data-column="5" onclick='Color(this.innerText)'>Destino</a>
-                    <a class="toggle-vis dropdown-item" id="t-Vuelo" data-column="6" onclick='Color(this.innerText)'>Vuelo</a>
-                    <a class="toggle-vis dropdown-item" id="t-Retorno" data-column="7" onclick='Color(this.innerText)'>Retorno</a>
-                    <a class="toggle-vis dropdown-item" id="t-Grupo" data-column="8" onclick='Color(this.innerText)'>Grupo</a>
-                    <a class="toggle-vis dropdown-item" id="t-Observaciones" data-column="9" onclick='Color(this.innerText)'>Observaciones</a>
-                    <a class="toggle-vis dropdown-item" id="t-Pasajeros" data-column="10" onclick='Color(this.innerText)'>Pasajeros</a>
-                    <a class="toggle-vis dropdown-item" id="t-Valor" data-column="11" onclick='Color(this.innerText)'>Valor</a>
-                    <a class="toggle-vis dropdown-item" id="t-Creador" data-column="12" onclick='Color(this.innerText)'>Creador</a>
-                    <a class="toggle-vis dropdown-item" id="t-Factura" data-column="13" onclick='Color(this.innerText)'>Factura</a>                                      
-                </div> `,
-                attr: {
-                    'data-toggle': 'dropdown',
-                    'aria-haspopup': true,
-                    'aria-expanded': false,
-                    'text': 'ocultar'
-                },
-                className: 'btn dropdown-toggle'
-            },
-            {
-                extend: 'print',
-                exportOptions: {
-                    columns: ':visible'
-                }
-            },
-            {
-                text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                       </div>`,
-                attr: {
-                    title: 'Fecha',
-                    id: 'Date'
-                },
-                className: 'btn btn-secondary fech'
-            }
-        ],
-        deferRender: true,
-        autoWidth: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: false,
-        },
-        responsive: true,
-        order: [[0, 'desc']],
-        language: {
-            "lengthMenu": "Mostrar 10 filas",
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar : ",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
-        ajax: {
-            method: "POST",
-            url: "/links/productos",
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "id" },
-            { data: "categoria" },
-            { data: "nombre" },
-            {
-                data: "fecha",
-                render: function (data, method, row) {
-                    return moment.utc(data).format('ll') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "porcentage" },
-            { data: "totalmtr2" },
-            { data: "valmtr2" },
-            {
-                data: "valproyect",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "mzs" },
-            { data: "cantidad" },
-            {
-                data: "estado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 7:
-                            return `<span class="badge badge-pill badge-success">Activo</span>`
-                            break;
-                        case 11:
-                            return `<span class="badge badge-pill badge-danger">Agotado</span>`
-                            break;
-                        case 10:
-                            return `<span class="badge badge-pill badge-info">Vendido</span>`
-                            break;
-                    }
-                }
-            }
-        ]
-    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
-*/
-    // Daterangepicker 
-    /*var start = moment().subtract(29, "days").startOf("hour");
-    var end = moment().startOf("hour").add(32, "hour");*/
-    /*$(".fech").daterangepicker({
-        locale: {
-            'format': 'YYYY-MM-DD HH:mm',
-            'separator': ' a ',
-            'applyLabel': 'Aplicar',
-            'cancelLabel': 'Cancelar',
-            'fromLabel': 'De',
-            'toLabel': 'A',
-            'customRangeLabel': 'Personalizado',
-            'weekLabel': 'S',
-            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            'firstDay': 1
-        },
-        opens: "center",
-        timePicker: true,
-        timePicker24Hour: true,
-        timePickerIncrement: 15,
-        opens: "right",
-        alwaysShowCalendars: false,
-        //autoApply: false,
-        startDate: moment().subtract(29, "days"),
-        endDate: moment(),
-        ranges: {
-            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
-            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
-            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
-            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-            'Hoy': [moment().startOf('days'), moment().endOf("days")],
-            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
-            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
-            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
-        }
-    }, function (start, end, label) {
-        maxDateFilter = end;
-        minDateFilter = start;
-        table.draw();
-        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
-    });*/
-
     let recargada = true,
         dataid = 0,
         total = 0,
@@ -2193,6 +1982,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 { data: "mtr2" },
                 {
                     data: "estado",
+                    className: 'c',
                     render: function (data, method, row) {
                         switch (data) {
                             case 1:
@@ -2242,7 +2032,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             columnDefs: [
                 { "visible": false, "targets": 1 }
             ],
-            order: [[1, 'asc']],
+            order: [[2, 'asc']],
             drawCallback: function (settings) {
                 var api = this.api();
                 var rows = api.rows({ page: 'current' }).nodes();
@@ -2308,21 +2098,22 @@ if (window.location == `${window.location.origin}/links/productos`) {
             table.draw();
         });
     }
-    $('#datatable').on('click', 'tr', function () {
-        $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-        var data = $('#datatable').DataTable().row(this).data();
+    $('#datatable').on('click', 'tr .c', function () {
+        var fila = $(this).parents('tr');
+        var data = $('#datatable').DataTable().row(fila).data();
+        //var data = $('#datatable').DataTable().row(this).data();
         if (data.estado === 9) {
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
             $(this).toggleClass('selected');
             $('#proyecto').val();
             $('#idproyecto').val();
             var url = `/links/orden?id=${data.id}`;
             $(location).attr('href', url);
         } else {
-            $('#ModalEventos').modal('hide')
             SMSj('info', 'Producto no disponible')
         }
     });
