@@ -2504,7 +2504,7 @@ if (window.location.pathname == `/links/orden`) {
             fcha = moment(new Date(moment(fch).add(dia, 'days'))).format('YYYY-MM-DD')
         }
         Años(2, 1, 6);
-
+        $('.hoy').text(moment().format('YYYY-MM-DD'))
         var separacion = parseFloat($('#separacion').val());
         var porcentage = parseFloat($('#porcentage').val());
         var precio = parseFloat($('#vrlote').cleanVal());
