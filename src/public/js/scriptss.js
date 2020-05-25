@@ -2505,6 +2505,8 @@ if (window.location.pathname == `/links/orden`) {
         }
         Años(2, 1, 6);
 
+        var separacion = parseFloat($('#separacion').val());
+        var porcentage = parseFloat($('#porcentage').val());
         var precio = parseFloat($('#vrlote').cleanVal());
         var inicial = parseFloat($('#cuotainicial').cleanVal());
         var cuota = parseFloat(precio) - parseFloat(inicial);
@@ -2585,12 +2587,16 @@ if (window.location.pathname == `/links/orden`) {
                                     Dt();
                                 } else {
                                     $('#bonoid').val(data[0].id);
-                                    inicial = inicial - (inicial * data[0].descuento / 100);
+                                    $('#ahorro').val(Moneda(Math.round(precio * data[0].descuento / 100)));
                                     precio = precio - (precio * data[0].descuento / 100);
+                                    inicial = precio * porcentage / 100;
+                                    diferinicial = inicial / $('#diferinicial').val();
                                     oficial30 = Moneda(Math.round(inicial));
                                     oficial70 = Moneda(Math.round(precio - inicial));
                                     $('#dto').val(data[0].descuento + '%');
-                                    $('#ahorro').val(Moneda(Math.round(precio * data[0].descuento / 100)));
+                                    $('#cuotainicial').val(Moneda(Math.round(inicial)))
+                                    $('#p70').val(Moneda(Math.round(precio - inicial)));
+                                    $('.totalote').val(Moneda(Math.round(precio)))
                                 }
                                 bono = data[0].pin;
                             } else {
@@ -2631,7 +2637,7 @@ if (window.location.pathname == `/links/orden`) {
 
             recolecta = {
                 cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - (meses + u)))),
-                cuota30: Moneda(Math.round((diferinicial - 1000000) / u)),
+                cuota30: Moneda(Math.round((diferinicial - separacion) / u)),
                 oficial30,
                 oficial70,
                 N,

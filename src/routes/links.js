@@ -227,7 +227,9 @@ router.post('/pagos', async (req, res) => {
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
     const { id } = req.query;
+    console.log(id)
     const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ? `, id);
+    console.log(proyecto)
     res.render('links/orden', { proyecto, id });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {

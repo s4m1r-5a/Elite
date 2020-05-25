@@ -28,10 +28,13 @@
                                         class="rounded-circle mt-2">
                                 </div>
                                 <div class="col-sm-9 col-xl-12 col-xxl-9 mt-2">
-                                    <strong>Altos de Cañaveral</strong>
-                                    <span class="float-right text-muted text-sm">26-04-2020</span><br>
-                                    <strong>Lote: </strong><span class=""> 30</span><br>
-                                    <strong>Asesor: </strong><span class=""> Ana Milena</span>
+                                    {{#each proyecto}}
+                                    <strong>{{nombre}}</strong>
+                                    <span class="float-right text-muted text-sm hoy">26-04-2020</span><br>
+                                    <strong>Mz: </strong><span class="">{{mz}}</span><br>
+                                    <strong>Lote: </strong><span class="">{{n}}</span><br>
+                                    {{/each}}
+                                    <strong>Asesor: </strong><span class="">{{user.fullname}}</span>
                                 </div>
                             </div>
                         </div>
@@ -339,6 +342,8 @@
                         </div>
                         <div class="card-body">
                             {{#each proyecto}}
+                            <input type="hidden" id="separacion" value="{{separacion}}">
+                            <input type="hidden" id="porcentage" value="{{porcentage}}">
                             <input type="hidden" id="fechs" value="{{fechafin}}">
                             <div class="row">
                                 <div class="col-12 col-lg-6">
@@ -527,6 +532,24 @@
                                                     <input class="form-control-no-border float-right" type="text"
                                                         value="$0" id="ahorro" name="ahorro"
                                                         style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-12">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th class="text-center">
+                                                    <i class="feather-md text-primary" data-feather="dollar-sign"></i>
+                                                    Total Lote
+                                                </th>
+                                                <td class="text-center">
+                                                    <input class="form-control-no-border totalote" type="text"
+                                                        value="{{valor}}"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled
+                                                        required>
                                                 </td>
                                             </tr>
                                         </tbody>
