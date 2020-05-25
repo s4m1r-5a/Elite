@@ -81,9 +81,8 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
         separacion, incentivo, fecha, fechafin, proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
     const produc = {
         categoria, proveedor, nombre: title.toUpperCase(),
-        porcentage, totalmtr2: totalmtr2.length > 3 ? totalmtr2.replace(/\./g, '') : totalmtr2,
-        valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2, valproyect, mzs,
-        cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
+        porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
+        valproyect, mzs, cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
     };
     if (proveedor == '0') {
@@ -100,8 +99,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     }
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
     var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, estado, valor, inicial) VALUES ';
-    console.log(req.body)
-    console.log(n)
+    console.log(produc)
     await n.map((t, i) => {
         console.log(datos.insertId)
         console.log(mz ? mz[i].toUpperCase() : 'no')

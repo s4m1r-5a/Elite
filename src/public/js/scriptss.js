@@ -1793,7 +1793,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
         $('.v').change(function () {
             if ($('#tmt2').val() && $('#vmt2').val()) {
-                var valor = $('#tmt2').cleanVal() * $('#vmt2').cleanVal();
+                var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
                 $('#valproyect').val(valor);
                 $('.valproyect').html('$ ' + Moneda(valor) + '.00');
             }
@@ -1983,8 +1983,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> MT² 
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
-                                    <input type="checkbox" class="float-right ml-1" name="estado" value="9" checked>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                    <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
                                </div>
@@ -2004,8 +2004,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     <i class="feather-md" data-feather="heart"></i> MT² 
                                     <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
-                                    <input type="checkbox" class="float-right ml-1" name="estado" value="9" checked>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                    <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
                                </div>
@@ -2026,7 +2026,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             $('.mt2').each(function (index, element) {
                 metroscuadrados += parseFloat($(this).val())
             });
-            if ($('#tmt2').cleanVal() != metroscuadrados) {
+            if ($('#tmt2').val() != metroscuadrados) {
                 e.preventDefault()
                 $('#ModalEventos').one('shown.bs.modal', function () {
                     $('#ModalEventos').modal('hide')
@@ -2042,7 +2042,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 var inicial = valor * 30 / 100;
                 $(this).siblings('input[name="valor"]').val(valor);
                 $(this).siblings('input[name="inicial"]').val(inicial);
-                $(this).next('span').html('$ ' + Moneda(valor) + '.00');
+                $(this).next('span').text('$ ' + Moneda(valor) + '.00');
             } else {
                 SMSj('info', 'Establezaca primero los valores del proyecto');
                 $(this).val('');
