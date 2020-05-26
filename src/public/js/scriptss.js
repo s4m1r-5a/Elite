@@ -337,15 +337,6 @@ $('#quien').change(function () {
     }
 });
 
-
-
-
-
-
-
-
-
-
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
     //alert($('input[name="movil"]').val());

@@ -151,19 +151,11 @@
 				</div>
 			</li>
 			<li class="nav-item dropdown">
-				<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-toggle="dropdown">
+				<a class="nav-icon" href="#" data-toggle="modal" data-target="#afiliar">
 					<div class="position-relative">
-						<i class="align-middle" data-feather="dollar-sign"></i>
+						<i class="align-middle" data-feather="user-plus"></i>
 					</div>
 				</a>
-
-				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item"><i class="align-middle mr-1" data-feather="dollar-sign"></i><span
-							id="saldoactual">{{user.saldoactual}}</span></a>
-					<div class="dropdown-divider"></div>
-					<a class="dropdown-item" href="/links/recarga">Agregar saldo</a>
-					<a class="dropdown-item" data-toggle="modal" data-target="#afiliar">Afiliar persona</a>
-				</div>
 			</li>
 			<li class="nav-item dropdown">
 				<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-toggle="dropdown">
@@ -197,7 +189,7 @@
 		<div class="modal-content">
 			<form action="/links/afiliado" method="POST">
 				<div class="modal-header">
-					<h5 class="modal-title">Afiliar persona a RedFlix</h5>
+					<h5 class="modal-title">Afiliar persona a Grupo Elite</h5>
 					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
 						<span aria-hidden="true">&times;</span>
 					</button>
@@ -209,10 +201,6 @@
 					<div class="modal-body m-3">
 						<input type="text" name="movil" class="form-control form-control-lg" data-mask="000-000-0000"
 							placeholder="Ingrese numero movil de afiliado" style="text-align:center" />
-					</div>
-					<div class="custom-control custom-switch">
-						<input type="checkbox" class="custom-control-input" id="customSwitch1" name="cajero">
-						<label class="custom-control-label" for="customSwitch1">Cajero</label>
 					</div>
 				</div>
 				<div class="modal-footer">

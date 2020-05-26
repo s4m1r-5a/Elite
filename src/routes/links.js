@@ -142,7 +142,6 @@ router.get('/social', isLoggedIn, (req, res) => {
     res.render('links/social');
 });
 
-
 router.post('/add', async (req, res) => {
     const { title, url, description } = req.body;
     const newLink = {
@@ -291,6 +290,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     await ncuota.map((t, i) => {
         cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
     });
+    console.log(cuotas.slice(0, -1))
     await pool.query(cuotas.slice(0, -1));
 
     req.flash('success', 'Separación realizada exitosamente');
@@ -385,15 +385,15 @@ router.post('/tabla/:id', async (req, res) => {
             };
 
             if (d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-                d.cuota = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+                d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`
             } else if (d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
-                d.cuota = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+                d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`
             };
             if (d.fecha2) {
                 if (d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`
                 } else if (d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
-                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra}" type="hidden" name="cuota">`
+                    d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`
                 };
             };
             dataSet.data.push(d);
