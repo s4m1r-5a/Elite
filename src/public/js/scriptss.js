@@ -1820,9 +1820,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($('#vmt2').val()) {
                 var valor = $(this).val() * $('#vmt2').cleanVal();
                 var inicial = valor * 30 / 100;
+                var sum = 0;
                 $(this).siblings('input[name="valor"]').val(valor);
                 $(this).siblings('input[name="inicial"]').val(inicial);
                 $(this).next('span').text('$ ' + Moneda(valor) + '.00');
+                $('.mt2').each(function (index, element) {
+                    if ($(this).val()) {
+                        sum += parseFloat($(this).val())
+                    }
+                });
+                $('#calculom').text(sum)
             } else {
                 SMSj('info', 'Establezaca primero los valores del proyecto');
                 $(this).val('');
