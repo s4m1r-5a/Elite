@@ -1555,10 +1555,15 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     );
     $(document).ready(function () {
-        $('.proveedor').change(function () {
+        $('.proveedor, .socio').change(function () {
             if ($(this).val() === '0') {
                 $('#datosproveedor').show('slow');
                 $("#datosproveedor input, #datosproveedor select").prop('disabled', false)
+                if ($(this).hasClass("socio")) {
+                    $('#titu').html('DATOS SOCIO COMERCIAL');
+                } else {
+                    $('#titu').html('DATOS PROVEEDOR');
+                }
             } else {
                 $('#datosproveedor').hide('slow');
                 $('#datosproveedor input').val('');
@@ -1641,11 +1646,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                                    <div class="custom-control custom-switch float-right">
-                                        <input type="checkbox" class="custom-control-input estado" id="estado${i}">
-                                        <label class="custom-control-label" for="estado${i}">.</label>
-                                    </div>
                                </div>
+                            </th>  
+                            <th>                                
+                                <div class="custom-control custom-switch float-right">
+                                    <input type="checkbox" class="custom-control-input estado" id="estado${i}">
+                                    <label class="custom-control-label" for="estado${i}">.</label>
+                                </div>
                             </th>  
                         </tr>
                     </thead>
@@ -1666,11 +1673,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 <div class="text-left">
                                     LOTES 
                                     <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                                    <div class="custom-control custom-switch float-right">
-                                        <input type="checkbox" class="custom-control-input estado" id="estado${i}">
-                                        <label class="custom-control-label" for="estado${i}">.</label>
-                                    </div>
                                </div>
+                            </th>  
+                            <th>                                
+                                <div class="custom-control custom-switch float-right">
+                                    <input type="checkbox" class="custom-control-input estado" id="estado${i}">
+                                    <label class="custom-control-label" for="estado${i}">.</label>
+                                </div>
                             </th>  
                         </tr>
                     </thead>
@@ -1736,6 +1745,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     <input type="hidden" name="inicial" value="">
                                </div>
                             </th>  
+                            <th>
+                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
+                            </th>  
                         </tr>
                     `);
                     i++;
@@ -1761,14 +1774,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             </th>
                             <th>
                                 <div class="text-left">
-                                    <i class="feather-md" data-feather="heart"></i> MT² 
-                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                MT² <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
                                     <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
                                     <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
                                </div>
                             </th>  
+                            <th>
+                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
+                            </th>
                         </tr>
                     `);
                 } else {
@@ -1789,6 +1805,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                     <input type="hidden" name="valor">
                                     <input type="hidden" name="inicial" value="">
                                </div>
+                            </th>  
+                            <th>
+                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
                             </th>  
                         </tr>
                     `);
@@ -2030,7 +2050,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             columnDefs: [
                 { "visible": false, "targets": 1 }
             ],
-            order: [[2, 'asc']],
+            order: [[1, 'asc']],
             drawCallback: function (settings) {
                 var api = this.api();
                 var rows = api.rows({ page: 'current' }).nodes();

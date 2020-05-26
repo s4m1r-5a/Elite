@@ -152,6 +152,21 @@
                                         </tr>
                                         <tr>
                                             <th>
+                                                <i class="feather-md" data-feather="users"></i>
+                                                SOCIO C
+                                            </th>
+                                            <td>
+                                                <select class="form-control-no-border edi socio" name="socio"
+                                                    style="padding: 1px; width: 100%;" required>
+                                                    {{#each proveedores}}
+                                                    <option value="{{id}}">{{empresa}}</option>
+                                                    {{/each}}
+                                                    <option value="0">OTRO</option>
+                                                </select>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
                                                 <br>
                                                 <div class="text-center">
                                                     <h6>TOTAL MTR²</h6>
@@ -316,7 +331,7 @@
 
                         <div class="row datos mt-3" id="datosproveedor" style="display: none;">
                             <div class="col-12 text-center">
-                                <h2>DATOS PROVEEDOR</h2>
+                                <h2 id="titu"></h2>
                             </div>
                             <div class="col-12 col-lg-6">
                                 <table class="table table-sm my-2">
@@ -324,8 +339,31 @@
                                         <tr>
                                             <th>
                                                 <i class="feather-md" data-feather="user"></i>
+                                                REPRESENTANTE
+                                            </th>
+                                            <td>
+                                                <input class="form-control-no-border edi text-uppercase nombres u"
+                                                    type="text" placeholder="Nombre completo" autocomplete="off"
+                                                    style="padding: 1px; width: 100%;" name="nombres" disabled required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="credit-card"></i>
+                                                DOCUMENTO
+                                            </th>
+                                            <td>
+                                                <input class="form-control-no-border edi documento u" type="text"
+                                                    placeholder="DOCUMENTO DE IDENTIDAD" autocomplete="off"
+                                                    style="padding: 1px; width: 100%;" name="documento" disabled
+                                                    required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="user"></i>
                                                 <input class="form-control-no-border edi text-center text-uppercase"
-                                                    type="text" placeholder="NOMBRE DEL PROVEEDOR" autocomplete="off"
+                                                    type="text" placeholder="EMPRESA" autocomplete="off"
                                                     style="padding: 1px; width: 80%;" name="empresa" disabled required>
                                             </th>
                                             <td>
@@ -410,6 +448,27 @@
                                         <tr>
                                             <th>
                                                 <i class="feather-md" data-feather="map-pin"></i>
+                                                M. MERCANTIL
+                                            </th>
+                                            <td>
+                                                <input type="text" name="mercantil" class="form-control-no-border edi"
+                                                    placeholder="MATRICULA M" style="padding: 1px; width: 100%;"
+                                                    disabled required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                F. MERCANTIL
+                                            </th>
+                                            <td>
+                                                <input type="date" name="fechaM" class="form-control-no-border edi"
+                                                    style="padding: 1px; width: 100%;" disabled required>
+                                            </td>
+                                        </tr>
+                                        <tr>
+                                            <th>
+                                                <i class="feather-md" data-feather="map-pin"></i>
                                                 EMAIL
                                             </th>
                                             <td>
@@ -455,6 +514,12 @@
                                                     required>
                                             </td>
                                         </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                            <div class="col-12 col-lg-6">
+                                <table class="table table-sm my-2">
+                                    <tbody>
                                     </tbody>
                                 </table>
                             </div>

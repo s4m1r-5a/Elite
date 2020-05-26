@@ -78,15 +78,19 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
-        separacion, incentivo, fecha, fechafin, proveedor, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
+        separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
+        cta, numero, mail, direccion, tel, web, descripcion } = req.body;
     const produc = {
-        categoria, proveedor, nombre: title.toUpperCase(),
+        categoria, proveedor, socio, nombre: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
         valproyect, mzs, cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
     };
-    if (proveedor == '0') {
+    if (proveedor == '0' || socio == '0') {
         const proveedr = {
+            representante: null,
+            matricula: mercantil,
+            fecha: fechaM,
             empresa: empresa.toUpperCase(),
             nit, banco: banco.toUpperCase(),
             cta, numero,
@@ -94,22 +98,35 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
             direccion, tel,
             web: web.toLowerCase()
         }
+        const newclient = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento);
+        if (newclient.length > 0) {
+            proveedr.representante = newclient[0].id
+        } else {
+            const cliente = {
+                nombre: nombres.toUpperCase(),
+                documento,
+                movil: tel,
+                email: mail,
+                direccion
+            }
+            const newcliente = await pool.query('INSERT INTO clientes SET ? ', cliente);
+            proveedr.representante = newcliente.insertId
+        }
+
         const newprovee = await pool.query('INSERT INTO proveedores SET ? ', proveedr);
-        produc.proveedor = newprovee.insertId
+        if (proveedor == '0') {
+            produc.proveedor = newprovee.insertId
+        } else if (socio == '0') {
+            produc.socio = newprovee.insertId
+        }
     }
+
     const datos = await pool.query('INSERT INTO productos SET ? ', produc);
-    var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, estado, valor, inicial) VALUES ';
-    console.log(produc)
+    var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, valor, inicial) VALUES ';
     await n.map((t, i) => {
-        console.log(datos.insertId)
-        console.log(mz ? mz[i].toUpperCase() : 'no')
-        console.log(t)
-        console.log(mtr2[i])
-        console.log(estado[i] === undefined ? 15 : estado[i])
-        console.log(valor[i])
-        console.log(inicial[i])
-        producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
+        producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
     });
+    console.log(producdata)
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
     res.redirect('/links/productos');
