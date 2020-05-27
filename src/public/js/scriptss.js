@@ -684,6 +684,13 @@ $(document).ready(function () {
     });
 }*/
 //////////////////////////* TABLERO *///////////////////////////////////////
+if (window.location.pathname == `/`) {
+    $(document).ready(function () {
+        var players = new Playerjs({ id: "player", file: 'video/ProyectoGrupoElite.MP4', player: 2 });
+        players.api("play")
+    });
+}
+//////////////////////////* TABLERO *///////////////////////////////////////
 if (window.location.pathname == `/tablero`) {
     new Chart(document.getElementById("chartjs-dashboard-pie"), {})
     //new Chart(document.getElementById("chartjs-line"), {})
