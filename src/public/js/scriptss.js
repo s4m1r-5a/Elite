@@ -1561,8 +1561,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 $("#datosproveedor input, #datosproveedor select").prop('disabled', false)
                 if ($(this).hasClass("socio")) {
                     $('#titu').html('DATOS SOCIO COMERCIAL');
+                    $(`.proveedor select option[value='1']`).attr("selected", true);
                 } else {
                     $('#titu').html('DATOS PROVEEDOR');
+                    $(`.socio select option[value='1']`).attr("selected", true);
                 }
             } else {
                 $('#datosproveedor').hide('slow');
