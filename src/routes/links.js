@@ -754,69 +754,35 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', async (req, res) => {
     const result = await rango(req.user.id);
-    const sald = await saldo(26, result, req.user.id);
     const { movil, cajero } = req.body, pin = ID(13);
 
-    if (sald !== 'NO' || cajero !== undefined) {
-
-        const usua = await usuario(req.user.id);
-        const nuevoPin = {
-            id: pin,
-            categoria: 1,
-            usuario: req.user.id
-        }
-        var cel = movil.replace(/-/g, "");
-        if (cajero !== undefined) {
-            nuevoPin.categoria = 2
-        } else {
-            const venta = {
-                fechadecompra: new Date(),
-                pin,
-                vendedor: usua,
-                cajero: req.user.fullname,
-                idcajero: req.user.id,
-                product: 26,
-                rango: result,
-                movildecompra: cel
-            }
-            await pool.query('INSERT INTO ventas SET ? ', venta);
-        }
-        await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-
-        var options = {
-            method: 'POST',
-            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-            form: {
-                "phone": '57' + movil,
-                "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_RedFlix_* _tu_ *ID* _es_ *_${pin}_* \n
-                *_Registrarte_* _en:_\n*https://redflixx.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://redflixx.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3012673944* \n\n*Bienvenido a* *_RedFlix..._* _la mejor empresa de entretenimiento y contenido digital del país_`
-            }
-        };
-        var dat = {
-            from: 'whatsapp:+14155238886',
-            body: `_Se creo un nuevo registo con el movil_ *${pin}* \n\n*_RedFlix_*`,
-            to: 'whatsapp:+573007753983'
-        }
-        ////// mensajes Twilio ///////////
-        client.messages
-            .create(dat)
-            .then(message => console.log(message.sid));
-
-        ////////////////////* chat-api *////////////////////////////
-        request(options, function (error, response, body) {
-            if (error) return console.error('Failed: %s', error.message);
-            console.log('Success: ', body);
-        });
-
-        sms('57' + movil, `Felicidades ya eres parte de nuestro equipo RedFlix ingresa a https://redflixx.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
-        req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
-        res.redirect('/tablero');
-    } else if (sald === 'NO') {
-
-        req.flash('error', 'Afiliacion no realizada, saldo insuficiente');
-        res.redirect('/links/recarga');
-
+    const nuevoPin = {
+        id: pin,
+        categoria: 1,
+        usuario: req.user.id
     }
+    var cel = movil.replace(/-/g, "");
+    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '57' + movil,
+            "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
+                *_Registrarte_* _en:_\n*https://grupoelite.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://grupoelite.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+        }
+    };
+
+    ////////////////////* chat-api *////////////////////////////
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
+
+    sms('57' + movil, `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelite.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
+    req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
+    res.redirect('/tablero');
 });
 router.post('/id', async (req, res) => {
     const { pin } = req.body;

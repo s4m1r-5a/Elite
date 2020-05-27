@@ -8,7 +8,7 @@
 							<i class="align-middle" data-feather="box"></i>
 							<h1 class="h2">Empieza ahora</h1>
 							<p class="lead">
-								Registrate y se parte de nuestro equipo RedFlix.
+								Registrate y se parte de nuestro equipo ELITE.
 							</p>
 						</a>
 					</div>
@@ -33,9 +33,14 @@
 												</div>
 												<div class="form-group">
 													<label>Id de registro</label>
-													<input class="form-control form-control-lg" id="pin" type="text"
-														name="pin" placeholder="Ingrese pin de registro" required />
+													<input class="form-control form-control-md text-center" id="pin"
+														type="text" name="pin" placeholder="Ingrese pin de registro"
+														value="{{id}}" autocomplete="off" required />
 												</div>
+											</div>
+											<div class="text-center mt-3">
+												<samp>..! Ya tienes cuenta ¡.. </samp>
+												<a href="/signin">Inicia_Sesion</a>
 											</div>
 										</div>
 										<div id="arrows-primary-step-2" class="">
@@ -57,18 +62,20 @@
 												<div class="form-group">
 													<label>Documento</label>
 													<input class="form-control form-control-lg" type="text"
-														name="document" placeholder="Ingrese numero de documento" required />
+														name="document" placeholder="Ingrese numero de documento"
+														required />
 												</div>
 												<div class="form-group">
 													<label>Nombre</label>
 													<input class="form-control form-control-lg" type="text"
-														name="fullname" placeholder="Ingrese su nombre completo" required />
+														name="fullname" placeholder="Ingrese su nombre completo"
+														required />
 												</div>
 												<div class="form-group">
 													<label>Movil</label>
 													<input type="text" name="movil" class="form-control form-control-lg"
-														data-mask="000-000-0000"
-														placeholder="Ingrese su numero movil" required />
+														data-mask="000-000-0000" placeholder="Ingrese su numero movil"
+														required />
 												</div>
 												<div class="form-group">
 													<label>Email</label>
