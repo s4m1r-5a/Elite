@@ -109,22 +109,21 @@ passport.use('local.signup', new LocalStrategy({
   passwordField: 'password',
   passReqToCallback: true
 }, async (req, username, password, done) => {
-  const { document, fullname, pin, movil } = req.body;
+  const { fullname, pin, movil } = req.body;
   let newUser = {
     id: regiId(),
-    document,
     fullname,
     pin,
     movil,
     username,
     password,
-    imagen: '/img/avatars/avatar.jpg'
+    imagen: '/img/avatars/avatar.svg'
   };
   newUser.password = await helpers.encryptPassword(password);
   // Saving in the Database
-  //console.log(newUser);
-  const result = await pool.query('INSERT INTO users SET ? ', newUser);
-  //console.log(result);
+  console.log(newUser);
+  const result = await pool.query('INSERT INTO users SET ?', newUser);
+  console.log(result);
   //newUser.id = result.insertId;
   return done(null, newUser);
 }));
@@ -134,7 +133,8 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-  const rows = await pool.query('SELECT * FROM users WHERE id = ?', id);
+  const rows = await pool.query(`SELECT u.id, u.pin, u.fullname, u.username, u.imagen, u.admin, r.rango 
+  FROM users u INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ?`, id);
   done(null, rows[0]);
 });
 

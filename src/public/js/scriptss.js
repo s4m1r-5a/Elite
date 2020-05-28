@@ -84,6 +84,17 @@ function SMSj(tipo, mensaje) {
 };
 $(document).ready(function () {
     moment.locale('es');
+    if ($('#nivel').html() == 'Inversionista') {
+        $('#nivel').addClass('badge-warning')
+    } else if ($('#nivel').html() == 'Director') {
+        $('#nivel').addClass('badge-info')
+    } else if ($('#nivel').html() == 'Gerente') {
+        $('#nivel').addClass('badge-dark')
+    } else if ($('#nivel').html() == 'Vicepresidente') {
+        $('#nivel').addClass('badge-tertiary')
+    } else {
+        $('#nivel').addClass('badge-success')
+    }
     $('#disable').on('click', function () {
         SMSj('error', 'Aun no se encuentra habilitada esta opcion, trabajamos en ello. RedFlix...')
     })
@@ -2478,7 +2489,6 @@ if (window.location.pathname == `/links/orden`) {
                 data.push(t3)
                 q++
             }
-
             data.filter((r) => {
                 return r.getMonth() === 5 || r.getMonth() === 11;
             }).map((r) => {
@@ -2535,20 +2545,21 @@ if (window.location.pathname == `/links/orden`) {
         var separacion = parseFloat($('#separacion').val());
         var porcentage = parseFloat($('#porcentage').val());
         var precio = parseFloat($('#vrlote').cleanVal());
+        $('.totalote').val(Moneda(precio))
         var inicial = parseFloat($('#cuotainicial').cleanVal());
         var cuota = parseFloat(precio) - parseFloat(inicial);
-        var diferinicial = inicial / $('#diferinicial').val();
         var cuotaextrao, cut = 0, anos = $('#ncuotas').val() / 6;
-        var oficial70 = '', oficial30 = '', bono = '', meses = 0;
+        var oficial70 = '', oficial30 = '', bono = '', meses = 0, cuota30 = 0, cuota70 = 0;
         $('#p70').val(Moneda(cuota));
         function Dt() {
             bono = '';
             $('#dto').val('0%');
             $('#ahorro').val('$0');
-            oficial70 = '$' + $('#p70').val();
-            oficial30 = '$' + $('#cuotainicial').val();
             precio = parseFloat($('#vrlote').cleanVal());
-            inicial = parseFloat($('#cuotainicial').cleanVal());
+            inicial = precio * porcentage / 100
+            oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
+            oficial30 = '$' + Moneda(inicial);
+            separacion = parseFloat($('#separacion').val());
         };
         $('#AgregarCliente').click(function () {
             $('.cliente2').show('slow');
@@ -2558,21 +2569,9 @@ if (window.location.pathname == `/links/orden`) {
             $('.cliente2 input').val('');
         });
         $('.edi').on('change', function () {
-            var i, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
-                mesesextra = '', D = parseFloat($('#dia').val());
-            meses = 0;
-            Años(u, D, N)
-            if ($('#ahorro').val() === '$0') {
-                oficial70 = '$' + $('#p70').val();
-                oficial30 = '$' + $('#cuotainicial').val();
-            }
-            if (u > 2) {
-                Dt();
-                $('#bono').attr('disabled', true);
-                SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
-            } else {
-                $('#bono').attr('disabled', false);
-            }
+            var abono = parseFloat($('#abono').cleanVal()) || 0, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
+                mesesextra = '', D = parseFloat($('#dia').val()), meses = 0;
+            Años(u + 1, D, N)
             if ($(this).hasClass("movil")) {
                 var card = $(this).parents('div.row').attr("id")
                 $.ajax({
@@ -2617,7 +2616,6 @@ if (window.location.pathname == `/links/orden`) {
                                     $('#ahorro').val(Moneda(Math.round(precio * data[0].descuento / 100)));
                                     precio = precio - (precio * data[0].descuento / 100);
                                     inicial = precio * porcentage / 100;
-                                    diferinicial = inicial / $('#diferinicial').val();
                                     oficial30 = Moneda(Math.round(inicial));
                                     oficial70 = Moneda(Math.round(precio - inicial));
                                     $('#dto').val(data[0].descuento + '%');
@@ -2638,33 +2636,65 @@ if (window.location.pathname == `/links/orden`) {
                     SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
                 }
             }
-            cuota = Math.round(precio - inicial);
-            //anos = $('#ncuotas').val() / 12
-            if ($('#cuotaestrao').val() && $('#Emeses').val()) {
-                cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
-                $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
-                cuota = cuota - cut;
-
-                if ($('#Emeses').val() == 1) {
-                    mesesextra = 6
-                    meses = jun
-
-                } else if ($('#Emeses').val() == 2) {
-                    mesesextra = 12
-                    meses = dic
-
-                } else {
-                    mesesextra = 2
-                    meses = jun + dic
-
-                };
+            if ($('#ahorro').val() === '$0') {
+                Dt()
+            }
+            if (u > 2) {
+                Dt();
+                $('#bono').attr('disabled', true);
+                SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
             } else {
-                //dddsd
+                $('#bono').attr('disabled', false);
+            }
+            if (abono !== 0) {
+                separacion = abono;
+            } else {
+                separacion = parseFloat($('#separacion').val());
+            }
+            var Estra = () => {
+                if ($('#cuotaestrao').val() && $('#Emeses').val()) {
+                    cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
+                    $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
+                    cuota = cuota - cut;
+
+                    if ($('#Emeses').val() == 1) {
+                        mesesextra = 6
+                        meses = jun
+
+                    } else if ($('#Emeses').val() == 2) {
+                        mesesextra = 12
+                        meses = dic
+
+                    } else {
+                        mesesextra = 2
+                        meses = jun + dic
+
+                    };
+                }
+            }
+
+            if (separacion >= inicial) {
+                Años(0, D, N)
+                resl = separacion - inicial;
+                cuota = Math.round(precio - resl - inicial);
+                Estra()
+                cuota30 = 0;
+                cuota70 = Moneda(Math.round(cuota / (N - meses)));
+                $(`#diferinicial option[value='0']`).attr("selected", true);
+                $("#diferinicial").prop('disabled', true)
+
+            } else {
+                cuota = Math.round(precio - inicial);
+                Estra()
+                cuota30 = Moneda(Math.round((inicial - separacion) / u))
+                cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
+                $("#diferinicial").prop('disabled', false)
             }
 
             recolecta = {
-                cuota70: Moneda(Math.round(cuota / ($('#ncuotas').val() - (meses + u)))),
-                cuota30: Moneda(Math.round((diferinicial - separacion) / u)),
+                separacion: Moneda(separacion),
+                cuota70,
+                cuota30,
                 oficial30,
                 oficial70,
                 N,

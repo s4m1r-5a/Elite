@@ -252,7 +252,8 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const { nombres, documento, lugarexpedicion, fechaexpedicion,
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client,
-        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, estado, ncuota, tipo } = req.body;
+        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota,
+        estado, ncuota, tipo, tipobsevacion, obsevacion } = req.body;
     function Cliente(N) {
         cliente = {
             nombre: nombres[N],
@@ -293,7 +294,8 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         extraordinariameses,
         cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : '',
         cupon: cupon ? cupon : 1,
-        inicialdiferida,
+        inicialdiferida: inicialdiferida || null,
+        tipobsevacion, obsevacion,
         ahorro: ahorro ? ahorro.replace(/\./g, '') : ''
     };
     console.log(req.body)
@@ -343,7 +345,7 @@ router.post('/tabla/:id', async (req, res) => {
     if (req.params.id == 1) {
         var data = new Array();
         dataSet.data = data
-        const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra } = req.body;
+        const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra, separacion } = req.body;
         var v = Math.round((parseFloat(N) - parseFloat(u)) / 2);
         var p = (parseFloat(N) - parseFloat(u)) / 2
         var j = Math.round(parseFloat(u) / 2);
@@ -353,7 +355,7 @@ router.post('/tabla/:id', async (req, res) => {
             n: `1 <input value="1" type="hidden" name="ncuota">`,
             fecha: fcha2,
             oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>`,
-            cuota: '1.000.000 <input value="1000000" type="hidden" name="cuota">',
+            cuota: `${separacion} <input value="${separacion.replace(/\./g, '')}" type="hidden" name="cuota">`,
             stado: `<span class="badge badge-primary">Pendiente</span>
                     <input value="3" type="hidden" name="estado">
                     <input value="SEPARACION" type="hidden" name="tipo">`,
@@ -363,11 +365,12 @@ router.post('/tabla/:id', async (req, res) => {
             stado2: ''
         }
         dataSet.data.push(l);
-
+        console.log(N / 2)
         for (i = 1; i <= v; i++) {
             y = o < 1 ? j + i : u > 3 ? j + i + 2 : i + j + 1;
-
-            if (i <= j) {
+            console.log(cuota70)
+            if (i <= j && cuota30 != 0) {
+                console.log(cuota30)
                 x = {
                     n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                     fecha: moment(fcha).add(i, 'month'),
@@ -383,7 +386,11 @@ router.post('/tabla/:id', async (req, res) => {
                                           <input value="3" type="hidden" name="estado">`
                 }
                 dataSet.data.push(x);
-            };
+            } else if (cuota30 == 0) {
+                v = N / 2;
+                p = v;
+                y = i;
+            }
 
             d = {
                 n: i + `<input value="${i}" type="hidden" name="ncuota">`,
