@@ -488,6 +488,15 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     }
 
 });
+router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
+    console.log(req.params)
+    const { id } = req.params
+    sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id WHERE p.id = ?`
+
+    const orden = await pool.query(sql, id);
+    res.render('links/ordendeseparacion', { orden });
+})
 ////////////////////////////* SOAT *////////////////////////////////////////
 router.post('/soat', isLoggedIn, (req, res) => {
     var options = {

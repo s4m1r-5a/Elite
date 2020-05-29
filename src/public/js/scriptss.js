@@ -1220,7 +1220,7 @@ if (window.location.pathname == `/links/reportes`) {
             return true;
         }
     );
-    $('#datatable2').on('click', '.te', function () {
+    /*$('#datatable2').on('click', '.te', function () {
         if ($('#usuarioadmin').val() == 1) {
             var fila = $(this).parents('tr');
             if ($(fila).hasClass('selected')) {
@@ -1259,6 +1259,22 @@ if (window.location.pathname == `/links/reportes`) {
                 });
             }
         })
+    });*/
+    $('#datatable2').on('click', 'tr', function () {
+        var data = $('#datatable2').DataTable().row(this).data();
+        $(this).toggleClass('selected');
+        /*var facturas = $('#datatable2').DataTable().rows('.selected').data().length;
+        $('.facturas').html(facturas);
+        if ($(`span.${data.id}`).length) {
+            $("span").remove(`.${data.id}`);
+            total -= parseFloat(data.valor.replace(/(?!\w|\s).| /g, ""));
+        } else {
+            $('#facturas').append(factura);
+            total += parseFloat(data.valor.replace(/(?!\w|\s).| /g, ""));
+        }
+        $('span.total').mask('000,000,000', { reverse: true });
+        $('span.total').text(Moneda(total));*/
+
     });
     //////////////////////* Table2 */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
@@ -1545,6 +1561,53 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
+
+
+
+
+
+
+
+
+
+
+
+    $(document).ready(function () {
+        var g = $('#fechaFactura').text()
+        $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'))
+        $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())))
+
+        $('.relacion').text(`Prestacion de servicio de transporte privado de pasajeros, correspondiente a ${$('#nservicios').val()} servicio(s) prestado(s). Relación de reservas anexada a esta factura`)
+
+        //$('#totalLetras').text(`POR CONCEPTO DE ${$('#nservicios').val()} SERVICIOS PRESTADOS CON UN VALOR EXPRESADO EN LETRAS DE ${NumeroALetras($('#vLetras').val())}`)
+        $('#totalLetras').text(`${NumeroALetras($('#vLetras').val())} MCT********`)
+        var table2 = $('#tablaFactura').DataTable({
+            paging: false,
+            ordering: false,
+            info: false,
+            searching: false,
+            //deferRender: true,
+            autoWidth: true,
+            responsive: false,
+            columnDefs: [{
+                render: function (data, type, row) {
+                    return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
+                },
+                targets: 1
+            },
+            {
+                render: function (data, type, row) {
+                    return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
+                },
+                targets: 10
+            },
+            { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }
+            ]
+        });
+        //window.print();
+        //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
+        window.addEventListener("load", window.print());
+    })
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {

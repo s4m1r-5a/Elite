@@ -1,0 +1,327 @@
+<input type="hidden" id="imgQr" value="{{imag.i}}">
+{{#each orden}}
+<main id="imprimir" class="content">
+    <div class="card">
+        <!--<img src="/img/avatars/avatar.svg" class="card-img" alt="...">
+        <div class="card-img-overlay">
+            <h5 class="card-title">ORDEN DE SEPARACIÓN {{lote}}</h5>
+        </div>-->
+        <div class="text-right">
+            <h3 class="card-title">ORDEN DE SEPARACIÓN {{lote}}</h3>
+            <small class="text-muted">Asesor </small><span class="badge badge-dark text-md-center">{{fullname}}</span>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-sm-5">
+            <div class="card border-primary mb-3">
+                <div class="row no-gutters">
+                    <div class="col-md-3">
+                        <img src="/img/avatars/avatar.svg" class="card-img" alt="...">
+                    </div>
+                    <div class="col-md-9">
+                        <div class="card-body text-primary h4">
+                            <h3 class="card-title text-right">8668598-9 Nit</h3>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="phone-call"></i> <span
+                                    class="align-middle card-text">+57 301-515-2306</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="mail"></i> <span
+                                    class="align-middle card-text">info@grupoelitered.com.co</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="globe"></i> <span
+                                    class="align-middle card-text">www.grupoelitered.com.co</span>
+                            </div>
+                            <p class="card-text"><small class="text-muted">Barrio la Granja mz L lote 17 esquina</small>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-sm-7">
+            <div class="card border-primary h4 mb-3">
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        <div class="card-body text-primary">
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="user"></i>
+                                <span class="align-middle card-text text-warning">{{nombre}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="heart"></i> <span
+                                    class="align-middle card-text">{{estadocivil}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="phone-call"></i>
+                                <span class="align-middle card-text">{{movil}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="mail"></i>
+                                <span class="align-middle card-text">{{email}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="map"></i>
+                                <span class="align-middle text-muted">{{direccion}}</span>
+                            </div>
+                            <!--<p class="card-text"><small class="text-muted">{{direccion}}</small></p>-->
+                        </div>
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body text-primary">
+                            <h3 class="card-title text-right" id="fechaOrden">2020/02/04</h3>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="credit-card"></i>
+                                <span class="align-middle card-text">CC:</span>
+                                <span class="align-middle text-muted">{{documento}}</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="calendar"></i>
+                                <span class="align-middle card-text">Fec.Nac:</span>
+                                <span class="align-middle text-muted">2020/02/04</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="calendar"></i>
+                                <span class="align-middle card-text">Expedida:</span>
+                                <span class="align-middle text-muted">2020/02/04</span>
+                            </div>
+                            <div class="mb-2">
+                                <i class="align-middle mr-2" data-feather="map-pin"></i>
+                                <span class="align-middle card-text">Expedida en:</span>
+                                <span class="align-middle text-muted">{{lugarexpedicion}}</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="card">
+        <div class="row" id="cliente1">
+            <div class="col-6">
+                <table class="table table-sm my-2">
+                    <tbody>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="user"></i> Proyecto
+                            </th>
+                            <td>
+                                <span class="text-md-center">{{categoria}}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="credit-card"></i>
+                                Documento
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi documento u" type="text"
+                                    placeholder="Documento de identidad" autocomplete="off"
+                                    style="padding: 1px; width: 100%;" name="documento" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="map-pin"></i>
+                                Expedida
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi lugarexpedicion u" type="text"
+                                    name="lugarexpedicion" placeholder="Lugar de expedición del documento"
+                                    autocomplete="off" style="padding: 1px; width: 100%;" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="calendar"></i> F.
+                                Expedición
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi fechas espedida u" type="text"
+                                    placeholder="Fecha de expedición" autocomplete="off"
+                                    style="padding: 1px; width: 100%;" name="fechaexpedicion" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="calendar"></i> F.
+                                Nacimiento
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi fechas nacido u" type="text"
+                                    placeholder="Fecha de nacimiento" autocomplete="off"
+                                    style="padding: 1px; width: 100%;" name="fechanacimiento" required>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="col-6">
+                <table class="table table-sm my-2">
+                    <tbody>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="heart"></i> Mz
+                                <span class="badge badge-dark text-md-center ml-2">{{mz}}</span>
+                            </th>
+                            <td>
+                                <i class="feather-md" data-feather="heart"></i> Lote
+                                <span class="badge badge-dark text-md-center ml-2">{{n}}</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="mail"></i>
+                                Email
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi text-lowercase email u" type="email"
+                                    placeholder="Correo electrónico" autocomplete="off"
+                                    style="padding: 1px; width: 100%;" name="email" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="phone-call"></i>
+                                Móvil
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi movil u" type="tel" data-mask="000-000-0000"
+                                    placeholder="Numero celular" autocomplete="off" style="padding: 1px; width: 100%;"
+                                    name="movil" id="movil" required>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <i class="feather-md" data-feather="map"></i>
+                                Dirección
+                            </th>
+                            <td>
+                                <input class="form-control-no-border edi direccion u" type="text"
+                                    placeholder="Dirección de residencia" autocomplete="off"
+                                    style="padding: 1px; width: 100%;" name="direccion" required>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <div class="card text-left">
+        <div class="card-body h3">
+            <h2 class="card-title"></h2>
+            <p class="card-text">Datos de Ruta</p>
+            <table id="tableRuta" class="table table-sm table-hover display h3" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Partida</th>
+                        <th>Destino</th>
+                        <th>Retorno</th>
+                        <th id="vuelo" style="display: none;">Vuelo</th>
+                    </tr>
+                </thead>
+                <tbody class="text-primary">
+                    <tr>
+                        <th>{{partida}}</th>
+                        <th>{{destino}}</th>
+                        <th>{{idavuelta}}</th>
+                        <th class="vuelo">{{vuelo}}</th>
+                    </tr>
+                </tbody>
+            </table>
+            <hr class="mb-2">
+            <h5 class="card-title"></h5>
+            <p class="card-text">Datos del Vehiculo</p>
+            <table id="tableCar" class="table table-sm table-hover display" style="width:100%">
+                <thead>
+                    <tr>
+                        <th>Placa</th>
+                        <th>Marca</th>
+                        <th>Clase</th>
+                        <th>Linea</th>
+                        <th>Modelo</th>
+                    </tr>
+                </thead>
+                <tbody class="text-primary">
+                    <tr>
+                        <th>{{placa}}</th>
+                        <th>{{marca}}</th>
+                        <th>{{clase}}</th>
+                        <th>{{linea}}</th>
+                        <th>{{modelo}}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="card-deck mb-7 h3">
+            <div class="card">
+                <div class="card-body text-primary" id="observa" style="display: none;">
+                    <h5 class="card-title">Observaciones</h5>
+                    <p class="card-text">{{observaciones}}</p>
+                    <!--<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>-->
+                </div>
+            </div>
+            <div class="card">
+                <input type="hidden" id="paxOrden" value="{{pasajeros}}">
+                <div class="card-body pasajeros" style="display: none;">
+                    <h5 class="card-title"></h5>
+                    <p class="card-text">Pasajeros | Grupo</p>
+                    <table id="tablePax" class="table table-sm table-hover display" style="width:100%">
+                        <thead>
+                            <tr>
+                                <th>Pasajero</th>
+                                <th>Documento</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-primary"></tbody>
+                    </table>
+                    <!--<p class="card-text"><small class="text-muted">Last updated 3 mins ago</small></p>-->
+                </div>
+            </div>
+        </div>
+
+        <div class="card-footer text-muted">
+            <div class="mb-0 flo">
+                <div class="grid-block ml-5" style="background-image: url('/img/firma.png');
+                            text-align: center;
+                            height: 100%;
+                            width: 20%;">.
+                    <hr>
+                    .
+                    <br>
+                </div>
+                <strong class=" ml-4">TOMAS EMILIO QUINTERO DEL RIO</strong><br>
+                <strong class=" ml-7">Autorizado por:</strong>
+            </div>
+            <div class="footer-copyright text-center my-3">
+                Cualquier comentario o sugerencia del servicio prestado, contáctenos a través de los medios
+                expuestos al
+                comienzo de este documento.
+            </div>
+
+        </div>
+    </div>
+</main>
+{{/each}}
