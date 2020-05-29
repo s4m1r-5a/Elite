@@ -495,6 +495,7 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id WHERE p.id = ?`
 
     const orden = await pool.query(sql, id);
+    console.log(orden)
     res.render('links/ordendeseparacion', { orden });
 })
 ////////////////////////////* SOAT *////////////////////////////////////////
@@ -961,7 +962,7 @@ async function saldo(producto, rango, id, monto) {
 };
 async function rango(id) {
     if (id == 15) { return 1 }
-    let m = new Date(),
+    /*let m = new Date(),
         month = Math.sign(m.getMonth() - 2) > 0 ? m.getMonth() - 2 : 1,
         d, meses = 0,
         mes = 0,
@@ -1063,7 +1064,8 @@ async function rango(id) {
         return Math.min(...reportes);
     } else {
         return 5;
-    };
+    };*/
+    return 4;
 };
 var normalize = (function () {
     var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",

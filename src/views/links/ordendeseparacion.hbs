@@ -112,46 +112,42 @@
                         </tr>
                         <tr>
                             <th>
-                                <i class="feather-md" data-feather="credit-card"></i>
-                                Documento
+                                <i class="feather-md" data-feather="map-pin"></i> Mtr²
+                                <span class="badge badge-dark text-md-center ml-2">{{mtr2}}</span>
                             </th>
                             <td>
-                                <input class="form-control-no-border edi documento u" type="text"
-                                    placeholder="Documento de identidad" autocomplete="off"
-                                    style="padding: 1px; width: 100%;" name="documento" required>
+                                Vr mtr²
+                                <span class="badge badge-dark text-md-center ml-2">${{valmtr2}}</span>
+                                <strong class="float-right"> Total ${{valor}}</strong>
                             </td>
                         </tr>
                         <tr>
                             <th>
-                                <i class="feather-md" data-feather="map-pin"></i>
-                                Expedida
+                                <i class="feather-md" data-feather="credit-card"></i> Cuota Inicial
+                                <span class="badge badge-dark text-md-center ml-2">{{porcentage}}%</span>
                             </th>
                             <td>
-                                <input class="form-control-no-border edi lugarexpedicion u" type="text"
-                                    name="lugarexpedicion" placeholder="Lugar de expedición del documento"
-                                    autocomplete="off" style="padding: 1px; width: 100%;" required>
+                                Diferida
+                                <span class="badge badge-dark text-md-center ml-2">{{inicialdiferida}}</span>
+                                <strong class="float-right"> Total ${{inicial}}</strong>
                             </td>
                         </tr>
                         <tr>
                             <th>
-                                <i class="feather-md" data-feather="calendar"></i> F.
-                                Expedición
+                                <i class="feather-md" data-feather="calendar"></i> Separacion
                             </th>
                             <td>
-                                <input class="form-control-no-border edi fechas espedida u" type="text"
-                                    placeholder="Fecha de expedición" autocomplete="off"
-                                    style="padding: 1px; width: 100%;" name="fechaexpedicion" required>
+                                <strong class="float-right"> ${{inicialdiferida}}</strong>
                             </td>
                         </tr>
                         <tr>
                             <th>
-                                <i class="feather-md" data-feather="calendar"></i> F.
-                                Nacimiento
+                                <i class="feather-md" data-feather="calendar"></i> Financiación Pryt
+                                <span class="badge badge-dark text-md-center ml-2">{{numerocuotaspryecto}} meses</span>
                             </th>
                             <td>
-                                <input class="form-control-no-border edi fechas nacido u" type="text"
-                                    placeholder="Fecha de nacimiento" autocomplete="off"
-                                    style="padding: 1px; width: 100%;" name="fechanacimiento" required>
+                                <i class="feather-md" data-feather="calendar"></i> Cuota
+                                <strong class="float-right"> ${{inicial}}</strong>
                             </td>
                         </tr>
                     </tbody>
