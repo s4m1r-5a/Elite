@@ -507,43 +507,51 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const orden = await pool.query(sql, id);
     //console.log(orden)
     var e = Math.round(i / 2);
-    var u = Math.round(p / 2);
-    y = orden
+    var u = Math.round((p - i) / 2);
+    console.log(e, u)
+    y = await orden
         .filter((a) => {
             return a.tipo === 'INICIAL';
         })
-        .map((a) => {
-            if (a.ncuota > e) {
+        .map((a, b) => {
+            if (a.ncuota > e && e > 2) {
                 v = {
-                    id: a.id,
-                    separacion: a.separacion,
-                    tipo: a.tipo,
-                    ncuota2 = a.ncuota,
-                    fecha2 = a.fecha,
-                    cuota2 = a.cuota,
-                    estado2 = a.estado
+                    ncuota2: a.ncuota,
+                    fecha2: a.fecha,
+                    cuota2: a.cuota,
+                    estado2: a.estado
                 }
-                return a
-            } else {
-                return a
+                return Object.assign(orden[b - 1], v);
+            } else if (e < 2 && a.ncuota == 2) {
+                v = {
+                    ncuota2: a.ncuota,
+                    fecha2: a.fecha,
+                    cuota2: a.cuota,
+                    estado2: a.estado
+                }
+                return Object.assign(orden[b], v);
             }
         })
-    orden
-        .filter((a) => {
-            return a.tipo === 'FINANCIACION';
+    y.push(orden[0])
+    w = await orden
+        .filter((t, c) => {
+            return t.tipo === 'FINANCIACION';
         })
-        .map((a) => {
-            if (a.ncuota > u) {
-                a.ncuota = a.ncuota + '2';
-                a.fecha = a.fecha + '2';
-                a.cuota = a.cuota + '2';
-                a.estado = a.estado + '2';
-                y.push(a)
-            } else {
-                y.push(a)
+        .map((t, c) => {
+            if (t.ncuota > u) {
+                s = {
+                    ncuota2: t.ncuota,
+                    fecha2: t.fecha,
+                    cuota2: t.cuota,
+                    estado2: t.estado
+                }
+                console.log(orden[c - 1])
+                console.log(s)
+                console.log(Object.assign(orden[c - 1], s))
+                return Object.assign(orden[c - 1], s);
             }
         })
-    console.log(y)
+    //console.log(w)
     respuesta = { "data": orden };
     res.send(respuesta);
 })
