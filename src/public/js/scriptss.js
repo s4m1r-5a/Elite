@@ -1260,10 +1260,10 @@ if (window.location.pathname == `/links/reportes`) {
             }
         })
     });*/
-    $('#datatable2').on('click', 'tr', function () {
+    /*$('#datatable2').on('click', 'tr', function () {
         var data = $('#datatable2').DataTable().row(this).data();
         $(this).toggleClass('selected');
-        /*var facturas = $('#datatable2').DataTable().rows('.selected').data().length;
+        var facturas = $('#datatable2').DataTable().rows('.selected').data().length;
         $('.facturas').html(facturas);
         if ($(`span.${data.id}`).length) {
             $("span").remove(`.${data.id}`);
@@ -1273,9 +1273,9 @@ if (window.location.pathname == `/links/reportes`) {
             total += parseFloat(data.valor.replace(/(?!\w|\s).| /g, ""));
         }
         $('span.total').mask('000,000,000', { reverse: true });
-        $('span.total').text(Moneda(total));*/
+        $('span.total').text(Moneda(total));
 
-    });
+    });*/
     //////////////////////* Table2 */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
@@ -1366,6 +1366,12 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "fullname",
                 className: 'te'
+            },
+            {
+                data: "id",
+                render: function (data, method, row) {
+                    return `<a type="button" class="btn btn-sm btn-outline-dark" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Print</a>`
+                }
             }
         ]
     });
@@ -1563,6 +1569,8 @@ if (window.location.pathname == `/links/reportes`) {
     });
 }
 if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
+    $('footer').hide()
+    $('nav').hide()
     var table = $('#datatable').DataTable({
         paging: false,
         ordering: false,
@@ -1611,10 +1619,43 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                             break;
                     }
                 }
+            },
+            { data: "ncuota2" },
+            {
+                data: "fecha2",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            {
+                data: "cuota2",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "estado2",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 13:
+                            return `<span class="badge badge-pill badge-success">Pagada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
             }
         ],
         initComplete: function (settings, json) {
             //tableOrden.column(2).visible(true);
+            window.addEventListener("load", window.print());
         },
         columnDefs: [
             { "visible": false, "targets": 0 }
@@ -1628,9 +1669,9 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
             api.column(0, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
                     $(rows).eq(i).before(
-                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                        `<tr class="group">
                             <td colspan="8">
-                                <div class="text-center">
+                                <div class="text-right text-muted">
                                     ${group}
                                 </div>
                             </td>
@@ -1643,84 +1684,19 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         }
     });
 
-    // Daterangepicker
-    var start = moment().subtract(29, "days").startOf("hour");
-    var end = moment().startOf("hour").add(32, "hour");
-    $(".fech").daterangepicker({
-        locale: {
-            'format': 'YYYY-MM-DD HH:mm',
-            'separator': ' a ',
-            'applyLabel': 'Aplicar',
-            'cancelLabel': 'Cancelar',
-            'fromLabel': 'De',
-            'toLabel': 'A',
-            'customRangeLabel': 'Personalizado',
-            'weekLabel': 'S',
-            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            'firstDay': 1
-        },
-        opens: "center",
-        timePicker: true,
-        timePicker24Hour: true,
-        timePickerIncrement: 15,
-        opens: "right",
-        alwaysShowCalendars: false,
-        startDate: start,
-        endDate: end,
-        ranges: {
-            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
-            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
-            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
-            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-            'Hoy': [moment().startOf('days'), moment().endOf("days")],
-            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
-            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
-            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
-        }
-    }, function (start, end, label) {
-        maxDateFilter = end;
-        minDateFilter = start;
-        table.draw();
-    });
-
     $(document).ready(function () {
         var g = $('#fechaFactura').text()
         $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'))
         $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())))
 
-        $('.relacion').text(`Prestacion de servicio de transporte privado de pasajeros, correspondiente a ${$('#nservicios').val()} servicio(s) prestado(s). Relación de reservas anexada a esta factura`)
 
-        //$('#totalLetras').text(`POR CONCEPTO DE ${$('#nservicios').val()} SERVICIOS PRESTADOS CON UN VALOR EXPRESADO EN LETRAS DE ${NumeroALetras($('#vLetras').val())}`)
-        $('#totalLetras').text(`${NumeroALetras($('#vLetras').val())} MCT********`)
-        var table2 = $('#tablaFactura').DataTable({
-            paging: false,
-            ordering: false,
-            info: false,
-            searching: false,
-            //deferRender: true,
-            autoWidth: true,
-            responsive: false,
-            columnDefs: [{
-                render: function (data, type, row) {
-                    return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
-                },
-                targets: 1
-            },
-            {
-                render: function (data, type, row) {
-                    return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
-                },
-                targets: 10
-            },
-            { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }
-            ]
-        });
         //window.print();
         //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
-        window.addEventListener("load", window.print());
+        //window.addEventListener("load", window.print());
     })
+} else {
+    $('footer').show()
+    $('nav').show()
 }
 
 

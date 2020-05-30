@@ -501,58 +501,81 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { p, i } = req.body;
-    var y;
-    console.log(req.body)
     sql = `SELECT * FROM cuotas WHERE separacion = ?`
     const orden = await pool.query(sql, id);
-    //console.log(orden)
+    var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
     var u = Math.round((p - i) / 2);
-    console.log(e, u)
-    y = await orden
-        .filter((a) => {
-            return a.tipo === 'INICIAL';
-        })
-        .map((a, b) => {
-            if (a.ncuota > e && e > 2) {
-                v = {
-                    ncuota2: a.ncuota,
-                    fecha2: a.fecha,
-                    cuota2: a.cuota,
-                    estado2: a.estado
-                }
-                return Object.assign(orden[b - 1], v);
-            } else if (e < 2 && a.ncuota == 2) {
-                v = {
-                    ncuota2: a.ncuota,
-                    fecha2: a.fecha,
-                    cuota2: a.cuota,
-                    estado2: a.estado
-                }
-                return Object.assign(orden[b], v);
-            }
-        })
-    y.push(orden[0])
+    var m = (p - i) / 2;
+    var v = i / 2;
+
     w = await orden
-        .filter((t, c) => {
-            return t.tipo === 'FINANCIACION';
-        })
         .map((t, c) => {
-            if (t.ncuota > u) {
+            if (t.tipo === 'SEPARACION') {
+                s = {
+                    ncuota2: '',
+                    fecha2: '',
+                    cuota2: '',
+                    estado2: ''
+                }
+                return Object.assign(orden[0], s);
+            }
+            if (t.tipo === 'INICIAL' && i === '1') {
+                s = {
+                    ncuota2: '',
+                    fecha2: '',
+                    cuota2: '',
+                    estado2: ''
+                }
+                return Object.assign(t, s);
+
+            } else if (t.tipo === 'INICIAL' && t.ncuota > e) {
                 s = {
                     ncuota2: t.ncuota,
                     fecha2: t.fecha,
                     cuota2: t.cuota,
                     estado2: t.estado
                 }
-                console.log(orden[c - 1])
-                console.log(s)
-                console.log(Object.assign(orden[c - 1], s))
-                return Object.assign(orden[c - 1], s);
+                return Object.assign(y[t.ncuota - e], s);
+
+            } else if (t.tipo === 'INICIAL') {
+                y.push(t)
+                if (v !== e && t.ncuota === e) {
+                    console.log(t.ncuota)
+                    h = {
+                        ncuota2: '',
+                        fecha2: '',
+                        cuota2: '',
+                        estado2: ''
+                    }
+                    return Object.assign(y[e], h)
+                }
+            }
+            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
+                s = {
+                    ncuota2: t.ncuota,
+                    fecha2: t.fecha,
+                    cuota2: t.cuota,
+                    estado2: t.estado
+                }
+                return Object.assign(o[t.ncuota - u], s);
+
+            } else if (t.tipo === 'FINANCIACION') {
+                o.push(t)
+                if (m !== u && t.ncuota === u) {
+                    console.log(t.ncuota)
+                    h = {
+                        ncuota2: '',
+                        fecha2: '',
+                        cuota2: '',
+                        estado2: ''
+                    }
+                    return Object.assign(o[u], h)
+                }
             }
         })
-    //console.log(w)
-    respuesta = { "data": orden };
+    //console.log(w.filter(Boolean))
+    respuesta = { "data": w.filter(Boolean) };
     res.send(respuesta);
 })
 ////////////////////////////* SOAT *////////////////////////////////////////
