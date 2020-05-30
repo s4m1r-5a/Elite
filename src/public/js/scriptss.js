@@ -1561,16 +1561,129 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
+}
+if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
+    var table = $('#datatable').DataTable({
+        paging: false,
+        ordering: false,
+        info: false,
+        searching: false,
+        //deferRender: true,
+        autoWidth: true,
+        responsive: false,
+        ajax: {
+            method: "POST",
+            url: "/links/ordendeseparacion/" + $('#orden').val(),
+            data: {
+                p: $('#numerocuotaspryecto').val(),
+                i: $('#inicialdiferida').val()
+            },
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "tipo" },
+            { data: "ncuota" },
+            {
+                data: "fecha",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            {
+                data: "cuota",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 13:
+                            return `<span class="badge badge-pill badge-success">Pagada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
+                            break;
+                    }
+                }
+            }
+        ],
+        initComplete: function (settings, json) {
+            //tableOrden.column(2).visible(true);
+        },
+        columnDefs: [
+            { "visible": false, "targets": 0 }
+        ],
+        order: [[1, 'asc']],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
 
+            api.column(0, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="8">
+                                <div class="text-center">
+                                    ${group}
+                                </div>
+                            </td>
+                        </tr>`
+                    );
 
+                    last = group;
+                }
+            });
+        }
+    });
 
-
-
-
-
-
-
-
+    // Daterangepicker
+    var start = moment().subtract(29, "days").startOf("hour");
+    var end = moment().startOf("hour").add(32, "hour");
+    $(".fech").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        startDate: start,
+        endDate: end,
+        ranges: {
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")],
+            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
+            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
+            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        }
+    }, function (start, end, label) {
+        maxDateFilter = end;
+        minDateFilter = start;
+        table.draw();
+    });
 
     $(document).ready(function () {
         var g = $('#fechaFactura').text()
@@ -1609,6 +1722,10 @@ if (window.location.pathname == `/links/reportes`) {
         window.addEventListener("load", window.print());
     })
 }
+
+
+
+
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     let recargada = true,

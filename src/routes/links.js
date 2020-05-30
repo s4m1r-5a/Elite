@@ -492,11 +492,60 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     console.log(req.params)
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id WHERE p.id = ?`
+            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
 
     const orden = await pool.query(sql, id);
     console.log(orden)
-    res.render('links/ordendeseparacion', { orden });
+    res.render('links/ordendeseparacion', { orden, id });
+})
+router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    const { p, i } = req.body;
+    var y;
+    console.log(req.body)
+    sql = `SELECT * FROM cuotas WHERE separacion = ?`
+    const orden = await pool.query(sql, id);
+    //console.log(orden)
+    var e = Math.round(i / 2);
+    var u = Math.round(p / 2);
+    y = orden
+        .filter((a) => {
+            return a.tipo === 'INICIAL';
+        })
+        .map((a) => {
+            if (a.ncuota > e) {
+                v = {
+                    id: a.id,
+                    separacion: a.separacion,
+                    tipo: a.tipo,
+                    ncuota2 = a.ncuota,
+                    fecha2 = a.fecha,
+                    cuota2 = a.cuota,
+                    estado2 = a.estado
+                }
+                return a
+            } else {
+                return a
+            }
+        })
+    orden
+        .filter((a) => {
+            return a.tipo === 'FINANCIACION';
+        })
+        .map((a) => {
+            if (a.ncuota > u) {
+                a.ncuota = a.ncuota + '2';
+                a.fecha = a.fecha + '2';
+                a.cuota = a.cuota + '2';
+                a.estado = a.estado + '2';
+                y.push(a)
+            } else {
+                y.push(a)
+            }
+        })
+    console.log(y)
+    respuesta = { "data": orden };
+    res.send(respuesta);
 })
 ////////////////////////////* SOAT *////////////////////////////////////////
 router.post('/soat', isLoggedIn, (req, res) => {
