@@ -73,7 +73,9 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
 router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
-    await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id}`)
+    await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
+    SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, 
+    p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id}`)
     res.send(respuesta);
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
@@ -81,7 +83,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
         separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
         cta, numero, mail, direccion, tel, web, descripcion } = req.body;
     const produc = {
-        categoria, proveedor, socio, nombre: title.toUpperCase(),
+        categoria, proveedor, socio, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
         valproyect, mzs, cantidad, estado: 7, fecha, fechafin, separacion: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''

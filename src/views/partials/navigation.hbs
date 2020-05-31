@@ -1,4 +1,5 @@
 {{#if user}}
+<input type="hidden" id="usuarioadmin" value="{{user.admin}}">
 <nav id="sidebar" class="sidebar">
 	<div class="sidebar-content ">
 		<a class="sidebar-brand" href="/tablero">
@@ -30,7 +31,8 @@
 			</li>
 			<li class="sidebar-item active">
 				<a class="sidebar-link" href="/links/productos">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Productos</span>
+					<i class="align-middle" data-feather="shopping-cart"></i> <span
+						class="align-middle">Productos</span>
 					<span class="sidebar-badge badge badge-primary"></span>
 				</a>
 			</li>
@@ -42,7 +44,8 @@
 			</li>
 			<li class="sidebar-item active">
 				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Solicitudes</span>
+					<i class="align-middle" data-feather="shopping-cart"></i> <span
+						class="align-middle">Solicitudes</span>
 					<span class="sidebar-badge badge badge-primary"></span>
 				</a>
 			</li>

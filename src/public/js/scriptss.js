@@ -68,6 +68,7 @@ $(".fechas").daterangepicker({
     showDropdowns: true,
     opens: "right",
 });
+var admin = $('#usuarioadmin').val()
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -1756,7 +1757,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($('#tmt2').val() && $('#vmt2').val()) {
                 var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
                 $('#valproyect').val(valor);
-                $('.valproyect').html('$ ' + Moneda(valor) + '.00');
+                $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
             }
         });
         $("form input:not(.edi)").on({
@@ -2012,14 +2013,26 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 $('#lts').prop('disabled', false);
             }
         })
+        $('#vmt2, #porcentage').change(function () {
+            var valor, inicial;
+            $('.mt2').each(function (index, element) {
+                if ($(this).val()) {
+                    valor = $(this).val() * $('#vmt2').cleanVal();
+                    inicial = valor * $('#porcentage').val() / 100;
+                    $(this).siblings('input[name="valor"]').val(valor);
+                    $(this).siblings('input[name="inicial"]').val(inicial);
+                    $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
+                }
+            });
+        });
         $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
             if ($('#vmt2').val()) {
                 var valor = $(this).val() * $('#vmt2').cleanVal();
-                var inicial = valor * 30 / 100;
+                var inicial = valor * $('#porcentage').val() / 100;
                 var sum = 0;
                 $(this).siblings('input[name="valor"]').val(valor);
                 $(this).siblings('input[name="inicial"]').val(inicial);
-                $(this).next('span').text('$ ' + Moneda(valor) + '.00');
+                $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
                 $('.mt2').each(function (index, element) {
                     if ($(this).val()) {
                         sum += parseFloat($(this).val())
@@ -2219,8 +2232,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             },
             initComplete: function (settings, json) {
-                //tableOrden.column(2).visible(true);
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+                $('#ModalEventos').modal('toggle');
                 $('#ModalEventos').modal('hide')
             },
             columnDefs: [
@@ -2383,7 +2396,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     var table2 = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
-            {
+            admin === '1' ? {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
                         </div>`,
@@ -2397,7 +2410,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
                 }
-            }
+            } : 'print',
         ],
         deferRender: true,
         autoWidth: false,
@@ -2409,6 +2422,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         responsive: true,
         order: [[1, "desc"]],
         columnDefs: [
+            { "visible": admin === '1' ? true : false, "targets": [7, 5, -1] },
             { responsivePriority: 1, targets: -1 },
             { responsivePriority: 2, targets: 3 },
             { responsivePriority: 3, targets: 7 },
@@ -2452,12 +2466,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 defaultContent: ''
             },
             { data: "id", className: 'tu' },
-            { data: "categoria", className: 'tu' },
-            { data: "nombre", className: 'tu' },
+            { data: "proyect", className: 'tu' },
             {
                 data: "fecha", className: 'tu',
                 render: function (data, method, row) {
-                    return moment.utc(data).format('ll') //pone la fecha en un formato entendible
+                    return moment.utc(data).format('ll')
                 }
             },
             { data: "porcentage", className: 'tu' },
@@ -2465,14 +2478,14 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "valmtr2", className: 'to',
                 render: function (data, method, row) {
-                    return `<div class="input-group">
+                    return admin === '1' ? `<div class="input-group">
                                 <input type="text" class="form-control-no-border text-center edi"
                                     autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
                                 <span class="input-group-append">
                                     <button class="btn btn-primary btn-sm"
                                         type="button">ok</button>
                                 </span>
-                            </div>`
+                            </div>` : Moneda(data)
                 }
             },
             {
