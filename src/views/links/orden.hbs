@@ -343,8 +343,9 @@
                         <div class="card-body">
                             {{#each proyecto}}
                             <input type="hidden" id="separacion" value="{{separacion}}">
-                            <input type="hidden" id="porcentage" value="{{porcentage}}">
+                            <input type="hidden" id="porcentage" name="iniciar" value="{{porcentage}}">
                             <input type="hidden" id="fechs" value="{{fechafin}}">
+                            <input type="hidden" id="extran" name="extran" value="">
                             <div class="row">
                                 <div class="col-12 col-lg-6">
                                     <table class="table table-sm my-2">
@@ -367,7 +368,7 @@
                                                 </th>
                                                 <td>
                                                     <input class="form-control-no-border val" type="text" id="vrmtr"
-                                                        value="{{valmtr2}}"
+                                                        value="{{valmtr2}}" name="vrmt2"
                                                         style="padding: 1px; width: 100%; text-align:center" disabled>
                                                 </td>
                                             </tr>
@@ -550,14 +551,15 @@
                                             <tr>
                                                 <th class="text-center">
                                                     <i class="feather-md text-primary" data-feather="dollar-sign"></i>
-                                                    Abono
+                                                    Separar
                                                 </th>
                                                 <td class="text-center">
-                                                    <input class="form-control-no-border text-center edi" name="abono"
-                                                        autocomplete="off" type="text" placeholder="Abono" id="abono"
+                                                    <input class="form-control-no-border text-center edi"
+                                                        name="separacion" autocomplete="off" type="text"
+                                                        placeholder="Abono" id="abono"
                                                         style="padding: 1px; width: 100%; background-color: #FFFFCC;"
                                                         data-mask="000.000.000" data-mask-reverse="true"
-                                                        data-mask-selectonfocus="true">
+                                                        data-mask-selectonfocus="true" value="{{separacion}}">
                                                 </td>
                                             </tr>
                                         </tbody>
@@ -590,11 +592,11 @@
                             <div class="card-actions float-right">
                                 <select name="tipobsevacion" class="form-control-no-border"
                                     style="padding: 1px; width: 100%; text-align-last:center; background-color: #FFFFCC;">
-                                    <option value="1">Seleccione tipo de Negociacion</option>
-                                    <option value="1">Negociacion por Trueque</option>
-                                    <option value="2">Negociacion en efectivo</option>
-                                    <option value="3">Otro tipo de Negociacion</option>
-                                    <option value="4">Ninguna Negociacion</option>
+                                    <option value="Ninguna">Seleccione tipo de Negociacion</option>
+                                    <option value="Trueque">Negociacion por Trueque</option>
+                                    <option value="efectivo">Negociacion en efectivo</option>
+                                    <option value="Otro">Otro tipo de Negociacion</option>
+                                    <option value="Ninguna">Ninguna Negociacion</option>
                                 </select>
                             </div>
                             <h5 class="card-title mb-0">Obsevaciones</h5>

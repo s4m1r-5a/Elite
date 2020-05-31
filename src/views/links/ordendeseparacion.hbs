@@ -114,7 +114,7 @@
                                     <i class="feather-md" data-feather="user"></i> Proyecto
                                 </th>
                                 <td>
-                                    <span class="text-md-center">{{categoria}}</span>
+                                    <span class="text-md-center">{{proyect}}</span>
                                 </td>
                             </tr>
                             <tr>
@@ -124,14 +124,14 @@
                                 </th>
                                 <td>
                                     Vr mtr²
-                                    <span class="badge badge-dark text-md-center ml-2">${{valmtr2}}</span>
+                                    <span class="badge badge-dark text-md-center ml-2">${{vrmt2}}</span>
                                     <strong class="float-right"> Total ${{valor}}</strong>
                                 </td>
                             </tr>
                             <tr>
                                 <th>
                                     <i class="feather-md" data-feather="credit-card"></i> Cuota Inicial
-                                    <span class="badge badge-dark text-md-center ml-2">{{porcentage}}%</span>
+                                    <span class="badge badge-dark text-md-center ml-2">{{iniciar}}%</span>
                                 </th>
                                 <td>
                                     Diferida
@@ -150,7 +150,7 @@
                                 </th>
                                 <td>
                                     <i class="feather-md" data-feather="calendar"></i> Cuota
-                                    <strong class="float-right"> ${{inicial}}</strong>
+                                    <strong class="float-right" id="cuota"></strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -183,7 +183,7 @@
                                 <th>
                                     <i class="feather-md" data-feather="phone-call"></i>
                                     Extraordinaria
-                                    <span class="badge badge-dark text-md-center ml-2">3</span>
+                                    <span class="badge badge-dark text-md-center ml-2">{{extran}}</span>
                                 </th>
                                 <td>
                                     Mes(es) <span class="badge badge-dark text-md-center ml-2">jun & dic</span>
@@ -194,7 +194,7 @@
                                 <i class="feather-md" data-feather="calendar"></i> Separacion
                             </th>
                             <td>
-                                <strong class="float-right"> ${{inicialdiferida}}</strong>
+                                <strong class="float-right"> ${{separar}}</strong>
                             </td>
                             </tr>
                         </tbody>

@@ -2738,6 +2738,12 @@ if (window.location.pathname == `/links/orden`) {
             $('.cliente2 input').val('');
         });
         $('.edi').on('change', function () {
+            if ($(this).attr('id') === 'abono') {
+                if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val())) {
+                    $('#abono').val(Moneda($('#separacion').val()))
+                    SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
+                }
+            }
             var abono = parseFloat($('#abono').cleanVal()) || 0, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
                 mesesextra = '', D = parseFloat($('#dia').val()), meses = 0;
             Años(u + 1, D, N)
@@ -2763,6 +2769,7 @@ if (window.location.pathname == `/links/orden`) {
                     }
                 });
             }
+
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
                     $.ajax({
@@ -2839,6 +2846,7 @@ if (window.location.pathname == `/links/orden`) {
                         meses = jun + dic
 
                     };
+                    $('#extran').val(meses)
                 }
             }
 

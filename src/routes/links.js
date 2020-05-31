@@ -128,7 +128,6 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     await n.map((t, i) => {
         producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
     });
-    console.log(producdata)
     await pool.query(producdata.slice(0, -1));
     req.flash('success', 'Producto registrado exitosamente');
     res.redirect('/links/productos');
@@ -255,7 +254,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota,
-        estado, ncuota, tipo, tipobsevacion, obsevacion } = req.body;
+        estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
     function Cliente(N) {
         cliente = {
             nombre: nombres[N],
@@ -287,7 +286,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
             client[1] = clie.insertId
         }
     };
-    const separacion = {
+    const separ = {
         lote,
         cliente: client[0],
         cliente2: documento[1] ? client[1] : null,
@@ -298,11 +297,12 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         cupon: cupon ? cupon : 1,
         inicialdiferida: inicialdiferida || null,
         tipobsevacion, obsevacion,
-        ahorro: ahorro ? ahorro.replace(/\./g, '') : ''
+        ahorro: ahorro ? ahorro.replace(/\./g, '') : '',
+        separar: separacion.replace(/\./g, ''),
+        extran, vrmt2: vrmt2.replace(/\./g, ''),
+        iniciar
     };
-    console.log(req.body)
-    //documento[1] ? separacion.cliente2 = client[1] : '';
-    const h = await pool.query('INSERT INTO preventa SET ? ', separacion);
+    const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1 }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
@@ -311,7 +311,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     await ncuota.map((t, i) => {
         cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
     });
-    console.log(cuotas.slice(0, -1))
     await pool.query(cuotas.slice(0, -1));
 
     req.flash('success', 'Separación realizada exitosamente');
@@ -367,12 +366,9 @@ router.post('/tabla/:id', async (req, res) => {
             stado2: ''
         }
         dataSet.data.push(l);
-        console.log(N / 2)
         for (i = 1; i <= v; i++) {
             y = o < 1 ? j + i : u > 3 ? j + i + 2 : i + j + 1;
-            console.log(cuota70)
             if (i <= j && cuota30 != 0) {
-                console.log(cuota30)
                 x = {
                     n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                     fecha: moment(fcha).add(i, 'month'),
@@ -385,7 +381,8 @@ router.post('/tabla/:id', async (req, res) => {
                     fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
                     cuota2: i > o ? '' : cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
                     stado2: i > o ? '' : `<span class="badge badge-primary">Pendiente</span>
-                                          <input value="3" type="hidden" name="estado">`
+                                          <input value="3" type="hidden" name="estado">
+                                          <input value="INICIAL" type="hidden" name="tipo">`
                 }
                 dataSet.data.push(x);
             } else if (cuota30 == 0) {
@@ -450,7 +447,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'WHERE p.asesor = ?';
 
-        sql = `SELECT p.id, pt.nombre proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
+        sql = `SELECT p.id, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id ${ d} `
 
