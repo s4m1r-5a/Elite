@@ -64,6 +64,11 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         await pool.query('DELETE FROM productosd WHERE producto = ?', id);
         await pool.query('DELETE FROM productos WHERE id = ?', id);
         res.send(true);
+    } else if (id === 'editar') {
+        const { id } = req.body;
+        const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
+        console.log(fila)
+        res.send(fila[0]);
     } else {
         const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
         respuesta = { "data": fila };

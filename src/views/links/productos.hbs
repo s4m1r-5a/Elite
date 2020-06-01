@@ -118,10 +118,11 @@
                         <a class="r atras"><i class="feather-lg mr-0" data-feather="arrow-left-circle"></i></a>
                     </div>
                 </div>
-                <form action="/links/regispro" method="POST">
+                <form id="pro" action="/links/regispro" method="POST">
                     <div class="card-body">
                         <div class="row">
                             <input type="hidden" class="client" value="" name="client">
+                            <input type="hidden" id="ideditar" value="" name="editar">
                             <div class="col-12 col-lg-6">
                                 <table class="table table-sm my-2">
                                     <tbody>
@@ -261,7 +262,8 @@
                                                 CUOTA INICIAL
                                             </th>
                                             <td>
-                                                <select class="form-control-no-border edi" id="porcentage" name="porcentage"
+                                                <select class="form-control-no-border edi" id="porcentage"
+                                                    name="porcentage"
                                                     style="padding: 1px; width: 100%;text-align:center;" required>
                                                     <option value="15">15%</option>
                                                     <option value="20">20%</option>
@@ -536,6 +538,24 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
+                            <div class="col-12">
+                                <table id="datatabledit" class="table table-striped table-hover table-sm display nowrap"
+                                    style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th>MZ</th>
+                                            <th>LT</th>
+                                            <th>MT2</th>
+                                            <th>ESTADO</th>
+                                            <th>VALOR</th>
+                                            <th>CUOTA I</th>
+                                            <th style="width:5%;">DSCP</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                     <div class="card-footer mb-4">
@@ -547,6 +567,9 @@
         </div>
     </div>
 </div>
+
+
+
 <!-- BEGIN primary modal -->
 <div class="modal fade" id="ModalConfir" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
@@ -578,180 +601,178 @@
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
-            <form action="/links/gf" method="POST">
-                <div class="modal-body m-3">
-                    <div class="row">
-                        <div class="col-12 col-lg-6">
-                            <table class="table table-sm my-2">
-                                <tbody>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="home"></i>
-                                            PRODUCTO
-                                        </th>
-                                        <td>
-                                            <select class="form-control-no-border edi" name="categoria"
-                                                style="padding: 1px; width: 100%;" required>
-                                                <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
-                                                <option value="CONSTUCCION">CONSTUCCIÓN</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="framer"></i>
-                                            NOMBRE PDO
-                                        </th>
-                                        <td>
-                                            <input class="form-control-no-border edi text-uppercase" type="text"
-                                                placeholder="NOMBRE DEL PROYECTO" autocomplete="off"
-                                                style="padding: 1px; width: 100%;" name="title" required>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <br>
-                                            <div class="text-center">
-                                                <h6>TOTAL MTR²</h6>
-                                            </div>
-                                            <div class="text-center">
-                                                <span
-                                                    class="badge badge-info text-center text-md-center valproyect">000.000</span>
-                                            </div>
-                                            <input type="hidden" name="totalmtr2" id="tmt2">
-                                        </th>
-                                        <th>
-                                            <br>
-                                            <div class="text-center">
-                                                <h6>VALOR MTR²</h6>
-                                            </div>
-                                            <div class="text-center">
-                                                <span
-                                                    class="badge badge-success text-center text-md-center valproyect">$0.000.000.000</span>
-                                            </div>
-                                            <input type="hidden" name="valmtr2" id="vmt2">
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <div class="text-center">
-                                                <h6>SEPARACION</h6>
-                                            </div>
-                                            <div class="text-center">
-                                                <input class="form-control-no-border text-center v" name="separacion"
-                                                    autocomplete="off" type="text" placeholder="Monto de separacion"
-                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                    data-mask="000.000.000" data-mask-reverse="true"
-                                                    data-mask-selectonfocus="true" required>
-                                            </div>
-                                        </th>
-                                        <th>
-                                            <div class="text-center">
-                                                <h6>INSENTIVO</h6>
-                                            </div>
-                                            <div class="text-center">
-                                                <input class="form-control-no-border text-center v" name="incentivo"
-                                                    autocomplete="off" type="text"
-                                                    placeholder="Insentivo por separacion"
-                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                    data-mask="000.000.000" data-mask-reverse="true"
-                                                    data-mask-selectonfocus="true" required>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="col-12 col-lg-6">
-                            <table class="table table-sm my-2">
-                                <tbody>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="dollar-sign"></i>
-                                            COSTE DEL PROYEYO
-                                        </th>
-                                        <td>
-                                            <div class="text-center">
-                                                <span
-                                                    class="badge badge-dark text-center text-md-center valproyect">$0.000.000.000</span>
-                                            </div>
-                                            <input type="hidden" name="valproyect" id="valproyect">
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="calendar"></i> INICIO Y
-                                            TERMINACÍON
-                                        </th>
-                                        <td>
-                                            <input type="hidden" id="inicio" name="fecha">
-                                            <input type="hidden" id="fin" name="fechafin">
-                                            <div id="reportrange" class="overflow-hidden form-control">
-                                                <i class="far fa-calendar"></i>&nbsp;
-                                                <span></span> <i class="fas fa-caret-down"></i>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="percent"></i>
-                                            CUOTA INICIAL
-                                        </th>
-                                        <td>
-                                            <select class="form-control-no-border edi proveedor" name="porcentage"
-                                                style="padding: 1px; width: 100%;text-align:center;" required>
-                                                <option value="15">15%</option>
-                                                <option value="20">20%</option>
-                                                <option value="25">25%</option>
-                                                <option value="30">30%</option>
-                                                <option value="35">35%</option>
-                                                <option value="40">40%</option>
-                                            </select>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="user-check"></i>
-                                            PROVEEDOR
-                                        </th>
-                                        <td>
-                                            <select class="form-control-no-border edi proveedor" name="proveedor"
-                                                style="padding: 1px; width: 100%;" required>
-                                                {{#each proveedores}}
-                                                <option value="{{id}}">{{empresa}}</option>
-                                                {{/each}}
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                        </div>
-                        <div class="col-12">
-                            <table id="datatabledit" class="table table-striped table-hover table-sm display nowrap"
-                                style="width:100%">
-                                <thead>
-                                    <tr>
-                                        <th></th>
-                                        <th>MZ</th>
-                                        <th>LT</th>
-                                        <th>MT2</th>
-                                        <th>ESTADO</th>
-                                        <th>VALOR</th>
-                                        <th>CUOTA I</th>
-                                        <th style="width:5%;">DSCP</th>
-                                    </tr>
-                                </thead>
-                                <tbody></tbody>
-                            </table>
-                        </div>
+
+            <div class="modal-body m-3">
+                <div class="row">
+                    <div class="col-12 col-lg-6">
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="home"></i>
+                                        PRODUCTO
+                                    </th>
+                                    <td>
+                                        <select class="form-control-no-border edi" name="categoria"
+                                            style="padding: 1px; width: 100%;" required>
+                                            <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
+                                            <option value="CONSTUCCION">CONSTUCCIÓN</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="framer"></i>
+                                        NOMBRE PDO
+                                    </th>
+                                    <td>
+                                        <input class="form-control-no-border edi text-uppercase" type="text"
+                                            placeholder="NOMBRE DEL PROYECTO" autocomplete="off"
+                                            style="padding: 1px; width: 100%;" name="title" required>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <br>
+                                        <div class="text-center">
+                                            <h6>TOTAL MTR²</h6>
+                                        </div>
+                                        <div class="text-center">
+                                            <span
+                                                class="badge badge-info text-center text-md-center valproyect">000.000</span>
+                                        </div>
+                                        <input type="hidden" name="totalmtr2" id="tmt2">
+                                    </th>
+                                    <th>
+                                        <br>
+                                        <div class="text-center">
+                                            <h6>VALOR MTR²</h6>
+                                        </div>
+                                        <div class="text-center">
+                                            <span
+                                                class="badge badge-success text-center text-md-center valproyect">$0.000.000.000</span>
+                                        </div>
+                                        <input type="hidden" name="valmtr2" id="vmt2">
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <div class="text-center">
+                                            <h6>SEPARACION</h6>
+                                        </div>
+                                        <div class="text-center">
+                                            <input class="form-control-no-border text-center v" name="separacion"
+                                                autocomplete="off" type="text" placeholder="Monto de separacion"
+                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                data-mask="000.000.000" data-mask-reverse="true"
+                                                data-mask-selectonfocus="true" required>
+                                        </div>
+                                    </th>
+                                    <th>
+                                        <div class="text-center">
+                                            <h6>INSENTIVO</h6>
+                                        </div>
+                                        <div class="text-center">
+                                            <input class="form-control-no-border text-center v" name="incentivo"
+                                                autocomplete="off" type="text" placeholder="Insentivo por separacion"
+                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                data-mask="000.000.000" data-mask-reverse="true"
+                                                data-mask-selectonfocus="true" required>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-12 col-lg-6">
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="dollar-sign"></i>
+                                        COSTE DEL PROYEYO
+                                    </th>
+                                    <td>
+                                        <div class="text-center">
+                                            <span
+                                                class="badge badge-dark text-center text-md-center valproyect">$0.000.000.000</span>
+                                        </div>
+                                        <input type="hidden" name="valproyect" id="valproyect">
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="calendar"></i> INICIO Y
+                                        TERMINACÍON
+                                    </th>
+                                    <td>
+                                        <input type="hidden" id="inicio" name="fecha">
+                                        <input type="hidden" id="fin" name="fechafin">
+                                        <div id="reportrange" class="overflow-hidden form-control">
+                                            <i class="far fa-calendar"></i>&nbsp;
+                                            <span></span> <i class="fas fa-caret-down"></i>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="percent"></i>
+                                        CUOTA INICIAL
+                                    </th>
+                                    <td>
+                                        <select class="form-control-no-border edi proveedor" name="porcentage"
+                                            style="padding: 1px; width: 100%;text-align:center;" required>
+                                            <option value="15">15%</option>
+                                            <option value="20">20%</option>
+                                            <option value="25">25%</option>
+                                            <option value="30">30%</option>
+                                            <option value="35">35%</option>
+                                            <option value="40">40%</option>
+                                        </select>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <i class="feather-md" data-feather="user-check"></i>
+                                        PROVEEDOR
+                                    </th>
+                                    <td>
+                                        <select class="form-control-no-border edi proveedor" name="proveedor"
+                                            style="padding: 1px; width: 100%;" required>
+                                            {{#each proveedores}}
+                                            <option value="{{id}}">{{empresa}}</option>
+                                            {{/each}}
+                                        </select>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-12">
+                        <table id="datatabledit" class="table table-striped table-hover table-sm display nowrap"
+                            style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>MZ</th>
+                                    <th>LT</th>
+                                    <th>MT2</th>
+                                    <th>ESTADO</th>
+                                    <th>VALOR</th>
+                                    <th>CUOTA I</th>
+                                    <th>DSCP</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
                     </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                    <button type="button" class="btn btn-danger">Eliminar Proyecto</button>
-                    <button type="submit" class="btn btn-primary">Editar</button>
-                </div>
-            </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                <button type="button" class="btn btn-danger">Eliminar Proyecto</button>
+                <button type="submit" class="btn btn-primary">Editar</button>
+            </div>
         </div>
     </div>
 </div>

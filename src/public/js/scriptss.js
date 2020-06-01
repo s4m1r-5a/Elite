@@ -1803,10 +1803,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             var val = $(this).val(), i = 1;
             $('#datosproducto table').remove();
             $('#datosproducto2 table').remove();
-
             /*$('#datosproducto table:last').remove();
             $('#datosproducto2 table:last').remove();*/
-
             while (i <= val) {
                 if (i % 2 === 1) {
                     $('#datosproducto').append(`
@@ -2082,7 +2080,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         }, cb);
         cb(start, end);
-
     });
 
     function Dtas(n) {
@@ -2315,7 +2312,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 backdrop: 'static',
                 keyboard: true,
             });
-            $(this).toggleClass('selected');
+            fila.toggleClass('selected');
             $('#proyecto').val();
             $('#idproyecto').val();
             var url = `/links/orden?id=${data.id}`;
@@ -2327,9 +2324,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $('#datatable2').on('click', '.to button', function () {
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
-
         if ($(this).parent().prev().val().indexOf(",") > 0) {
-
             var datos = { valor: $(this).parent().prev().cleanVal() };
             $('#ModalConfir').modal('toggle');
             $('#bt').on('click', function () {
@@ -2520,7 +2515,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 defaultContent: `<div class="dropdown">
                 <button type="button" class="btn btn-sm btn-outline-dark dropdown-toggle" data-toggle="dropdown">Acción</button>
                     <div class="dropdown-menu">
-                        <a class="dropdown-item estado">Hbilitar & Dbilitar</a>
+                        <a class="dropdown-item estado">True || False</a>
+                        <a class="dropdown-item editar">Editar</a>
                         <a class="dropdown-item eliminar">Eliminar</a>
                     </div>
                 </div>`
@@ -2549,6 +2545,169 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         $('#ModalEventos').modal('hide')
                         SMSj('error', 'Proyecto eliminado correctamente')
                     })
+                }
+            }
+        })
+    });
+    function Tablaedit(n) {
+        var tabledit = $('#datatabledit').DataTable({
+            ajax: {
+                method: "POST",
+                url: "/links/productos/" + n,
+                dataSrc: "data"
+            },
+            columns: [
+                {
+                    className: 'control',
+                    orderable: true,
+                    data: null,
+                    defaultContent: ''
+                },
+                {
+                    data: "mz",
+                    render: function (data, method, row) {
+                        return `<input class="form-control-no-border text-center" type="text" name="mz" value="${data}>`
+                    }
+                },
+                {
+                    data: "n",
+                    render: function (data, method, row) {
+                        return `<input class="form-control-no-border text-center lt" value="${data}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>`
+                    }
+                },
+                {
+                    data: "mtr2",
+                    render: function (data, method, row) {
+                        return `<input class="form-control-no-border text-center mt2" value="${data}" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>`
+                    }
+                },
+                {
+                    data: "estado",
+                    render: function (data, method, row) {
+                        switch (data) {
+                            case 1:
+                                return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                                break;
+                            case 9:
+                                return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                break;
+                            case 10:
+                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                                break;
+                            case 12:
+                                return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: "valor",
+                    render: function (data, method, row) {
+                        return `<input class="form-control-no-border text-center" type="text" name="valor" value="${Moneda(data)}">`
+                    }
+                },
+                {
+                    data: "inicial",
+                    render: function (data, method, row) {
+                        return `<input class="form-control-no-border text-center" type="text" name="inicial" value="${Moneda(data)}"></input>`
+                    }
+                },
+                {
+                    data: "descripcion",
+                    render: function (data, method, row) {
+                        return `<textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                        name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;">${data}</textarea>`
+                    }
+                }
+            ],
+            deferRender: true,
+            paging: true,
+            search: {
+                regex: true,
+                caseInsensitive: false,
+            },
+            responsive: {
+                details: {
+                    type: 'column'
+                }
+            },
+            details: {
+                display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                type: 'none',
+                target: ''
+            },
+            initComplete: function (settings, json) {
+                $('#ModalEventos').modal('toggle');
+                $('#ModalEventos').modal('hide')
+            },
+            columnDefs: [
+                { "visible": false, "targets": 1 }
+            ],
+            order: [[1, 'asc']],
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(1, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                                <td colspan="8">
+                                    <div class="text-center">
+                                        ${group != '0' ? 'MANZANA "' + group + '"' : ''}
+                                    </div>
+                                </td>
+                            </tr>`
+                        );
+
+                        last = group;
+                    }
+                });
+            }
+        });
+    }
+    table2.on('click', '.editar', function () {
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
+        var fila = $(this).parents('tr');
+        var data = table2.row(fila).data();
+        var datos = { id: data.id };
+        $.ajax({
+            type: 'POST',
+            url: '/links/productos/editar',
+            data: datos,
+            async: true,
+            success: function (data) {
+                if (data) {
+                    $('#ideditar').val(data.id)
+                    $(`select[name="categoria"] option[value='${data.categoria}']`).attr("selected", true);
+                    $(`input[name="title"]`).val(data.proyect);
+                    $(`.socio option[value='${data.socio}']`).attr("selected", true);
+                    $('#tmt2').val(data.totalmtr2)
+                    $('#vmt2').val(Moneda(data.valmtr2))
+                    $(`input[name="separacion"]`).val(Moneda(data.separacion))
+                    $(`input[name="incentivo"]`).val(Moneda(data.incentivo))
+                    $('.valproyect').html('$' + Moneda(data.valproyect))
+                    $('#valproyect').val(data.valproyect)
+                    $('#inicio').val(moment(data.fecha).format('YYYY-MM-DD'))
+                    $('#fin').val(moment(data.fechafin).format('YYYY-MM-DD'))
+                    $(`#porcentage option[value='${data.porcentage}']`).attr("selected", true);
+                    $(`.proveedor option[value='${data.proveedor}']`).attr("selected", true);
+                    data.mzs === null ? '' : $('#MANZANAS').prop("checked", true), $('#mzs').val(data.mzs).prop("disabled", false);
+                    $('#lts').val(data.cantidad);
+                    $("#cuadro2").hide("slow");
+                    $("#cuadro1").hide("slow");
+                    $("#cuadro3").show("slow");
+                    Tablaedit(data.id)
+                    /*$('#ModalEventos').modal('toggle');
+                    $('#ModalEventos').modal('hide')*/
                 }
             }
         })
