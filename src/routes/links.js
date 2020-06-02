@@ -69,18 +69,45 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
         console.log(fila)
         res.send(fila[0]);
+    } else if (id === 'nuevo') {
+        const { producto, mz, n, mtr2, estado, valor, inicial } = req.body;
+        const nuevo = { producto, mz: mz ? mz.toUpperCase() : 'no', n, mtr2, estado, valor, inicial }
+        const fila = await pool.query('INSERT INTO productosd SET ? ', nuevo);
+        await pool.query(`UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`)
+        res.send(true);
+    } else if (id === 'emili') {
+        const { id, prod } = req.body;
+        await pool.query('DELETE FROM productosd WHERE id = ?', id);
+        await pool.query(`UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`)
+        res.send(true);
+    } else if (id === 'update') {
+        const { id, mz, n, mtr2, valor, inicial, descripcion } = req.body;
+        d = {
+            mz: mz != 'no' ? mz.toUpperCase() : 'no', n, mtr2, valor: valor.replace(/\./g, ''),
+            inicial: inicial.replace(/\./g, ''), descripcion
+        }
+        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])
+        res.send(true);
     } else {
         const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
         respuesta = { "data": fila };
         res.send(respuesta);
     }
 });
+router.put('/produc/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    const { valor } = req.body;
+    await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
+    SET pd.inicial = pd.valor * ${valor} /100, p.porcentage = ${valor} 
+    WHERE pd.producto = ${id} AND pd.estado = 9`)
+    res.send(true);
+});
 router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
     SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, 
-    p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id}`)
+    p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id} AND pd.estado = 9`)
     res.send(respuesta);
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {

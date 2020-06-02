@@ -581,7 +581,7 @@ $(document).ready(function () {
         $("input").prop('disabled', false);
     })
     //////* Evitar que se envie formulario con la tecla enter *//////
-    $("input").keydown(function (e) {
+    /*$("input").keydown(function (e) {
         // Capturamos qué telca ha sido
         var keyCode = e.which;
         // Si la tecla es el Intro/Enter
@@ -591,7 +591,7 @@ $(document).ready(function () {
             // Devolvemos falso
             return false;
         }
-    });
+    });*/
 });
 //////////////////////////* INDEX */////////////////////////////////////////
 /*if (window.location.pathname == `/`) {
@@ -695,7 +695,7 @@ $(document).ready(function () {
         }
     });
 }*/
-//////////////////////////* TABLERO *///////////////////////////////////////
+//////////////////////////* INICIO *///////////////////////////////////////
 if (window.location.pathname == `/`) {
     $(document).ready(function () {
         var players = new Playerjs({ id: "player", file: 'video/ProyectoGrupoElite.MP4', player: 2 });
@@ -1873,13 +1873,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
                     $(this).val(9)
                 });
-
             } else {
-
                 $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
                     $(this).val(15)
                 });
-
             }
         });
         $('#datosproducto, #datosproducto2').on('change', 'table .lts', function () {
@@ -1991,7 +1988,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 i++;
             };
         });
-        $('form').submit(function (e) {
+        $('#pro form').submit(function (e) {
             $('#ModalEventos').modal({
                 toggle: true,
                 backdrop: 'static',
@@ -2013,15 +2010,32 @@ if (window.location == `${window.location.origin}/links/productos`) {
         })
         $('#vmt2, #porcentage').change(function () {
             var valor, inicial;
-            $('.mt2').each(function (index, element) {
-                if ($(this).val()) {
-                    valor = $(this).val() * $('#vmt2').cleanVal();
-                    inicial = valor * $('#porcentage').val() / 100;
-                    $(this).siblings('input[name="valor"]').val(valor);
-                    $(this).siblings('input[name="inicial"]').val(inicial);
-                    $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
-                }
-            });
+            if ($(this).attr('id') === 'porcentage' && $('#ideditar').val()) {
+                var datos = { valor: $(this).val() }
+                $.ajax({
+                    type: "PUT",
+                    url: "/links/produc/" + $('#ideditar').val(),
+                    data: datos,
+                    async: false,
+                    success: function (data) {
+                        if (data) {
+                            tabledit.ajax.reload(function (json) {
+                                SMSj('success', 'Nuevo porcentage establecido correctamente')
+                            })
+                        }
+                    }
+                })
+            } else {
+                $('.mt2').each(function (index, element) {
+                    if ($(this).val()) {
+                        valor = $(this).val() * $('#vmt2').cleanVal();
+                        inicial = valor * $('#porcentage').val() / 100;
+                        $(this).siblings('input[name="valor"]').val(valor);
+                        $(this).siblings('input[name="inicial"]').val(inicial);
+                        $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
+                    }
+                });
+            }
         });
         $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
             if ($('#vmt2').val()) {
@@ -2037,6 +2051,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     }
                 });
                 $('#calculom').text(sum)
+                $('#tmt2').val(sum)
+                var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
+                $('#valproyect').val(valor);
+                $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
             } else {
                 SMSj('info', 'Establezaca primero los valores del proyecto');
                 $(this).val('');
@@ -2401,7 +2419,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    //$("#cuadro2").hide("slow");
+                    tabledit.ajax.url("/links/productos/0").load(function () {
+                        tabledit.columns.adjust().draw();
+                    });
+                    $('#ideditar').val('')
+                    $('.datatabledit').hide()
+                    $('#cuadro3 input').val('')
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
                 }
@@ -2549,127 +2572,266 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
     });
-    function Tablaedit(n) {
-        var tabledit = $('#datatabledit').DataTable({
-            ajax: {
-                method: "POST",
-                url: "/links/productos/" + n,
-                dataSrc: "data"
-            },
-            columns: [
-                {
-                    className: 'control',
-                    orderable: true,
-                    data: null,
-                    defaultContent: ''
-                },
-                {
-                    data: "mz",
-                    render: function (data, method, row) {
-                        return `<input class="form-control-no-border text-center" type="text" name="mz" value="${data}>`
-                    }
-                },
-                {
-                    data: "n",
-                    render: function (data, method, row) {
-                        return `<input class="form-control-no-border text-center lt" value="${data}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>`
-                    }
-                },
-                {
-                    data: "mtr2",
-                    render: function (data, method, row) {
-                        return `<input class="form-control-no-border text-center mt2" value="${data}" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>`
-                    }
-                },
-                {
-                    data: "estado",
-                    render: function (data, method, row) {
-                        switch (data) {
-                            case 1:
-                                return `<span class="badge badge-pill badge-info">En Proceso</span>`
-                                break;
-                            case 9:
-                                return `<span class="badge badge-pill badge-success">Disponible</span>`
-                                break;
-                            case 10:
-                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
-                                break;
-                            case 12:
-                                return `<span class="badge badge-pill badge-secondary">Separado</span>`
-                                break;
-                            case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
-                                break;
-                        }
-                    }
-                },
-                {
-                    data: "valor",
-                    render: function (data, method, row) {
-                        return `<input class="form-control-no-border text-center" type="text" name="valor" value="${Moneda(data)}">`
-                    }
-                },
-                {
-                    data: "inicial",
-                    render: function (data, method, row) {
-                        return `<input class="form-control-no-border text-center" type="text" name="inicial" value="${Moneda(data)}"></input>`
-                    }
-                },
-                {
-                    data: "descripcion",
-                    render: function (data, method, row) {
-                        return `<textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
-                        name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;">${data}</textarea>`
-                    }
-                }
-            ],
-            deferRender: true,
-            paging: true,
-            search: {
-                regex: true,
-                caseInsensitive: false,
-            },
-            responsive: {
-                details: {
-                    type: 'column'
+    var tabledit = $('#datatabledit').DataTable({
+        ajax: {
+            method: "POST",
+            url: "/links/productos/0",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: "mz",
+                render: function (data, method, row) {
+                    return `<input class="form-control-no-border text-center text-uppercase mz" type="text" name="mz" value="${data}" style="padding: 1px; width: 30px; background-color: #FFFFCC;">`
                 }
             },
+            {
+                data: "n",
+                render: function (data, method, row) {
+                    return `<input class="form-control-no-border text-center lt" value="${data}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>`
+                }
+            },
+            {
+                data: "mtr2",
+                render: function (data, method, row) {
+                    return `<input class="form-control-no-border text-center mt2" value="${data}" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>`
+                }
+            },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                            break;
+                    }
+                }
+            },
+            {
+                data: "valor",
+                render: function (data, method, row) {
+                    return `<input class="form-control-no-border text-center valor" type="text" name="valor" value="${Moneda(data)}">`
+                }
+            },
+            {
+                data: "inicial",
+                render: function (data, method, row) {
+                    return `<input class="form-control-no-border text-center inicial" type="text" name="inicial" value="${Moneda(data)}"></input>`
+                }
+            },
+            {
+                data: "descripcion",
+                render: function (data, method, row) {
+                    return `<textarea class="form-control-no-border float-right mr-1 descripcion" placeholder="Estipula aqui los linderos del lote" 
+                        name="descripcion" rows="1" autocomplete="off" style="background-color: #FFFFCC; width: 100%;">${data}</textarea>`
+                }
+            },
+            {
+                orderable: false,
+                data: null,
+                defaultContent: `<a class="no float-right"><i class="align-middle mr-2 fas fa-fw fa-trash"></i></i></a>`
+            }
+        ],
+        iDisplayLength: 10,
+        stateSave: true,
+        stateDuration: -1,
+        autoWidth: false,
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            /*details: {
+                type: 'column'
+            }*/
             details: {
                 display: $.fn.dataTable.Responsive.display.childRowImmediate,
                 type: 'none',
                 target: ''
-            },
-            initComplete: function (settings, json) {
+            }
+        },
+        initComplete: function (settings, json) {
+            if ($('#cuadro3').is(':visible')) {
                 $('#ModalEventos').modal('toggle');
                 $('#ModalEventos').modal('hide')
-            },
-            columnDefs: [
-                { "visible": false, "targets": 1 }
-            ],
-            order: [[1, 'asc']],
-            drawCallback: function (settings) {
-                var api = this.api();
-                var rows = api.rows({ page: 'current' }).nodes();
-                var last = null;
+                $(`#datatabledit input[name="valor"]`).mask('000.000.000', { reverse: true });
+                $(`#datatabledit input[name="inicial"]`).mask('000.000.000', { reverse: true });
+            }
+        },
+        columnDefs: [
+            //{ "visible": false, "targets": 1 }
+            { responsivePriority: 1, targets: -1 },
+            /*{ responsivePriority: 2, targets: 0 },
+            { responsivePriority: 3, targets: 2 },
+            { responsivePriority: 4, targets: -2 },
+            { responsivePriority: 10001, targets: -3 }*/
+        ],
+        order: [[0, 'asc']],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
 
-                api.column(1, { page: 'current' }).data().each(function (group, i) {
-                    if (last !== group) {
-                        $(rows).eq(i).before(
-                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+            api.column(0, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
                                 <td colspan="8">
                                     <div class="text-center">
                                         ${group != '0' ? 'MANZANA "' + group + '"' : ''}
                                     </div>
                                 </td>
                             </tr>`
-                        );
+                    );
 
-                        last = group;
-                    }
-                });
+                    last = group;
+                }
+            });
+        },
+        rowCallback: function (row, data, index) {
+            if (data["estado"] == 10) {
+                $(row).css("background-color", "#39E9CC");
+            } else if (data["estado"] == 1) {
+                $(row).css("background-color", "#FFFFCC");
             }
-        });
+        }
+    });
+    $('#Modaledit').on('click', '#mas', function (e) {
+        e.preventDefault()
+        var datos = $('#Modaledit #mast').serialize();
+        $('#Modaledit').modal('toggle');
+        $.ajax({
+            type: 'POST',
+            url: '/links/productos/nuevo',
+            data: datos,
+            async: true,
+            success: function (data) {
+                if (data) {
+                    tabledit.ajax.reload(function (json) {
+                        SMSj('success', 'Subproducto agregado correctamente')
+                    })
+                }
+            }
+        })
+    })
+
+    $('#Modaledit').on('change', '.mt2', function () {
+        var valor = $(this).val() * $('#vmt2').cleanVal();
+        var inicial = valor * $('#porcentage').val() / 100;
+        var sum = 0;
+        $('#Modaledit input[name="valor"]').val(valor);
+        $('#Modaledit input[name="inicial"]').val(inicial);
+        $('#Modaledit #va').html('$ ' + Moneda(Math.round(valor)));
+        $('#Modaledit #in').html('$ ' + Moneda(Math.round(inicial)));
+        tabledit
+            .column(2)
+            .data()
+            .filter(function (value, index) {
+                //console.log(sum += parseFloat(value), index, value)
+                sum += parseFloat(value)
+                //return value === "" ? true : false;
+            });
+
+        $('#tmt2').val(sum + parseFloat($(this).val()))
+        var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
+        $('#valproyect').val(valor);
+        $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
+    });
+    /*
+        tabledit.row(fila)
+            .css('color', 'red')
+            .animate({ color: 'black' });
+    */
+    var Recorre = () => {
+        tabledit
+            .column(2)
+            .data()
+            .filter(function (value, index) {
+                //console.log(sum += parseFloat(value), index, value)
+                sum += parseFloat(value)
+                //return value === "" ? true : false;
+            });
+
+        $('#tmt2').val(sum + parseFloat($(this).val()))
+        var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
+        $('#valproyect').val(valor);
+        $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
     }
+    tabledit.on('click', '.no', function () {
+        var fila = $(this).parents('tr');
+        var data = tabledit.row(fila).data();
+        if (data.estado == 9 || data.estado == 15) {
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+            var datos = { id: data.id, prod: data.producto };
+            $.ajax({
+                type: 'POST',
+                url: '/links/productos/emili',
+                data: datos,
+                async: true,
+                success: function (data) {
+                    if (data) {
+                        tabledit.ajax.reload(function (json) {
+                            tabledit.columns.adjust().draw();
+                            $('#ModalEventos').modal('hide')
+                            SMSj('error', 'Proyecto eliminado correctamente')
+                        })
+                    }
+                }
+            })
+        } else {
+            SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
+        }
+    });
+    tabledit.on('change', 'tr input, textarea', function () {
+        var fila = $(this).parents('tr');
+        var data = tabledit.row(fila).data();
+        var d = {
+            id: data.id,
+            mz: fila.find(`.mz`).val(),
+            n: fila.find(`.lt`).val(),
+            mtr2: fila.find(`.mt2`).val(),
+            valor: fila.find(`.valor`).val(),
+            inicial: fila.find(`.inicial`).val(),
+            descripcion: fila.find(`.descripcion`).val()
+        }
+        console.log(d)
+        if (data.estado == 9 || data.estado == 15) {
+            $.ajax({
+                type: 'POST',
+                url: '/links/productos/update',
+                data: d,
+                async: true,
+                success: function (data) {
+                    if (data) {
+                        tabledit.ajax.reload(function (json) {
+                            tabledit.columns.adjust().draw();
+                            SMSj('success', 'Actualizacion exitosa')
+                        })
+                    }
+                }
+            })
+        } else {
+            SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
+        }
+    });
     table2.on('click', '.editar', function () {
         $('#ModalEventos').modal({
             toggle: true,
@@ -2687,6 +2849,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             success: function (data) {
                 if (data) {
                     $('#ideditar').val(data.id)
+                    $('#di').val(data.id)
                     $(`select[name="categoria"] option[value='${data.categoria}']`).attr("selected", true);
                     $(`input[name="title"]`).val(data.proyect);
                     $(`.socio option[value='${data.socio}']`).attr("selected", true);
@@ -2702,10 +2865,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $(`.proveedor option[value='${data.proveedor}']`).attr("selected", true);
                     data.mzs === null ? '' : $('#MANZANAS').prop("checked", true), $('#mzs').val(data.mzs).prop("disabled", false);
                     $('#lts').val(data.cantidad);
+                    $('#vmt2').prop('disabled', true)
+                    $('.datatabledit').show()
                     $("#cuadro2").hide("slow");
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
-                    Tablaedit(data.id)
+                    //Tablaedit(data.id)
+                    tabledit.ajax.url("/links/productos/" + data.id).load(function () {
+                        tabledit.columns.adjust().draw();
+                        $('#ModalEventos').modal('hide')
+                    });
                     /*$('#ModalEventos').modal('toggle');
                     $('#ModalEventos').modal('hide')*/
                 }
