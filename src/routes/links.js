@@ -70,8 +70,8 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         console.log(fila)
         res.send(fila[0]);
     } else if (id === 'nuevo') {
-        const { producto, mz, n, mtr2, estado, valor, inicial } = req.body;
-        const nuevo = { producto, mz: mz ? mz.toUpperCase() : 'no', n, mtr2, estado, valor, inicial }
+        const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
+        const nuevo = { producto, mz: mz ? mz.toUpperCase() : 'no', n, mtr2, estado, valor, inicial, descripcion }
         const fila = await pool.query('INSERT INTO productosd SET ? ', nuevo);
         await pool.query(`UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`)
         res.send(true);

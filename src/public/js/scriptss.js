@@ -2622,13 +2622,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "valor",
                 render: function (data, method, row) {
-                    return `<input class="form-control-no-border text-center valor" type="text" name="valor" value="${Moneda(data)}">`
+                    return `<input class="form-control-no-border text-center valor" type="text" name="valor" value="${Moneda(data)}" disabled>`
                 }
             },
             {
                 data: "inicial",
                 render: function (data, method, row) {
-                    return `<input class="form-control-no-border text-center inicial" type="text" name="inicial" value="${Moneda(data)}"></input>`
+                    return `<input class="form-control-no-border text-center inicial" type="text" name="inicial" value="${Moneda(data)}" disabled>`
                 }
             },
             {
@@ -2803,17 +2803,22 @@ if (window.location == `${window.location.origin}/links/productos`) {
     tabledit.on('change', 'tr input, textarea', function () {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
-        var d = {
-            id: data.id,
-            mz: fila.find(`.mz`).val(),
-            n: fila.find(`.lt`).val(),
-            mtr2: fila.find(`.mt2`).val(),
-            valor: fila.find(`.valor`).val(),
-            inicial: fila.find(`.inicial`).val(),
-            descripcion: fila.find(`.descripcion`).val()
-        }
-        console.log(d)
         if (data.estado == 9 || data.estado == 15) {
+            if ($(this).hasClass('mt2')) {
+                var vr = parseFloat($(this).val()) * parseFloat($('#vmt2').cleanVal());
+                var ini = (parseFloat($(this).val()) * parseFloat($('#vmt2').cleanVal())) * parseFloat($('#porcentage').val()) / 100
+                fila.find(`.valor`).val(Moneda(vr))
+                fila.find(`.inicial`).val(Moneda(ini))
+            }
+            var d = {
+                id: data.id,
+                mz: fila.find(`.mz`).val(),
+                n: fila.find(`.lt`).val(),
+                mtr2: fila.find(`.mt2`).val(),
+                valor: fila.find(`.valor`).val(),
+                inicial: fila.find(`.inicial`).val(),
+                descripcion: fila.find(`.descripcion`).val()
+            }
             $.ajax({
                 type: 'POST',
                 url: '/links/productos/update',
