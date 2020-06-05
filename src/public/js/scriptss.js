@@ -2835,6 +2835,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
             })
         } else {
             SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
+            fila.find(`.mz`).val(data.mz)
+            fila.find(`.lt`).val(data.n)
+            fila.find(`.mt2`).val(data.mtr2)
+            fila.find(`.valor`).val(data.valor)
+            fila.find(`.inicial`).val(data.inicial)
+            fila.find(`.descripcion`).val(data.descripcion)
         }
     });
     table2.on('click', '.editar', function () {
@@ -2872,6 +2878,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#lts').val(data.cantidad);
                     $('#vmt2').prop('disabled', true)
                     $('.datatabledit').show()
+                    $('#sololotes').html('')
+                    $('#sololotes2').html('')
+                    $('#datosproducto').html('')
+                    $('#datosproducto2').html('')
                     $("#cuadro2").hide("slow");
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
