@@ -2654,7 +2654,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 defaultContent: `<a class="no float-right"><i class="align-middle mr-2 fas fa-fw fa-trash"></i></i></a>`
             }
         ],
-        iDisplayLength: 10,
         stateSave: true,
         stateDuration: -1,
         autoWidth: false,
@@ -2841,6 +2840,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 fila.find(`.valor`).val(Moneda(vr))
                 fila.find(`.inicial`).val(Moneda(ini))
             }
+            tabledit.state.save()
             var d = {
                 id: data.id,
                 mz: fila.find(`.mz`).val(),
@@ -2858,10 +2858,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 async: true,
                 success: function (data) {
                     if (data) {
-                        tabledit.ajax.reload(function (json) {
+                        tabledit.ajax.reload(null, false)
+                        /*tabledit.ajax.reload(function (json) {
                             tabledit.columns.adjust().draw();
                             SMSj('success', 'Actualizacion exitosa')
-                        })
+                        })*/
+                        SMSj('success', 'Actualizacion exitosa')
                     }
                 }
             })
