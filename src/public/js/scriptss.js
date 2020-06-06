@@ -2609,7 +2609,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="9">Disponible</option>
-                                <option value="1">En Proceso</option>
                                 <option value="15">Inactivo</option>
                             </select>`
                             break;
@@ -2624,7 +2623,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="15">Inactivo</option>
-                                <option value="1">En Proceso</option>
                                 <option value="9">Disponible</option>
                             </select>`
                             break;
