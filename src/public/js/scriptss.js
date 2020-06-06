@@ -2645,7 +2645,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 data: "descripcion",
                 render: function (data, method, row) {
                     return `<textarea class="form-control-no-border float-right mr-1 descripcion" placeholder="Estipula aqui los linderos del lote" 
-                        name="descripcion" rows="1" autocomplete="off" style="background-color: #FFFFCC; width: 100%;">${data}</textarea>`
+                        name="descripcion" rows="1" autocomplete="off" style="background-color: #FFFFCC; width: 100%;">${data !== null ? data : ''}</textarea>`
                 }
             },
             {
@@ -2710,9 +2710,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
             });
         },
         rowCallback: function (row, data, index) {
-            if (data["estado"] == 10) {
+            if (data["estado"] == 9) {
                 $(row).css("background-color", "#39E9CC");
-            } else if (data["estado"] == 1) {
+            } else if (data["estado"] == 15) {
                 $(row).css("background-color", "#FFFFCC");
             }
         }
@@ -2819,8 +2819,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     });
     tabledit.on('click', 'tr span', function () {
-        $(this).hide()
-        $(this).siblings('select').show('slow')
+        var fila = $(this).parents('tr');
+        var data = tabledit.row(fila).data();
+        if (data.estado == 9 || data.estado == 15) {
+            var este = $(this), aquel = $(this).siblings()
+            este.hide()
+            aquel.fadeToggle(2000)
+            setTimeout(function () {
+                aquel.hide()
+                este.fadeToggle(2000)
+            }, 9000);
+        }
     })
     tabledit.on('change', 'tr input, textarea, select', function () {
         var fila = $(this).parents('tr');
@@ -2861,8 +2870,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             fila.find(`.mz`).val(data.mz)
             fila.find(`.lt`).val(data.n)
             fila.find(`.mt2`).val(data.mtr2)
-            fila.find(`.valor`).val(data.valor)
-            fila.find(`.inicial`).val(data.inicial)
+            fila.find(`.valor`).val(Moneda(data.valor))
+            fila.find(`.inicial`).val(Moneda(data.inicial))
             fila.find(`.descripcion`).val(data.descripcion)
         }
     });
