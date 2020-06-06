@@ -80,9 +80,10 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`)
         res.send(true);
     } else if (id === 'update') {
-        const { id, mz, n, mtr2, valor, inicial, descripcion } = req.body;
+        const { id, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
         d = {
-            mz: mz != 'no' ? mz.toUpperCase() : 'no', n, mtr2, valor: valor.replace(/\./g, ''),
+            mz: mz != 'no' ? mz.toUpperCase() : 'no', n, mtr2,
+            estado, valor: valor.replace(/\./g, ''),
             inicial: inicial.replace(/\./g, ''), descripcion
         }
         await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])

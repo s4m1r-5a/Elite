@@ -2605,7 +2605,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             return `<span class="badge badge-pill badge-info">En Proceso</span>`
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            return `<span class="badge badge-pill badge-success">Disponible</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="9">Disponible</option>
+                                <option value="1">En Proceso</option>
+                                <option value="15">Inactivo</option>
+                            </select>`
                             break;
                         case 10:
                             return `<span class="badge badge-pill badge-primary">Vendido</span>`
@@ -2614,7 +2620,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             return `<span class="badge badge-pill badge-secondary">Separado</span>`
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                            return `<span class="badge badge-pill badge-warning">Inactivo</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="15">Inactivo</option>
+                                <option value="1">En Proceso</option>
+                                <option value="9">Disponible</option>
+                            </select>`
                             break;
                     }
                 }
@@ -2808,7 +2820,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
             SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
         }
     });
-    tabledit.on('change', 'tr input, textarea', function () {
+    tabledit.on('click', 'tr span', function () {
+        $(this).hide()
+        $(this).siblings('select').show('slow')
+    })
+    tabledit.on('change', 'tr input, textarea, select', function () {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
         if (data.estado == 9 || data.estado == 15) {
@@ -2823,6 +2839,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 mz: fila.find(`.mz`).val(),
                 n: fila.find(`.lt`).val(),
                 mtr2: fila.find(`.mt2`).val(),
+                estado: fila.find(`.estado`).val() || data.estado,
                 valor: fila.find(`.valor`).val(),
                 inicial: fila.find(`.inicial`).val(),
                 descripcion: fila.find(`.descripcion`).val()
