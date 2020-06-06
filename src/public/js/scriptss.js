@@ -2675,10 +2675,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         columnDefs: [
             //{ "visible": false, "targets": 1 }
             { responsivePriority: 1, targets: -1 },
-            /*{ responsivePriority: 2, targets: 0 },
-            { responsivePriority: 3, targets: 2 },
-            { responsivePriority: 4, targets: -2 },
-            { responsivePriority: 10001, targets: -3 }*/
+            //{ responsivePriority: 10001, targets: -3 }
         ],
         order: [[0, 'asc']],
         drawCallback: function (settings) {
@@ -2728,7 +2725,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
     })
-
     $('#Modaledit').on('change', '.mt2', function () {
         var valor = $(this).val() * $('#vmt2').cleanVal();
         var inicial = valor * $('#porcentage').val() / 100;
@@ -2741,29 +2737,41 @@ if (window.location == `${window.location.origin}/links/productos`) {
             .column(2)
             .data()
             .filter(function (value, index) {
-                //console.log(sum += parseFloat(value), index, value)
                 sum += parseFloat(value)
-                //return value === "" ? true : false;
             });
 
         $('#tmt2').val(sum + parseFloat($(this).val()))
         var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
         $('#valproyect').val(valor);
         $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
+        Dts()
     });
     /*
         tabledit.row(fila)
             .css('color', 'red')
             .animate({ color: 'black' });
     */
+    var Dts = () => {
+        $('form input').prop('disabled', false);
+        var datos = $('form').serialize();
+        $.ajax({
+            type: 'POST',
+            url: '/links/regispro',
+            data: datos,
+            async: true,
+            success: function (data) {
+                if (data) {
+                    SMSj('success', 'Producto actualizado correctamente')
+                }
+            }
+        })
+    }
     var Recorre = () => {
         tabledit
             .column(2)
             .data()
             .filter(function (value, index) {
-                //console.log(sum += parseFloat(value), index, value)
                 sum += parseFloat(value)
-                //return value === "" ? true : false;
             });
 
         $('#tmt2').val(sum + parseFloat($(this).val()))
@@ -2876,7 +2884,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $(`.proveedor option[value='${data.proveedor}']`).attr("selected", true);
                     data.mzs === null ? '' : $('#MANZANAS').prop("checked", true), $('#mzs').val(data.mzs).prop("disabled", false);
                     $('#lts').val(data.cantidad);
-                    $('#vmt2').prop('disabled', true)
+                    $('#lts').prop('disabled', true);
+                    $('#vmt2').prop('disabled', true);
+                    $('#mzs').prop('disabled', true);
+                    $('#MANZANAS').prop('disabled', true);
                     $('.datatabledit').show()
                     $('#sololotes').html('')
                     $('#sololotes2').html('')

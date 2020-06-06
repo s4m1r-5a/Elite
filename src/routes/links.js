@@ -67,7 +67,6 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'editar') {
         const { id } = req.body;
         const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
-        console.log(fila)
         res.send(fila[0]);
     } else if (id === 'nuevo') {
         const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
@@ -110,10 +109,15 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
     p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id} AND pd.estado = 9`)
     res.send(respuesta);
 });
+router.post('/actualiza', isLoggedIn, async (req, res) => {
+    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, separacion, incentivo, fecha,
+        fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
+
+});
 router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
         separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
-        cta, numero, mail, direccion, tel, web, descripcion } = req.body;
+        cta, numero, mail, direccion, tel, web, descripcion, editar } = req.body;
     const produc = {
         categoria, proveedor, socio, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
@@ -154,15 +158,19 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
             produc.socio = newprovee.insertId
         }
     }
-
-    const datos = await pool.query('INSERT INTO productos SET ? ', produc);
-    var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, valor, inicial) VALUES ';
-    await n.map((t, i) => {
-        producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
-    });
-    await pool.query(producdata.slice(0, -1));
-    req.flash('success', 'Producto registrado exitosamente');
-    res.redirect('/links/productos');
+    if (editar) {
+        await pool.query(`UPDATE productos SET ? WHERE id = ?`, [produc, editar]);
+        res.send(true);
+    } else {
+        const datos = await pool.query('INSERT INTO productos SET ? ', produc);
+        var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, valor, inicial) VALUES ';
+        await n.map((t, i) => {
+            producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
+        });
+        await pool.query(producdata.slice(0, -1));
+        req.flash('success', 'Producto registrado exitosamente');
+        res.redirect('/links/productos');
+    }
 });
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
