@@ -1,742 +1,668 @@
 <main class="content">
     <div class="container-fluid p-0">
-        <div class="card">
-            <div class="card-header">
-                <h1 class="mb-3">ORDEN DE SEPARACIÓN</h1>
-            </div>
-            <div class="card-body">
-                <div class="row">
-                    <form action="/links/orden" method="POST" id="enviodeorden">
-                        <input type="hidden" id="lot" value="{{id}}" name="lote">
-                        <div class="col-xl-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-actions float-right">
-                                        <div class="dropdown show">
-                                            <a href="#" data-toggle="dropdown" data-display="static">
-                                                <i class="align-middle" data-feather="more-horizontal"></i>
-                                            </a>
+        <h1 class="h3 mb-3">ORDEN DE SEPARACIÓN LOTE EN EL PROYECTO</h1>
+        <div class="row">
+            <form action="/links/orden" method="POST" id="enviodeorden">
+                <input type="hidden" id="lot" value="{{id}}" name="lote">
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-actions float-right">
+                                <div class="dropdown show">
+                                    <a href="#" data-toggle="dropdown" data-display="static">
+                                        <i class="align-middle" data-feather="more-horizontal"></i>
+                                    </a>
 
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item" href="#">Action</a>
-                                                <a class="dropdown-item" href="#">Another action</a>
-                                                <a class="dropdown-item" href="#">Something else here</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <h5 class="card-title mb-0">Proyecto & Cliente</h5>
-                                    <div class="row no-gutters">
-                                        <div class="col-sm-3 col-xl-12 col-xxl-3 text-center mb-1">
-                                            <img src="/img/avatars/avatar.svg" width="64" height="64"
-                                                class="rounded-circle mt-2">
-                                        </div>
-                                        <div class="col-sm-9 col-xl-12 col-xxl-9 mt-2">
-                                            {{#each proyecto}}
-                                            <strong>{{nombre}}</strong>
-                                            <span class="float-right text-muted text-sm hoy"></span><br>
-                                            <strong>Mz: </strong><span class="">{{mz}}</span><br>
-                                            <strong>Lote: </strong><span class="">{{n}}</span><br>
-                                            {{/each}}
-                                            <strong>Asesor: </strong><span class="">{{user.fullname}}</span>
-                                        </div>
+                                    <div class="dropdown-menu dropdown-menu-right">
+                                        <a class="dropdown-item" href="#">Action</a>
+                                        <a class="dropdown-item" href="#">Another action</a>
+                                        <a class="dropdown-item" href="#">Something else here</a>
                                     </div>
                                 </div>
-                                <div class="card-body">
-                                    <div class="row" id="cliente1">
-                                        <input type="hidden" class="client" value="" name="client">
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="user"></i>
-                                                            Nombre
-                                                        </th>
-                                                        <td>
-                                                            <input
-                                                                class="form-control-no-border edi text-uppercase nombres u"
-                                                                type="text" placeholder="Nombre completo"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="nombres" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="credit-card"></i>
-                                                            Documento
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi documento u"
-                                                                type="text" placeholder="Documento de identidad"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="documento" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="map-pin"></i>
-                                                            Expedida
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi lugarexpedicion u"
-                                                                type="text" name="lugarexpedicion"
-                                                                placeholder="Lugar de expedición del documento"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="calendar"></i> F.
-                                                            Expedición
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi fechas espedida u"
-                                                                type="text" placeholder="Fecha de expedición"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="fechaexpedicion" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="calendar"></i> F.
-                                                            Nacimiento
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi fechas nacido u"
-                                                                type="text" placeholder="Fecha de nacimiento"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="fechanacimiento" required>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="heart"></i>
-                                                            Estado Civil
-                                                        </th>
-                                                        <td>
-                                                            <select class="form-control-no-border edi estadocivil u"
-                                                                name="estadocivil" style="padding: 1px; width: 100%;"
-                                                                required>
-                                                                <option value="">Situación sentimental?</option>
-                                                                <option value="Casado(a)">Casado(a)</option>
-                                                                <option value="Soltero(a)">Soltero(a)</option>
-                                                                <option value="Viudo(a)">Viudo(a)</option>
-                                                                <option value="Divorciado(a)">Divorciado(a)</option>
-                                                                <option value="Union libre">Union libre</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="mail"></i>
-                                                            Email
-                                                        </th>
-                                                        <td>
-                                                            <input
-                                                                class="form-control-no-border edi text-lowercase email u"
-                                                                type="email" placeholder="Correo electrónico"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="email" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="phone-call"></i>
-                                                            Móvil
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi movil u" type="tel"
-                                                                data-mask="000-000-0000" placeholder="Numero celular"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="movil" id="movil" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="map"></i>
-                                                            Dirección
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi direccion u"
-                                                                type="text" placeholder="Dirección de residencia"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="direccion" required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="user-plus"></i>
-                                                        </th>
-                                                        <td>
-                                                            <a class="btn btn-outline-dark btn-sm float-right mr-3"
-                                                                id="AgregarCliente"><i
-                                                                    class="fas fa-fw fa-user-plus"></i>
-                                                                Agregar cliente</a>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    <!--Cliente #2-->
-                                    <div class="row cliente2" id="cliente2" style="display: none;">
-                                        <input type="hidden" class="client" value="" name="client">
-                                        <div class="col-12 col-lg-12">
-                                            <div class="d-inline-block float-right">
-                                                <a class="r atras"><i class="feather-lg"
-                                                        data-feather="x-circle"></i></a>
-                                            </div>
-                                            <hr style="width: 90%;" />
-                                            <div class="h4">Cliente #2</div>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="user"></i>
-                                                            Nombre
-                                                        </th>
-                                                        <td>
-                                                            <input
-                                                                class="form-control-no-border edi text-uppercase nombres d"
-                                                                type="text" placeholder="Nombre completo"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="nombres">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="credit-card"></i>
-                                                            Documento
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi documento d"
-                                                                type="text" placeholder="Documento de identidad"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="documento">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="map-pin"></i>
-                                                            Expedida
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi lugarexpedicion d"
-                                                                type="text" name="lugarexpedicion"
-                                                                placeholder="Lugar de expedición del documento"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="calendar"></i> F.
-                                                            Expedición
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi fechas espedida d"
-                                                                type="text" placeholder="Fecha de expedición"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="fechaexpedicion">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="calendar"></i> F.
-                                                            Nacimiento
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi fechas nacido d"
-                                                                type="text" placeholder="Fecha de nacimiento"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="fechanacimiento">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="users"></i>Parentesco
-                                                        </th>
-                                                        <td>
-                                                            <select name="Parentesco" class="form-control-no-border edi"
-                                                                style="padding: 1px; width: 50%;" name="parentesco">
-                                                                <option value="">Parentesco?</option>
-                                                                <option value="Esposo(a)">Esposo(a)</option>
-                                                                <option value="Socio(a)">Socio(a)</option>
-                                                                <option value="Amigo(a)">Amigo(a)</option>
-                                                                <option value="Familiar">Familiar</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="heart"></i>
-                                                            Estado Civil
-                                                        </th>
-                                                        <td>
-                                                            <select class="form-control-no-border edi estadocivil d"
-                                                                name="estadocivil" style="padding: 1px; width: 100%;">
-                                                                <option value="">Situación sentimental?</option>
-                                                                <option value="Casado(a)">Casado(a)</option>
-                                                                <option value="Soltero(a)">Soltero(a)</option>
-                                                                <option value="Viudo(a)">Viudo(a)</option>
-                                                                <option value="Divorciado(a)">Divorciado(a)</option>
-                                                                <option value="Union libre">Union libre</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="mail"></i>
-                                                            Email
-                                                        </th>
-                                                        <td>
-                                                            <input
-                                                                class="form-control-no-border edi text-lowercase email d"
-                                                                type="email" placeholder="Correo electrónico"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="email">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="phone-call"></i>
-                                                            Móvil
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi movil d" type="tel"
-                                                                data-mask="000-000-0000" placeholder="Numero celular"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="movil">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md" data-feather="map"></i>
-                                                            Dirección
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi direccion d"
-                                                                type="text" placeholder="Dirección de residencia"
-                                                                autocomplete="off" style="padding: 1px; width: 100%;"
-                                                                name="direccion">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-
+                            </div>
+                            <h5 class="card-title mb-0">Proyecto & Cliente</h5>
+                            <div class="row no-gutters">
+                                <div class="col-sm-3 col-xl-12 col-xxl-3 text-center mb-1">
+                                    <img src="/img/avatars/avatar.svg" width="64" height="64"
+                                        class="rounded-circle mt-2">
+                                </div>
+                                <div class="col-sm-9 col-xl-12 col-xxl-9 mt-2">
+                                    {{#each proyecto}}
+                                    <strong>{{nombre}}</strong>
+                                    <span class="float-right text-muted text-sm hoy"></span><br>
+                                    <strong>Mz: </strong><span class="">{{mz}}</span><br>
+                                    <strong>Lote: </strong><span class="">{{n}}</span><br>
+                                    {{/each}}
+                                    <strong>Asesor: </strong><span class="">{{user.fullname}}</span>
                                 </div>
                             </div>
                         </div>
-                        <div class="col-xl-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-actions float-right">
-                                        <div class="dropdown show">
-                                            <a href="#" data-toggle="dropdown" data-display="static">
-                                                <i class="align-middle" data-feather="more-horizontal"></i>
-                                            </a>
-
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item" href="#">Action</a>
-                                                <a class="dropdown-item" href="#">Another action</a>
-                                                <a class="dropdown-item" href="#">Something else here</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <h5 class="card-title mb-0">Forma de pago</h5>
-                                </div>
-                                <div class="card-body">
-                                    {{#each proyecto}}
-                                    <input type="hidden" id="separacion" value="{{separacion}}">
-                                    <input type="hidden" id="porcentage" name="iniciar" value="{{porcentage}}">
-                                    <input type="hidden" id="fechs" value="{{fechafin}}">
-                                    <input type="hidden" id="extran" name="extran" value="">
-                                    <div class="row">
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="maximize"></i>
-                                                            MTr²
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi" type="text"
-                                                                id="mtr" value="{{mtr2}}"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="trending-up"></i>
-                                                            Vr MTr²
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border val" type="text"
-                                                                id="vrmtr" value="{{valmtr2}}" name="vrmt2"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="map-pin"></i>
-                                                            Lote
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border val" type="text"
-                                                                id="vrlote" value="{{valor}}"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="droplet"></i>
-                                                            N° Cuotas
-                                                        </th>
-                                                        <td>
-                                                            <select name="numerocuotaspryecto" id="ncuotas"
-                                                                class="form-control-no-border edi"
-                                                                style="padding: 1px; width: 70%; text-align-last:center"
-                                                                required>
-                                                            </select>
-                                                            <select id="dia" name="dia"
-                                                                class="form-control-no-border edi float-right"
-                                                                style="padding: 1px; width: 20%; text-align-last:center">
-                                                                <option value="1">1</option>
-                                                                <option value="2">2</option>
-                                                                <option value="3">3</option>
-                                                                <option value="4">4</option>
-                                                                <option value="5">5</option>
-                                                                <option value="6">6</option>
-                                                                <option value="7">7</option>
-                                                                <option value="8">8</option>
-                                                                <option value="9">9</option>
-                                                                <option value="10">10</option>
-                                                                <option value="11">11</option>
-                                                                <option value="12">12</option>
-                                                                <option value="13">13</option>
-                                                                <option value="14">14</option>
-                                                                <option value="15">15</option>
-                                                                <option value="16">16</option>
-                                                                <option value="17">17</option>
-                                                                <option value="18">18</option>
-                                                                <option value="19">19</option>
-                                                                <option value="20">20</option>
-                                                                <option value="21">21</option>
-                                                                <option value="22">22</option>
-                                                                <option value="23">23</option>
-                                                                <option value="24">24</option>
-                                                                <option value="25">25</option>
-                                                                <option value="26">26</option>
-                                                                <option value="27">27</option>
-                                                                <option value="28">28</option>
-                                                                <option value="29">29</option>
-                                                                <option value="30">30</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="calendar"></i>
-                                                            Extraor
-                                                        </th>
-                                                        <td>
-                                                            <select id="Emeses" name="extraordinariameses"
-                                                                class="form-control-no-border edi float-right"
-                                                                style="padding: 1px; width: 100%; text-align-last:center">
-                                                                <option value="">Niguna</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="dollar-sign"></i>
-                                                            Extraor vr
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border edi val"
-                                                                id="cuotaestrao" type="text"
-                                                                placeholder="Ingrese cuota extra" autocomplete="off"
-                                                                data-mask="000.000.000" data-mask-reverse="true"
-                                                                data-mask-selectonfocus="true"
-                                                                name="cuotaextraordinaria"
-                                                                style="padding: 1px; width: 100%; text-align:center">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="text-center">
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="dollar-sign"></i>
-                                                            Total Lote
-                                                        </th>
-                                                        <td class="text-center">
-                                                            <input class="form-control-no-border text-center totalote"
-                                                                type="text" value="{{valor}}"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled required>
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                        <div class="col-12 col-lg-6">
-                                            <table class="table table-sm my-2">
-                                                <tbody>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary" data-feather="slack"></i>
-                                                            Inicial
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border val" type="text"
-                                                                value="{{inicial}}" id="cuotainicial"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled required>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="percent"></i>
-                                                            70%
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border" type="text" value=""
-                                                                id="p70" name="proyecto70x100to"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary" data-feather="tag"></i>
-                                                            Cupon
-                                                        </th>
-                                                        <td>
-                                                            <input type="hidden" id="bonoid" name="cupon" value="">
-                                                            <input class="form-control-no-border edi" type="text"
-                                                                placeholder="N° bono" id="bono"
-                                                                style="padding: 1px; width: 100%; text-align:center">
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="droplet"></i>
-                                                            Diferir
-                                                        </th>
-                                                        <td>
-                                                            <select name="inicialdiferida" id="diferinicial"
-                                                                class="form-control-no-border edi"
-                                                                style="padding: 1px; width: 100%; text-align-last:center">
-                                                                <option value="1">1 Cuota</option>
-                                                                <option value="2">2 Cuotas</option>
-                                                                <option value="3">3 Cuotas</option>
-                                                                <option value="4">4 Cuotas</option>
-                                                                <option value="0">Ninguna</option>
-                                                            </select>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="trending-down"></i>
-                                                            Dto
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border" type="text" value="0%"
-                                                                id="dto"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th>
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="pocket"></i>
-                                                            Ahorra
-                                                        </th>
-                                                        <td>
-                                                            <input class="form-control-no-border float-right"
-                                                                type="text" value="$0" id="ahorro" name="ahorro"
-                                                                style="padding: 1px; width: 100%; text-align:center"
-                                                                disabled>
-                                                        </td>
-                                                    </tr>
-                                                    <tr>
-                                                        <th class="text-center">
-                                                            <i class="feather-md text-primary"
-                                                                data-feather="dollar-sign"></i>
-                                                            Separar
-                                                        </th>
-                                                        <td class="text-center">
-                                                            <input class="form-control-no-border text-center edi"
-                                                                name="separacion" autocomplete="off" type="text"
-                                                                placeholder="Abono" id="abono"
-                                                                style="padding: 1px; width: 100%; background-color: #FFFFCC;"
-                                                                data-mask="000.000.000" data-mask-reverse="true"
-                                                                data-mask-selectonfocus="true" value="{{separacion}}">
-                                                        </td>
-                                                    </tr>
-                                                </tbody>
-                                            </table>
-                                        </div>
-                                    </div>
-                                    {{/each}}
-                                    <table id="datatables-clients" class="table table-sm table-striped"
-                                        style="width:100%">
-                                        <thead>
+                        <div class="card-body">
+                            <div class="row" id="cliente1">
+                                <input type="hidden" class="client" value="" name="client">
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
                                             <tr>
-                                                <th>#</th>
-                                                <th>fecha</th>
-                                                <th>oficial</th>
-                                                <th>Cuota</th>
-                                                <th>Estado</th>
-                                                <th>#</th>
-                                                <th>fecha</th>
-                                                <th>Cuota</th>
-                                                <th>Estado</th>
+                                                <th>
+                                                    <i class="feather-md" data-feather="user"></i>
+                                                    Nombre
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-uppercase nombres u"
+                                                        type="text" placeholder="Nombre completo" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="nombres" required>
+                                                </td>
                                             </tr>
-                                        </thead>
-                                        <tbody id="cuerpo"></tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="credit-card"></i>
+                                                    Documento
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi documento u" type="text"
+                                                        placeholder="Documento de identidad" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="documento" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="map-pin"></i>
+                                                    Expedida
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi lugarexpedicion u"
+                                                        type="text" name="lugarexpedicion"
+                                                        placeholder="Lugar de expedición del documento"
+                                                        autocomplete="off" style="padding: 1px; width: 100%;" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="calendar"></i> F.
+                                                    Expedición
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi fechas espedida u"
+                                                        type="text" placeholder="Fecha de expedición" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="fechaexpedicion"
+                                                        required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="calendar"></i> F.
+                                                    Nacimiento
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi fechas nacido u"
+                                                        type="text" placeholder="Fecha de nacimiento" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="fechanacimiento"
+                                                        required>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="heart"></i>
+                                                    Estado Civil
+                                                </th>
+                                                <td>
+                                                    <select class="form-control-no-border edi estadocivil u"
+                                                        name="estadocivil" style="padding: 1px; width: 100%;" required>
+                                                        <option value="">Situación sentimental?</option>
+                                                        <option value="Casado(a)">Casado(a)</option>
+                                                        <option value="Soltero(a)">Soltero(a)</option>
+                                                        <option value="Viudo(a)">Viudo(a)</option>
+                                                        <option value="Divorciado(a)">Divorciado(a)</option>
+                                                        <option value="Union libre">Union libre</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="mail"></i>
+                                                    Email
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-lowercase email u"
+                                                        type="email" placeholder="Correo electrónico" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="email" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="phone-call"></i>
+                                                    Móvil
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi movil u" type="tel"
+                                                        data-mask="000-000-0000" placeholder="Numero celular"
+                                                        autocomplete="off" style="padding: 1px; width: 100%;"
+                                                        name="movil" id="movil" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="map"></i>
+                                                    Dirección
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi direccion u" type="text"
+                                                        placeholder="Dirección de residencia" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="direccion" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="user-plus"></i>
+                                                </th>
+                                                <td>
+                                                    <a class="btn btn-outline-dark btn-sm float-right mr-3"
+                                                        id="AgregarCliente"><i class="fas fa-fw fa-user-plus"></i>
+                                                        Agregar cliente</a>
+                                                </td>
+                                            </tr>
+                                        </tbody>
                                     </table>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-actions float-right">
-                                        <select name="tipobsevacion" class="form-control-no-border"
-                                            style="padding: 1px; width: 100%; text-align-last:center; background-color: #FFFFCC;">
-                                            <option value="Ninguna">Seleccione tipo de Negociacion</option>
-                                            <option value="Trueque">Negociacion por Trueque</option>
-                                            <option value="efectivo">Negociacion en efectivo</option>
-                                            <option value="Otro">Otro tipo de Negociacion</option>
-                                            <option value="Ninguna">Ninguna Negociacion</option>
-                                        </select>
+                            <!--Cliente #2-->
+                            <div class="row cliente2" id="cliente2" style="display: none;">
+                                <input type="hidden" class="client" value="" name="client">
+                                <div class="col-12 col-lg-12">
+                                    <div class="d-inline-block float-right">
+                                        <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
                                     </div>
-                                    <h5 class="card-title mb-0">Obsevaciones</h5>
+                                    <hr style="width: 90%;" />
+                                    <div class="h4">Cliente #2</div>
                                 </div>
-                                <div class="card-body">
-                                    <textarea class="form-control-no-border" placeholder="Ponga aqui sus obsevaciones"
-                                        name="obsevacion" cols="120" rows="3" autocomplete="off"
-                                        style="background-color: #FFFFCC; width: 100%;"></textarea>
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="user"></i>
+                                                    Nombre
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-uppercase nombres d"
+                                                        type="text" placeholder="Nombre completo" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="nombres">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="credit-card"></i>
+                                                    Documento
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi documento d" type="text"
+                                                        placeholder="Documento de identidad" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="documento">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="map-pin"></i>
+                                                    Expedida
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi lugarexpedicion d"
+                                                        type="text" name="lugarexpedicion"
+                                                        placeholder="Lugar de expedición del documento"
+                                                        autocomplete="off" style="padding: 1px; width: 100%;">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="calendar"></i> F.
+                                                    Expedición
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi fechas espedida d"
+                                                        type="text" placeholder="Fecha de expedición" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="fechaexpedicion">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="calendar"></i> F.
+                                                    Nacimiento
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi fechas nacido d"
+                                                        type="text" placeholder="Fecha de nacimiento" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="fechanacimiento">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="users"></i>Parentesco
+                                                </th>
+                                                <td>
+                                                    <select name="Parentesco" class="form-control-no-border edi"
+                                                        style="padding: 1px; width: 50%;" name="parentesco">
+                                                        <option value="">Parentesco?</option>
+                                                        <option value="Esposo(a)">Esposo(a)</option>
+                                                        <option value="Socio(a)">Socio(a)</option>
+                                                        <option value="Amigo(a)">Amigo(a)</option>
+                                                        <option value="Familiar">Familiar</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="heart"></i>
+                                                    Estado Civil
+                                                </th>
+                                                <td>
+                                                    <select class="form-control-no-border edi estadocivil d"
+                                                        name="estadocivil" style="padding: 1px; width: 100%;">
+                                                        <option value="">Situación sentimental?</option>
+                                                        <option value="Casado(a)">Casado(a)</option>
+                                                        <option value="Soltero(a)">Soltero(a)</option>
+                                                        <option value="Viudo(a)">Viudo(a)</option>
+                                                        <option value="Divorciado(a)">Divorciado(a)</option>
+                                                        <option value="Union libre">Union libre</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="mail"></i>
+                                                    Email
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-lowercase email d"
+                                                        type="email" placeholder="Correo electrónico" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="email">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="phone-call"></i>
+                                                    Móvil
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi movil d" type="tel"
+                                                        data-mask="000-000-0000" placeholder="Numero celular"
+                                                        autocomplete="off" style="padding: 1px; width: 100%;"
+                                                        name="movil">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="map"></i>
+                                                    Dirección
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi direccion d" type="text"
+                                                        placeholder="Dirección de residencia" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="direccion">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
-                        </div>
-                        <div class="col-xl-12">
-                            <div class="card">
-                                <div class="card-header">
-                                    <div class="card-actions float-right">
-                                        <div class="dropdown show">
-                                            <a href="#" data-toggle="dropdown" data-display="static">
-                                                <i class="align-middle" data-feather="more-horizontal"></i>
-                                            </a>
 
-                                            <div class="dropdown-menu dropdown-menu-right">
-                                                <a class="dropdown-item" href="#">Action</a>
-                                                <a class="dropdown-item" href="#">Another action</a>
-                                                <a class="dropdown-item" href="#">Something else here</a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <h5 class="card-title mb-0">Aclaraciones y condiciones de separación</h5>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Forma de pago</h5>
+                        </div>
+                        <div class="card-body">
+                            {{#each proyecto}}
+                            <input type="hidden" id="separacion" value="{{separacion}}">
+                            <input type="hidden" id="porcentage" name="iniciar" value="{{porcentage}}">
+                            <input type="hidden" id="fechs" value="{{fechafin}}">
+                            <input type="hidden" id="extran" name="extran" value="">
+                            <div class="row">
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="maximize"></i>
+                                                    MTr²
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi" type="text" id="mtr"
+                                                        value="{{mtr2}}"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="trending-up"></i>
+                                                    Vr MTr²
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border val" type="text" id="vrmtr"
+                                                        value="{{valmtr2}}" name="vrmt2"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="map-pin"></i>
+                                                    Lote
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border val" type="text" id="vrlote"
+                                                        value="{{valor}}"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="droplet"></i>
+                                                    N° Cuotas
+                                                </th>
+                                                <td>
+                                                    <select name="numerocuotaspryecto" id="ncuotas"
+                                                        class="form-control-no-border edi"
+                                                        style="padding: 1px; text-align-last:center"
+                                                        required>
+                                                    </select>
+                                                    <select id="dia" name="dia"
+                                                        class="form-control-no-border edi float-right"
+                                                        style="padding: 1px; text-align-last:center">
+                                                        <option value="1">1</option>
+                                                        <option value="2">2</option>
+                                                        <option value="3">3</option>
+                                                        <option value="4">4</option>
+                                                        <option value="5">5</option>
+                                                        <option value="6">6</option>
+                                                        <option value="7">7</option>
+                                                        <option value="8">8</option>
+                                                        <option value="9">9</option>
+                                                        <option value="10">10</option>
+                                                        <option value="11">11</option>
+                                                        <option value="12">12</option>
+                                                        <option value="13">13</option>
+                                                        <option value="14">14</option>
+                                                        <option value="15">15</option>
+                                                        <option value="16">16</option>
+                                                        <option value="17">17</option>
+                                                        <option value="18">18</option>
+                                                        <option value="19">19</option>
+                                                        <option value="20">20</option>
+                                                        <option value="21">21</option>
+                                                        <option value="22">22</option>
+                                                        <option value="23">23</option>
+                                                        <option value="24">24</option>
+                                                        <option value="25">25</option>
+                                                        <option value="26">26</option>
+                                                        <option value="27">27</option>
+                                                        <option value="28">28</option>
+                                                        <option value="29">29</option>
+                                                        <option value="30">30</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="calendar"></i>
+                                                    Extraor
+                                                </th>
+                                                <td>
+                                                    <select id="Emeses" name="extraordinariameses"
+                                                        class="form-control-no-border edi float-right"
+                                                        style="padding: 1px; width: 100%; text-align-last:center">
+                                                        <option value="">Niguna</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="dollar-sign"></i>
+                                                    Extraor vr
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi val" id="cuotaestrao"
+                                                        type="text" placeholder="Ingrese cuota extra" autocomplete="off"
+                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" name="cuotaextraordinaria"
+                                                        style="padding: 1px; width: 100%; text-align:center">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-center">
+                                                    <i class="feather-md text-primary" data-feather="dollar-sign"></i>
+                                                    Total Lote
+                                                </th>
+                                                <td class="text-center">
+                                                    <input class="form-control-no-border text-center totalote"
+                                                        type="text" value="{{valor}}"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled
+                                                        required>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
-                                <div class="card-body">
-                                    <ul class="timeline mt-2 mb-0">
-                                        <li class="timeline-item">
-                                            <strong>#1</strong>
-                                            <i class="feather-md text-primary float-right mr-3"
-                                                data-feather="check-circle"></i>
-                                            <br>
-                                            <span>
-                                                Presentar a la administración del proyecto la documentación
-                                                necesaria para la
-                                                firma del contrato
-                                                de promesa de compraventa y cuota de separación en un plazo máximo
-                                                de 8 días,
-                                                pasada esta fecha, la administración
-                                                del proyecto no tiene ninguna responsabilidad por la reserva del
-                                                inmueble y esta
-                                                queda en libertad de venderlo a otra persona.
-                                            </span>
-                                        </li>
-                                        <li class="timeline-item">
-                                            <strong>#2</strong>
-                                            <i class="feather-md text-primary float-right mr-3"
-                                                data-feather="check-circle"></i>
-                                            <br>
-                                            <span>
-                                                Son ARRAS: En caso de desistimiento o incumplimiento unilateralde
-                                                cualquiera de
-                                                las
-                                                (2) partes sobre las condiciones exigidas en este documento, si es
-                                                el comprador
-                                                pagara la suma de $1.000.000 M/L (Un Millon De Pesos) y si es el
-                                                vendedor,
-                                                devolvera
-                                                la totalidadde los pagos recibidos con un interés equivalente al
-                                                DTF.
-                                            </span>
-                                        </li>
-                                        <li class="timeline-item">
-                                            <strong>#3</strong>
-                                            <i class="feather-md text-primary float-right mr-3"
-                                                data-feather="check-circle"></i>
-                                            <br>
-                                            <span>
-                                                Puede hacer sus consignaciones a las siguientes cuentas bancarias:
-                                                <strong>CUENTA
-                                                    CORRIENTE #50900011438 BANCOLOMBIA,</strong> a nombre de
-                                                <strong>GRUPO ELITE
-                                                    FINCA RAIZ S.A.S NIT: 901311748.</strong> Enviar soporte de pago
-                                                al correo
-                                            </span>
-                                            <hr />
-                                            <br>
-                                            <label class="custom-control custom-checkbox" style="width: 280px;">
-                                                <input type="checkbox" class="custom-control-input" required>
-                                                <span class="custom-control-label">Acepta nuestros terminos y
-                                                    condiciones</span>
-                                            </label>
-                                            <br>
-                                            <button type="submit" class="btn btn-primary float-right">Enviar</button>
-                                            <button type="reset"
-                                                class="btn btn-google float-right mr-3">Cancelar</button>
-                                        </li>
-                                    </ul>
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="slack"></i>
+                                                    Inicial
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border val" type="text"
+                                                        value="{{inicial}}" id="cuotainicial"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled
+                                                        required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="percent"></i>
+                                                    70%
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border" type="text" value="" id="p70"
+                                                        name="proyecto70x100to"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="tag"></i>
+                                                    Cupon
+                                                </th>
+                                                <td>
+                                                    <input type="hidden" id="bonoid" name="cupon" value="">
+                                                    <input class="form-control-no-border edi" type="text"
+                                                        placeholder="N° bono" id="bono"
+                                                        style="padding: 1px; width: 100%; text-align:center">
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="droplet"></i>
+                                                    Diferir
+                                                </th>
+                                                <td>
+                                                    <select name="inicialdiferida" id="diferinicial"
+                                                        class="form-control-no-border edi"
+                                                        style="padding: 1px; width: 100%; text-align-last:center">
+                                                        <option value="1">1 Cuota</option>
+                                                        <option value="2">2 Cuotas</option>
+                                                        <option value="3">3 Cuotas</option>
+                                                        <option value="4">4 Cuotas</option>
+                                                        <option value="0">Ninguna</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="trending-down"></i>
+                                                    Dto
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border" type="text" value="0%"
+                                                        id="dto" style="padding: 1px; width: 100%; text-align:center"
+                                                        disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md text-primary" data-feather="pocket"></i>
+                                                    Ahorra
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border float-right" type="text"
+                                                        value="$0" id="ahorro" name="ahorro"
+                                                        style="padding: 1px; width: 100%; text-align:center" disabled>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th class="text-center">
+                                                    <i class="feather-md text-primary" data-feather="dollar-sign"></i>
+                                                    Separar
+                                                </th>
+                                                <td class="text-center">
+                                                    <input class="form-control-no-border text-center edi"
+                                                        name="separacion" autocomplete="off" type="text"
+                                                        placeholder="Abono" id="abono"
+                                                        style="padding: 1px; width: 100%; background-color: #FFFFCC;"
+                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" value="{{separacion}}">
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
                                 </div>
                             </div>
+                            {{/each}}
+                            <table id="datatables-clients" class="table table-sm table-striped" style="width:100%">
+                                <thead>
+                                    <tr>
+                                        <th>#</th>
+                                        <th>fecha</th>
+                                        <th>oficial</th>
+                                        <th>Cuota</th>
+                                        <th>Estado</th>
+                                        <th>#</th>
+                                        <th>fecha</th>
+                                        <th>Cuota</th>
+                                        <th>Estado</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="cuerpo"></tbody>
+                            </table>
                         </div>
-                    </form>
+                    </div>
                 </div>
-            </div>
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <div class="card-actions float-right">
+                                <select name="tipobsevacion" class="form-control-no-border"
+                                    style="padding: 1px; width: 100%; text-align-last:center; background-color: #FFFFCC;">
+                                    <option value="Ninguna">Seleccione tipo de Negociacion</option>
+                                    <option value="Trueque">Negociacion por Trueque</option>
+                                    <option value="efectivo">Negociacion en efectivo</option>
+                                    <option value="Otro">Otro tipo de Negociacion</option>
+                                    <option value="Ninguna">Ninguna Negociacion</option>
+                                </select>
+                            </div>
+                            <h5 class="card-title mb-0">Obsevaciones</h5>
+                        </div>
+                        <div class="card-body">
+                            <textarea class="form-control-no-border" placeholder="Ponga aqui sus obsevaciones"
+                                name="obsevacion" cols="120" rows="3" autocomplete="off"
+                                style="background-color: #FFFFCC; width: 100%;"></textarea>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-xl-12">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Aclaraciones y condiciones de separación</h5>
+                        </div>
+                        <div class="card-body">
+                            <ul class="timeline mt-2 mb-0">
+                                <li class="timeline-item">
+                                    <strong>#1</strong>
+                                    <i class="feather-md text-primary float-right mr-3" data-feather="check-circle"></i>
+                                    <br>
+                                    <span>
+                                        Presentar a la administración del proyecto la documentación
+                                        necesaria para la
+                                        firma del contrato
+                                        de promesa de compraventa y cuota de separación en un plazo máximo
+                                        de 8 días,
+                                        pasada esta fecha, la administración
+                                        del proyecto no tiene ninguna responsabilidad por la reserva del
+                                        inmueble y esta
+                                        queda en libertad de venderlo a otra persona.
+                                    </span>
+                                </li>
+                                <li class="timeline-item">
+                                    <strong>#2</strong>
+                                    <i class="feather-md text-primary float-right mr-3" data-feather="check-circle"></i>
+                                    <br>
+                                    <span>
+                                        Son ARRAS: En caso de desistimiento o incumplimiento unilateralde
+                                        cualquiera de
+                                        las
+                                        (2) partes sobre las condiciones exigidas en este documento, si es
+                                        el comprador
+                                        pagara la suma de $1.000.000 M/L (Un Millon De Pesos) y si es el
+                                        vendedor,
+                                        devolvera
+                                        la totalidadde los pagos recibidos con un interés equivalente al
+                                        DTF.
+                                    </span>
+                                </li>
+                                <li class="timeline-item">
+                                    <strong>#3</strong>
+                                    <i class="feather-md text-primary float-right mr-3" data-feather="check-circle"></i>
+                                    <br>
+                                    <span>
+                                        Puede hacer sus consignaciones a las siguientes cuentas bancarias:
+                                        <strong>CUENTA
+                                            CORRIENTE #50900011438 BANCOLOMBIA,</strong> a nombre de
+                                        <strong>GRUPO ELITE
+                                            FINCA RAIZ S.A.S NIT: 901311748.</strong> Enviar soporte de pago
+                                        al correo
+                                    </span>
+                                    <hr />
+                                    <br>
+                                    <label class="custom-control custom-checkbox">
+                                        <input type="checkbox" class="custom-control-input" required>
+                                        <span class="custom-control-label">Acepta nuestros terminos y
+                                            condiciones</span>
+                                    </label>
+                                    <br>
+                                    <button type="submit" class="btn btn-primary float-right">Enviar</button>
+                                    <button type="reset" class="btn btn-google float-right mr-3">Cancelar</button>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            </form>
         </div>
     </div>
 </main>
