@@ -618,23 +618,6 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     respuesta = { "data": w.filter(Boolean) };
     res.send(respuesta);
 })
-////////////////////////////* SOAT *////////////////////////////////////////
-router.post('/soat', isLoggedIn, (req, res) => {
-    var options = {
-        method: 'GET',
-        url: 'https://sbapi.bancolombia.com/v1/reference-data/party/party-data-management/vehicles/EXC98E',
-        headers:
-        {
-            accept: 'application/vnd.bancolombia.v1+json',
-            authorization: 'Bearer sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM'
-        }
-    };
-
-    request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-
-    });
-});
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
@@ -907,7 +890,7 @@ router.post('/afiliado', async (req, res) => {
         form: {
             "phone": '57' + movil,
             "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-                *_Registrarte_* _en:_\n*https://grupoelite.herokuapp.com/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*http://grupoelite.herokuapp.com/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+                *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
         }
     };
 
@@ -917,7 +900,7 @@ router.post('/afiliado', async (req, res) => {
         console.log('Success: ', body);
     });
 
-    sms('57' + movil, `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelite.herokuapp.com/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
+    sms('57' + movil, `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
     req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
     res.redirect('/tablero');
 });
