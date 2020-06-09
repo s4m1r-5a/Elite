@@ -3303,7 +3303,11 @@ if (window.location.pathname == `/links/orden`) {
                         { data: "stado2" }
                     ],
                     columnDefs: [
-                        { "visible": false, "targets": groupColumn }
+                        { "visible": false, "targets": groupColumn },
+                        { responsivePriority: 10002, targets: 5 },
+                        { responsivePriority: 10003, targets: 6 },
+                        { responsivePriority: 10004, targets: 7 },
+                        { responsivePriority: 10005, targets: 8 }
                     ],
                     order: [[groupColumn, 'asc']],
                     displayLength: 50,
