@@ -1700,9 +1700,6 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('nav').show()
 }
 
-
-
-
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     let recargada = true,
@@ -2582,7 +2579,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "mz",
                 render: function (data, method, row) {
-                    return `<input class="form-control-no-border text-center text-uppercase mz" type="text" name="mz" value="${data}" style="padding: 1px; width: 30px; background-color: #FFFFCC;">`
+                    return `<input class="form-control-no-border text-center mz" type="text" name="mz" value="${data}" style="padding: 1px; width: 30px; background-color: #FFFFCC;">`
                 }
             },
             {
@@ -2686,7 +2683,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             { responsivePriority: 1, targets: -1 },
             //{ responsivePriority: 10001, targets: -3 }
         ],
-        order: [[0, 'asc']],
+        order: [[0, 'asc'], [1, 'asc']],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
@@ -2737,24 +2734,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $('#Modaledit').on('change', '.mt2', function () {
         var valor = $(this).val() * $('#vmt2').cleanVal();
         var inicial = valor * $('#porcentage').val() / 100;
-        var sum = 0;
         $('#Modaledit input[name="valor"]').val(valor);
         $('#Modaledit input[name="inicial"]').val(inicial);
         $('#Modaledit #va').html('$ ' + Moneda(Math.round(valor)));
         $('#Modaledit #in').html('$ ' + Moneda(Math.round(inicial)));
-        tabledit
-            .column(2)
-            .data()
-            .filter(function (value, index) {
-                sum += parseFloat(value)
-            });
-
-        $('#tmt2').val(sum + parseFloat($(this).val()))
-        var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
-        $('#valproyect').val(valor);
-        $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
-        Dts()
+        Recorre($(this).val() || 0)
     });
+    $('#Modaledit').one('hidden.bs.modal', function () {
+        $('#Modaledit input, textarea, select').val('')
+        Recorre(0)
+    })
     /*
         tabledit.row(fila)
             .css('color', 'red')
@@ -2766,27 +2755,22 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $.ajax({
             type: 'POST',
             url: '/links/regispro',
-            data: datos,
-            async: true,
-            success: function (data) {
-                if (data) {
-                    SMSj('success', 'Producto actualizado correctamente')
-                }
-            }
+            data: datos
         })
     }
-    var Recorre = () => {
+    var Recorre = (n) => {
+        var sum = 0;
         tabledit
             .column(2)
             .data()
             .filter(function (value, index) {
                 sum += parseFloat(value)
             });
-
-        $('#tmt2').val(sum + parseFloat($(this).val()))
-        var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
+        $('#tmt2').val(sum + parseFloat(n))
+        var valor = parseFloat($('#tmt2').val()) * parseFloat($('#vmt2').cleanVal());
         $('#valproyect').val(valor);
         $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
+        Dts()
     }
     tabledit.on('click', '.no', function () {
         var fila = $(this).parents('tr');
@@ -2839,11 +2823,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 var ini = (parseFloat($(this).val()) * parseFloat($('#vmt2').cleanVal())) * parseFloat($('#porcentage').val()) / 100
                 fila.find(`.valor`).val(Moneda(vr))
                 fila.find(`.inicial`).val(Moneda(ini))
+                //Recorre(parseFloat(data.mtr2) - parseFloat($(this).val()))
+                $('#tmt2').val((parseFloat($('#tmt2').val()) - parseFloat(data.mtr2)) + parseFloat($(this).val() || 0))
+                var valor = parseFloat($('#tmt2').val()) * parseFloat($('#vmt2').cleanVal());
+                $('#valproyect').val(valor);
+                $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
+                Dts()
             }
             tabledit.state.save()
             var d = {
                 id: data.id,
-                mz: fila.find(`.mz`).val(),
+                mz: fila.find(`.mz`).val().toLocaleLowerCase(),
                 n: fila.find(`.lt`).val(),
                 mtr2: fila.find(`.mt2`).val(),
                 estado: fila.find(`.estado`).val() || data.estado,
@@ -2926,6 +2916,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     tabledit.ajax.url("/links/productos/" + data.id).load(function () {
                         tabledit.columns.adjust().draw();
                         $('#ModalEventos').modal('hide')
+                        Recorre(0)
                     });
                     /*$('#ModalEventos').modal('toggle');
                     $('#ModalEventos').modal('hide')*/
@@ -3368,7 +3359,6 @@ if (window.location.pathname == `/links/orden`) {
         }
 
     })
-
 };
 /////////////////////////////* SOLICITUDES *////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/solicitudes`) {
