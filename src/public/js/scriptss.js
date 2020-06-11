@@ -1128,11 +1128,49 @@ if (window.location.pathname == `/links/pagos`) {
                     //alert(data)
                     if (data.status) {
                         console.log(data);
-                        $('.Cliente').html(data.paquete.cliente);
-                        $('.Cliente').val(data.paquete.cliente);
-                        $('#Code').val(data.paquete.idcliente + '-' + data.paquete.asesor + '-' + data.paquete.id);
-                        $('.nombreproyecto').html(data.paquete.nombre);
-                        $('.Lote').html(data.paquete.n);
+                        $('.Cliente').html(data.client.nombre);
+                        $('.Cliente').val(data.client.nombre);
+                        /*$('#Code').val(data.client.id + '-' + data.paquete.asesor + '-' + data.paquete.id);
+                        $('.nombreproyecto').html(data.paquete.nombre);*/
+                        data.d.map((r) => {
+                            $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
+                        });
+                        var Calculo = (m) => {
+
+                            var mora = 0, cuot = 0;
+
+                            data.d.filter((r) => {
+                                return r.id == m
+                            }).map((r) => {
+                                $('#Cupon').html(r.pin);
+                                $('#Dto').html(r.descuento);
+                                $('#Ahorro').html(Moneda(r.ahorro));
+                                $('#Proyecto').html(Moneda(r.valor));
+                                $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
+                            })
+
+                            data.cuotas.filter((r) => {
+                                return r.separacion == m
+                            }).map((r, x) => {
+                                mor = r.mora || 0;
+                                mora += mor;
+                                cuot += r.cuota
+                                $('#Concepto').html(r.tipo);
+                                $('#Cuotan').html(Moneda(r.ncuota));
+                                $('#Cuota').html(Moneda(r.cuota));
+                                $('#Mora').html(Moneda(mor));
+                                $('#Facturas').html(x + 1);
+                                $('.Totalf').html(Moneda(r.cuota + mor));
+                                $('.Total').html(Moneda(mora + cuot));
+                                //$('#Total').val(data.paquete.total);
+                            })
+                        }
+                        Calculo($('#proyectos').val())
+                        $('#proyectos').change(function () {
+                            Calculo($(this).val())
+                        })
+                        //$(`.proveedor select option[value='1']`).attr("selected", true);
+                        /*$('.Lote').html(data.paquete.n);
                         $('#Cupon').html(data.paquete.pin);
                         $('#Dto').html(data.paquete.descuento);
                         $('#Ahorro').html(Moneda(data.paquete.ahorro));
@@ -1145,7 +1183,7 @@ if (window.location.pathname == `/links/pagos`) {
                         $('#Movil').val(data.paquete.movil);
                         $('#Email').val(data.paquete.email);
                         $('#Total').val(data.paquete.total);
-                        $('#Description').val(data.paquete.concepto + '-' + data.paquete.nombre + ' Lote: ' + data.paquete.n);
+                        $('#Description').val(data.paquete.concepto + '-' + data.paquete.nombre + ' Lote: ' + data.paquete.n);*/
                         skdt = true;
                     } else {
                         $(".alert").show();

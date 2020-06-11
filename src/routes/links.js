@@ -224,49 +224,21 @@ router.get('/pagos', async (req, res) => {
 router.get('/pagos/:id', async (req, res) => {
     const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id)
     if (cliente.length > 0) {
-        const d = await pool.query(`SELECT p.id, p.numerocuotaspryecto, p.extraordinariameses, p.cuotaextraordinaria, p.inicialdiferida, pd.n, pr.nombre, 
-        p.fecha, pd.valor, c.pin, c.descuento, c.estado FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
-        INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [cliente[0].id, cliente[0].id]);
+        const client = cliente[0]
+        const d = await pool.query(`SELECT p.id, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, 
+        c.descuento, pr.proyect FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
+        INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [client.id, client.id]);
+        var c = ''
         if (d.length > 0) {
-            let { id, n, nombre, numerocuotaspryecto, extraordinariameses, cuotaextraordinaria, inicialdiferida, fecha, valor, pin, descuento, estado } = d[0]
-            const vr = valor
-            const ahorro = descuento > 0 ? valor * descuento / 100 : 0;
-            descuento > 0 ? valor = valor - ahorro : '';
-            const cuotainicial = valor * 30 / 100;
-            const proyecto = valor - cuotainicial;
-            var concepto, cuota, mora = 0, total, interes = 0;
-            function H() {
-                paquete = {
-                    id, cliente: cliente[0].nombre, idcliente: cliente[0].id, movil: cliente[0].movil, email: cliente[0].email,
-                    n, nombre, concepto, cuota, ahorro, vr, valor, descuento, mora, total, pin, estado, asesor: req.user.id
-                }
-            }
-            const a = await pool.query(`SELECT * FROM payu WHERE state_pol = 4 AND reference_sale = ?`, id);
-            if (a.length > 0) {
-                var fec = a[0].transaction_date;
-                var cuotai = cuotainicial / inicialdiferida
 
-                await a.filter((c) => {
-                    return c.description === 'INICIAL';
-                }).map((c, i, a) => {
-                    if (moment(c.transaction_date).format('YYYY-MM-DD') > moment(fecha).add(i, 'month').format('YYYY-MM-DD') || c.value < cuotai) {
-                    }
-                });
-                var j = cuotaextraordinaria ? parseFloat(numerocuotaspryecto.slice(-2, -1)) : 0;
-                var nxmes = extraordinariameses > 2 ? j * 2 : j;
-                var extraordinaria = cuotaextraordinaria * nxmes;
-                cuota = (proyecto - extraordinaria) / (numerocuotaspryecto - nxmes)
-                H();
-                res.send({ paquete, status: true });
-            } else {
-                concepto = 'Separacion';
-                cuota = '1000000'
-                total = cuota
-                H();
-                res.send({ paquete, status: true });
-            }
+            d.length > 1 ? d.map((b, x) => {
+                c += `${x > 0 ? ' OR ' : ''}separacion = ${b.id}`
+            }) : c = `separacion = ${d[0].id}`;
+
+            const cuotas = await pool.query(`SELECT * FROM cuotas WHERE estado = 3 AND fecha <= CURDATE() AND (${c})`);
+            res.send({ d, client, cuotas, status: true });
         } else {
-            res.send({ paquete: 'Aun no se genera ninguna orden de separacion, comuniiquece con un asesor', status: false });
+            res.send({ paquete: 'Aun no realiza una separacion, comuniiquece con un asesor', status: false });
         }
     } else {
         res.send({ paquete: 'No existe un registro con este numero de documeto, comuniiquece con un asesor', status: false });

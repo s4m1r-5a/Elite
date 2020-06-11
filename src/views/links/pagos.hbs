@@ -3,14 +3,12 @@
         <div class="row h-100">
             <div class="col-sm-12 col-md-10 col-lg-8 mx-auto d-table h-100">
                 <div class="d-table-cell align-middle">
-
                     <div class="text-center mt-4">
                         <h1 class="h2">Reset password</h1>
                         <p class="lead">
                             Enter your email to reset your password.
                         </p>
                     </div>
-
                     <div class="card">
                         <div class="card-body">
                             <div class="m-sm-4">
@@ -64,8 +62,10 @@
                                                                         <i class="feather-lg" data-feather="sun"></i>
                                                                     </th>
                                                                     <td>
-                                                                        <span class="nombreproyecto"></span> Lote:
-                                                                        <span class="Lote"></span>
+                                                                        Proyecto:
+                                                                        <select class="form-control-no-border"
+                                                                            id="proyectos">
+                                                                        </select>
                                                                     </td>
                                                                 </tr>
                                                             </tbody>
@@ -114,6 +114,16 @@
                                                                                 <span id="Proyecto-Dto"></span>
                                                                             </td>
                                                                         </tr>
+                                                                        <tr class="mb-4">
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
+                                                                                Facturas V.
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Facturas"></span>
+                                                                            </td>
+                                                                        </tr>
                                                                     </tbody>
                                                                 </table>
                                                             </div>
@@ -144,6 +154,16 @@
                                                                             <th>
                                                                                 <i class="feather-md"
                                                                                     data-feather="map"></i>
+                                                                                N° Cuota
+                                                                            </th>
+                                                                            <td>
+                                                                                <span id="Cuotan"></span>
+                                                                            </td>
+                                                                        </tr>
+                                                                        <tr>
+                                                                            <th>
+                                                                                <i class="feather-md"
+                                                                                    data-feather="map"></i>
                                                                                 Cuota
                                                                             </th>
                                                                             <td>
@@ -166,6 +186,18 @@
                                                         </div>
                                                         <table class="table table-sm my-2">
                                                             <tbody>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="dollar-sign"></i>
+                                                                        Total Factura
+                                                                    </th>
+                                                                    <td>
+                                                                        <div class="d-inline-block float-right">
+                                                                            <span class="Totalf"></span>
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
                                                                 <tr>
                                                                     <th>
                                                                         <i class="feather-md"
