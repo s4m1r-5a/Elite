@@ -114,7 +114,7 @@ passport.use('local.signup', new LocalStrategy({
     id: regiId(),
     fullname,
     pin,
-    movil,
+    cel: movil,
     username,
     password,
     imagen: '/img/avatars/avatar.svg'

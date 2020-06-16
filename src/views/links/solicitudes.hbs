@@ -13,23 +13,74 @@
             </div>
             <div class="card-body">
                 <input type="hidden" id="tu" value="{{user.id}}">
-                <table id="datatable" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
+                <table id="datatable" class="table table-sm table-striped table-hover display nowrap"
+                    style="width:100%">
                     <thead>
                         <tr>
-                            <th style="width:1%;">Id</th>
-                            <th style="width:2%;">Benefactor</th>
-                            <th style="width:2%;">Adquisidor</th>
-                            <th style="width:3%;">Fecha</th>
-                            <th style="width:2%;">Monto</th>
-                            <th style="width:1%;">Metodo</th>
-                            <th style="width:1%;">Solicitante</th>
-                            <th style="width:5%;" data-priority="10000">Recibo</th>
-                            <th style="width:5%;" data-priority="2">Estado</th>
-                            <th style="width:5%;" data-priority="1">Accion</th>
+                            <th>Id</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>proyecto</th>
+                            <th>lote</th>
+                            <th>Monto</th>
+                            <th>Facturas V</th>
+                            <th>Recibo</th>
+                            <th data-priority="2">Estado</th>
+                            <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+                            <th data-priority="1">Accion</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="Modalimg" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;
+                    &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;</h5>
+                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                    <a class="reditar" data-dismiss="modal" aria-label="Close">
+                        <i class="feather mr-0" data-feather="x"></i></a>
+                </div>
+            </div>
+            <div class="modal-body">
+                <div class="row no-gutters">
+                    <div class="col-md-6">
+                        <img src="" class="card-img foto" alt="...">
+                    </div>
+                    <div class="col-md-6">
+                        <div class="card-body text-primary h4">
+                            <div class="mb-0 float-right">
+                                <small class="text-muted fecha"></small><br>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text cliente"></span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text proyecto"></span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text lote"></span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text recibo"></span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text fatvc"></span>
+                            </div>
+                            <p class="card-text estado">
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

@@ -255,7 +255,7 @@
                                                             <div class="card-body border">
                                                                 <label class="custom-control custom-radio">
                                                                     <input name="custom-radio" type="radio"
-                                                                        class="custom-control-input">
+                                                                        class="custom-control-input forma" disabled>
                                                                     <span class="custom-control-label">PayPal</span>
                                                                     <img src="/img/pagos/pagos15.png" class="rounded"
                                                                         alt="Ashley" style="width: 80%;">
@@ -266,7 +266,7 @@
                                                             <div class="card-body border">
                                                                 <label class="custom-control custom-radio">
                                                                     <input name="custom-radio" type="radio"
-                                                                        class="custom-control-input">
+                                                                        class="custom-control-input forma" id="pay">
                                                                     <span class="custom-control-label">Payu</span>
                                                                     <img src="/img/pagos/pagos.png" class="rounded"
                                                                         alt="Ashley" style="width: 80%;">
@@ -277,7 +277,7 @@
                                                             <div class="card-body border">
                                                                 <label class="custom-control custom-radio">
                                                                     <input name="custom-radio" type="radio"
-                                                                        class="custom-control-input">
+                                                                        class="custom-control-input forma">
                                                                     <span class="custom-control-label">Ofice</span>
                                                                     <img src="/img/pagos/pagos16.png" class="rounded"
                                                                         alt="Ashley" style="width: 80%;">
@@ -341,13 +341,25 @@
                                                                         <th>
                                                                             <i class="feather-md"
                                                                                 data-feather="dollar-sign"></i>
-                                                                            Valor
+                                                                            transaccion
                                                                         </th>
                                                                         <td>
                                                                             <div class="d-inline-block float-right">
-                                                                                <input type="text" name="amount"
-                                                                                    class="text-right Total" id="Total"
-                                                                                    disabled>
+                                                                                <span class="transaccion"></span>
+                                                                            </div>
+                                                                        </td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <th>
+                                                                            <i class="feather-md"
+                                                                                data-feather="dollar-sign"></i>
+                                                                            Total
+                                                                        </th>
+                                                                        <td>
+                                                                            <div class="d-inline-block float-right">
+                                                                                <span class="Total3"></span>
+                                                                                <input type="hidden" name="amount"
+                                                                                    id="Total">
                                                                             </div>
                                                                         </td>
                                                                     </tr>
@@ -368,11 +380,67 @@
                                                                 value="http://localhost:3000/planes">
                                                             <input name="confirmationUrl" type="hidden"
                                                                 value="https://grupoelite.herokuapp.com/confir">
-                                                            <div class="mt-auto">
+                                                            <div class="mt-auto pgpayu" style="display: none;">
                                                                 <input name="Submit" type="submit"
                                                                     class="btn btn-lg btn-outline-danger" value="Pagar">
                                                             </div>
                                                         </form>
+                                                        <div class="card border-primary mb-3 pgofi"
+                                                            style="display: none;">
+                                                            <div class="row no-gutters">
+                                                                <div class="col-md-5">
+                                                                    <img src="/img/recibo.gif" class="card-img"
+                                                                        alt="...">
+                                                                </div>
+                                                                <div class="col-md-7">
+                                                                    <form enctype="multipart/form-data"
+                                                                        action="/links/recibo" method="POST">
+                                                                        <div class="card-body">
+                                                                            <h5 class="card-title">Sube un Recibo
+                                                                            </h5>
+                                                                            <input type="hidden" id="Total2" name="total">
+                                                                            <input type="hidden" id="factrs" name="factrs">
+                                                                            <input type="hidden" id="idC" name="id">
+                                                                            <input id="ahora" type="hidden" name="ahora">
+                                                                            <input class="form-control-no-border edi"
+                                                                                type="text" id="recibo"
+                                                                                placeholder="N° de recibo aqui..."
+                                                                                data-toggle="tooltip"
+                                                                                data-placement="top"
+                                                                                data-container="body"
+                                                                                title="Numero de Recibo"
+                                                                                autocomplete="off"
+                                                                                data-toggle="dropdown"
+                                                                                aria-haspopup="true"
+                                                                                aria-expanded="false" name="recibo"
+                                                                                required>
+                                                                            <div class="progress progress-sm shadow-sm reditarh"
+                                                                                style="display: none;">
+                                                                                <div class="progress-bar bg-primary"
+                                                                                    role="progressbar"
+                                                                                    style="height: 20%; width: 100%">
+                                                                                </div>
+                                                                            </div>
+                                                                            <div class="m-sm-4">
+                                                                                <div class="form-group">
+                                                                                    <input
+                                                                                        class="form-control-no-border edi"
+                                                                                        type="file" name="image"
+                                                                                        id="file" style="width: 100%;"
+                                                                                        required>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                        <div class="card-footer">
+                                                                            <button type="submit"
+                                                                                class="btn btn-lg btn-primary float-right"
+                                                                                style="top: 90%;">Enviar
+                                                                                Pago</button>
+                                                                        </div>
+                                                                    </form>
+                                                                </div>
+                                                            </div>
+                                                        </div>
                                                     </div>
                                                 </div>
                                             </div>

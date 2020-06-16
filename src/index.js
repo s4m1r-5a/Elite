@@ -14,18 +14,19 @@ const sms = require('./sms.js');
 const { database } = require('./keys');
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
+const multer = require('multer');
 
 const transpoter = nodemailer.createTransport({
-    host: 'smtp.hostinger.co',
-    port: 587,
-    secure: false,
-    auth: {
-        user: 'suport@tqtravel.co',
-        pass: '123456789'
-    },
-    tls: {
-        rejectUnauthorized: false
-    }
+  host: 'smtp.hostinger.co',
+  port: 587,
+  secure: false,
+  auth: {
+    user: 'suport@tqtravel.co',
+    pass: '123456789'
+  },
+  tls: {
+    rejectUnauthorized: false
+  }
 })
 
 // Intializations
@@ -44,9 +45,35 @@ app.engine('.hbs', exphbs({
 }))
 app.set('view engine', '.hbs');
 
+// Multer Middlwares - Creates the folder if doesn't exists
+const storage = multer.diskStorage({
+  destination: path.join(__dirname, 'public/uploads'),
+  filename: (req, file, cb) => {
+    cb(null, ID(34) + path.extname(file.originalname));
+  }
+});
+
+app.use(multer({
+  storage,
+  dest: path.join(__dirname, 'public/uploads'),
+  fileFilter: function (req, file, cb) {
+
+    var filetypes = /jpeg|jpg|png|gif|mkv|mp4|x-matroska|video/;
+    var mimetype = filetypes.test(file.mimetype);
+    var extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+
+    if (mimetype && extname) {
+      return cb(null, true);
+    }
+    cb("Error: File upload only supports the following filetypes - " + filetypes);
+  },
+  //limits: { fileSize: 2062191114 },
+}).single('image'));
+
+
 // Middlewares : significa cada ves que el usuario envia una peticion
 app.use(morgan('dev'));
-app.use(bodyParser.urlencoded({extended: false}));
+app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
 
 app.use(session({
@@ -84,5 +111,15 @@ app.use(express.static(path.join(__dirname, 'public')));
 // Starting
 app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
-  
+
 });
+
+function ID(lon) {
+  let chars = "a0b1c2d3-e4f5g6h7i8j9k0z-1l2m3n4o-5p6q7r8s9-t0u1v2w3x4y",
+    code = "";
+  for (x = 0; x < lon; x++) {
+    let rand = Math.floor(Math.random() * chars.length);
+    code += chars.substr(rand, 1);
+  };
+  return code;
+};
