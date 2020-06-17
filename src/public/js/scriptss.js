@@ -16,7 +16,7 @@ let languag = {
     "sInfoEmpty": "",
     "sInfoFiltered": "",
     "sInfoPostFix": "",
-    "sSearch": "",
+    "sSearch": "Buscar : ",
     "sUrl": "",
     "sInfoThousands": ",",
     "sLoadingRecords": "Cargando...",
@@ -1231,7 +1231,7 @@ if (window.location.pathname == `/links/pagos`) {
     });
     $('form').submit(function () {
         $('input').prop('disabled', false);
-        $('#ahora').val(Date().now())
+        $('#ahora').val(moment.utc(data.fech).format('YYYY-MM-DD HH:mm'))
         alert('kjhda')
         var fd = $('form').serialize();
         $.ajax({
@@ -3511,7 +3511,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: ['pageLength',
+        buttons: [
             {
                 text: `<div class="mb-0">
                                         <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
@@ -3667,6 +3667,236 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         })
     })
+    var comisiones = $('#comisiones').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/comision",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            { data: "ids" },
+            { data: "name" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return '%' + (parseFloat(data) * 100) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descripcion" },
+            { data: "mz" },
+            { data: "n" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-dark">Disponible</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
+    var bonos = $('#bonos').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/bono",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            { data: "ids" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "n" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "facturasvenc" },
+            { data: "recibo" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
+    var premios = $('#premios').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/premio",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            { data: "ids" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "n" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "facturasvenc" },
+            { data: "recibo" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
     // Daterangepicker
     /*var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");*/
