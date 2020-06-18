@@ -121,7 +121,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     const produc = {
         categoria, proveedor, socio, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
-        valproyect, mzs, cantidad, estado: 7, fechaini: fecha, fechafin, separaciones: separacion.replace(/\./g, ''),
+        valproyect, mzs, cantidad, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
     };
     if (proveedor == '0' || socio == '0') {
@@ -650,9 +650,34 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             if (cuot == req.body.monto) {
                 if (req.body.cuota === req.body.monto && req.body.facturasvenc > 1) {
                     estados = req.body.estado
+                } else if (req.body.tipo === 'SEPARACION') {
+                    var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
+                    console.log(precio)
+                    if (parseFloat(req.body.monto) >= precio) {
+                        estados = 10
+                    } else {
+                        estados = 12
+                    }
+                    if (req.body.incentivo) {
+                        var f = {
+                            fech, monto: req.body.incentivo, concepto: 'COMICION DIRECTA', stado: 9, descripcion: 'SEPARACION',
+                            asesor: req.body.asesor, porciento: 0, total: req.body.cuota, lt: req.body.lote
+                        }
+                        await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    }
+                } else if (req.body.estado != 10) {
+                    var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
+                    var valr = parseFloat(req.body.monto)
+                    console.log(precio, valr)
+                    const pagos = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND estado = 13 AND fechs < '${fech}'`)
+                    if (pagos.length > 0) {
+                        pagos.map((c, x) => {
+                            valr += parseFloat(c.cuota)
+                        })
+                    }
+                    valr >= precio ? estados = 10 : 12
                 } else {
-                    estados = req.body.tipo === 'FINANCIACION' ?
-                        10 : req.body.tipo === 'SEPARACION' ? 12 : req.body.estado
+                    estados = req.body.estado
                 }
                 await pool.query(
                     `UPDATE solicitudes s 
@@ -672,13 +697,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
                 if (aidi) {
                     await pool.query(`UPDATE cuotas SET ? WHERE ${aidi}`, { estado: 13 });
                 }
-                if (req.body.tipo === 'SEPARACION') {
-                    var f = {
-                        fech, monto: req.body.incentivo, concepto: 'COMICION DIRECTA', stado: 9, descripcion: 'SEPARACION',
-                        asesor: req.body.asesor, porciento: 0, total: req.body.cuota, lt: req.body.lote
-                    }
-                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                }
+
                 var options = {
                     method: 'POST',
                     url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -709,8 +728,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Ps(cuot, aidi)
         }
 
-        console.log(Desendentes(req.body.pin, estados))
-        res.send(true);
+        console.log(req.body)
+        res.send(Desendentes(req.body.pin, estados));
     }
 });
 //Desendentes('ABCDE12345678')

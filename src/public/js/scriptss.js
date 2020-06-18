@@ -31,7 +31,7 @@ let languag = {
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
 };
-/*let languag = {
+let languag2 = {
     "lengthMenu": "Ver 10 filas",
     "sProcessing": "Procesando...",
     "sLengthMenu": "Ver _MENU_ filas",
@@ -55,7 +55,7 @@ let languag = {
         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
     }
-};*/
+};
 $(".fechas").daterangepicker({
     locale: {
         'format': 'YYYY-MM-DD',
@@ -1124,7 +1124,7 @@ if (window.location.pathname == `/links/pagos`) {
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    console.log(data)
+                    //console.log(data)
                     if (data.status) {
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
@@ -1136,7 +1136,7 @@ if (window.location.pathname == `/links/pagos`) {
                         });
                         var Calculo = (m) => {
 
-                            var mora = 0, cuot = 0, Description = '';
+                            var mora = 0, cuot = 0, Description = '', cont = 0;
 
                             data.d.filter((r) => {
                                 return r.id == m
@@ -1152,7 +1152,7 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
-                                mor = r.mora || 0;
+                                mor = r.mora;
                                 mora += mor;
                                 cuot += r.cuota
                                 $('#Concepto').html(r.tipo);
@@ -1167,7 +1167,22 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
                                 $('#idC').val(r.id);
+                                cont++
                             })
+                            if (cont === 0) {
+                                $('#Concepto').html('ABONO');
+                                $('#Cuotan').html(0);
+                                $('#Cuota').html(0);
+                                $('#Mora').html(0);
+                                $('#Facturas').html(0);
+                                $('.Totalf').html(0);
+                                $('.Total').html(0);
+                                $('.Total3').html(0);
+                                $('#Total, #Total2').val(0);
+                                $('#Description').val('ABONO ' + Description);
+                                $('#factrs').val(0);
+                                $('#idC').val('');
+                            }
                         }
                         Calculo($('#proyectos').val())
                         $('#proyectos').change(function () {
@@ -1225,14 +1240,12 @@ if (window.location.pathname == `/links/pagos`) {
         }
     });
     $('.Total2').change(function () {
-        alert('lkjdljhdjol')
         var resul = $(this).val();
         $('#Total, #Total2').val(resul)
     });
     $('form').submit(function () {
         $('input').prop('disabled', false);
-        $('#ahora').val(moment.utc(data.fech).format('YYYY-MM-DD HH:mm'))
-        alert('kjhda')
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'))
         var fd = $('form').serialize();
         $.ajax({
             url: '/links/pagos',
@@ -1849,6 +1862,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
         $('a.atras').on('click', function () {
+            $('.card-footer').show('')
             $("#cuadro2").hide("slow");
             $("#cuadro3").hide("slow");
             $("#cuadro1").show("slow");
@@ -2256,31 +2270,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     }
                 }
             ],
-            language: {
-                "lengthMenu": "Mostrar 10 filas",
-                "sProcessing": "Procesando...",
-                "sLengthMenu": "Mostrar _MENU_ registros",
-                "sZeroRecords": "No se encontraron resultados",
-                "sEmptyTable": "Ningún dato disponible en esta tabla",
-                "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-                "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-                "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-                "sInfoPostFix": "",
-                "sSearch": "Buscar : ",
-                "sUrl": "",
-                "sInfoThousands": ",",
-                "sLoadingRecords": "Cargando...",
-                "oPaginate": {
-                    "sFirst": "Primero",
-                    "sLast": "Último",
-                    "sNext": "Siguiente",
-                    "sPrevious": "Anterior"
-                },
-                "oAria": {
-                    "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                    "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-                }
-            },
+            language: languag2,
             ajax: {
                 method: "POST",
                 url: "/links/productos/" + n,
@@ -2545,31 +2535,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             { responsivePriority: 3, targets: 7 },
             { responsivePriority: 4, targets: 6 }
         ],
-        language: {
-            "lengthMenu": "Mostrar 10 filas",
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar : ",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
+        language: languag2,
         ajax: {
             method: "POST",
             url: "/links/productos",
@@ -2612,7 +2578,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             { data: "mzs", className: 'tu' },
             { data: "cantidad", className: 'tu' },
             {
-                data: "estado", className: 'tu',
+                data: "estados", className: 'tu',
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
@@ -3011,6 +2977,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#sololotes2').html('')
                     $('#datosproducto').html('')
                     $('#datosproducto2').html('')
+                    $('.card-footer').hide('')
                     $("#cuadro2").hide("slow");
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
