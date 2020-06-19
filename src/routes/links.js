@@ -225,7 +225,7 @@ router.get('/pagos/:id', async (req, res) => {
     const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id)
     if (cliente.length > 0) {
         const client = cliente[0]
-        const d = await pool.query(`SELECT p.id, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, 
+        const d = await pool.query(`SELECT p.id, p.ahorro, pd.id lt, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, 
         c.descuento, pr.proyect FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
         INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [client.id, client.id]);
         var c = ''
@@ -254,17 +254,20 @@ router.post('/pagos', async (req, res) => {
     res.send(hash);
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibo, ahora } = req.body;
+    const { total, factrs, id, recibo, ahora, concpto, lt } = req.body;
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
     if (recibe.length > 0) {
         req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
         res.redirect('/links/pagos');
     } else {
+        console.log(req.body)
         const pago = {
-            fech: ahora, pago: id, monto: total, recibo, facturasvenc: factrs,
-            concepto: 'PAGO', stado: 3, img: '/uploads/' + req.file.filename
+            fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
+            concepto: 'PAGO', stado: 3, img: '/uploads/' + req.file.filename,
+            descp: concpto
         }
-        await pool.query('UPDATE cuotas set estado = 1 WHERE id = ?', id);
+        concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
+            await pool.query('UPDATE cuotas set estado = 1 WHERE id = ?', id);
         await pool.query('INSERT INTO solicitudes SET ? ', pago);
         req.flash('success', 'Solicitud de pago enviada correctamente');
         res.redirect('/links/pagos');
@@ -624,8 +627,15 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": solicitudes };
         //console.log(solicitudes)
         res.send(respuesta);
-    } else if (id === 'cobro') {
-
+    } else if (id === 'abono') {
+        const solicitudes = await pool.query(`SELECT * FROM solicitudes s
+        INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN preventa pr ON pr.lote = pd.id 
+        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
+        INNER JOIN clientes cl ON pr.cliente = cl.id WHERE s.concepto = 'ABONO' 
+        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        respuesta = { "data": solicitudes };
+        //console.log(solicitudes)
+        res.send(respuesta);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
@@ -646,6 +656,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     } else {
         const fech = moment(req.body.fechs).format('YYYY-MM-DD')
         var cuot = parseFloat(req.body.cuota), aidi = '', estados = 0;
+        console.log(req.body)
         var Ps = async (cuot, aidi) => {
             if (cuot == req.body.monto) {
                 if (req.body.cuota === req.body.monto && req.body.facturasvenc > 1) {
@@ -660,7 +671,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
                     }
                     if (req.body.incentivo) {
                         var f = {
-                            fech, monto: req.body.incentivo, concepto: 'COMICION DIRECTA', stado: 9, descripcion: 'SEPARACION',
+                            fech, monto: req.body.incentivo, concepto: 'COMICION DIRECTA', stado: 9, descp: 'SEPARACION',
                             asesor: req.body.asesor, porciento: 0, total: req.body.cuota, lt: req.body.lote
                         }
                         await pool.query(`INSERT INTO solicitudes SET ?`, f);
@@ -668,7 +679,6 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
                 } else if (req.body.estado != 10) {
                     var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
                     var valr = parseFloat(req.body.monto)
-                    console.log(precio, valr)
                     const pagos = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND estado = 13 AND fechs < '${fech}'`)
                     if (pagos.length > 0) {
                         pagos.map((c, x) => {
@@ -718,7 +728,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
         const pas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND (estado = 3 OR estado = 5) AND fechs < '${fech}'`)
 
-        if (pas.length > 0 && req.body.cuota != req.body.monto) {
+        if (pas.length > 0 && req.body.monto > req.body.cuota) {
             pas.map((c, x) => {
                 cuot += parseFloat(c.cuota) + parseFloat(c.mora)
                 aidi += x === 0 ? `id = ${c.id}` : ` AND id = ${c.id}`;
@@ -728,7 +738,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Ps(cuot, aidi)
         }
 
-        console.log(req.body)
+        //console.log(req.body)
         res.send(Desendentes(req.body.pin, estados));
     }
 });
@@ -963,7 +973,7 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', async (req, res) => {
-    const result = await rango(req.user.id);
+    //const result = await rango(req.user.id);
     const { movil, cajero } = req.body, pin = ID(13);
 
     const nuevoPin = {
@@ -1308,7 +1318,7 @@ async function Desendentes(pin, stados) {
             personal += val
             if (a.uno === null) {
                 var f = {
-                    fech: hoy, monto, concepto: 'COMICION DIRECTA', stado: 9, descripcion: 'VENTA DIRECTA',
+                    fech: hoy, monto, concepto: 'COMICION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
                     asesor: j.acreedor, porciento: j.comision, total: val, lt: a.lote
                 }
                 await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
@@ -1339,7 +1349,7 @@ async function Desendentes(pin, stados) {
                 venta += val
                 if (a.uno === null) {
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descripcion: 'PRIMERA LINEA',
+                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'PRIMERA LINEA',
                         asesor: j.acreedor, porciento: j.nivel1, total: val, lt: a.lote
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
@@ -1369,7 +1379,7 @@ async function Desendentes(pin, stados) {
                 venta += val
                 if (a.uno === null) {
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descripcion: 'SEGUNDA LINEA',
+                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'SEGUNDA LINEA',
                         asesor: j.acreedor, porciento: j.nivel2, total: val, lt: a.lote
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ dos: j.acreedor }, a.lote]);
@@ -1398,7 +1408,7 @@ async function Desendentes(pin, stados) {
                 venta += val
                 if (a.uno === null) {
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descripcion: 'TERCERA LINEA',
+                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'TERCERA LINEA',
                         asesor: j.acreedor, porciento: j.nivel3, total: val, lt: a.lote
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ tres: j.acreedor }, a.lote]);
@@ -1414,7 +1424,7 @@ async function Desendentes(pin, stados) {
         if (tot >= 500000000 && tot < 1000000000) {
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descripcion: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 4 }, j.acreedor]);
@@ -1423,7 +1433,7 @@ async function Desendentes(pin, stados) {
         } else if (tot >= 1000000000 && tot < 2000000000) {
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descripcion: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 3 }, j.acreedor]);
@@ -1432,7 +1442,7 @@ async function Desendentes(pin, stados) {
         } else if (tot >= 2000000000 && tot < 3000000000) {
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descripcion: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 2 }, j.acreedor]);
@@ -1441,7 +1451,7 @@ async function Desendentes(pin, stados) {
         } else if (tot >= 300000000) {
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descripcion: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 1 }, j.acreedor]);
@@ -1461,14 +1471,14 @@ async function Desendentes(pin, stados) {
     } else if (rango === 3) {
         var f = {
             fech: hoy, monto: bonop * bonus, concepto: 'BONO', stado: 9, porciento: bonus,
-            descripcion: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop
+            descp: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop
         }
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
 
     } else if (rango === 2 || rango === 1) {
         var f = {
             fech: hoy, monto: (bonop + bono) * bonus, concepto: 'BONO', stado: 9, porciento: bonus,
-            descripcion: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono
+            descp: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono
         }
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
     }

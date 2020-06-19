@@ -46,10 +46,10 @@ let languag2 = {
     "sInfoThousands": ",",
     "sLoadingRecords": "Cargando...",
     "oPaginate": {
-        "sFirst": "Primero",
-        "sLast": "Último",
-        "sNext": "Siguiente",
-        "sPrevious": "Anterior"
+        "sFirst": "Pri",
+        "sLast": "Últ",
+        "sNext": "Sig",
+        "sPrevious": "Ant"
     },
     "oAria": {
         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
@@ -1124,7 +1124,7 @@ if (window.location.pathname == `/links/pagos`) {
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    //console.log(data)
+                    console.log(data)
                     if (data.status) {
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
@@ -1146,6 +1146,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Ahorro').html(Moneda(r.ahorro));
                                 $('#Proyecto').html(Moneda(r.valor));
                                 $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
+                                $('#lt').val(Moneda(r.lt));
                                 Description = r.proyect + ' Lote: ' + r.n;
                             })
 
@@ -1156,6 +1157,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 mora += mor;
                                 cuot += r.cuota
                                 $('#Concepto').html(r.tipo);
+                                $('#concpto').val(r.tipo)
                                 $('#Cuotan').html(Moneda(r.ncuota));
                                 $('#Cuota').html(Moneda(r.cuota));
                                 $('#Mora').html(Moneda(mor));
@@ -1182,6 +1184,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Description').val('ABONO ' + Description);
                                 $('#factrs').val(0);
                                 $('#idC').val('');
+                                $('#concpto').val('ABONO')
                             }
                         }
                         Calculo($('#proyectos').val())
@@ -3499,39 +3502,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         },
         responsive: true,
         order: [[0, 'desc']],
-        language: {
-            "lengthMenu": "Mostrar 10 filas",
-            "sProcessing": "Procesando...",
-            "sLengthMenu": "Mostrar _MENU_ registros",
-            "sZeroRecords": "No se encontraron resultados",
-            "sEmptyTable": "Ningún dato disponible en esta tabla",
-            "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
-            "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
-            "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
-            "sInfoPostFix": "",
-            "sSearch": "Buscar : ",
-            "sUrl": "",
-            "sInfoThousands": ",",
-            "sLoadingRecords": "Cargando...",
-            "oPaginate": {
-                "sFirst": "Primero",
-                "sLast": "Último",
-                "sNext": "Siguiente",
-                "sPrevious": "Anterior"
-            },
-            "oAria": {
-                "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
-                "sSortDescending": ": Activar para ordenar la columna de manera descendente"
-            }
-        },
+        language: languag2,
         ajax: {
             method: "POST",
             url: "/links/solicitudes/pago",
             dataSrc: "data"
         },
-        /*initComplete: function (settings, json, row) {
-                                        alert(row);
-        },*/
+        initComplete: function (settings, json, row) {
+            $('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+        },
         columns: [
             { data: "ids" },
             { data: "nombre" },
@@ -3543,6 +3522,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             { data: "proyect" },
             { data: "n" },
+            { data: "descp" },
             {
                 data: "monto",
                 render: function (data, method, row) {
@@ -3634,6 +3614,94 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         })
     })
+    var abonos = $('#abonos').DataTable({
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/abono",
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "ids" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "n" },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "recibo" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
+    abonos.on('click', '.dropdown-item', function () {
+        var fila = $(this).parents('tr');
+        var data = abonos.row(fila).data();
+        var dts = data
+        console.log(data)
+        $.ajax({
+            type: 'PUT',
+            url: '/links/solicitudes/' + $(this).text(),
+            data: dts,
+            success: function (data) {
+                abonos.ajax.reload(null, false)
+                if (data) {
+                    SMSj('success', `Solicitud procesada correctamente`);
+                } else {
+                    SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                }
+            }
+        })
+    })
     var comisiones = $('#comisiones').DataTable({
         deferRender: true,
         paging: true,
@@ -3686,7 +3754,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             },
             { data: "concepto" },
-            { data: "descripcion" },
+            { data: "descp" },
             { data: "mz" },
             { data: "n" },
             {

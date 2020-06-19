@@ -12,7 +12,7 @@
                 </div>
             </div>
             <div class="card-body">
-                <input type="hidden" id="tu" value="{{user.id}}">
+                <input type="hidden" id="tu" value="{{user.id}}">                
                 <table id="datatable" class="table table-sm table-striped table-hover display nowrap"
                     style="width:100%">
                     <thead>
@@ -22,8 +22,31 @@
                             <th>Fecha</th>
                             <th>proyecto</th>
                             <th>lote</th>
+                            <th>Descp</th>
                             <th>Monto</th>
                             <th>Facturas V</th>
+                            <th>Recibo</th>
+                            <th data-priority="2">Estado</th>
+                            <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+                            <th data-priority="1">Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <hr>
+                <h3>ABONOS</h3>
+                <table id="abonos" class="table table-sm table-striped table-hover display nowrap"
+                    style="width:100%">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Cliente</th>
+                            <th>Fecha</th>
+                            <th>proyecto</th>
+                            <th>lote</th>                            
+                            <th>Descp</th>
+                            <th>Monto</th>
                             <th>Recibo</th>
                             <th data-priority="2">Estado</th>
                             <!--<th style="width:5%;" data-priority="10000">Recibo</th>
