@@ -484,7 +484,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         sql = `SELECT p.id, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id ${ d} `
+            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${ d} `
 
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
@@ -526,7 +526,7 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     console.log(req.params)
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.id INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
+            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
 
     const orden = await pool.query(sql, id);
     console.log(orden)
@@ -622,16 +622,33 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s INNER JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON c.separacion = pr.id INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.id WHERE s.concepto = 'PAGO' 
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto = 'PAGO' 
+        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        respuesta = { "data": solicitudes };
+        //console.log(solicitudes) 
+        res.send(respuesta);
+    } else if (id === 'abono') {
+        const solicitudes = await pool.query(`SELECT * FROM solicitudes s
+        INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN productos p ON pd.producto = p.id 
+        INNER JOIN preventa pr ON pr.lote = pd.id INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto = 'ABONO' 
         ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes };
         //console.log(solicitudes)
         res.send(respuesta);
-    } else if (id === 'abono') {
-        const solicitudes = await pool.query(`SELECT * FROM solicitudes s
-        INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN preventa pr ON pr.lote = pd.id 
-        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.id WHERE s.concepto = 'ABONO' 
+    } else if (id === 'comision') {
+        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, 
+        s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar,
+        us.id, us.fullname, cl.nombre, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+        INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
+        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE (s.concepto = 'COMISION DIRECTA' OR s.concepto = 'COMISION INDIRECTA')
+        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        respuesta = { "data": solicitudes };
+        //console.log(solicitudes)
+        res.send(respuesta);
+    } else if (id === 'bono') {
+        const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
+        INNER JOIN users u ON s.asesor = u.id WHERE s.concepto = 'BONO'
         ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes };
         //console.log(solicitudes)
@@ -654,92 +671,177 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
 
     } else {
-        const fech = moment(req.body.fechs).format('YYYY-MM-DD')
+        const fech = moment(req.body.fechs).format('YYYY-MM-DD HH:mm')
         var cuot = parseFloat(req.body.cuota), aidi = '', estados = 0;
         console.log(req.body)
-        var Ps = async (cuot, aidi) => {
-            if (cuot == req.body.monto) {
-                if (req.body.cuota === req.body.monto && req.body.facturasvenc > 1) {
-                    estados = req.body.estado
-                } else if (req.body.tipo === 'SEPARACION') {
-                    var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
-                    console.log(precio)
-                    if (parseFloat(req.body.monto) >= precio) {
-                        estados = 10
-                    } else {
-                        estados = 12
+        if (req.body.concepto === 'ABONO') {
+            const abonoi = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
+            INNER JOIN users u ON p.asesor = u.id WHERE c.separacion = ${req.body.id} AND c.tipo = 'INICIAL' AND c.estado = 3`)
+            if (abonoi.length > 0) {
+                var vr = 0, monto = parseFloat(req.body.monto), pin, w = 0, valor = abonoi[0].cuotaextraordinaria, valorcuota = abonoi[0].cuota;
+                abonoi
+                    .filter((c) => {
+                        return c.cuota !== c.cuotaextraordinaria
+                    })
+                    .map((c, x) => {
+                        vr += parseFloat(c.cuota)
+                        pin = c.pin
+                        w = x
+                    })
+                if (monto >= vr) {
+                    estados = 10
+                    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} AND tipo = 'INICIAL' AND estado = 3`, { estado: 10, fechapago: fech });
+                    if (monto > vr) {
+                        var cut = Math.round(monto - vr), v = 0, cuota = 0, o = 0;
+                        const abonof = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
+                        WHERE c.separacion = ${req.body.id} AND c.tipo = 'FINANCIACION' AND c.estado = 3`)
+                        var valor2 = abonof[0].cuotaextraordinaria, valorcuota2 = abonof[0].cuota;
+                        abonof
+                            .filter((c) => {
+                                return c.cuota !== c.cuotaextraordinaria
+                            })
+                            .map((c, x) => {
+                                v += parseFloat(c.cuota)
+                                o = x
+                            })
+                        cuota = valorcuota2 - Math.round(cut / o + 1)
+                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} 
+                        AND tipo = 'FINANCIACION' AND cuota != ${valor2} AND estado = 3`, { cuota });
                     }
-                    if (req.body.incentivo) {
-                        var f = {
-                            fech, monto: req.body.incentivo, concepto: 'COMICION DIRECTA', stado: 9, descp: 'SEPARACION',
-                            asesor: req.body.asesor, porciento: 0, total: req.body.cuota, lt: req.body.lote
-                        }
-                        await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                    }
-                } else if (req.body.estado != 10) {
-                    var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
-                    var valr = parseFloat(req.body.monto)
-                    const pagos = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND estado = 13 AND fechs < '${fech}'`)
-                    if (pagos.length > 0) {
-                        pagos.map((c, x) => {
-                            valr += parseFloat(c.cuota)
-                        })
-                    }
-                    valr >= precio ? estados = 10 : 12
+                    Desendentes(pin, estados)
+
                 } else {
-                    estados = req.body.estado
-                }
-                await pool.query(
-                    `UPDATE solicitudes s 
-                        INNER JOIN cuotas c ON s.pago = c.id 
-                        INNER JOIN preventa p ON c.separacion = p.id 
-                        INNER JOIN productosd o ON p.lote = o.id SET ? WHERE s.ids = ?`,
-                    [
-                        {
-                            's.stado': 4,
-                            'c.estado': 13,
-                            'c.fechapago': moment(fech).format('YYYY-MM-DD HH:mm'),
-                            'o.fechar': moment(fech).format('YYYY-MM-DD HH:mm'),
-                            'o.estado': estados
-                        }, req.body.ids
-                    ]
-                );
-                if (aidi) {
-                    await pool.query(`UPDATE cuotas SET ? WHERE ${aidi}`, { estado: 13 });
+                    console.log(w + 1)
+                    var cuota = valorcuota - Math.round(monto / w + 1)
+                    await pool.query(`UPDATE cuotas SET WHERE separacion = ${req.body.id} 
+                    AND tipo = 'INICIAL' AND cuota != ${valor} AND estado = 3`, { cuota });
                 }
 
-                var options = {
-                    method: 'POST',
-                    url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-                    form: {
-                        "phone": '57' + req.body.movil,
-                        "body": `*_${req.body.nombre}_* \n_hemos procesado tu pago de manera exitoza_\n_Recibo *${req.body.recibo}*_\n_Monto *${req.body.monto}*_\n_Factura(s) *${req.body.facturasvenc}*_\n_Tipo *${req.body.tipo}*_\n_N° cuota *${req.body.ncuota}*_\n_Fecha *${req.body.fech}*_\n_Concepto *${req.body.proyect} LOTE ${req.body.n}*_
-                             \n\n*_GRUPO ELITE FINCA RAÍZ_*`
+            } else {
+                const abonof = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
+                WHERE c.separacion = ${req.body.id} AND c.estado = 3`)
+                if (abonof.length > 0) {
+                    var vr = 0, monto = parseFloat(req.body.monto), o = 0, valor = abonof[0].cuotaextraordinaria, valorcuota = abonof[0].cuota;
+                    abonof
+                        .filter((c) => {
+                            return c.cuota !== c.cuotaextraordinaria
+                        })
+                        .map((c, x) => {
+                            vr += parseFloat(c.cuota)
+                            o = x
+                        })
+                    if (monto > vr) {
+                        console.log(' monto es mayor a vr ', monto, vr);
+
+                        //res.send(false);
+                    } else if (monto === vr) {
+                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} AND estado = 3`, { estado: 13, fechapago: fech });
+                    } else {
+                        console.log(o + 1)
+                        var cuota = valorcuota - Math.round(monto / o + 1)
+                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} 
+                        AND cuota != ${valor} AND estado = 3`, { cuota });
                     }
-                };
-                request(options, function (error, response, body) {
-                    if (error) return console.error('Failed: %s', error.message);
-                    console.log('Success: ', body);
-                });
-                sms('57' + req.body.movil, `hemos procesado tu pago de manera exitoza Recibo: ${req.body.recibo} Monto: ${req.body.monto} Concepto: ${req.body.proyect} LOTE ${req.body.n}`);
-                //Rango(separacion, tipo, valor, ahorro,)
+                }
+            }
+        } else {
+            var Ps = async (cuot, aidi) => {
+                if (cuot == req.body.monto) {
+                    if (req.body.cuota === req.body.monto && req.body.facturasvenc > 1) {
+                        estados = req.body.estado
+                    } else if (req.body.tipo === 'SEPARACION') {
+                        var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
+                        console.log(precio)
+                        if (parseFloat(req.body.monto) >= precio) {
+                            estados = 10
+                        } else {
+                            estados = 12
+                        }
+                        if (req.body.incentivo) {
+                            var retefuente = req.body.incentivo * 0.10
+                            var reteica = req.body.incentivo * 8 / 1000
+                            var f = {
+                                fech, monto: req.body.incentivo, concepto: 'COMISION DIRECTA', stado: 9, descp: 'SEPARACION',
+                                asesor: req.body.asesor, porciento: 0, total: req.body.cuota, lt: req.body.lote, retefuente,
+                                reteica, pagar: req.body.incentivo - (retefuente + reteica)
+                            }
+                            await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                        }
+                    } else if (req.body.estado != 10) {
+                        var precio = (parseFloat(req.body.valor) - parseFloat(req.body.ahorro)) * parseFloat(req.body.iniciar) / 100
+                        var valr = parseFloat(req.body.monto)
+                        const pagos = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND estado = 13 AND fechs < '${fech}'`)
+                        if (pagos.length > 0) {
+                            pagos.map((c, x) => {
+                                valr += parseFloat(c.cuota)
+                            })
+                        }
+                        valr >= precio ? estados = 10 : 12
+                    } else {
+                        estados = req.body.estado
+                    }
+                    await pool.query(
+                        `UPDATE solicitudes s 
+                            INNER JOIN cuotas c ON s.pago = c.id 
+                            INNER JOIN preventa p ON c.separacion = p.id 
+                            INNER JOIN productosd o ON p.lote = o.id SET ? WHERE s.ids = ?`,
+                        [
+                            {
+                                's.stado': 4,
+                                'c.estado': 13,
+                                'c.fechapago': moment(fech).format('YYYY-MM-DD HH:mm'),
+                                'o.fechar': moment(fech).format('YYYY-MM-DD HH:mm'),
+                                'o.estado': estados
+                            }, req.body.ids
+                        ]
+                    );
+                    if (aidi) {
+                        await pool.query(`UPDATE cuotas SET ? WHERE ${aidi}`, { estado: 13 });
+                    }
+                    Desendentes(req.body.pin, estados)
+                    var options = {
+                        method: 'POST',
+                        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+                        form: {
+                            "phone": '57' + req.body.movil,
+                            "body": `*_${req.body.nombre}_* \n_hemos procesado tu pago de manera exitoza_\n_Recibo *${req.body.recibo}*_\n_Monto *${req.body.monto}*_\n_Factura(s) *${req.body.facturasvenc}*_\n_Tipo *${req.body.tipo}*_\n_N° cuota *${req.body.ncuota}*_\n_Fecha *${req.body.fech}*_\n_Concepto *${req.body.proyect} LOTE ${req.body.n}*_
+                                 \n\n*_GRUPO ELITE FINCA RAÍZ_*`
+                        }
+                    };
+                    request(options, function (error, response, body) {
+                        if (error) return console.error('Failed: %s', error.message);
+                        console.log('Success: ', body);
+                    });
+                    sms('57' + req.body.movil, `hemos procesado tu pago de manera exitoza Recibo: ${req.body.recibo} Monto: ${req.body.monto} Concepto: ${req.body.proyect} LOTE ${req.body.n}`);
+                    //Rango(separacion, tipo, valor, ahorro,)
+                }
+            }
+
+            const pas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND (estado = 3 OR estado = 5) AND fechs < '${fech}'`)
+
+            if (pas.length > 0 && req.body.monto > req.body.cuota) {
+                pas.map((c, x) => {
+                    cuot += parseFloat(c.cuota) + parseFloat(c.mora)
+                    aidi += x === 0 ? `id = ${c.id}` : ` AND id = ${c.id}`;
+                })
+                /*if (req.body.monto > cuot) {
+                    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} AND tipo = 'INICIAL' AND estado = 3`, { estado: 10, fechapago: fech });
+                    if (monto > vr) {
+                        var cut = Math.round(monto - vr), v = 0, cuota = 0;
+                        const abonof = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.id} AND tipo = 'FINANCIACION' AND estado = 3`)
+                        abonof.map((c, x) => {
+                            v += parseFloat(c.cuota)
+                        })
+                        cuota = Math.round(cut / abonof.length)
+                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${req.body.id} AND tipo = 'FINANCIACION' AND estado = 3`, { cuota });
+                    }
+                }*/
+                Ps(cuot, aidi)
+            } else {
+                Ps(cuot, aidi)
             }
         }
-
-        const pas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${req.body.separacion} AND (estado = 3 OR estado = 5) AND fechs < '${fech}'`)
-
-        if (pas.length > 0 && req.body.monto > req.body.cuota) {
-            pas.map((c, x) => {
-                cuot += parseFloat(c.cuota) + parseFloat(c.mora)
-                aidi += x === 0 ? `id = ${c.id}` : ` AND id = ${c.id}`;
-            })
-            Ps(cuot, aidi)
-        } else {
-            Ps(cuot, aidi)
-        }
-
-        //console.log(req.body)
-        res.send(Desendentes(req.body.pin, estados));
+        res.send(true);
     }
 });
 //Desendentes('ABCDE12345678')
@@ -1292,6 +1394,7 @@ var normalize = (function () {
 
 })();
 async function Desendentes(pin, stados) {
+
     if (stados != 10) {
         return false
     }
@@ -1302,7 +1405,7 @@ async function Desendentes(pin, stados) {
 
     const asesor = await pool.query(`SELECT * FROM pines p INNER JOIN users u ON p.acreedor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id WHERE p.id = ? LIMIT 1`, pin);
-    //console.log(asesor)
+
     var j = asesor[0]
     const directas = await pool.query(`SELECT * FROM preventa p 
     INNER JOIN productosd l ON p.lote = l.id
@@ -1315,26 +1418,30 @@ async function Desendentes(pin, stados) {
         await directas.map(async (a, x) => {
             var val = a.valor - a.ahorro
             var monto = val * j.comision
+            var retefuente = monto * 0.10
+            var reteica = monto * 8 / 1000
             personal += val
-            if (a.uno === null) {
+            if (a.directa === null) {
+                bonop += val
                 var f = {
-                    fech: hoy, monto, concepto: 'COMICION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
-                    asesor: j.acreedor, porciento: j.comision, total: val, lt: a.lote
+                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
+                    asesor: j.acreedor, porciento: j.comision, total: val, lt: a.lote, retefuente,
+                    reteica, pagar: monto - (retefuente + reteica)
                 }
                 await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
                 await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                bonop += val
             }
         })
     }
 
-    const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ?`, j.acreedor);
+    const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND usuario IS NOT NULL`, j.acreedor);
 
     if (lineaUno.length > 0) {
         await lineaUno.map((p, x) => {
             lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
             linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
         });
+
         const reporte = await pool.query(`SELECT * FROM preventa p 
     INNER JOIN productosd l ON p.lote = l.id
     INNER JOIN productos o ON l.producto = o.id
@@ -1346,15 +1453,18 @@ async function Desendentes(pin, stados) {
             await reporte.map(async (a, x) => {
                 var val = a.valor - a.ahorro
                 var monto = val * j.nivel1
+                var retefuente = monto * 0.10
+                var reteica = monto * 8 / 1000
                 venta += val
                 if (a.uno === null) {
+                    bono += val
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'PRIMERA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel1, total: val, lt: a.lote
+                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'PRIMERA LINEA',
+                        asesor: j.acreedor, porciento: j.nivel1, total: val, lt: a.lote, retefuente,
+                        reteica, pagar: monto - (retefuente + reteica)
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                    bono += val
                 }
             })
         }
@@ -1365,6 +1475,7 @@ async function Desendentes(pin, stados) {
             lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
             linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
         });
+
         const reporte2 = await pool.query(`SELECT * FROM preventa p 
     INNER JOIN productosd l ON p.lote = l.id
     INNER JOIN productos o ON l.producto = o.id
@@ -1373,18 +1484,21 @@ async function Desendentes(pin, stados) {
     WHERE (${lDesc}) AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
         if (reporte2.length > 0) {
-            await reporte.map(async (a, x) => {
+            await reporte2.map(async (a, x) => {
                 var val = a.valor - a.ahorro
                 var monto = val * j.nivel2
+                var retefuente = monto * 0.10
+                var reteica = monto * 8 / 1000
                 venta += val
-                if (a.uno === null) {
+                if (a.dos === null) {
+                    bono += val
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'SEGUNDA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel2, total: val, lt: a.lote
+                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'SEGUNDA LINEA',
+                        asesor: j.acreedor, porciento: j.nivel2, total: val, lt: a.lote, retefuente,
+                        reteica, pagar: monto - (retefuente + reteica)
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ dos: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                    bono += val
                 }
             })
         }
@@ -1402,18 +1516,21 @@ async function Desendentes(pin, stados) {
     WHERE (${lDesc}) AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
         if (reporte3.length > 0) {
-            await reporte.map(async (a, x) => {
+            await reporte3.map(async (a, x) => {
                 var val = a.valor - a.ahorro
                 var monto = val * j.nivel3
+                var retefuente = monto * 0.10
+                var reteica = monto * 8 / 1000
                 venta += val
-                if (a.uno === null) {
+                if (a.tres === null) {
+                    bono += val
                     var f = {
-                        fech: hoy, monto, concepto: 'COMICION INDIRECTA', stado: 9, descp: 'TERCERA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel3, total: val, lt: a.lote
+                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'TERCERA LINEA',
+                        asesor: j.acreedor, porciento: j.nivel3, total: val, lt: a.lote, retefuente,
+                        reteica, pagar: monto - (retefuente + reteica)
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ tres: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
-                    bono += val
                 }
             })
         }
@@ -1422,36 +1539,48 @@ async function Desendentes(pin, stados) {
     var tot = venta + personal
     if (personal >= j.venta && tot >= j.ventas) {
         if (tot >= 500000000 && tot < 1000000000) {
+            var retefuente = j.premio * 0.10
+            var reteica = j.premio * 8 / 1000
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot, retefuente,
+                reteica, pagar: j.premio - (retefuente + reteica)
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 4 }, j.acreedor]);
             rango = 4
 
         } else if (tot >= 1000000000 && tot < 2000000000) {
+            var retefuente = j.premio * 0.10
+            var reteica = j.premio * 8 / 1000
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot, retefuente,
+                reteica, pagar: j.premio - (retefuente + reteica)
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 3 }, j.acreedor]);
             rango = 3
 
         } else if (tot >= 2000000000 && tot < 3000000000) {
+            var retefuente = j.premio * 0.10
+            var reteica = j.premio * 8 / 1000
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
+                reteica, pagar: j.premio - (retefuente + reteica)
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 2 }, j.acreedor]);
             rango = 2
 
         } else if (tot >= 300000000) {
+            var retefuente = j.premio * 0.10
+            var reteica = j.premio * 8 / 1000
             var f = {
                 fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot
+                descp: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
+                reteica, pagar: j.premio - (retefuente + reteica)
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
             await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 1 }, j.acreedor]);
@@ -1466,23 +1595,30 @@ async function Desendentes(pin, stados) {
     }
 
     if (rango === 5) {
-        await pool.query(`UPDATE solicitudes SET ? WHERE concepto = 'COMICION INDIRECTA' AND asesor = ?`, [{ stado: 15 }, j.acreedor]);
+        await pool.query(`DELETE FROM solicitudes WHERE concepto = 'COMISION INDIRECTA' AND asesor = ?`, j.acreedor);
 
     } else if (rango === 3) {
+        var monto = bonop * bonus
+        var retefuente = monto * 0.10
+        var reteica = monto * 8 / 1000
         var f = {
-            fech: hoy, monto: bonop * bonus, concepto: 'BONO', stado: 9, porciento: bonus,
-            descp: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop
+            fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
+            descp: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop, retefuente,
+            reteica, pagar: monto - (retefuente + reteica)
         }
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
 
     } else if (rango === 2 || rango === 1) {
+        var monto = (bonop + bono) * bonus
+        var retefuente = monto * 0.10
+        var reteica = monto * 8 / 1000
         var f = {
-            fech: hoy, monto: (bonop + bono) * bonus, concepto: 'BONO', stado: 9, porciento: bonus,
-            descp: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono
+            fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
+            descp: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono, retefuente,
+            reteica, pagar: monto - (retefuente + reteica)
         }
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
     }
-
     return true
 };
 module.exports = router;

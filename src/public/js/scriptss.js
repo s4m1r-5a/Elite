@@ -1300,7 +1300,7 @@ if (window.location.pathname == `/links/reportes`) {
     );
 
 
-    const doc = new jsPDF()
+    /*const doc = new jsPDF()
 
     // It can parse html:
     // <table id="my-table"></table>
@@ -1315,8 +1315,8 @@ if (window.location.pathname == `/links/reportes`) {
             // ...
         ],
     })
+    doc.save('table.pdf')*/
 
-    doc.save('table.pdf')
     /*$('#datatable2').on('click', '.te', function () {
         if ($('#usuarioadmin').val() == 1) {
             var fila = $(this).parents('tr');
@@ -3501,7 +3501,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             caseInsensitive: false,
         },
         responsive: true,
-        order: [[0, 'desc']],
+        order: [[0, "desc"]], //[0, "asc"]
         language: languag2,
         ajax: {
             method: "POST",
@@ -3605,9 +3605,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             url: '/links/solicitudes/' + $(this).text(),
             data: dts,
             success: function (data) {
-                table.ajax.reload(null, false)
                 if (data) {
                     SMSj('success', `Solicitud procesada correctamente`);
+                    table.ajax.reload(null, false)
                 } else {
                     SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                 }
@@ -3626,7 +3626,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 type: 'column'
             }
         },
-        order: [[1, "desc"]],
+        order: [[0, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -3714,7 +3714,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 type: 'column'
             }
         },
-        order: [[1, "desc"]],
+        order: [[0, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -3726,15 +3726,21 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         },*/
         columns: [
             { data: "ids" },
-            { data: "name" },
+            { data: "nam" },
             {
                 data: "fech",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             { data: "fullname" },
             { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
             {
                 data: "monto",
                 render: function (data, method, row) {
@@ -3746,15 +3752,25 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 render: function (data, method, row) {
                     return '%' + (parseFloat(data) * 100) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
-            },
-            {
-                data: "total",
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
                 render: function (data, method, row) {
                     return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             },
             { data: "concepto" },
             { data: "descp" },
+            { data: "proyect" },
             { data: "mz" },
             { data: "n" },
             {
@@ -3800,7 +3816,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 type: 'column'
             }
         },
-        order: [[1, "desc"]],
+        order: [[0, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -3812,23 +3828,48 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         },*/
         columns: [
             { data: "ids" },
-            { data: "nombre" },
+            { data: "fullname" },
             {
                 data: "fech",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
-            { data: "proyect" },
-            { data: "n" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
             {
                 data: "monto",
                 render: function (data, method, row) {
                     return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             },
-            { data: "facturasvenc" },
-            { data: "recibo" },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return '%' + (parseFloat(data) * 100) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
             {
                 data: "stado",
                 render: function (data, method, row) {
@@ -3843,7 +3884,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             return `<span class="badge badge-pill badge-info">Pendiente</span>`
                             break;
                         default:
-                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                            return `<span class="badge badge-pill badge-dark">Disponible</span>`
                     }
                 }
             },
@@ -3872,7 +3913,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 type: 'column'
             }
         },
-        order: [[1, "desc"]],
+        order: [[0, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -3888,7 +3929,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             {
                 data: "fech",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             { data: "proyect" },
