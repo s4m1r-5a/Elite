@@ -2812,7 +2812,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         Recorre($(this).val() || 0)
     });
     $('#Modaledit').one('hidden.bs.modal', function () {
-        $('#Modaledit input, textarea, select').val('')
+        alert('jkhkfhkdfh')
+        //$('#Modaledit input, #Modaledit textarea, #Modaledit select').val('')
         Recorre(0)
     })
     /*
