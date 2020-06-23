@@ -1865,16 +1865,25 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
         $('a.atras').on('click', function () {
+            table2.ajax.reload(null, false)
             $('.card-footer').show('')
             $("#cuadro2").hide("slow");
             $("#cuadro3").hide("slow");
             $("#cuadro1").show("slow");
+            $('#lts').prop('disabled', false);
+            $('#tmt2').prop('disabled', false);
+            $('#vmt2').prop('disabled', false);
+            $('#MANZANAS').prop('disabled', false);
+            $('#MANZANAS').prop("checked", false)
         });
         $('.v').change(function () {
             if ($('#tmt2').val() && $('#vmt2').val()) {
                 var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
                 $('#valproyect').val(valor);
                 $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
+                if ($('.proveedor').val() != 0 && $('.socio').val() != 0) {
+                    Dts()
+                }
             }
         });
         $("form input:not(.edi)").on({
@@ -2104,23 +2113,29 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 i++;
             };
         });
-        $('#pro form').submit(function (e) {
-            $('#ModalEventos').modal({
-                toggle: true,
-                backdrop: 'static',
-                keyboard: true,
-            });
-            var metroscuadrados = 0;
-            $('.mt2').each(function (index, element) {
-                metroscuadrados += parseFloat($(this).val())
-            });
-            if ($('#tmt2').val() != metroscuadrados) {
+        $('#pro').submit(function (e) {
+            if ($('#ideditar').val()) {
                 e.preventDefault()
-                $('#ModalEventos').one('shown.bs.modal', function () {
-                    $('#ModalEventos').modal('hide')
-                }).modal('show');
-                SMSj('error', 'los datos no concuerdan con la totalidad de los metros cuadrados que se registro, rectifique e intentelo nuevamente')
+                Dts()
             } else {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+                /*var metroscuadrados = 0;
+                $('.mt2').each(function (index, element) {
+                    metroscuadrados += parseFloat($(this).val())
+                });
+                if ($('#tmt2').val() != metroscuadrados) {
+                    e.preventDefault()
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                    }).modal('show');
+                    SMSj('error', 'los datos no concuerdan con la totalidad de los metros cuadrados que se registro, rectifique e intentelo nuevamente')
+                } else {
+                    $('#lts').prop('disabled', false);
+                }*/
                 $('#lts').prop('disabled', false);
             }
         })
@@ -2135,9 +2150,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     async: false,
                     success: function (data) {
                         if (data) {
-                            tabledit.ajax.reload(function (json) {
-                                SMSj('success', 'Nuevo porcentage establecido correctamente')
-                            })
+                            tabledit.ajax.reload(null, false);
+                            SMSj('success', 'Nuevo porcentage establecido correctamente');
                         }
                     }
                 })
@@ -2185,6 +2199,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             $("#reportrange span").html(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
             $('#inicio').val(start.format("YYYY-MM-DD"))
             $('#fin').val(end.format("YYYY-MM-DD"))
+            Dts()
         }
         $("#reportrange").daterangepicker({
             locale: {
@@ -2615,30 +2630,32 @@ if (window.location == `${window.location.origin}/links/productos`) {
         ]
     });
     table2.on('click', '.eliminar', function () {
-        $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-        var fila = $(this).parents('tr');
-        var data = table2.row(fila).data();
-        var datos = { id: data.id };
+        var mensaje = confirm("¿Seguro deseas eliminar este LOTE?");
+        if (mensaje) {
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+            var fila = $(this).parents('tr');
+            var data = table2.row(fila).data();
+            var datos = { id: data.id };
 
-        $.ajax({
-            type: 'POST',
-            url: '/links/productos/eliminar',
-            data: datos,
-            async: true,
-            success: function (data) {
-                if (data) {
-                    table2.ajax.reload(function (json) {
-                        table2.columns.adjust().draw();
+            $.ajax({
+                type: 'POST',
+                url: '/links/productos/eliminar',
+                data: datos,
+                async: true,
+                success: function (data) {
+                    if (data) {
+                        table2.ajax.reload(null, false)
+                        //table2.columns.adjust().draw();
                         $('#ModalEventos').modal('hide')
                         SMSj('error', 'Proyecto eliminado correctamente')
-                    })
+                    }
                 }
-            }
-        })
+            })
+        }
     });
     var tabledit = $('#datatabledit').DataTable({
         ajax: {
@@ -2700,13 +2717,15 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "valor",
                 render: function (data, method, row) {
-                    return `<input class="form-control-no-border text-center valor" type="text" name="valor" value="${Moneda(data)}" disabled>`
+                    return `<span class="badge badge-pill badge-dark valor2">${Moneda(data)}</span>
+                    <input class="valor" type="hidden" name="valor" value="${Moneda(data)}">`
                 }
             },
             {
                 data: "inicial",
                 render: function (data, method, row) {
-                    return `<input class="form-control-no-border text-center inicial" type="text" name="inicial" value="${Moneda(data)}" disabled>`
+                    return `<span class="badge badge-pill badge-dark inicial2">${Moneda(data)}</span>
+                    <input class="inicial" type="hidden" name="inicial" value="${Moneda(data)}">`
                 }
             },
             {
@@ -2745,8 +2764,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             if ($('#cuadro3').is(':visible')) {
                 $('#ModalEventos').modal('toggle');
                 $('#ModalEventos').modal('hide')
-                $(`#datatabledit input[name="valor"]`).mask('000.000.000', { reverse: true });
-                $(`#datatabledit input[name="inicial"]`).mask('000.000.000', { reverse: true });
+                //$(`#datatabledit input[name="valor"]`).mask('000.000.000', { reverse: true });
+                //$(`#datatabledit input[name="inicial"]`).mask('000.000.000', { reverse: true });
             }
         },
         columnDefs: [
@@ -2795,7 +2814,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
             async: true,
             success: function (data) {
                 if (data) {
+                    //tabledit.ajax.reload(null, false)
                     tabledit.ajax.reload(function (json) {
+                        tabledit.columns.adjust().draw();
+                        Recorre(0)
                         SMSj('success', 'Subproducto agregado correctamente')
                     })
                 }
@@ -2812,8 +2834,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         Recorre($(this).val() || 0)
     });
     $('#Modaledit').one('hidden.bs.modal', function () {
-        alert('jkhkfhkdfh')
-        //$('#Modaledit input, #Modaledit textarea, #Modaledit select').val('')
+        $('#Modaledit .edi, #Modaledit textarea').val('')
         Recorre(0)
     })
     /*
@@ -2822,22 +2843,33 @@ if (window.location == `${window.location.origin}/links/productos`) {
             .animate({ color: 'black' });
     */
     var Dts = () => {
-        $('form input').prop('disabled', false);
-        var datos = $('form').serialize();
-        $.ajax({
-            type: 'POST',
-            url: '/links/regispro',
-            data: datos
-        })
+        if ($('#ideditar').val()) {
+            $('form input').prop('disabled', false);
+            var datos = $('form').serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/links/regispro',
+                data: datos,
+                success: function (data) {
+                    $('#lts').prop('disabled', true);
+                    $('#tmt2').prop('disabled', true);
+                    $('#vmt2').prop('disabled', true);
+                    $('#mzs').prop('disabled', true);
+                    $('#MANZANAS').prop('disabled', true);
+                }
+            })
+        }
     }
     var Recorre = (n) => {
-        var sum = 0;
+        var sum = 0, cont = 0;
         tabledit
             .column(2)
             .data()
             .filter(function (value, index) {
                 sum += parseFloat(value)
+                cont++
             });
+        $('#lts').val(cont)
         $('#tmt2').val(sum + parseFloat(n))
         var valor = parseFloat($('#tmt2').val()) * parseFloat($('#vmt2').cleanVal());
         $('#valproyect').val(valor);
@@ -2848,27 +2880,31 @@ if (window.location == `${window.location.origin}/links/productos`) {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
         if (data.estado == 9 || data.estado == 15) {
-            $('#ModalEventos').modal({
-                toggle: true,
-                backdrop: 'static',
-                keyboard: true,
-            });
-            var datos = { id: data.id, prod: data.producto };
-            $.ajax({
-                type: 'POST',
-                url: '/links/productos/emili',
-                data: datos,
-                async: true,
-                success: function (data) {
-                    if (data) {
-                        tabledit.ajax.reload(function (json) {
-                            tabledit.columns.adjust().draw();
-                            $('#ModalEventos').modal('hide')
-                            SMSj('error', 'Proyecto eliminado correctamente')
-                        })
+            var mensaje = confirm("¿Seguro deseas eliminar este LOTE?");
+            if (mensaje) {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+                var datos = { id: data.id, prod: data.producto };
+                $.ajax({
+                    type: 'POST',
+                    url: '/links/productos/emili',
+                    data: datos,
+                    async: true,
+                    success: function (data) {
+                        if (data) {
+                            tabledit.ajax.reload(function (json) {
+                                tabledit.columns.adjust().draw();
+                                Recorre(0)
+                                $('#ModalEventos').modal('hide')
+                                SMSj('error', 'Proyecto eliminado correctamente')
+                            })
+                        }
                     }
-                }
-            })
+                })
+            }
         } else {
             SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
         }
@@ -2895,6 +2931,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 var ini = (parseFloat($(this).val()) * parseFloat($('#vmt2').cleanVal())) * parseFloat($('#porcentage').val()) / 100
                 fila.find(`.valor`).val(Moneda(vr))
                 fila.find(`.inicial`).val(Moneda(ini))
+                fila.find(`.valor2`).html(Moneda(vr))
+                fila.find(`.inicial2`).html(Moneda(ini))
                 //Recorre(parseFloat(data.mtr2) - parseFloat($(this).val()))
                 $('#tmt2').val((parseFloat($('#tmt2').val()) - parseFloat(data.mtr2)) + parseFloat($(this).val() || 0))
                 var valor = parseFloat($('#tmt2').val()) * parseFloat($('#vmt2').cleanVal());
@@ -2930,12 +2968,14 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             })
         } else {
-            SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
+            SMSj('success', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible')
             fila.find(`.mz`).val(data.mz)
             fila.find(`.lt`).val(data.n)
             fila.find(`.mt2`).val(data.mtr2)
             fila.find(`.valor`).val(Moneda(data.valor))
             fila.find(`.inicial`).val(Moneda(data.inicial))
+            fila.find(`.valor2`).html(Moneda(data.valor))
+            fila.find(`.inicial2`).html(Moneda(data.inicial))
             fila.find(`.descripcion`).val(data.descripcion)
         }
     });
@@ -2961,21 +3001,20 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $(`input[name="title"]`).val(data.proyect);
                     $(`.socio option[value='${data.socio}']`).attr("selected", true);
                     $('#tmt2').val(data.totalmtr2)
-                    $('#vmt2').val(Moneda(data.valmtr2))
+                    $('#vmt2').val(Moneda(data.valmtr2)).prop('disabled', true)
                     $(`input[name="separacion"]`).val(Moneda(data.separaciones))
-                    $(`input[name="incentivo"]`).val(Moneda(data.incentivo))
+                    $(`input[name="incentivo"]`).val(Moneda(data.incentivo) || 0)
                     $('.valproyect').html('$' + Moneda(data.valproyect))
                     $('#valproyect').val(data.valproyect)
                     $('#inicio').val(moment(data.fechaini).format('YYYY-MM-DD'))
                     $('#fin').val(moment(data.fechafin).format('YYYY-MM-DD'))
+                    $("#reportrange span").html(moment(data.fechaini).format("MMMM D, YYYY") + " - " + moment(data.fechafin).format("MMMM D, YYYY"));
+                    start = moment(data.fechaini);
+                    end = moment(data.fechafin);
                     $(`#porcentage option[value='${data.porcentage}']`).attr("selected", true);
                     $(`.proveedor option[value='${data.proveedor}']`).attr("selected", true);
-                    data.mzs === null ? '' : $('#MANZANAS').prop("checked", true), $('#mzs').val(data.mzs).prop("disabled", false);
+                    data.mzs === null ? '' : $('#MANZANAS').prop("checked", true), $('#mzs').val(data.mzs);
                     $('#lts').val(data.cantidad);
-                    $('#lts').prop('disabled', true);
-                    $('#vmt2').prop('disabled', true);
-                    $('#mzs').prop('disabled', true);
-                    $('#MANZANAS').prop('disabled', true);
                     $('.datatabledit').show()
                     $('#sololotes').html('')
                     $('#sololotes2').html('')

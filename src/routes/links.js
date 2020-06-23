@@ -119,10 +119,11 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
         separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
         cta, numero, mail, direccion, tel, web, descripcion, editar } = req.body;
+    //console.log(req.body)
     const produc = {
         categoria, proveedor, socio, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
-        valproyect, mzs, cantidad, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.replace(/\./g, ''),
+        valproyect, mzs: mzs ? mzs : 0, cantidad, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.replace(/\./g, ''),
         incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
     };
     if (proveedor == '0' || socio == '0') {
@@ -134,7 +135,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
             nit, banco: banco.toUpperCase(),
             cta, numero,
             mail: mail.toLowerCase(),
-            direccion, tel,
+            direccion, tel: tel.replace(/-/g, ""),
             web: web.toLowerCase()
         }
         const newclient = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento);
@@ -144,7 +145,7 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
             const cliente = {
                 nombre: nombres.toUpperCase(),
                 documento,
-                movil: tel,
+                movil: tel.replace(/-/g, ""),
                 email: mail,
                 direccion
             }
