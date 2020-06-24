@@ -7,6 +7,7 @@ const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro, dataSet } = require('../keys');
 const request = require('request');
+const cron = require("node-cron");
 const axios = require('axios');
 const moment = require('moment');
 const nodemailer = require('nodemailer')
@@ -23,6 +24,30 @@ const transpoter = nodemailer.createTransport({
     }
 })
 moment.locale('es');
+cron.schedule("30 10 * * *", async () => {
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            "phone": '',
+            "body": ''
+        }
+    };
+    const cliente = await pool.query(`SELECT c.nombre, p.producto, v.correo, v.fechadevencimiento, v.movildecompra 
+    FROM ventas v INNER JOIN products p ON v.product = p.id_producto INNER JOIN clientes c ON v.client = c.id WHERE 
+    v.fechadevencimiento = ? `, moment().subtract(3, 'days').startOf("days").format('YYYY-MM-DD'));
+    if (cliente.length > 0) {
+        cliente.map((x, p) => {
+            options.form.body = `_Hola *${x.nombre.split(" ")[0]}* tu suscripsion a *NETFLIX* terminara en 3 días, recuerda realizar el pago oportuno de tu cuenta *${x.correo}* para que no te quedes sin servicio.._ \n\n_Si quieres conocer las formas de pago escribenos al *3012673944*_\n
+            *RedFlix..*`;
+            options.form.phone = '57' + x.movildecompra
+            request(options, function (error, response, body) {
+                if (error) return console.error('Failed: %s', error.message);
+                console.log('Success: ', body);
+            });
+        })
+    }
+});
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
@@ -280,16 +305,23 @@ router.post('/recibo', async (req, res) => {
 });
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
-    const { id } = req.query;
-    console.log(id)
-    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ? `, id);
-    console.log(proyecto)
-    res.render('links/orden', { proyecto, id });
+    const { id, h } = req.query;
+    var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD hh:mm A');
+    console.log(ahora)
+    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id 
+    WHERE (pd.estado = 9 OR pd.estado = 14) AND (pd.tramitando IS NULL OR pd.tramitando < '${ahora}') AND pd.id = ${id} `);
+    if (proyecto.length > 0) {
+        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 14, tramitando: h }, id]);
+        res.render('links/orden', { proyecto, id });
+    } else {
+        req.flash('error', 'Lo sentimos este producto ya esta siendo procesado por alguien mas, intentalo mas tarde');
+        res.redirect('/links/productos');
+    }
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
     const { nombres, documento, lugarexpedicion, fechaexpedicion,
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
-        numerocuotaspryecto, extraordinariameses, lote, client,
+        numerocuotaspryecto, extraordinariameses, lote, client, ahora,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota,
         estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
     function Cliente(N) {
@@ -340,7 +372,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         iniciar
     };
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1 }, lote]);
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
 

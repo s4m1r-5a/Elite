@@ -1,4 +1,3 @@
-
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
 function Moneda(valor) {
     valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
@@ -1192,9 +1191,17 @@ if (window.location.pathname == `/links/pagos`) {
                             Calculo($(this).val())
                         })
                         $('.Total2').change(function () {
-                            if ($(this).val()) {
+                            var totl2 = parseFloat($(this).cleanVal())
+                            var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
+                            var totl = parseFloat($('.Total').html().replace(/\./g, ''))
+                            if (totl2 === totalf || totl2 > totl) {
                                 $('.Total3').html($(this).val());
                                 $('#Total, #Total2').val($(this).cleanVal());
+                            } else if ($(this).val()) {
+                                $(this).val('')
+                                SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
+                                $('.Total3').html(Moneda($('.Total').html()));
+                                $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
                             } else {
                                 $('.Total3').html(Moneda($('.Total').html()));
                                 $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
@@ -2230,7 +2237,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }, cb);
         cb(start, end);
     });
-
+    // Math.floor()
     function Dtas(n) {
         var table = $('#datatable').DataTable({
             dom: 'Bfrtip',
@@ -2329,6 +2336,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             case 15:
                                 return `<span class="badge badge-pill badge-warning">Inactivo</span>`
                                 break;
+                            case 14:
+                                return `<span class="badge badge-pill badge-danger">Tramitando</span>`
+                                break;
                         }
                     }
                 },
@@ -2340,7 +2350,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     data: "inicial",
                     render: $.fn.dataTable.render.number('.', '.', 0, '$')
                 },
-                { data: "descripcion" }
+                { data: "descripcion" },
+                {
+                    data: "tramitando",
+                    render: function (data, method, row) {
+                        return data ? `<span class="badge badge-danger text-center text-uppercase">${moment(data).format('MMM-D hh:mm A')}</span>` : '';
+                    }
+                }
             ],
             deferRender: true,
             paging: true,
@@ -2431,7 +2447,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
         var fila = $(this).parents('tr');
         var data = $('#datatable').DataTable().row(fila).data();
         //var data = $('#datatable').DataTable().row(this).data();
-        if (data.estado === 9) {
+        var ya = moment(new Date()).format('YYYY-MM-DD hh:mm A')
+        if (data.estado === 9 || data.estado === 14) {
             $('#ModalEventos').modal({
                 toggle: true,
                 backdrop: 'static',
@@ -2440,10 +2457,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
             fila.toggleClass('selected');
             $('#proyecto').val();
             $('#idproyecto').val();
-            var url = `/links/orden?id=${data.id}`;
+            var url = `/links/orden?id=${data.id}&h=${ya}`;
             $(location).attr('href', url);
         } else {
-            SMSj('info', 'Producto no disponible')
+            SMSj('info', 'Este Producto no se encuentra disponible')
         }
     });
     $('#datatable2').on('click', '.to button', function () {
@@ -3043,6 +3060,8 @@ if (window.location.pathname == `/links/orden`) {
         // Datatables clients        
         var groupColumn = 2;
         var fch = new Date();
+        var ya = moment(new Date()).format('YYYY-MM-DD hh:mm A');
+        $('.ya').val(ya)
         $('.val').mask('000.000.000', { reverse: true });
         var fechs = new Date($('#fechs').val());
         var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
