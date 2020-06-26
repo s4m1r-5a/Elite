@@ -8,15 +8,21 @@ const { isLoggedIn } = require('../lib/auth');
 // SIGNUP
 router.get('/signup', (req, res) => {
   const { id } = req.query;
-  console.log(id)
   res.render('auth/signup', { id: id });
 });
 
-router.post('/signup', passport.authenticate('local.signup', {
-  successRedirect: '/tablero',
-  failureRedirect: '/signup',
-  failureFlash: true
-}));
+router.post('/signup', async (req, res, next) => {
+  const rows = await pool.query(`SELECT * FROM users u WHERE u.document = ?`, req.body.document);
+  if (rows.length > 0) {
+    req.flash('error', 'Este usuario ya se encuentra registrado, inicie sesion con su usuario ' + rows[0].username);
+    res.redirect('/signin');
+  }
+  passport.authenticate('local.signup', {
+    successRedirect: '/tablero',
+    failureRedirect: '/signup',
+    failureFlash: true
+  })(req, res, next);
+})
 
 // SINGIN
 router.get('/signin', (req, res) => {

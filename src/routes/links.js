@@ -24,6 +24,16 @@ const transpoter = nodemailer.createTransport({
     }
 })
 moment.locale('es');
+/*
+SELECT * FROM pines p
+LEFT JOIN users u ON u.pin = p.id
+LEFT JOIN pines p1 ON p1.usuario = u.id
+LEFT JOIN users u1 ON u1.pin = p1.id 
+LEFT JOIN pines p2 ON p2.usuario = u1.id
+LEFT JOIN users u2 ON u2.pin = p2.id 
+LEFT JOIN pines p3 ON p3.usuario = u2.id
+LEFT JOIN users u3 ON u3.pin = p3.id
+*/
 cron.schedule("30 10 * * *", async () => {
     var options = {
         method: 'POST',

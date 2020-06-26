@@ -18,10 +18,10 @@ passport.use('local.signin', new LocalStrategy({
     if (validPassword) {
       done(null, user, req.flash('success', 'Bienvenido ' + user.fullname));
     } else {
-      done(null, false, req.flash('error', 'Incorrect Password'));
+      done(null, false, req.flash('error', 'Password incorrecto'));
     }
   } else {
-    return done(null, false, req.flash('error', 'The Username does not exists.'));
+    return done(null, false, req.flash('error', 'Este usuario no existe.'));
   }
 }));
 
@@ -109,10 +109,11 @@ passport.use('local.signup', new LocalStrategy({
   passwordField: 'password',
   passReqToCallback: true
 }, async (req, username, password, done) => {
-  const { fullname, pin, movil } = req.body;
+  const { document, fullname, pin, movil } = req.body;
   let newUser = {
     id: regiId(),
     fullname,
+    document,
     pin,
     cel: movil,
     username,
@@ -121,9 +122,7 @@ passport.use('local.signup', new LocalStrategy({
   };
   newUser.password = await helpers.encryptPassword(password);
   // Saving in the Database
-  console.log(newUser);
   const result = await pool.query('INSERT INTO users SET ?', newUser);
-  console.log(result);
   //newUser.id = result.insertId;
   return done(null, newUser);
 }));
