@@ -112,11 +112,11 @@ passport.use('local.signup', new LocalStrategy({
   const { document, fullname, pin, movil } = req.body;
   let newUser = {
     id: regiId(),
-    fullname,
+    fullname: fullname.toUpperCase(),
     document,
     pin,
     cel: movil,
-    username,
+    username: username.toLowerCase(),
     password,
     imagen: '/img/avatars/avatar.svg'
   };

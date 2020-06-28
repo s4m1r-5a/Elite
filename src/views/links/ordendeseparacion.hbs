@@ -10,7 +10,7 @@
         <div class="card-body">
             <div class="row">
                 <div class="col-sm-5">
-                    <div class="card border-primary mb-3">
+                    <div class="card border-primary mb-1">
                         <div class="row no-gutters">
                             <div class="col-md-3">
                                 <img src="/img/avatars/avatar.svg" class="card-img" alt="...">
@@ -42,7 +42,7 @@
                     </div>
                 </div>
                 <div class="col-sm-7">
-                    <div class="card border-primary h4 mb-3">
+                    <div class="card border-primary h4 mb-1">
                         <div class="row no-gutters">
                             <div class="col-md-6">
                                 <div class="card-body text-primary">
@@ -60,7 +60,7 @@
                                     </div>
                                     <div class="mb-0">
                                         <i class="align-middle mr-1" data-feather="mail"></i>
-                                        <span class="align-middle card-text">{{email}}</span>
+                                        <small class="align-middle card-text">{{email}}</small>
                                     </div>
                                     <!--<div class="mb-0">
                                         <i class="align-middle mr-1" data-feather="map"></i>
@@ -124,8 +124,8 @@
                                 </th>
                                 <td>
                                     Vr mtr²
-                                    <span class="badge badge-dark text-md-center ml-2">${{vrmt2}}</span>
-                                    <strong class="float-right"> Total ${{valor}}</strong>
+                                    <span class="badge badge-dark text-md-center ml-2 m2">{{vrmt2}}</span>
+                                    <strong class="float-right totalp">{{valor}}</strong>
                                 </td>
                             </tr>
                             <tr>
@@ -136,7 +136,7 @@
                                 <td>
                                     Diferida
                                     <span class="badge badge-dark text-md-center ml-2">{{inicialdiferida}} meses</span>
-                                    <strong class="float-right"> Total ${{inicial}}</strong>
+                                    <strong class="float-right totali">{{inicial}}</strong>
                                     <input type="hidden" id="inicialdiferida" value="{{inicialdiferida}}">
                                 </td>
                             </tr>
@@ -150,7 +150,7 @@
                                 </th>
                                 <td>
                                     <i class="feather-md" data-feather="calendar"></i> Cuota
-                                    <strong class="float-right" id="cuota"></strong>
+                                    <strong class="float-right" id="cuota">{{cuot}}</strong>
                                 </td>
                             </tr>
                         </tbody>
@@ -176,7 +176,7 @@
                                 </th>
                                 <td>
                                     Cupon <span class="badge badge-dark text-md-center ml-2">{{pin}}</span>
-                                    <strong class="float-right"> Ahorro ${{ahorro}}</strong>
+                                    <strong class="float-right ahorro">{{ahorro}}</strong>
                                 </td>
                             </tr>
                             <tr>
@@ -187,14 +187,14 @@
                                 </th>
                                 <td>
                                     Mes(es) <span class="badge badge-dark text-md-center ml-2">jun & dic</span>
-                                    <strong class="float-right"> Cuota ${{cuotaextraordinaria}}</strong>
+                                    <strong class="float-right extrao">{{cuotaextraordinaria}}</strong>
                                 </td>
                             </tr>
                             <th>
                                 <i class="feather-md" data-feather="calendar"></i> Separacion
                             </th>
                             <td>
-                                <strong class="float-right"> ${{separar}}</strong>
+                                <strong class="float-right separar">{{separar}}</strong>
                             </td>
                             </tr>
                         </tbody>
@@ -221,7 +221,7 @@
             </table>
             <h4 class="card-title">Observaciones</h4>
             {{tipobsevacion}} <small class="text-muted">{{obsevacion}}</small>
-            <ul class="timeline mt-7 mb-0">
+            <ul class="timeline mt-4 mb-0">
                 <li class="timeline-item">
                     <strong>#1</strong>
                     <i class="feather-md text-primary float-right mr-3" data-feather="check-circle"></i>

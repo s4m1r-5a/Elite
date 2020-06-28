@@ -1,5 +1,13 @@
 
 module.exports = {
+    /*database: {
+        connectionLimit: 1000,
+        host: '96.43.143.58',
+        user: 'samir',
+        password: 'Abcd1234@',
+        database: 'elite',
+        port: 3306
+    },*/
     database: {
         connectionLimit: 1000,
         host: '213.190.6.64',
@@ -12,7 +20,7 @@ module.exports = {
         host: 'localhost',
         user: 'samir',
         password: 'Abcd1234@',
-        database: 'elite'
+        database: 'elite' 
     },*/
     registro: {
         pin: 'hola'
