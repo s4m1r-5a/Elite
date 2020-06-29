@@ -1,20 +1,20 @@
 module.exports = {
-    database: {
+    /*database: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
         password: 'Abcd1234@',
         database: 'elite',
         port: 3306
-    },
-    /*database: {
+    },*/
+    database: {
         connectionLimit: 1000,
         host: '213.190.6.64',
         user: 'u152781536_ELITE',
         password: '12345678',
         database: 'u152781536_Elite'
     },
-    database: {
+    /*database: {
         connectionLimit: 1000,
         host: 'localhost',
         user: 'samir',
@@ -54,6 +54,11 @@ module.exports = {
         client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
         otro: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.MTI4Mg.RO7HFV11U1YNtFNpPnCcOIaQcHU72f7tPn3HoOCMXOg',
         v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`
+    },
+    Contactos: {
+        client_secret: 'lIFar1pydYRrcArlKxTe3S8h',
+        client_id: '358691758390-ea426ocipho2d13q7aku48q3gmo9ktal.apps.googleusercontent.com',
+        redirect_uris: 'http://localhost:3000/contactos'
     }
 };
 

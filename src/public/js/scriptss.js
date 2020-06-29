@@ -4396,3 +4396,309 @@ if (window.location == `${window.location.origin}/links/red`) {
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     });
 };
+/////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/clientes`) {
+    minDateFilter = "";
+    maxDateFilter = "";
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            if (typeof aData._date == 'undefined') {
+                aData._date = new Date(aData[3]).getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
+    $(document).ready(function () {
+        $("#Date_search").html("");
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+            // Get the column API object
+            var column = table.column($(this).attr('data-column'));
+            // Toggle the visibility
+            column.visible(!column.visible());
+        });
+
+        $('#crearcliente').submit(function (e) {
+            alert('sdfhsdhfk')
+            e.preventDefault();
+            $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+            var fd = $('form').serialize();
+            $.ajax({
+                url: '/links/clientes/agregar',
+                data: fd,
+                type: 'PUT',
+                async: false,
+                success: function (data) {
+                    console.log(data);
+                }
+            });
+        });
+    });
+    var Color = (val) => {
+        var elemen = $(`#t-${val}`);
+        if (elemen.hasClass('i')) {
+            elemen.css('background-color', 'transparent');
+            elemen.removeClass('.i');
+        } else {
+            elemen.css('background-color', '#FFFFCC');
+            elemen.addClass('i');
+        }
+    }
+    var clientes = $('#clientes').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [
+            {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                        </div>`,
+                attr: {
+                    title: 'Fecha',
+                    id: 'Date'
+                },
+                className: 'btn btn-secondary fech'
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: true,
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/clientes",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+        },
+        columns: [
+            { data: "fullname" },
+            {
+                data: "nrango",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
+                            break;
+                        case 2:
+                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-secondary">Director</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
+            },
+            {
+                data: "nombre1",
+                render: function (data, method, row) {
+                    return data ? data.toLocaleLowerCase() : '';
+                }
+            },
+            {
+                data: "rango1",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
+                            break;
+                        case 2:
+                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-secondary">Director</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
+            },
+            {
+                data: "nombre2",
+                render: function (data, method, row) {
+                    return data ? data.toLocaleLowerCase() : '';
+                }
+            },
+            {
+                data: "rango2",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
+                            break;
+                        case 2:
+                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-secondary">Director</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
+            },
+            {
+                data: "nombre3",
+                render: function (data, method, row) {
+                    return data ? data.toLocaleLowerCase() : '';
+                }
+            },
+            {
+                data: "rango3",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
+                            break;
+                        case 2:
+                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-secondary">Director</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
+            }
+        ],
+        columnDefs: [
+            { "visible": false, "targets": 0 },
+            { "visible": false, "targets": 1 }/*,
+            { responsivePriority: 10002, targets: 5 },
+            { responsivePriority: 10003, targets: 6 },
+            { responsivePriority: 10004, targets: 7 },
+            { responsivePriority: 10005, targets: 8 }*/
+        ],
+        order: [[0, 'desc'], [6, 'desc'], [4, 'desc'], [2, 'desc']],
+        displayLength: 20,
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+
+            api.column(0, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    var datos = api.rows(i).data(), e = '';
+                    $(rows).eq(i).before(
+                        `<tr class="group">
+                            <td colspan="8">
+                                <div class="text-center text-muted">
+                                    ${group.toLocaleUpperCase()} 
+                                </div>
+                                ${e}
+                            </td>
+                        </tr>`
+                    );
+                    last = group;
+                    $(rows).eq(i).hide();
+                } else {
+                    //$('.table-sortable').find('tr:not(.' + vClass + ')').hide();
+                    $(rows).eq(i).hide();
+                }
+            });
+        }
+    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
+    red.on('click', 'tr', function () {
+        $(this).toggleClass('selected')
+        var rows = red.rows({ page: 'current' }).nodes();
+        var last = $(this).find('div').text().toLocaleLowerCase().trim();
+
+        red.column(0, { page: 'current' }).data().each(function (group, i) {
+            if (last == group.toLocaleLowerCase().trim() && $(rows).eq(i).is(':hidden')) {
+                $(rows).eq(i).show();
+            } else if (last == group.toLocaleLowerCase().trim()) {
+                $(rows).eq(i).hide();
+            }
+        });
+    })
+    // Daterangepicker
+    /*var start = moment().subtract(29, "days").startOf("hour");
+    var end = moment().startOf("hour").add(32, "hour");*/
+    $(".fech").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        //autoApply: false,
+        startDate: moment().subtract(29, "days"),
+        endDate: moment(),
+        ranges: {
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")],
+            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
+            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
+            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        }
+    }, function (start, end, label) {
+        maxDateFilter = end;
+        minDateFilter = start;
+        table.draw();
+        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    });
+
+
+};

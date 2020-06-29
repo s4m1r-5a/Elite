@@ -5,10 +5,13 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
-const { registro, dataSet } = require('../keys');
+const { registro, dataSet, Contactos } = require('../keys');
 const request = require('request');
 const cron = require("node-cron");
 const axios = require('axios');
+const fs = require('fs');
+const readline = require('readline');
+const { google } = require('googleapis');
 const moment = require('moment');
 const nodemailer = require('nodemailer')
 const transpoter = nodemailer.createTransport({
@@ -185,6 +188,108 @@ router.post('/red', async (req, res) => {
     ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : ''}`);
     respuesta = { "data": red };
     res.send(respuesta);
+});
+///////////////////* CLIENTES *///////////////////////////
+router.get('/clientes', isLoggedIn, (req, res) => {
+    res.render('links/clientes');
+});
+router.post('/clientes', async (req, res) => {
+    const cliente = await pool.query(`SELECT * FROM clientes c 
+    LEFT JOIN users u ON r.acsor = u.id     
+    ${req.user.admin != 1 ? 'WHERE c.acsor = ' + req.user.id : ''}`);
+    respuesta = { "data": cliente };
+    res.send(respuesta);
+});
+router.put('/clientes/:id', async (req, res) => {
+    console.log(req.body)
+    const {
+        ahora, nombres, documento, lugarexpedicion, fechaexpedicion,
+        fechanacimiento, estadocivil, email, cel, direccion
+    } = req.body;
+    const clit = {
+        nombre: nombres.toUpperCase(), documento, fechanacimiento, lugarexpedicion,
+        fechaexpedicion, estadocivil, movil: cel.replace(/-/g, ""), agendado: 1,
+        email: email.toLowerCase(), direccion: direccion.toLowerCase(),
+        acsor: req.user.id, tiempo: ahora, google: ''
+    }
+    const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
+    if (!cliente.length) {
+        const SCOPES = ['https://www.googleapis.com/auth/contacts'];
+        const TOKEN_PATH = 'token.json';
+        var person = {
+            "resource": {
+                "names": [{ "familyName": nombres.toUpperCase() }],
+                "emailAddresses": [{ "value": email.toLowerCase() }],
+                "phoneNumbers": [{ "value": cel.replace(/-/g, ""), "type": "Personal" }],
+                "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
+            }
+        };
+        await fs.readFile('credentials.json', (err, content) => {
+            if (err) return console.log('Error loading client secret file:', err);
+            authorize(JSON.parse(content), crearcontacto);
+        });
+    }
+    var contact = async function () {
+        if (idcontacto) {
+            clearInterval(time);
+            if (!user) {
+                persona = { nombre: nombre.toUpperCase(), movil: cel, email1: correo, email3: idcontacto };
+                const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
+                venta2.client = clien.insertId;
+            } else if (!contacto) {
+                const persona = { nombre: nombre.toUpperCase(), email3: idcontacto };
+                await pool.query('UPDATE clientes set ? WHERE id = ?', [persona, user]);
+            }
+            uy();
+        };
+    }
+    //let time = await setInterval(contact, 10);
+    res.send(true);
+
+    function authorize(credentials, callback) {
+        const { client_secret, client_id, redirect_uris } = Contactos;
+        const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirect_uris);
+
+        // Comprueba si previamente hemos almacenado un token.
+        fs.readFile(TOKEN_PATH, (err, token) => {
+            if (err) return getNewToken(oAuth2Client, callback);
+            oAuth2Client.setCredentials(JSON.parse(token));
+            callback(oAuth2Client);
+        });
+    }
+    function getNewToken(oAuth2Client, callback) {
+        const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+        });
+        console.log('Autorice esta aplicación visitando esta url: ', authUrl);
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Ingrese el código de esa página aquí: ', (code) => {
+            rl.close();
+            oAuth2Client.getToken(code, (err, token) => {
+                if (err) return console.error('Error retrieving access token', err);
+                oAuth2Client.setCredentials(token);
+                // Almacenar el token en el disco para posteriores ejecuciones del programa
+                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                    if (err) return console.error(err);
+                    console.log('Token almacenado en', TOKEN_PATH);
+                });
+                callback(oAuth2Client);
+            });
+        });
+    }
+    function crearcontacto(auth) {
+        const service = google.people({ version: 'v1', auth });
+        service.people.createContact(person, (err, res) => {
+            if (err) return console.error('La API devolvió un ' + err);
+            idcontacto = res.data.resourceName;
+            console.log("Response", res.data);
+        });
+    }
 });
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
@@ -1756,4 +1861,48 @@ async function Desendentes(pin, stados) {
     }
     return true
 };
+function authorize(credentials, callback) {
+    const { client_secret, client_id, redirect_uris } = Contactos;
+    const oAuth2Client = new google.auth.OAuth2(
+        client_id, client_secret, redirect_uris);
+
+    // Comprueba si previamente hemos almacenado un token.
+    fs.readFile(TOKEN_PATH, (err, token) => {
+        if (err) return getNewToken(oAuth2Client, callback);
+        oAuth2Client.setCredentials(JSON.parse(token));
+        callback(oAuth2Client);
+    });
+}
+function getNewToken(oAuth2Client, callback) {
+    const authUrl = oAuth2Client.generateAuthUrl({
+        access_type: 'offline',
+        scope: SCOPES,
+    });
+    console.log('Autorice esta aplicación visitando esta url: ', authUrl);
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout,
+    });
+    rl.question('Ingrese el código de esa página aquí: ', (code) => {
+        rl.close();
+        oAuth2Client.getToken(code, (err, token) => {
+            if (err) return console.error('Error retrieving access token', err);
+            oAuth2Client.setCredentials(token);
+            // Almacenar el token en el disco para posteriores ejecuciones del programa
+            fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                if (err) return console.error(err);
+                console.log('Token almacenado en', TOKEN_PATH);
+            });
+            callback(oAuth2Client);
+        });
+    });
+}
+function crearcontacto(auth) {
+    const service = google.people({ version: 'v1', auth });
+    service.people.createContact(person, (err, res) => {
+        if (err) return console.error('La API devolvió un ' + err);
+        idcontacto = res.data.resourceName;
+        console.log("Response", res.data.resourceName);
+    });
+}
 module.exports = router;
