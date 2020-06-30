@@ -1292,7 +1292,6 @@ if (window.location.pathname == `/links/pagos`) {
         });
     });
 }
-
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
     let p = '', fecha = new Date(), fechs = new Date();
@@ -1837,7 +1836,9 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 
     $(document).ready(function () {
         var g = $('#fechaFactura').text()
+        var j = $('#fechaFactura').html()
         $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'))
+        $('#fechaOrden').html('..............................' + moment(j).format('YYYY-MM-DD'))
         $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())))
         var totalp = Moneda($('.totalp').html())
         var m2 = Moneda($('.m2').html())
@@ -1853,6 +1854,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         $('.extrao').html('Cuota $' + extrao)
         $('.separar').html('$' + separar)
         $('#cuota').html('$' + cuota)
+
         //window.print();   
         //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
         //window.addEventListener("load", window.print());
@@ -1861,7 +1863,6 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('footer').show()
     $('nav').show()
 }
-
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     let recargada = true,
@@ -3232,7 +3233,6 @@ if (window.location.pathname == `/links/orden`) {
                     }
                 });
             }
-
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
                     $.ajax({
@@ -3278,7 +3278,7 @@ if (window.location.pathname == `/links/orden`) {
             if ($('#ahorro').val() === '$0') {
                 Dt()
             }
-            if (u > 2) {
+            if (u > 1) {
                 Dt();
                 $('#bono').attr('disabled', true);
                 SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
@@ -4349,111 +4349,111 @@ if (window.location == `${window.location.origin}/links/red`) {
 if (window.location == `${window.location.origin}/links/clientes`) {
 
     $(document).ready(function () {
-      
-    $('#crearcliente').submit(function (e) {
-        e.preventDefault();
-        $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-        $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-        var fd = $('form').serialize();
-        $.ajax({
-            url: '/links/clientes/agregar',
-            data: fd,
-            type: 'PUT',
-            async: false,
-            success: function (data) {
-                clientes.ajax.reload(null, false)
-                /*tabledit.ajax.reload(function (json) {
-                    tabledit.columns.adjust().draw();
-                    SMSj('success', 'Actualizacion exitosa')
-                })*/
-                $('#ModalEventos').modal('hide')
-                $('#agrecli').show("slow")
-                $("#addcliente").hide("slow");
-                $("#addcliente input").val('')
-            }
-        });
-    });
-    $('.atras').click(function () {
-        $('#agrecli').show("slow")
-        $("#addcliente").hide("slow");
-        $("#addcliente input").val('')
-    })
-});
 
-var clientes = $('#clientes').DataTable({
-    dom: 'Bfrtip',
-    lengthMenu: [
-        [10, 25, 50, -1],
-        ['10 filas', '25 filas', '50 filas', 'Ver todo']
-    ],
-    buttons: [
-        {
-            text: `<div class="mb-0">
+        $('#crearcliente').submit(function (e) {
+            e.preventDefault();
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+            $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+            var fd = $('form').serialize();
+            $.ajax({
+                url: '/links/clientes/agregar',
+                data: fd,
+                type: 'PUT',
+                async: false,
+                success: function (data) {
+                    clientes.ajax.reload(null, false)
+                    /*tabledit.ajax.reload(function (json) {
+                        tabledit.columns.adjust().draw();
+                        SMSj('success', 'Actualizacion exitosa')
+                    })*/
+                    $('#ModalEventos').modal('hide')
+                    $('#agrecli').show("slow")
+                    $("#addcliente").hide("slow");
+                    $("#addcliente input").val('')
+                }
+            });
+        });
+        $('.atras').click(function () {
+            $('#agrecli').show("slow")
+            $("#addcliente").hide("slow");
+            $("#addcliente input").val('')
+        })
+    });
+
+    var clientes = $('#clientes').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [
+            {
+                text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>
                         </div>`,
-            attr: {
-                title: 'Agregar-Clientes',
-                id: 'agrecli'
+                attr: {
+                    title: 'Agregar-Clientes',
+                    id: 'agrecli'
+                },
+                className: 'btn btn-outline-dark',
+                action: function () {
+                    $('#agrecli').hide("slow")
+                    $("#addcliente").show("slow");
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/clientes",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
+        },
+        columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
             },
-            className: 'btn btn-outline-dark',
-            action: function () {
-                $('#agrecli').hide("slow")
-                $("#addcliente").show("slow");
-            }
-        }
-    ],
-    deferRender: true,
-    paging: true,
-    autoWidth: true,
-    search: {
-        regex: true,
-        caseInsensitive: false,
-    },
-    responsive: true,
-    order: [[0, "desc"]], //[0, "asc"]
-    language: languag2,
-    ajax: {
-        method: "POST",
-        url: "/links/clientes",
-        dataSrc: "data"
-    },
-    initComplete: function (settings, json, row) {
-        $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
-    },
-    columns: [
-        {
-            className: 'control',
-            orderable: true,
-            data: null,
-            defaultContent: ''
-        },
-        { data: "idc" },
-        { data: "nombre" },
-        { data: "documento" },
-        {
-            data: "fechanacimiento",
-            render: function (data, method, row) {
-                return data ? moment(data).format('YYYY-MM-DD') : '';
-            }
-        },
-        { data: "lugarexpedicion" },
-        {
-            data: "fechaexpedicion",
-            render: function (data, method, row) {
-                return data ? moment(data).format('YYYY-MM-DD') : '';
-            }
-        },
-        { data: "estadocivil" },
-        { data: "movil" },
-        { data: "email" },
-        { data: "direccion" },
-        {
-            className: 't',
-            defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+            { data: "idc" },
+            { data: "nombre" },
+            { data: "documento" },
+            {
+                data: "fechanacimiento",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            { data: "lugarexpedicion" },
+            {
+                data: "fechaexpedicion",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            { data: "estadocivil" },
+            { data: "movil" },
+            { data: "email" },
+            { data: "direccion" },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
@@ -4461,7 +4461,7 @@ var clientes = $('#clientes').DataTable({
                                             <a class="dropdown-item">Declinar</a>
                                         </div>
                                     </div>` : ''
-        }
-    ]
-});
+            }
+        ]
+    });
 };
