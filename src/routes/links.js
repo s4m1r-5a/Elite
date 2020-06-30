@@ -474,16 +474,17 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         cliente2: documento[1] ? client[1] : null,
         asesor: req.user.id,
         numerocuotaspryecto,
-        extraordinariameses,
-        cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : '',
+        extraordinariameses: extraordinariameses ? extraordinariameses : 0,
+        cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
         cupon: cupon ? cupon : 1,
         inicialdiferida: inicialdiferida || null,
         tipobsevacion, obsevacion,
-        ahorro: ahorro ? ahorro.replace(/\./g, '') : '',
+        ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
         separar: separacion.replace(/\./g, ''),
-        extran, vrmt2: vrmt2.replace(/\./g, ''),
+        extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
         iniciar, cuot
     };
+    console.log(separ)
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
