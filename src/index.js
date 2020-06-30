@@ -9,7 +9,7 @@ const flash = require('connect-flash');
 const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
 //const {Builder, By, Key, until} = require('selenium-webdriver');
-const val = require('../navegacion.js');
+//const val = require('../navegacion.js');
 const sms = require('./sms.js');
 const { database } = require('./keys');
 const crypto = require('crypto')
@@ -103,7 +103,7 @@ app.use((req, res, next) => {
 app.use(require('./routes/index'));
 app.use(require('./routes/authentication'));
 app.use('/links', require('./routes/links'));
-app.use(require('../navegacion'));
+//app.use(require('../navegacion'));
 
 // Public
 app.use(express.static(path.join(__dirname, 'public')));

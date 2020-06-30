@@ -67,6 +67,14 @@ $(".fechas").daterangepicker({
     opens: "right",
 });
 var admin = $('#usuarioadmin').val()
+var cli = $('#cli').val()
+if (!cli) {
+    $('#AddClientes').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+    });
+}
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -124,7 +132,21 @@ $(document).ready(function () {
             //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
         }
     });
-
+    $('#crearclientes').submit(function (e) {
+        e.preventDefault();
+        $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+        var fd = $('form').serialize();
+        $.ajax({
+            url: '/links/clientes/agregar',
+            data: fd,
+            type: 'PUT',
+            async: false,
+            success: function (data) {
+                $('#AddClientes').modal('toggle')
+                SMSj('success', 'Datos atualizados correctamente')
+            }
+        });
+    });
 });
 //Leva a mayúsculas la primera letra de cada palabra
 function titleCase(texto) {
@@ -214,12 +236,6 @@ function init_events(ele) {
 $('.pagarpayu').attr("disabled", true);
 $('.ntfx').attr("disabled", true);
 $('input[name="nombre"]').attr("disabled", true);
-
-/*$('.pagar').change(function () {
-    card = $(this).parents('div.card').attr("id")
-    var fd = $(`#${card} form`).serialize();
-    actualizardatos(card, fd)
-});*/
 
 function actualizardatos(card, fd, ot) {
     $.ajax({
@@ -1849,7 +1865,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[5]).getTime();
+                aData._date = new Date(aData[2]).getTime();
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -1865,6 +1881,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     );
     $(document).ready(function () {
+
         $('.proveedor, .socio').change(function () {
             if ($(this).val() === '0') {
                 $('#datosproveedor').show('slow');
@@ -2253,59 +2270,26 @@ if (window.location == `${window.location.origin}/links/productos`) {
     function Dtas(n) {
         var table = $('#datatable').DataTable({
             dom: 'Bfrtip',
-            buttons: ['pageLength',
+            buttons: [
                 {
-                    text: `<div class="mb-0">
-                                        <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                                    </div>`,
+                    text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                placeholder="MZ">`,
                     attr: {
-                        title: 'Fecha',
-                        id: 'Date'
+                        title: 'Busqueda por MZ',
+                        id: ''
                     },
-                    className: 'btn btn-secondary fech',
+                    className: 'btn btn-secondary min'
                 },
                 {
-                    text: `<div class="mb-0">
-                                        <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Generar Factura</span>
-                                    </div>`,
+                    text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                placeholder="LT">`,
                     attr: {
-                        title: 'FacturaG',
-                        id: 'factu'
+                        title: 'Busqueda por LT',
+                        id: ''
                     },
-                    className: 'btn btn-secondary',
-                    action: function () {
-                        if ($('#facturas span').text().length) {
-                            let datosfactura = {
-                                cliente,
-                                nreservas: $('.facturas').text(),
-                                reservas: $('#facturas').text().trim().replace(/(?!\w|\s).|  /g, "-"),
-                                total: $('.total').text().replace(/(?!\w|\s).| /g, ""),
-                                estado: 'pendiente'
-                            };
-
-                            $.ajax({
-                                type: "POST",
-                                url: '/links/generarafactura',
-                                data: datosfactura,
-                                success: function (data) {
-                                    table.rows('.selected').remove().draw(false);
-                                    total = 0;
-                                    $('#facturas span').remove();
-                                    $('span.total').text('');
-                                    $('p.clientes').text('');
-                                    $('.facturas').html('0');
-                                    SMSj('success', 'Factura generada exitosamente')
-                                    table2.ajax.reload(function (json) {
-                                        $("#cuadro2").hide("slow");
-                                        $("#cuadro1").show("slow");
-                                    });
-                                }
-                            })
-                        } else {
-                            SMSj('warning', 'Debebe seleccionar las reservas a facturar antes de generar la factura')
-                        }
-                    }
-                }
+                    className: 'btn btn-secondary max'
+                },
+                'pageLength'
             ],
             language: languag2,
             ajax: {
@@ -2321,12 +2305,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     defaultContent: ''
                 },
                 { data: "mz" },
-                {
-                    data: "n",
-                    render: function (data, method, row) {
-                        return `<span class="badge badge-dark text-center text-uppercase">${data}</span>`
-                    }
-                },
+                { data: "n" },
                 { data: "mtr2" },
                 {
                     data: "estado",
@@ -2362,7 +2341,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     data: "inicial",
                     render: $.fn.dataTable.render.number('.', '.', 0, '$')
                 },
-                { data: "descripcion" },
                 {
                     data: "tramitando",
                     render: function (data, method, row) {
@@ -2371,25 +2349,23 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             ],
             deferRender: true,
+            autoWidth: true,
             paging: true,
             search: {
                 regex: true,
                 caseInsensitive: false,
             },
-            responsive: {
-                details: {
-                    type: 'column'
-                }
-            },
+            responsive: true,
             initComplete: function (settings, json) {
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
                 $('#ModalEventos').modal('toggle');
                 $('#ModalEventos').modal('hide')
+                $('#datatable_filter').hide()
             },
             columnDefs: [
-                { "visible": false, "targets": 1 }
+                //{ "visible": false, "targets": 1 }
             ],
-            order: [[1, 'asc']],
+            order: [[1, 'asc'], [2, 'asc']],
             drawCallback: function (settings) {
                 var api = this.api();
                 var rows = api.rows({ page: 'current' }).nodes();
@@ -2412,47 +2388,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 });
             }
         });
-
-        // Daterangepicker
-        var start = moment().subtract(29, "days").startOf("hour");
-        var end = moment().startOf("hour").add(32, "hour");
-        $(".fech").daterangepicker({
-            locale: {
-                'format': 'YYYY-MM-DD HH:mm',
-                'separator': ' a ',
-                'applyLabel': 'Aplicar',
-                'cancelLabel': 'Cancelar',
-                'fromLabel': 'De',
-                'toLabel': 'A',
-                'customRangeLabel': 'Personalizado',
-                'weekLabel': 'S',
-                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                'firstDay': 1
-            },
-            opens: "center",
-            timePicker: true,
-            timePicker24Hour: true,
-            timePickerIncrement: 15,
-            opens: "right",
-            alwaysShowCalendars: false,
-            startDate: start,
-            endDate: end,
-            ranges: {
-                'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
-                'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
-                'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
-                'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-                'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-                'Hoy': [moment().startOf('days'), moment().endOf("days")],
-                'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
-                'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
-                'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
-            }
-        }, function (start, end, label) {
-            maxDateFilter = end;
-            minDateFilter = start;
-            table.draw();
+        $('#min, #max').on('keyup', function () {
+            var col = $(this).attr('id') === 'min' ? 1 : 2;
+            table
+                .columns(col)
+                .search(this.value)
+                .draw();
         });
     }
     $('#datatable').on('click', 'tr .c', function () {
@@ -4398,38 +4339,9 @@ if (window.location == `${window.location.origin}/links/red`) {
 };
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/clientes`) {
-    minDateFilter = "";
-    maxDateFilter = "";
-    $.fn.dataTableExt.afnFiltering.push(
-        function (oSettings, aData, iDataIndex) {
-            if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[3]).getTime();
-            }
-            if (minDateFilter && !isNaN(minDateFilter)) {
-                if (aData._date < minDateFilter) {
-                    return false;
-                }
-            }
-            if (maxDateFilter && !isNaN(maxDateFilter)) {
-                if (aData._date > maxDateFilter) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    );
-    $(document).ready(function () {
-        $("#Date_search").html("");
-        $('a.toggle-vis').on('click', function (e) {
-            e.preventDefault();
-            // Get the column API object
-            var column = table.column($(this).attr('data-column'));
-            // Toggle the visibility
-            column.visible(!column.visible());
-        });
 
+    $(document).ready(function () {
         $('#crearcliente').submit(function (e) {
-            alert('sdfhsdhfk')
             e.preventDefault();
             $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
             var fd = $('form').serialize();
@@ -4439,21 +4351,24 @@ if (window.location == `${window.location.origin}/links/clientes`) {
                 type: 'PUT',
                 async: false,
                 success: function (data) {
-                    console.log(data);
+                    clientes.ajax.reload(null, false)
+                    /*tabledit.ajax.reload(function (json) {
+                        tabledit.columns.adjust().draw();
+                        SMSj('success', 'Actualizacion exitosa')
+                    })*/
+                    $('#agrecli').show("slow")
+                    $("#addcliente").hide("slow");
+                    $("#addcliente input").val('')
                 }
             });
         });
+        $('.atras').click(function () {
+            $('#agrecli').show("slow")
+            $("#addcliente").hide("slow");
+            $("#addcliente input").val('')
+        })
     });
-    var Color = (val) => {
-        var elemen = $(`#t-${val}`);
-        if (elemen.hasClass('i')) {
-            elemen.css('background-color', 'transparent');
-            elemen.removeClass('.i');
-        } else {
-            elemen.css('background-color', '#FFFFCC');
-            elemen.addClass('i');
-        }
-    }
+
     var clientes = $('#clientes').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [
@@ -4463,13 +4378,17 @@ if (window.location == `${window.location.origin}/links/clientes`) {
         buttons: [
             {
                 text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                            <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>
                         </div>`,
                 attr: {
-                    title: 'Fecha',
-                    id: 'Date'
+                    title: 'Agregar-Clientes',
+                    id: 'agrecli'
                 },
-                className: 'btn btn-secondary fech'
+                className: 'btn btn-outline-dark',
+                action: function () {
+                    $('#agrecli').hide("slow")
+                    $("#addcliente").show("slow");
+                }
             }
         ],
         deferRender: true,
@@ -4480,6 +4399,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             caseInsensitive: false,
         },
         responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
         language: languag2,
         ajax: {
             method: "POST",
@@ -4487,218 +4407,46 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             dataSrc: "data"
         },
         initComplete: function (settings, json, row) {
-            $('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+            $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
         },
         columns: [
-            { data: "fullname" },
             {
-                data: "nrango",
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
+            { data: "idc" },
+            { data: "nombre" },
+            { data: "documento" },
+            {
+                data: "fechanacimiento",
                 render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
-                            break;
-                        case 2:
-                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
-                            break;
-                        case 4:
-                            return `<span class="badge badge-pill badge-secondary">Director</span>`
-                            break;
-                        default:
-                            return ``
-                    }
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
                 }
             },
+            { data: "lugarexpedicion" },
             {
-                data: "nombre1",
+                data: "fechaexpedicion",
                 render: function (data, method, row) {
-                    return data ? data.toLocaleLowerCase() : '';
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
                 }
             },
+            { data: "estadocivil" },
+            { data: "movil" },
+            { data: "email" },
+            { data: "direccion" },
             {
-                data: "rango1",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
-                            break;
-                        case 2:
-                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
-                            break;
-                        case 4:
-                            return `<span class="badge badge-pill badge-secondary">Director</span>`
-                            break;
-                        default:
-                            return ``
-                    }
-                }
-            },
-            {
-                data: "nombre2",
-                render: function (data, method, row) {
-                    return data ? data.toLocaleLowerCase() : '';
-                }
-            },
-            {
-                data: "rango2",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
-                            break;
-                        case 2:
-                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
-                            break;
-                        case 4:
-                            return `<span class="badge badge-pill badge-secondary">Director</span>`
-                            break;
-                        default:
-                            return ``
-                    }
-                }
-            },
-            {
-                data: "nombre3",
-                render: function (data, method, row) {
-                    return data ? data.toLocaleLowerCase() : '';
-                }
-            },
-            {
-                data: "rango3",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>`
-                            break;
-                        case 2:
-                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Gerente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Inversionista</span>`
-                            break;
-                        case 4:
-                            return `<span class="badge badge-pill badge-secondary">Director</span>`
-                            break;
-                        default:
-                            return ``
-                    }
-                }
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
             }
-        ],
-        columnDefs: [
-            { "visible": false, "targets": 0 },
-            { "visible": false, "targets": 1 }/*,
-            { responsivePriority: 10002, targets: 5 },
-            { responsivePriority: 10003, targets: 6 },
-            { responsivePriority: 10004, targets: 7 },
-            { responsivePriority: 10005, targets: 8 }*/
-        ],
-        order: [[0, 'desc'], [6, 'desc'], [4, 'desc'], [2, 'desc']],
-        displayLength: 20,
-        drawCallback: function (settings) {
-            var api = this.api();
-            var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-
-            api.column(0, { page: 'current' }).data().each(function (group, i) {
-                if (last !== group) {
-                    var datos = api.rows(i).data(), e = '';
-                    $(rows).eq(i).before(
-                        `<tr class="group">
-                            <td colspan="8">
-                                <div class="text-center text-muted">
-                                    ${group.toLocaleUpperCase()} 
-                                </div>
-                                ${e}
-                            </td>
-                        </tr>`
-                    );
-                    last = group;
-                    $(rows).eq(i).hide();
-                } else {
-                    //$('.table-sortable').find('tr:not(.' + vClass + ')').hide();
-                    $(rows).eq(i).hide();
-                }
-            });
-        }
-    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
-    red.on('click', 'tr', function () {
-        $(this).toggleClass('selected')
-        var rows = red.rows({ page: 'current' }).nodes();
-        var last = $(this).find('div').text().toLocaleLowerCase().trim();
-
-        red.column(0, { page: 'current' }).data().each(function (group, i) {
-            if (last == group.toLocaleLowerCase().trim() && $(rows).eq(i).is(':hidden')) {
-                $(rows).eq(i).show();
-            } else if (last == group.toLocaleLowerCase().trim()) {
-                $(rows).eq(i).hide();
-            }
-        });
-    })
-    // Daterangepicker
-    /*var start = moment().subtract(29, "days").startOf("hour");
-    var end = moment().startOf("hour").add(32, "hour");*/
-    $(".fech").daterangepicker({
-        locale: {
-            'format': 'YYYY-MM-DD HH:mm',
-            'separator': ' a ',
-            'applyLabel': 'Aplicar',
-            'cancelLabel': 'Cancelar',
-            'fromLabel': 'De',
-            'toLabel': 'A',
-            'customRangeLabel': 'Personalizado',
-            'weekLabel': 'S',
-            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-            'firstDay': 1
-        },
-        opens: "center",
-        timePicker: true,
-        timePicker24Hour: true,
-        timePickerIncrement: 15,
-        opens: "right",
-        alwaysShowCalendars: false,
-        //autoApply: false,
-        startDate: moment().subtract(29, "days"),
-        endDate: moment(),
-        ranges: {
-            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
-            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
-            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
-            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
-            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-            'Hoy': [moment().startOf('days'), moment().endOf("days")],
-            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
-            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
-            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
-        }
-    }, function (start, end, label) {
-        maxDateFilter = end;
-        minDateFilter = start;
-        table.draw();
-        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+        ]
     });
-
-
 };

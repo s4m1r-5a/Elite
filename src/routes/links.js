@@ -195,56 +195,58 @@ router.get('/clientes', isLoggedIn, (req, res) => {
 });
 router.post('/clientes', async (req, res) => {
     const cliente = await pool.query(`SELECT * FROM clientes c 
-    LEFT JOIN users u ON r.acsor = u.id     
+    LEFT JOIN users u ON c.acsor = u.id     
     ${req.user.admin != 1 ? 'WHERE c.acsor = ' + req.user.id : ''}`);
     respuesta = { "data": cliente };
     res.send(respuesta);
 });
 router.put('/clientes/:id', async (req, res) => {
-    console.log(req.body)
+    const SCOPES = ['https://www.googleapis.com/auth/contacts'];
+    const TOKEN_PATH = 'token.json';
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion,
-        fechanacimiento, estadocivil, email, cel, direccion
+        fechanacimiento, estadocivil, email, cel, direccion, asesors
     } = req.body;
+
     const clit = {
         nombre: nombres.toUpperCase(), documento, fechanacimiento, lugarexpedicion,
         fechaexpedicion, estadocivil, movil: cel.replace(/-/g, ""), agendado: 1,
         email: email.toLowerCase(), direccion: direccion.toLowerCase(),
         acsor: req.user.id, tiempo: ahora, google: ''
     }
-    const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
-    if (!cliente.length) {
-        const SCOPES = ['https://www.googleapis.com/auth/contacts'];
-        const TOKEN_PATH = 'token.json';
-        var person = {
-            "resource": {
-                "names": [{ "familyName": nombres.toUpperCase() }],
-                "emailAddresses": [{ "value": email.toLowerCase() }],
-                "phoneNumbers": [{ "value": cel.replace(/-/g, ""), "type": "Personal" }],
-                "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
+    if (req.params.id === 'agregar') {
+        const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
+        if (!cliente.length) {
+            var person = {
+                "resource": {
+                    "names": [{ "familyName": nombres.toUpperCase() }],
+                    "emailAddresses": [{ "value": email.toLowerCase() }],
+                    "phoneNumbers": [{ "value": cel.replace(/-/g, ""), "type": "Personal" }],
+                    "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
+                }
+            };
+            await fs.readFile('credentials.json', (err, content) => {
+                if (err) return console.log('Error loading client secret file:', err);
+                authorize(JSON.parse(content), crearcontacto);
+            });
+            const ir = await pool.query('INSERT INTO clientes SET ? ', clit);
+            if (asesors) {
+                const asr = {
+                    fullname: nombres.toUpperCase(), document: documento,
+                    cel: cel.replace(/-/g, ""), username: email.toLowerCase(), cli: ir.insertId
+                }
+                await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             }
-        };
-        await fs.readFile('credentials.json', (err, content) => {
-            if (err) return console.log('Error loading client secret file:', err);
-            authorize(JSON.parse(content), crearcontacto);
-        });
-    }
-    var contact = async function () {
-        if (idcontacto) {
-            clearInterval(time);
-            if (!user) {
-                persona = { nombre: nombre.toUpperCase(), movil: cel, email1: correo, email3: idcontacto };
-                const clien = await pool.query('INSERT INTO clientes SET ? ', persona);
-                venta2.client = clien.insertId;
-            } else if (!contacto) {
-                const persona = { nombre: nombre.toUpperCase(), email3: idcontacto };
-                await pool.query('UPDATE clientes set ? WHERE id = ?', [persona, user]);
+            res.send(true);
+        } else if (cliente.length > 0 && asesors) {
+            const asr = {
+                fullname: nombres.toUpperCase(), document: documento,
+                cel: cel.replace(/-/g, ""), username: email.toLowerCase(), cli: cliente[0].idc
             }
-            uy();
-        };
+            await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
+            res.send(true);
+        }
     }
-    //let time = await setInterval(contact, 10);
-    res.send(true);
 
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = Contactos;
@@ -286,8 +288,8 @@ router.put('/clientes/:id', async (req, res) => {
         const service = google.people({ version: 'v1', auth });
         service.people.createContact(person, (err, res) => {
             if (err) return console.error('La API devolvió un ' + err);
-            idcontacto = res.data.resourceName;
-            console.log("Response", res.data);
+            clit.google = res.data.resourceName;
+            console.log("Response", res.data.resourceName);
         });
     }
 });
@@ -410,12 +412,22 @@ router.get('/orden', isLoggedIn, async (req, res) => {
     }
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
+    const SCOPES = ['https://www.googleapis.com/auth/contacts'];
+    const TOKEN_PATH = 'token.json';
     const { nombres, documento, lugarexpedicion, fechaexpedicion,
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota,
         estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
     function Cliente(N) {
+        person = {
+            "resource": {
+                "names": [{ "familyName": nombres[N].toUpperCase() }],
+                "emailAddresses": [{ "value": email[N].toLowerCase() }],
+                "phoneNumbers": [{ "value": movil[N].replace(/-/g, ""), "type": "Personal" }],
+                "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
+            }
+        };
         cliente = {
             nombre: nombres[N].toUpperCase(),
             documento: documento[N],
@@ -426,13 +438,19 @@ router.post('/orden', isLoggedIn, async (req, res) => {
             email: email[N].toLowerCase(),
             movil: movil[N].replace(/-/g, ""),
             direccion: direccion[N].toLowerCase(),
-            parentesco
+            parentesco, acsor: req.user.id, venta: 1,
+            tiempo: ahora
         };
     };
+
     Cliente(0);
     if (client[0]) {
         await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[0]]);
     } else {
+        await fs.readFile('credentials.json', (err, content) => {
+            if (err) return console.log('Error loading client secret file:', err);
+            authorize(JSON.parse(content), crearcontacto);
+        });
         clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
         client[0] = clie.insertId
     }
@@ -442,6 +460,10 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         if (client[1]) {
             await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[1]]);
         } else {
+            await fs.readFile('credentials.json', (err, content) => {
+                if (err) return console.log('Error loading client secret file:', err);
+                authorize(JSON.parse(content), crearcontacto);
+            });
             clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
             client[1] = clie.insertId
         }
@@ -475,6 +497,51 @@ router.post('/orden', isLoggedIn, async (req, res) => {
 
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
+
+    function authorize(credentials, callback) {
+        const { client_secret, client_id, redirect_uris } = Contactos;
+        const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirect_uris);
+
+        // Comprueba si previamente hemos almacenado un token.
+        fs.readFile(TOKEN_PATH, (err, token) => {
+            if (err) return getNewToken(oAuth2Client, callback);
+            oAuth2Client.setCredentials(JSON.parse(token));
+            callback(oAuth2Client);
+        });
+    }
+    function getNewToken(oAuth2Client, callback) {
+        const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+        });
+        console.log('Autorice esta aplicación visitando esta url: ', authUrl);
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Ingrese el código de esa página aquí: ', (code) => {
+            rl.close();
+            oAuth2Client.getToken(code, (err, token) => {
+                if (err) return console.error('Error retrieving access token', err);
+                oAuth2Client.setCredentials(token);
+                // Almacenar el token en el disco para posteriores ejecuciones del programa
+                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                    if (err) return console.error(err);
+                    console.log('Token almacenado en', TOKEN_PATH);
+                });
+                callback(oAuth2Client);
+            });
+        });
+    }
+    function crearcontacto(auth) {
+        const service = google.people({ version: 'v1', auth });
+        service.people.createContact(person, (err, res) => {
+            if (err) return console.error('La API devolvió un ' + err);
+            cliente.google = res.data.resourceName;
+            console.log("Response", res.data.resourceName);
+        });
+    }
 });
 router.get('/cel/:id', async (req, res) => {
     const datos = await pool.query('SELECT * FROM clientes WHERE movil = ?', req.params.id)
@@ -1861,6 +1928,12 @@ async function Desendentes(pin, stados) {
     }
     return true
 };
+/*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
+const TOKEN_PATH = 'token.json';
+fs.readFile('credentials.json', (err, content) => {
+    if (err) return console.log('Error loading client secret file:', err);
+    authorize(JSON.parse(content), listConnectionNames);
+});*/
 function authorize(credentials, callback) {
     const { client_secret, client_id, redirect_uris } = Contactos;
     const oAuth2Client = new google.auth.OAuth2(
@@ -1897,12 +1970,27 @@ function getNewToken(oAuth2Client, callback) {
         });
     });
 }
-function crearcontacto(auth) {
+function listConnectionNames(auth) {
     const service = google.people({ version: 'v1', auth });
-    service.people.createContact(person, (err, res) => {
-        if (err) return console.error('La API devolvió un ' + err);
-        idcontacto = res.data.resourceName;
-        console.log("Response", res.data.resourceName);
+    service.people.connections.list({
+        resourceName: 'people/me',
+        pageSize: 100,
+        personFields: 'biographies,birthdays,coverPhotos,emailAddresses,events,genders,imClients,interests,locales,memberships,metadata,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,residences,sipAddresses,skills,urls,userDefined'
+    }, (err, res) => {
+        if (err) return console.error('The API returned an error: ' + err);
+        const connections = res.data.connections;
+        if (connections) {
+            console.log('Connections:');
+            connections.forEach((person) => {
+                if (person.names && person.names.length > 0) {
+                    console.log(person.names);
+                } else {
+                    console.log('No display name found for connection.');
+                }
+            });
+        } else {
+            console.log('No connections found.');
+        }
     });
 }
 module.exports = router;

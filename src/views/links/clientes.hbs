@@ -5,7 +5,7 @@
                 <div class="card">
                     <div class="card-header">
                         <form id="crearcliente">
-                            <div class="row" id="cliente1">
+                            <div class="row" id="addcliente" style="display: none;">
                                 <div class="col-12 col-lg-12">
                                     <div class="d-inline-block float-right">
                                         <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
@@ -116,8 +116,8 @@
                                                 <td>
                                                     <input class="form-control-no-border edi movil u" type="tel"
                                                         data-mask="000-000-0000" placeholder="Numero celular"
-                                                        autocomplete="off" style="padding: 1px; width: 100%;"
-                                                        name="cel" required>
+                                                        autocomplete="off" style="padding: 1px; width: 100%;" name="cel"
+                                                        required>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -137,8 +137,7 @@
                                                 </th>
                                                 <td>
                                                     <button class="btn btn-outline-dark btn-sm float-right mr-3"
-                                                        type="submit" id="AgregarCliente"><i
-                                                            class="fas fa-fw fa-user-plus"></i>
+                                                        type="submit"><i class="fas fa-fw fa-user-plus"></i>
                                                         Guardar</button>
                                                 </td>
                                             </tr>
@@ -153,16 +152,18 @@
                             style="width:100%">
                             <thead>
                                 <tr>
-                                    <th style="width:5%;">Id</th>
-                                    <th style="width:10%;">Proyecto</th>
-                                    <th style="width:10%;">Mz</th>
-                                    <th style="width:10%;">Lote</th>
-                                    <th style="width:5%;">Estado</th>
-                                    <th style="width:3%;">Cliente</th>
-                                    <th style="width:15%;">Documento</th>
-                                    <th style="width:15%;">Fecha</th>
-                                    <th style="width:15%;">Asesor</th>
-                                    <th style="width:15%;">Accion</th>
+                                    <th></th>
+                                    <th>Id</th>
+                                    <th>Nombre</th>
+                                    <th>Documento</th>
+                                    <th>Fecha nc</th>
+                                    <th>Lugar exp</th>
+                                    <th>Fecha exp</th>
+                                    <th>Estado cvl</th>
+                                    <th>Movil</th>
+                                    <th>Email</th>
+                                    <th>Dirección</th>
+                                    <th>Accion</th>
                                 </tr>
                             </thead>
                             <tbody></tbody>

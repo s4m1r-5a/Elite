@@ -132,7 +132,7 @@ passport.serializeUser((user, done) => {
 });
 
 passport.deserializeUser(async (id, done) => {
-  const rows = await pool.query(`SELECT u.id, u.pin, u.fullname, u.username, u.imagen, u.admin, r.rango 
+  const rows = await pool.query(`SELECT u.id, u.pin, u.fullname, u.document, u.username, u.imagen, u.admin, u.cel, u.cli, r.rango 
   FROM users u INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ?`, id);
   done(null, rows[0]);
 });
