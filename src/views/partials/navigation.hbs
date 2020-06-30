@@ -1,5 +1,6 @@
 {{#if user}}
 <input type="hidden" id="usuarioadmin" value="{{user.admin}}">
+<input type="hidden" id="cli" value="{{user.cli}}">
 <nav id="sidebar" class="sidebar">
 	<div class="sidebar-content ">
 		<a class="sidebar-brand" href="/tablero">
@@ -52,6 +53,13 @@
 				<a class="sidebar-link" href="/links/solicitudes">
 					<i class="align-middle" data-feather="bell"></i> <span
 						class="align-middle">Solicitudes</span>
+					<span class="sidebar-badge badge badge-primary"></span>
+				</a>
+			</li>
+			<li class="sidebar-item active">
+				<a class="sidebar-link" href="/links/clientes">
+					<i class="align-middle" data-feather="users"></i> <span
+						class="align-middle">Clientes</span>
 					<span class="sidebar-badge badge badge-primary"></span>
 				</a>
 			</li>
