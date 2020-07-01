@@ -175,10 +175,6 @@ function titleCase(texto) {
         }
     );
 }
-
-
-
-
 //////////////////////////////////////////////////////////////////
 var $validationForm = $("#smartwizard-arrows-primary");
 $validationForm.smartWizard({
@@ -240,7 +236,6 @@ function init_events(ele) {
         })
     })
 };
-
 $('.pagarpayu').attr("disabled", true);
 $('.ntfx').attr("disabled", true);
 $('input[name="nombre"]').attr("disabled", true);
@@ -316,7 +311,6 @@ $('.pagarp').click(function () {
         alert('Debes completar todos los campos');
     }
 });
-
 $(".pagar").keydown(function () {
     $(`.pagarpayu`).attr("disabled", true);
 });
@@ -370,7 +364,6 @@ $('#quien').change(function () {
         $('#id').focus();
     }
 });
-
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
     //alert($('input[name="movil"]').val());
@@ -475,7 +468,6 @@ $(document).ready(function () {
     $('#Modalventa').one('hidden.bs.modal', function () {
         $("#Modalventa input").val('');
     })
-
     $('#monto').change(function () {
         let re = Math.round($(this).cleanVal() / ($('#tasa').text() / 10));
         let utilidad = Math.round($(this).cleanVal() * 0.06);
@@ -551,7 +543,6 @@ $(document).ready(function () {
     $('#cuenta').on('change', function () {
         Banco($(this).val());
     })
-
     function Banco(dato) {
         d = { bank: dato.slice(0, 4) };
         $.ajax({
@@ -566,7 +557,6 @@ $(document).ready(function () {
             }
         });
     }
-
     $("#nomdest").on('change', function () {
         var t = $(this).val();
         if (!isNaN(t)) {
