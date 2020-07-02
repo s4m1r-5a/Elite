@@ -63,7 +63,9 @@
                                                 <td>
                                                     <input class="form-control-no-border edi documento u" type="text"
                                                         placeholder="Documento de identidad" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="documento" required>
+                                                        style="padding: 1px; width: 100%;" name="documento"
+                                                        data-mask="000.000.000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" required>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -205,7 +207,9 @@
                                                 <td>
                                                     <input class="form-control-no-border edi documento d" type="text"
                                                         placeholder="Documento de identidad" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="documento">
+                                                        style="padding: 1px; width: 100%;" name="documento"
+                                                        data-mask="000.000.000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true">
                                                 </td>
                                             </tr>
                                             <tr>
@@ -650,7 +654,7 @@
                                     <hr />
                                     <br>
                                     <label class="custom-control custom-checkbox">
-                                        <input type="checkbox" class="custom-control-input" required>
+                                        <input type="checkbox" class="custom-control-input" id="acepto" required>
                                         <span class="custom-control-label">Acepta nuestros terminos y
                                             condiciones</span>
                                     </label>

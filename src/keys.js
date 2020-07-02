@@ -1,20 +1,20 @@
 module.exports = {
-    database: {
+    /*database: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
         password: 'Abcd1234@',
         database: 'elite',
         port: 3306
-    },
-    /*database: {
+    },*/
+    database: {
         connectionLimit: 1000,
         host: '213.190.6.64',
         user: 'u152781536_ELITE',
         password: '12345678',
         database: 'u152781536_Elite'
     },
-    database: {
+    /*database: {
         connectionLimit: 1000,
         host: 'localhost',
         user: 'samir',

@@ -149,9 +149,12 @@ $(document).ready(function () {
             type: 'PUT',
             async: false,
             success: function (data) {
-                //$('#AddClientes').modal('toggle')
-                $('#ModalEventos').modal('hide')
-                SMSj('success', 'Datos atualizados correctamente')
+                if (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                        SMSj('success', 'Datos atualizados correctamente')
+                    }).modal('hide');
+                }
             }
         });
     });
@@ -175,10 +178,6 @@ function titleCase(texto) {
         }
     );
 }
-
-
-
-
 //////////////////////////////////////////////////////////////////
 var $validationForm = $("#smartwizard-arrows-primary");
 $validationForm.smartWizard({
@@ -240,7 +239,6 @@ function init_events(ele) {
         })
     })
 };
-
 $('.pagarpayu').attr("disabled", true);
 $('.ntfx').attr("disabled", true);
 $('input[name="nombre"]').attr("disabled", true);
@@ -316,7 +314,6 @@ $('.pagarp').click(function () {
         alert('Debes completar todos los campos');
     }
 });
-
 $(".pagar").keydown(function () {
     $(`.pagarpayu`).attr("disabled", true);
 });
@@ -370,7 +367,6 @@ $('#quien').change(function () {
         $('#id').focus();
     }
 });
-
 $('#ventaiux').click(function () {
     var fd = $('#formulario').serialize();
     //alert($('input[name="movil"]').val());
@@ -475,7 +471,6 @@ $(document).ready(function () {
     $('#Modalventa').one('hidden.bs.modal', function () {
         $("#Modalventa input").val('');
     })
-
     $('#monto').change(function () {
         let re = Math.round($(this).cleanVal() / ($('#tasa').text() / 10));
         let utilidad = Math.round($(this).cleanVal() * 0.06);
@@ -551,7 +546,6 @@ $(document).ready(function () {
     $('#cuenta').on('change', function () {
         Banco($(this).val());
     })
-
     function Banco(dato) {
         d = { bank: dato.slice(0, 4) };
         $.ajax({
@@ -566,7 +560,6 @@ $(document).ready(function () {
             }
         });
     }
-
     $("#nomdest").on('change', function () {
         var t = $(this).val();
         if (!isNaN(t)) {
@@ -615,108 +608,6 @@ $(document).ready(function () {
         }
     });*/
 });
-//////////////////////////* INDEX */////////////////////////////////////////
-/*if (window.location.pathname == `/`) {
-    var scaling = 1;
-    //count
-    var currentSliderCount = 0;
-    var videoCount = $(".row").children().length;
-    var showCount = 0;
-    var sliderCount = 1;
-    var controlsWidth = 40;
-    var scollWidth = 0;
-    var win = $(window);
-    var prev = $(".prev");
-    var next = $(".next");
-    //sizes
-    var windowWidth = 0;
-    var frameWidth = 0;
-
-    $(document).ready(function () {
-        var player = new Playerjs({ id: "player" });
-        var player2 = new Playerjs({ id: "player2" });
-        var player3 = new Playerjs({ id: "player3" });
-        var player4 = new Playerjs({ id: "player4" });
-        var player5 = new Playerjs({ id: "player5" }); ///storage/new4tb/504562/aplay1080720.m3u8
-        $(".tile").on({
-            mouseenter: function () {
-                play = $(this).children('.tile__media').attr("id");
-                pley = play + '.api("play", "https://mdstrm.com/live-stream-playlist/57d01d6c28b263eb73b59a5a.m3u8");';
-                sto = play + '.api("stop");';
-                eval(pley);
-            },
-            mouseleave: function () {
-                eval(sto);
-            }
-        });
-        init();
-    });
-
-    $(window).resize(function () {
-        init();
-    });
-
-    function init() {
-        windowWidth = win.width();
-        frameWidth = win.width() - 80;
-    }
-
-    next.on("click", function () {
-        var padre = $(this).parent();
-        scollWidth = parseFloat(padre.children(".px").val());
-        scollWidth = scollWidth - frameWidth;
-        padre.children(".px").val(scollWidth)
-        padre.children("div.row").velocity({
-            left: scollWidth
-        }, {
-            duration: 700,
-            easing: "swing",
-            queue: "",
-            loop: false, // Si la animación debe ciclarse
-            delay: false, // Demora
-            mobileHA: true // Acelerado por hardware, activo por defecto
-        });
-        padre.children("div.row").css("left", scollWidth);
-        currentSliderCount--;
-        padre.children(".ctn").val(currentSliderCount);        
-    });
-
-    prev.on("click", function () {
-        var padre = $(this).parent();
-        scollWidth = parseFloat(padre.children(".px").val());
-        scollWidth = scollWidth + frameWidth;
-        padre.children(".px").val(scollWidth)        
-        if (parseFloat(padre.children(".ctn").val()) >= sliderCount - 1) {
-            padre.children("div.row").css("left", 0);
-            currentSliderCount = 0;
-            padre.children(".ctn").val(currentSliderCount);
-            //scollWidth = 0;
-            padre.children(".px").val(0)
-        } else {
-            currentSliderCount++;
-            padre.children(".ctn").val(currentSliderCount);
-            padre.children('div.row').velocity({
-                left: scollWidth
-            }, {
-                duration: 700,
-                easing: "swing",
-                queue: "",
-                //begin: function() {
-                //console.log("iniciando animación")
-                //},
-                //progress: function() {
-                //console.log("animación en proceso")
-                //},
-                //complete: function() {
-                // console.log("animación completada")
-                //},
-                loop: false, // Si la animación debe ciclarse
-                delay: false, // Demora
-                mobileHA: true // Acelerado por hardware, activo por defecto
-            });
-        }
-    });
-}*/
 //////////////////////////* INICIO *///////////////////////////////////////
 if (window.location.pathname == `/`) {
     $(document).ready(function () {
@@ -1292,7 +1183,6 @@ if (window.location.pathname == `/links/pagos`) {
         });
     });
 }
-
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
     let p = '', fecha = new Date(), fechs = new Date();
@@ -1837,7 +1727,9 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 
     $(document).ready(function () {
         var g = $('#fechaFactura').text()
+        var j = $('#fechaFactura').html()
         $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'))
+        $('#fechaOrden').html('..............................' + moment(j).format('YYYY-MM-DD'))
         $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())))
         var totalp = Moneda($('.totalp').html())
         var m2 = Moneda($('.m2').html())
@@ -1853,6 +1745,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         $('.extrao').html('Cuota $' + extrao)
         $('.separar').html('$' + separar)
         $('#cuota').html('$' + cuota)
+
         //window.print();   
         //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
         //window.addEventListener("load", window.print());
@@ -1861,7 +1754,6 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('footer').show()
     $('nav').show()
 }
-
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
     let recargada = true,
@@ -3201,6 +3093,7 @@ if (window.location.pathname == `/links/orden`) {
             $('.cliente2 input').val('');
         });
         $('.edi').on('change', function () {
+            $('#acepto').prop("checked", false)
             if ($(this).attr('id') === 'abono') {
                 if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val())) {
                     $('#abono').val(Moneda($('#separacion').val()))
@@ -3210,17 +3103,18 @@ if (window.location.pathname == `/links/orden`) {
             var abono = parseFloat($('#abono').cleanVal()) || 0, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
                 mesesextra = '', D = parseFloat($('#dia').val()), meses = 0;
             Años(u + 1, D, N)
-            if ($(this).hasClass("movil")) {
-                var card = $(this).parents('div.row').attr("id")
+            var card = $(this).parents('div.row').attr("id")
+            if (($(this).hasClass("movil") && !$(`#${card} .documento`).val()) || $(this).hasClass("documento")) {
                 $.ajax({
                     url: '/links/cel/' + $(this).cleanVal(),
                     type: 'GET',
                     async: false,
                     success: function (data) {
                         if (data.length > 0) {
-                            $(`#${card} .client`).val(data[0].id);
+                            $(`#${card} .client`).val(data[0].idc);
                             $(`#${card} .nombres`).val(data[0].nombre);
-                            $(`#${card} .documento`).val(data[0].documento);
+                            $(`#${card} .documento`).val(data[0].documento).mask("000.000.000.000.000", { reverse: true });
+                            $(`#${card} .movil`).val(data[0].movil).mask('000-000-0000', { reverse: true });
                             $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
                             $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
                             $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
@@ -3228,11 +3122,12 @@ if (window.location.pathname == `/links/orden`) {
                             $(`#${card} .email`).val(data[0].email);
                             $(`#${card} .direccion`).val(data[0].direccion);
                             $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
+                        } else {
+                            SMSj('info', 'Numero de documento no encontrado, proceda con el registro')
                         }
                     }
                 });
             }
-
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
                     $.ajax({
@@ -3278,7 +3173,7 @@ if (window.location.pathname == `/links/orden`) {
             if ($('#ahorro').val() === '$0') {
                 Dt()
             }
-            if (u > 2) {
+            if (u > 1) {
                 Dt();
                 $('#bono').attr('disabled', true);
                 SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
@@ -4349,111 +4244,115 @@ if (window.location == `${window.location.origin}/links/red`) {
 if (window.location == `${window.location.origin}/links/clientes`) {
 
     $(document).ready(function () {
-      
-    $('#crearcliente').submit(function (e) {
-        e.preventDefault();
-        $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-        $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-        var fd = $('form').serialize();
-        $.ajax({
-            url: '/links/clientes/agregar',
-            data: fd,
-            type: 'PUT',
-            async: false,
-            success: function (data) {
-                clientes.ajax.reload(null, false)
-                /*tabledit.ajax.reload(function (json) {
-                    tabledit.columns.adjust().draw();
-                    SMSj('success', 'Actualizacion exitosa')
-                })*/
-                $('#ModalEventos').modal('hide')
-                $('#agrecli').show("slow")
-                $("#addcliente").hide("slow");
-                $("#addcliente input").val('')
-            }
-        });
-    });
-    $('.atras').click(function () {
-        $('#agrecli').show("slow")
-        $("#addcliente").hide("slow");
-        $("#addcliente input").val('')
-    })
-});
 
-var clientes = $('#clientes').DataTable({
-    dom: 'Bfrtip',
-    lengthMenu: [
-        [10, 25, 50, -1],
-        ['10 filas', '25 filas', '50 filas', 'Ver todo']
-    ],
-    buttons: [
-        {
-            text: `<div class="mb-0">
+        $('#crearcliente').submit(function (e) {
+            e.preventDefault();
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+            $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+            var fd = $('form').serialize();
+            $.ajax({
+                url: '/links/clientes/agregar',
+                data: fd,
+                type: 'PUT',
+                async: false,
+                success: function (data) {
+                    if (data) {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                            clientes.ajax.reload(null, false)
+                            $('#ModalEventos').modal('hide')
+                            $('#agrecli').show("slow")
+                            $("#addcliente").hide("slow");
+                            $("#addcliente input").val('')
+                        }).modal('hide');
+                        /*tabledit.ajax.reload(function (json) {
+                            tabledit.columns.adjust().draw();
+                            SMSj('success', 'Actualizacion exitosa')
+                        })*/
+                    }
+                }
+            });
+        });
+        $('.atras').click(function () {
+            $('#agrecli').show("slow")
+            $("#addcliente").hide("slow");
+            $("#addcliente input").val('')
+        })
+    });
+
+    var clientes = $('#clientes').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [
+            {
+                text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>
                         </div>`,
-            attr: {
-                title: 'Agregar-Clientes',
-                id: 'agrecli'
+                attr: {
+                    title: 'Agregar-Clientes',
+                    id: 'agrecli'
+                },
+                className: 'btn btn-outline-dark',
+                action: function () {
+                    $('#agrecli').hide("slow")
+                    $("#addcliente").show("slow");
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/clientes",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
+        },
+        columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
             },
-            className: 'btn btn-outline-dark',
-            action: function () {
-                $('#agrecli').hide("slow")
-                $("#addcliente").show("slow");
-            }
-        }
-    ],
-    deferRender: true,
-    paging: true,
-    autoWidth: true,
-    search: {
-        regex: true,
-        caseInsensitive: false,
-    },
-    responsive: true,
-    order: [[0, "desc"]], //[0, "asc"]
-    language: languag2,
-    ajax: {
-        method: "POST",
-        url: "/links/clientes",
-        dataSrc: "data"
-    },
-    initComplete: function (settings, json, row) {
-        $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
-    },
-    columns: [
-        {
-            className: 'control',
-            orderable: true,
-            data: null,
-            defaultContent: ''
-        },
-        { data: "idc" },
-        { data: "nombre" },
-        { data: "documento" },
-        {
-            data: "fechanacimiento",
-            render: function (data, method, row) {
-                return data ? moment(data).format('YYYY-MM-DD') : '';
-            }
-        },
-        { data: "lugarexpedicion" },
-        {
-            data: "fechaexpedicion",
-            render: function (data, method, row) {
-                return data ? moment(data).format('YYYY-MM-DD') : '';
-            }
-        },
-        { data: "estadocivil" },
-        { data: "movil" },
-        { data: "email" },
-        { data: "direccion" },
-        {
-            className: 't',
-            defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+            { data: "idc" },
+            { data: "nombre" },
+            { data: "documento" },
+            {
+                data: "fechanacimiento",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            { data: "lugarexpedicion" },
+            {
+                data: "fechaexpedicion",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            { data: "estadocivil" },
+            { data: "movil" },
+            { data: "email" },
+            { data: "direccion" },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
@@ -4461,7 +4360,7 @@ var clientes = $('#clientes').DataTable({
                                             <a class="dropdown-item">Declinar</a>
                                         </div>
                                     </div>` : ''
-        }
-    ]
-});
+            }
+        ]
+    });
 };
