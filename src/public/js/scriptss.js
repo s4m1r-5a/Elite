@@ -3085,8 +3085,8 @@ if (window.location.pathname == `/links/orden`) {
             oficial30 = '$' + Moneda(inicial);
             separacion = parseFloat($('#separacion').val());
         };
-        $('#AgregarCliente').click(function () {
-            $('.cliente2').show('slow');
+        $('#AgregarClient').click(function () {
+            $('#cliente2').show('slow');
         });
         $('.atras').click(function () {
             $('.cliente2').hide('slow');
