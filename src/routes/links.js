@@ -430,7 +430,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         };
         cliente = {
             nombre: nombres[N].toUpperCase(),
-            documento: documento[N],
+            documento: documento[N].replace(/\./g, ''),
             lugarexpedicion: lugarexpedicion[N],
             fechaexpedicion: fechaexpedicion[N],
             fechanacimiento: fechanacimiento[N],
@@ -445,27 +445,37 @@ router.post('/orden', isLoggedIn, async (req, res) => {
 
     Cliente(0);
     if (client[0]) {
-        await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[0]]);
+        await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, client[0]]);
     } else {
-        await fs.readFile('credentials.json', (err, content) => {
-            if (err) return console.log('Error loading client secret file:', err);
-            authorize(JSON.parse(content), crearcontacto);
-        });
-        clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
-        client[0] = clie.insertId
-    }
-
-    if (documento[1]) {
-        Cliente(1);
-        if (client[1]) {
-            await pool.query('UPDATE clientes set ? WHERE id = ?', [cliente, client[1]]);
+        const datosc = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento[0])
+        if (datosc.length > 0) {
+            await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, datosc[0].idc]);
         } else {
             await fs.readFile('credentials.json', (err, content) => {
                 if (err) return console.log('Error loading client secret file:', err);
                 authorize(JSON.parse(content), crearcontacto);
             });
             clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
-            client[1] = clie.insertId
+            client[0] = clie.insertId
+        }
+    }
+
+    if (documento[1]) {
+        Cliente(1);
+        if (client[1]) {
+            await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, client[1]]);
+        } else {
+            const datosc = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento[1])
+            if (datosc.length > 0) {
+                await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, datosc[0].idc]);
+            } else {
+                await fs.readFile('credentials.json', (err, content) => {
+                    if (err) return console.log('Error loading client secret file:', err);
+                    authorize(JSON.parse(content), crearcontacto);
+                });
+                clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
+                client[1] = clie.insertId
+            }
         }
     };
     const separ = {
@@ -484,7 +494,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
         iniciar, cuot
     };
-    console.log(separ)
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
@@ -545,7 +554,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     }
 });
 router.get('/cel/:id', async (req, res) => {
-    const datos = await pool.query('SELECT * FROM clientes WHERE movil = ?', req.params.id)
+    const datos = await pool.query('SELECT * FROM clientes WHERE movil = ? OR documento = ?', [req.params.id, req.params.id])
     res.send(datos);
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {

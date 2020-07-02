@@ -149,9 +149,12 @@ $(document).ready(function () {
             type: 'PUT',
             async: false,
             success: function (data) {
-                //$('#AddClientes').modal('toggle')
-                $('#ModalEventos').modal('hide')
-                SMSj('success', 'Datos atualizados correctamente')
+                if (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                        SMSj('success', 'Datos atualizados correctamente')
+                    }).modal('hide');
+                }
             }
         });
     });
@@ -605,108 +608,6 @@ $(document).ready(function () {
         }
     });*/
 });
-//////////////////////////* INDEX */////////////////////////////////////////
-/*if (window.location.pathname == `/`) {
-    var scaling = 1;
-    //count
-    var currentSliderCount = 0;
-    var videoCount = $(".row").children().length;
-    var showCount = 0;
-    var sliderCount = 1;
-    var controlsWidth = 40;
-    var scollWidth = 0;
-    var win = $(window);
-    var prev = $(".prev");
-    var next = $(".next");
-    //sizes
-    var windowWidth = 0;
-    var frameWidth = 0;
-
-    $(document).ready(function () {
-        var player = new Playerjs({ id: "player" });
-        var player2 = new Playerjs({ id: "player2" });
-        var player3 = new Playerjs({ id: "player3" });
-        var player4 = new Playerjs({ id: "player4" });
-        var player5 = new Playerjs({ id: "player5" }); ///storage/new4tb/504562/aplay1080720.m3u8
-        $(".tile").on({
-            mouseenter: function () {
-                play = $(this).children('.tile__media').attr("id");
-                pley = play + '.api("play", "https://mdstrm.com/live-stream-playlist/57d01d6c28b263eb73b59a5a.m3u8");';
-                sto = play + '.api("stop");';
-                eval(pley);
-            },
-            mouseleave: function () {
-                eval(sto);
-            }
-        });
-        init();
-    });
-
-    $(window).resize(function () {
-        init();
-    });
-
-    function init() {
-        windowWidth = win.width();
-        frameWidth = win.width() - 80;
-    }
-
-    next.on("click", function () {
-        var padre = $(this).parent();
-        scollWidth = parseFloat(padre.children(".px").val());
-        scollWidth = scollWidth - frameWidth;
-        padre.children(".px").val(scollWidth)
-        padre.children("div.row").velocity({
-            left: scollWidth
-        }, {
-            duration: 700,
-            easing: "swing",
-            queue: "",
-            loop: false, // Si la animación debe ciclarse
-            delay: false, // Demora
-            mobileHA: true // Acelerado por hardware, activo por defecto
-        });
-        padre.children("div.row").css("left", scollWidth);
-        currentSliderCount--;
-        padre.children(".ctn").val(currentSliderCount);        
-    });
-
-    prev.on("click", function () {
-        var padre = $(this).parent();
-        scollWidth = parseFloat(padre.children(".px").val());
-        scollWidth = scollWidth + frameWidth;
-        padre.children(".px").val(scollWidth)        
-        if (parseFloat(padre.children(".ctn").val()) >= sliderCount - 1) {
-            padre.children("div.row").css("left", 0);
-            currentSliderCount = 0;
-            padre.children(".ctn").val(currentSliderCount);
-            //scollWidth = 0;
-            padre.children(".px").val(0)
-        } else {
-            currentSliderCount++;
-            padre.children(".ctn").val(currentSliderCount);
-            padre.children('div.row').velocity({
-                left: scollWidth
-            }, {
-                duration: 700,
-                easing: "swing",
-                queue: "",
-                //begin: function() {
-                //console.log("iniciando animación")
-                //},
-                //progress: function() {
-                //console.log("animación en proceso")
-                //},
-                //complete: function() {
-                // console.log("animación completada")
-                //},
-                loop: false, // Si la animación debe ciclarse
-                delay: false, // Demora
-                mobileHA: true // Acelerado por hardware, activo por defecto
-            });
-        }
-    });
-}*/
 //////////////////////////* INICIO *///////////////////////////////////////
 if (window.location.pathname == `/`) {
     $(document).ready(function () {
@@ -3192,6 +3093,7 @@ if (window.location.pathname == `/links/orden`) {
             $('.cliente2 input').val('');
         });
         $('.edi').on('change', function () {
+            $('#acepto').prop("checked", false)
             if ($(this).attr('id') === 'abono') {
                 if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val())) {
                     $('#abono').val(Moneda($('#separacion').val()))
@@ -3201,17 +3103,18 @@ if (window.location.pathname == `/links/orden`) {
             var abono = parseFloat($('#abono').cleanVal()) || 0, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
                 mesesextra = '', D = parseFloat($('#dia').val()), meses = 0;
             Años(u + 1, D, N)
-            if ($(this).hasClass("movil")) {
-                var card = $(this).parents('div.row').attr("id")
+            var card = $(this).parents('div.row').attr("id")
+            if (($(this).hasClass("movil") && !$(`#${card} .documento`).val()) || $(this).hasClass("documento")) {
                 $.ajax({
                     url: '/links/cel/' + $(this).cleanVal(),
                     type: 'GET',
                     async: false,
                     success: function (data) {
                         if (data.length > 0) {
-                            $(`#${card} .client`).val(data[0].id);
+                            $(`#${card} .client`).val(data[0].idc);
                             $(`#${card} .nombres`).val(data[0].nombre);
-                            $(`#${card} .documento`).val(data[0].documento);
+                            $(`#${card} .documento`).val(data[0].documento).mask("000.000.000.000.000", { reverse: true });
+                            $(`#${card} .movil`).val(data[0].movil).mask('000-000-0000', { reverse: true });
                             $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
                             $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
                             $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
@@ -3219,6 +3122,8 @@ if (window.location.pathname == `/links/orden`) {
                             $(`#${card} .email`).val(data[0].email);
                             $(`#${card} .direccion`).val(data[0].direccion);
                             $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
+                        } else {
+                            SMSj('info', 'Numero de documento no encontrado, proceda con el registro')
                         }
                     }
                 });
@@ -4355,15 +4260,19 @@ if (window.location == `${window.location.origin}/links/clientes`) {
                 type: 'PUT',
                 async: false,
                 success: function (data) {
-                    clientes.ajax.reload(null, false)
-                    /*tabledit.ajax.reload(function (json) {
-                        tabledit.columns.adjust().draw();
-                        SMSj('success', 'Actualizacion exitosa')
-                    })*/
-                    $('#ModalEventos').modal('hide')
-                    $('#agrecli').show("slow")
-                    $("#addcliente").hide("slow");
-                    $("#addcliente input").val('')
+                    if (data) {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                            clientes.ajax.reload(null, false)
+                            $('#ModalEventos').modal('hide')
+                            $('#agrecli').show("slow")
+                            $("#addcliente").hide("slow");
+                            $("#addcliente input").val('')
+                        }).modal('hide');
+                        /*tabledit.ajax.reload(function (json) {
+                            tabledit.columns.adjust().draw();
+                            SMSj('success', 'Actualizacion exitosa')
+                        })*/
+                    }
                 }
             });
         });
