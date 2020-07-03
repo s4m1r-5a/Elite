@@ -205,12 +205,12 @@ router.put('/clientes/:id', async (req, res) => {
     const TOKEN_PATH = 'token.json';
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion,
-        fechanacimiento, estadocivil, email, cel, direccion, asesors
+        fechanacimiento, estadocivil, email, movil, direccion, asesors
     } = req.body;
-
+    console.log(req.body)
     const clit = {
-        nombre: nombres.toUpperCase(), documento, fechanacimiento, lugarexpedicion,
-        fechaexpedicion, estadocivil, movil: cel.replace(/-/g, ""), agendado: 1,
+        nombre: nombres.toUpperCase(), documento: documento.replace(/\./g, ''), fechanacimiento,
+        lugarexpedicion, fechaexpedicion, estadocivil, movil: movil.replace(/-/g, ""), agendado: 1,
         email: email.toLowerCase(), direccion: direccion.toLowerCase(),
         acsor: req.user.id, tiempo: ahora, google: ''
     }
@@ -221,7 +221,7 @@ router.put('/clientes/:id', async (req, res) => {
                 "resource": {
                     "names": [{ "familyName": nombres.toUpperCase() }],
                     "emailAddresses": [{ "value": email.toLowerCase() }],
-                    "phoneNumbers": [{ "value": cel.replace(/-/g, ""), "type": "Personal" }],
+                    "phoneNumbers": [{ "value": movil.replace(/-/g, ""), "type": "Personal" }],
                     "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
                 }
             };
@@ -233,7 +233,7 @@ router.put('/clientes/:id', async (req, res) => {
             if (asesors) {
                 const asr = {
                     fullname: nombres.toUpperCase(), document: documento,
-                    cel: cel.replace(/-/g, ""), username: email.toLowerCase(), cli: ir.insertId
+                    cel: movil.replace(/-/g, ""), username: email.toLowerCase(), cli: ir.insertId
                 }
                 await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             }
@@ -241,7 +241,7 @@ router.put('/clientes/:id', async (req, res) => {
         } else if (cliente.length > 0 && asesors) {
             const asr = {
                 fullname: nombres.toUpperCase(), document: documento,
-                cel: cel.replace(/-/g, ""), username: email.toLowerCase(), cli: cliente[0].idc
+                cel: movil.replace(/-/g, ""), username: email.toLowerCase(), cli: cliente[0].idc
             }
             await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             res.send(true);

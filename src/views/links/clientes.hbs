@@ -4,7 +4,7 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header">
-                        <form id="crearcliente">
+                        <form id="creacliente">
                             <div class="row" id="addcliente" style="display: none;">
                                 <div class="col-12 col-lg-12">
                                     <div class="d-inline-block float-right">
@@ -35,7 +35,9 @@
                                                 <td>
                                                     <input class="form-control-no-border edi documento u" type="text"
                                                         placeholder="Documento de identidad" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="documento" required>
+                                                        style="padding: 1px; width: 100%;" name="documento"
+                                                        data-mask="000.000.000.000.000" data-mask-reverse="true"
+                                                        data-mask-selectonfocus="true" required>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -116,8 +118,8 @@
                                                 <td>
                                                     <input class="form-control-no-border edi movil u" type="tel"
                                                         data-mask="000-000-0000" placeholder="Numero celular"
-                                                        autocomplete="off" style="padding: 1px; width: 100%;" name="cel"
-                                                        required>
+                                                        autocomplete="off" style="padding: 1px; width: 100%;"
+                                                        name="movil" id="movil" required>
                                                 </td>
                                             </tr>
                                             <tr>
@@ -136,7 +138,7 @@
                                                     <i class="feather-md" data-feather="user-plus"></i>
                                                 </th>
                                                 <td>
-                                                    <button class="btn btn-outline-dark btn-sm float-right mr-3"
+                                                    <button class="btn btn-outline-dark btn-sm float-right mr-3 guard"
                                                         type="submit"><i class="fas fa-fw fa-user-plus"></i>
                                                         Guardar</button>
                                                 </td>

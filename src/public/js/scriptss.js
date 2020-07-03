@@ -142,7 +142,7 @@ $(document).ready(function () {
             keyboard: true,
         });
         $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-        var fd = $('form').serialize();
+        var fd = $('#crearclientes').serialize();
         $.ajax({
             url: '/links/clientes/agregar',
             data: fd,
@@ -1204,7 +1204,7 @@ if (window.location.pathname == `/links/reportes`) {
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[1]).getTime();
+                aData._date = new Date(aData[7]).getTime();
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -1219,7 +1219,6 @@ if (window.location.pathname == `/links/reportes`) {
             return true;
         }
     );
-
 
     /*const doc = new jsPDF()
 
@@ -1294,7 +1293,7 @@ if (window.location.pathname == `/links/reportes`) {
         $('span.total').text(Moneda(total));
 
     });*/
-    //////////////////////* Table2 */////////////////////// 
+    //////////////////////* TABLA DE REPORTES */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
@@ -1352,7 +1351,10 @@ if (window.location.pathname == `/links/reportes`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                            return `<span class="badge badge-pill badge-info">Procesando</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-dark">Verificando</span>`
                             break;
                         case 9:
                             return `<span class="badge badge-pill badge-success">Disponible</span>`
@@ -1362,6 +1364,12 @@ if (window.location.pathname == `/links/reportes`) {
                             break;
                         case 12:
                             return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                            break;
+                        case 14:
+                            return `<span class="badge badge-pill badge-danger">Tramitando</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactivo</span>`
                             break;
                     }
                 }
@@ -2215,6 +2223,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             case 1:
                                 return `<span class="badge badge-pill badge-info">Procesando</span>`
                                 break;
+                            case 8:
+                                return `<span class="badge badge-pill badge-dark">Verificando</span>`
+                                break;
                             case 9:
                                 return `<span class="badge badge-pill badge-success">Disponible</span>`
                                 break;
@@ -2224,11 +2235,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             case 12:
                                 return `<span class="badge badge-pill badge-secondary">Separado</span>`
                                 break;
-                            case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
-                                break;
                             case 14:
                                 return `<span class="badge badge-pill badge-danger">Tramitando</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
                                 break;
                         }
                     }
@@ -2557,7 +2568,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-info">En Proceso</span>`
+                            return `<span class="badge badge-pill badge-info">Procesando</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-dark">Verificando</span>`
                             break;
                         case 9:
                             return `<span class="badge badge-pill badge-success">Disponible</span>
@@ -2572,6 +2586,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             break;
                         case 12:
                             return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                            break;
+                        case 14:
+                            return `<span class="badge badge-pill badge-danger">Tramitando</span>`
                             break;
                         case 15:
                             return `<span class="badge badge-pill badge-warning">Inactivo</span>
@@ -3444,7 +3461,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             {
                 data: "monto",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(parseFloat(data))
                 }
             },
             { data: "facturasvenc" },
@@ -3491,6 +3508,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg .lote').html('LOTE: ' + data.n)
         $('#Modalimg .recibo').html('RECIBO: ' + data.recibo)
         $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc)
+        admin == 1 ? `<div class="btn-group btn-group-sm">
+                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                        aria-haspopup="true" aria-expanded="false">Acción</button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item">Aprobar</a>
+                                <a class="dropdown-item">Declinar</a>
+                            </div>
+                        </div>` : ''
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`)
@@ -3504,7 +3529,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`)
         }
-
         $('#Modalimg').modal({
             backdrop: 'static',
             keyboard: true,
@@ -4244,16 +4268,17 @@ if (window.location == `${window.location.origin}/links/red`) {
 if (window.location == `${window.location.origin}/links/clientes`) {
 
     $(document).ready(function () {
-
-        $('#crearcliente').submit(function (e) {
-            e.preventDefault();
+        $('.guard').click(function () {
             $('#ModalEventos').modal({
                 toggle: true,
                 backdrop: 'static',
                 keyboard: true,
             });
+        })
+        $('#creacliente').submit(function (e) {
+            e.preventDefault();
             $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-            var fd = $('form').serialize();
+            var fd = $('#creacliente').serialize();
             $.ajax({
                 url: '/links/clientes/agregar',
                 data: fd,
