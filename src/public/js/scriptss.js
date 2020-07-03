@@ -2311,7 +2311,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         var fila = $(this).parents('tr');
         var data = $('#datatable').DataTable().row(fila).data();
         //var data = $('#datatable').DataTable().row(this).data();
-        var ya = moment(new Date()).format('YYYY-MM-DD hh:mm A')
+        var ya = moment(Date()).format('YYYY-MM-DD HH:mm')
         if (data.estado === 9 || data.estado === 14) {
             $('#ModalEventos').modal({
                 toggle: true,
@@ -2927,10 +2927,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
 /////////////////////////////* ORDEN */////////////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden`) {
     $(document).ready(function () {
-        // Datatables clients        
+        // Datatables clients  
+        if ($('#mesje').text()) {
+            $('#ModalMensaje').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
         var groupColumn = 2;
         var fch = new Date();
-        var ya = moment(new Date()).format('YYYY-MM-DD hh:mm A');
+        var ya = moment(Date()).format('YYYY-MM-DD HH:mm');
         $('.ya').val(ya)
         $('.val').mask('000.000.000', { reverse: true });
         var fechs = new Date($('#fechs').val());
@@ -3447,7 +3454,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             $('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
         },
         columns: [
-            { data: "ids" },
+            {
+                className: 't',
+                data: "ids"
+            },
             { data: "nombre" },
             {
                 data: "fech",
@@ -3456,6 +3466,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             },
             { data: "proyect" },
+            { data: "mz" },
             { data: "n" },
             { data: "descp" },
             {
@@ -3483,39 +3494,25 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             return `<span class="badge badge-pill badge-secondary">sin formato</span>`
                     }
                 }
-            },
-            {
-                className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
-                                        </div>
-                                    </div>` : ''
             }
         ]
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
+        var dts = data
         fila.toggleClass('selected')
         $("#Modalimg .foto").attr('src', data.img);
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'))
         $('#Modalimg .cliente').html(data.nombre)
         $('#Modalimg .proyecto').html(data.proyect)
+        $('#Modalimg .mz').html('MZ: ' + data.mz)
         $('#Modalimg .lote').html('LOTE: ' + data.n)
         $('#Modalimg .recibo').html('RECIBO: ' + data.recibo)
         $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc)
-        admin == 1 ? `<div class="btn-group btn-group-sm">
-                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                        aria-haspopup="true" aria-expanded="false">Acción</button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item">Aprobar</a>
-                                <a class="dropdown-item">Declinar</a>
-                            </div>
-                        </div>` : ''
+        if (admin == 1) {
+            $('.dropdown-item').hide()
+        }
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`)
@@ -3524,7 +3521,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`)
                 break;
             case 3:
-                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`)
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
+                $('#apde').attr('data-toggle', "dropdown");
+                $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
+                                        <a class="dropdown-item">Declinar</a>`);
                 break;
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`)
@@ -3534,28 +3534,26 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        /*$('#Modalimg').one('hidden.bs.modal', function () {
-            $('#actualizar').modal('show');
-        })*/
-    })
-    table.on('click', '.dropdown-item', function () {
-        var fila = $(this).parents('tr');
-        var data = table.row(fila).data();
-        var dts = data
-        $.ajax({
-            type: 'PUT',
-            url: '/links/solicitudes/' + $(this).text(),
-            data: dts,
-            success: function (data) {
-                if (data) {
-                    SMSj('success', `Solicitud procesada correctamente`);
-                    table.ajax.reload(null, false)
-                } else {
-                    SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+        $('.dropdown-item').on('click', function () {
+            $.ajax({
+                type: 'PUT',
+                url: '/links/solicitudes/' + $(this).text(),
+                data: dts,
+                success: function (data) {
+                    if (data) {
+                        SMSj('success', `Solicitud procesada correctamente`);
+                        table.ajax.reload(null, false)
+                    } else {
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
                 }
-            }
+            })
         })
     })
+
+    /*$('#Modalimg').one('hidden.bs.modal', function () {
+        table.rows('.selected').data().toggleClass('selected');
+    })*/
     var abonos = $('#abonos').DataTable({
         deferRender: true,
         paging: true,

@@ -30,8 +30,7 @@ moment.locale('es');
 cron.schedule("50 23 * * *", async () => {
     await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
     SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
-    WHERE p.tramitando < CURDATE() AND p.estado = 1`);
-    await pool.query(`UPDATE productosd SET estado = 9, tramitando = NULL WHERE estado = 14`);
+    WHERE MONTH(pr.fecha) = MONTH(NOW()) AND DAY(pr.fecha) < DAY(NOW()) AND p.estado = 1`);
     await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
     WHERE p.cupon IS NULL`)
 });
@@ -398,17 +397,20 @@ router.post('/recibo', async (req, res) => {
 });
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
+    moment.locale('es');
     const { id, h } = req.query;
-    var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD hh:mm A');
-    console.log(ahora)
-    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id 
-    WHERE (pd.estado = 9 OR pd.estado = 14) AND (pd.tramitando IS NULL OR pd.tramitando < '${ahora}') AND pd.id = ${id} `);
-    if (proyecto.length > 0) {
-        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 14, tramitando: h }, id]);
-        res.render('links/orden', { proyecto, id });
+    var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
+    var hora2 = moment(h).subtract(2, 'hours').format('YYYY-MM-DD HH:mm');
+
+    const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
+    var t = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada'
+    var hora = t.indexOf("*") > 0 ? t.split('*')[1] : hora2;
+    if (ahora > hora) {
+        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: req.user.username + '*' + h }, id]);
+        res.render('links/orden', { proyecto, id, mensaje: '' });
     } else {
-        req.flash('error', 'Lo sentimos este producto ya esta siendo procesado por alguien mas, intentalo mas tarde');
-        res.redirect('/links/productos');
+        var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${req.user.fullname} EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`
+        res.render('links/orden', { proyecto, id, mensaje });
     }
 });
 router.post('/orden', isLoggedIn, async (req, res) => {

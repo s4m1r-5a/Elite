@@ -20,8 +20,9 @@
                             <th>Id</th>
                             <th>Cliente</th>
                             <th>Fecha</th>
-                            <th>proyecto</th>
-                            <th>lote</th>
+                            <th>Proyecto</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
                             <th>Descp</th>
                             <th>Monto</th>
                             <th>Facturas V</th>
@@ -29,7 +30,6 @@
                             <th data-priority="2">Estado</th>
                             <!--<th style="width:5%;" data-priority="10000">Recibo</th>
                             <th style="width:5%;" data-priority="2">Estado</th>-->
-                            <th data-priority="1">Accion</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -165,6 +165,9 @@
                                 <span class="align-middle card-text proyecto"></span>
                             </div>
                             <div class="mb-0">
+                                <span class="align-middle card-text mz"></span>
+                            </div>
+                            <div class="mb-0">
                                 <span class="align-middle card-text lote"></span>
                             </div>
                             <div class="mb-0">
@@ -175,6 +178,13 @@
                             </div>
                             <p class="card-text estado">
                             </p>
+                            <div class="mb-0 float-right">
+                                <div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
+                                        aria-haspopup="true" aria-expanded="false">Acción</button>
+                                    <div class="dropdown-menu"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
