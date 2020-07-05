@@ -57,6 +57,25 @@
                                             </tr>
                                             <tr>
                                                 <th>
+                                                    <i class="feather-md" data-feather="help-circle"></i>
+                                                    Tipo de documento
+                                                </th>
+                                                <td>
+                                                    <select class="form-control-no-border edi tipod u" name="tipo"
+                                                        style="padding: 1px; width: 100%;" required>
+                                                        <option value="Cedula de ciudadania">Cedula de ciudadania
+                                                        </option>
+                                                        <option value="Cedula de extranjeria">Cedula de extranjeria
+                                                        </option>
+                                                        <option value="Tarjeta de identidad">Tarjeta de identidad
+                                                        </option>
+                                                        <option value="Pasaporte">Pasaporte</option>
+                                                        <option value="Nit">Nit</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
                                                     <i class="feather-md" data-feather="credit-card"></i>
                                                     Documento
                                                 </th>
@@ -140,14 +159,210 @@
                                             </tr>
                                             <tr>
                                                 <th>
+                                                    <i class="feather-md" data-feather="globe"></i>
+                                                    Pais
+                                                </th>
+                                                <td>
+                                                    <input type="hidden" id="pa" value="">
+                                                    <select class="form-control-no-border" id="pais"
+                                                        style="background-color:#FFFFCC; padding: 1px; width: 100%;">
+                                                        <optgroup label="A">
+                                                            <option value='1907'>Alaska</option>
+                                                            <option value='355'>Albania</option>
+                                                            <option value='49'>Alemania</option>
+                                                            <option value='376'>Andorra</option>
+                                                            <option value='244'>Angola</option>
+                                                            <option value='966'>Arabia Saudí</option>
+                                                            <option value='213'>Argelia</option>
+                                                            <option value='54'>Argentina</option>
+                                                            <option value='374'>Armenia</option>
+                                                            <option value='61'>Australia</option>
+                                                            <option value='43'>Austria</option>
+                                                        </optgroup>
+                                                        <optgroup label="B">
+                                                            <option value='973'>Bahreim</option>
+                                                            <option value='880'>Bangladesh</option>
+                                                            <option value='32'>Bélgica</option>
+                                                            <option value='591'>Bolivia</option>
+                                                            <option value='387'>Bosnia</option>
+                                                            <option value='55'>Brasil</option>
+                                                            <option value='359'>Bulgaria</option>
+                                                        </optgroup>
+                                                        <optgroup label="C">
+                                                            <option value='238'>Cabo Verde</option>
+                                                            <option value='855'>Camboya</option>
+                                                            <option value='237'>Camerún</option>
+                                                            <option value='1'>Canadá</option>
+                                                            <option value='236'>Centroafricana, Rep.
+                                                            </option>
+                                                            <option value='420'>Checa, Rep.</option>
+                                                            <option value='56'>Chile</option>
+                                                            <option value='86'>China</option>
+                                                            <option value='357'>Chipre</option>
+                                                            <option value='57' selected>Colombia</option>
+                                                            <option value='242'>Congo, Rep. del</option>
+                                                            <option value='243'>Congo, Rep. Democ.</option>
+                                                            <option value='850'>Corea, Rep. Democ.</option>
+                                                            <option value='82'>Corea, Rep.</option>
+                                                            <option value='225'>Costa de Marfil</option>
+                                                            <option value='506'>Costa Rica</option>
+                                                            <option value='385'>Croacia</option>
+                                                            <option value='53'>Cuba</option>
+                                                        </optgroup>
+                                                        <optgroup label="D">
+                                                            <option value='45'>Dinamarca</option>
+                                                            <option value='1809'>Dominicana, Rep.</option>
+                                                        </optgroup>
+                                                        <optgroup label="E">
+                                                            <option value='593'>Ecuador</option>
+                                                            <option value='20'>Egipto</option>
+                                                            <option value='503'>El Salvador</option>
+                                                            <option value='971'>Emiratos Árabes Unidos
+                                                            </option>
+                                                            <option value='421'>Eslovaca, Rep.</option>
+                                                            <option value='386'>Eslovenia</option>
+                                                            <option value='34'>España</option>
+                                                            <option value='1'>Estados Unidos</option>
+                                                            <option value='372'>Estonia</option>
+                                                            <option value='251'>Etiopía</option>
+                                                        </optgroup>
+                                                        <optgroup label="F">
+                                                            <option value='63'>Filipinas</option>
+                                                            <option value='358'>Finlandia</option>
+                                                            <option value='33'>Francia</option>
+                                                        </optgroup>
+                                                        <optgroup label="G">
+                                                            <option value='9567'>Gibraltar</option>
+                                                            <option value='30'>Grecia</option>
+                                                            <option value='299'>Groenlandia</option>
+                                                            <option value='502'>Guatemala</option>
+                                                            <option value='240'>Guinea Ecuatorial</option>
+                                                        </optgroup>
+                                                        <optgroup label="H">
+                                                            <option value='509'>Haití</option>
+                                                            <option value='1808'>Hawai</option>
+                                                            <option value='504'>Honduras</option>
+                                                            <option value='852'>Hong Kong</option>
+                                                            <option value='36'>Hungría</option>
+                                                        </optgroup>
+                                                        <optgroup label="I">
+                                                            <option value='91'>India</option>
+                                                            <option value='62'>Indonesia</option>
+                                                            <option value='98'>Irán</option>
+                                                            <option value='964'>Irak</option>
+                                                            <option value='353'>Irlanda</option>
+                                                            <option value='354'>Islandia</option>
+                                                            <option value='972'>Israel</option>
+                                                            <option value='39'>Italia</option>
+                                                        </optgroup>
+                                                        <optgroup label="J">
+                                                            <option value='1876'>Jamaica</option>
+                                                            <option value='81'>Japón</option>
+                                                            <option value='962'>Jordania</option>
+                                                        </optgroup>
+                                                        <optgroup label="K">
+                                                            <option value='254'>Kenia</option>
+                                                            <option value='965'>Kuwait</option>
+                                                        </optgroup>
+                                                        <optgroup label="L">
+                                                            <option value='856'>Laos</option>
+                                                            <option value='371'>Letonia</option>
+                                                            <option value='961'>Líbano</option>
+                                                            <option value='231'>Liberia</option>
+                                                            <option value='218'>Libia</option>
+                                                            <option value='41'>Liechtenstein</option>
+                                                            <option value='370'>Lituania</option>
+                                                            <option value='352'>Luxemburgo</option>
+                                                        </optgroup>
+                                                        <optgroup label="M">
+                                                            <option value='261'>Madagascar</option>
+                                                            <option value='60'>Malasia</option>
+                                                            <option value='356'>Malta</option>
+                                                            <option value='212'>Marruecos</option>
+                                                            <option value='596'>Martinica</option>
+                                                            <option value='222'>Mauritania</option>
+                                                            <option value='52'>México</option>
+                                                            <option value='373'>Moldavia</option>
+                                                            <option value='377'>Mónaco</option>
+                                                            <option value='976'>Mongolia</option>
+                                                            <option value='258'>Mozambique</option>
+                                                        </optgroup>
+                                                        <optgroup label="N">
+                                                            <option value='264'>Namibia</option>
+                                                            <option value='977'>Nepal</option>
+                                                            <option value='505'>Nicaragua</option>
+                                                            <option value='234'>Nigeria</option>
+                                                            <option value='47'>Noruega</option>
+                                                            <option value='64'>Nueva Zelanda</option>
+                                                        </optgroup>
+                                                        <optgroup label="P">
+                                                            <option value='31'>Países Bajos</option>
+                                                            <option value='92'>Pakistán</option>
+                                                            <option value='507'>Panamá</option>
+                                                            <option value='595'>Paraguay</option>
+                                                            <option value='51'>Perú</option>
+                                                            <option value='48'>Polonia</option>
+                                                            <option value='351'>Portugal</option>
+                                                            <option value='1787'>Puerto Rico</option>
+                                                        </optgroup>
+                                                        <optgroup label="Q">
+                                                            <option value='974'>Qatar</option>
+                                                        </optgroup>
+                                                        <optgroup label="R">
+                                                            <option value='44'>Reino Unido</option>
+                                                            <option value='40'>Rumania</option>
+                                                            <option value='7'>Rusia</option>
+                                                        </optgroup>
+                                                        <optgroup label="S">
+                                                            <option value='378'>San Marino</option>
+                                                            <option value='221'>Senegal</option>
+                                                            <option value='65'>Singapur</option>
+                                                            <option value='963'>Siria</option>
+                                                            <option value='252'>Somalia</option>
+                                                            <option value='94'>Sri-Lanka</option>
+                                                            <option value='27'>Sudáfrica</option>
+                                                            <option value='249'>Sudán</option>
+                                                            <option value='46'>Suecia</option>
+                                                            <option value='41'>Suiza</option>
+                                                        </optgroup>
+                                                        <optgroup label="T">
+                                                            <option value='66'>Tailandia</option>
+                                                            <option value='886'>Taiwan</option>
+                                                            <option value='255'>Tanzania</option>
+                                                            <option value='216'>Túnez</option>
+                                                            <option value='90'>Turquía</option>
+                                                        </optgroup>
+                                                        <optgroup label="U">
+                                                            <option value='380'>Ucrania</option>
+                                                            <option value='256'>Uganda</option>
+                                                            <option value='598'>Uruguay</option>
+                                                        </optgroup>
+                                                        <optgroup label="V">
+                                                            <option value='39'>Vaticano</option>
+                                                            <option value='58'>Venezuela</option>
+                                                            <option value='84'>Vietnam</option>
+                                                        </optgroup>
+                                                        <optgroup label="Y">
+                                                            <option value='967'>Yemen</option>
+                                                            <option value='381'>Yugoslavia</option>
+                                                        </optgroup>
+                                                        <optgroup label="Z">
+                                                            <option value='260'>Zambia</option>
+                                                            <option value='263'>Zimbawe</option>
+                                                        </optgroup>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
                                                     <i class="feather-md" data-feather="phone-call"></i>
                                                     Móvil
                                                 </th>
                                                 <td>
                                                     <input class="form-control-no-border edi movil u" type="tel"
-                                                        data-mask="000-000-0000" placeholder="Numero celular"
-                                                        autocomplete="off" style="padding: 1px; width: 100%;"
-                                                        name="movil" id="movil" required>
+                                                        placeholder="Numero celular" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="movil" id="movil"
+                                                        required>
                                                 </td>
                                             </tr>
                                             <tr>

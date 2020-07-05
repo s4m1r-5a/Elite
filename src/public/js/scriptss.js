@@ -3549,11 +3549,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             })
         })
+        $('#Modalimg').one('hidden.bs.modal', function () {
+            fila.toggleClass('selected');
+        })
     })
 
-    /*$('#Modalimg').one('hidden.bs.modal', function () {
-        table.rows('.selected').data().toggleClass('selected');
-    })*/
+    /**/
     var abonos = $('#abonos').DataTable({
         deferRender: true,
         paging: true,
@@ -4264,7 +4265,22 @@ if (window.location == `${window.location.origin}/links/red`) {
 };
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/clientes`) {
-
+    $.jMaskGlobals = {
+        maskElements: 'input,td,span,div',
+        dataMaskAttr: '*[data-mask]',
+        dataMask: true,
+        watchInterval: 300,
+        watchInputs: true,
+        watchDataMask: false,
+        byPassKeys: [9, 16, 17, 18, 36, 37, 38, 39, 40, 91],
+        translation: {
+            '$': { pattern: /\d/ },
+            '*': { pattern: /\d/, optional: true },
+            '#': { pattern: /\d/, recursive: true },
+            'A': { pattern: /[a-zA-Z0-9]/ },
+            'S': { pattern: /[a-zA-Z]/ }
+        }
+    };
     $(document).ready(function () {
         $('.guard').click(function () {
             $('#ModalEventos').modal({
@@ -4303,6 +4319,20 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             $('#agrecli').show("slow")
             $("#addcliente").hide("slow");
             $("#addcliente input").val('')
+        })
+        $('.movil').mask("57 ***-***-****");
+
+        $('#pais').change(function () {
+            $('.movil').val('')
+            $('.movil').mask(`${$(this).val()} ***-***-****`).focus();
+        })
+        $('.tipod').change(function () {
+            $('.documento').val('')
+            if ($(this).val() === "Cedula de extranjeria" || $(this).val() === "Pasaporte" || $(this).val() === "Nit") {
+                $('.documento').unmask().focus();
+            } else {
+                $('.documento').mask('#.##$', { reverse: true, selectonfocus: true }).focus();
+            }
         })
     });
 

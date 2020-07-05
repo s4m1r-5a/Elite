@@ -203,14 +203,14 @@ router.put('/clientes/:id', async (req, res) => {
     const SCOPES = ['https://www.googleapis.com/auth/contacts'];
     const TOKEN_PATH = 'token.json';
     const {
-        ahora, nombres, documento, lugarexpedicion, fechaexpedicion,
+        ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors
     } = req.body;
     console.log(req.body)
     const clit = {
         nombre: nombres.toUpperCase(), documento: documento.replace(/\./g, ''), fechanacimiento,
         lugarexpedicion, fechaexpedicion, estadocivil, movil: movil.replace(/-/g, ""), agendado: 1,
-        email: email.toLowerCase(), direccion: direccion.toLowerCase(),
+        email: email.toLowerCase(), direccion: direccion.toLowerCase(), tipo,
         acsor: req.user.id, tiempo: ahora, google: ''
     }
     if (req.params.id === 'agregar') {
