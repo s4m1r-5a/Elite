@@ -556,7 +556,8 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     }
 });
 router.get('/cel/:id', async (req, res) => {
-    const datos = await pool.query('SELECT * FROM clientes WHERE movil = ? OR documento = ?', [req.params.id, req.params.id])
+    const { id } = req.params
+    const datos = await pool.query(`SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`)
     res.send(datos);
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
@@ -660,6 +661,7 @@ router.post('/tabla/:id', async (req, res) => {
             };
             dataSet.data.push(d);
         };
+        //console.log(dataSet)
         res.send(true);
     } else {
         res.send(dataSet);

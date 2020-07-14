@@ -2926,6 +2926,160 @@ if (window.location == `${window.location.origin}/links/productos`) {
 };
 /////////////////////////////* ORDEN */////////////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden`) {
+    $.jMaskGlobals = {
+        maskElements: 'input,td,span,div',
+        dataMaskAttr: '*[data-mask]',
+        dataMask: true,
+        watchInterval: 300,
+        watchInputs: true,
+        watchDataMask: false,
+        byPassKeys: [9, 16, 17, 18, 36, 37, 38, 39, 40, 91],
+        translation: {
+            '$': { pattern: /\d/ },
+            '*': { pattern: /\d/, optional: true },
+            '#': { pattern: /\d/, recursive: true },
+            'A': { pattern: /[a-zA-Z0-9]/ },
+            'S': { pattern: /[a-zA-Z]/ }
+        }
+    };
+    var fch = new Date();
+    var Meses = (extra) => {
+        var fechs = new Date($('#fechs').val());
+        var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
+        months += extra
+        fechs = new Date(moment(fechs).add(extra, 'month'));
+        if (months > 42) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        <option value="24">24 Cuotas</option>
+        <option value="30">30 Cuotas</option>
+        <option value="36">36 Cuotas</option>
+        <option value="42">42 Cuotas</option>
+        <option value="48">48 Cuotas</option>
+        `)
+        } else if (months > 36) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        <option value="24">24 Cuotas</option>
+        <option value="30">30 Cuotas</option>
+        <option value="36">36 Cuotas</option>
+        <option value="42">42 Cuotas</option>
+        `)
+
+        } else if (months > 30) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        <option value="24">24 Cuotas</option>
+        <option value="30">30 Cuotas</option>
+        <option value="36">36 Cuotas</option>
+        `)
+
+        } else if (months > 24) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        <option value="24">24 Cuotas</option>
+        <option value="30">30 Cuotas</option>
+        `)
+
+        } else if (months > 18) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        <option value="24">24 Cuotas</option>
+        `)
+
+        } else if (months > 12) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        <option value="18">18 Cuotas</option>
+        `)
+
+        } else if (months > 6) {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        <option value="12">12 Cuotas</option>
+        `)
+
+        } else {
+            $('#ncuotas').html(`
+        <option value="6">6 Cuotas</option>
+        `)
+
+        };
+    };
+    $('.val').mask('#.##$', { reverse: true });
+    var meses = 0;
+    var groupColumn = 2;
+    var dic = 0;
+    var jun = 0;
+    var fcha = moment(fch).startOf('month').format('YYYY-MM-DD');
+    //var anos = $('#ncuotas').val() / 6;
+    var h = 1;
+    var separacion = parseFloat($('#separacion').val());
+    var porcentage = parseFloat($('#porcentage').val());
+    var precio = parseFloat($('#vrlote').cleanVal());
+    var inicial = parseFloat($('#cuotainicial').cleanVal());
+    var cuota = precio - inicial;
+    var cuotaextrao;
+    var cut = 0;
+    var abono = parseFloat($('#abono').cleanVal()) || 0;
+    var u = parseFloat($('#diferinicial').val());
+    var mesesextra = '';
+    var D = parseFloat($('#dia').val());
+    var oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
+    var oficial30 = '$' + Moneda(inicial);
+    var bono = '';
+    var meses = 0;
+    var cuota30 = Moneda(Math.round((inicial - separacion) / u));
+    Meses(0)
+    var N = parseFloat($('#ncuotas').val());
+    var cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
+    console.log(cuota, N, meses, u)
+    $.ajax({
+        url: '/links/tabla/1',
+        type: 'POST',
+        data: {
+            separacion: Moneda(separacion),
+            cuota70,
+            cuota30,
+            oficial30,
+            oficial70,
+            N,
+            u,
+            fcha,
+            fcha2: moment(fch).format('YYYY-MM-DD'),
+            mesesextra: '',
+            extra: ''
+        },
+        async: false,
+        success: function (data) {
+            if (data) {
+                console.log({
+                    separacion: Moneda(separacion),
+                    cuota70: Moneda(Math.round(cuota / (N - (meses + u)))),
+                    cuota30: Moneda(Math.round((inicial - separacion) / u)),
+                    oficial30: '$' + Moneda(inicial),
+                    oficial70: '$' + Moneda((100 - inicial) * precio / 100),
+                    N: parseFloat($('#ncuotas').val()),
+                    u: parseFloat($('#diferinicial').val()),
+                    fcha,
+                    fcha2: moment(fch).format('YYYY-MM-DD'),
+                    mesesextra: '',
+                    extra: $('#cuotaestrao').val()
+                })
+            }
+        }
+    });
     $(document).ready(function () {
         // Datatables clients  
         if ($('#mesje').text()) {
@@ -2935,90 +3089,63 @@ if (window.location.pathname == `/links/orden`) {
                 toggle: true
             });
         }
-        var groupColumn = 2;
-        var fch = new Date();
-        var ya = moment(Date()).format('YYYY-MM-DD HH:mm');
-        $('.ya').val(ya)
-        $('.val').mask('000.000.000', { reverse: true });
-        var fechs = new Date($('#fechs').val());
-        var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
-        var h = 1;
-        var Meses = (extra) => {
-            months += extra
-            fechs = new Date(moment(fechs).add(extra, 'month'));
-            if (months > 42) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            `)
-            } else if (months > 36) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            `)
 
-            } else if (months > 30) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            `)
-
-            } else if (months > 24) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            `)
-
-            } else if (months > 18) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            `)
-
-            } else if (months > 12) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            `)
-
-            } else if (months > 6) {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            `)
-
+        $('.di').css("background-color", "#FFFFCC");
+        $(`.pais option[value='57']`).prop("selected", true);
+        $('.movil').mask("57 ***-***-****");
+        $('.pais').change(function () {
+            var card = $(this).parents('div.row').attr("id")
+            $(`#${card} .movil`).val('')
+            $(`#${card} .movil`).mask(`${$(this).val()} ***-***-****`).focus();
+        })
+        $('.tipod').change(function () {
+            var card = $(this).parents('div.row').attr("id")
+            $(`#${card} .documento`).val('')
+            if ($(this).val() === "Cedula de extranjeria" || $(this).val() === "Pasaporte" || $(this).val() === "Nit") {
+                //$(`#${card} .documento`).unmask().focus();
+                $(`#${card} .documento`).mask('AAAAAAAAAA').focus();
             } else {
-                $('#ncuotas').html(`
-            <option value="6">6 Cuotas</option>
-            `)
+                $(`#${card} .documento`).mask('#.##$', { reverse: true, selectonfocus: true }).focus();
+            }
+        })
+        $('.movil, .documento').on('change', function () {
+            var card = $(this).parents('div.row').attr("id")
+            if (($(this).hasClass("movil") && !$(`#${card} .documento`).val()) || $(this).hasClass("documento")) {
+                $.ajax({
+                    url: '/links/cel/' + $(this).cleanVal(),
+                    type: 'GET',
+                    async: false,
+                    success: function (data) {
+                        if (data.length > 0) {
+                            $(`#${card} .client`).val(data[0].idc);
+                            $(`#${card} .nombres`).val(data[0].nombre);
+                            data[0].tipo === "Cedula de ciudadania" || data[0].tipo === "Tarjeta de identidad" || !data[0].tipo ?
+                                $(`#${card} .documento`).val(data[0].documento).mask('#.##$', { reverse: true }) :
+                                $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
+                            $(`#${card} .movil`).val(data[0].movil).mask('**** $$$-$$$-$$$$', { reverse: true });
+                            $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
+                            $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
+                            $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
+                            $(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
+                            !data[0].tipo ? $(`#${card} .tipod option[value='Cedula de ciudadania']`).attr("selected", true) :
+                                $(`#${card} .tipod option[value='${data[0].tipo}']`).attr("selected", true);
+                            var pais = data[0].movil.split(" ");
+                            data[0].movil.indexOf(" ") > 0 ? $(`#${card} .pais option[value='${pais[0]}']`).prop("selected", true) :
+                                $(`#${card} .pais option[value='57']`).prop("selected", true);
+                            $(`#${card} .email`).val(data[0].email);
+                            $(`#${card} .direccion`).val(data[0].direccion);
+                            $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
+                            $(`#${card} .movil`).mask("57 ***-***-****");
+                        } else {
+                            SMSj('info', 'Cliente no encontrado, proceda con el registro')
+                        }
+                    }
+                });
+            }
+        })
+        var ya = moment(fch).format('YYYY-MM-DD HH:mm');
+        $('.ya').val(ya)
 
-            };
-        };
-        Meses(0)
-        var dic = 0;
-        var jun = 0;
-        var fcha;
         var Años = (inic, dia, month) => {
             dic = 0;
             jun = 0;
@@ -3090,15 +3217,9 @@ if (window.location.pathname == `/links/orden`) {
         }
         Años(2, 1, 6);
         $('.hoy').text(moment().format('YYYY-MM-DD'))
-        var separacion = parseFloat($('#separacion').val());
-        var porcentage = parseFloat($('#porcentage').val());
-        var precio = parseFloat($('#vrlote').cleanVal());
         $('.totalote').val(Moneda(precio))
-        var inicial = parseFloat($('#cuotainicial').cleanVal());
-        var cuota = parseFloat(precio) - parseFloat(inicial);
-        var cuotaextrao, cut = 0, anos = $('#ncuotas').val() / 6;
-        var oficial70 = '', oficial30 = '', bono = '', meses = 0, cuota30 = 0, cuota70 = 0;
         $('#p70').val(Moneda(cuota));
+
         function Dt() {
             bono = '';
             $('#dto').val('0%');
@@ -3118,42 +3239,27 @@ if (window.location.pathname == `/links/orden`) {
         });
         $('.edi').on('change', function () {
             $('#acepto').prop("checked", false)
+            //abono = parseFloat($('#abono').cleanVal()) || 0;
+            u = parseFloat($('#diferinicial').val());
+            mesesextra = '';
+            D = parseFloat($('#dia').val());
+            oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
+            oficial30 = '$' + Moneda(inicial);
+            meses = 0;
+            cuota30 = Moneda(Math.round((inicial - separacion) / u));
+            N = parseFloat($('#ncuotas').val());
+            cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
+
             if ($(this).attr('id') === 'abono') {
                 if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val())) {
                     $('#abono').val(Moneda($('#separacion').val()))
                     SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
                 }
             }
-            var abono = parseFloat($('#abono').cleanVal()) || 0, N = parseFloat($('#ncuotas').val()), u = parseFloat($('#diferinicial').val()),
-                mesesextra = '', D = parseFloat($('#dia').val()), meses = 0;
             Años(u + 1, D, N)
-            var card = $(this).parents('div.row').attr("id")
-            if (($(this).hasClass("movil") && !$(`#${card} .documento`).val()) || $(this).hasClass("documento")) {
-                $.ajax({
-                    url: '/links/cel/' + $(this).cleanVal(),
-                    type: 'GET',
-                    async: false,
-                    success: function (data) {
-                        if (data.length > 0) {
-                            $(`#${card} .client`).val(data[0].idc);
-                            $(`#${card} .nombres`).val(data[0].nombre);
-                            $(`#${card} .documento`).val(data[0].documento).mask("000.000.000.000.000", { reverse: true });
-                            $(`#${card} .movil`).val(data[0].movil).mask('000-000-0000', { reverse: true });
-                            $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
-                            $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
-                            $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
-                            $(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
-                            $(`#${card} .email`).val(data[0].email);
-                            $(`#${card} .direccion`).val(data[0].direccion);
-                            $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
-                        } else {
-                            SMSj('info', 'Numero de documento no encontrado, proceda con el registro')
-                        }
-                    }
-                });
-            }
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
+                    h = 1;
                     $.ajax({
                         url: '/links/bono/' + $(this).val(),
                         type: 'GET',
@@ -3197,11 +3303,16 @@ if (window.location.pathname == `/links/orden`) {
             if ($('#ahorro').val() === '$0') {
                 Dt()
             }
-            if (u > 1) {
+            if (u > 1 && h === 1) {
+                h = 2
                 Dt();
                 $('#bono').attr('disabled', true);
                 SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
+            } else if (u > 1) {
+                Dt();
+                $('#bono').attr('disabled', true);
             } else {
+                h = 1
                 $('#bono').attr('disabled', false);
             }
             if (abono !== 0) {
@@ -3270,71 +3381,11 @@ if (window.location.pathname == `/links/orden`) {
                 data: recolecta,
                 async: false,
                 success: function (data) {
-                    //console.log(data)
+                    tabla.ajax.reload(function (json) {
+                        SMSj('success', 'Se realizaron cambios exitosamente')
+                    })
                 }
             });
-            if (h === 1) {
-                h = 2;
-                var tabla = $("#datatables-clients").DataTable({
-                    dom: '<"toolbar">',
-                    info: false,
-                    responsive: true,
-                    ajax: {
-                        method: "POST",
-                        url: "/links/tabla/2",
-                        dataSrc: "data"
-                    },
-                    columns: [
-                        { data: "n" },
-                        {
-                            data: "fecha",
-                            render: function (data, method, row) {
-                                return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
-                            }
-                        },
-                        { data: "oficial" },
-                        { data: "cuota" },
-                        { data: "stado" },
-                        { data: "n2" },
-                        {
-                            data: "fecha2",
-                            render: function (data, method, row) {
-                                return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
-                            }
-                        },
-                        { data: "cuota2" },
-                        { data: "stado2" }
-                    ],
-                    columnDefs: [
-                        { "visible": false, "targets": groupColumn },
-                        { responsivePriority: 10002, targets: 5 },
-                        { responsivePriority: 10003, targets: 6 },
-                        { responsivePriority: 10004, targets: 7 },
-                        { responsivePriority: 10005, targets: 8 }
-                    ],
-                    order: [[groupColumn, 'asc']],
-                    displayLength: 50,
-                    drawCallback: function (settings) {
-                        var api = this.api();
-                        var rows = api.rows({ page: 'current' }).nodes();
-                        var last = null;
-
-                        api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
-                            if (last !== group) {
-                                $(rows).eq(i).before(
-                                    '<tr class="group"><td colspan="8">' + group + '</td></tr>'
-                                );
-
-                                last = group;
-                            }
-                        });
-                    }
-                });
-            } else {
-                $("#datatables-clients").DataTable().ajax.reload(function (json) {
-                    //SMSj('info', 'Todo marcha perfecto')
-                })
-            }
         })
     });
     var opcion = 'no';
@@ -3373,6 +3424,64 @@ if (window.location.pathname == `/links/orden`) {
         }
 
     })
+    var tabla = $("#datatables-clients").DataTable({
+        dom: '<"toolbar">',
+        info: false,
+        responsive: true,
+        ajax: {
+            method: "POST",
+            url: "/links/tabla/2",
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "n" },
+            {
+                data: "fecha",
+                render: function (data, method, row) {
+                    return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
+                }
+            },
+            { data: "oficial" },
+            { data: "cuota" },
+            { data: "stado" },
+            { data: "n2" },
+            {
+                data: "fecha2",
+                render: function (data, method, row) {
+                    return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
+                }
+            },
+            { data: "cuota2" },
+            { data: "stado2" }
+        ],
+        columnDefs: [
+            { "visible": false, "targets": groupColumn },
+            { responsivePriority: 10002, targets: 5 },
+            { responsivePriority: 10003, targets: 6 },
+            { responsivePriority: 10004, targets: 7 },
+            { responsivePriority: 10005, targets: 8 }
+        ],
+        order: [[groupColumn, 'asc']],
+        displayLength: 50,
+        initComplete: function (settings, json) {
+            //hacer algo apenas cargue la tabla
+        },
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+
+            api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before(
+                        '<tr class="group"><td colspan="8">' + group + '</td></tr>'
+                    );
+
+                    last = group;
+                }
+            });
+        }
+    });
 };
 /////////////////////////////* SOLICITUDES *//////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/solicitudes`) {
