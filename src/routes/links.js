@@ -404,13 +404,16 @@ router.get('/orden', isLoggedIn, async (req, res) => {
 
     const proyecto = await pool.query(`SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`, id);
     var t = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada'
+    var p = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada'
     var hora = t.indexOf("*") > 0 ? t.split('*')[1] : hora2;
     if (ahora > hora) {
-        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: req.user.username + '*' + h }, id]);
+        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: req.user.fullname + '*' + h }, id]);
         res.render('links/orden', { proyecto, id, mensaje: '' });
-    } else {
-        var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${req.user.fullname} EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`
+    } else if (req.user.fullname !== t.split('*')[0]) {
+        var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${t.split('*')[0]} EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`
         res.render('links/orden', { proyecto, id, mensaje });
+    } else {
+        res.render('links/orden', { proyecto, id, mensaje: '' });
     }
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
@@ -634,7 +637,7 @@ router.post('/tabla/:id', async (req, res) => {
             d = {
                 n: i + `<input value="${i}" type="hidden" name="ncuota">`,
                 fecha: moment(fcha).add(y, 'month'),
-                oficial: `<span class="badge badge-dark text-center text-uppercase">Poyecto ${oficial70}</span>`,
+                oficial: `<span class="badge badge-dark text-center text-uppercase">Financiamiento ${oficial70}</span>`,
                 cuota: cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
                 stado: `<span class="badge badge-primary">Pendiente</span>
                         <input value="3" type="hidden" name="estado">

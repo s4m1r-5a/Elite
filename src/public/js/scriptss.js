@@ -3032,11 +3032,10 @@ if (window.location.pathname == `/links/orden`) {
     var cuota = precio - inicial;
     var cuotaextrao;
     var cut = 0;
-    var abono = parseFloat($('#abono').cleanVal()) || 0;
     var u = parseFloat($('#diferinicial').val());
     var mesesextra = '';
     var D = parseFloat($('#dia').val());
-    var oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
+    var oficial70 = '$' + Moneda((100 - porcentage) * precio / 100);
     var oficial30 = '$' + Moneda(inicial);
     var bono = '';
     var meses = 0;
@@ -3044,7 +3043,7 @@ if (window.location.pathname == `/links/orden`) {
     Meses(0)
     var N = parseFloat($('#ncuotas').val());
     var cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
-    console.log(cuota, N, meses, u)
+    console.log(cuota / (N - (meses + u)))
     $.ajax({
         url: '/links/tabla/1',
         type: 'POST',
@@ -3063,7 +3062,7 @@ if (window.location.pathname == `/links/orden`) {
         },
         async: false,
         success: function (data) {
-            if (data) {
+            /*if (data) {
                 console.log({
                     separacion: Moneda(separacion),
                     cuota70: Moneda(Math.round(cuota / (N - (meses + u)))),
@@ -3077,7 +3076,7 @@ if (window.location.pathname == `/links/orden`) {
                     mesesextra: '',
                     extra: $('#cuotaestrao').val()
                 })
-            }
+            }*/
         }
     });
     $(document).ready(function () {
@@ -3149,72 +3148,56 @@ if (window.location.pathname == `/links/orden`) {
         var Años = (inic, dia, month) => {
             dic = 0;
             jun = 0;
-            dia = dia - fch.getDate()
-            var t1 = new Date(moment(fch).add(inic, 'month').add(dia, 'days'))
-            var t2 = new Date(moment(fch).add(month, 'month').add(dia, 'days'))
-            var valfecha1 = t1.valueOf()
-            var valfecha2 = t2.valueOf()
+            var t1 = new Date(moment(fch).add(inic, 'month').startOf('month')).valueOf()
+            var t2 = new Date(moment(fch).add(month, 'month').endOf('month')).valueOf()
+            var r = $('#Emeses').val() || 0;
+            var data = new Array();
             var q = 0;
             var t3
-            var data = new Array();
 
-            while (valfecha1 < valfecha2) {
-                valfecha1 = new Date(moment(fch).add(inic + q, 'month').add(dia, 'days')).valueOf()
-                t3 = new Date(moment(fch).add(inic + q, 'month').add(dia, 'days'))
+            while (t1 < t2) {
+                t1 = new Date(moment(fch).add(inic + q, 'month').endOf('month')).valueOf()
+                t3 = new Date(moment(fch).add(inic + q, 'month').startOf('month'))
                 data.push(t3)
                 q++
             }
+
             data.filter((r) => {
                 return r.getMonth() === 5 || r.getMonth() === 11;
             }).map((r) => {
                 r.getMonth() === 5 ? jun++ : dic++;
             });
 
+            /*$('#Emeses option[value="1"]').length ? $('#Emeses option[value="1"]').remove() : '';
+            $('#Emeses option[value="2"]').length ? $('#Emeses option[value="2"]').remove() : '';
+            $('#Emeses option[value="3"]').length ? $('#Emeses option[value="3"]').remove() : '';*/
+
             if (jun > 0 && dic > 0) {
-
-                if (!$('#Emeses option[value="1"]').length) {
-                    $('#Emeses').append(`                        
-                        <option value="1">Junio</option>
-                        <option value="2">Diciembre</option>
-                        <option value="3">Jun & Dic</option>
-                    `);
-                } else if (!$('#Emeses option[value="2"]').length) {
-                    $('#Emeses').append(`
-                        <option value="2">Diciembre</option>
-                        <option value="3">Jun & Dic</option>
-                    `);
-                }
-
+                $('#Emeses').html(` 
+                            <option value="">Niguna</option>                       
+                            <option value="1">Junio</option>
+                            <option value="2">Diciembre</option>
+                            <option value="3">Jun & Dic</option>
+                        `);
             } else if (jun > 0 && dic === 0) {
-
-                if (!$('#Emeses option[value="1"]').length) {
-                    $('#Emeses').append(`                        
-                        <option value="1">Junio</option>
-                    `);
-                }
-                $('#Emeses option[value="2"]') ? $('#Emeses option[value="2"]').remove() : '';
-                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
-
+                $('#Emeses').html(` 
+                            <option value="">Niguna</option>                       
+                            <option value="1">Junio</option>
+                        `);
             } else if (jun === 0 && dic > 0) {
-
-                if (!$('#Emeses').length) {
-                    alert('Debe actualizar la pagina')
-                } else if (!$('#Emeses option[value="2"]').length) {
-                    $('#Emeses').append(`
-                        <option value="2">Diciembre</option>
-                    `);
-                }
-                $('#Emeses option[value="1"]') ? $('#Emeses option[value="1"]').remove() : '';
-                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
-
+                $('#Emeses').html(`
+                            <option value="">Niguna</option>
+                            <option value="2">Diciembre</option>
+                        `);
             } else {
-
-                $('#Emeses option[value="1"]') ? $('#Emeses option[value="1"]').remove() : '';
-                $('#Emeses option[value="2"]') ? $('#Emeses option[value="2"]').remove() : '';
-                $('#Emeses option[value="3"]') ? $('#Emeses option[value="3"]').remove() : '';
+                $('#Emeses').html(`<option value="">Niguna</option>`);
+            }
+            if (r) {
+                $(`#Emeses option[value='${r}']`).attr("selected", true);
             }
             fcha = moment(new Date(moment(fch).add(dia, 'days'))).format('YYYY-MM-DD')
         }
+
         Años(2, 1, 6);
         $('.hoy').text(moment().format('YYYY-MM-DD'))
         $('.totalote').val(Moneda(precio))
@@ -3224,11 +3207,13 @@ if (window.location.pathname == `/links/orden`) {
             bono = '';
             $('#dto').val('0%');
             $('#ahorro').val('$0');
+            $('#bono').val('');
+            $('#bonoid').val('');
+            $('.totalote').val($('#vrlote').val());
             precio = parseFloat($('#vrlote').cleanVal());
             inicial = precio * porcentage / 100
-            oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
-            oficial30 = '$' + Moneda(inicial);
-            separacion = parseFloat($('#separacion').val());
+            $('#cuotainicial').val(Moneda(inicial));
+            $('#p70').val(Moneda(precio - inicial));
         };
         $('#AgregarClient').click(function () {
             $('#cliente2').show('slow');
@@ -3239,23 +3224,17 @@ if (window.location.pathname == `/links/orden`) {
         });
         $('.edi').on('change', function () {
             $('#acepto').prop("checked", false)
-            //abono = parseFloat($('#abono').cleanVal()) || 0;
             u = parseFloat($('#diferinicial').val());
-            mesesextra = '';
             D = parseFloat($('#dia').val());
-            oficial70 = '$' + Moneda((100 - inicial) * precio / 100);
-            oficial30 = '$' + Moneda(inicial);
-            meses = 0;
-            cuota30 = Moneda(Math.round((inicial - separacion) / u));
             N = parseFloat($('#ncuotas').val());
-            cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
 
             if ($(this).attr('id') === 'abono') {
-                if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val())) {
+                if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val()) || !$('#abono').val()) {
                     $('#abono').val(Moneda($('#separacion').val()))
                     SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
                 }
             }
+            var abono = parseFloat($('#abono').cleanVal());
             Años(u + 1, D, N)
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
@@ -3267,21 +3246,20 @@ if (window.location.pathname == `/links/orden`) {
                         success: function (data) {
                             if (data.length) {
                                 var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
-                                if (fecha < new Date()) {
-                                    SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
-                                    $('#bonoid').val('');
-                                    Dt();
-                                } else if (data[0].producto != null) {
+                                if (data[0].producto != null) {
                                     SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
-                                    $('#bonoid').val('');
+                                    //$('#bonoid').val('');
+                                    Dt();
+                                } else if (fecha < new Date()) {
+                                    SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                                    //$('#bonoid').val('');
                                     Dt();
                                 } else {
+                                    var ahorr = Math.round(precio * data[0].descuento / 100)
                                     $('#bonoid').val(data[0].id);
-                                    $('#ahorro').val(Moneda(Math.round(precio * data[0].descuento / 100)));
-                                    precio = precio - (precio * data[0].descuento / 100);
+                                    $('#ahorro').val(Moneda(ahorr));
+                                    precio = precio - ahorr;
                                     inicial = precio * porcentage / 100;
-                                    oficial30 = Moneda(Math.round(inicial));
-                                    oficial70 = Moneda(Math.round(precio - inicial));
                                     $('#dto').val(data[0].descuento + '%');
                                     $('#cuotainicial').val(Moneda(Math.round(inicial)))
                                     $('#p70').val(Moneda(Math.round(precio - inicial)));
@@ -3290,7 +3268,7 @@ if (window.location.pathname == `/links/orden`) {
                                 bono = data[0].pin;
                             } else {
                                 Dt();
-                                $('#bonoid').val('');
+                                //$('#bonoid').val('');
                                 SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
                             }
                         }
@@ -3300,14 +3278,12 @@ if (window.location.pathname == `/links/orden`) {
                     SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
                 }
             }
-            if ($('#ahorro').val() === '$0') {
-                Dt()
-            }
+
             if (u > 1 && h === 1) {
                 h = 2
                 Dt();
-                $('#bono').attr('disabled', true);
-                SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 3 partidas no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
+                $('#bono').val('').attr('disabled', true);
+                SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 1 no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
             } else if (u > 1) {
                 Dt();
                 $('#bono').attr('disabled', true);
@@ -3315,32 +3291,34 @@ if (window.location.pathname == `/links/orden`) {
                 h = 1
                 $('#bono').attr('disabled', false);
             }
-            if (abono !== 0) {
-                separacion = abono;
-            } else {
-                separacion = parseFloat($('#separacion').val());
-            }
-            var Estra = () => {
-                if ($('#cuotaestrao').val() && $('#Emeses').val()) {
-                    cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
-                    $('#Emeses').val() == 1 ? cut = cuotaextrao * jun : $('#Emeses').val() == 2 ? cut = cuotaextrao * dic : cut = cuotaextrao * (jun + dic);
-                    cuota = cuota - cut;
 
-                    if ($('#Emeses').val() == 1) {
+            separacion = abono;
+            var Estra = () => {
+                cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
+                var co = $('#cuotaestrao').val() ? $('#Emeses').val() : "0";
+                switch (co) {
+                    case "1":
+                        cut = cuotaextrao * jun
                         mesesextra = 6
                         meses = jun
-
-                    } else if ($('#Emeses').val() == 2) {
+                        break;
+                    case "2":
+                        cut = cuotaextrao * dic
                         mesesextra = 12
                         meses = dic
-
-                    } else {
+                        break;
+                    case "3":
+                        cut = cuotaextrao * (jun + dic)
                         mesesextra = 2
                         meses = jun + dic
-
-                    };
-                    $('#extran').val(meses)
+                        break;
+                    default:
+                        cut = 0
+                        mesesextra = 0
+                        meses = 0
                 }
+                cuota = cuota - cut;
+                $('#extran').val(meses)
             }
 
             if (separacion >= inicial) {
@@ -3352,7 +3330,6 @@ if (window.location.pathname == `/links/orden`) {
                 cuota70 = Moneda(Math.round(cuota / (N - meses)));
                 $(`#diferinicial option[value='0']`).attr("selected", true);
                 $("#diferinicial").prop('disabled', true)
-
             } else {
                 cuota = Math.round(precio - inicial);
                 Estra()
@@ -3382,7 +3359,7 @@ if (window.location.pathname == `/links/orden`) {
                 async: false,
                 success: function (data) {
                     tabla.ajax.reload(function (json) {
-                        SMSj('success', 'Se realizaron cambios exitosamente')
+                        //SMSj('success', 'Se realizaron cambios exitosamente')
                     })
                 }
             });
@@ -3427,7 +3404,13 @@ if (window.location.pathname == `/links/orden`) {
     var tabla = $("#datatables-clients").DataTable({
         dom: '<"toolbar">',
         info: false,
-        responsive: true,
+        responsive: {
+            details: {
+                display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                type: 'none',
+                target: ''
+            }
+        },
         ajax: {
             method: "POST",
             url: "/links/tabla/2",
@@ -3456,10 +3439,10 @@ if (window.location.pathname == `/links/orden`) {
         ],
         columnDefs: [
             { "visible": false, "targets": groupColumn },
-            { responsivePriority: 10002, targets: 5 },
-            { responsivePriority: 10003, targets: 6 },
-            { responsivePriority: 10004, targets: 7 },
-            { responsivePriority: 10005, targets: 8 }
+            { responsivePriority: 1, targets: 0 },
+            { responsivePriority: 2, targets: 1 },
+            { responsivePriority: 3, targets: 3 },
+            { responsivePriority: 4, targets: 4 }
         ],
         order: [[groupColumn, 'asc']],
         displayLength: 50,
