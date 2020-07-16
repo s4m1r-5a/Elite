@@ -379,10 +379,13 @@ router.post('/recibo', async (req, res) => {
         req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
         res.redirect('/links/pagos');
     } else {
+        var imagenes = ''
+        req.files.map((e) => {
+            imagenes += `/uploads/${e.filename},`
+        })
         const pago = {
             fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
-            concepto: 'PAGO', stado: 3, img: '/uploads/' + req.file.filename,
-            descp: concpto
+            concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto
         }
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
@@ -732,7 +735,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     return Object.assign(y[e], h)
                 }
             }
-            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {            
+            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
                 s = {
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,

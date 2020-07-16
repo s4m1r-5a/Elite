@@ -68,7 +68,7 @@ app.use(multer({
     cb("Error: File upload only supports the following filetypes - " + filetypes);
   },
   //limits: { fileSize: 2062191114 },
-}).single('image'));
+}).any('image'));
 
 
 // Middlewares : significa cada ves que el usuario envia una peticion

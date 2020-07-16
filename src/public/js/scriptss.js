@@ -3593,9 +3593,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
-        var dts = data
+        var dts = data, imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         fila.toggleClass('selected')
-        $("#Modalimg .foto").attr('src', data.img);
+        if (Array.isArray(imagenes)) {
+            $("#Modalimg .foto").hide()
+            imagenes.map((e) => {
+                $("#Modalimg .fotos").append(`<img src="${e}" class="card-img" alt="...">`);
+            })
+        } else {
+            $("#Modalimg .foto").attr('src', data.img).show();
+        }
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'))
         $('#Modalimg .cliente').html(data.nombre)
         $('#Modalimg .proyecto').html(data.proyect)

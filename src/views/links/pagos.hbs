@@ -4,9 +4,9 @@
             <div class="col-sm-12 col-md-10 col-lg-8 mx-auto d-table h-100">
                 <div class="d-table-cell align-middle">
                     <div class="text-center mt-4">
-                        <h1 class="h2">Reset password</h1>
+                        <h1 class="h2">Pagos</h1>
                         <p class="lead">
-                            Enter your email to reset your password.
+                            Conoce aqui el monto de tus cuotas.
                         </p>
                     </div>
                     <div class="card">
@@ -16,17 +16,29 @@
                                     <div class="card-body">
                                         <div id="smartwizard" class="wizard wizard-primary mb-4">
                                             <ul>
-                                                <li><a href="#arrows-primary-step-1">Paso 1<br /><small>Pin de
-                                                            registro</small></a>
+                                                <li>
+                                                    <a class="sidebar-link" href="#arrows-primary-step-1">
+                                                        <i class="align-middle" data-feather="credit-card"></i> <span
+                                                            class="align-middle">Documento</span>
+                                                    </a>
                                                 </li>
-                                                <li><a href="#arrows-primary-step-2">Step Title<br /><small>Step
-                                                            description</small></a>
+                                                <li>
+                                                    <a class="sidebar-link" href="#arrows-primary-step-2">
+                                                        <i class="align-middle" data-feather="droplet"></i> <span
+                                                            class="align-middle">Cuota</span>
+                                                    </a>
                                                 </li>
-                                                <li><a href="#arrows-primary-step-3">Step Title<br /><small>Step
-                                                            description</small></a>
+                                                <li>
+                                                    <a class="sidebar-link" href="#arrows-primary-step-3">
+                                                        <i class="align-middle" data-feather="help-circle"></i> <span
+                                                            class="align-middle">Metodo</span>
+                                                    </a>
                                                 </li>
-                                                <li><a href="#arrows-primary-step-4">Step Title<br /><small>Step
-                                                            description</small></a>
+                                                <li>
+                                                    <a class="sidebar-link" href="#arrows-primary-step-4">
+                                                        <i class="align-middle" data-feather="dollar-sign"></i> <span
+                                                            class="align-middle">Pago</span>
+                                                    </a>
                                                 </li>
                                             </ul>
                                             <div>
@@ -40,7 +52,7 @@
                                                             <label>Documento</label>
                                                             <input class="form-control form-control-lg" id="cedula"
                                                                 type="text" name="pin"
-                                                                placeholder="Ingrese pin de registro" required
+                                                                placeholder="Ingrese numero de documento" required
                                                                 autocomplete="off" />
                                                         </div>
                                                     </div>
@@ -398,12 +410,16 @@
                                                                         <div class="card-body">
                                                                             <h5 class="card-title">Sube un Recibo
                                                                             </h5>
-                                                                            <input type="hidden" id="Total2" name="total">
-                                                                            <input type="hidden" id="factrs" name="factrs">
+                                                                            <input type="hidden" id="Total2"
+                                                                                name="total">
+                                                                            <input type="hidden" id="factrs"
+                                                                                name="factrs">
                                                                             <input type="hidden" id="idC" name="id">
-                                                                            <input type="hidden" id="concpto" name="concpto">
+                                                                            <input type="hidden" id="concpto"
+                                                                                name="concpto">
                                                                             <input type="hidden" id="lt" name="lt">
-                                                                            <input id="ahora" type="hidden" name="ahora">
+                                                                            <input id="ahora" type="hidden"
+                                                                                name="ahora">
                                                                             <input class="form-control-no-border edi"
                                                                                 type="text" id="recibo"
                                                                                 placeholder="N° de recibo aqui..."
@@ -428,8 +444,8 @@
                                                                                     <input
                                                                                         class="form-control-no-border edi"
                                                                                         type="file" name="image"
-                                                                                        id="file" style="width: 100%;"
-                                                                                        required>
+                                                                                        id="file" multiple
+                                                                                        style="width: 100%;" required>
                                                                                 </div>
                                                                             </div>
                                                                         </div>
