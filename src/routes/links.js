@@ -422,7 +422,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const { nombres, documento, lugarexpedicion, fechaexpedicion,
         fechanacimiento, estadocivil, email, movil, direccion, parentesco,
         numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
-        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota,
+        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
     function Cliente(N) {
         person = {
@@ -677,7 +677,7 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
 
     const orden = await pool.query(sql, id);
-    console.log(orden)
+    //console.log(orden)
     res.render('links/ordendeseparacion', { orden, id });
 })
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
@@ -690,7 +690,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     var u = Math.round((p - i) / 2);
     var m = (p - i) / 2;
     var v = i / 2;
-
+    console.log(o)
     w = await orden
         .map((t, c) => {
             if (t.tipo === 'SEPARACION') {
@@ -723,7 +723,6 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             } else if (t.tipo === 'INICIAL') {
                 y.push(t)
                 if (v !== e && t.ncuota === e) {
-                    console.log(t.ncuota)
                     h = {
                         ncuota2: '',
                         fecha2: '',
@@ -733,7 +732,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     return Object.assign(y[e], h)
                 }
             }
-            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
+            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {            
                 s = {
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,
@@ -745,7 +744,6 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             } else if (t.tipo === 'FINANCIACION') {
                 o.push(t)
                 if (m !== u && t.ncuota === u) {
-                    console.log(t.ncuota)
                     h = {
                         ncuota2: '',
                         fecha2: '',
