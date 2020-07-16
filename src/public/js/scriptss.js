@@ -3364,6 +3364,75 @@ if (window.location.pathname == `/links/orden`) {
                 }
             });
         })
+        var tabla = $("#datatables-clients").DataTable({
+            dom: '<"toolbar">',
+            info: false,
+            /*responsive: {
+                details: {
+                    display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                    type: 'none',
+                    target: ''
+                }
+            }*/
+            responsive: true,
+            ajax: {
+                method: "POST",
+                url: "/links/tabla/2",
+                dataSrc: "data"
+            },
+            columns: [
+                { data: "n" },
+                {
+                    data: "fecha",
+                    render: function (data, method, row) {
+                        return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
+                    }
+                },
+                { data: "oficial" },
+                { data: "cuota" },
+                { data: "stado" },
+                { data: "n2" },
+                {
+                    data: "fecha2",
+                    render: function (data, method, row) {
+                        return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
+                    }
+                },
+                { data: "cuota2" },
+                { data: "stado2" }
+            ],
+            columnDefs: [
+                { "visible": false, "targets": groupColumn },
+                { responsivePriority: 1, targets: 0 },
+                { responsivePriority: 2, targets: 1 },
+                { responsivePriority: 3, targets: 3 },
+                { responsivePriority: 4, targets: 4 },
+                { responsivePriority: 10001, targets: 5 },
+                { responsivePriority: 20002, targets: 6 },
+                { responsivePriority: 30003, targets: 7 },
+                { responsivePriority: 40004, targets: 8 }
+            ],
+            order: [[groupColumn, 'asc']],
+            displayLength: 50,
+            initComplete: function (settings, json) {
+                //hacer algo apenas cargue la tabla
+            },
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            '<tr class="group"><td colspan="8">' + group + '</td></tr>'
+                        );
+
+                        last = group;
+                    }
+                });
+            }
+        });
     });
     var opcion = 'no';
     $('#enviodeorden').submit(function (e) {
@@ -3401,70 +3470,6 @@ if (window.location.pathname == `/links/orden`) {
         }
 
     })
-    var tabla = $("#datatables-clients").DataTable({
-        dom: '<"toolbar">',
-        info: false,
-        responsive: {
-            details: {
-                display: $.fn.dataTable.Responsive.display.childRowImmediate,
-                type: 'none',
-                target: ''
-            }
-        },
-        ajax: {
-            method: "POST",
-            url: "/links/tabla/2",
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "n" },
-            {
-                data: "fecha",
-                render: function (data, method, row) {
-                    return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
-                }
-            },
-            { data: "oficial" },
-            { data: "cuota" },
-            { data: "stado" },
-            { data: "n2" },
-            {
-                data: "fecha2",
-                render: function (data, method, row) {
-                    return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
-                }
-            },
-            { data: "cuota2" },
-            { data: "stado2" }
-        ],
-        columnDefs: [
-            { "visible": false, "targets": groupColumn },
-            { responsivePriority: 1, targets: 0 },
-            { responsivePriority: 2, targets: 1 },
-            { responsivePriority: 3, targets: 3 },
-            { responsivePriority: 4, targets: 4 }
-        ],
-        order: [[groupColumn, 'asc']],
-        displayLength: 50,
-        initComplete: function (settings, json) {
-            //hacer algo apenas cargue la tabla
-        },
-        drawCallback: function (settings) {
-            var api = this.api();
-            var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-
-            api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
-                if (last !== group) {
-                    $(rows).eq(i).before(
-                        '<tr class="group"><td colspan="8">' + group + '</td></tr>'
-                    );
-
-                    last = group;
-                }
-            });
-        }
-    });
 };
 /////////////////////////////* SOLICITUDES *//////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/solicitudes`) {
