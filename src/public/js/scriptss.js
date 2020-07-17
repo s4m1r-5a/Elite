@@ -1182,6 +1182,267 @@ if (window.location.pathname == `/links/pagos`) {
             }
         });
     });
+
+    var doc = new jsPDF('l', 'mm', 'a5')
+    var img = new Image()
+    img.src = '/img/avatars/avatar.png'
+    var totalPagesExp = '{total_pages_count_string}'
+    //doc.addPage("a3");
+    doc.autoTable({
+        head: headRows(),
+        body: bodyRows(40),
+        showHead: false,
+        columnStyles: {
+            id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
+        },
+        didDrawPage: function (data) {
+            // Header
+            doc.setFontSize(20)
+            doc.setTextColor(40)
+            doc.setFontStyle('normal')
+            if (img) {
+                doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
+            }
+            doc.text('Recibo 54', data.settings.margin.left + 13, 20)
+
+            // Footer
+            var str = 'Page ' + doc.internal.getNumberOfPages()
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                str = str + ' of ' + totalPagesExp
+            }
+            doc.setFontSize(10)
+
+            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+            var pageSize = doc.internal.pageSize
+            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+            doc.text(str, data.settings.margin.left, pageHeight - 10)
+        },
+        margin: { top: 30 },
+    })
+
+    // Total page number plugin only available in jspdf v1.0+
+    if (typeof doc.putTotalPages === 'function') {
+        doc.putTotalPages(totalPagesExp)
+    }
+    //doc.output('dataurlnewwindow')
+    function headRows() {
+        return [
+            { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+        ]
+    }
+
+    function footRows() {
+        return [
+            { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+        ]
+    }
+
+    function columns() {
+        return [
+            { header: 'ID', dataKey: 'id' },
+            { header: 'Name', dataKey: 'name' },
+            { header: 'Email', dataKey: 'email' },
+            { header: 'City', dataKey: 'city' },
+            { header: 'Exp', dataKey: 'expenses' },
+        ]
+    }
+
+    function data(rowCount) {
+        rowCount = rowCount || 10
+        var body = []
+        for (var j = 1; j <= rowCount; j++) {
+            body.push({
+                id: j,
+                name: 'Samir',
+                email: 'samirsaldarriaga@hotmail.com',
+                city: 'Santa Marta',
+                expenses: 'Desarrollador',
+            })
+        }
+        return body
+    }
+
+    function bodyRows(rowCount) {
+        rowCount = rowCount || 10
+        var body = [{
+            id: '',
+            name: 'Samir Saldarriaga',
+            email: 'samirsaldarriaga@hotmail.com',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'PRADOS DE PONTEVEDRA',
+            email: 'Mz 5',
+            city: 'Lt 8',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Cupon	U5HG1',
+            email: 'Proyecto	64.480.000',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Dto	5',
+            email: 'Concepto	ABONO',
+            city: '1',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Ahorro	3.224.000',
+            email: 'N° Cuota	0',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Proyecto Dto	 61.256.000',
+            email: 'Cuota	0',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Facturas V.	0',
+            email: 'Mora	0',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: '',
+            email: '',
+            city: '',
+            expenses: ''
+        },
+        {
+            id: '',
+            name: 'Total Factura',
+            email: '',
+            city: '',
+            expenses: '$0'
+        },
+        {
+            id: '',
+            name: 'Total a Pagar',
+            email: '',
+            city: '',
+            expenses: '$0'
+        },
+        {
+            id: '',
+            name: 'Otro Valor',
+            email: '',
+            city: '',
+            expenses: '$0'
+        }]
+        /*for (var j = 1; j <= rowCount; j++) {
+            body.push({
+                id: j,
+                name: 'Samir',
+                email: 'samirsaldarriaga@hotmail.com',
+                city: 'Santa Marta',
+                expenses: 'Desarrollador',
+            })
+        }*/
+        return body
+    }
+    /*var img = new Image()
+    img.src = '/img/avatars/avatar.png'*/
+    /*doc.setFontSize(15);
+    doc.setFont("helvetica");
+    doc.setFontType("bold");
+    doc.text("GRUPO ELITE S.A.S.", 50, 25);*/
+
+    /*doc.setFontSize(18)
+    doc.text('Factura 54', 45, 27)
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+    doc.addImage(img, 'png', 10, 10, 25, 35)
+
+    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+    var pageSize = doc.internal.pageSize
+    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+    var text = doc.splitTextToSize('lksdfjsdkfjds sdkj fsdjfks jfskjfksjlñjlksjfkljfkdjf fjdjfls fjlsjlfjsljflsjflsjflsjlfjsldfjlsjfhkjf kdfjhdjfhkdshfkshfkshfkshfk', pageWidth - 35, {})
+    doc.text(text, 45, 33)*/
+
+    /*var head = headRows()
+    head[0]['text'] = 'Text'
+    var body = bodyRows(4)
+    body.forEach(function (row) {
+        row['text'] = 'hjsdkfhkdsjfh dshfdhs fhsdfhlahf hflkhdfkhsakfhdskajf dkjasfhalfhkhfkdsfhkahfkdafhkfhhfkhfkfhdklhkdfh hfkdshfjkdhfjkdhfskf skfhksd fks fh'
+    })
+    doc.text(
+        "Overflow 'linebreak' (default) with one column with long content",
+        14, 22
+    )
+    doc.autoTable({
+        //head: head,
+        body: body,
+        startY: doc.lastAutoTable.finalY + 15,
+        rowPageBreak: 'auto',
+        bodyStyles: { valign: 'top' },
+    })*/
+    /*doc.setFontSize(18)
+    doc.text('Factura 54', 14, 22)
+    doc.setFontSize(11)
+    doc.setTextColor(100)
+
+    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+    var pageSize = doc.internal.pageSize
+    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+    var text = doc.splitTextToSize('lksdfjsdkfjds sdkj fsdjfks jfskjfksjlñjlksjfkljfkdjf fjdjfls fjlsjlfjsljflsjflsjflsjlfjsldfjlsjfhkjf kdfjhdjfhkdshfkshfkshfkshfk', pageWidth - 35, {})
+    doc.text(text, 14, 30)
+    doc.autoTable({
+        html: '#datatable',
+        //head: headRows(),
+        //body: bodyRows(40),
+        startY: 50,
+        showHead: 'firstPage',
+    })*/
+
+    //doc.text(text, 14, doc.lastAutoTable.finalY + 10)
+    //doc.save('table.pdf')
+    //doc.output('dataurlnewwindow')
+    /*var doc = new jsPDF();
+
+    doc.text("This is the default font.", 20, 20);
+
+    doc.setFont("courier");
+    doc.setFontStyle("normal");
+    doc.text("This is courier normal.", 20, 30);
+
+    doc.setFont("times");
+    doc.setFontStyle("italic");
+    doc.text("This is times italic.", 20, 40);
+
+    doc.setFont("helvetica");
+    doc.setFontStyle("bold");
+    doc.text("This is helvetica bold.", 20, 50);
+
+    doc.setFont("courier");
+    doc.setFontStyle("bolditalic");
+    doc.text("This is courier bolditalic.", 20, 60);
+
+    doc.setFont("times");
+    doc.setFontStyle("normal");
+    doc.text("This is centred text.", 105, 80, null, null, "center");
+    doc.text("And a little bit more underneath it.", 105, 90, null, null, "center");
+    doc.text("This is right aligned text", 200, 100, null, null, "right");
+    doc.text("And some more", 200, 110, null, null, "right");
+    doc.text("Back to left", 20, 120);
+
+    doc.text("10 degrees rotated", 20, 140, null, 10);
+    doc.text("-10 degrees rotated", 20, 160, null, -10);
+    doc.autoTable({ html: '#datatable' })
+    doc.save('table.pdf')*/
+
 }
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
@@ -1686,26 +1947,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         initComplete: function (settings, json) {
             //tableOrden.column(2).visible(true);
             window.addEventListener("load", window.print());
-            /*var doc = new jsPDF()
-            doc.text(20, 20, 'This is the default font.');
 
-            doc.setFont("courier");
-            doc.setFontType("normal");
-            doc.text(20, 30, 'Esto es courier normal.');
-
-            doc.setFont("times");
-            doc.setFontType("italic");
-            doc.text(20, 40, 'Esto es times italic.');
-
-            doc.setFont("helvetica");
-            doc.setFontType("bold");
-            doc.text(20, 50, 'Esto es helvetica bold.');
-
-            doc.setFont("courier");
-            doc.setFontType("bolditalic");
-            doc.text(20, 60, 'Esto es courier bolditalic.');
-            doc.autoTable({ html: '#datatable' })
-            doc.save('table.pdf')*/
         },
         columnDefs: [
             { "visible": false, "targets": 0 }
@@ -1758,6 +2000,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>
         //window.addEventListener("load", window.print());
     })
+
 } else {
     $('footer').show()
     $('nav').show()
