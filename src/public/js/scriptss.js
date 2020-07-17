@@ -3023,7 +3023,6 @@ if (window.location.pathname == `/links/orden`) {
     var dic = 0;
     var jun = 0;
     var fcha = moment(fch).startOf('month').format('YYYY-MM-DD');
-    //var anos = $('#ncuotas').val() / 6;
     var h = 1;
     var separacion = parseFloat($('#separacion').val());
     var porcentage = parseFloat($('#porcentage').val());
@@ -3043,7 +3042,8 @@ if (window.location.pathname == `/links/orden`) {
     Meses(0)
     var N = parseFloat($('#ncuotas').val());
     var cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
-    console.log(cuota / (N - (meses + u)))
+    $('#cuota').val(cuota70.replace(/\./g, ''))
+
     $.ajax({
         url: '/links/tabla/1',
         type: 'POST',
@@ -3080,7 +3080,6 @@ if (window.location.pathname == `/links/orden`) {
         }
     });
     $(document).ready(function () {
-        // Datatables clients  
         if ($('#mesje').text()) {
             $('#ModalMensaje').modal({
                 backdrop: 'static',
@@ -3091,21 +3090,17 @@ if (window.location.pathname == `/links/orden`) {
 
         $('.di').css("background-color", "#FFFFCC");
         $(`.pais option[value='57']`).prop("selected", true);
+        $('.documento').mask("AAAAAAAAAAA");
+        $('.document').mask("AAAAAAAAAAA");
         $('.movil').mask("57 ***-***-****");
         $('.pais').change(function () {
             var card = $(this).parents('div.row').attr("id")
             $(`#${card} .movil`).val('')
             $(`#${card} .movil`).mask(`${$(this).val()} ***-***-****`).focus();
         })
-        $('.tipod').change(function () {
-            var card = $(this).parents('div.row').attr("id")
-            $(`#${card} .documento`).val('')
-            if ($(this).val() === "Cedula de extranjeria" || $(this).val() === "Pasaporte" || $(this).val() === "Nit") {
-                //$(`#${card} .documento`).unmask().focus();
-                $(`#${card} .documento`).mask('AAAAAAAAAA').focus();
-            } else {
-                $(`#${card} .documento`).mask('#.##$', { reverse: true, selectonfocus: true }).focus();
-            }
+        $('.pai').change(function () {
+            $(`.movi`).val('')
+            $(`.movi`).mask(`${$(this).val()} ***-***-****`).focus();
         })
         $('.movil, .documento').on('change', function () {
             var card = $(this).parents('div.row').attr("id")
@@ -3118,25 +3113,64 @@ if (window.location.pathname == `/links/orden`) {
                         if (data.length > 0) {
                             $(`#${card} .client`).val(data[0].idc);
                             $(`#${card} .nombres`).val(data[0].nombre);
-                            data[0].tipo === "Cedula de ciudadania" || data[0].tipo === "Tarjeta de identidad" || !data[0].tipo ?
-                                $(`#${card} .documento`).val(data[0].documento).mask('#.##$', { reverse: true }) :
-                                $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
                             $(`#${card} .movil`).val(data[0].movil).mask('**** $$$-$$$-$$$$', { reverse: true });
-                            $(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
-                            $(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
-                            $(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
-                            $(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
-                            !data[0].tipo ? $(`#${card} .tipod option[value='Cedula de ciudadania']`).attr("selected", true) :
-                                $(`#${card} .tipod option[value='${data[0].tipo}']`).attr("selected", true);
                             var pais = data[0].movil.split(" ");
                             data[0].movil.indexOf(" ") > 0 ? $(`#${card} .pais option[value='${pais[0]}']`).prop("selected", true) :
                                 $(`#${card} .pais option[value='57']`).prop("selected", true);
                             $(`#${card} .email`).val(data[0].email);
-                            $(`#${card} .direccion`).val(data[0].direccion);
-                            $(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
+                            $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
+                            /*data[0].tipo === "Cedula de ciudadania" || data[0].tipo === "Tarjeta de identidad" || !data[0].tipo ?
+                                $(`#${card} .documento`).val(data[0].documento).mask('#.##$', { reverse: true }) :
+                                $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');*/
+                            //$(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
+                            //$(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
+                            //$(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
+                            //$(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
+                            /*!data[0].tipo ? $(`#${card} .tipod option[value='Cedula de ciudadania']`).attr("selected", true) :
+                                $(`#${card} .tipod option[value='${data[0].tipo}']`).attr("selected", true);*/
+                            //$(`#${card} .direccion`).val(data[0].direccion);
+                            //$(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
                             $(`#${card} .movil`).mask("57 ***-***-****");
                         } else {
                             SMSj('info', 'Cliente no encontrado, proceda con el registro')
+                            $('#AddCliente input').val('')
+                            $('#AddCliente .document').val($(`#${card} .documento`).val())
+                            $('#AddCliente .movi').val($(`#${card} .movil`).val()).mask('**** $$$-$$$-$$$$', { reverse: true })
+                            $('#AddCliente').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                            $('#crearcliente').submit(function (e) {
+                                e.preventDefault();
+                                $('#AddCliente').modal('hide')
+                                $('#ModalEventos').modal({
+                                    toggle: true,
+                                    backdrop: 'static',
+                                    keyboard: true,
+                                });
+                                $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+                                var fd = $('#crearcliente').serialize();
+                                $.ajax({
+                                    url: '/links/clientes/agregar',
+                                    data: fd,
+                                    type: 'PUT',
+                                    async: false,
+                                    success: function (data) {
+                                        if (data) {
+                                            $('#ModalEventos').one('shown.bs.modal', function () {
+                                                $('#ModalEventos').modal('hide')
+                                                SMSj('success', 'Cliente registrado correctamente')
+                                                $(`#${card} .client`).val(data.code);
+                                                $(`#${card} .nombres`).val($('#AddCliente .nombr').val().toLocaleUpperCase());
+                                                $(`#${card} .movil`).val($('#AddCliente .movi').val()).mask('**** $$$-$$$-$$$$', { reverse: true });
+                                                $(`#${card} .email`).val($('#AddCliente .mail').val());
+                                                $(`#${card} .documento`).val($('#AddCliente .document').val()).mask('AAAAAAAAAA');
+                                            }).modal('hide');
+                                        }
+                                    }
+                                });
+                            });
                         }
                     }
                 });
@@ -3217,10 +3251,30 @@ if (window.location.pathname == `/links/orden`) {
         };
         $('#AgregarClient').click(function () {
             $('#cliente2').show('slow');
+            $('.cliente2 input').prop('required', true);
+        });
+        $('#AgregarClient2').click(function () {
+            $('#cliente3').show('slow');
+            $('.cliente3 input').prop('required', true);
+        });
+        $('#AgregarClient3').click(function () {
+            $('#cliente4').show('slow');
+            $('.cliente4 input').prop('required', true);
         });
         $('.atras').click(function () {
             $('.cliente2').hide('slow');
             $('.cliente2 input').val('');
+            $('.cliente2 input').prop('required', false);
+        });
+        $('.atras3').click(function () {
+            $('.cliente3').hide('slow');
+            $('.cliente3 input').val('');
+            $('.cliente3 input').prop('required', false);
+        });
+        $('.atras4').click(function () {
+            $('.cliente4').hide('slow');
+            $('.cliente4 input').val('');
+            $('.cliente4 input').prop('required', false);
         });
         $('.edi').on('change', function () {
             $('#acepto').prop("checked", false)
@@ -3248,11 +3302,9 @@ if (window.location.pathname == `/links/orden`) {
                                 var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
                                 if (data[0].producto != null) {
                                     SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
-                                    //$('#bonoid').val('');
                                     Dt();
                                 } else if (fecha < new Date()) {
                                     SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
-                                    //$('#bonoid').val('');
                                     Dt();
                                 } else {
                                     var ahorr = Math.round(precio * data[0].descuento / 100)
@@ -3268,7 +3320,6 @@ if (window.location.pathname == `/links/orden`) {
                                 bono = data[0].pin;
                             } else {
                                 Dt();
-                                //$('#bonoid').val('');
                                 SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
                             }
                         }

@@ -206,7 +206,7 @@ router.put('/clientes/:id', async (req, res) => {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors
     } = req.body;
-    console.log(req.body)
+
     const clit = {
         nombre: nombres.toUpperCase(), documento: documento.replace(/\./g, ''), fechanacimiento,
         lugarexpedicion, fechaexpedicion, estadocivil, movil: movil.replace(/-/g, ""), agendado: 1,
@@ -236,7 +236,8 @@ router.put('/clientes/:id', async (req, res) => {
                 }
                 await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             }
-            res.send(true);
+            res.send({ code: ir.insertId });
+
         } else if (cliente.length > 0 && asesors) {
             const asr = {
                 fullname: nombres.toUpperCase(), document: documento,
@@ -420,76 +421,16 @@ router.get('/orden', isLoggedIn, async (req, res) => {
     }
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
-    const SCOPES = ['https://www.googleapis.com/auth/contacts'];
-    const TOKEN_PATH = 'token.json';
-    const { nombres, documento, lugarexpedicion, fechaexpedicion,
-        fechanacimiento, estadocivil, email, movil, direccion, parentesco,
-        numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
+    const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
-    function Cliente(N) {
-        person = {
-            "resource": {
-                "names": [{ "familyName": nombres[N].toUpperCase() }],
-                "emailAddresses": [{ "value": email[N].toLowerCase() }],
-                "phoneNumbers": [{ "value": movil[N].replace(/-/g, ""), "type": "Personal" }],
-                "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
-            }
-        };
-        cliente = {
-            nombre: nombres[N].toUpperCase(),
-            documento: documento[N].replace(/\./g, ''),
-            lugarexpedicion: lugarexpedicion[N],
-            fechaexpedicion: fechaexpedicion[N],
-            fechanacimiento: fechanacimiento[N],
-            estadocivil: estadocivil[N],
-            email: email[N].toLowerCase(),
-            movil: movil[N].replace(/-/g, ""),
-            direccion: direccion[N].toLowerCase(),
-            parentesco, acsor: req.user.id, venta: 1,
-            tiempo: ahora
-        };
-    };
-
-    Cliente(0);
-    if (client[0]) {
-        await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, client[0]]);
-    } else {
-        const datosc = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento[0])
-        if (datosc.length > 0) {
-            await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, datosc[0].idc]);
-        } else {
-            await fs.readFile('credentials.json', (err, content) => {
-                if (err) return console.log('Error loading client secret file:', err);
-                authorize(JSON.parse(content), crearcontacto);
-            });
-            clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
-            client[0] = clie.insertId
-        }
-    }
-
-    if (documento[1]) {
-        Cliente(1);
-        if (client[1]) {
-            await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, client[1]]);
-        } else {
-            const datosc = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento[1])
-            if (datosc.length > 0) {
-                await pool.query('UPDATE clientes set ? WHERE idc = ?', [cliente, datosc[0].idc]);
-            } else {
-                await fs.readFile('credentials.json', (err, content) => {
-                    if (err) return console.log('Error loading client secret file:', err);
-                    authorize(JSON.parse(content), crearcontacto);
-                });
-                clie = await pool.query('INSERT INTO clientes SET ? ', cliente);
-                client[1] = clie.insertId
-            }
-        }
-    };
+    console.log(req.body)
     const separ = {
         lote,
         cliente: client[0],
-        cliente2: documento[1] ? client[1] : null,
+        cliente2: client[1] ? client[1] : null,
+        cliente3: client[2] ? client[2] : null,
+        cliente4: client[3] ? client[3] : null,
         asesor: req.user.id,
         numerocuotaspryecto,
         extraordinariameses: extraordinariameses ? extraordinariameses : 0,
@@ -502,6 +443,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
         iniciar, cuot
     };
+    console.log(separ)
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
     cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
@@ -515,51 +457,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
 
     req.flash('success', 'Separación realizada exitosamente');
     res.redirect('/links/reportes');
-
-    function authorize(credentials, callback) {
-        const { client_secret, client_id, redirect_uris } = Contactos;
-        const oAuth2Client = new google.auth.OAuth2(
-            client_id, client_secret, redirect_uris);
-
-        // Comprueba si previamente hemos almacenado un token.
-        fs.readFile(TOKEN_PATH, (err, token) => {
-            if (err) return getNewToken(oAuth2Client, callback);
-            oAuth2Client.setCredentials(JSON.parse(token));
-            callback(oAuth2Client);
-        });
-    }
-    function getNewToken(oAuth2Client, callback) {
-        const authUrl = oAuth2Client.generateAuthUrl({
-            access_type: 'offline',
-            scope: SCOPES,
-        });
-        console.log('Autorice esta aplicación visitando esta url: ', authUrl);
-        const rl = readline.createInterface({
-            input: process.stdin,
-            output: process.stdout,
-        });
-        rl.question('Ingrese el código de esa página aquí: ', (code) => {
-            rl.close();
-            oAuth2Client.getToken(code, (err, token) => {
-                if (err) return console.error('Error retrieving access token', err);
-                oAuth2Client.setCredentials(token);
-                // Almacenar el token en el disco para posteriores ejecuciones del programa
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                    if (err) return console.error(err);
-                    console.log('Token almacenado en', TOKEN_PATH);
-                });
-                callback(oAuth2Client);
-            });
-        });
-    }
-    function crearcontacto(auth) {
-        const service = google.people({ version: 'v1', auth });
-        service.people.createContact(person, (err, res) => {
-            if (err) return console.error('La API devolvió un ' + err);
-            cliente.google = res.data.resourceName;
-            console.log("Response", res.data.resourceName);
-        });
-    }
 });
 router.get('/cel/:id', async (req, res) => {
     const { id } = req.params
