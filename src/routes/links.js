@@ -405,7 +405,7 @@ router.get('/cupones', isLoggedIn, async (req, res) => {
 });
 router.post('/cupon', isLoggedIn, async (req, res) => {
     const { dto, std, cliente, ctn } = req.body;
-    if (ctn < 2) {
+    if (ctn < 1) {
         var hora = moment().format('YYYY-MM-DD HH:mm');
         var pin = ID(5);
         const cupon = {
@@ -419,11 +419,13 @@ router.post('/cupon', isLoggedIn, async (req, res) => {
         const encargado = await pool.query(`SELECT u.fullname, u.cel, u.username FROM encargos e INNER JOIN users u ON e.user = u.id  WHERE e.cargo = 'CUPONES'`);
         const en = encargado[0]
         var nom = en.fullname.split(" ")[0];
+        var cl = en.cel.indexOf(" ") > 0 ? en.cel : '57' + en.cel
+
         var options = {
             method: 'POST',
             url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
             form: {
-                "phone": '57' + en.cel,
+                "phone": cl,
                 "body": `_*${nom}* tienes una solicitu de un *CUPON ${pin}* del *${cupon.descuento}%* por aprobar de *${klint[0].nombre}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
             }
         };
@@ -431,7 +433,7 @@ router.post('/cupon', isLoggedIn, async (req, res) => {
             if (error) return console.error('Failed: %s', error.message);
             console.log('Success: ', body);
         });
-        await sms('57' + en.cel, `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`);
+        await sms(cl, `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`);
         res.send({ tipo: 'success', msj: 'Solicitud de cupon enviada correctamente' });
     } else {
         res.send({ tipo: 'error', msj: 'Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud' });
@@ -453,12 +455,13 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
     const { d } = req.params;
     const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
     if (d === 'Aprobar') {
+        var cel = movil.indexOf(" ") > 0 ? movil : '57' + movil
         await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
         var options = {
             method: 'POST',
             url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
             form: {
-                "phone": '57' + movil,
+                "phone": cel,
                 "body": `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`
             }
         };
@@ -466,7 +469,7 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
             if (error) return console.error('Failed: %s', error.message);
             console.log('Success: ', body);
         });
-        await sms('57' + movil, `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`);
+        await sms(cel, `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`);
         res.send(true);
     }
 });
@@ -536,12 +539,13 @@ router.get('/cel/:id', async (req, res) => {
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
     const { movil } = req.body;
+    var cel = movil.indexOf(" ") > 0 ? movil : '57' + movil
     const codigo = ID2(5);
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
-            "phone": '57' + movil,
+            "phone": cel,
             "body": `_*Grupo Elite* te da la Bienvenida, usa este codigo *${codigo}* para confirmar tu separacion_ \n\n_*GRUPO ELITE FICA RAÍZ*_`
         }
     };
@@ -549,7 +553,7 @@ router.post('/codigo', isLoggedIn, async (req, res) => {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
-    await sms('57' + movil, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
+    await sms(cel, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
     res.send(codigo);
 });
 router.get('/bono/:id', async (req, res) => {
@@ -1110,11 +1114,12 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
                 }
                 console.log(req.body.pin, estados)
                 await Desendentes(req.body.pin, estados)
+                var cel = req.body.movil.indexOf(" ") > 0 ? req.body.movil : '57' + req.body.movil
                 var options = {
                     method: 'POST',
                     url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
                     form: {
-                        "phone": '57' + req.body.movil,
+                        "phone": cel,
                         "body": `*_${req.body.nombre}_* \n_hemos procesado tu pago de manera exitoza_\n_Recibo *${req.body.recibo}*_\n_Monto *${req.body.monto}*_\n_Factura(s) *${req.body.facturasvenc}*_\n_Tipo *${req.body.tipo}*_\n_N° cuota *${req.body.ncuota}*_\n_Fecha *${req.body.fech}*_\n_Concepto *${req.body.proyect} LOTE ${req.body.n}*_
                                  \n\n*_GRUPO ELITE FINCA RAÍZ_*`
                     }
@@ -1123,7 +1128,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
                     if (error) return console.error('Failed: %s', error.message);
                     console.log('Success: ', body);
                 });
-                sms('57' + req.body.movil, `hemos procesado tu pago de manera exitoza Recibo: ${req.body.recibo} Monto: ${req.body.monto} Concepto: ${req.body.proyect} LOTE ${req.body.n}`);
+                sms(cel, `hemos procesado tu pago de manera exitoza Recibo: ${req.body.recibo} Monto: ${req.body.monto} Concepto: ${req.body.proyect} LOTE ${req.body.n}`);
                 //Rango(separacion, tipo, valor, ahorro,)
             }
 

@@ -1,4 +1,20 @@
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
+$.jMaskGlobals = {
+    maskElements: 'input,td,span,div',
+    dataMaskAttr: '*[data-mask]',
+    dataMask: true,
+    watchInterval: 300,
+    watchInputs: true,
+    watchDataMask: false,
+    byPassKeys: [9, 16, 17, 18, 36, 37, 38, 39, 40, 91],
+    translation: {
+        '$': { pattern: /\d/ },
+        '*': { pattern: /\d/, optional: true },
+        '#': { pattern: /\d/, recursive: true },
+        'A': { pattern: /[a-zA-Z0-9]/ },
+        'S': { pattern: /[a-zA-Z]/ }
+    }
+};
 function Moneda(valor) {
     valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
@@ -132,22 +148,36 @@ $(document).ready(function () {
             //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
         }
     });
+    $('#pays').change(function () {
+        $('.movl').val('')
+        $('.movl').mask(`${$(this).val()} ***-***-****`).focus();
+    })
+    $('.movl').mask("57 ***-***-****");
+    $('.docum').mask("AAAAAAAAAAA");
     var coun = 0
     $('#pedircupon').click(function () {
-        //$('#Mcupon').modal('hide')
-        $('#pedircupon').prop('disabled', true)
-        $.ajax({
-            url: '/links/cupon',
-            data: { dto: $('#porcntgd').val(), ctn: coun++ },
-            type: 'POST',
-            async: false,
-            success: function (data) {
-                if (data) {
-                    SMSj(data.tipo, data.msj)
-                    $('#pedircupon').prop('disabled', false)
+        if (!cli) {
+            SMSj('error', 'No puedes solicitar un CUPON sin haber completado tu registro primero. Actualiza tus datos')
+            $('#AddClientes').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        } else {
+            $('#pedircupon').prop('disabled', true)
+            $.ajax({
+                url: '/links/cupon',
+                data: { dto: $('#porcntgd').val(), ctn: coun++ },
+                type: 'POST',
+                async: false,
+                success: function (data) {
+                    if (data) {
+                        SMSj(data.tipo, data.msj)
+                        $('#pedircupon').prop('disabled', false)
+                    }
                 }
-            }
-        })
+            })
+        }
     })
     $('#crearclientes').submit(function (e) {
         e.preventDefault();
@@ -4679,22 +4709,7 @@ if (window.location == `${window.location.origin}/links/red`) {
 };
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/clientes`) {
-    $.jMaskGlobals = {
-        maskElements: 'input,td,span,div',
-        dataMaskAttr: '*[data-mask]',
-        dataMask: true,
-        watchInterval: 300,
-        watchInputs: true,
-        watchDataMask: false,
-        byPassKeys: [9, 16, 17, 18, 36, 37, 38, 39, 40, 91],
-        translation: {
-            '$': { pattern: /\d/ },
-            '*': { pattern: /\d/, optional: true },
-            '#': { pattern: /\d/, recursive: true },
-            'A': { pattern: /[a-zA-Z0-9]/ },
-            'S': { pattern: /[a-zA-Z]/ }
-        }
-    };
+
     $(document).ready(function () {
         $('.guard').click(function () {
             $('#ModalEventos').modal({
