@@ -4941,14 +4941,20 @@ if (window.location == `${window.location.origin}/links/cupones`) {
                 defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
-                                        </div>
+                                        <div class="dropdown-menu"></div>
                                     </div>` : ''
             }
         ]
     });
+    cupones.on('click', '.btnaprobar', function () {
+        var fila = $(this).parents('tr');
+        var data = cupones.row(fila).data();
+        if (data.estado == 3) {
+            $(this).attr('data-toggle', "dropdown")
+            $(this).next().html(`<a class="dropdown-item">Aprobar</a>
+                                 <a class="dropdown-item">Declinar</a>`);
+        }
+    })
     cupones.on('click', '.dropdown-item', function () {
         var fila = $(this).parents('tr');
         var data = cupones.row(fila).data();
