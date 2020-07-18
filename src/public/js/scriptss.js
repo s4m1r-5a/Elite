@@ -132,6 +132,23 @@ $(document).ready(function () {
             //$(this).val($(this).val().toLowerCase().trim().split(' ').map(v => v[0].toUpperCase() + v.substr(1)).join(' '))
         }
     });
+    var coun = 0
+    $('#pedircupon').click(function () {
+        //$('#Mcupon').modal('hide')
+        $('#pedircupon').prop('disabled', true)
+        $.ajax({
+            url: '/links/cupon',
+            data: { dto: $('#porcntgd').val(), ctn: coun++ },
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                if (data) {
+                    SMSj(data.tipo, data.msj)
+                    $('#pedircupon').prop('disabled', false)
+                }
+            }
+        })
+    })
     $('#crearclientes').submit(function (e) {
         e.preventDefault();
         //$('#AddClientes').modal('toggle')
@@ -1187,11 +1204,12 @@ if (window.location.pathname == `/links/pagos`) {
     var img = new Image()
     img.src = '/img/avatars/avatar.png'
     var totalPagesExp = '{total_pages_count_string}'
-    //doc.addPage("a3");
+    //doc.addPage("a3"); 
     doc.autoTable({
-        head: headRows(),
-        body: bodyRows(40),
-        showHead: false,
+        //head: headRows(),
+        //body: bodyRows(40),
+        html: '#tablarecibo',
+        //showHead: false,
         columnStyles: {
             id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
         },
@@ -1225,7 +1243,7 @@ if (window.location.pathname == `/links/pagos`) {
     if (typeof doc.putTotalPages === 'function') {
         doc.putTotalPages(totalPagesExp)
     }
-    //doc.output('dataurlnewwindow')
+    doc.output('dataurlnewwindow')
     function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
@@ -1365,7 +1383,7 @@ if (window.location.pathname == `/links/pagos`) {
     doc.setFontSize(11)
     doc.setTextColor(100)
     doc.addImage(img, 'png', 10, 10, 25, 35)
-
+ 
     // jsPDF 1.4+ uses getWidth, <1.4 uses .width
     var pageSize = doc.internal.pageSize
     var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
@@ -1393,7 +1411,7 @@ if (window.location.pathname == `/links/pagos`) {
     doc.text('Factura 54', 14, 22)
     doc.setFontSize(11)
     doc.setTextColor(100)
-
+ 
     // jsPDF 1.4+ uses getWidth, <1.4 uses .width
     var pageSize = doc.internal.pageSize
     var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
@@ -1411,25 +1429,25 @@ if (window.location.pathname == `/links/pagos`) {
     //doc.save('table.pdf')
     //doc.output('dataurlnewwindow')
     /*var doc = new jsPDF();
-
+ 
     doc.text("This is the default font.", 20, 20);
-
+ 
     doc.setFont("courier");
     doc.setFontStyle("normal");
     doc.text("This is courier normal.", 20, 30);
-
+ 
     doc.setFont("times");
     doc.setFontStyle("italic");
     doc.text("This is times italic.", 20, 40);
-
+ 
     doc.setFont("helvetica");
     doc.setFontStyle("bold");
     doc.text("This is helvetica bold.", 20, 50);
-
+ 
     doc.setFont("courier");
     doc.setFontStyle("bolditalic");
     doc.text("This is courier bolditalic.", 20, 60);
-
+ 
     doc.setFont("times");
     doc.setFontStyle("normal");
     doc.text("This is centred text.", 105, 80, null, null, "center");
@@ -1437,7 +1455,7 @@ if (window.location.pathname == `/links/pagos`) {
     doc.text("This is right aligned text", 200, 100, null, null, "right");
     doc.text("And some more", 200, 110, null, null, "right");
     doc.text("Back to left", 20, 120);
-
+ 
     doc.text("10 degrees rotated", 20, 140, null, 10);
     doc.text("-10 degrees rotated", 20, 160, null, -10);
     doc.autoTable({ html: '#datatable' })
@@ -1482,11 +1500,11 @@ if (window.location.pathname == `/links/reportes`) {
     );
 
     /*const doc = new jsPDF()
-
+ 
     // It can parse html:
     // <table id="my-table"></table>
     doc.autoTable({ html: '#my-table' })
-
+ 
     // Or use javascript directly:
     doc.autoTable({
         head: [['Name', 'Email', 'Country']],
@@ -1516,13 +1534,13 @@ if (window.location.pathname == `/links/reportes`) {
             $('#ModalOrden').modal('toggle');
         }
     });
-
+ 
     $('#ModalOrden').on('hidden.bs.modal', function () {
         $('#datatable2 tr.selected').toggleClass('selected');
         $("#ModalOrden input").val('');
         $("#car").attr("src", '/img/car.jpg');
     });
-
+ 
     // Guardar o Actualizar Orden
     $('#guardarOrden').on('click', function () {
         RecogerDatos()
@@ -1552,7 +1570,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
         $('span.total').mask('000,000,000', { reverse: true });
         $('span.total').text(Moneda(total));
-
+ 
     });*/
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
@@ -3549,6 +3567,9 @@ if (window.location.pathname == `/links/orden`) {
                                 } else if (fecha < new Date()) {
                                     SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
                                     Dt();
+                                } else if (data[0].estado != 9) {
+                                    SMSj('error', 'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
+                                    Dt();
                                 } else {
                                     var ahorr = Math.round(precio * data[0].descuento / 100)
                                     $('#bonoid').val(data[0].id);
@@ -4022,7 +4043,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         var fila = $(this).parents('tr');
         var data = abonos.row(fila).data();
         var dts = data
-        console.log(data)
         $.ajax({
             type: 'PUT',
             url: '/links/solicitudes/' + $(this).text(),
@@ -4810,4 +4830,126 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             }
         ]
     });
+};
+/////////////////////////////* CUPONES */////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/cupones`) {
+
+    var cupones = $('#tablacupones').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [
+            {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>
+                        </div>`,
+                attr: {
+                    title: 'Agregar-Clientes',
+                    id: 'agrecli'
+                },
+                className: 'btn btn-outline-dark',
+                action: function () {
+                    $('#agrecli').hide("slow")
+                    $("#addcliente").show("slow");
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: true,
+        order: [[1, "desc"]], //[0, "asc"]
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/cupones",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#datatable_filter').prepend("<h3 class='text-center mt-2'>CLIENTES</h3>");
+        },
+        columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
+            { data: "id" },
+            { data: "pin" },
+            {
+                data: "descuento",
+                render: function (data, method, row) {
+                    return data + '%';
+                }
+            },
+            {
+                data: "fecha",
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : '';
+                }
+            },
+            {
+                data: "estado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 14:
+                            return `<span class="badge badge-pill badge-dark">Usado</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-danger">Inactivo</span>`
+                    }
+                }
+            },
+            {
+                data: "ahorro",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "nombre" },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
+    cupones.on('click', '.dropdown-item', function () {
+        var fila = $(this).parents('tr');
+        var data = cupones.row(fila).data();
+        var dts = data
+        $.ajax({
+            type: 'POST',
+            url: '/links/cupones/' + $(this).text(),
+            data: dts,
+            success: function (data) {
+                cupones.ajax.reload(null, false)
+                if (data) {
+                    SMSj('success', `Cupon de descuento enviado al solicitante correctamente`);
+                } else {
+                    SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                }
+            }
+        })
+    })
 };

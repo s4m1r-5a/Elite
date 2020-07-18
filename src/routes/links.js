@@ -399,6 +399,77 @@ router.post('/recibo', async (req, res) => {
     //uploads/
 
 });
+//////////////* CUPONES *//////////////////////////////////
+router.get('/cupones', isLoggedIn, async (req, res) => {
+    res.render('links/cupones');
+});
+router.post('/cupon', isLoggedIn, async (req, res) => {
+    const { dto, std, cliente, ctn } = req.body;
+    if (ctn < 2) {
+        var hora = moment().format('YYYY-MM-DD HH:mm');
+        var pin = ID(5);
+        const cupon = {
+            pin,
+            descuento: dto ? dto : 5,
+            estado: std ? std : 3,
+            clients: cliente ? cliente : req.user.cli
+        }
+        await pool.query('INSERT INTO cupones SET ? ', cupon);
+        const klint = await pool.query(`SELECT * FROM  clientes WHERE idc = ?`, cupon.clients);
+        const encargado = await pool.query(`SELECT u.fullname, u.cel, u.username FROM encargos e INNER JOIN users u ON e.user = u.id  WHERE e.cargo = 'CUPONES'`);
+        const en = encargado[0]
+        var nom = en.fullname.split(" ")[0];
+        var options = {
+            method: 'POST',
+            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+            form: {
+                "phone": '57' + en.cel,
+                "body": `_*${nom}* tienes una solicitu de un *CUPON ${pin}* del *${cupon.descuento}%* por aprobar de *${klint[0].nombre}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
+            }
+        };
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+        await sms('57' + en.cel, `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`);
+        res.send({ tipo: 'success', msj: 'Solicitud de cupon enviada correctamente' });
+    } else {
+        res.send({ tipo: 'error', msj: 'Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud' });
+    }
+});
+router.post('/cupones', isLoggedIn, async (req, res) => {
+
+    var d = req.user.admin > 0 ? '' : 'WHERE c.clients = ?';
+    var sql = `SELECT c.id, c.pin, c.descuento, c.fecha, c.estado, v.ahorro, p.mz, p.n, t.proyect, cl.nombre, cl.movil, 
+    cl.email FROM cupones c LEFT JOIN preventa v ON c.producto = v.id LEFT JOIN productosd p ON v.lote = p.id 
+    LEFT JOIN productos t ON p.producto = t.id LEFT JOIN clientes cl ON c.clients = cl.idc ${d} `
+
+    const cupones = await pool.query(sql, req.user.cli);
+    respuesta = { "data": cupones };
+    res.send(respuesta);
+
+});
+router.post('/cupones/:d', isLoggedIn, async (req, res) => {
+    const { d } = req.params;
+    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+    if (d === 'Aprobar') {
+        await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
+        var options = {
+            method: 'POST',
+            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+            form: {
+                "phone": '57' + movil,
+                "body": `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`
+            }
+        };
+        request(options, function (error, response, body) {
+            if (error) return console.error('Failed: %s', error.message);
+            console.log('Success: ', body);
+        });
+        await sms('57' + movil, `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`);
+        res.send(true);
+    }
+});
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
     moment.locale('es');

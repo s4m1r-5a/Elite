@@ -151,6 +151,13 @@
 				</div>
 			</li>
 			<li class="nav-item dropdown">
+				<a class="nav-icon" href="#" data-toggle="modal" data-target="#Mcupon">
+					<div class="position-relative">
+						<i class="align-middle" data-feather="tag"></i>
+					</div>
+				</a>
+			</li>
+			<li class="nav-item dropdown">
 				<a class="nav-icon" href="#" data-toggle="modal" data-target="#afiliar">
 					<div class="position-relative">
 						<i class="align-middle" data-feather="user-plus"></i>
@@ -183,6 +190,44 @@
 		</ul>
 	</div>
 </nav>
+<!-- BEGIN primary modal -->
+<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#defaultModalPrimary">
+	Primary
+</button>-->
+<div class="modal fade" id="Mcupon" tabindex="-1" role="dialog" aria-hidden="true">
+	<div class="modal-dialog modal-sm" role="document">
+		<div class="modal-content">
+			<div class="modal-header">
+				<i class="feather-lg text-danger" data-feather="tag"></i>
+				<h1 class="modal-title ml-1">Cupon</h1>
+				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
+					<span aria-hidden="true">&times;</span>
+				</button>
+			</div>
+			<div class="modal-body m-3">
+				<div class="row">
+					<div class="col-sm-9">
+						<!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
+							data-mask="99999" autocomplete="off" style="width: 50%;">-->
+						<p>Seleciona el descuento que quieres generar para el cupon, si se aprueba
+							reciviras un WhatsApp con el cupon</p>
+					</div>
+					<div class="col-sm-3 text-center">
+						<select id="porcntgd" style="text-align-last:center;">
+							<option value="3">3%</option>
+							<option value="5" selected>5%</option>
+							<option value="7">7%</option>
+							<option value="10">10%</option>
+						</select>
+					</div>
+				</div>
+				<button type="button" id="pedircupon" class="btn btn-sm btn-outline-dark float-right"
+					data-dismiss="modal">Solicitar cupon</button>
+			</div>
+		</div>
+	</div>
+</div>
+<!-- END primary modal -->
 <!-- BEGIN primary modal -->
 <!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#defaultModalPrimary">
 	Primary
