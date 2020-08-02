@@ -38,6 +38,20 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 router.get('/prueba', async (req, res) => {
+    await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
+    SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
+    WHERE p.estado = 1`);
+    await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
+    WHERE p.cupon IS NULL`)
+    await pool.query(
+        `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.stado = ?`,
+        [
+            {
+                's.stado': 3,
+                'c.estado': 3
+            }, 6
+        ]
+    );
     res.send(true);
 })
 //////////////////* PRODUCTOS */////////////////////
@@ -498,39 +512,45 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
-    console.log(req.body)
-    const separ = {
-        lote,
-        cliente: client[0],
-        cliente2: client[1] ? client[1] : null,
-        cliente3: client[2] ? client[2] : null,
-        cliente4: client[3] ? client[3] : null,
-        asesor: req.user.id,
-        numerocuotaspryecto,
-        extraordinariameses: extraordinariameses ? extraordinariameses : 0,
-        cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
-        cupon: cupon ? cupon : 1,
-        inicialdiferida: inicialdiferida || null,
-        tipobsevacion, obsevacion,
-        ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
-        separar: separacion.replace(/\./g, ''),
-        extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
-        iniciar, cuot
-    };
-    console.log(separ)
-    const h = await pool.query('INSERT INTO preventa SET ? ', separ);
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
-    cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
+    //console.log(req.body)
+    const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
+    if (!fp.length) {
+        req.flash('error', 'Separación no realizada a existe una orden con este lote');
+        res.redirect(`/links/orden?id=${lote}&h=${ahora}`);
+    } else {
+        const separ = {
+            lote,
+            cliente: client[0],
+            cliente2: client[1] ? client[1] : null,
+            cliente3: client[2] ? client[2] : null,
+            cliente4: client[3] ? client[3] : null,
+            asesor: req.user.id,
+            numerocuotaspryecto,
+            extraordinariameses: extraordinariameses ? extraordinariameses : 0,
+            cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
+            cupon: cupon ? cupon : 1,
+            inicialdiferida: inicialdiferida || null,
+            tipobsevacion, obsevacion,
+            ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
+            separar: separacion.replace(/\./g, ''),
+            extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
+            iniciar, cuot
+        };
+        //console.log(separ)
+        const h = await pool.query('INSERT INTO preventa SET ? ', separ);
+        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
+        cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
 
-    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
-    await ncuota.map((t, i) => {
-        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
-    });
-    await pool.query(cuotas.slice(0, -1));
+        var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
+        await ncuota.map((t, i) => {
+            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
+        });
+        await pool.query(cuotas.slice(0, -1));
 
-    req.flash('success', 'Separación realizada exitosamente');
-    res.redirect('/links/reportes');
+        req.flash('success', 'Separación realizada exitosamente');
+        res.redirect('/links/reportes');
+    }
 });
 router.get('/cel/:id', async (req, res) => {
     const { id } = req.params
@@ -895,17 +915,50 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
+    var Eli = (img) => {
+        fs.exists(img, function (exists) {
+            if (exists) {
+                fs.unlink(img, function (err) {
+                    if (err) throw err;
+                    console.log('Archivo eliminado');
+                });
+            } else {
+                console.log('El archivo no exise');
+            }
+        });
+    }
     if (id === 'Declinar') {
-        await pool.query(
+        /*await pool.query(
             `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.ids = ?`,
-            [
-                {
-                    's.stado': 6,
-                    'c.estado': 6
-                }, req.body.ids
-            ]
-        );
-
+            [{ 'c.estado': 3 }, req.body.ids]
+        );*/
+        const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
+        await pool.query(`DELETE FROM solicitudes WHERE ids = ?`, req.body.ids);
+        var imagenes = img.indexOf(",") > 0 ? img.split(",") : img
+        if (Array.isArray(imagenes)) {
+            imagenes.map((e) => {
+                Eli(e);
+            })
+        } else {
+            Eli(imagenes);
+        }
+        if (cel) {
+            var movil = cel.indexOf("-") > 0 ? cel.replace(/-/g, "") : cel
+            var celu = movil.indexOf(" ") > 0 ? movil : '57' + movil
+            var options = {
+                method: 'POST',
+                url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+                form: {
+                    "phone": celu,
+                    "body": `_*${fullname.split(" ")[0]}*_\n_Solicitud de pago *RECHAZADA*_\n_Proyecto *${proyect}*_\n_Manzana *${mz}* Lote *${n}*_\n_Cliente *${nombre}*_\n\n_*DESCRIPCIÓN*:_\n_${por}_\n\n_*GRUPO ELITE FICA RAÍZ*_`
+                }
+            };
+            request(options, function (error, response, body) {
+                if (error) return console.error('Failed: %s', error.message);
+                console.log('Success: ', body);
+            });
+            await sms(celu, `${fullname.split(",")[0]} tu solicitud de pago fue RECHAZADA MZ${mz} LT${n} ${por}`);
+        }
         res.send(true);
 
     } else {
