@@ -4259,25 +4259,34 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             toggle: true
         });
         $('.dropdown-item').on('click', function () {
-            $.ajax({
-                type: 'PUT',
-                url: '/links/solicitudes/' + $(this).text(),
-                data: dts,
-                success: function (data) {
-                    if (data) {
-                        SMSj('success', `Solicitud procesada correctamente`);
-                        table.ajax.reload(null, false)
-                    } else {
-                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                    }
+            var accion = $(this).text(), e = 1, porque = '';
+            if (accion === 'Declinar') {
+                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
+                if (porque != null) {
+                    dts.por = porque;
+                    e = 2
                 }
-            })
+            }
+            if (accion !== 'Declinar' || e === 2) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/links/solicitudes/' + accion,
+                    data: dts,
+                    success: function (data) {
+                        if (data) {
+                            SMSj('success', `Solicitud procesada correctamente`);
+                            table.ajax.reload(null, false)
+                        } else {
+                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                        }
+                    }
+                })
+            }
         })
         $('#Modalimg').one('hidden.bs.modal', function () {
             fila.toggleClass('selected');
         })
     })
-
     /**/
     var abonos = $('#abonos').DataTable({
         deferRender: true,
@@ -4350,21 +4359,30 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     });
     abonos.on('click', '.dropdown-item', function () {
         var fila = $(this).parents('tr');
-        var data = abonos.row(fila).data();
-        var dts = data
-        $.ajax({
-            type: 'PUT',
-            url: '/links/solicitudes/' + $(this).text(),
-            data: dts,
-            success: function (data) {
-                abonos.ajax.reload(null, false)
-                if (data) {
-                    SMSj('success', `Solicitud procesada correctamente`);
-                } else {
-                    SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                }
+        var dts = abonos.row(fila).data();
+        var accion = $(this).text(), e = 1, porque = '';
+        if (accion === 'Declinar') {
+            porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
+            if (porque != null) {
+                dts.por = porque;
+                e = 2
             }
-        })
+        }
+        if (accion !== 'Declinar' || e === 2) {
+            $.ajax({
+                type: 'PUT',
+                url: '/links/solicitudes/' + $(this).text(),
+                data: dts,
+                success: function (data) {
+                    abonos.ajax.reload(null, false)
+                    if (data) {
+                        SMSj('success', `Solicitud procesada correctamente`);
+                    } else {
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
+                }
+            })
+        }
     })
     var comisiones = $('#comisiones').DataTable({
         deferRender: true,
