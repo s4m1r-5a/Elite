@@ -655,6 +655,63 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(orden)
     res.render('links/ordendeseparacion', { orden, id });
 })
+router.get('/ordn/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params
+    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
+    p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
+    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.tipobsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, 
+    pd.valor, pt.proyect, c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
+    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
+    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+    LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+    INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
+
+    const orden = await pool.query(sql, id);
+    res.render('links/ordn', { orden, id });
+})
+router.post('/editarorden', isLoggedIn, async (req, res) => {
+    console.log(req.body);
+    const { orden, separacion, cuotaInicial, vrm2, cuotaFinanciacion, separar,
+        ahorro, idpin, mxr, mss, porcentage, inicial, valor } = req.body;
+    const actualizar = {
+        'p.extran': mxr, 'p.extraordinariameses': mss, 'p.vrmt2': vrm2, 'p.iniciar': porcentage, 'p.ahorro': ahorro,
+        'p.cuot': cuotaFinanciacion, 'l.inicial': inicial, 'l.valor': valor, 'c.cuota': cuotaFinanciacion//'p.obsevacion',
+    }
+    if (separar > 0) {
+        actualizar['p.separar'] = separacion;
+        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'SEPARACION'`,
+            [{ cuota: separacion }, orden]);
+    }
+    if (cuotaInicial > 0) {
+        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'INICIAL'`,
+            [{ cuota: cuotaInicial }, orden]);
+    }
+    idpin ? actualizar['p.cupon'] = idpin : '';
+
+    var cf = mss == 3 ? `AND c.estado = 3 AND c.tipo = 'FINANCIACION' AND MONTH(c.fechs) != 6 AND MONTH(c.fechs) != 12`
+        : mss == 2 ? `AND c.estado = 3 AND c.tipo = 'FINANCIACION' AND MONTH(c.fechs) != 12`
+            : mss == 1 ? `AND c.estado = 3 AND c.tipo = 'FINANCIACION' AND MONTH(c.fechs) != 6`
+                : `AND c.estado = 3 AND c.tipo = 'FINANCIACION'`;
+
+    await pool.query(`UPDATE cuotas c 
+    INNER JOIN preventa p ON c.separacion = p.id
+    INNER JOIN productosd l ON p.lote = l.id SET ? 
+    WHERE c.separacion = ? ${cf}`,
+        [actualizar, orden]);
+
+    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
+    p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
+    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.tipobsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, 
+    pd.valor, pt.proyect, c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
+    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
+    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+    LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+    INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
+
+    const ordn = await pool.query(sql, orden);
+    console.log(ordn)
+    res.send(ordn);
+});
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { p, i } = req.body;
@@ -665,11 +722,12 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     var u = Math.round((p - i) / 2);
     var m = (p - i) / 2;
     var v = i / 2;
-    console.log(o)
+    //console.log(orden)
     w = await orden
         .map((t, c) => {
             if (t.tipo === 'SEPARACION') {
                 s = {
+                    id2: '',
                     ncuota2: '',
                     fecha2: '',
                     cuota2: '',
@@ -679,6 +737,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             }
             if (t.tipo === 'INICIAL' && i === '1') {
                 s = {
+                    id2: '',
                     ncuota2: '',
                     fecha2: '',
                     cuota2: '',
@@ -688,6 +747,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 
             } else if (t.tipo === 'INICIAL' && t.ncuota > e) {
                 s = {
+                    id2: t.id,
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,
                     cuota2: t.cuota,
@@ -699,6 +759,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                 y.push(t)
                 if (v !== e && t.ncuota === e) {
                     h = {
+                        id2: '',
                         ncuota2: '',
                         fecha2: '',
                         cuota2: '',
@@ -709,6 +770,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
             }
             if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
                 s = {
+                    id2: t.id,
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,
                     cuota2: t.cuota,
@@ -720,6 +782,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                 o.push(t)
                 if (m !== u && t.ncuota === u) {
                     h = {
+                        id2: '',
                         ncuota2: '',
                         fecha2: '',
                         cuota2: '',
