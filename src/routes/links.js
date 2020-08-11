@@ -27,6 +27,18 @@ const transpoter = nodemailer.createTransport({
     }
 })
 moment.locale('es');
+
+var url = 'https://bin.chat-api.com/1bd03zz1'
+/*request(url, función(error, respuesta, cuerpo) {
+    if(!error) {
+        console.log(body);
+    }
+});*/
+request(url, function (error, response, body) {
+    if (error) return console.error('Failed: %s', error.message);
+
+    console.log('Success: ', body);
+});
 cron.schedule("50 23 * * *", async () => {
     await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
     SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
