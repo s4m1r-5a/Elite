@@ -202,6 +202,25 @@
                                                                     <th>
                                                                         <i class="feather-md"
                                                                             data-feather="dollar-sign"></i>
+                                                                        Tienes un BONO ?
+                                                                    </th>
+                                                                    <td>
+                                                                        <div class="d-inline-block float-right">
+                                                                            <input
+                                                                                class="form-control-no-border edi direccion d text-right Total2"
+                                                                                type="text"
+                                                                                placeholder="Ingrese aqui el BONO"
+                                                                                autocomplete="off"
+                                                                                style="padding: 1px; width: 100%;"
+                                                                                name="Bono" data-mask="000.000.000"
+                                                                                data-mask-selectonfocus="true">
+                                                                        </div>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="dollar-sign"></i>
                                                                         Total Factura
                                                                     </th>
                                                                     <td>
@@ -236,7 +255,7 @@
                                                                                 placeholder="Ingrese aqui otro valor"
                                                                                 autocomplete="off"
                                                                                 style="padding: 1px; width: 100%;"
-                                                                                name="direccion" data-mask="000.000.000"
+                                                                                name="otrovalor" data-mask="000.000.000"
                                                                                 data-mask-reverse="true"
                                                                                 data-mask-selectonfocus="true">
                                                                         </div>
@@ -399,6 +418,29 @@
                                                         </form>
                                                         <div class="card border-primary mb-3 pgofi"
                                                             style="display: none;">
+                                                            <div class="card">
+                                                                <div class="card-body border">
+                                                                    <label class="custom-control custom-radio">
+                                                                        <input name="custom-radio" type="radio"
+                                                                            class="custom-control-input forma" disabled>
+                                                                        <span class="custom-control-label">PayPal</span>
+                                                                        <img src="/img/pagos/pagos15.png"
+                                                                            class="rounded" alt="Ashley"
+                                                                            style="width: 80%;">
+                                                                    </label>
+                                                                </div>
+                                                            </div>
+                                                            <div class="card">
+                                                                <div class="card-body border">
+                                                                    <label class="custom-control custom-radio">
+                                                                        <input name="custom-radio" type="radio"
+                                                                            class="custom-control-input forma" id="pay">
+                                                                        <span class="custom-control-label">Payu</span>
+                                                                        <img src="/img/pagos/pagos.png" class="rounded"
+                                                                            alt="Ashley" style="width: 80%;">
+                                                                    </label>
+                                                                </div>
+                                                            </div>
                                                             <div class="row no-gutters">
                                                                 <div class="col-md-5">
                                                                     <img src="/img/recibo.gif" class="card-img"
@@ -420,8 +462,7 @@
                                                                             <input type="hidden" id="lt" name="lt">
                                                                             <input id="ahora" type="hidden"
                                                                                 name="ahora">
-                                                                            <input class="form-control-no-border edi"
-                                                                                type="text" id="recibo"
+                                                                            <input class="edi" type="text" id="recibo"
                                                                                 placeholder="N° de recibo aqui..."
                                                                                 data-toggle="tooltip"
                                                                                 data-placement="top"
@@ -474,6 +515,10 @@
         </div>
     </div>
 </main>
+
+
+
+
 <table class="table table-sm my-2" id="tablarecibo">
     <tbody>
         <tr>
@@ -601,8 +646,8 @@
                 <div class="d-inline-block float-right">
                     <input class="form-control-no-border edi direccion d text-right Total2" type="text"
                         placeholder="Ingrese aqui otro valor" autocomplete="off" style="padding: 1px; width: 100%;"
-                        name="direccion" data-mask="000.000.000" data-mask-reverse="true"
-                        data-mask-selectonfocus="true" value="$0">
+                        name="direccion" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true"
+                        value="$0">
                 </div>
             </td>
         </tr>

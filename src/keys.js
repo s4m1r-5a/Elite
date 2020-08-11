@@ -1,5 +1,5 @@
 module.exports = {
-    database0: {
+    database: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
@@ -7,7 +7,7 @@ module.exports = {
         database: 'pruebasElite',
         port: 3306
     },
-    database: {
+    database0: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
@@ -58,7 +58,7 @@ module.exports = {
         ]
     },
     Soat: {
-        secret_id: 'sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM',
+        secret_id: 'yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP',
         client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
         otro: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.MTI4Mg.RO7HFV11U1YNtFNpPnCcOIaQcHU72f7tPn3HoOCMXOg',
         v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`
