@@ -50,7 +50,7 @@ router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
 router.get('/prueba', async (req, res) => {
-    await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
+    /*await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
     SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
     WHERE p.estado = 1`);
     await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
@@ -63,7 +63,31 @@ router.get('/prueba', async (req, res) => {
                 'c.estado': 3
             }, 6
         ]
-    );
+    );*/
+    //var request = require("request");
+
+    var options = {
+        method: 'POST',
+        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
+        headers:
+        {
+            accept: 'application/json',
+            'content-type': 'application/x-www-form-urlencoded',
+            authorization: `Basic ${Buffer.from("37eb1267-6c33-46b1-a76f-33a553fd812f:yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP").toString('base64')}` 
+            //'Basic base64(37eb1267-6c33-46b1-a76f-33a553fd812f:sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM)'
+        },
+        form:
+        {
+            grant_type: 'client_credentials',
+            scope: `Transfer-Intention:write:app`
+        }
+    };
+
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+
+        console.log('Success: ', body);
+    });
     res.send(true);
 })
 //////////////////* PRODUCTOS */////////////////////
@@ -523,7 +547,7 @@ router.get('/orden', isLoggedIn, async (req, res) => {
 router.post('/orden', isLoggedIn, async (req, res) => {
     const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
-        estado, ncuota, tipo, tipobsevacion, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
+        estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
     //console.log(req.body)
     const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
     if (!fp.length) {
@@ -542,7 +566,6 @@ router.post('/orden', isLoggedIn, async (req, res) => {
             cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
             cupon: cupon ? cupon : 1,
             inicialdiferida: inicialdiferida || null,
-            tipobsevacion, obsevacion,
             ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
             separar: separacion.replace(/\./g, ''),
             extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
@@ -691,8 +714,8 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
     sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
-    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.tipobsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, 
-    pd.valor, pt.proyect, c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
+    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
+    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
     FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
     INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
     LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
@@ -733,8 +756,8 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
 
     sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
-    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.tipobsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, 
-    pd.valor, pt.proyect, c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
+    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
+    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento 
     FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
     INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
     LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
