@@ -1847,6 +1847,18 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
+
+    tableOrden.on('click', 'tr', function () {
+        //var fila = $(this).parents('tr');
+        var data = tableOrden.row(this).data();
+        $('#idanular').val(data.id)
+
+        /* $('#Anulacion').one('shown.bs.modal', function () {
+             //clientes.ajax.reload(null, false)
+             $('#idanular').val(data.id);
+         })//.modal('hide');*/
+
+    })
 }
 //////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/')[3]}`) {

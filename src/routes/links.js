@@ -845,8 +845,8 @@ router.get('/reportes', isLoggedIn, (req, res) => {
     //Desendentes(15)
     res.render('links/reportes');
 });
-router.put('/reportes', isLoggedIn, async (req, res) => {
-
+router.post('/anular', isLoggedIn, async (req, res) => {
+    console.log(req.body);
 });
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;

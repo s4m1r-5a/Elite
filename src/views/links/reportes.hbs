@@ -92,59 +92,63 @@
                 </button>
             </div>
             <div class="modal-body m-3">
-                <div class="row">
-                    <div class="col-sm-12">
-                        <div class="mb-1 float-right">
-                            <select id="porcntgd" data-toggle="tooltip" data-placement="top" data-container="body"
-                                title="Seleccione un motivo para la anulacion"
-                                style="text-align-last:center;padding:1px;">
-                                <option selected>Motivo de la anulacion ?</option>
-                                <option value="Cambio">Cambio de Producto</option>
-                                <option value="Error">Error al crear la orden</option>
-                                <option value="Desistimiento">Cliene desiste del Producto</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div class="col-sm-12">
-                        <!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
-							data-mask="99999" autocomplete="off" style="width: 50%;">-->
-                        <div class="mb-1 mt-2">
-                            <i class="feather-md text-primary mr-0" data-feather="align-left"
-                                style="margin-top: -10.5%;"></i>
-                            <textarea id="smsdescripcion" class="form-control-no-border edi"
-                                placeholder="Deja en claro el motivo de esta anulacion" cols="50" rows="2"
-                                autocomplete="off" data-toggle="tooltip" data-placement="top" data-container="body"
-                                title="Deje en claro el motivo de la anulacion" style="width: 90%;"
-                                maxlength="300"></textarea>
-                            <div class="progress progress-sm shadow-sm mb-0 reditarh" style="display: none;">
-                                <div class="progress-bar bg-primary" role="progressbar"
-                                    style="height: 20%; width: 100%"></div>
+                <form id="enanul" action="/links/anular" method="POST">
+                    <input id="idanular" type="hidden" name="idan">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <div class="mb-1 float-right">
+                                <select id="porcntgd" data-toggle="tooltip" data-placement="top" data-container="body"
+                                    title="Seleccione un motivo para la anulacion" name="causa"
+                                    style="text-align-last:center;padding:1px;" required>
+                                    <option value="">Motivo de la anulacion ?</option>
+                                    <option value="CAMBIO">Cambio de Producto</option>
+                                    <option value="ERROR">Error al crear la orden</option>
+                                    <option value="DESISTIMIENTO">Cliene desiste del Producto</option>
+                                </select>
                             </div>
                         </div>
-                        <hr>
-                        <p>
-                            Ahora bien despues de haber dejado claro el motivo, debes decidir que hacer con el
-                            dinero que esta persona a dado, en el caso de que lo halla echo que deseas hacer con el.
-                        </p>
+                        <div class="col-sm-12">
+                            <!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
+							data-mask="99999" autocomplete="off" style="width: 50%;">-->
+                            <div class="mb-1 mt-2">
+                                <i class="feather-md text-primary mr-0" data-feather="align-left"
+                                    style="margin-top: -10.5%;"></i>
+                                <textarea class="form-control-no-border edi" name="motivo"
+                                    placeholder="Deja en claro el motivo de esta anulacion" cols="50" rows="2"
+                                    autocomplete="off" data-toggle="tooltip" data-placement="top" data-container="body"
+                                    title="Deje en claro el motivo de la anulacion" style="width: 90%;" maxlength="300"
+                                    required></textarea>
+                                <div class="progress progress-sm shadow-sm mb-0 reditarh" style="display: none;">
+                                    <div class="progress-bar bg-primary" role="progressbar"
+                                        style="height: 20%; width: 100%"></div>
+                                </div>
+                            </div>
+                            <hr>
+                            <p>
+                                Ahora bien despues de haber dejado claro el motivo, debes decidir que hacer con el
+                                dinero que esta persona a dado, en el caso de que lo halla echo que deseas hacer con el.
+                            </p>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <select data-toggle="tooltip" data-placement="top" data-container="body" name="qhacer"
+                                required title="Seleccione un motivo para la anulacion"
+                                style="text-align-last:center;padding:1px;">
+                                <option value="">Seleciona una opcion</option>
+                                <option value="BONO">Generar bono</option>
+                                <option value="DEVOLUCION">Generar devolucion</option>
+                            </select>
+                            <div class="float-right" style="border-left:1px solid darkblue;height: 100px;"></div>
+                        </div>
+                        <div class="col-sm-6 text-center">
+                            <p>
+                                Recuerda que las opciones que escojas estan sujetas a terminos y condiciones
+                                establecidas
+                                por Grupo Elite
+                            </p>
+                        </div>
                     </div>
-                    <div class="col-sm-6 text-center">
-                        <select id="porcntgd" data-toggle="tooltip" data-placement="top" data-container="body"
-                            title="Seleccione un motivo para la anulacion" style="text-align-last:center;padding:1px;">
-                            <option selected>Seleciona una opcion</option>
-                            <option value="Cambio">Generar bono</option>
-                            <option value="Error">Generar devolucion</option>
-                        </select>
-                        <div class="float-right" style="border-left:1px solid darkblue;height: 100px;"></div>
-                    </div>
-                    <div class="col-sm-6 text-center">
-                        <p>
-                            Recuerda que las opciones que escojas estan sujetas a terminos y condiciones establecidas
-                            por Grupo Elite
-                        </p>
-                    </div>
-                </div>
-                <button type="button" id="pedircupon" class="btn btn-sm btn-outline-danger float-right"
-                    data-dismiss="modal">Anular</button>
+                    <button type="submit" class="btn btn-sm btn-outline-danger float-right">Anular</button>
+                </form>
             </div>
         </div>
     </div>
