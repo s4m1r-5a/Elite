@@ -61,7 +61,7 @@ router.get('/prueba', async (req, res) => {
         {
             accept: 'application/json',
             'content-type': 'application/x-www-form-urlencoded',
-            authorization: `Basic ${Buffer.from("37eb1267-6c33-46b1-a76f-33a553fd812f:yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP").toString('base64')}` 
+            authorization: `Basic ${Buffer.from("37eb1267-6c33-46b1-a76f-33a553fd812f:yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP").toString('base64')}`
             //'Basic base64(37eb1267-6c33-46b1-a76f-33a553fd812f:sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM)'
         },
         form:
@@ -412,8 +412,9 @@ router.post('/pagos', async (req, res) => {
     res.send(hash);
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibo, ahora, concpto, lt } = req.body;
+    const { total, factrs, id, recibo, ahora, concpto, lt, formap } = req.body;
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
+    console.log(req.body)
     if (recibe.length > 0) {
         req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
         res.redirect('/links/pagos');
@@ -424,7 +425,7 @@ router.post('/recibo', async (req, res) => {
         })
         const pago = {
             fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
-            concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto
+            concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap
         }
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
@@ -951,10 +952,6 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         });
     }
     if (id === 'Declinar') {
-        /*await pool.query(
-            `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.ids = ?`,
-            [{ 'c.estado': 3 }, req.body.ids]
-        );*/
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
         await pool.query(`DELETE FROM solicitudes WHERE ids = ?`, req.body.ids);
         var imagenes = img.indexOf(",") > 0 ? img.split(",") : img
@@ -966,6 +963,10 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Eli(imagenes);
         }
         if (cel) {
+            await pool.query(
+                `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.ids = ?`,
+                [{ 'c.estado': 3 }, req.body.ids]
+            );
             var movil = cel.indexOf("-") > 0 ? cel.replace(/-/g, "") : cel
             var celu = movil.indexOf(" ") > 0 ? movil : '57' + movil
             var options = {

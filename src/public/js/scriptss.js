@@ -1216,19 +1216,24 @@ if (window.location.pathname == `/links/pagos`) {
         var resul = $(this).val();
         $('#Total, #Total2').val(resul)
     });
-    $('form').submit(function () {
-        $('input').prop('disabled', false);
-        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'))
-        var fd = $('form').serialize();
-        $.ajax({
-            url: '/links/pagos',
-            data: fd,
-            type: 'POST',
-            async: false,
-            success: function (data) {
-                $('input[name="signature"]').val(data);
-            }
-        });
+    $('form').submit(function (e) {
+        if ($('#Total2').val() === '0') {
+            SMSj('error', 'El total debe ser diferente a cero');
+            e.preventDefault()
+        } else {
+            $('input').prop('disabled', false);
+            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'))
+            var fd = $('form').serialize();
+            $.ajax({
+                url: '/links/pagos',
+                data: fd,
+                type: 'POST',
+                async: false,
+                success: function (data) {
+                    $('input[name="signature"]').val(data);
+                }
+            });
+        }
     });
 
     var doc = new jsPDF('l', 'mm', 'a5')
