@@ -207,13 +207,12 @@
                                                                     <td>
                                                                         <div class="d-inline-block float-right">
                                                                             <input
-                                                                                class="form-control-no-border edi direccion d text-right Total2"
+                                                                                class="form-control-no-border edi text-right"
                                                                                 type="text"
                                                                                 placeholder="Ingrese aqui el BONO"
                                                                                 autocomplete="off"
                                                                                 style="padding: 1px; width: 100%;"
-                                                                                name="Bono" data-mask="000.000.000"
-                                                                                data-mask-selectonfocus="true">
+                                                                                name="Bono">
                                                                         </div>
                                                                     </td>
                                                                 </tr>
@@ -418,37 +417,54 @@
                                                         </form>
                                                         <div class="card border-primary mb-3 pgofi"
                                                             style="display: none;">
-                                                            <div class="card">
-                                                                <div class="card-body border">
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="custom-radio" type="radio"
-                                                                            class="custom-control-input forma" disabled>
-                                                                        <span class="custom-control-label">PayPal</span>
-                                                                        <img src="/img/pagos/pagos15.png"
-                                                                            class="rounded" alt="Ashley"
-                                                                            style="width: 80%;">
-                                                                    </label>
+                                                            <form enctype="multipart/form-data" id="enrecb"
+                                                                action="/links/recibo" method="POST">
+                                                                <div class="card">
+                                                                    <div class="card-header">
+                                                                        <!--<img src="/img/bcolom.png" width="60" height="60"
+                                                                        alt="Ashley Briggs"
+                                                                        class="rounded-circle mt-3 img float-right">-->
+                                                                        <img src="/img/bancolombia-logo.png" width="150"
+                                                                            height="45" alt="Ashley Briggs"
+                                                                            class="float-right">
+                                                                    </div>
+                                                                    <div class="card-body">
+                                                                        <label class="custom-control custom-radio">
+                                                                            <input name="formap" type="radio"
+                                                                                class="custom-control-input forma"
+                                                                                value="CTA-CTE-8509713538" required>
+                                                                            <span class="custom-control-label">CTA CTE
+                                                                                <mark>50900011438</mark></span>
+                                                                        </label>
+                                                                        <label class="custom-control custom-radio">
+                                                                            <input name="formap" type="radio"
+                                                                                class="custom-control-input forma"
+                                                                                value="CTA-AHO-8509713538" required>
+                                                                            <span class="custom-control-label">CTA AHO
+                                                                                <mark>8509713538</mark></span>
+                                                                        </label>
+                                                                        <label class="custom-control custom-radio">
+                                                                            <input name="formap" type="radio"
+                                                                                class="custom-control-input forma"
+                                                                                value="EFECTIVO" required>
+                                                                            <span class="custom-control-label">
+                                                                                <mark>EFECTIVO</mark></span>
+                                                                        </label>
+                                                                        <label class="custom-control custom-radio">
+                                                                            <input name="formap" type="radio"
+                                                                                class="custom-control-input forma"
+                                                                                value="CHEQUE" required>
+                                                                            <span class="custom-control-label">
+                                                                                <mark>CHEQUE</mark></span>
+                                                                        </label>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
-                                                            <div class="card">
-                                                                <div class="card-body border">
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="custom-radio" type="radio"
-                                                                            class="custom-control-input forma" id="pay">
-                                                                        <span class="custom-control-label">Payu</span>
-                                                                        <img src="/img/pagos/pagos.png" class="rounded"
-                                                                            alt="Ashley" style="width: 80%;">
-                                                                    </label>
-                                                                </div>
-                                                            </div>
-                                                            <div class="row no-gutters">
-                                                                <div class="col-md-5">
-                                                                    <img src="/img/recibo.gif" class="card-img"
-                                                                        alt="...">
-                                                                </div>
-                                                                <div class="col-md-7">
-                                                                    <form enctype="multipart/form-data"
-                                                                        action="/links/recibo" method="POST">
+                                                                <div class="row no-gutters">
+                                                                    <div class="col-md-5">
+                                                                        <img src="/img/recibo.gif" class="card-img"
+                                                                            alt="...">
+                                                                    </div>
+                                                                    <div class="col-md-7">
                                                                         <div class="card-body">
                                                                             <h5 class="card-title">Sube un Recibo
                                                                             </h5>
@@ -491,14 +507,14 @@
                                                                             </div>
                                                                         </div>
                                                                         <div class="card-footer">
-                                                                            <button type="submit"
+                                                                            <button type="submit" id="enviarpago"
                                                                                 class="btn btn-lg btn-primary float-right"
                                                                                 style="top: 90%;">Enviar
                                                                                 Pago</button>
                                                                         </div>
-                                                                    </form>
+                                                                    </div>
                                                                 </div>
-                                                            </div>
+                                                            </form>
                                                         </div>
                                                     </div>
                                                 </div>
