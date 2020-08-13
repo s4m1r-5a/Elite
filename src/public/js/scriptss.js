@@ -1851,7 +1851,9 @@ if (window.location.pathname == `/links/reportes`) {
     tableOrden.on('click', 'tr', function () {
         //var fila = $(this).parents('tr');
         var data = tableOrden.row(this).data();
+        console.log(data)
         $('#idanular').val(data.id)
+        $('#idlote').val(data.lote)
 
         /* $('#Anulacion').one('shown.bs.modal', function () {
              //clientes.ajax.reload(null, false)
