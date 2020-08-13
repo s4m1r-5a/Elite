@@ -866,7 +866,6 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         res.redirect('/links/reportes');
     } else {
         const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, idlote);
-        console.log(o[0].total)
         if (qhacer === 'BONO') {
             var pin = ID(5);
             const bono = {
@@ -874,16 +873,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
                 tip: qhacer, monto: o[0].total, motivo, concept: causa
             }
             await pool.query('INSERT INTO cupones SET ? ', bono);
-            await pool.query(`UPDATE solicitudes s 
-                LEFT JOIN cuotas c ON s.pago = c.id
-                LEFT JOIN preventa p ON s.lt = p.lote  
-                LEFT JOIN productosd l ON s.lt = l.id 
-                LEFT JOIN productos d ON l.producto  = d.id 
-                SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9, 
-                l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-                l.valor = d.valmtr2 * l.mtr2, l.inicial = (d.valmtr2 * l.mtr2) * porcentage / 100 
-                WHERE s.lt = ? `, idlote
-            );
+
             var nom = en.fullname.split(" ")[0];
             var cl = en.cel.indexOf(" ") > 0 ? en.cel : '57' + en.cel
 
@@ -900,6 +890,16 @@ router.post('/anular', isLoggedIn, async (req, res) => {
                 console.log('Success: ', body);
             });
         }
+        await pool.query(`UPDATE solicitudes s 
+            LEFT JOIN cuotas c ON s.pago = c.id
+            LEFT JOIN preventa p ON s.lt = p.lote  
+            LEFT JOIN productosd l ON s.lt = l.id 
+            LEFT JOIN productos d ON l.producto  = d.id 
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9, 
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
+            l.valor = d.valmtr2 * l.mtr2, l.inicial = (d.valmtr2 * l.mtr2) * porcentage / 100 
+            WHERE s.lt = ? `, idlote
+        );
         res.redirect('/links/reportes');
     }
     //respuesta = { "data": ventas };
@@ -913,7 +913,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'WHERE p.asesor = ?';
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${ d} `
 
