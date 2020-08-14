@@ -27,6 +27,18 @@ const transpoter = nodemailer.createTransport({
     }
 })
 moment.locale('es');
+
+var url = 'https://bin.chat-api.com/1bd03zz1'
+/*request(url, función(error, respuesta, cuerpo) {
+    if(!error) {
+        console.log(body);
+    }
+});*/
+request(url, function (error, response, body) {
+    if (error) return console.error('Failed: %s', error.message);
+
+    console.log('Success: ', body);
+});
 cron.schedule("50 23 * * *", async () => {
     await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
     SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
@@ -846,7 +858,68 @@ router.get('/reportes', isLoggedIn, (req, res) => {
     res.render('links/reportes');
 });
 router.post('/anular', isLoggedIn, async (req, res) => {
+    const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
+        fullname, cel, idc, qhacer, causa, motivo } = req.body
+
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0'
+    };
     console.log(req.body);
+    const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND (concepto = 'ABONO' OR concepto = 'PAGO') AND lt = ${lote}`);
+    if (u.length > 0) {
+        req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
+        res.redirect('/links/reportes');
+    } else {
+        const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, lote);
+        if (qhacer === 'BONO') {
+            var pin = ID(5);
+            const bono = {
+                pin, descuento: 0, estado: 9, clients: idc,
+                tip: qhacer, monto: o[0].total, motivo, concept: causa
+            }
+            await pool.query('INSERT INTO cupones SET ? ', bono);
+
+            var nombr = nombre.split(" ")[0],
+                movi = movil.indexOf(" ") > 0 ? movil : '57' + movil,
+                fullnam = fullname.split(" ")[0],
+                ce = cel.indexOf(" ") > 0 ? cel : '57' + cel;
+            var M = () => {
+                options.form = {
+                    "phone": movi,
+                    "body": `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(o[0].total)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`
+                }
+                request(options, function (error, response, body) {
+                    if (error) return console.error('Failed: %s', error.message);
+                    console.log('Success: ', body);
+                });
+            }
+            options.form = {
+                "phone": ce,
+                "body": `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
+            }
+            console.log(nombr, movi, fullnam, ce, bono, options)
+            request(options, function (error, response, body) {
+                if (error) return console.error('Failed: %s', error.message);
+                console.log('Success: ', body);
+                M()
+            });
+
+        }
+        await pool.query(`UPDATE solicitudes s 
+            LEFT JOIN cuotas c ON s.pago = c.id
+            LEFT JOIN preventa p ON s.lt = p.lote  
+            LEFT JOIN productosd l ON s.lt = l.id 
+            LEFT JOIN productos d ON l.producto  = d.id 
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9, 
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
+            l.valor = d.valmtr2 * l.mtr2, l.inicial = (d.valmtr2 * l.mtr2) * porcentage / 100 
+            WHERE s.lt = ? `, lote
+        );
+        res.send(true);
+    }
+    //respuesta = { "data": ventas };
+
 });
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -854,7 +927,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? '' : 'WHERE p.asesor = ?';
 
-        sql = `SELECT p.id, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.nombre, c.documento, u.fullname, p.fecha
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${ d} `
 
@@ -2059,6 +2132,11 @@ async function Desendentes(pin, stados) {
     }
     return true
 };
+function Moneda(valor) {
+    valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
+    valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
+    return valor;
+}
 /*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
 const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
