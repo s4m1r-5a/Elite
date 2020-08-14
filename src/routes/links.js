@@ -872,7 +872,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         res.redirect('/links/reportes');
     } else {
         const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, lote);
-        if (qhacer === 'BONO') {
+        if (qhacer === 'BONO' && o[0].total > 0) {
             var pin = ID(5);
             const bono = {
                 pin, descuento: 0, estado: 9, clients: idc,
@@ -898,7 +898,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
                 "phone": ce,
                 "body": `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
             }
-            console.log(nombr, movi, fullnam, ce, bono, options)
+            //console.log(nombr, movi, fullnam, ce, bono, options)
             request(options, function (error, response, body) {
                 if (error) return console.error('Failed: %s', error.message);
                 console.log('Success: ', body);

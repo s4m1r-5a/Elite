@@ -1863,6 +1863,7 @@ if (window.location.pathname == `/links/reportes`) {
     var datos
     tableOrden.on('click', 'tr', function () {
         datos = tableOrden.row(this).data();
+        //console.log(datos)
     })
     var Enviar = (datos) => {
         $.ajax({
