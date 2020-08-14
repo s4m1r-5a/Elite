@@ -7,7 +7,7 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header">
-
+                        <h1 class="text-left">REPORTES</h1>
                     </div>
                     <div class="card-body">
                         <table id="datatable2" class="table table-sm table-striped table-hover display nowrap"
@@ -93,12 +93,10 @@
             </div>
             <div class="modal-body m-3">
                 <form id="enanul" action="/links/anular" method="POST">
-                    <input id="idanular" type="hidden" name="idseparacion">
-                    <input id="idlote" type="hidden" name="idlote">
                     <div class="row">
                         <div class="col-sm-12">
                             <div class="mb-1 float-right">
-                                <select id="porcntgd" data-toggle="tooltip" data-placement="top" data-container="body"
+                                <select id="causa" data-toggle="tooltip" data-placement="top" data-container="body"
                                     title="Seleccione un motivo para la anulacion" name="causa"
                                     style="text-align-last:center;padding:1px;" required>
                                     <option value="">Motivo de la anulacion ?</option>
@@ -114,7 +112,7 @@
                             <div class="mb-1 mt-2">
                                 <i class="feather-md text-primary mr-0" data-feather="align-left"
                                     style="margin-top: -10.5%;"></i>
-                                <textarea class="form-control-no-border edi" name="motivo"
+                                <textarea class="form-control-no-border edi" name="motivo" id="motivo"
                                     placeholder="Deja en claro el motivo de esta anulacion" cols="50" rows="2"
                                     autocomplete="off" data-toggle="tooltip" data-placement="top" data-container="body"
                                     title="Deje en claro el motivo de la anulacion" style="width: 90%;" maxlength="300"
@@ -132,7 +130,7 @@
                         </div>
                         <div class="col-sm-6 text-center">
                             <select data-toggle="tooltip" data-placement="top" data-container="body" name="qhacer"
-                                required title="Seleccione un motivo para la anulacion"
+                                required title="Seleccione un motivo para la anulacion" id="qhacer"
                                 style="text-align-last:center;padding:1px;">
                                 <option value="">Seleciona una opcion</option>
                                 <option value="BONO">Generar bono</option>
@@ -148,7 +146,7 @@
                             </p>
                         </div>
                     </div>
-                    <button type="submit" class="btn btn-sm btn-outline-danger float-right">Anular</button>
+                    <button type="submit" id="Anula" class="btn btn-sm btn-outline-danger float-right">Anular</button>
                 </form>
             </div>
         </div>

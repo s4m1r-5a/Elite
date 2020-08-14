@@ -1594,25 +1594,25 @@ if (window.location.pathname == `/links/reportes`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-info">Procesando</span>`
+                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-dark">Verificando</span>`
+                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            return `<span class="badge badge-pill badge-success">Vendido</span>`
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                            return `<span class="badge badge-pill badge-dark">Separado</span>`
                             break;
                         case 14:
-                            return `<span class="badge badge-pill badge-danger">Tramitando</span>`
+                            return `<span class="badge badge-pill badge-primary">Tramitando</span>`
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
                             break;
                     }
                 }
@@ -1653,7 +1653,20 @@ if (window.location.pathname == `/links/reportes`) {
                         : `<a type="button" class="btn btn-sm btn-outline-dark" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Print</a>`
                 }
             }
-        ]
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["estado"] == 12) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["estado"] == 8) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["estado"] == 10) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["estado"] == 1) {
+                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+            }
+        }
     });
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
@@ -1847,19 +1860,42 @@ if (window.location.pathname == `/links/reportes`) {
         table3.draw();
         table4.draw();
     });
-
+    var datos
     tableOrden.on('click', 'tr', function () {
-        //var fila = $(this).parents('tr');
-        var data = tableOrden.row(this).data();
-        console.log(data)
-        $('#idanular').val(data.id)
-        $('#idlote').val(data.lote)
-
-        /* $('#Anulacion').one('shown.bs.modal', function () {
-             //clientes.ajax.reload(null, false)
-             $('#idanular').val(data.id);
-         })//.modal('hide');*/
-
+        datos = tableOrden.row(this).data();
+    })
+    var Enviar = (datos) => {
+        $.ajax({
+            url: '/links/anular',
+            data: datos,
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                if (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                        tableOrden.ajax.reload(null, false)
+                        SMSj('success', 'Orden anulada correctamente')
+                    }).modal('hide');
+                    data = null
+                }
+            }
+        });
+    }
+    $('#enanul').submit(function (e) {
+        e.preventDefault();
+        datos.causa = $('#causa').val();
+        datos.motivo = $('#motivo').val();
+        datos.qhacer = $('#qhacer').val();
+        $('#Anulacion').modal('hide')
+        $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
+    });
+    $('#Anulacion').on('hidden.bs.modal', function (e) {
+        Enviar(datos);
     })
 }
 //////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
@@ -4220,7 +4256,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             return `<span class="badge badge-pill badge-success">Aprobada</span>`
                             break;
                         case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
                             break;
                         case 3:
                             return `<span class="badge badge-pill badge-info">Pendiente</span>`
@@ -4230,7 +4266,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     }
                 }
             }
-        ]
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        }
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
