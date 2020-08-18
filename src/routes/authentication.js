@@ -10,25 +10,30 @@ router.get('/signup', (req, res) => {
   const { id } = req.query;
   res.render('auth/signup', { id: id });
 });
-
 router.post('/signup', async (req, res, next) => {
-  const rows = await pool.query(`SELECT * FROM users u WHERE u.document = ?`, req.body.document);
+  const { document, username, pin } = req.body;
+  const rows = await pool.query(`SELECT * FROM users WHERE document = ? OR username = ?`, [document, username]);
   if (rows.length > 0) {
-    req.flash('error', 'Este usuario ya se encuentra registrado, inicie sesion con su usuario ' + rows[0].username);
+    req.flash('error', 'Usted ya se encuentra registrado en nuestro sitio, inicie sesion con su usuario ' + rows[0].username);
     res.redirect('/signin');
+  } else {
+    const row = await pool.query(`SELECT * FROM pines WHERE id = ? AND acreedor IS NULL`, pin);
+    if (row.length > 0) {
+      passport.authenticate('local.signup', {
+        successRedirect: '/tablero',
+        failureRedirect: '/signup',
+        failureFlash: true
+      })(req, res, next);
+    } else {
+      req.flash('error', 'Este pin ya fue usado por alguien mas, comuniquese con su patrocinador');
+      res.redirect('/signup');
+    }
   }
-  passport.authenticate('local.signup', {
-    successRedirect: '/tablero',
-    failureRedirect: '/signup',
-    failureFlash: true
-  })(req, res, next);
 })
-
 // SINGIN
 router.get('/signin', (req, res) => {
   res.render('auth/signin');
 });
-
 router.post('/signin', (req, res, next) => {
   req.check('username', 'Username is Required').notEmpty();
   req.check('password', 'Password is Required').notEmpty();
@@ -43,7 +48,6 @@ router.post('/signin', (req, res, next) => {
     failureFlash: true
   })(req, res, next);
 });
-
 router.get('/auth/facebook',
   passport.authenticate('facebook', {
     scope: ['profile', 'email']
@@ -55,7 +59,6 @@ router.get('/auth/facebook/callback',
     failureRedirect: '/signup',
     failureFlash: true
   }));
-
 router.get('/auth/google',
   passport.authenticate('google', {
     scope: [' profile ', 'email'],
@@ -63,7 +66,6 @@ router.get('/auth/google',
     altura: 50,
     theme: 'oscuro'
   }));
-
 router.get('/auth/google/callback',
   passport.authenticate('google', {
     successRedirect: '/tablero',
@@ -80,7 +82,6 @@ router.get('/logout', (req, res) => {
   req.logOut();
   res.redirect('/');
 });
-
 router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
@@ -200,5 +201,4 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     //AND YEAR(v.fechadecompra) = YEAR(CURDATE())
   }*/
 });
-
 module.exports = router;

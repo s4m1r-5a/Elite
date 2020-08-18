@@ -13,7 +13,8 @@ const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
 const moment = require('moment');
-const nodemailer = require('nodemailer')
+const nodemailer = require('nodemailer');
+const { isNull } = require('util');
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -524,6 +525,10 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
         res.send(true);
     }
 });
+router.get('/bono/:id', async (req, res) => {
+    const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id)
+    res.send(bono);
+});
 //////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
     moment.locale('es');
@@ -611,10 +616,6 @@ router.post('/codigo', isLoggedIn, async (req, res) => {
     });
     await sms(cel, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
     res.send(codigo);
-});
-router.get('/bono/:id', async (req, res) => {
-    const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id)
-    res.send(bono);
 });
 router.post('/tabla/:id', async (req, res) => {
     if (req.params.id == 1) {
@@ -1591,26 +1592,41 @@ router.post('/recarga', isLoggedIn, async (req, res) => {
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', async (req, res) => {
-    //const result = await rango(req.user.id);
-    const { movil, cajero } = req.body, pin = ID(13);
-
-    const nuevoPin = {
-        id: pin,
-        categoria: 1,
-        usuario: req.user.id
-    }
+    const { movil, cajero } = req.body;
+    var pin = ID(13);
     var cel = movil.replace(/-/g, "");
-    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
-
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
-            "phone": '57' + movil,
+            "phone": '57' + cel,
             "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
                 *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
         }
     };
+    const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
+    if (h.length > 0) {
+        pin = h[0].id
+        options.form = {
+            "phone": '57' + cel,
+            "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
+                *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+        }
+        if (h[0].acreedor !== null) {
+            options.form = {
+                "phone": '57' + cel,
+                "body": `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*https://grupoelitered.com.co/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+            }
+        }
+    } else {
+        const nuevoPin = {
+            id: pin,
+            categoria: 1,
+            usuario: req.user.id,
+            celular: cel
+        }
+        await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+    }
 
     ////////////////////* chat-api *////////////////////////////
     request(options, function (error, response, body) {

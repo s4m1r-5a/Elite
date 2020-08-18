@@ -24,7 +24,6 @@ passport.use('local.signin', new LocalStrategy({
     return done(null, false, req.flash('error', 'Este usuario no existe.'));
   }
 }));
-
 passport.use(new FacebookStrategy({
   clientID: Facebook.client_id,
   clientSecret: Facebook.client_secret,
@@ -61,7 +60,6 @@ passport.use(new FacebookStrategy({
   }
 }
 ));
-
 passport.use(new GoogleStrategy({
   clientID: Google.client_id,
   clientSecret: Google.client_secret,
@@ -103,7 +101,6 @@ passport.use(new GoogleStrategy({
   }
 }
 ));
-
 passport.use('local.signup', new LocalStrategy({
   usernameField: 'username',
   passwordField: 'password',
@@ -126,17 +123,14 @@ passport.use('local.signup', new LocalStrategy({
   //newUser.id = result.insertId;
   return done(null, newUser);
 }));
-
 passport.serializeUser((user, done) => {
   done(null, user.id);
 });
-
 passport.deserializeUser(async (id, done) => {
   const rows = await pool.query(`SELECT u.id, u.pin, u.fullname, u.document, u.username, u.imagen, u.admin, u.cel, u.cli, r.rango 
   FROM users u INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ?`, id);
   done(null, rows[0]);
 });
-
 function regiId(chars = "01234567890", lon = 20) {
   let code = "";
   for (x = 0; x < lon; x++) {

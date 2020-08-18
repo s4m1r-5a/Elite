@@ -246,6 +246,8 @@ $validationForm.smartWizard({
     backButtonSupport: false,
     useURLhash: false
 }).on("leaveStep", () => {
+    //$('.h').attr("disabled", false);
+    //return true
     var fd = $('form').serialize();
     let skdt;
     $.ajax({
@@ -1212,10 +1214,64 @@ if (window.location.pathname == `/links/pagos`) {
             return true;
         }
     });
-    $('.Total2').change(function () {
+    $('#bono').change(function () {
+        var totl2 = parseFloat($(this).cleanVal())
+        var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
+        var totl = parseFloat($('.Total').html().replace(/\./g, ''))
+        if (totl2 === totalf || totl2 > totl) {
+            $('.Total3').html($(this).val());
+            $('#Total, #Total2').val($(this).cleanVal());
+        } else if ($(this).val()) {
+            $(this).val('')
+            SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
+            $('.Total3').html(Moneda($('.Total').html()));
+            $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+        } else {
+            $('.Total3').html(Moneda($('.Total').html()));
+            $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+        }
+        Payu()
+        if ($(this).val() !== bono && $(this).val()) {
+            h = 1;
+            $.ajax({
+                url: '/links/bono/' + $(this).val(),
+                type: 'GET',
+                async: false,
+                success: function (data) {
+                    if (data.length) {
+                        var fecha = moment(data[0].fecha).add(1, 'year').endOf("days");
+                        var dat = data[0];
+                        if (dat.tip != 'BONO') {
+                            SMSj('error', 'Este codigo de serie no pertenece a ningun bono. Para mas informacion comuniquese con el asesor encargado');
+                            //Dt();
+                        } else if (dat.producto != null) {
+                            SMSj('error', 'Este bono ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
+                            //Dt();
+                        } else if (fecha < new Date()) {
+                            SMSj('error', 'Este bono de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                            //Dt();
+                        } else if (dat.estado != 9) {
+                            SMSj('error', 'Este bono aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
+                            //Dt();
+                        } else {
+                            $('#TotalBono').html(Moneda(dat.monto))
+                        }
+                        bono = data[0].pin;
+                    } else {
+                        Dt();
+                        SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
+                    }
+                }
+            });
+        } else {
+            Dt();
+            SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
+        }
+    })
+    /*$('.Total2').change(function () {
         var resul = $(this).val();
         $('#Total, #Total2').val(resul)
-    });
+    });*/
     $('form').submit(function (e) {
         if ($('#Total2').val() === '0') {
             SMSj('error', 'El total debe ser diferente a cero');
