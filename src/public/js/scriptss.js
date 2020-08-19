@@ -1063,32 +1063,205 @@ if (window.location.pathname == `/tablero`) {
 if (window.location.pathname == `/links/pagos`) {
     //alert('sajljsdlaj')
     var validationForm = $("#smartwizard");
+    validationForm.smartWizard("loader", "show");
     validationForm.smartWizard({
-        theme: "arrows",
-        showStepURLhash: false,
-        lang: {
-            next: 'Siguiente',
-            previous: 'Atras'
+        /*showStepURLhash: false,
+        backButtonSupport: false,*/
+        useURLhash: false,
+        selected: 0, // Paso inicial seleccionado, 0 - primer paso
+        theme: 'arrows', //'default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+        justified: true, // Justificación del menú Nav.
+        darkMode: true, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+        autoAdjustHeight: true, // Ajustar automáticamente la altura del contenido
+        cycleSteps: false, // Permite recorrer los pasos
+        backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
+        //enableURLhash: true, // Habilitar la selección del paso basado en el hash url
+        transition: {
+            animation: 'none', // Efecto en la navegación, none/fade/slide-horizontal/slide-vertical/slide-swing
+            speed: '400',  // Velocidad de animación Transion
+            easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
         },
         toolbarSettings: {
-            toolbarPosition: 'bottom', // none, top, bottom, both
-            toolbarButtonPosition: 'right', // left, right
+            toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos
+            toolbarButtonPosition: 'right', // izquierda, derecha, centro
             showNextButton: true, // show/hide a Next button
-            showPreviousButton: false // show/hide a Previous button
-            //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+            showPreviousButton: true, // show/hide a Previous button
+            //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
         },
-        autoAdjustHeight: true,
-        backButtonSupport: false,
-        useURLhash: false
-    }).on("leaveStep", () => {
-        let skdt;
-        if (!$('.Cliente').html()) {
+        anchorSettings: {
+            anchorClickable: true, // Activar/Desactivar la navegación del ancla
+            enableAllAnchors: false, // Activa todos los anclajes en los que se puede hacer clic todas las veces
+            markDoneStep: true, // Añadir estado hecho en la navegación
+            markAllPreviousStepsAsDone: true, // Cuando un paso seleccionado por url hash, todos los pasos anteriores se marcan hecho
+            removeDoneStepOnNavigateBack: false, // Mientras navega hacia atrás paso después de paso activo se borrará
+            enableAnchorOnDoneStep: true // Habilitar/Deshabilitar los pasos de navegación
+        },
+        keyboardSettings: {
+            keyNavigation: true, // Activar/Desactivar la navegación del teclado (las teclas izquierda y derecha se utilizan si está habilitada)
+            keyLeft: [37], // Código de tecla izquierdo
+            keyRight: [39] // Código de tecla derecha
+        },
+        lang: { //   Variables de idioma para el botón
+            next: 'Siguiente',
+            previous: 'Anterior'
+        },
+        disabledSteps: [], // Pasos de matriz desactivados
+        errorSteps: [], // Paso de resaltado con errores
+        hiddenSteps: [] // Pasos ocultos
+    }).on("leaveStep", async (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
+        console.log(currentStepNumber)
+        //var stepIndex = validationForm.smartWizard("getStepIndex");
+        //console.log(stepIndex)
+        let skdt = false;
+        var repo = $('#cedula').val();
+        var ajaxURL = "/links/pagos/" + repo;
+        // Devolver un objeto de promesa
+        var V = await $.ajax({
+            method: "GET",
+            url: ajaxURL,
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+            }
+        }).done(function (data) {
+            //console.log(data)
+            if (data.status) {
+                $('.Cliente').html(data.client.nombre);
+                $('.Cliente').val(data.client.nombre);
+                $('#Code').val(data.client.id + '-' + data.d.n + '-' + data.d.id);
+                $('#Movil').val(data.client.movil);
+                $('#Email').val(data.client.email);
+                data.d.map((r) => {
+                    $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
+                });
+                var Calculo = (m) => {
+                    var mora = 0, cuot = 0, Description = '', cont = 0;
+                    data.d.filter((r) => {
+                        return r.id == m
+                    }).map((r) => {
+                        $('#Cupon').html(r.pin);
+                        $('#Dto').html(r.descuento);
+                        $('#Ahorro').html(Moneda(r.ahorro));
+                        $('#Proyecto').html(Moneda(r.valor));
+                        $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
+                        $('#lt').val(Moneda(r.lt));
+                        Description = r.proyect + ' Lote: ' + r.n;
+                    })
+                    data.cuotas.filter((r) => {
+                        return r.separacion == m
+                    }).map((r, x) => {
+                        mor = r.mora;
+                        mora += mor;
+                        cuot += r.cuota
+                        $('#Concepto').html(r.tipo);
+                        $('#concpto').val(r.tipo)
+                        $('#Cuotan').html(Moneda(r.ncuota));
+                        $('#Cuota').html(Moneda(r.cuota));
+                        $('#Mora').html(Moneda(mor));
+                        $('#Facturas').html(x + 1);
+                        $('.Totalf').html(Moneda(r.cuota + mor));
+                        $('.Total').html(Moneda(mora + cuot));
+                        $('.Total3').html(Moneda(mora + cuot));
+                        $('#Total, #Total2').val(mora + cuot);
+                        $('#Description').val(r.tipo + ' ' + Description);
+                        $('#factrs').val(x + 1);
+                        $('#idC').val(r.id);
+                        cont++
+                    })
+                    if (cont === 0) {
+                        $('#Concepto').html('ABONO');
+                        $('#Cuotan').html(0);
+                        $('#Cuota').html(0);
+                        $('#Mora').html(0);
+                        $('#Facturas').html(0);
+                        $('.Totalf').html(0);
+                        $('.Total').html(0);
+                        $('.Total3').html(0);
+                        $('#Total, #Total2').val(0);
+                        $('#Description').val('ABONO ' + Description);
+                        $('#factrs').val(0);
+                        $('#idC').val('');
+                        $('#concpto').val('ABONO')
+                    }
+                }
+                Calculo($('#proyectos').val())
+                $('#proyectos').change(function () {
+                    Calculo($(this).val())
+                })
+                $('.Total2').change(function () {
+                    var totl2 = parseFloat($(this).cleanVal())
+                    var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
+                    var totl = parseFloat($('.Total').html().replace(/\./g, ''))
+                    if (totl2 === totalf || totl2 > totl) {
+                        $('.Total3').html($(this).val());
+                        $('#Total, #Total2').val($(this).cleanVal());
+                    } else if ($(this).val()) {
+                        $(this).val('')
+                        SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
+                        $('.Total3').html(Moneda($('.Total').html()));
+                        $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                    } else {
+                        $('.Total3').html(Moneda($('.Total').html()));
+                        $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                    }
+                    Payu()
+                })
+                var Payu = () => {
+                    if ($('#pay').prop('checked')) {
+                        var l = parseFloat($('#Total').val())
+                        var cal = Math.round((l * 3.4 / 100) + 900)
+                        $('.transaccion').html(Moneda(cal))
+                        $('.Total3').html(Moneda(l + cal));
+                        $('#Total, #Total2').val(l + cal);
+                        $('.pgpayu').show();
+                        $('.pgofi').hide();
+                        $('#recibo').val('');
+                        $('#file').val('');
+
+                    } else {
+                        $('.transaccion').html('0')
+                        $('.Total3').html($('.Total2').val() ? $('.Total2').val() : $('.Total').html());
+                        $('#Total, #Total2').val($('.Total2').val() ? $('.Total2').cleanVal() : $('.Total').html().replace(/\./g, ''));
+                        $('.pgpayu').hide();
+                        $('.pgofi').show();
+                    }
+                }
+                $('.forma').change(function () {
+                    Payu()
+                })
+                skdt = true;
+            } else {
+                $(".alert").show();
+                $('.alert-message').html('<strong>Error!</strong> ' + data.paquete);
+                setTimeout(function () {
+                    $(".alert").fadeOut(3000);
+                }, 2000);
+                skdt = false;
+            }
+            $('#ModalEventos').one('shown.bs.modal', function () {
+                //$('#ModalEventos').modal('hide')
+                SMSj('success', 'Datos atualizados correctamente')
+            }).modal('hide');
+
+        }).fail(function (err) {
+            $('#ModalEventos').one('shown.bs.modal', function () {
+                //$('#ModalEventos').modal('hide')
+                SMSj('error', 'Datos no se actualizaron correctamente')
+            }).modal('hide');
+            skdt = false;
+        });
+        return skdt
+
+        /*if (!$('.Cliente').html()) {
             $.ajax({
                 url: '/links/pagos/' + $('#cedula').val(),
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    console.log(data)
+                    //console.log(data)
                     if (data.status) {
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
@@ -1099,9 +1272,7 @@ if (window.location.pathname == `/links/pagos`) {
                             $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
                         });
                         var Calculo = (m) => {
-
                             var mora = 0, cuot = 0, Description = '', cont = 0;
-
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
@@ -1113,7 +1284,6 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#lt').val(Moneda(r.lt));
                                 Description = r.proyect + ' Lote: ' + r.n;
                             })
-
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
@@ -1207,13 +1377,57 @@ if (window.location.pathname == `/links/pagos`) {
                     }
                 }
             });
-
             return skdt;
 
         } else {
             return true;
-        }
+        }*/
     });
+
+
+    // Ajax content loading with "stepContent" event
+    /*$("#smartwizard").on("stepContent", function (e, anchorObject, stepIndex, stepDirection) {
+
+        //  Leer el valor de los datos del elemento de anclaje
+        var repo = anchorObject.data('repo');
+        var ajaxURL = "https://api.npms.io/v2/package/" + repo;
+
+        // Devolver un objeto de promesa
+        return new Promise((resolve, reject) => {
+            // Llamada de Ajax para obtener su contenido
+            $.ajax({
+                method: "GET",
+                url: ajaxURL,
+                beforeSend: function (xhr) {
+                    // Mostrar el cargador
+                    $('#smartwizard').smartWizard("loader", "show");
+                }
+            }).done(function (res) {
+                var html = 'Ajax data about ' + repo + ' loaded from GitHub';
+                html += 'URL:' + ajaxURL;
+                html += 'Name:' + res.collected.metadata.name;
+
+                // Resolver la promesa con el contenido
+                resolve(html);
+
+                // Ocultar el cargador
+                $('#smartwizard').smartWizard("loader", "hide");
+            }).fail(function (err) {
+
+                // Rechazar la promesa con mensaje de error para mostrar como contenido
+                reject("An error loading the resource");
+
+                // Ocultar el cargador
+                $('#smartwizard').smartWizard("loader", "hide");
+            });
+
+        });
+    });*/
+
+    // Inicialización SmartWizard
+    //$('#smartwizard').smartWizard();
+
+
     $('#bono').change(function () {
         var totl2 = parseFloat($(this).cleanVal())
         var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
@@ -1330,12 +1544,11 @@ if (window.location.pathname == `/links/pagos`) {
         },
         margin: { top: 30 },
     })
-
     // Total page number plugin only available in jspdf v1.0+
     if (typeof doc.putTotalPages === 'function') {
         doc.putTotalPages(totalPagesExp)
     }
-    doc.output('dataurlnewwindow')
+    //doc.output('dataurlnewwindow')
     function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
