@@ -1108,154 +1108,12 @@ if (window.location.pathname == `/links/pagos`) {
         disabledSteps: [], // Pasos de matriz desactivados
         errorSteps: [], // Paso de resaltado con errores
         hiddenSteps: [] // Pasos ocultos
-    }).on("leaveStep", async (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
+    }).on("leaveStep", (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
         console.log(currentStepNumber)
         //var stepIndex = validationForm.smartWizard("getStepIndex");
         //console.log(stepIndex)
         let skdt = false;
-        var repo = $('#cedula').val();
-        var ajaxURL = "/links/pagos/" + repo;
-        // Devolver un objeto de promesa
-        var V = await $.ajax({
-            method: "GET",
-            url: ajaxURL,
-            beforeSend: function (xhr) {
-                $('#ModalEventos').modal({
-                    toggle: true,
-                    backdrop: 'static',
-                    keyboard: true,
-                });
-            }
-        }).done(function (data) {
-            //console.log(data)
-            if (data.status) {
-                $('.Cliente').html(data.client.nombre);
-                $('.Cliente').val(data.client.nombre);
-                $('#Code').val(data.client.id + '-' + data.d.n + '-' + data.d.id);
-                $('#Movil').val(data.client.movil);
-                $('#Email').val(data.client.email);
-                data.d.map((r) => {
-                    $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
-                });
-                var Calculo = (m) => {
-                    var mora = 0, cuot = 0, Description = '', cont = 0;
-                    data.d.filter((r) => {
-                        return r.id == m
-                    }).map((r) => {
-                        $('#Cupon').html(r.pin);
-                        $('#Dto').html(r.descuento);
-                        $('#Ahorro').html(Moneda(r.ahorro));
-                        $('#Proyecto').html(Moneda(r.valor));
-                        $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
-                        $('#lt').val(Moneda(r.lt));
-                        Description = r.proyect + ' Lote: ' + r.n;
-                    })
-                    data.cuotas.filter((r) => {
-                        return r.separacion == m
-                    }).map((r, x) => {
-                        mor = r.mora;
-                        mora += mor;
-                        cuot += r.cuota
-                        $('#Concepto').html(r.tipo);
-                        $('#concpto').val(r.tipo)
-                        $('#Cuotan').html(Moneda(r.ncuota));
-                        $('#Cuota').html(Moneda(r.cuota));
-                        $('#Mora').html(Moneda(mor));
-                        $('#Facturas').html(x + 1);
-                        $('.Totalf').html(Moneda(r.cuota + mor));
-                        $('.Total').html(Moneda(mora + cuot));
-                        $('.Total3').html(Moneda(mora + cuot));
-                        $('#Total, #Total2').val(mora + cuot);
-                        $('#Description').val(r.tipo + ' ' + Description);
-                        $('#factrs').val(x + 1);
-                        $('#idC').val(r.id);
-                        cont++
-                    })
-                    if (cont === 0) {
-                        $('#Concepto').html('ABONO');
-                        $('#Cuotan').html(0);
-                        $('#Cuota').html(0);
-                        $('#Mora').html(0);
-                        $('#Facturas').html(0);
-                        $('.Totalf').html(0);
-                        $('.Total').html(0);
-                        $('.Total3').html(0);
-                        $('#Total, #Total2').val(0);
-                        $('#Description').val('ABONO ' + Description);
-                        $('#factrs').val(0);
-                        $('#idC').val('');
-                        $('#concpto').val('ABONO')
-                    }
-                }
-                Calculo($('#proyectos').val())
-                $('#proyectos').change(function () {
-                    Calculo($(this).val())
-                })
-                $('.Total2').change(function () {
-                    var totl2 = parseFloat($(this).cleanVal())
-                    var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
-                    var totl = parseFloat($('.Total').html().replace(/\./g, ''))
-                    if (totl2 === totalf || totl2 > totl) {
-                        $('.Total3').html($(this).val());
-                        $('#Total, #Total2').val($(this).cleanVal());
-                    } else if ($(this).val()) {
-                        $(this).val('')
-                        SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
-                        $('.Total3').html(Moneda($('.Total').html()));
-                        $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
-                    } else {
-                        $('.Total3').html(Moneda($('.Total').html()));
-                        $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
-                    }
-                    Payu()
-                })
-                var Payu = () => {
-                    if ($('#pay').prop('checked')) {
-                        var l = parseFloat($('#Total').val())
-                        var cal = Math.round((l * 3.4 / 100) + 900)
-                        $('.transaccion').html(Moneda(cal))
-                        $('.Total3').html(Moneda(l + cal));
-                        $('#Total, #Total2').val(l + cal);
-                        $('.pgpayu').show();
-                        $('.pgofi').hide();
-                        $('#recibo').val('');
-                        $('#file').val('');
-
-                    } else {
-                        $('.transaccion').html('0')
-                        $('.Total3').html($('.Total2').val() ? $('.Total2').val() : $('.Total').html());
-                        $('#Total, #Total2').val($('.Total2').val() ? $('.Total2').cleanVal() : $('.Total').html().replace(/\./g, ''));
-                        $('.pgpayu').hide();
-                        $('.pgofi').show();
-                    }
-                }
-                $('.forma').change(function () {
-                    Payu()
-                })
-                skdt = true;
-            } else {
-                $(".alert").show();
-                $('.alert-message').html('<strong>Error!</strong> ' + data.paquete);
-                setTimeout(function () {
-                    $(".alert").fadeOut(3000);
-                }, 2000);
-                skdt = false;
-            }
-            $('#ModalEventos').one('shown.bs.modal', function () {
-                //$('#ModalEventos').modal('hide')
-                SMSj('success', 'Datos atualizados correctamente')
-            }).modal('hide');
-
-        }).fail(function (err) {
-            $('#ModalEventos').one('shown.bs.modal', function () {
-                //$('#ModalEventos').modal('hide')
-                SMSj('error', 'Datos no se actualizaron correctamente')
-            }).modal('hide');
-            skdt = false;
-        });
-        return skdt
-
-        /*if (!$('.Cliente').html()) {
+        if (currentStepNumber === 0) {
             $.ajax({
                 url: '/links/pagos/' + $('#cedula').val(),
                 type: 'GET',
@@ -1377,11 +1235,18 @@ if (window.location.pathname == `/links/pagos`) {
                     }
                 }
             });
-            return skdt;
+        } else if (currentStepNumber === 1) {
+            alert(currentStepNumber);
+            skdt = true;
+        } else if (currentStepNumber === 2) {
+            alert(currentStepNumber);
+            skdt = true;
+        } else if (currentStepNumber === 3) {
+            alert(currentStepNumber);
+            skdt = true;
+        }
+        return skdt;
 
-        } else {
-            return true;
-        }*/
     });
 
 
