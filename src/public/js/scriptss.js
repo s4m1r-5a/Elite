@@ -1085,7 +1085,7 @@ if (window.location.pathname == `/links/pagos`) {
             toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos
             toolbarButtonPosition: 'right', // izquierda, derecha, centro
             showNextButton: true, // show/hide a Next button
-            showPreviousButton: true, // show/hide a Previous button
+            showPreviousButton: false, // show/hide a Previous button
             //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
         },
         anchorSettings: {
@@ -1189,40 +1189,16 @@ if (window.location.pathname == `/links/pagos`) {
                             var totl = parseFloat($('.Total').html().replace(/\./g, ''))
                             if (totl2 === totalf || totl2 > totl) {
                                 $('.Total3').html($(this).val());
-                                $('#Total, #Total2').val($(this).cleanVal());
-                            } else if ($(this).val()) {
+                                $('#Total, #Total2').val(totl2);
+                            } else if (totl2) {
                                 $(this).val('')
                                 SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
-                                $('.Total3').html(Moneda($('.Total').html()));
-                                $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                                $('.Total3').html(Moneda(totl));
+                                $('#Total, #Total2').val(totl);
                             } else {
-                                $('.Total3').html(Moneda($('.Total').html()));
-                                $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                                $('.Total3').html(Moneda(totl));
+                                $('#Total, #Total2').val(totl);
                             }
-                            Payu()
-                        })
-                        var Payu = () => {
-                            if ($('#pay').prop('checked')) {
-                                var l = parseFloat($('#Total').val())
-                                var cal = Math.round((l * 3.4 / 100) + 900)
-                                $('.transaccion').html(Moneda(cal))
-                                $('.Total3').html(Moneda(l + cal));
-                                $('#Total, #Total2').val(l + cal);
-                                $('.pgpayu').show();
-                                $('.pgofi').hide();
-                                $('#recibo').val('');
-                                $('#file').val('');
-
-                            } else {
-                                $('.transaccion').html('0')
-                                $('.Total3').html($('.Total2').val() ? $('.Total2').val() : $('.Total').html());
-                                $('#Total, #Total2').val($('.Total2').val() ? $('.Total2').cleanVal() : $('.Total').html().replace(/\./g, ''));
-                                $('.pgpayu').hide();
-                                $('.pgofi').show();
-                            }
-                        }
-                        $('.forma').change(function () {
-                            Payu()
                         })
                         skdt = true;
                     } else {
@@ -1236,8 +1212,24 @@ if (window.location.pathname == `/links/pagos`) {
                 }
             });
         } else if (currentStepNumber === 1) {
-            alert(currentStepNumber);
-            skdt = true;
+            var T = $('.Total').html();
+            var T2 = $('.Total2').val();
+            if (T != 0 || T2) {
+                skdt = true
+                validationForm.smartWizard("setOptions", {
+                    toolbarSettings: {
+                        toolbarPosition: 'bottom',
+                        toolbarButtonPosition: 'right',
+                        showNextButton: true,
+                        showPreviousButton: false,
+                        toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+                    }
+                });
+                $('.sw-btn-next').html('Pagar')
+            } else {
+                skdt = false
+                SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
+            }
         } else if (currentStepNumber === 2) {
             alert(currentStepNumber);
             skdt = true;
@@ -1248,50 +1240,31 @@ if (window.location.pathname == `/links/pagos`) {
         return skdt;
 
     });
+    var Pay = (forma) => {
+        var t2 = $('.Total2').val(),
+            T2 = $('.Total2').cleanVal(),
+            t = $('.Total').html(),
+            T = $('.Total').html().replace(/\./g, '');
 
+        if (forma === 'payu') {
+            var l = parseFloat($('#Total').val())
+            var cal = Math.round((l * 3.4 / 100) + 900)
+            $('.transaccion').html(Moneda(cal))
+            $('.Total3').html(Moneda(l + cal));
+            $('#Total, #Total2').val(l + cal);
+            $('#recibo').val('');
+            $('#file').val('');
 
-    // Ajax content loading with "stepContent" event
-    /*$("#smartwizard").on("stepContent", function (e, anchorObject, stepIndex, stepDirection) {
-
-        //  Leer el valor de los datos del elemento de anclaje
-        var repo = anchorObject.data('repo');
-        var ajaxURL = "https://api.npms.io/v2/package/" + repo;
-
-        // Devolver un objeto de promesa
-        return new Promise((resolve, reject) => {
-            // Llamada de Ajax para obtener su contenido
-            $.ajax({
-                method: "GET",
-                url: ajaxURL,
-                beforeSend: function (xhr) {
-                    // Mostrar el cargador
-                    $('#smartwizard').smartWizard("loader", "show");
-                }
-            }).done(function (res) {
-                var html = 'Ajax data about ' + repo + ' loaded from GitHub';
-                html += 'URL:' + ajaxURL;
-                html += 'Name:' + res.collected.metadata.name;
-
-                // Resolver la promesa con el contenido
-                resolve(html);
-
-                // Ocultar el cargador
-                $('#smartwizard').smartWizard("loader", "hide");
-            }).fail(function (err) {
-
-                // Rechazar la promesa con mensaje de error para mostrar como contenido
-                reject("An error loading the resource");
-
-                // Ocultar el cargador
-                $('#smartwizard').smartWizard("loader", "hide");
-            });
-
-        });
-    });*/
-
-    // Inicialización SmartWizard
-    //$('#smartwizard').smartWizard();
-
+        } else if (forma === 'recibo' || forma === 'bancolombia') {
+            $('.transaccion').html('0')
+            $('.Total3').html(t2 ? t2 : t);
+            $('#Total, #Total2').val(T2 ? T2 : T);
+        }
+        $('.sw-btn-next').on('click', function () {
+            alert('dfjdkfj')
+            $('#' + forma).submit();
+        })
+    }
 
     $('#bono').change(function () {
         var totl2 = parseFloat($(this).cleanVal())
