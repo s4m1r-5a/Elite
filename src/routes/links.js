@@ -447,9 +447,7 @@ router.post('/recibo', async (req, res) => {
         req.flash('success', 'Solicitud de pago enviada correctamente');
         res.redirect('/links/pagos');
     }
-
     //uploads/
-
 });
 //////////////* CUPONES *//////////////////////////////////
 router.get('/cupones', isLoggedIn, async (req, res) => {

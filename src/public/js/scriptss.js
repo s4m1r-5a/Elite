@@ -1255,13 +1255,13 @@ if (window.location.pathname == `/links/pagos`) {
             $('#recibo').val('');
             $('#file').val('');
 
-        } else if (forma === 'recibo' || forma === 'bancolombia') {
+        } else if (forma === 'recbo' || forma === 'bancolombia') {
             $('.transaccion').html('0')
             $('.Total3').html(t2 ? t2 : t);
             $('#Total, #Total2').val(T2 ? T2 : T);
         }
         $('.sw-btn-next').on('click', function () {
-            alert('dfjdkfj')
+            $('#' + forma).validate();
             $('#' + forma).submit();
         })
     }
@@ -1324,24 +1324,54 @@ if (window.location.pathname == `/links/pagos`) {
         var resul = $(this).val();
         $('#Total, #Total2').val(resul)
     });*/
-    $('form').submit(function (e) {
-        if ($('#Total2').val() === '0') {
-            SMSj('error', 'El total debe ser diferente a cero');
-            e.preventDefault()
-        } else {
-            $('input').prop('disabled', false);
-            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'))
-            var fd = $('form').serialize();
-            $.ajax({
-                url: '/links/pagos',
-                data: fd,
-                type: 'POST',
-                async: false,
-                success: function (data) {
-                    $('input[name="signature"]').val(data);
-                }
-            });
+    $('#recbo').validate({
+        debug: false,
+        rules: {
+            recibo: {
+                required: true,
+                number: true,
+                maxlength: 7,
+                minlength: 3
+            },
+            image: {
+                required: true
+            }/*,
+            weight: {
+                required: {
+                    depends: function (elem) {
+                        return $("#age").val() > 50
+                    }
+                },
+                number: true,
+                min: 0
+            }*/
+        },
+        messages: {
+            recibo: {
+                required: 'Introduce la referencia del recibo.',
+                number: 'Introduce un código postal válido.',
+                maxlength: 'Debe contener 5 dígitos.',
+                minlength: 'Debe contener 5 dígitos.'
+            },
+            image: {
+                required: 'Apellido obligatorio.'
+            },
         }
+    });
+    $('form').submit(function (e) {
+        //e.preventDefault()
+        $('input').prop('disabled', false);
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        var fd = $('form').serialize();
+        $.ajax({
+            url: '/links/pagos',
+            data: fd,
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                $('input[name="signature"]').val(data);
+            }
+        });
     });
 
     var doc = new jsPDF('l', 'mm', 'a5')
