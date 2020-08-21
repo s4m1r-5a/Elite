@@ -1061,7 +1061,14 @@ if (window.location.pathname == `/tablero`) {
 };
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pagos`) {
-    //alert('sajljsdlaj')
+    var bono = 0, tsinbono = 0, vx = 0;
+    var DT = () => {
+        bono = 0;
+        $('#TotalBono').html('-0');
+        $('#bono').val('').focus();
+        $('#Code').val(vx);
+        $('.bonus').val('');
+    }
     var validationForm = $("#smartwizard");
     validationForm.smartWizard("loader", "show");
     validationForm.smartWizard({
@@ -1109,9 +1116,6 @@ if (window.location.pathname == `/links/pagos`) {
         errorSteps: [], // Paso de resaltado con errores
         hiddenSteps: [] // Pasos ocultos
     }).on("leaveStep", (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
-        console.log(currentStepNumber)
-        //var stepIndex = validationForm.smartWizard("getStepIndex");
-        //console.log(stepIndex)
         let skdt = false;
         if (currentStepNumber === 0) {
             $.ajax({
@@ -1123,7 +1127,6 @@ if (window.location.pathname == `/links/pagos`) {
                     if (data.status) {
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
-                        $('#Code').val(data.client.id + '-' + data.d.n + '-' + data.d.id);
                         $('#Movil').val(data.client.movil);
                         $('#Email').val(data.client.email);
                         data.d.map((r) => {
@@ -1131,6 +1134,8 @@ if (window.location.pathname == `/links/pagos`) {
                         });
                         var Calculo = (m) => {
                             var mora = 0, cuot = 0, Description = '', cont = 0;
+                            $('#Code').val(data.client.idc + '-' + m);
+                            vx = data.client.idc + '-' + m;
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
@@ -1147,7 +1152,9 @@ if (window.location.pathname == `/links/pagos`) {
                             }).map((r, x) => {
                                 mor = r.mora;
                                 mora += mor;
-                                cuot += r.cuota
+                                cuot += r.cuota;
+                                c = mora + cuot;
+                                tsinbono = c;
                                 $('#Concepto').html(r.tipo);
                                 $('#concpto').val(r.tipo)
                                 $('#Cuotan').html(Moneda(r.ncuota));
@@ -1155,9 +1162,9 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Mora').html(Moneda(mor));
                                 $('#Facturas').html(x + 1);
                                 $('.Totalf').html(Moneda(r.cuota + mor));
-                                $('.Total').html(Moneda(mora + cuot));
-                                $('.Total3').html(Moneda(mora + cuot));
-                                $('#Total, #Total2').val(mora + cuot);
+                                $('.Total, .Total3').html(Moneda(c));
+                                //$('.Total3').html(Moneda(mora + cuot));
+                                $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
                                 $('#idC').val(r.id);
@@ -1178,6 +1185,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#idC').val('');
                                 $('#concpto').val('ABONO')
                             }
+                            DT()
                         }
                         Calculo($('#proyectos').val())
                         $('#proyectos').change(function () {
@@ -1188,7 +1196,7 @@ if (window.location.pathname == `/links/pagos`) {
                             var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
                             var totl = parseFloat($('.Total').html().replace(/\./g, ''))
                             if (totl2 === totalf || totl2 > totl) {
-                                $('.Total3').html($(this).val());
+                                $('.Total3').html(Moneda(totl2));
                                 $('#Total, #Total2').val(totl2);
                             } else if (totl2) {
                                 $(this).val('')
@@ -1214,31 +1222,21 @@ if (window.location.pathname == `/links/pagos`) {
         } else if (currentStepNumber === 1) {
             var T = $('.Total').html();
             var T2 = $('.Total2').val();
-            if (T != 0 || T2) {
+            if (T != 0 || T2 || bono) {
                 skdt = true
-                validationForm.smartWizard("setOptions", {
-                    toolbarSettings: {
-                        toolbarPosition: 'bottom',
-                        toolbarButtonPosition: 'right',
-                        showNextButton: true,
-                        showPreviousButton: false,
-                        toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
-                    }
-                });
                 $('.sw-btn-next').html('Pagar')
             } else {
                 skdt = false
                 SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
             }
         } else if (currentStepNumber === 2) {
-            alert(currentStepNumber);
+            //alert(currentStepNumber);
             skdt = true;
         } else if (currentStepNumber === 3) {
-            alert(currentStepNumber);
+            //alert(currentStepNumber);
             skdt = true;
         }
         return skdt;
-
     });
     var Pay = (forma) => {
         var t2 = $('.Total2').val(),
@@ -1267,63 +1265,49 @@ if (window.location.pathname == `/links/pagos`) {
     }
 
     $('#bono').change(function () {
-        var totl2 = parseFloat($(this).cleanVal())
-        var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
-        var totl = parseFloat($('.Total').html().replace(/\./g, ''))
-        if (totl2 === totalf || totl2 > totl) {
-            $('.Total3').html($(this).val());
-            $('#Total, #Total2').val($(this).cleanVal());
-        } else if ($(this).val()) {
-            $(this).val('')
-            SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
-            $('.Total3').html(Moneda($('.Total').html()));
-            $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
-        } else {
-            $('.Total3').html(Moneda($('.Total').html()));
-            $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
-        }
-        Payu()
         if ($(this).val() !== bono && $(this).val()) {
-            h = 1;
             $.ajax({
                 url: '/links/bono/' + $(this).val(),
                 type: 'GET',
                 async: false,
                 success: function (data) {
                     if (data.length) {
-                        var fecha = moment(data[0].fecha).add(1, 'year').endOf("days");
                         var dat = data[0];
+                        var fecha = moment(dat.fecha).add(1, 'year').endOf("days");
                         if (dat.tip != 'BONO') {
                             SMSj('error', 'Este codigo de serie no pertenece a ningun bono. Para mas informacion comuniquese con el asesor encargado');
-                            //Dt();
+                            DT()
                         } else if (dat.producto != null) {
                             SMSj('error', 'Este bono ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
-                            //Dt();
+                            DT()
                         } else if (fecha < new Date()) {
                             SMSj('error', 'Este bono de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
-                            //Dt();
+                            DT()
                         } else if (dat.estado != 9) {
                             SMSj('error', 'Este bono aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
-                            //Dt();
+                            DT()
                         } else {
-                            $('#TotalBono').html(Moneda(dat.monto))
+                            var hfv = tsinbono - dat.monto;
+                            var vr = hfv < 0 ? 0 : hfv;
+                            $('.Total, .Total3').html(Moneda(vr));
+                            $('#Total, #Total2').val(vr);
+                            $('#TotalBono').html('-' + Moneda(dat.monto));
+                            $('.bonus').val(dat.pin);
+                            bono = dat.pin;
+                            $('#Code').val(vx + '-' + bono);
                         }
-                        bono = data[0].pin;
                     } else {
-                        Dt();
-                        SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
+                        DT();
+                        SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado');
                     }
                 }
             });
         } else {
-            Dt();
+            DT();
             SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
         }
     })
-    /*$('.Total2').change(function () {
-        var resul = $(this).val();
-        $('#Total, #Total2').val(resul)
-    });*/
+
     $('#recbo').validate({
         debug: false,
         rules: {
@@ -1332,6 +1316,9 @@ if (window.location.pathname == `/links/pagos`) {
                 number: true,
                 maxlength: 7,
                 minlength: 3
+            },
+            formap: {
+                required: true
             },
             image: {
                 required: true
@@ -1348,14 +1335,20 @@ if (window.location.pathname == `/links/pagos`) {
         },
         messages: {
             recibo: {
-                required: 'Introduce la referencia del recibo.',
-                number: 'Introduce un código postal válido.',
-                maxlength: 'Debe contener 5 dígitos.',
-                minlength: 'Debe contener 5 dígitos.'
+                required: `Introduce la referencia del recibo.`,
+                /*number: `Introduce un código válido.`,
+                maxlength: 'Debe contener max 7 dígitos.',
+                minlength: 'Debe contener min 3 dígitos.'*/
+            },
+            formap: {
+                required: 'Debes escojer una forma de pago.'
             },
             image: {
-                required: 'Apellido obligatorio.'
+                required: 'Debes seleccionar una imagen.'
             },
+        },
+        errorPlacement: function (error, element) {
+            SMSj('info', `${error[0].innerText} GRUPO ELITE`)
         }
     });
     $('form').submit(function (e) {

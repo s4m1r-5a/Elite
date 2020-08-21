@@ -8,7 +8,7 @@
                         Conoce aqui el monto de tus cuotas.
                     </p>
                 </div>
-                <div id="smartwizard" class="wizard wizard-primary mb-4">
+                <div id="smartwizard" class="wizard wizard-primary mb-1">
                     <ul>
                         <li>
                             <a class="sidebar-link" href="#arrows-primary-step-1">
@@ -174,12 +174,36 @@
                                 <tbody>
                                     <tr>
                                         <th>
+                                            <i class="feather-md" data-feather="bookmark"></i>
+                                            ¿ Tienes un BONO ?
+                                        </th>
+                                        <td>
+                                            <div class="d-inline-block float-right">
+                                                <input class="form-control-no-border edi d text-center" id="bono"
+                                                    type="text" placeholder="Ingrese aqui el bono" autocomplete="off"
+                                                    style="padding: 1px; width: 100%;" name="bono">
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
                                             <i class="feather-md" data-feather="dollar-sign"></i>
                                             Total Factura
                                         </th>
                                         <td>
                                             <div class="d-inline-block float-right">
                                                 <span class="Totalf"></span>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <i class="feather-md" data-feather="dollar-sign"></i>
+                                            Bono
+                                        </th>
+                                        <td>
+                                            <div class="d-inline-block float-right">
+                                                <span id="TotalBono"></span>
                                             </div>
                                         </td>
                                     </tr>
@@ -442,6 +466,7 @@
                                                     <input type="hidden" id="idC" name="id">
                                                     <input type="hidden" id="concpto" name="concpto">
                                                     <input type="hidden" id="lt" name="lt">
+                                                    <input type="hidden" class="bonus" name="bono">
                                                     <input id="ahora" type="hidden" name="ahora">
                                                     <input class="edi float-right mb-3" type="text" id="recibo"
                                                         placeholder="N° de recibo aqui..." data-toggle="tooltip"
@@ -478,111 +503,8 @@
     </div>
 </main>
 
-<div class="tab tab-vertical tab-dark">
-    <ul class="nav nav-tabs" role="tablist">
-        <li class="nav-item" onclick="myFunction()">
-            <a class="nav-link active" href="#vertical-icon-tab-1" data-toggle="tab" role="tab" aria-controls="profile"
-                aria-selected="true">
-                <img src="/img/logos/ban.png" width="40" height="40" class="" alt="Ashley Briggs">
-                <!--<i class="align-middle" data-feather="home"></i>-->
-            </a>
-        </li>
-        <li class="nav-item" onclick="myFunction()">
-            <a class="nav-link" href="#vertical-icon-tab-2" data-toggle="tab" role="tab" aria-controls="profile"
-                aria-selected="false">
-                <img src="/img/logos/payu4.png" width="40" height="40" class="" alt="Ashley Briggs">
-                <!--<i class="align-middle" data-feather="settings"></i>-->
-            </a>
-        </li>
-        <li class="nav-item" onclick="myFunction()">
-            <a class="nav-link" href="#vertical-icon-tab-3" data-toggle="tab" role="tab" aria-controls="profile"
-                aria-selected="false">
-                <img src="/img/logos/pp.png" width="40" height="40" class="rounded-circle" alt="Ashley Briggs">
-                <!--<i class="align-middle" data-feather="message-square"></i>-->
-            </a>
-        </li>
-        <li class="nav-item" onclick="myFunction()">
-            <a class="nav-link" href="#vertical-icon-tab-4" data-toggle="tab" role="tab" aria-controls="profile"
-                aria-selected="false">
-                <img src="/img/logos/recibo.jpg" width="40" height="40" class="rounded-circle" alt="Ashley Briggs">
-                <!--<i class="align-middle" data-feather="message-square"></i>-->
-            </a>
-        </li>
-    </ul>
-    <div class="tab-content">
-        <div class="tab-pane fade show active" id="vertical-icon-tab-1" role="tabpanel" aria-labelledby="home-tab">
-            <h4 class="tab-title">Vertical icon tabs</h4>
-            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-                ligula eget dolor tellus eget condimentum rhoncus. Aenean massa. Cum
-                sociis
-                natoque
-                penatibus et magnis neque dis parturient montes, nascetur ridiculus mus.
-                In
-                enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
-            <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-                Nulla
-                consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-                vulputate
-                eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-                justo.
-            </p>
-        </div>
-        <div class="tab-pane fade" id="vertical-icon-tab-2" role="tabpanel" aria-labelledby="profile-tab">
-            <h4 class="tab-title">Another one</h4>
-            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-                ligula eget dolor tellus eget condimentum rhoncus. Aenean massa. Cum
-                sociis
-                natoque
-                penatibus et magnis neque dis parturient montes, nascetur ridiculus mus.
-                In
-                enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
-            <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-                Nulla
-                consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-                vulputate
-                eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-                justo.
-            </p>
-        </div>
-        <div class="tab-pane fade" id="vertical-icon-tab-3" role="tabpanel" aria-labelledby="profile-tab">
-            <h4 class="tab-title">One more</h4>
-            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-                ligula eget dolor tellus eget condimentum rhoncus. Aenean massa. Cum
-                sociis
-                natoque
-                penatibus et magnis neque dis parturient montes, nascetur ridiculus mus.
-                In
-                enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
-            <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-                Nulla
-                consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-                vulputate
-                eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-                justo.
-            </p>
-        </div>
-        <div class="tab-pane fade" id="vertical-icon-tab-4" role="tabpanel" aria-labelledby="profile-tab">
-            <h4 class="tab-title">One more</h4>
-            <p>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Aenean commodo
-                ligula eget dolor tellus eget condimentum rhoncus. Aenean massa. Cum
-                sociis
-                natoque
-                penatibus et magnis neque dis parturient montes, nascetur ridiculus mus.
-                In
-                enim justo, rhoncus ut, imperdiet a, venenatis vitae, justo.</p>
-            <p>Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem.
-                Nulla
-                consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec,
-                vulputate
-                eget, arcu. In enim justo, rhoncus ut, imperdiet a, venenatis vitae,
-                justo.
-            </p>
-        </div>
-    </div>
-</div>
 
-
-<table class="table table-sm my-2" id="tablarecibo">
+<table class="table table-sm my-2" id="tablarecibo" style="display: none;">
     <tbody>
         <tr>
             <th colspan="4">

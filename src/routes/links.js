@@ -425,7 +425,7 @@ router.post('/pagos', async (req, res) => {
     res.send(hash);
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibo, ahora, concpto, lt, formap } = req.body;
+    const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono } = req.body;
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
     console.log(req.body)
     if (recibe.length > 0) {
@@ -440,6 +440,7 @@ router.post('/recibo', async (req, res) => {
             fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
             concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap
         }
+        bono != 0 ? pago.bono = bono : '';
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
         await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
