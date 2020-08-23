@@ -1061,16 +1061,17 @@ if (window.location.pathname == `/tablero`) {
 };
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pagos`) {
-    var bono = 0, tsinbono = 0, vx = 0;
+    var bono = 0, tsinbono = 0, vx = 0, cliente;
     var DT = () => {
         bono = 0;
         $('#TotalBono').html('-0');
         $('#bono').val('').focus();
+        $('.TotalBono').val('');
         $('#Code').val(vx);
         $('.bonus').val('');
     }
     var validationForm = $("#smartwizard");
-    validationForm.smartWizard("loader", "show");
+    //validationForm.smartWizard("loader", "show");
     validationForm.smartWizard({
         /*showStepURLhash: false,
         backButtonSupport: false,*/
@@ -1123,8 +1124,9 @@ if (window.location.pathname == `/links/pagos`) {
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    //console.log(data)
+                    console.log(data)
                     if (data.status) {
+                        cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
                         $('#Movil').val(data.client.movil);
@@ -1229,10 +1231,37 @@ if (window.location.pathname == `/links/pagos`) {
                 skdt = false
                 SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
             }
+            if (T === '0' && !T2 && bono) {
+                skdt = false
+                //$('input').prop('disabled', false);
+                $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+                var fd = $('#recbo').serialize();
+                $.ajax({
+                    url: '/links/bonus',
+                    data: fd,
+                    type: 'POST',
+                    beforeSend: function (xhr) {
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (data) {
+                        if (data) {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('success', `El bono fue redimido exitosamente`);
+                            validationForm.smartWizard("reset");
+                        } else {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
+                        }
+                    }
+                });
+            }
         } else if (currentStepNumber === 2) {
-            //alert(currentStepNumber);
-            skdt = true;
-        } else if (currentStepNumber === 3) {
             //alert(currentStepNumber);
             skdt = true;
         }
@@ -1277,6 +1306,9 @@ if (window.location.pathname == `/links/pagos`) {
                         if (dat.tip != 'BONO') {
                             SMSj('error', 'Este codigo de serie no pertenece a ningun bono. Para mas informacion comuniquese con el asesor encargado');
                             DT()
+                        } else if (dat.clients != cliente) {
+                            SMSj('error', 'Este bono no pertenece a este cliente. Para mas informacion comuniquese con el asesor encargado');
+                            DT()
                         } else if (dat.producto != null) {
                             SMSj('error', 'Este bono ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
                             DT()
@@ -1292,6 +1324,7 @@ if (window.location.pathname == `/links/pagos`) {
                             $('.Total, .Total3').html(Moneda(vr));
                             $('#Total, #Total2').val(vr);
                             $('#TotalBono').html('-' + Moneda(dat.monto));
+                            $('.TotalBono').val(dat.monto);
                             $('.bonus').val(dat.pin);
                             bono = dat.pin;
                             $('#Code').val(vx + '-' + bono);
