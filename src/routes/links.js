@@ -920,7 +920,6 @@ router.post('/anular', isLoggedIn, async (req, res) => {
                 tip: qhacer, monto: o[0].total, motivo, concept: causa
             }
             await pool.query('INSERT INTO cupones SET ? ', bono);
-
             var nombr = nombre.split(" ")[0],
                 movi = movil.indexOf(" ") > 0 ? movil : '57' + movil,
                 fullnam = fullname.split(" ")[0],
@@ -939,23 +938,41 @@ router.post('/anular', isLoggedIn, async (req, res) => {
                 "phone": ce,
                 "body": `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
             }
-            //console.log(nombr, movi, fullnam, ce, bono, options)
             request(options, function (error, response, body) {
                 if (error) return console.error('Failed: %s', error.message);
                 console.log('Success: ', body);
                 M()
             });
 
+        } else if (qhacer === 'DEVOLUCION' && o[0].total > 0) {
+            const total = o[0].total;
+            const porciento = 0.20;
+            const monto = o[0].total * porciento;
+            const facturasvenc = o.length;
+            const fech = moment(Date()).format('YYYY-MM-DD');
+            const devolucion = {
+                fech, monto, concepto: qhacer, stado: 3, descp: causa,
+                porciento, total, lt: lote, retefuente: 0, facturasvenc, recibo: 'NO APLICA',
+                reteica: 0, pagar: total - monto, formap: 'INDEFINIDA'
+            }
+            await pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
         await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
             LEFT JOIN preventa p ON s.lt = p.lote  
+            LEFT JOIN cupones cp ON p.cupon = cp.id
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
-            SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9, 
-            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-            l.valor = d.valmtr2 * l.mtr2, l.inicial = (d.valmtr2 * l.mtr2) * porcentage / 100 
-            WHERE s.lt = ? `, lote
+            SET ?  WHERE s.lt = ? `,
+            [
+                {
+                    "s.stado": 6, "c.estado": 6, "l.estado": 9, "l.estado": 9,
+                    "l.uno": NULL, "l.dos": NULL, "l.tres": NULL, "l.directa": NULL,
+                    "l.valor": d.valmtr2 * l.mtr2, "cp.estado": 6, "p.tipobsevacion": "ANULADA",
+                    "p.descrip": causa + "-" + motivo, "l.inicial": (d.valmtr2 * l.mtr2) * porcentage / 100,
+
+                }, lote
+            ]
         );
         res.send(true);
     }
