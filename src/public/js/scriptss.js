@@ -246,6 +246,8 @@ $validationForm.smartWizard({
     backButtonSupport: false,
     useURLhash: false
 }).on("leaveStep", () => {
+    //$('.h').attr("disabled", false);
+    //return true
     var fd = $('form').serialize();
     let skdt;
     $.ajax({
@@ -1059,28 +1061,64 @@ if (window.location.pathname == `/tablero`) {
 };
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pagos`) {
-    //alert('sajljsdlaj')
+    var bono = 0, tsinbono = 0, vx = 0, cliente;
+    var DT = () => {
+        bono = 0;
+        $('#TotalBono').html('-0');
+        $('#bono').val('').focus();
+        $('.TotalBono').val('');
+        $('#Code').val(vx);
+        $('.bonus').val('');
+    }
     var validationForm = $("#smartwizard");
+    //validationForm.smartWizard("loader", "show");
     validationForm.smartWizard({
-        theme: "arrows",
-        showStepURLhash: false,
-        lang: {
-            next: 'Siguiente',
-            previous: 'Atras'
+        /*showStepURLhash: false,
+        backButtonSupport: false,*/
+        useURLhash: false,
+        selected: 0, // Paso inicial seleccionado, 0 - primer paso
+        theme: 'arrows', //'default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+        justified: true, // Justificación del menú Nav.
+        darkMode: true, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+        autoAdjustHeight: true, // Ajustar automáticamente la altura del contenido
+        cycleSteps: false, // Permite recorrer los pasos
+        backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
+        //enableURLhash: true, // Habilitar la selección del paso basado en el hash url
+        transition: {
+            animation: 'none', // Efecto en la navegación, none/fade/slide-horizontal/slide-vertical/slide-swing
+            speed: '400',  // Velocidad de animación Transion
+            easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
         },
         toolbarSettings: {
-            toolbarPosition: 'bottom', // none, top, bottom, both
-            toolbarButtonPosition: 'right', // left, right
+            toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos
+            toolbarButtonPosition: 'right', // izquierda, derecha, centro
             showNextButton: true, // show/hide a Next button
-            showPreviousButton: false // show/hide a Previous button
-            //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+            showPreviousButton: false, // show/hide a Previous button
+            //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
         },
-        autoAdjustHeight: true,
-        backButtonSupport: false,
-        useURLhash: false
-    }).on("leaveStep", () => {
-        let skdt;
-        if (!$('.Cliente').html()) {
+        anchorSettings: {
+            anchorClickable: true, // Activar/Desactivar la navegación del ancla
+            enableAllAnchors: false, // Activa todos los anclajes en los que se puede hacer clic todas las veces
+            markDoneStep: true, // Añadir estado hecho en la navegación
+            markAllPreviousStepsAsDone: true, // Cuando un paso seleccionado por url hash, todos los pasos anteriores se marcan hecho
+            removeDoneStepOnNavigateBack: false, // Mientras navega hacia atrás paso después de paso activo se borrará
+            enableAnchorOnDoneStep: true // Habilitar/Deshabilitar los pasos de navegación
+        },
+        keyboardSettings: {
+            keyNavigation: true, // Activar/Desactivar la navegación del teclado (las teclas izquierda y derecha se utilizan si está habilitada)
+            keyLeft: [37], // Código de tecla izquierdo
+            keyRight: [39] // Código de tecla derecha
+        },
+        lang: { //   Variables de idioma para el botón
+            next: 'Siguiente',
+            previous: 'Anterior'
+        },
+        disabledSteps: [], // Pasos de matriz desactivados
+        errorSteps: [], // Paso de resaltado con errores
+        hiddenSteps: [] // Pasos ocultos
+    }).on("leaveStep", (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
+        let skdt = false;
+        if (currentStepNumber === 0) {
             $.ajax({
                 url: '/links/pagos/' + $('#cedula').val(),
                 type: 'GET',
@@ -1088,18 +1126,18 @@ if (window.location.pathname == `/links/pagos`) {
                 success: function (data) {
                     console.log(data)
                     if (data.status) {
+                        cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
                         $('.Cliente').val(data.client.nombre);
-                        $('#Code').val(data.client.id + '-' + data.d.n + '-' + data.d.id);
                         $('#Movil').val(data.client.movil);
                         $('#Email').val(data.client.email);
                         data.d.map((r) => {
                             $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
                         });
                         var Calculo = (m) => {
-
                             var mora = 0, cuot = 0, Description = '', cont = 0;
-
+                            $('#Code').val(data.client.idc + '-' + m);
+                            vx = data.client.idc + '-' + m;
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
@@ -1111,13 +1149,14 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#lt').val(Moneda(r.lt));
                                 Description = r.proyect + ' Lote: ' + r.n;
                             })
-
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
                                 mor = r.mora;
                                 mora += mor;
-                                cuot += r.cuota
+                                cuot += r.cuota;
+                                c = mora + cuot;
+                                tsinbono = c;
                                 $('#Concepto').html(r.tipo);
                                 $('#concpto').val(r.tipo)
                                 $('#Cuotan').html(Moneda(r.ncuota));
@@ -1125,9 +1164,9 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Mora').html(Moneda(mor));
                                 $('#Facturas').html(x + 1);
                                 $('.Totalf').html(Moneda(r.cuota + mor));
-                                $('.Total').html(Moneda(mora + cuot));
-                                $('.Total3').html(Moneda(mora + cuot));
-                                $('#Total, #Total2').val(mora + cuot);
+                                $('.Total, .Total3').html(Moneda(c));
+                                //$('.Total3').html(Moneda(mora + cuot));
+                                $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
                                 $('#idC').val(r.id);
@@ -1148,6 +1187,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#idC').val('');
                                 $('#concpto').val('ABONO')
                             }
+                            DT()
                         }
                         Calculo($('#proyectos').val())
                         $('#proyectos').change(function () {
@@ -1158,41 +1198,17 @@ if (window.location.pathname == `/links/pagos`) {
                             var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
                             var totl = parseFloat($('.Total').html().replace(/\./g, ''))
                             if (totl2 === totalf || totl2 > totl) {
-                                $('.Total3').html($(this).val());
-                                $('#Total, #Total2').val($(this).cleanVal());
-                            } else if ($(this).val()) {
+                                $('.Total3').html(Moneda(totl2));
+                                $('#Total, #Total2').val(totl2);
+                            } else if (totl2) {
                                 $(this).val('')
                                 SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
-                                $('.Total3').html(Moneda($('.Total').html()));
-                                $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                                $('.Total3').html(Moneda(totl));
+                                $('#Total, #Total2').val(totl);
                             } else {
-                                $('.Total3').html(Moneda($('.Total').html()));
-                                $('#Total, #Total2').val($('.Total').html().replace(/\./g, ''));
+                                $('.Total3').html(Moneda(totl));
+                                $('#Total, #Total2').val(totl);
                             }
-                            Payu()
-                        })
-                        var Payu = () => {
-                            if ($('#pay').prop('checked')) {
-                                var l = parseFloat($('#Total').val())
-                                var cal = Math.round((l * 3.4 / 100) + 900)
-                                $('.transaccion').html(Moneda(cal))
-                                $('.Total3').html(Moneda(l + cal));
-                                $('#Total, #Total2').val(l + cal);
-                                $('.pgpayu').show();
-                                $('.pgofi').hide();
-                                $('#recibo').val('');
-                                $('#file').val('');
-
-                            } else {
-                                $('.transaccion').html('0')
-                                $('.Total3').html($('.Total2').val() ? $('.Total2').val() : $('.Total').html());
-                                $('#Total, #Total2').val($('.Total2').val() ? $('.Total2').cleanVal() : $('.Total').html().replace(/\./g, ''));
-                                $('.pgpayu').hide();
-                                $('.pgofi').show();
-                            }
-                        }
-                        $('.forma').change(function () {
-                            Payu()
                         })
                         skdt = true;
                     } else {
@@ -1205,35 +1221,183 @@ if (window.location.pathname == `/links/pagos`) {
                     }
                 }
             });
-
-            return skdt;
-
-        } else {
-            return true;
+        } else if (currentStepNumber === 1) {
+            var T = $('.Total').html();
+            var T2 = $('.Total2').val();
+            if (T != 0 || T2 || bono) {
+                skdt = true
+                $('.sw-btn-next').html('Pagar')
+            } else {
+                skdt = false
+                SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
+            }
+            if (T === '0' && !T2 && bono) {
+                skdt = false
+                //$('input').prop('disabled', false);
+                $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+                var fd = $('#recbo').serialize();
+                $.ajax({
+                    url: '/links/bonus',
+                    data: fd,
+                    type: 'POST',
+                    beforeSend: function (xhr) {
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (data) {
+                        if (data) {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('success', `El bono fue redimido exitosamente`);
+                            validationForm.smartWizard("reset");
+                        } else {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
+                        }
+                    }
+                });
+            }
+        } else if (currentStepNumber === 2) {
+            //alert(currentStepNumber);
+            skdt = true;
         }
+        return skdt;
     });
-    $('.Total2').change(function () {
-        var resul = $(this).val();
-        $('#Total, #Total2').val(resul)
-    });
-    $('form').submit(function (e) {
-        if ($('#Total2').val() === '0') {
-            SMSj('error', 'El total debe ser diferente a cero');
-            e.preventDefault()
-        } else {
-            $('input').prop('disabled', false);
-            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'))
-            var fd = $('form').serialize();
+    var Pay = (forma) => {
+        var t2 = $('.Total2').val(),
+            T2 = $('.Total2').cleanVal(),
+            t = $('.Total').html(),
+            T = $('.Total').html().replace(/\./g, '');
+
+        if (forma === 'payu') {
+            var l = parseFloat($('#Total').val())
+            var cal = Math.round((l * 3.4 / 100) + 900)
+            $('.transaccion').html(Moneda(cal))
+            $('.Total3').html(Moneda(l + cal));
+            $('#Total, #Total2').val(l + cal);
+            $('#recibo').val('');
+            $('#file').val('');
+
+        } else if (forma === 'recbo' || forma === 'bancolombia') {
+            $('.transaccion').html('0')
+            $('.Total3').html(t2 ? t2 : t);
+            $('#Total, #Total2').val(T2 ? T2 : T);
+        }
+        $('.sw-btn-next').on('click', function () {
+            $('#' + forma).validate();
+            $('#' + forma).submit();
+        })
+    }
+
+    $('#bono').change(function () {
+        if ($(this).val() !== bono && $(this).val()) {
             $.ajax({
-                url: '/links/pagos',
-                data: fd,
-                type: 'POST',
+                url: '/links/bono/' + $(this).val(),
+                type: 'GET',
                 async: false,
                 success: function (data) {
-                    $('input[name="signature"]').val(data);
+                    if (data.length) {
+                        var dat = data[0];
+                        var fecha = moment(dat.fecha).add(1, 'year').endOf("days");
+                        if (dat.tip != 'BONO') {
+                            SMSj('error', 'Este codigo de serie no pertenece a ningun bono. Para mas informacion comuniquese con el asesor encargado');
+                            DT()
+                        } else if (dat.clients != cliente) {
+                            SMSj('error', 'Este bono no pertenece a este cliente. Para mas informacion comuniquese con el asesor encargado');
+                            DT()
+                        } else if (dat.producto != null) {
+                            SMSj('error', 'Este bono ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
+                            DT()
+                        } else if (fecha < new Date()) {
+                            SMSj('error', 'Este bono de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                            DT()
+                        } else if (dat.estado != 9) {
+                            SMSj('error', 'Este bono aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
+                            DT()
+                        } else {
+                            var hfv = tsinbono - dat.monto;
+                            var vr = hfv < 0 ? 0 : hfv;
+                            $('.Total, .Total3').html(Moneda(vr));
+                            $('#Total, #Total2').val(vr);
+                            $('#TotalBono').html('-' + Moneda(dat.monto));
+                            $('.TotalBono').val(dat.monto);
+                            $('.bonus').val(dat.pin);
+                            bono = dat.pin;
+                            $('#Code').val(vx + '-' + bono);
+                        }
+                    } else {
+                        DT();
+                        SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado');
+                    }
                 }
             });
+        } else {
+            DT();
+            SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
         }
+    })
+
+    $('#recbo').validate({
+        debug: false,
+        rules: {
+            recibo: {
+                required: true,
+                number: true,
+                maxlength: 7,
+                minlength: 3
+            },
+            formap: {
+                required: true
+            },
+            image: {
+                required: true
+            }/*,
+            weight: {
+                required: {
+                    depends: function (elem) {
+                        return $("#age").val() > 50
+                    }
+                },
+                number: true,
+                min: 0
+            }*/
+        },
+        messages: {
+            recibo: {
+                required: `Introduce la referencia del recibo.`,
+                /*number: `Introduce un código válido.`,
+                maxlength: 'Debe contener max 7 dígitos.',
+                minlength: 'Debe contener min 3 dígitos.'*/
+            },
+            formap: {
+                required: 'Debes escojer una forma de pago.'
+            },
+            image: {
+                required: 'Debes seleccionar una imagen.'
+            },
+        },
+        errorPlacement: function (error, element) {
+            SMSj('info', `${error[0].innerText} GRUPO ELITE`)
+        }
+    });
+    $('form').submit(function (e) {
+        //e.preventDefault()
+        $('input').prop('disabled', false);
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        var fd = $('form').serialize();
+        $.ajax({
+            url: '/links/pagos',
+            data: fd,
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                $('input[name="signature"]').val(data);
+            }
+        });
     });
 
     var doc = new jsPDF('l', 'mm', 'a5')
@@ -1274,12 +1438,11 @@ if (window.location.pathname == `/links/pagos`) {
         },
         margin: { top: 30 },
     })
-
     // Total page number plugin only available in jspdf v1.0+
     if (typeof doc.putTotalPages === 'function') {
         doc.putTotalPages(totalPagesExp)
     }
-    doc.output('dataurlnewwindow')
+    //doc.output('dataurlnewwindow')
     function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
