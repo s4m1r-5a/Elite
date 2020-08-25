@@ -15,6 +15,7 @@ const { google } = require('googleapis');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 const { isNull } = require('util');
+const { Console } = require('console');
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -41,11 +42,11 @@ request(url, function (error, response, body) {
     console.log('Success: ', body);
 });
 cron.schedule("50 23 * * *", async () => {
-    await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
+    /*await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
     SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
     WHERE MONTH(pr.fecha) = MONTH(NOW()) AND DAY(pr.fecha) < DAY(NOW()) AND p.estado = 1`);
     await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
-    WHERE p.cupon IS NULL`)
+    WHERE p.cupon IS NULL`)*/
 });
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -425,7 +426,7 @@ router.post('/pagos', async (req, res) => {
     res.send(hash);
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono } = req.body;
+    const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono, pin } = req.body;
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
     console.log(req.body)
     if (recibe.length > 0) {
@@ -440,7 +441,7 @@ router.post('/recibo', async (req, res) => {
             fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
             concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap
         }
-        bono != 0 ? pago.bono = bono : '';
+        bono != 0 ? pago.bono = pin : '';
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
         await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
@@ -451,7 +452,7 @@ router.post('/recibo', async (req, res) => {
     //uploads/
 });
 router.post('/bonus', async (req, res) => {
-    const { factrs, id, ahora, concpto, lt, bonomonto, bono } = req.body;
+    const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin } = req.body;
     const recibe = await pool.query(
         `SELECT c.id, pr.id e FROM cupones c
             INNER JOIN clientes cl ON c.clients = cl.idc 
@@ -906,7 +907,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0'
     };
-    console.log(req.body);
+    //console.log(req.body);
     const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND (concepto = 'ABONO' OR concepto = 'PAGO') AND lt = ${lote}`);
     if (u.length > 0) {
         req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
@@ -949,7 +950,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             const porciento = 0.20;
             const monto = o[0].total * porciento;
             const facturasvenc = o.length;
-            const fech = moment(Date()).format('YYYY-MM-DD');
+            const fech = moment(new Date()).format('YYYY-MM-DD');
             const devolucion = {
                 fech, monto, concepto: qhacer, stado: 3, descp: causa,
                 porciento, total, lt: lote, retefuente: 0, facturasvenc, recibo: 'NO APLICA',
@@ -967,9 +968,9 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             [
                 {
                     "s.stado": 6, "c.estado": 6, "l.estado": 9, "l.estado": 9,
-                    "l.uno": NULL, "l.dos": NULL, "l.tres": NULL, "l.directa": NULL,
-                    "l.valor": d.valmtr2 * l.mtr2, "cp.estado": 6, "p.tipobsevacion": "ANULADA",
-                    "p.descrip": causa + "-" + motivo, "l.inicial": (d.valmtr2 * l.mtr2) * porcentage / 100,
+                    "l.uno": null, "l.dos": null, "l.tres": null, "l.directa": null,
+                    "l.valor": "d.valmtr2" * "l.mtr2", "cp.estado": 6, "p.tipobsevacion": "ANULADA",
+                    "p.descrip": causa + "-" + motivo, "l.inicial": ("d.valmtr2" * "l.mtr2") * "d.porcentage" / 100,
 
                 }, lote
             ]
@@ -977,7 +978,6 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         res.send(true);
     }
     //respuesta = { "data": ventas };
-
 });
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -1022,6 +1022,37 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
         res.send(respuesta);
+
+    } else if (id == 'eliminar') {
+
+        const { k, h } = req.body;
+        const u = await pool.query(`SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
+        LEFT JOIN solicitudes s ON pd.id = s.lt WHERE pd.estado != 9 AND s.stado != 6 AND p.id = ?`, k);
+        const U = u[0] || { fech: h, u: 0 };
+        const m = moment(U.fech).format('YYYY-MM');
+        var D = () => {
+            var imagenes = U.img.indexOf(",") > 0 ? U.img.split(",") : U.img
+            if (Array.isArray(imagenes)) {
+                imagenes.map((e) => {
+                    Eli(e);
+                })
+            } else {
+                Eli(imagenes);
+            };
+        };
+        //console.log(u.length, h, m)
+        if (u.length === 1 && h === m) {
+            D();
+            await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
+            res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
+        } else {
+            res.send({
+                r: false,
+                m: u.length > 1 ? `Este reporte tiene mas de un recibo generado, por eso no es posible eliminarlo`
+                    : u.length < 1 ? `Este reporte no es posible eliminarlo ya que se encuentra ANULADO...`
+                        : `Este reporte tiene un recibo generado hace mas de un mes, por eso no es posible eliminarlo`
+            });
+        }
     }
 
 });
@@ -1070,21 +1101,19 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    var Eli = (img) => {
-        fs.exists(img, function (exists) {
-            if (exists) {
-                fs.unlink(img, function (err) {
-                    if (err) throw err;
-                    console.log('Archivo eliminado');
-                });
-            } else {
-                console.log('El archivo no exise');
-            }
-        });
-    }
+    if (req.user.admin != 1) {
+        res.send(false);
+    };
+
     if (id === 'Declinar') {
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
+        await pool.query(
+            `UPDATE solicitudes s LEFT JOIN cuotas c ON s.pago = c.id LEFT JOIN cupones cp ON s.bono = cp.id SET ? WHERE s.ids = ?`,
+            [{ 'c.estado': 3, 'cp.producto': null, 'cp.estado': 9 }, req.body.ids]
+        );
+
         await pool.query(`DELETE FROM solicitudes WHERE ids = ?`, req.body.ids);
+
         var imagenes = img.indexOf(",") > 0 ? img.split(",") : img
         if (Array.isArray(imagenes)) {
             imagenes.map((e) => {
@@ -1094,10 +1123,6 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Eli(imagenes);
         }
         if (cel) {
-            await pool.query(
-                `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.ids = ?`,
-                [{ 'c.estado': 3 }, req.body.ids]
-            );
             var movil = cel.indexOf("-") > 0 ? cel.replace(/-/g, "") : cel
             var celu = movil.indexOf(" ") > 0 ? movil : '57' + movil
             var options = {
@@ -2553,6 +2578,20 @@ async function Desendentes(pin, stados) {
     }
     return true
 };
+async function Eli(img) {
+    fs.exists(img, function (exists) {
+        if (exists) {
+            fs.unlink(img, function (err) {
+                if (err) throw err;
+                console.log('Archivo eliminado');
+                return 'Archivo eliminado';
+            });
+        } else {
+            console.log('El archivo no exise');
+            return 'El archivo no exise';
+        }
+    });
+}
 function Moneda(valor) {
     valor = valor.toString().split('').reverse().join('').replace(/(?=\d*\.?)(\d{3})/g, '$1.');
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
