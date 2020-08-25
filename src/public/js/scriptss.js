@@ -1069,6 +1069,7 @@ if (window.location.pathname == `/links/pagos`) {
         $('.TotalBono').val('');
         $('#Code').val(vx);
         $('.bonus').val('');
+        $('.bonu').val('');
     }
     var validationForm = $("#smartwizard");
     //validationForm.smartWizard("loader", "show");
@@ -1326,6 +1327,7 @@ if (window.location.pathname == `/links/pagos`) {
                             $('#TotalBono').html('-' + Moneda(dat.monto));
                             $('.TotalBono').val(dat.monto);
                             $('.bonus').val(dat.pin);
+                            $('.bonu').val(dat.id);
                             bono = dat.pin;
                             $('#Code').val(vx + '-' + bono);
                         }
@@ -1393,7 +1395,13 @@ if (window.location.pathname == `/links/pagos`) {
             url: '/links/pagos',
             data: fd,
             type: 'POST',
-            async: false,
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
             success: function (data) {
                 $('input[name="signature"]').val(data);
             }
@@ -1811,6 +1819,7 @@ if (window.location.pathname == `/links/reportes`) {
                                                     <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
                                                     <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
+                                                    <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                                 </div>
                                         </div>`
                         : `<a type="button" class="btn btn-sm btn-outline-dark" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Print</a>`
@@ -2027,6 +2036,33 @@ if (window.location.pathname == `/links/reportes`) {
     tableOrden.on('click', 'tr', function () {
         datos = tableOrden.row(this).data();
     })
+    var Eliminar = (eli) => {
+        var D = { k: eli, h: moment().format('YYYY-MM') };
+        $.ajax({
+            url: '/links/reportes/eliminar',
+            data: D,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data.r) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    SMSj('success', data.m);
+                    validationForm.smartWizard("reset");
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    SMSj('error', data.m);
+                }
+            }
+        });
+    }
     var Enviar = (datos) => {
         $.ajax({
             url: '/links/anular',
@@ -4454,22 +4490,19 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         } else {
             $("#Modalimg .foto").attr('src', data.img).show();
         }
-        $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'))
-        $('#Modalimg .cliente').html(data.nombre)
-        $('#Modalimg .proyecto').html(data.proyect)
-        $('#Modalimg .mz').html('MZ: ' + data.mz)
-        $('#Modalimg .lote').html('LOTE: ' + data.n)
-        $('#Modalimg .recibo').html('RECIBO: ' + data.recibo)
-        $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc)
-        if (admin == 1) {
-            $('.dropdown-item').hide()
-        }
+        $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
+        $('#Modalimg .cliente').html(data.nombre);
+        $('#Modalimg .proyecto').html(data.proyect);
+        $('#Modalimg .mz').html('MZ: ' + data.mz);
+        $('#Modalimg .lote').html('LOTE: ' + data.n);
+        $('#Modalimg .recibo').html('RECIBO: ' + data.recibo);
+        $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc);
         switch (data.stado) {
             case 4:
-                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`)
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
                 break;
             case 6:
-                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`)
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
                 break;
             case 3:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
@@ -4478,7 +4511,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         <a class="dropdown-item">Declinar</a>`);
                 break;
             default:
-                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`)
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
+        }
+        if (admin == 1) {
+            $('.dropdown-item').show()
+            $('#nove').show()
+        } else {
+            $('.dropdown-item').hide()
         }
         $('#Modalimg').modal({
             backdrop: 'static',
@@ -4494,7 +4533,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     e = 2
                 }
             }
-            if (accion !== 'Declinar' || e === 2) {
+            if ((accion !== 'Declinar' || e === 2) && admin == 1) {
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
