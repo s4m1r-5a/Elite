@@ -4275,10 +4275,53 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             }
             if ((accion !== 'Declinar' || e === 2) && admin == 1) {
+                var doc = new jsPDF('l', 'mm', 'a5')
+                var img = new Image()
+                img.src = '/img/avatars/avatar.png'
+                var totalPagesExp = '{total_pages_count_string}'
+                //doc.addPage("a3"); 
+                doc.autoTable({
+                    head: headRows(),
+                    body: bodyRows(40),
+                    //html: '#tablarecibo',
+                    showHead: false,
+                    columnStyles: {
+                        id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
+                    },
+                    didDrawPage: function (data) {
+                        // Header
+                        doc.setFontSize(20)
+                        doc.setTextColor(40)
+                        doc.setFontStyle('normal')
+                        if (img) {
+                            doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
+                        }
+                        doc.text('Recibo 54', data.settings.margin.left + 13, 20)
+
+                        // Footer
+                        var str = 'Page ' + doc.internal.getNumberOfPages()
+                        // Total page number plugin only available in jspdf v1.0+
+                        if (typeof doc.putTotalPages === 'function') {
+                            str = str + ' of ' + totalPagesExp
+                        }
+                        doc.setFontSize(10)
+
+                        // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                        var pageSize = doc.internal.pageSize
+                        var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                        doc.text(str, data.settings.margin.left, pageHeight - 10)
+                    },
+                    margin: { top: 30 },
+                })
+                // Total page number plugin only available in jspdf v1.0+
+                if (typeof doc.putTotalPages === 'function') {
+                    doc.putTotalPages(totalPagesExp)
+                }
                 var blob = doc.output('blob');
+
                 var fd = new FormData();
                 dts.arch = blob
-                fd.append(dts);
+                fd.append('pdf', blob);
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
@@ -4304,6 +4347,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             }).modal('hide');
                             SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                         }
+                    },
+                    error: function (data) {
+                        console.log(data);
                     }
                 })
             }
@@ -4729,49 +4775,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
 
 
 
-    var doc = new jsPDF('l', 'mm', 'a5')
-    var img = new Image()
-    img.src = '/img/avatars/avatar.png'
-    var totalPagesExp = '{total_pages_count_string}'
-    //doc.addPage("a3"); 
-    doc.autoTable({
-        //head: headRows(),
-        //body: bodyRows(40),
-        html: '#tablarecibo',
-        //showHead: false,
-        columnStyles: {
-            id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
-        },
-        didDrawPage: function (data) {
-            // Header
-            doc.setFontSize(20)
-            doc.setTextColor(40)
-            doc.setFontStyle('normal')
-            if (img) {
-                doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
-            }
-            doc.text('Recibo 54', data.settings.margin.left + 13, 20)
 
-            // Footer
-            var str = 'Page ' + doc.internal.getNumberOfPages()
-            // Total page number plugin only available in jspdf v1.0+
-            if (typeof doc.putTotalPages === 'function') {
-                str = str + ' of ' + totalPagesExp
-            }
-            doc.setFontSize(10)
-
-            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-            var pageSize = doc.internal.pageSize
-            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-            doc.text(str, data.settings.margin.left, pageHeight - 10)
-        },
-        margin: { top: 30 },
-    })
-    // Total page number plugin only available in jspdf v1.0+
-    if (typeof doc.putTotalPages === 'function') {
-        doc.putTotalPages(totalPagesExp)
-    }
-    doc.output('dataurlnewwindow')
+    //doc.output('dataurlnewwindow')
     function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
