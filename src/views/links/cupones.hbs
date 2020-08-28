@@ -4,6 +4,79 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header">
+                        <form id="creacliente">
+                            <div class="row" id="addcliente" style="display: none;">
+                                <div class="col-12 col-lg-12">
+                                    <div class="d-inline-block float-right">
+                                        <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
+                                    </div>
+                                    <hr style="width: 90%;" />
+                                </div>
+                                <input type="hidden" class="ya" value="" name="ahora">
+                                <div class="col-12">
+                                    <table class="table table-sm my-2">
+                                        <tbody>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="heart"></i>
+                                                    Responsable
+                                                </th>
+                                                <td>
+                                                    <select class="form-control-no-border edi estadocivil u"
+                                                        name="estadocivil" style="padding: 1px; width: 100%;" required>
+                                                        <option value="">Situación sentimental?</option>
+                                                    </select>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="mail"></i>
+                                                    Monto
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-lowercase email u"
+                                                        type="email" placeholder="Correo electrónico" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="email" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="phone-call"></i>
+                                                    Motivo
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi movil u text-center"
+                                                        type="text" placeholder="Numero celular"
+                                                        style="padding: 1px; width: 100%;" autocomplete="off"
+                                                        name="movil" id="movil" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="map"></i>
+                                                    Dirección
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi direccion u" type="text"
+                                                        placeholder="Dirección de residencia" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="direccion" required>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="user-plus"></i>
+                                                </th>
+                                                <td>
+                                                    <button class="btn btn-outline-dark btn-sm float-right mr-3 guard"
+                                                        type="submit"><i class="fas fa-fw fa-user-plus"></i>
+                                                        Guardar</button>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </form>
                     </div>
                     <div class="card-body">
                         <table id="tablacupones" class="table table-sm table-striped table-hover display nowrap"

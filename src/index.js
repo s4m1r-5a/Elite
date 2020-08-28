@@ -49,7 +49,7 @@ app.set('view engine', '.hbs');
 const storage = multer.diskStorage({
   destination: path.join(__dirname, 'public/uploads'),
   filename: (req, file, cb) => {
-    cb(null, ID(34) + path.extname(file.originalname));
+    cb(null, ID(34) + (path.extname(file.originalname) || '.pdf'));
   }
 });
 
@@ -57,15 +57,18 @@ app.use(multer({
   storage,
   dest: path.join(__dirname, 'public/uploads'),
   fileFilter: function (req, file, cb) {
-
-    var filetypes = /jpeg|jpg|png|gif|mkv|mp4|x-matroska|video/;
+    /*var filetypes =  /jpeg|jpg|png|gif|mkv|mp4|application\/pdf|x-matroska|video/;
     var mimetype = filetypes.test(file.mimetype);
-    var extname = filetypes.test(path.extname(file.originalname).toLowerCase());
+    var extname = filetypes.test(path.extname(file.originalname).toLowerCase());*/
+    //console.log(file, path.extname(file.originalname).toLowerCase())
+    var filetypes = ['jpeg', 'jpg', 'png', 'gif', 'mkv', 'mp4', 'application/pdf', '', 'x-matroska', 'video'];
+    var mimetype = filetypes.indexOf(file.mimetype);
+    var extname = filetypes.indexOf(path.extname(file.originalname).toLowerCase());
 
     if (mimetype && extname) {
       return cb(null, true);
     }
-    cb("Error: File upload only supports the following filetypes - " + filetypes);
+    cb("Error: File upload only supports the following filetypes - " + filetypes + ' - ' + file.mimetype);
   },
   //limits: { fileSize: 2062191114 },
 }).any('image'));

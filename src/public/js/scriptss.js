@@ -3490,7 +3490,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
 };
 /////////////////////////////* ORDEN */////////////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden`) {
-    $.jMaskGlobals = {
+    /*$.jMaskGlobals = {
         maskElements: 'input,td,span,div',
         dataMaskAttr: '*[data-mask]',
         dataMask: true,
@@ -3505,7 +3505,7 @@ if (window.location.pathname == `/links/orden`) {
             'A': { pattern: /[a-zA-Z0-9]/ },
             'S': { pattern: /[a-zA-Z]/ }
         }
-    };
+    };*/
     var fch = new Date();
     var Meses = (extra) => {
         var fechs = new Date($('#fechs').val());
@@ -3793,7 +3793,7 @@ if (window.location.pathname == `/links/orden`) {
             if (r) {
                 $(`#Emeses option[value='${r}']`).attr("selected", true);
             }
-            fcha = moment(new Date(moment(fch).add(dia, 'days'))).format('YYYY-MM-DD')
+            fcha = moment(fch).format(`YYYY-MM-${dia}`);
         }
 
         Años(2, 1, 6);
@@ -4220,8 +4220,53 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
-        var dts = data, imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
-        fila.toggleClass('selected')
+        var dts = data,
+            imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
+        fila.toggleClass('selected');
+
+        var doc = new jsPDF('l', 'mm', 'a5')
+        var img = new Image()
+        img.src = '/img/avatars/avatar.png'
+        var totalPagesExp = '{total_pages_count_string}'
+        //doc.addPage("a3"); 
+        doc.autoTable({
+            head: headRows(),
+            body: bodyRows(40),
+            //html: '#tablarecibo',
+            showHead: false,
+            columnStyles: {
+                id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
+            },
+            didDrawPage: function (data) {
+                // Header
+                doc.setFontSize(20)
+                doc.setTextColor(40)
+                doc.setFontStyle('normal')
+                if (img) {
+                    doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
+                }
+                doc.text('Recibo 54', data.settings.margin.left + 13, 20)
+
+                // Footer
+                var str = 'Page ' + doc.internal.getNumberOfPages()
+                // Total page number plugin only available in jspdf v1.0+
+                if (typeof doc.putTotalPages === 'function') {
+                    str = str + ' of ' + totalPagesExp
+                }
+                doc.setFontSize(10)
+
+                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                var pageSize = doc.internal.pageSize
+                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                doc.text(str, data.settings.margin.left, pageHeight - 10)
+            },
+            margin: { top: 30 },
+        })
+        // Total page number plugin only available in jspdf v1.0+
+        if (typeof doc.putTotalPages === 'function') {
+            doc.putTotalPages(totalPagesExp)
+        }
+
         if (Array.isArray(imagenes)) {
             $("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").hide()
@@ -4266,19 +4311,31 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             toggle: true
         });
         $('.dropdown-item').on('click', function () {
-            var accion = $(this).text(), e = 1, porque = '';
+
+            var accion = $(this).text(),
+                e = 1, porque = '',
+                blob = doc.output('blob'),
+                fd = new FormData();
+            
+            fd.append('pdf', blob);
+            fd.append('ids', dts.ids);
+
             if (accion === 'Declinar') {
                 porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
                 if (porque != null) {
-                    dts.por = porque;
+                    //dts.por = porque;
                     e = 2
+                    fd.append('img', data.img);
+                    fd.append('por', porque);
+                    fd.append('cel', data.cel);
+                    fd.append('fullname', data.fullname);
+                    fd.append('mz', data.mz);
+                    fd.append('n', data.n);
+                    fd.append('proyect', data.proyect);
+                    fd.append('nombre', data.nombre);
                 }
             }
             if ((accion !== 'Declinar' || e === 2) && admin == 1) {
-                var blob = doc.output('blob');
-                var fd = new FormData();
-                dts.arch = blob
-                fd.append(dts);
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
@@ -4304,6 +4361,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             }).modal('hide');
                             SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                         }
+                    },
+                    error: function (data) {
+                        console.log(data);
                     }
                 })
             }
@@ -4729,49 +4789,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
 
 
 
-    var doc = new jsPDF('l', 'mm', 'a5')
-    var img = new Image()
-    img.src = '/img/avatars/avatar.png'
-    var totalPagesExp = '{total_pages_count_string}'
-    //doc.addPage("a3"); 
-    doc.autoTable({
-        //head: headRows(),
-        //body: bodyRows(40),
-        html: '#tablarecibo',
-        //showHead: false,
-        columnStyles: {
-            id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
-        },
-        didDrawPage: function (data) {
-            // Header
-            doc.setFontSize(20)
-            doc.setTextColor(40)
-            doc.setFontStyle('normal')
-            if (img) {
-                doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
-            }
-            doc.text('Recibo 54', data.settings.margin.left + 13, 20)
 
-            // Footer
-            var str = 'Page ' + doc.internal.getNumberOfPages()
-            // Total page number plugin only available in jspdf v1.0+
-            if (typeof doc.putTotalPages === 'function') {
-                str = str + ' of ' + totalPagesExp
-            }
-            doc.setFontSize(10)
-
-            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-            var pageSize = doc.internal.pageSize
-            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-            doc.text(str, data.settings.margin.left, pageHeight - 10)
-        },
-        margin: { top: 30 },
-    })
-    // Total page number plugin only available in jspdf v1.0+
-    if (typeof doc.putTotalPages === 'function') {
-        doc.putTotalPages(totalPagesExp)
-    }
-    doc.output('dataurlnewwindow')
+    //doc.output('dataurlnewwindow')
     function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
