@@ -1105,11 +1105,11 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    console.log(req.body)
+    console.log(req.body)//, req.files[0].filename)
     if (req.user.admin != 1) {
-        res.send(false);
+        return res.send(false);
     };
-    res.send(false);
+
     if (id === 'Declinar') {
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
         await pool.query(
@@ -1148,6 +1148,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
     } else {
         const R = await PagosAbonos(req.body.ids);
+        console.log(R)
         res.send(R);
         /*const fech = moment(req.body.fechs).format('YYYY-MM-DD')
         const fech2 = moment(req.body.fech).format('YYYY-MM-DD HH:mm')
@@ -2099,9 +2100,7 @@ async function PagosAbonos(Tid) {
                             await pool.query('INSERT INTO cupones SET ? ', bono);
 
                             var nombr = S.nombre.split(" ")[0],
-                                bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* 
-                                para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale 
-                                por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`
+                                bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
 
                             EnviarWTSAP(S.movil, bodi);
                         };
@@ -2192,9 +2191,7 @@ async function PagosAbonos(Tid) {
                         await pool.query('INSERT INTO cupones SET ? ', bono);
 
                         var nombr = S.nombre.split(" ")[0],
-                            bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* 
-                                    para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale 
-                                    por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`
+                            bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
 
                         EnviarWTSAP(S.movil, bodi);
 
@@ -2369,15 +2366,10 @@ async function PagosAbonos(Tid) {
     }
     Desendentes(S.pin, estados)
 
-    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. 
-    Recibo *${S.recibo}* Bono *${S.bono != null ? S.bono : 'NO APLICA'}* Monto *${Moneda(monto)}* 
-    Factura(s) *${S.facturasvenc}* Tipo *${S.tipo}* # de cuota *${S.ncuota}* Fecha *${S.fech}* 
-    Concepto *${S.proyect} MZ ${S.mz} LT ${S.n}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-
+    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Bono *${S.bono != null ? S.bono : 'NO APLICA'}* Monto *${Moneda(monto)}* Factura(s) *${S.facturasvenc}* Tipo *${S.tipo}* # de cuota *${S.ncuota}* Fecha *${S.fech}* Concepto *${S.proyect} MZ ${S.mz} LT ${S.n}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    var smsj = `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
     EnviarWTSAP(S.movil, bod);
-    sms(cel, `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`);
     return true
-
 }
 var normalize = (function () {
     var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",
@@ -2647,7 +2639,7 @@ function Moneda(valor) {
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
     return valor;
 }
-function EnviarWTSAP(movil, body) {
+function EnviarWTSAP(movil, body, smsj) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
     var options = {
         method: 'POST',
@@ -2661,6 +2653,7 @@ function EnviarWTSAP(movil, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
+    sms(cel, smsj);
 }
 /*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
 const TOKEN_PATH = 'token.json';
@@ -2727,4 +2720,5 @@ function listConnectionNames(auth) {
         }
     });
 }
+
 module.exports = router;
