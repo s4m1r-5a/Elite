@@ -4138,8 +4138,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         buttons: [
             {
                 text: `<div class="mb-0">
-                                        <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                                    </div>`,
+                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                        </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
@@ -4223,7 +4223,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         var data = table.row(fila).data(),
             imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         fila.toggleClass('selected');
-        //console.log(data)        
+        console.log(data)
         if (Array.isArray(imagenes)) {
             $("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").hide()
@@ -4393,7 +4393,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             doc.putTotalPages(totalPagesExp)
         }
         //doc.output('dataurlnewwindow')
-        
+
         $('.dropdown-item').on('click', function () {
 
             var accion = $(this).text(),
@@ -5685,7 +5685,6 @@ function Unidades(num) {
 
     return "";
 }
-
 function Decenas(num) {
 
     decena = Math.floor(num / 10);
@@ -5734,14 +5733,12 @@ function Decenas(num) {
             return Unidades(unidad);
     }
 } //Unidades()
-
 function DecenasY(strSin, numUnidades) {
     if (numUnidades > 0)
         return strSin + " Y " + Unidades(numUnidades)
 
     return strSin;
 } //DecenasY()
-
 function Centenas(num) {
 
     centenas = Math.floor(num / 100);
@@ -5772,7 +5769,6 @@ function Centenas(num) {
 
     return Decenas(decenas);
 } //Centenas()
-
 function Seccion(num, divisor, strSingular, strPlural) {
     cientos = Math.floor(num / divisor)
     resto = num - (cientos * divisor)
@@ -5790,7 +5786,6 @@ function Seccion(num, divisor, strSingular, strPlural) {
 
     return letras;
 } //Seccion()
-
 function Miles(num) {
     divisor = 1000;
     cientos = Math.floor(num / divisor)
@@ -5806,7 +5801,6 @@ function Miles(num) {
 
     //return Seccion(num, divisor, "UN MIL", "MIL") + " " + Centenas(resto);
 } //Miles()
-
 function Millones(num) {
     divisor = 1000000;
     cientos = Math.floor(num / divisor)
@@ -5822,7 +5816,6 @@ function Millones(num) {
 
     //return Seccion(num, divisor, "UN MILLON", "MILLONES") + " " + Miles(resto);
 } //Millones()
-
 function NumeroALetras(num, centavos) {
     var data = {
         numero: num,

@@ -1067,6 +1067,16 @@ router.get('/solicitudes', isLoggedIn, (req, res) => {
 router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id === 'pago') {
+
+        const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, 
+        pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, 
+        pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
+        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
+        s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
+        INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
+        INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id`);
+
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s INNER JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON c.separacion = pr.id INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
