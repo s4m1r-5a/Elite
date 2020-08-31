@@ -4388,7 +4388,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             if (typeof doc.putTotalPages === 'function') {
                 doc.putTotalPages(totalPagesExp)
             }
-            doc.output('dataurlnewwindow')
+            //doc.output('dataurlnewwindow')
         } else {
             $('.dropdown-item').hide()
         }
@@ -4399,12 +4399,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         });
 
         $('.dropdown-item').on('click', function () {
-            $('#Modalimg').modal('hide');
-            $('#ModalEventos').modal({
-                backdrop: 'static',
-                keyboard: true,
-                toggle: true
-            });
             var accion = $(this).text(),
                 e = 1, porque = '',
                 blob = doc.output('blob'),
@@ -5753,17 +5747,17 @@ function NumeroALetras(num, centavos) {
     else
         return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
 } //NumeroALetras()
- //return a promise that resolves with a File instance
-    function urltoFile(url, filename, mimeType){
-        return (fetch(url)
-            .then(function(res){return res.arrayBuffer();})
-            .then(function(buf){return new File([buf], filename,{type:mimeType});})
-        );
-    }
-    
-    //Usage example:
-    /*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
-    .then(function(file){ console.log(file);});*/
+//return a promise that resolves with a File instance
+function urltoFile(url, filename, mimeType) {
+    return (fetch(url)
+        .then(function (res) { return res.arrayBuffer(); })
+        .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
+    );
+}
+
+//Usage example:
+/*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
+.then(function(file){ console.log(file);});*/
 /*
     const url = 'data:image/png;base6....';
 fetch(url)
@@ -5771,15 +5765,15 @@ fetch(url)
   .then(blob => {
     const file = new File([blob], "File name",{ type: "image/png" })
   })*/
-  function getBase64(file) {
-   var reader = new FileReader();
-   reader.readAsDataURL(file);
-   reader.onload = function () {
-     console.log(reader.result);
-   };
-   reader.onerror = function (error) {
-     console.log('Error: ', error);
-   };
+function getBase64(file) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+        console.log(reader.result);
+    };
+    reader.onerror = function (error) {
+        console.log('Error: ', error);
+    };
 }
 /*
 var file = document.querySelector('#files > input[type="file"]').files[0];

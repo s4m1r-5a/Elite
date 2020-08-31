@@ -1103,14 +1103,6 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": so };
         res.send(respuesta);
 
-    } else if (id === 'abono') {
-        const solicitudes = await pool.query(`SELECT * FROM solicitudes s
-        INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN productos p ON pd.producto = p.id 
-        INNER JOIN preventa pr ON pr.lote = pd.id INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto = 'ABONO' 
-        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
-        respuesta = { "data": solicitudes };
-        //console.log(solicitudes)
-        res.send(respuesta);
     } else if (id === 'comision') {
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, 
         s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar,
@@ -1133,12 +1125,10 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    console.log(req.body)//, req.files[0].filename)
-    console.log('https://grupoelitered.com.co/public/' + req.files[0].filename)
     if (req.user.admin != 1) {
         return res.send(false);
     };
-    return res.send(true);
+    //return res.send(true);
     if (id === 'Declinar') {
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
         await pool.query(
@@ -1176,8 +1166,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
 
     } else {
-        const R = await PagosAbonos(req.body.ids);
-        console.log(R)
+        const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+        const R = await PagosAbonos(req.body.ids, pdf);
         res.send(R);
     }
 });
@@ -1742,7 +1732,7 @@ async function Pag(Tid) {
     //CUPONES id, pin, descuento, producto, fecha, estado, clients, tip, monto, motivo, concept
 }
 //Pag(158)
-async function PagosAbonos(Tid) {
+async function PagosAbonos(Tid, pdf) {
 
     const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, 
     pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, 
@@ -1761,7 +1751,7 @@ async function PagosAbonos(Tid) {
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? parseFloat(S.monto) + S.mount : parseFloat(S.monto);
     //console.log(S, monto)
-    if (S.stado == 4 || S.stado === 6) { return false };
+    if (S.stado === 4 || S.stado === 6) { return false };
     if (S.concepto === 'ABONO') {
         const Ai = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
             WHERE c.separacion = ${T} AND c.tipo = 'INICIAL' AND c.estado = 3`);
@@ -2102,11 +2092,14 @@ async function PagosAbonos(Tid) {
             Ps(Total, texto);
         }
     }
+    await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, Tid]);
     Desendentes(S.pin, estados)
 
     var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Bono *${S.bono != null ? S.bono : 'NO APLICA'}* Monto *${Moneda(monto)}* Factura(s) *${S.facturasvenc}* Tipo *${S.tipo}* # de cuota *${S.ncuota}* Fecha *${S.fech}* Concepto *${S.proyect} MZ ${S.mz} LT ${S.n}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     var smsj = `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
-    EnviarWTSAP(S.movil, bod);
+
+    //await EnviarWTSAP(S.movil, bod);
+    await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
     return true
 }
 var normalize = (function () {
