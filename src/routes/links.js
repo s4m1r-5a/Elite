@@ -428,7 +428,6 @@ router.post('/pagos', async (req, res) => {
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono, pin } = req.body;
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
-    console.log(req.body)
     if (recibe.length > 0) {
         req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
         res.redirect('/links/pagos');
@@ -437,8 +436,11 @@ router.post('/recibo', async (req, res) => {
         req.files.map((e) => {
             imagenes += `/uploads/${e.filename},`
         })
+        const r = await pool.query(`SELECT SUM(s.monto) + SUM(c.monto) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id WHERE stado = ? AND lt = ?`, [4, lt]);
+        var acumulado = r[0].monto;
         const pago = {
-            fech: ahora, monto: total, recibo, facturasvenc: factrs, lt,
+            fech: ahora, monto: total, recibo, facturasvenc: factrs, lt, acumulado,
             concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap
         }
         bono != 0 ? pago.bono = pin : '';
@@ -1067,24 +1069,27 @@ router.get('/solicitudes', isLoggedIn, (req, res) => {
 router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id === 'pago') {
-
-        const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, 
-        pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, 
-        pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
+        /*const u = await pool.query(`SELECT lt FROM solicitudes`);
+        console.log(u.length)
+        for (x = 0; x < 64; x++) {
+            const r = await pool.query(`SELECT SUM(s.monto) AS monto1, SUM(c.monto) AS monto 
+            FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id WHERE lt = ?`, u[x].lt);
+            var v = r[0].monto === null ? 0 : r[0].monto;
+            var total = r[0].monto1 + v;
+            await pool.query('UPDATE solicitudes SET ? WHERE lt = ?', [{ acumulado: total }, u[x].lt]);
+        }*/
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img,
+        pd.valor, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.acumulado, u.fullname, 
+        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
-        s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
-        INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+        s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
+        INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id`);
-
-        const solicitudes = await pool.query(`SELECT * FROM solicitudes s INNER JOIN cuotas c ON s.pago = c.id 
-        INNER JOIN preventa pr ON c.separacion = pr.id INNER JOIN productosd pd ON pr.lote = pd.id
-        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto = 'PAGO' 
-        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
-        respuesta = { "data": solicitudes };
-        //console.log(solicitudes) 
+        INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
+         WHERE s.concepto IN ('PAGO','ABONO') ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        respuesta = { "data": so };
         res.send(respuesta);
+
     } else if (id === 'abono') {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s
         INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN productos p ON pd.producto = p.id 

@@ -4170,6 +4170,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 className: 't',
                 data: "ids"
             },
+            { data: "fullname" },
             { data: "nombre" },
             {
                 data: "fech",
@@ -4220,17 +4221,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
-        var data = table.row(fila).data(),
-            imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
+        var data = table.row(fila).data();
+        var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         fila.toggleClass('selected');
-        console.log(data)
         if (Array.isArray(imagenes)) {
             $("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").hide()
             imagenes.map((e) => {
                 $("#Modalimg .fotos").append(`<img src="${e}" class="card-img" alt="...">`);
             })
-        } else {
+        } else if (imagenes) {
             $("#Modalimg .foto").attr('src', data.img).show();
         }
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
@@ -4256,9 +4256,139 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
         }
+        var doc = new jsPDF('l', 'mm', 'a5');
         if (admin == 1) {
             $('.dropdown-item').show()
             $('#nove').show()
+
+            var totall = data.valor - data.ahorro;
+            var saldo = totall - data.acumulado;
+            var bon = data.mount === null ? 0 : data.mount;
+            var img2 = new Image();
+            var img = new Image();
+            img.src = '/img/avatars/avatar.png'
+            img2.src = `http://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+            var totalPagesExp = '{total_pages_count_string}'
+            //doc.addPage("a3"); 
+            doc.autoTable({
+                head: [
+                    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+                ],
+                body: [{
+                    id: '',
+                    name: '',
+                    email: '',
+                    city: 'RECIBO DE CAJA',
+                    expenses: data.ids
+                },
+                {
+                    id: 'CLIENTE',
+                    name: data.nombre + ' ' + data.email,
+                    email: 'CC: ' + data.documento,
+                    city: data.movil,
+                    expenses: ''
+                },
+                {
+                    id: 'PRODUCTO',
+                    name: data.proyect,
+                    email: 'MZ. ' + data.mz,
+                    city: 'LT. ' + data.n,
+                    expenses: ''
+                },
+                {
+                    id: 'CONCEPTO',
+                    name: 'ABONO',
+                    email: data.descp,
+                    city: 'CUOTA #',
+                    expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+                },
+                {
+                    id: 'F PAGO',
+                    name: data.formap,
+                    email: 'R ' + data.recibo,
+                    city: 'MONTO',
+                    expenses: '$' + Moneda(data.monto)
+                },
+                {
+                    id: 'BONO',
+                    name: data.bono === null ? 'NO APLICA' : data.bono,
+                    email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                    city: 'MONTO',
+                    expenses: '$' + Moneda(bon)
+                },
+                {
+                    id: 'TOTAL',
+                    name: `${NumeroALetras(parseFloat(data.monto) + bon)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(parseFloat(data.monto) + bon)
+                },
+                {
+                    id: 'SLD FECHA',
+                    name: `${NumeroALetras(saldo)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(saldo)
+                },
+                {
+                    id: 'TOTAL SLD',
+                    name: `${NumeroALetras(saldo - parseFloat(data.monto) + bon)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(saldo - parseFloat(data.monto) + bon)
+                }],
+                //html: '#tablarecibo',
+                showHead: false,
+                columnStyles: {
+                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                    id: { textColor: 0, fontStyle: 'bold' },
+                    0: { columnWidth: '50' },
+                    1: { columnWidth: 'auto' },
+                    2: { columnWidth: 'wrap' },
+                    3: { columnWidth: 'wrap' },
+                    /*0: { cellWidth: 100 },
+                    1: { cellWidth: 80 },
+                    2: { cellWidth: 80 },*/
+                },
+                didDrawPage: function (data) {
+                    // Header
+                    doc.setTextColor(0)
+                    doc.setFontStyle('normal')
+                    if (img) {
+                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                        doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                    }
+                    doc.setFontSize(15)
+                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                    doc.setFontSize(7)
+                    doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+                    doc.setFontSize(10)
+                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                    doc.setFontSize(10)
+                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                    doc.setFontSize(8)
+                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+
+                    // Footer
+                    var str = 'Page ' + doc.internal.getNumberOfPages()
+                    // Total page number plugin only available in jspdf v1.0+
+                    if (typeof doc.putTotalPages === 'function') {
+                        str = str + ' of ' + totalPagesExp
+                    }
+                    doc.setFontSize(8)
+
+                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                    var pageSize = doc.internal.pageSize
+                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                    doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                },
+                margin: { top: 38 },
+            })
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                doc.putTotalPages(totalPagesExp)
+            }
+            doc.output('dataurlnewwindow')
         } else {
             $('.dropdown-item').hide()
         }
@@ -4267,135 +4397,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        var doc = new jsPDF('l', 'mm', 'a5');
-        var img2 = new Image();
-        var img = new Image();
-        img.src = '/img/avatars/avatar.png'
-        img2.src = `http://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
-        var totalPagesExp = '{total_pages_count_string}'
-        //doc.addPage("a3"); 
-        doc.autoTable({
-            head: [
-                { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
-            ],
-            body: [{
-                id: '',
-                name: '',
-                email: '',
-                city: 'RECIBO DE CAJA',
-                expenses: data.ids
-            },
-            {
-                id: 'CLIENTE',
-                name: data.nombre + ' ' + data.email,
-                email: 'CC: ' + data.documento,
-                city: data.movil,
-                expenses: ''
-            },
-            {
-                id: 'PRODUCTO',
-                name: data.proyect,
-                email: 'Mz ' + data.mz,
-                city: 'Lt ' + data.n,
-                expenses: ''
-            },
-            {
-                id: 'CONCEPTO',
-                name: 'ABONO',
-                email: data.descp,
-                city: 'Cuota 13',
-                expenses: ''
-            },
-            {
-                id: 'FORMA PAGO',
-                name: data.formap,
-                email: 'R ' + data.recibo,
-                city: 'MONTO',
-                expenses: '$' + Moneda(data.monto)
-            },
-            {
-                id: 'BONO',
-                name: 'HT54Y',
-                email: 'R5',
-                city: 'MONTO',
-                expenses: '$1.000.000'
-            },
-            {
-                id: 'TOTAL',
-                name: `${NumeroALetras(2000000)} MCT********`,
-                email: '',
-                city: '',
-                expenses: '$2.000.000'
-            },
-            {
-                id: 'SLD FECHA',
-                name: `${NumeroALetras(60000000)} MCT********`,
-                email: '',
-                city: '',
-                expenses: '$60.000.000'
-            },
-            {
-                id: 'TOTAL SLD',
-                name: `${NumeroALetras(58000000)} MCT********`,
-                email: '',
-                city: '',
-                expenses: '$58.000.000'
-            }],
-            //html: '#tablarecibo',
-            showHead: false,
-            columnStyles: {
-                //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                id: { textColor: 0, fontStyle: 'bold' },
-                0: { columnWidth: '50' },
-                1: { columnWidth: 'auto' },
-                2: { columnWidth: 'wrap' },
-                3: { columnWidth: 'wrap' },
-                /*0: { cellWidth: 100 },
-                1: { cellWidth: 80 },
-                2: { cellWidth: 80 },*/
-            },
-            didDrawPage: function (data) {
-                // Header
-                doc.setTextColor(0)
-                doc.setFontStyle('normal')
-                if (img) {
-                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                    doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
-                }
-                doc.setFontSize(15)
-                doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
-                doc.setFontSize(7)
-                doc.text('2020-08-28', data.settings.margin.left + 170, 8)
-                doc.setFontSize(10)
-                doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
-                doc.setFontSize(10)
-                doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
-                doc.setFontSize(8)
-                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
-
-                // Footer
-                var str = 'Page ' + doc.internal.getNumberOfPages()
-                // Total page number plugin only available in jspdf v1.0+
-                if (typeof doc.putTotalPages === 'function') {
-                    str = str + ' of ' + totalPagesExp
-                }
-                doc.setFontSize(8)
-
-                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                var pageSize = doc.internal.pageSize
-                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
-            },
-            margin: { top: 38 },
-        })
-        // Total page number plugin only available in jspdf v1.0+
-        if (typeof doc.putTotalPages === 'function') {
-            doc.putTotalPages(totalPagesExp)
-        }
-        //doc.output('dataurlnewwindow')
 
         $('.dropdown-item').on('click', function () {
-
+            $('#Modalimg').modal('hide');
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
             var accion = $(this).text(),
                 e = 1, porque = '',
                 blob = doc.output('blob'),
@@ -4455,103 +4464,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg').one('hidden.bs.modal', function () {
             fila.toggleClass('selected');
         })
-    })
-
-    var abonos = $('#abonos').DataTable({
-        deferRender: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: false,
-        },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        order: [[0, "desc"]],
-        language: languag,
-        ajax: {
-            method: "POST",
-            url: "/links/solicitudes/abono",
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "ids" },
-            { data: "nombre" },
-            {
-                data: "fech",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "proyect" },
-            { data: "n" },
-            { data: "descp" },
-            {
-                data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "recibo" },
-            {
-                data: "stado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 4:
-                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
-                            break;
-                        case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
-                            break;
-                        default:
-                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
-                    }
-                }
-            },
-            {
-                className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
-                                        </div>
-                                    </div>` : ''
-            }
-        ]
-    });
-    abonos.on('click', '.dropdown-item', function () {
-        var fila = $(this).parents('tr');
-        var dts = abonos.row(fila).data();
-        var accion = $(this).text(), e = 1, porque = '';
-        if (accion === 'Declinar') {
-            porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
-            if (porque != null) {
-                dts.por = porque;
-                e = 2
-            }
-        }
-        if (accion !== 'Declinar' || e === 2) {
-            $.ajax({
-                type: 'PUT',
-                url: '/links/solicitudes/' + $(this).text(),
-                data: dts,
-                success: function (data) {
-                    abonos.ajax.reload(null, false)
-                    if (data) {
-                        SMSj('success', `Solicitud procesada correctamente`);
-                    } else {
-                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                    }
-                }
-            })
-        }
     })
     var comisiones = $('#comisiones').DataTable({
         deferRender: true,
@@ -5824,7 +5736,7 @@ function NumeroALetras(num, centavos) {
         letrasCentavos: "",
     };
     if (centavos == undefined || centavos == false) {
-        data.letrasMonedaPlural = "DE PESOS";
+        data.letrasMonedaPlural = "PESOS";
         data.letrasMonedaSingular = "PESO";
     } else {
         data.letrasMonedaPlural = "CENTAVOS";
@@ -5841,3 +5753,34 @@ function NumeroALetras(num, centavos) {
     else
         return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
 } //NumeroALetras()
+ //return a promise that resolves with a File instance
+    function urltoFile(url, filename, mimeType){
+        return (fetch(url)
+            .then(function(res){return res.arrayBuffer();})
+            .then(function(buf){return new File([buf], filename,{type:mimeType});})
+        );
+    }
+    
+    //Usage example:
+    /*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
+    .then(function(file){ console.log(file);});*/
+/*
+    const url = 'data:image/png;base6....';
+fetch(url)
+  .then(res => res.blob())
+  .then(blob => {
+    const file = new File([blob], "File name",{ type: "image/png" })
+  })*/
+  function getBase64(file) {
+   var reader = new FileReader();
+   reader.readAsDataURL(file);
+   reader.onload = function () {
+     console.log(reader.result);
+   };
+   reader.onerror = function (error) {
+     console.log('Error: ', error);
+   };
+}
+/*
+var file = document.querySelector('#files > input[type="file"]').files[0];
+getBase64(file);*/
