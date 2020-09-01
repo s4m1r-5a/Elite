@@ -1751,7 +1751,11 @@ async function PagosAbonos(Tid, pdf) {
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? parseFloat(S.monto) + S.mount : parseFloat(S.monto);
     //console.log(S, monto)
-    if (S.stado === 4 || S.stado === 6) { return false };
+    if (S.stado === 4 || S.stado === 6) {
+        Eli(pdf)
+        return false
+    };
+
     if (S.concepto === 'ABONO') {
         const Ai = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
             WHERE c.separacion = ${T} AND c.tipo = 'INICIAL' AND c.estado = 3`);
@@ -1946,6 +1950,7 @@ async function PagosAbonos(Tid, pdf) {
             }
         }
     } else if (S.concepto === 'PAGO') {
+        console.log('es un pago')
         var Total = parseFloat(S.cuota), texto = '';
 
         var Ps = async (Total, texto) => {
@@ -1954,6 +1959,7 @@ async function PagosAbonos(Tid, pdf) {
             if (S.tipo === 'SEPARACION' && S.incentivo) {
                 //var retefuente = S.incentivo * 0.10
                 //var reteica = S.incentivo * 8 / 1000
+                console.log('es una separacion')
                 var solicitar = {
                     fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 9, descp: 'SEPARACION',
                     asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
@@ -1971,14 +1977,16 @@ async function PagosAbonos(Tid, pdf) {
                         'c.estado': 13,
                         'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
                         'o.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                        'o.estado': estados
+                        'o.estado': 12
                     }, Tid
                 ]
             );
+            console.log('actualiza el pago')
             if (texto) {
                 await pool.query(`UPDATE cuotas SET ? WHERE ${texto}`, { estado: 13 });
             }
             if (monto > Total) {
+                console.log('monto es mayor al total')
                 const d = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? 
                     AND tipo = 'INICIAL' AND estado = 3 AND fechs > ?`, [T, fech]);
 
@@ -2086,7 +2094,7 @@ async function PagosAbonos(Tid, pdf) {
                     } else {
                         estados = 12
                         cuotas = valorcuota - Math.round(excedente / d.length)
-                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${T} AND tipo = 'INICIAL' AND estado = 3 AND fechs > '${fech}'`, { cuotas });
+                        await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND tipo = 'INICIAL' AND estado = 3 AND fechs > ?`, [{ cuota: cuotas }, T, fech]);
                     }
                 } else {
                     const Af = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id
@@ -2165,7 +2173,7 @@ async function PagosAbonos(Tid, pdf) {
     var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Bono *${S.bono != null ? S.bono : 'NO APLICA'}* Monto *${Moneda(monto)}* Factura(s) *${S.facturasvenc}* Tipo *${S.tipo}* # de cuota *${S.ncuota}* Fecha *${S.fech}* Concepto *${S.proyect} MZ ${S.mz} LT ${S.n}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     var smsj = `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
 
-    await EnviarWTSAP(S.movil, bod);
+    //await EnviarWTSAP(S.movil, bod);
     await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
     return true
 }
@@ -2470,7 +2478,6 @@ function EnvWTSAP_FILE(movil, body, filename, caption) {
         console.log('Success: ', body);
     });
 }
-
 /*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
 const TOKEN_PATH = 'token.json';
 fs.readFile('credentials.json', (err, content) => {
@@ -2536,5 +2543,4 @@ function listConnectionNames(auth) {
         }
     });
 }
-
 module.exports = router;
