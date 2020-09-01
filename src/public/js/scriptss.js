@@ -4116,6 +4116,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             // Toggle the visibility
             column.visible(!column.visible());
         });
+
     });
     var Color = (val) => {
         var elemen = $(`#t-${val}`);
@@ -4137,8 +4138,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         buttons: [
             {
                 text: `<div class="mb-0">
-                                        <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                                    </div>`,
+                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                        </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
@@ -4169,6 +4170,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 className: 't',
                 data: "ids"
             },
+            { data: "fullname" },
             { data: "nombre" },
             {
                 data: "fech",
@@ -4220,60 +4222,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
-        var dts = data,
-            imagenes = data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
+        var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         fila.toggleClass('selected');
-
-        var doc = new jsPDF('l', 'mm', 'a5')
-        var img = new Image()
-        img.src = '/img/avatars/avatar.png'
-        var totalPagesExp = '{total_pages_count_string}'
-        //doc.addPage("a3"); 
-        doc.autoTable({
-            head: headRows(),
-            body: bodyRows(40),
-            //html: '#tablarecibo',
-            showHead: false,
-            columnStyles: {
-                id: { fillColor: 0, textColor: 255, fontStyle: 'bold' },
-            },
-            didDrawPage: function (data) {
-                // Header
-                doc.setFontSize(20)
-                doc.setTextColor(40)
-                doc.setFontStyle('normal')
-                if (img) {
-                    doc.addImage(img, 'png', data.settings.margin.left, 10, 10, 15)
-                }
-                doc.text('Recibo 54', data.settings.margin.left + 13, 20)
-
-                // Footer
-                var str = 'Page ' + doc.internal.getNumberOfPages()
-                // Total page number plugin only available in jspdf v1.0+
-                if (typeof doc.putTotalPages === 'function') {
-                    str = str + ' of ' + totalPagesExp
-                }
-                doc.setFontSize(10)
-
-                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                var pageSize = doc.internal.pageSize
-                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                doc.text(str, data.settings.margin.left, pageHeight - 10)
-            },
-            margin: { top: 30 },
-        })
-        // Total page number plugin only available in jspdf v1.0+
-        if (typeof doc.putTotalPages === 'function') {
-            doc.putTotalPages(totalPagesExp)
-        }
-
         if (Array.isArray(imagenes)) {
             $("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").hide()
             imagenes.map((e) => {
                 $("#Modalimg .fotos").append(`<img src="${e}" class="card-img" alt="...">`);
             })
-        } else {
+        } else if (imagenes) {
             $("#Modalimg .foto").attr('src', data.img).show();
         }
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
@@ -4299,9 +4256,139 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
         }
+        var doc = new jsPDF('l', 'mm', 'a5');
         if (admin == 1) {
             $('.dropdown-item').show()
             $('#nove').show()
+
+            var totall = data.valor - data.ahorro;
+            var saldo = totall - data.acumulado;
+            var bon = data.mount === null ? 0 : data.mount;
+            var img2 = new Image();
+            var img = new Image();
+            img.src = '/img/avatars/avatar.png'
+            img2.src = `http://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+            var totalPagesExp = '{total_pages_count_string}'
+            //doc.addPage("a3"); 
+            doc.autoTable({
+                head: [
+                    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+                ],
+                body: [{
+                    id: '',
+                    name: '',
+                    email: '',
+                    city: 'RECIBO DE CAJA',
+                    expenses: data.ids
+                },
+                {
+                    id: 'CLIENTE',
+                    name: data.nombre + ' ' + data.email,
+                    email: 'CC: ' + data.documento,
+                    city: data.movil,
+                    expenses: ''
+                },
+                {
+                    id: 'PRODUCTO',
+                    name: data.proyect,
+                    email: 'MZ. ' + data.mz,
+                    city: 'LT. ' + data.n,
+                    expenses: ''
+                },
+                {
+                    id: 'CONCEPTO',
+                    name: 'ABONO',
+                    email: data.descp,
+                    city: 'CUOTA #',
+                    expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+                },
+                {
+                    id: 'F PAGO',
+                    name: data.formap,
+                    email: 'R ' + data.recibo,
+                    city: 'MONTO',
+                    expenses: '$' + Moneda(data.monto)
+                },
+                {
+                    id: 'BONO',
+                    name: data.bono === null ? 'NO APLICA' : data.bono,
+                    email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                    city: 'MONTO',
+                    expenses: '$' + Moneda(bon)
+                },
+                {
+                    id: 'TOTAL',
+                    name: `${NumeroALetras(parseFloat(data.monto) + bon)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(parseFloat(data.monto) + bon)
+                },
+                {
+                    id: 'SLD FECHA',
+                    name: `${NumeroALetras(saldo)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(saldo)
+                },
+                {
+                    id: 'TOTAL SLD',
+                    name: `${NumeroALetras(saldo - parseFloat(data.monto) + bon)} MCT********`,
+                    email: '',
+                    city: '',
+                    expenses: '$' + Moneda(saldo - parseFloat(data.monto) + bon)
+                }],
+                //html: '#tablarecibo',
+                showHead: false,
+                columnStyles: {
+                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                    id: { textColor: 0, fontStyle: 'bold' },
+                    0: { columnWidth: '50' },
+                    1: { columnWidth: 'auto' },
+                    2: { columnWidth: 'wrap' },
+                    3: { columnWidth: 'wrap' },
+                    /*0: { cellWidth: 100 },
+                    1: { cellWidth: 80 },
+                    2: { cellWidth: 80 },*/
+                },
+                didDrawPage: function (data) {
+                    // Header
+                    doc.setTextColor(0)
+                    doc.setFontStyle('normal')
+                    if (img) {
+                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                        doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                    }
+                    doc.setFontSize(15)
+                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                    doc.setFontSize(7)
+                    doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+                    doc.setFontSize(10)
+                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                    doc.setFontSize(10)
+                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                    doc.setFontSize(8)
+                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+
+                    // Footer
+                    var str = 'Page ' + doc.internal.getNumberOfPages()
+                    // Total page number plugin only available in jspdf v1.0+
+                    if (typeof doc.putTotalPages === 'function') {
+                        str = str + ' of ' + totalPagesExp
+                    }
+                    doc.setFontSize(8)
+
+                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                    var pageSize = doc.internal.pageSize
+                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                    doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                },
+                margin: { top: 38 },
+            })
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                doc.putTotalPages(totalPagesExp)
+            }
+            //doc.output('dataurlnewwindow')
         } else {
             $('.dropdown-item').hide()
         }
@@ -4310,15 +4397,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        $('.dropdown-item').on('click', function () {
 
+        $('.dropdown-item').on('click', function () {
             var accion = $(this).text(),
                 e = 1, porque = '',
                 blob = doc.output('blob'),
                 fd = new FormData();
-            
+
             fd.append('pdf', blob);
-            fd.append('ids', dts.ids);
+            fd.append('ids', data.ids);
 
             if (accion === 'Declinar') {
                 porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
@@ -4371,103 +4458,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg').one('hidden.bs.modal', function () {
             fila.toggleClass('selected');
         })
-    })
-
-    var abonos = $('#abonos').DataTable({
-        deferRender: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: false,
-        },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        order: [[0, "desc"]],
-        language: languag,
-        ajax: {
-            method: "POST",
-            url: "/links/solicitudes/abono",
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "ids" },
-            { data: "nombre" },
-            {
-                data: "fech",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "proyect" },
-            { data: "n" },
-            { data: "descp" },
-            {
-                data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "recibo" },
-            {
-                data: "stado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 4:
-                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
-                            break;
-                        case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
-                            break;
-                        default:
-                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
-                    }
-                }
-            },
-            {
-                className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
-                                        </div>
-                                    </div>` : ''
-            }
-        ]
-    });
-    abonos.on('click', '.dropdown-item', function () {
-        var fila = $(this).parents('tr');
-        var dts = abonos.row(fila).data();
-        var accion = $(this).text(), e = 1, porque = '';
-        if (accion === 'Declinar') {
-            porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
-            if (porque != null) {
-                dts.por = porque;
-                e = 2
-            }
-        }
-        if (accion !== 'Declinar' || e === 2) {
-            $.ajax({
-                type: 'PUT',
-                url: '/links/solicitudes/' + $(this).text(),
-                data: dts,
-                success: function (data) {
-                    abonos.ajax.reload(null, false)
-                    if (data) {
-                        SMSj('success', `Solicitud procesada correctamente`);
-                    } else {
-                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                    }
-                }
-            })
-        }
     })
     var comisiones = $('#comisiones').DataTable({
         deferRender: true,
@@ -4784,26 +4774,20 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     });
 
-
-
-
-
-
-
     //doc.output('dataurlnewwindow')
-    function headRows() {
+    /*function headRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
         ]
-    }
+    }*/
 
-    function footRows() {
+    /*function footRows() {
         return [
             { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
         ]
-    }
+    }*/
 
-    function columns() {
+    /*function columns() {
         return [
             { header: 'ID', dataKey: 'id' },
             { header: 'Name', dataKey: 'name' },
@@ -4811,9 +4795,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             { header: 'City', dataKey: 'city' },
             { header: 'Exp', dataKey: 'expenses' },
         ]
-    }
+    }*/
 
-    function data(rowCount) {
+    /*function data(rowCount) {
         rowCount = rowCount || 10
         var body = []
         for (var j = 1; j <= rowCount; j++) {
@@ -4826,9 +4810,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             })
         }
         return body
-    }
+    }*/
 
-    function bodyRows(rowCount) {
+    /*function bodyRows(rowCount) {
         rowCount = rowCount || 10
         var body = [{
             id: '',
@@ -4907,7 +4891,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             city: '',
             expenses: '$0'
         }]
-        /*for (var j = 1; j <= rowCount; j++) {
+        for (var j = 1; j <= rowCount; j++) {
             body.push({
                 id: j,
                 name: 'Samir',
@@ -4915,9 +4899,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 city: 'Santa Marta',
                 expenses: 'Desarrollador',
             })
-        }*/
+        }
         return body
-    }
+    }*/
     /*var img = new Image()
     img.src = '/img/avatars/avatar.png'*/
     /*doc.setFontSize(15);
@@ -5581,3 +5565,216 @@ if (window.location == `${window.location.origin}/links/cupones`) {
         })
     })
 };
+
+function Unidades(num) {
+
+    switch (num) {
+        case 1:
+            return "UN";
+        case 2:
+            return "DOS";
+        case 3:
+            return "TRES";
+        case 4:
+            return "CUATRO";
+        case 5:
+            return "CINCO";
+        case 6:
+            return "SEIS";
+        case 7:
+            return "SIETE";
+        case 8:
+            return "OCHO";
+        case 9:
+            return "NUEVE";
+    }
+
+    return "";
+}
+function Decenas(num) {
+
+    decena = Math.floor(num / 10);
+    unidad = num - (decena * 10);
+
+    switch (decena) {
+        case 1:
+            switch (unidad) {
+                case 0:
+                    return "DIEZ";
+                case 1:
+                    return "ONCE";
+                case 2:
+                    return "DOCE";
+                case 3:
+                    return "TRECE";
+                case 4:
+                    return "CATORCE";
+                case 5:
+                    return "QUINCE";
+                default:
+                    return "DIECI" + Unidades(unidad);
+            }
+        case 2:
+            switch (unidad) {
+                case 0:
+                    return "VEINTE";
+                default:
+                    return "VEINTI" + Unidades(unidad);
+            }
+        case 3:
+            return DecenasY("TREINTA", unidad);
+        case 4:
+            return DecenasY("CUARENTA", unidad);
+        case 5:
+            return DecenasY("CINCUENTA", unidad);
+        case 6:
+            return DecenasY("SESENTA", unidad);
+        case 7:
+            return DecenasY("SETENTA", unidad);
+        case 8:
+            return DecenasY("OCHENTA", unidad);
+        case 9:
+            return DecenasY("NOVENTA", unidad);
+        case 0:
+            return Unidades(unidad);
+    }
+} //Unidades()
+function DecenasY(strSin, numUnidades) {
+    if (numUnidades > 0)
+        return strSin + " Y " + Unidades(numUnidades)
+
+    return strSin;
+} //DecenasY()
+function Centenas(num) {
+
+    centenas = Math.floor(num / 100);
+    decenas = num - (centenas * 100);
+
+    switch (centenas) {
+        case 1:
+            if (decenas > 0)
+                return "CIENTO " + Decenas(decenas);
+            return "CIEN";
+        case 2:
+            return "DOSCIENTOS " + Decenas(decenas);
+        case 3:
+            return "TRESCIENTOS " + Decenas(decenas);
+        case 4:
+            return "CUATROCIENTOS " + Decenas(decenas);
+        case 5:
+            return "QUINIENTOS " + Decenas(decenas);
+        case 6:
+            return "SEISCIENTOS " + Decenas(decenas);
+        case 7:
+            return "SETECIENTOS " + Decenas(decenas);
+        case 8:
+            return "OCHOCIENTOS " + Decenas(decenas);
+        case 9:
+            return "NOVECIENTOS " + Decenas(decenas);
+    }
+
+    return Decenas(decenas);
+} //Centenas()
+function Seccion(num, divisor, strSingular, strPlural) {
+    cientos = Math.floor(num / divisor)
+    resto = num - (cientos * divisor)
+
+    letras = "";
+
+    if (cientos > 0)
+        if (cientos > 1)
+            letras = Centenas(cientos) + " " + strPlural;
+        else
+            letras = strSingular;
+
+    if (resto > 0)
+        letras += "";
+
+    return letras;
+} //Seccion()
+function Miles(num) {
+    divisor = 1000;
+    cientos = Math.floor(num / divisor)
+    resto = num - (cientos * divisor)
+
+    strMiles = Seccion(num, divisor, "MIL", "MIL");
+    strCentenas = Centenas(resto);
+
+    if (strMiles == "")
+        return strCentenas;
+
+    return strMiles + " " + strCentenas;
+
+    //return Seccion(num, divisor, "UN MIL", "MIL") + " " + Centenas(resto);
+} //Miles()
+function Millones(num) {
+    divisor = 1000000;
+    cientos = Math.floor(num / divisor)
+    resto = num - (cientos * divisor)
+
+    strMillones = Seccion(num, divisor, "UN MILLON", "MILLONES");
+    strMiles = Miles(resto);
+
+    if (strMillones == "")
+        return strMiles;
+
+    return strMillones + " " + strMiles;
+
+    //return Seccion(num, divisor, "UN MILLON", "MILLONES") + " " + Miles(resto);
+} //Millones()
+function NumeroALetras(num, centavos) {
+    var data = {
+        numero: num,
+        enteros: Math.floor(num),
+        centavos: (((Math.round(num * 100)) - (Math.floor(num) * 100))),
+        letrasCentavos: "",
+    };
+    if (centavos == undefined || centavos == false) {
+        data.letrasMonedaPlural = "PESOS";
+        data.letrasMonedaSingular = "PESO";
+    } else {
+        data.letrasMonedaPlural = "CENTAVOS";
+        data.letrasMonedaSingular = "CENTAVO";
+    }
+
+    if (data.centavos > 0)
+        data.letrasCentavos = "CON " + NumeroALetras(data.centavos, true);
+
+    if (data.enteros == 0)
+        return "CERO " + data.letrasMonedaPlural + " " + data.letrasCentavos;
+    if (data.enteros == 1)
+        return Millones(data.enteros) + " " + data.letrasMonedaSingular + " " + data.letrasCentavos;
+    else
+        return Millones(data.enteros) + " " + data.letrasMonedaPlural + " " + data.letrasCentavos;
+} //NumeroALetras()
+//return a promise that resolves with a File instance
+function urltoFile(url, filename, mimeType) {
+    return (fetch(url)
+        .then(function (res) { return res.arrayBuffer(); })
+        .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
+    );
+}
+
+//Usage example:
+/*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
+.then(function(file){ console.log(file);});*/
+/*
+    const url = 'data:image/png;base6....';
+fetch(url)
+  .then(res => res.blob())
+  .then(blob => {
+    const file = new File([blob], "File name",{ type: "image/png" })
+  })*/
+function getBase64(file) {
+    var reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+        console.log(reader.result);
+    };
+    reader.onerror = function (error) {
+        console.log('Error: ', error);
+    };
+}
+/*
+var file = document.querySelector('#files > input[type="file"]').files[0];
+getBase64(file);*/

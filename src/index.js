@@ -10,11 +10,14 @@ const MySQLStore = require('express-mysql-session')(session);
 const bodyParser = require('body-parser');
 //const {Builder, By, Key, until} = require('selenium-webdriver');
 //const val = require('../navegacion.js');
+const fetch = require('node-fetch');
 const sms = require('./sms.js');
 const { database } = require('./keys');
 const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const multer = require('multer');
+const config = require("./config.js");
+const token = config.token, apiUrl = config.apiUrl;
 
 const transpoter = nodemailer.createTransport({
   host: 'smtp.hostinger.co',
@@ -116,7 +119,18 @@ app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
 
 });
+async function apiChatApi(method, params) {
+  const options = {};
+  options['method'] = "POST";
+  options['body'] = JSON.stringify(params);
+  options['headers'] = { 'Content-Type': 'application/json' };
 
+  const url = `${apiUrl}/${method}?token=${token}`;
+
+  const apiResponse = await fetch(url, options);
+  const jsonResponse = await apiResponse.json();
+  return jsonResponse;
+}
 function ID(lon) {
   let chars = "a0b1c2d3-e4f5g6h7i8j9k0z-1l2m3n4o-5p6q7r8s9-t0u1v2w3x4y",
     code = "";
