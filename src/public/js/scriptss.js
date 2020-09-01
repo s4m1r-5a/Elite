@@ -4260,7 +4260,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         if (admin == 1) {
             $('.dropdown-item').show()
             $('#nove').show()
-
             var totall = data.valor - data.ahorro;
             var saldo = totall - data.acumulado;
             var bon = data.mount === null ? 0 : data.mount;
@@ -4342,13 +4341,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 columnStyles: {
                     //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
                     id: { textColor: 0, fontStyle: 'bold' },
-                    0: { columnWidth: '50' },
-                    1: { columnWidth: 'auto' },
-                    2: { columnWidth: 'wrap' },
-                    3: { columnWidth: 'wrap' },
-                    /*0: { cellWidth: 100 },
-                    1: { cellWidth: 80 },
-                    2: { cellWidth: 80 },*/
+                    0: { cellWidth: '50' },
+                    1: { cellWidth: 'auto' },
+                    2: { cellWidth: 'wrap' },
+                    3: { cellWidth: 'wrap' },
                 },
                 didDrawPage: function (data) {
                     // Header
