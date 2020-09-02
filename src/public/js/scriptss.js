@@ -4266,7 +4266,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             var img2 = new Image();
             var img = new Image();
             img.src = '/img/avatars/avatar.png'
-            img2.src = `http://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
             var totalPagesExp = '{total_pages_count_string}'
             //doc.addPage("a3"); 
             doc.autoTable({
