@@ -4406,8 +4406,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 e = 1, porque = '',
                 blob = doc.output('blob'),
                 fd = new FormData();
-            var mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
-            if (mensaje) {
+            if (data.pdf) {
+                var mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
+                if (mensaje) {
+                    fd.append('pdf', blob);
+                }
+            } else {
                 fd.append('pdf', blob);
             }
             fd.append('pdef', data.pdf);
