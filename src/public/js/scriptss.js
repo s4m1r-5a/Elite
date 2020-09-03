@@ -3707,19 +3707,23 @@ if (window.location.pathname == `/links/orden`) {
                             });
                             $('#crearcliente').submit(function (e) {
                                 e.preventDefault();
-                                $('#AddCliente').modal('hide')
-                                $('#ModalEventos').modal({
-                                    toggle: true,
-                                    backdrop: 'static',
-                                    keyboard: true,
-                                });
                                 $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-                                var fd = $('#crearcliente').serialize();
+                                //var fd = $('#crearcliente').serialize();
+                                var formData = new FormData(document.getElementById("crearcliente"));
                                 $.ajax({
                                     url: '/links/clientes/agregar',
-                                    data: fd,
+                                    data: formData,
                                     type: 'PUT',
-                                    async: false,
+                                    processData: false,
+                                    contentType: false,
+                                    beforeSend: function (xhr) {
+                                        $('#AddCliente').modal('hide')
+                                        $('#ModalEventos').modal({
+                                            toggle: true,
+                                            backdrop: 'static',
+                                            keyboard: true,
+                                        });
+                                    },
                                     success: function (data) {
                                         if (data) {
                                             $('#ModalEventos').one('shown.bs.modal', function () {
@@ -4218,7 +4222,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 $(row).css("background-color", "#40E0D0");
             }
         }
-    }); //table.buttons().container().appendTo("#datatable_wrapper .col-sm-12 .col-md-6");
+    });
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data();
@@ -5297,22 +5301,24 @@ if (window.location == `${window.location.origin}/links/red`) {
 if (window.location == `${window.location.origin}/links/clientes`) {
 
     $(document).ready(function () {
-        $('.guard').click(function () {
-            $('#ModalEventos').modal({
-                toggle: true,
-                backdrop: 'static',
-                keyboard: true,
-            });
-        })
         $('#creacliente').submit(function (e) {
             e.preventDefault();
             $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
-            var fd = $('#creacliente').serialize();
+            //var fd = $('#creacliente').serialize();
+            var formData = new FormData(document.getElementById("creacliente"));
             $.ajax({
                 url: '/links/clientes/agregar',
-                data: fd,
+                data: formData,
                 type: 'PUT',
-                async: false,
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        toggle: true,
+                        backdrop: 'static',
+                        keyboard: true,
+                    });
+                },
                 success: function (data) {
                     if (data) {
                         $('#ModalEventos').one('shown.bs.modal', function () {
@@ -5381,6 +5387,9 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             caseInsensitive: false,
         },
         responsive: true,
+        columnDefs: [{
+            responsivePriority: 1, targets: [11, 12]
+        }],
         order: [[0, "desc"]], //[0, "asc"]
         language: languag2,
         ajax: {
@@ -5419,18 +5428,62 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             { data: "email" },
             { data: "direccion" },
             {
-                className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                data: "imags",
+                render: function (data, method, row) {
+                    return data ? `<span class="badge badge-pill badge-success">Imagen</span>`
+                        : `<span class="badge badge-pill badge-danger">No imagen</span>`
+                }
+            },
+            {
+                data: "idc",
+                render: function (data, method, row) {
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
+                                            <a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>
                                         </div>
-                                    </div>` : ''
+                                    </div>` : `<a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>`
+                }
             }
         ]
     });
+    function AdjuntarCC(id) {
+        $('#AdjutarDoc').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true,
+        });
+
+        $('#enviarDoc').submit(function (e) {
+            e.preventDefault();
+            var formData = new FormData(document.getElementById("enviarDoc"));
+            formData.append('idc', id);
+            $.ajax({
+                url: '/links/adjuntar',
+                data: formData,
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#AdjutarDoc').modal('hide');
+                    $('#ModalEventos').modal({
+                        toggle: true,
+                        backdrop: 'static',
+                        keyboard: true,
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        clientes.ajax.reload(null, false)
+                        SMSj('success', 'Documento agregado exitosamente')
+                    }
+                }
+            });
+        });
+    }
 };
 /////////////////////////////* CUPONES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/cupones`) {

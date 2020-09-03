@@ -1511,7 +1511,7 @@
                         data-feather="x-circle"></i></a>
             </div>
             <div class="modal-body m-3">
-                <form id="crearcliente">
+                <form id="crearcliente" enctype="multipart/form-data">
                     <div class="row">
                         <input type="hidden" class="ya" value="" name="ahora">
                         <input type="hidden" value="1" name="asesors">
@@ -1841,6 +1841,16 @@
                                             <input class="form-control-no-border edi" type="text"
                                                 placeholder="Dirección de residencia" autocomplete="off"
                                                 style="padding: 1px; width: 100%;" name="direccion" required>
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <i class="feather-md" data-feather="credit-card"></i>
+                                            Enviar ambas caras del documento
+                                        </th>
+                                        <td>
+                                            <input class="form-control-no-border edi float-right" type="file"
+                                                name="image" id="file" multiple style="width: 50%;" required>
                                         </td>
                                     </tr>
                                     <tr>

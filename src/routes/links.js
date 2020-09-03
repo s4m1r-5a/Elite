@@ -16,6 +16,7 @@ const moment = require('moment');
 const nodemailer = require('nodemailer');
 const { isNull } = require('util');
 const { Console } = require('console');
+const { send } = require('process');
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -258,12 +259,15 @@ router.put('/clientes/:id', async (req, res) => {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors
     } = req.body;
-
+    var imagenes = ''
+    req.files.map((e) => {
+        imagenes += `/uploads/${e.filename},`
+    })
     const clit = {
         nombre: nombres.toUpperCase(), documento: documento.replace(/\./g, ''), fechanacimiento,
         lugarexpedicion, fechaexpedicion, estadocivil, movil: movil.replace(/-/g, ""), agendado: 1,
         email: email.toLowerCase(), direccion: direccion.toLowerCase(), tipo,
-        acsor: req.user.id, tiempo: ahora, google: ''
+        acsor: req.user.id, tiempo: ahora, google: '', imags: imagenes
     }
     if (req.params.id === 'agregar') {
         const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
@@ -345,6 +349,14 @@ router.put('/clientes/:id', async (req, res) => {
         });
     }
 });
+router.post('/adjuntar', async (req, res) => {
+    var imagenes = ''
+    req.files.map((e) => {
+        imagenes += `/uploads/${e.filename},`
+    })
+    await pool.query('UPDATE clientes SET ? WHERE idc = ?', [{ imags: imagenes }, req.body.idc]);
+    res.send(true);
+})
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
     var options = {
