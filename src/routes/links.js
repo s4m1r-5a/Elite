@@ -1186,6 +1186,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         } else {
             pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
         }
+        //console.log(pdf)
         await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
         var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
         await EnviarWTSAP(movil, bod);
