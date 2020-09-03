@@ -1104,7 +1104,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img,
-        pd.valor, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.acumulado, u.fullname, 
+        pd.valor, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
         s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
@@ -1177,9 +1177,26 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         }
         res.send(true);
 
+    } else if (id === 'Enviar') {
+
+        const { ids, movil, nombre, pdef } = req.body;
+        var pdf = '';
+        if (!req.files[0]) {
+            pdf = pdef;
+        } else {
+            pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+        }
+        await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
+        var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+        await EnviarWTSAP(movil, bod);
+        await EnvWTSAP_FILE(movil, pdf, 'RECIBO DE CAJA ' + ids, 'PAGO EXITOSO');
+        res.send(true);
+
     } else {
+
+        const { ids } = req.body
         const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(req.body.ids, pdf);
+        const R = await PagosAbonos(ids, pdf);
         res.send(R);
     }
 });
@@ -2182,7 +2199,7 @@ async function PagosAbonos(Tid, pdf) {
     await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, Tid]);
     Desendentes(S.pin, estados)
 
-    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Bono *${S.bono != null ? S.bono : 'NO APLICA'}* Monto *${Moneda(monto)}* Factura(s) *${S.facturasvenc}* Tipo *${S.tipo}* # de cuota *${S.ncuota}* Fecha *${S.fech}* Concepto *${S.proyect} MZ ${S.mz} LT ${S.n}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Monto *${Moneda(monto)}* Adjuntamos recibo de pago *#${req.body.ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     var smsj = `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
 
     await EnviarWTSAP(S.movil, bod);

@@ -4244,6 +4244,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg .lote').html('LOTE: ' + data.n);
         $('#Modalimg .recibo').html('RECIBO: ' + data.recibo);
         $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc);
+        $('#apde').attr('data-toggle', "dropdown");
+        $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
@@ -4253,9 +4255,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 break;
             case 3:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
-                $('#apde').attr('data-toggle', "dropdown");
+                //$('#apde').attr('data-toggle', "dropdown");
                 $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
-                                        <a class="dropdown-item">Declinar</a>`);
+                                        <a class="dropdown-item">Declinar</a>
+                                        <a class="dropdown-item">Enviar</a>`);
                 break;
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
@@ -4403,9 +4406,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 e = 1, porque = '',
                 blob = doc.output('blob'),
                 fd = new FormData();
-
-            fd.append('pdf', blob);
+            var mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
+            if (mensaje) {
+                fd.append('pdf', blob);
+            }
+            fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
+            fd.append('movil', data.movil);
+            fd.append('nombre', data.nombre);
 
             if (accion === 'Declinar') {
                 porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
@@ -4414,12 +4422,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     e = 2
                     fd.append('img', data.img);
                     fd.append('por', porque);
-                    fd.append('cel', data.cel);
                     fd.append('fullname', data.fullname);
+                    fd.append('cel', data.cel);
                     fd.append('mz', data.mz);
                     fd.append('n', data.n);
                     fd.append('proyect', data.proyect);
-                    fd.append('nombre', data.nombre);
                 }
             }
             if ((accion !== 'Declinar' || e === 2) && admin == 1) {
