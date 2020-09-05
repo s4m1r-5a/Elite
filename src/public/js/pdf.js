@@ -17,7 +17,7 @@ var faker = window.faker
 var examples = {}
 window.examples = examples
 
-// Basic - shows what a default table looks like
+// Básico: muestra cómo se ve una tabla predeterminada
 examples.basic = function () {
     var doc = new jsPDF()
 
@@ -57,7 +57,7 @@ examples.basic = function () {
     return doc
 }
 
-// Minimal - shows how compact tables can be drawn
+// Mínima: muestra cómo se pueden dibujar tablas compactas.
 examples.minimal = function () {
     var doc = new jsPDF()
     doc.autoTable({
@@ -68,7 +68,7 @@ examples.minimal = function () {
     return doc
 }
 
-// Long data - shows how the overflow features looks and can be used
+// Datos largos: muestra cómo se ven y se pueden usar las funciones de desbordamiento
 examples.long = function () {
     var doc = new jsPDF('l')
 
@@ -105,7 +105,7 @@ examples.long = function () {
     return doc
 }
 
-// Content - shows how tables can be integrated with any other pdf content
+// Contenido: muestra cómo las tablas se pueden integrar con cualquier otro contenido PDF.
 examples.content = function () {
     var doc = new jsPDF()
 
@@ -132,7 +132,7 @@ examples.content = function () {
     return doc
 }
 
-// Multiple - shows how multiple tables can be drawn both horizontally and vertically
+// Múltiple: muestra cómo se pueden dibujar varias tablas tanto horizontal como verticalmente.
 examples.multiple = function () {
     var doc = new jsPDF()
     doc.text('Multiple tables', 14, 20)
@@ -181,7 +181,7 @@ examples.multiple = function () {
     return doc
 }
 
-// Header and footers - shows how header and footers can be drawn
+// Encabezado y pies de página: muestra cómo se pueden dibujar los encabezados y pies de página.
 examples['header-footer'] = function () {
     var doc = new jsPDF()
     var totalPagesExp = '{total_pages_count_string}'
@@ -223,7 +223,7 @@ examples['header-footer'] = function () {
     return doc
 }
 
-// Minimal - shows how compact tables can be drawn
+// Mínima: muestra cómo se pueden dibujar tablas compactas.
 examples.defaults = function () {
     // Global defaults
     // (would apply to all documents if more than one were created)
@@ -263,7 +263,7 @@ examples.defaults = function () {
     return doc
 }
 
-// Column styles - shows how tables can be drawn with specific column styles
+// Estilos de columna: muestra cómo se pueden dibujar tablas con estilos de columna específicos.
 examples.colstyles = function () {
     var doc = new jsPDF()
     doc.autoTable({
@@ -280,7 +280,7 @@ examples.colstyles = function () {
     return doc
 }
 
-// Col spans and row spans
+// Tramos de columnas y tramos de filas
 examples.spans = function () {
     var doc = new jsPDF('p', 'pt')
     doc.text('Rowspan and colspan', 40, 50)
@@ -320,7 +320,7 @@ examples.spans = function () {
     return doc
 }
 
-// Themes - shows how the different themes looks
+// Temas: muestra cómo se ven los diferentes temas.
 examples.themes = function () {
     var doc = new jsPDF()
 
@@ -346,7 +346,7 @@ examples.themes = function () {
     return doc
 }
 
-// Nested tables
+// Mesas anidadas
 examples.nested = function () {
     var doc = new jsPDF()
     doc.text('Nested tables', 14, 16)
@@ -387,7 +387,7 @@ examples.nested = function () {
     return doc
 }
 
-// Custom style - shows how custom styles can be applied
+// Estilo personalizado: muestra cómo se pueden aplicar los estilos personalizados.
 examples.custom = function () {
     var doc = new jsPDF()
     doc.autoTable({
@@ -503,7 +503,7 @@ examples.custom = function () {
 
 /*
  |--------------------------------------------------------------------------
- | Below is some helper functions for the examples
+ | A continuación se muestran algunas funciones auxiliares para los ejemplos.
  |--------------------------------------------------------------------------
  */
 
