@@ -1837,6 +1837,263 @@ if (window.location.pathname == `/links/reportes`) {
     $('#Anulacion').on('hidden.bs.modal', function (e) {
         Enviar(datos);
     })
+
+
+
+    var doc = new jsPDF()
+    var img2 = new Image();
+    var img = new Image();
+    img.src = '/img/avatars/avatar.png'
+    img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+    var totalPagesExp = '{total_pages_count_string}'
+
+    //doc.setFontSize(18)
+    //doc.text('With content', 14, 22)
+    doc.setTextColor(0)
+    doc.setFontStyle('normal')
+    if (img) {
+        doc.addImage(img, 'png', 13, 10, 15, 20)
+        doc.addImage(img2, 'png', 183, 15, 15, 15)
+    }
+    doc.setFontSize(15)
+    doc.setTextColor(110)
+    doc.text('CONSTRUCCIONES CAMPESTRES', 105, 25, null, null, "center");
+    /*doc.setFontSize(7)
+    doc.text('2020-08-28', 13 + 170, 8)
+    doc.setFontSize(10)
+    doc.text('Nit: 901311748-3', 13 + 18, 20)
+    doc.setFontSize(10)
+    doc.text('Tel: 300-775-3983', 13 + 18, 25)
+    doc.setFontSize(8)
+    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, 13 + 18, 30)*/
+
+    doc.setFontSize(11)
+    doc.setTextColor(0)
+
+    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+    var pageSize = doc.internal.pageSize
+    var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+    var titulo = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, pageWidth - 10, {})
+    var parrafo = doc.splitTextToSize(`Entre los suscritos a saber, por una parte, `, pageWidth - 10, {})
+    var text1 = doc.splitTextToSize(`PONTEVEDRA PROMOTORA S.A.S., `, pageWidth - 10, {})
+    var text2 = doc.splitTextToSize(`sociedad comercial legalmente constituida, con domicilio principal en la ciudad de Turbaco-Bolivar, con matrícula mercantil número `, pageWidth - 10, {})
+    var text3 = doc.splitTextToSize(`09-394948-12 `, pageWidth - 10, {})
+    var text4 = doc.splitTextToSize(`de fecha 03-05-2018, con `, pageWidth - 10, {})
+    var text5 = doc.splitTextToSize(`Nit. 901177360-5`, pageWidth - 10, {})
+    var text6 = doc.splitTextToSize(`, representada legalmente  por  `, pageWidth - 10, {})
+    var text6 = doc.splitTextToSize(`JUANA TERESA BRAY BOHORQUEZ`, pageWidth - 10, {})
+    var text7 = doc.splitTextToSize(`, mujer, mayor de edad, identificada con la `, pageWidth - 10, {})
+    var text8 = doc.splitTextToSize(`C.C 45.582.407`, pageWidth - 10, {})
+    var text9 = doc.splitTextToSize(`del Carmen de Bolívar, quien para los efectos del presente contrato será  LA  PROMITENTE VENDEDORA; y por la otra parte, `, pageWidth - 10, {})
+    var text10 = doc.splitTextToSize(`LAURA ANDREA RICAURTE VALDERRAMA`, pageWidth - 10, {})
+    var text11 = doc.splitTextToSize(`C.C 1.050.952.779`, pageWidth - 10, {})
+    var text12 = doc.splitTextToSize(` y `, pageWidth - 10, {})
+    var text13 = doc.splitTextToSize(`MARIA JOSE RICAURTE VALDERRAMA`, pageWidth - 10, {})
+    var text14 = doc.splitTextToSize(`C.C 1.047.496.162`, pageWidth - 10, {})
+    var text15 = doc.splitTextToSize(` de CARTAGENA-BOLIVAR, con Dirección Cartagena, Bolívar Urbanización la Española Mz o Casa 6 quien para los efectos de este contrato será `, pageWidth - 10, {})
+    var text16 = doc.splitTextToSize(` EL PROMITENTE COMPRADOR`, pageWidth - 10, {})
+    var text17 = doc.splitTextToSize(`, acordamos celebrar el presente `, pageWidth - 10, {})
+    var text18 = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA`, pageWidth - 10, {})
+    var text19 = doc.splitTextToSize(`, previas las siguientes consideraciones:`, pageWidth - 10, {})
+    doc.text(titulo, 105, 40, null, null, "center");
+
+    doc.setTextColor(100)
+    doc.text(parrafo, 13, 50)
+    doc.setTextColor(0)
+    doc.text(text1, 13, 50)
+    doc.text("This is centred text.", 105, 80, null, null, "center");
+    doc.text("And a little bit more underneath it.", 105, 90, null, null, "center");
+    doc.text("This is right aligned text", 200, 100, null, null, "right");
+    doc.text("And some more", 200, 110, null, null, "right");
+    doc.text("Back to left", 20, 120);
+    /*doc.setTextColor(100)
+    doc.text(text2, 13, 50)
+    doc.setTextColor(0)
+    doc.text(text3, 13, 50)
+    doc.setTextColor(100)
+    doc.text(text4, 13, 50)
+    doc.setTextColor(0)
+    doc.text(text5, 13, 50)
+    doc.setTextColor(100)
+    doc.text(text6, 13, 50)
+    doc.setTextColor(0)
+    doc.text(text7, 13, 50)
+    doc.setTextColor(100)
+    doc.text(text8, 13, 50)
+    doc.setTextColor(0)
+    doc.text(text9, 13, 50)*/
+    //doc.addPage("a3"); 
+    doc.autoTable({
+        head: [
+            { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+        ],
+        body: [{
+            id: '',
+            name: '',
+            email: '',
+            city: 'RECIBO DE CAJA',
+            expenses: 'data.ids'
+        },
+        {
+            id: 'CLIENTE',
+            name: 'data.nombre + ',
+            email: 'CC:  + data.document',
+            city: 'data.movil',
+            expenses: ''
+        },
+        {
+            id: 'PRODUCTO',
+            name: 'data.proyect',
+            email: 'MZ.  data.mz',
+            city: 'LT. ',
+            expenses: ''
+        },
+        {
+            id: 'CONCEPTO',
+            name: 'ABONO',
+            email: 'data.descp',
+            city: 'CUOTA #',
+            expenses: 'NO APLICA'
+        },
+        {
+            id: 'F PAGO',
+            name: 'data.formap',
+            email: 'R  data.recibo',
+            city: 'MONTO',
+            expenses: '$ + Moneda(data.monto)'
+        },
+        {
+            id: 'BONO',
+            name: 'NO APLICA',
+            email: 'R5 0',
+            city: 'MONTO',
+            expenses: '$'
+        },
+        {
+            id: 'TOTAL',
+            name: `MCT********`,
+            email: '',
+            city: '',
+            expenses: '$'
+        },
+        {
+            id: 'SLD FECHA',
+            name: ` MCT********`,
+            email: '',
+            city: '',
+            expenses: '$'
+        },
+        {
+            id: 'TOTAL SLD',
+            name: `MCT********`,
+            email: '',
+            city: '',
+            expenses: '$'
+        }],
+        //html: '#tablarecibo',
+        //showHead: false,
+        columnStyles: {
+            //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+            id: { textColor: 0, fontStyle: 'bold' },
+            0: { cellWidth: '50' },
+            1: { cellWidth: 'auto' },
+            2: { cellWidth: 'wrap' },
+            3: { cellWidth: 'wrap' },
+        },
+        /*didDrawPage: function (data) {
+            // Header
+            doc.setTextColor(0)
+            doc.setFontStyle('normal')
+            if (img) {
+                doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+            }
+            doc.setFontSize(15)
+            doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+            doc.setFontSize(7)
+            doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+            doc.setFontSize(10)
+            doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+            doc.setFontSize(10)
+            doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+            doc.setFontSize(8)
+            doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+
+            doc.setDrawColor(0, 255, 0)
+                .setLineWidth(1 / 72)
+            doc.setFontSize(8)
+            doc.text(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, data.settings.margin.left, 40)
+
+            // Footer
+            var str = 'Page ' + doc.internal.getNumberOfPages()
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                str = str + ' of ' + totalPagesExp
+            }
+            doc.setFontSize(8)
+
+            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+            var pageSize = doc.internal.pageSize
+            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+            doc.text(`https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+        },*/
+        margin: { top: 200 },
+        startY: 200,
+        showHead: 'firstPage',
+    })
+    // Total page number plugin only available in jspdf v1.0+
+    if (typeof doc.putTotalPages === 'function') {
+        doc.putTotalPages(totalPagesExp)
+    }
+    doc.output('dataurlnewwindow')
+
+    var pageWidth = 8.5,
+        lineHeight = 1.2,
+        margin = 0.5,
+        maxLineWidth = pageWidth - margin * 2,
+        fontSize = 24,
+        ptsPerInch = 72,
+        oneLineHeight = (fontSize * lineHeight) / ptsPerInch,
+        text =
+            "Two households, both alike in dignity,\n" +
+            "In fair Verona, where we lay our scene,\n" +
+            "From ancient grudge break to new mutiny,\n" +
+            "Where civil blood makes civil hands unclean.\n" +
+            "From forth the fatal loins of these two foes\n" +
+            "A pair of star-cross'd lovers take their life;\n" +
+            "Whole misadventured piteous overthrows\n" +
+            "Do with their death bury their parents' strife.\n" +
+            "The fearful passage of their death-mark'd love,\n" +
+            "And the continuance of their parents' rage,\n" +
+            // Tenga en cuenta que lo siguiente se ajustará automáticamente a dos líneas.
+            "Which, but their children's end, nought could remove, Is now the two hours' traffic of our stage;\n" +
+            "The which if you with patient ears attend,\n" +
+            "What here shall miss, our toil shall strive to mend.",
+        doc = new jsPDF({
+            unit: "in",
+            lineHeight: lineHeight
+        }).setProperties({ title: "String Splitting" });
+
+    // splitTextToSize toma su cadena y la convierte en una matriz de cadenas,
+    // cada uno de los cuales se puede mostrar dentro del maxLineWidth especificado.
+    var textLines = doc
+        .setFont("helvetica")
+        .setFontSize(fontSize)
+        .splitTextToSize(text, maxLineWidth);
+
+    // doc.text ahora puede agregar esas líneas fácilmente; de lo contrario, habría salido de la pantalla el texto.
+    doc.text(textLines, margin, margin + 2 * oneLineHeight);
+
+    // También puede calcular la altura del texto de manera muy simple:
+    var textHeight = (textLines.length * fontSize * lineHeight) / ptsPerInch;
+    doc
+        .setFont("Helvetica", "bold")
+        .text(
+            "Text Height: " + textHeight + " inches",
+            margin,
+            margin + oneLineHeight
+        );
+
 }
 //////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/')[3]}`) {
