@@ -4385,7 +4385,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
                     doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
                 },
-                margin: { top: 38 },
+                margin: { top: 34 },
             })
             // Total page number plugin only available in jspdf v1.0+
             if (typeof doc.putTotalPages === 'function') {
