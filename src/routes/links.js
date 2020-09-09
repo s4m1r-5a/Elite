@@ -2200,7 +2200,7 @@ async function PagosAbonos(Tid, pdf) {
     await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, Tid]);
     Desendentes(S.pin, estados)
 
-    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Monto *${Moneda(monto)}* Adjuntamos recibo de pago *#${req.body.ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitoza. Recibo *${S.recibo}* Monto *${Moneda(monto)}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     var smsj = `hemos procesado tu pago de manera exitoza Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
 
     await EnviarWTSAP(S.movil, bod);
