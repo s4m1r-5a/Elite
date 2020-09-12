@@ -1,5 +1,5 @@
 module.exports = {
-    database0: {
+    database: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
@@ -7,7 +7,7 @@ module.exports = {
         database: 'pruebasElite',
         port: 3306
     },
-    database: {
+    database0: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
