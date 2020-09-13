@@ -972,7 +972,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
-        await pool.query(`UPDATE solicitudes s 
+        /*await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
             LEFT JOIN preventa p ON s.lt = p.lote  
             LEFT JOIN cupones cp ON p.cupon = cp.id
@@ -988,6 +988,17 @@ router.post('/anular', isLoggedIn, async (req, res) => {
 
                 }, lote
             ]
+        );*/
+        await pool.query(`UPDATE solicitudes s 
+            LEFT JOIN cuotas c ON s.pago = c.id
+            LEFT JOIN preventa p ON s.lt = p.lote  
+            LEFT JOIN cupones cp ON p.cupon = cp.id
+            LEFT JOIN productosd l ON s.lt = l.id 
+            LEFT JOIN productos d ON l.producto  = d.id 
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9,
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
+            l.valor = d.valmtr2 * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA',
+            p.descrip = '${causa} - ${motivo}', l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
         );
         res.send(true);
     }
