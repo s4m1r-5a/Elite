@@ -462,16 +462,17 @@ router.get('/pagos/:id', async (req, res) => {
     }
 });
 router.post('/pagos', async (req, res) => {
-    console.log(req.body)
-    const { merchantId, amount, referenceCode } = req.body;
+    const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin } = req.body;
+    console.log(merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin)
     //var nombre = normalize(buyerFullName).toUpperCase();
     //var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
     var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
     //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
-    console.log(key, hash)
-    res.send({ sig: hash, ext: 'prueba hye' });
+    var ext = `${total} ~ ${factrs} ~ ${concpto} ~ ${lt} ~ ${bono ? bono : 0} ~ ${pin ? pin : 0} ~ ${id ? id : 0}`;
+    console.log(ext)
+    res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono, pin } = req.body;
