@@ -79,7 +79,9 @@ router.post('/confir', async (req, res) => {
     const { transaction_date, reference_sale, state_pol, payment_method_type, value, email_buyer, phone, cc_number,
         cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip
     } = req.body;
-    sms('573007753983', `Entro la confirmacion`);
+    console.log(req.body)
+    EnviarWTSAP('57 3007753983', req.body)
+    /*sms('573007753983', `Entro la confirmacion`);
     const ids = reference_sale.split("-");
     const r = {
         transaction_date, reference_sale, state_pol, payment_method_type, value, cc_number, cc_holder, response_message_pol,
@@ -108,10 +110,11 @@ router.post('/confir', async (req, res) => {
             -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-INSERTA`
         });
         sms('573007753983', `SE INSERTO CORRECTAMENTE`);
-    }
+    }*/
 });
 
 router.get(`/planes`, async (req, res) => {
+    console.log(req.query)
     const r = {
         transactionState: req.query.transactionState || '',
         referenceCode: req.query.referenceCode || '',
@@ -208,4 +211,20 @@ router.post(`/venta`, async (req, res) => {
 
     }
 });
+function EnviarWTSAP(movil, body, smsj) {
+    var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
+    var options = {
+        method: 'POST',
+        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+        form: {
+            phone: cel,
+            body
+        }
+    };
+    request(options, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });
+    smsj ? sms(cel, smsj) : '';
+}
 module.exports = router;

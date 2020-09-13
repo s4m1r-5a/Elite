@@ -1285,7 +1285,20 @@ if (window.location.pathname == `/links/pagos`) {
             $('#Total, #Total2').val(l + cal);
             $('#recibo').val('');
             $('#file').val('');
+            var fd = $('#payu').serialize();
+            $.ajax({
+                url: '/links/pagos',
+                data: fd,
+                type: 'POST',
+                beforeSend: function (xhr) {
 
+                },
+                async: true,
+                success: function (data) {
+                    $('#signature').val(data);
+                    alert(data)
+                }
+            });
         } else if (forma === 'recbo' || forma === 'bancolombia') {
             $('.transaccion').html('0')
             $('.Total3').html(t2 ? t2 : t);
@@ -1393,21 +1406,10 @@ if (window.location.pathname == `/links/pagos`) {
         //e.preventDefault()
         $('input').prop('disabled', false);
         $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-        var fd = $('form').serialize();
-        $.ajax({
-            url: '/links/pagos',
-            data: fd,
-            type: 'POST',
-            beforeSend: function (xhr) {
-                $('#ModalEventos').modal({
-                    backdrop: 'static',
-                    keyboard: true,
-                    toggle: true
-                });
-            },
-            success: function (data) {
-                $('input[name="signature"]').val(data);
-            }
+        $('#ModalEventos').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
         });
     });
 }

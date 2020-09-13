@@ -69,7 +69,7 @@ router.get('/prueba', async (req, res) => {
     );*/
     //var request = require("request");
 
-    var options = {
+    /*var options1 = {
         method: 'POST',
         url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
         headers:
@@ -82,15 +82,48 @@ router.get('/prueba', async (req, res) => {
         form:
         {
             grant_type: 'client_credentials',
-            scope: `Transfer-Intention:write:app`
+            scope: `Transfer-Intention:write:app Transfer-Intention:read:app`
         }
     };
+    request(options1, function (error, response, body) {
+        if (error) return console.error('Failed: %s', error.message);
+        console.log('Success: ', body);
+    });*/
 
+    var options = {
+        method: 'POST',
+        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
+        headers:
+        {
+            accept: 'application/vnd.bancolombia.v1+json',
+            'content-type': 'application/vnd.bancolombia.v1+json'
+        },
+        form:
+        {
+            "token_type": "Bearer",
+            "access_token": "AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmtdFG9j6TgzXbLObt3L0ZB0OzPEY_5FQOdKb8h52V2Q0TLb9FbjW6peNsFMmkc9Fp-ayy3lPtqYJGYl6TX7CW-WAXvPNH-gI_RK6L7UJXbGBmBNueWz3lpEQ61ETta9c5RUF7Dvn9svAZcRe1mHvdjk-itXDqB7tgWmm5L4PEFZr6Lf-hgeTL9POn134BckGa",
+            "expires_in": 1200,
+            "consented_on": 1599933480,
+            "scope": "Transfer-Intention:write:app Transfer-Intention:read:app"
+        },
+        body: `{"data":[
+                    {
+                        "commerceTransferButtonId": "h4ShG3NER1C",
+                        "transferReference": "1002345678",
+                        "transferDescription": "Compra en Telovendo",
+                        "transferAmount": 3458.33,
+                        "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
+                        "confirmationURL": "https://pagos-api-dev.cloud.net/callback"
+                    }
+                ]
+        }`
+    };
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
-
         console.log('Success: ', body);
     });
+
+
     res.send(true);
 })
 //////////////////* PRODUCTOS */////////////////////
@@ -429,12 +462,15 @@ router.get('/pagos/:id', async (req, res) => {
     }
 });
 router.post('/pagos', async (req, res) => {
+    console.log(req.body)
     const { merchantId, amount, referenceCode } = req.body;
     //var nombre = normalize(buyerFullName).toUpperCase();
+    //var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
     var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
     //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
+    console.log(key, hash)
     res.send(hash);
 });
 router.post('/recibo', async (req, res) => {
