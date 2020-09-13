@@ -1139,8 +1139,8 @@ if (window.location.pathname == `/links/pagos`) {
                             $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
                         });
                         var Calculo = (m) => {
-                            var mora = 0, cuot = 0, Description = '', cont = 0;
-                            $('#Code').val(data.client.idc + '-' + m);
+                            var mora = 0, cuot = 0, Description = '', cont = 0, c = ID(3);
+                            $('#Code').val(data.client.idc + '-' + m + '-' + c);
                             vx = data.client.idc + '-' + m;
                             data.d.filter((r) => {
                                 return r.id == m
@@ -1151,7 +1151,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Proyecto').html(Moneda(r.valor));
                                 $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
                                 $('#lt').val(Moneda(r.lt));
-                                Description = r.proyect + ' Lote: ' + r.n;
+                                Description = r.proyect + ' Mz ' + r.mz + ' Lote: ' + r.n;
                             })
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
@@ -1285,18 +1285,15 @@ if (window.location.pathname == `/links/pagos`) {
             $('#Total, #Total2').val(l + cal);
             $('#recibo').val('');
             $('#file').val('');
-            var fd = $('#payu').serialize();
+            var fd = $('form').serialize();
             $.ajax({
                 url: '/links/pagos',
                 data: fd,
                 type: 'POST',
-                beforeSend: function (xhr) {
-
-                },
                 async: true,
                 success: function (data) {
-                    $('#signature').val(data);
-                    alert(data)
+                    $('#signature').val(data.sig);
+                    $('#extra').val(data.ext)
                 }
             });
         } else if (forma === 'recbo' || forma === 'bancolombia') {
@@ -1406,6 +1403,7 @@ if (window.location.pathname == `/links/pagos`) {
         //e.preventDefault()
         $('input').prop('disabled', false);
         $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        //var u = $(this).attr('id');
         $('#ModalEventos').modal({
             backdrop: 'static',
             keyboard: true,
@@ -5854,7 +5852,15 @@ function urltoFile(url, filename, mimeType) {
         .then(function (buf) { return new File([buf], filename, { type: mimeType }); })
     );
 }
-
+function ID(lon) {
+    let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
+        code = "";
+    for (x = 0; x < lon; x++) {
+        let rand = Math.floor(Math.random() * chars.length);
+        code += chars.substr(rand, 1);
+    };
+    return code;
+};
 //Usage example:
 /*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
 .then(function(file){ console.log(file);});*/

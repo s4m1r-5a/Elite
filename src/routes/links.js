@@ -462,7 +462,7 @@ router.get('/pagos/:id', async (req, res) => {
     }
 });
 router.post('/pagos', async (req, res) => {
-    //console.log(req.body)
+    console.log(req.body)
     const { merchantId, amount, referenceCode } = req.body;
     //var nombre = normalize(buyerFullName).toUpperCase();
     //var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
@@ -471,7 +471,7 @@ router.post('/pagos', async (req, res) => {
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
     console.log(key, hash)
-    res.send(hash);
+    res.send({ sig: hash, ext: 'prueba hye' });
 });
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono, pin } = req.body;
@@ -484,7 +484,15 @@ router.post('/recibo', async (req, res) => {
         req.files.map((e) => {
             imagenes += `/uploads/${e.filename},`
         })
-
+        const a = await Bonos(bono, lt);
+        if (a) {
+            await pool.query('UPDATE cupones SET ? WHERE id = ?',
+                [{ producto: a, estado: 14 }, pin]
+            );
+        } else if (!a && bono != 0) {
+            req.flash('error', 'Solicitud de pago rechazada, Bono erroneo');
+            return res.redirect('/links/pagos');
+        }
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
@@ -509,7 +517,7 @@ router.post('/recibo', async (req, res) => {
 });
 router.post('/bonus', async (req, res) => {
     const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin } = req.body;
-    const recibe = await pool.query(
+    /*const recibe = await pool.query(
         `SELECT c.id, pr.id e FROM cupones c
             INNER JOIN clientes cl ON c.clients = cl.idc 
             INNER JOIN preventa pr ON cl.idc = pr.cliente 
@@ -517,32 +525,30 @@ router.post('/bonus', async (req, res) => {
             OR cl.idc = pr.cliente4 INNER JOIN productosd l ON pr.lote = l.id
             WHERE c.pin = ? AND l.id = ? AND c.producto IS NULL AND c.estado = 9`,
         [bono, lt]
-    );
-    //console.log(recibe[0].e)
-    const E = recibe[0].e;
-    const D = recibe[0].id;
-    if (recibe.length > 0) {
+    );*/
+    const a = await Bonos(bono, lt);
+    if (a) {
+        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lt]);
+        var l = r[0].monto1 || 0,
+            k = r[0].monto || 0;
+        var acumulado = l + k;
+
         const pago = {
             fech: ahora, monto: bonomonto, recibo: bono, facturasvenc: factrs, lt,
-            concepto: 'PAGO', stado: 3, descp: concpto, formap: 'BONO', bono: D
+            concepto: 'PAGO', stado: 3, descp: concpto, formap: 'BONO', bono: D, acumulado
         }
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
         await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
 
-        await pool.query(
-            'UPDATE cupones SET ? WHERE id = ?',
-            [
-                {
-                    producto: E,
-                    estado: 14
-                }, D
-            ]
+        await pool.query('UPDATE cupones SET ? WHERE id = ?',
+            [{ producto: a, estado: 14 }, pin]
         );
-
         const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
         const R = await PagosAbonos(P.insertId)
-        //console.log(R)
         res.send(R);
     } else {
         res.send(false);
@@ -1086,7 +1092,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                     r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t
             INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id
             INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id
-            INNER JOIN estados e ON t.estado = e.id WHERE ${ d} YEAR(t.fecha) = YEAR(CURDATE())
+            INNER JOIN estados e ON t.estado = e.id WHERE ${d} YEAR(t.fecha) = YEAR(CURDATE())
             AND MONTH(t.fecha) BETWEEN 1 and 12`
 
         const solicitudes = await pool.query(sql, req.user.id);
@@ -1100,7 +1106,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud,
                 t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto
             INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
-            WHERE ${ d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE())
+            WHERE ${d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE())
             AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
 
         const ventas = await pool.query(sql, req.user.id);
@@ -2292,6 +2298,23 @@ async function PagosAbonos(Tid, pdf) {
     await EnviarWTSAP(S.movil, bod);
     await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
     return true
+}
+async function Bonos(pin, lote) {
+    const recibe = await pool.query(
+        `SELECT pr.id FROM cupones c
+            INNER JOIN clientes cl ON c.clients = cl.idc 
+            INNER JOIN preventa pr ON cl.idc 
+            IN(pr.cliente, pr.cliente2, pr.cliente3, pr.cliente4) 
+            INNER JOIN productosd l ON pr.lote = l.id
+            WHERE c.pin = ? AND l.id = ? AND c.producto IS NULL AND c.estado = 9`,
+        [pin, lote]
+    );
+    if (recibe.length > 0) {
+        const IdSeparacion = recibe[0].id;
+        return IdSeparacion;
+    } else {
+        return false;
+    }
 }
 var normalize = (function () {
     var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",

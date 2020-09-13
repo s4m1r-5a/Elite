@@ -77,40 +77,28 @@ const transpoter = nodemailer.createTransport({
 
 router.post('/confir', async (req, res) => {
     const { transaction_date, reference_sale, state_pol, payment_method_type, value, email_buyer, phone, cc_number,
-        cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip
-    } = req.body;
+        cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip, transaction_id,
+        transaction_bank_id, currency, error_message_bank } = req.body;
     console.log(req.body)
-    EnviarWTSAP('57 3007753983', req.body)
-    /*sms('573007753983', `Entro la confirmacion`);
     const ids = reference_sale.split("-");
     const r = {
         transaction_date, reference_sale, state_pol, payment_method_type, value, cc_number, cc_holder, response_message_pol,
-        payment_method_name, description, pse_bank, reference_pol, ip, relacion: ids[2], cliente: ids[0], usuario: ides[1]
+        payment_method_name, description, pse_bank, reference_pol, ip, cliente: ids[0], transaction_id, transaction_bank_id,
+        currency, error_message_bank
     }
     const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
+    var d = '';
     if (pin.length > 0) {
         await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
-        await transpoter.sendMail({
-            from: "'Suport' <suport@tqtravel.co>",
-            to: 's4m1r.5a@gmail.com',
-            subject: 'confirmacion de que si sirbe',
-            text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
-                -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
-                -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-ACTUALIZA`
-        });
-        sms('573007753983', `SE ATUALIZO`);
     } else {
-        await pool.query('INSERT INTO payu SET ? ', r);
-        await transpoter.sendMail({
-            from: "'Suport' <suport@tqtravel.co>",
-            to: 's4m1r.5a@gmail.com',
-            subject: 'confirmacion de que si sirbe',
-            text: `${reference_sale}-${state_pol}-${payment_method_type}-${value}-${email_buyer}
-            -${phone}-${transaction_date}-${cc_number}-${cc_holder}-${description}
-            -${response_message_pol}-${payment_method_name}-${pse_bank}-${reference_pol}-${ip}-INSERTA`
-        });
-        sms('573007753983', `SE INSERTO CORRECTAMENTE`);
-    }*/
+        const l = await pool.query('INSERT INTO payu SET ? ', r);
+        d = l.insertId
+    }
+    if (state_pol == 4 && d) {
+        await pool.query('UPDATE solicitudes set ? WHERE reference_sale = ?', [{ transfer: d }, reference_sale]);
+        var body = reference_sale + ' ' + d + ' ' + description;
+        EnviarWTSAP('57 3007753983', body)
+    }
 });
 
 router.get(`/planes`, async (req, res) => {
