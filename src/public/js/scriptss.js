@@ -1432,7 +1432,7 @@ if (window.location.pathname == `/links/reportes`) {
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[7]).getTime();
+                aData._date = new Date(aData[8]).getTime();
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -1450,16 +1450,35 @@ if (window.location.pathname == `/links/reportes`) {
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
-        buttons: ['pageLength',
+        buttons: [
+            'pageLength',
             {
                 text: `<div class="mb-0">
-                    <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-               </div>`,
+                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
+                        </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
                 },
-                className: 'btn btn-secondary fech',
+                className: 'btn btn-secondary fech'
+            },
+            {
+                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            placeholder="MZ">`,
+                attr: {
+                    title: 'Busqueda por MZ',
+                    id: ''
+                },
+                className: 'btn btn-secondary min'
+            },
+            {
+                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            placeholder="LT">`,
+                attr: {
+                    title: 'Busqueda por LT',
+                    id: ''
+                },
+                className: 'btn btn-secondary max'
             }
         ],
         deferRender: true,
@@ -1586,6 +1605,13 @@ if (window.location.pathname == `/links/reportes`) {
                 $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
             }
         }
+    });
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 3 : 4;
+        tableOrden
+            .columns(col)
+            .search(this.value)
+            .draw();
     });
     //////////////////////* Table3 *///////////////////////    
     var table3 = $('#datatable3').DataTable({
@@ -4396,6 +4422,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
         buttons: [
+            'pageLength',
             {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
@@ -4405,6 +4432,24 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     id: 'Date'
                 },
                 className: 'btn btn-secondary fech'
+            },
+            {
+                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            placeholder="MZ">`,
+                attr: {
+                    title: 'Busqueda por MZ',
+                    id: ''
+                },
+                className: 'btn btn-secondary min'
+            },
+            {
+                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            placeholder="LT">`,
+                attr: {
+                    title: 'Busqueda por LT',
+                    id: ''
+                },
+                className: 'btn btn-secondary max'
             }
         ],
         deferRender: true,
@@ -4478,6 +4523,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 $(row).css("background-color", "#40E0D0");
             }
         }
+    });
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 5 : 6;
+        table
+            .columns(col)
+            .search(this.value)
+            .draw();
     });
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');

@@ -549,7 +549,7 @@ router.post('/bonus', async (req, res) => {
             [{ producto: a, estado: 14 }, pin]
         );
         const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
-        const R = await PagosAbonos(P.insertId)
+        const R = await PagosAbonos(P.insertId, '', 'GRUPO ELITE SISTEMA')
         res.send(R);
     } else {
         res.send(false);
@@ -1271,7 +1271,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
         const { ids } = req.body
         const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf);
+        const R = await PagosAbonos(ids, pdf, req.user.fullname);
         res.send(R);
     }
 });
@@ -1856,7 +1856,7 @@ async function Estados(S, L, P) {
 }*/
 //Pa(null, null, 313, Estados)
 
-async function PagosAbonos(Tid, pdf) {
+async function PagosAbonos(Tid, pdf, user) {
 
     const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, 
     pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, 
@@ -1901,6 +1901,7 @@ async function PagosAbonos(Tid, pdf) {
                             WHERE s.ids = ? AND c.tipo = 'INICIAL' AND c.estado = 3`,
                     [
                         {
+                            's.aprueba': user,
                             's.stado': 4,
                             'c.estado': 13,
                             'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -1937,6 +1938,7 @@ async function PagosAbonos(Tid, pdf) {
                                     AND c.cuota != ${extraordinaria} AND c.estado = 3`,
                             [
                                 {
+                                    's.aprueba': user,
                                     's.stado': 4,
                                     'c.estado': 13,
                                     'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -1971,6 +1973,7 @@ async function PagosAbonos(Tid, pdf) {
                                 AND c.cuota != ${extraordinaria} AND c.estado = 3`,
                             [
                                 {
+                                    's.aprueba': user,
                                     's.stado': 4,
                                     'c.cuota': cuota,
                                     'l.estado': estados
@@ -1992,6 +1995,7 @@ async function PagosAbonos(Tid, pdf) {
                             WHERE s.ids = ?  AND c.tipo = 'INICIAL' AND c.estado = 3`,
                     [
                         {
+                            's.aprueba': user,
                             's.stado': 4,
                             'c.cuota': cuota,
                             'l.estado': 12
@@ -2027,6 +2031,7 @@ async function PagosAbonos(Tid, pdf) {
                                 WHERE s.ids = ? AND c.estado = 3`,
                         [
                             {
+                                's.aprueba': user,
                                 's.stado': 4,
                                 'c.estado': 13,
                                 'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -2053,7 +2058,6 @@ async function PagosAbonos(Tid, pdf) {
 
                     }
                 } else {
-                    //console.log(cuotafinanciada, Math.round(monto / numerocuotas))
                     var cuota = cuotafinanciada - Math.round(monto / numerocuotas);
                     await pool.query(
                         `UPDATE cuotas c 
@@ -2064,6 +2068,7 @@ async function PagosAbonos(Tid, pdf) {
                                 AND c.cuota != ${extraordinaria} AND c.estado = 3`,
                         [
                             {
+                                's.aprueba': user,
                                 's.stado': 4,
                                 'c.cuota': cuota,
                                 'l.estado': 10
@@ -2097,6 +2102,7 @@ async function PagosAbonos(Tid, pdf) {
                         INNER JOIN productosd o ON p.lote = o.id SET ? WHERE s.ids = ?`,
                 [
                     {
+                        's.aprueba': user,
                         's.stado': 4,
                         'c.estado': 13,
                         'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -2133,6 +2139,7 @@ async function PagosAbonos(Tid, pdf) {
                                     AND c.estado = 3 AND fechs > ?`,
                             [
                                 {
+                                    's.aprueba': user,
                                     's.stado': 4,
                                     'c.estado': 13,
                                     'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -2168,6 +2175,7 @@ async function PagosAbonos(Tid, pdf) {
                                             WHERE c.separacion = ? AND c.estado = 3 AND fechs > ?`,
                                     [
                                         {
+                                            's.aprueba': user,
                                             's.stado': 4,
                                             'c.estado': 13,
                                             'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -2248,6 +2256,7 @@ async function PagosAbonos(Tid, pdf) {
                                     WHERE c.separacion = ? AND c.estado = 3 AND fechs > ?`,
                             [
                                 {
+                                    's.aprueba': user,
                                     's.stado': 4,
                                     'c.estado': 13,
                                     'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
@@ -2273,7 +2282,6 @@ async function PagosAbonos(Tid, pdf) {
                         }
                     } else {
                         cuota = cuotafinanciada - Math.round(excedenteinicial / numerocuotas)
-                        //console.log(cuota, cuotaextraordinaria)
                         await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND tipo = 'FINANCIACION' 
                             AND estado = 3 AND cuota != ? AND fechs > ?`, [{ cuota }, T, cuotaextraordinaria, fech]);
                     }
