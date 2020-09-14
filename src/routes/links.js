@@ -470,7 +470,7 @@ router.post('/pagos', async (req, res) => {
     //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
-    var ext = `${total} ~ ${factrs} ~ ${concpto} ~ ${lt} ~ ${bono ? bono : 0} ~ ${pin ? pin : 0} ~ ${id ? id : 0}`;
+    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
     console.log(ext)
     res.send({ sig: hash, ext });
 });
