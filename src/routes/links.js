@@ -1073,7 +1073,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
 
-        d = req.user.admin > 0 ? `WHERE p.tipobsevacion != 'ANULADA'` : `WHERE p.tipobsevacion != 'ANULADA' AND p.asesor = ?`;
+        d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
 
         sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, 
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha
@@ -1184,6 +1184,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             var total = l + k;
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
+        var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img,
         pd.valor, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
@@ -1192,7 +1193,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-         WHERE s.concepto IN ('PAGO','ABONO') ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);
         respuesta = { "data": so };
         res.send(respuesta);
 
