@@ -45,6 +45,10 @@ let languag = {
     "oAria": {
         "sSortAscending": ": Activar para ordenar la columna de manera ascendente",
         "sSortDescending": ": Activar para ordenar la columna de manera descendente"
+    },
+    "buttons": {
+        "copy": 'Copiar',
+        "csv": 'Exportar a CSV'
     }
 };
 let languag2 = {
@@ -1450,12 +1454,51 @@ if (window.location.pathname == `/links/reportes`) {
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
-        buttons: [
-            'pageLength',
+        buttons: [/*{
+            extend: 'collection',
+            text: 'Ctrl',
+            orientation: 'landscape',
+            buttons: [{
+                text: 'Copiar',
+                extend: 'copy'
+            },
             {
-                text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                        </div>`,
+                extend: 'pdf',
+                orientation: 'landscape',
+                pageSize: 'LEGAL'
+            },
+            {
+                text: 'Ach plano ',
+                extend: 'csv',
+                orientation: 'landscape'
+            },
+            {
+                text: 'Excel',
+                extend: 'excel',
+                orientation: 'landscape'
+            },
+            {
+                text: 'Imprimir',
+                extend: 'print',
+                orientation: 'landscape'
+            }
+            ]
+        },*/
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" 
+                width="36" height="36" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                stroke-linejoin="round" class="feather feather-calendar">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>`,
                 attr: {
                     title: 'Fecha',
                     id: 'Date'
@@ -1463,7 +1506,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary fech'
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
             placeholder="MZ">`,
                 attr: {
                     title: 'Busqueda por MZ',
@@ -1472,7 +1515,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary min'
             },
             {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
             placeholder="LT">`,
                 attr: {
                     title: 'Busqueda por LT',
@@ -1598,9 +1641,7 @@ if (window.location.pathname == `/links/reportes`) {
                     if (data) {
                         var fr = '', p = data.split(",");
                         p.map((e) => {
-                            console.log(e)
-                            fr += e ? `<a href="${e}" target="_blank" title="Click para ver documento" class="mr-1"><i class="fas fa-address-card"></i></a>`
-                                : ``
+                            fr += e ? `<a href="${e}" target="_blank" title="Click para ver documento" class="mr-1"><i class="fas fa-address-card"></i></a>` : ``
                         })
                         return fr;
                     } else {
@@ -4440,36 +4481,45 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: [
-            'pageLength',
-            {
-                text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="calendar"></i> <span class="align-middle">Fecha</span>
-                        </div>`,
-                attr: {
-                    title: 'Fecha',
-                    id: 'Date'
-                },
-                className: 'btn btn-secondary fech'
+        buttons: [{
+            extend: 'pageLength',
+            text: 'Ver',
+            orientation: 'landscape'
+        }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+        {
+            text: `<svg xmlns="http://www.w3.org/2000/svg" 
+                width="36" height="36" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                stroke-linejoin="round" class="feather feather-calendar">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>`,
+            attr: {
+                title: 'Fecha',
+                id: 'Date'
             },
-            {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            className: 'btn btn-secondary fech'
+        },
+        {
+            text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
             placeholder="MZ">`,
-                attr: {
-                    title: 'Busqueda por MZ',
-                    id: ''
-                },
-                className: 'btn btn-secondary min'
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
             },
-            {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
+            className: 'btn btn-secondary min'
+        },
+        {
+            text: `<input id="max" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
             placeholder="LT">`,
-                attr: {
-                    title: 'Busqueda por LT',
-                    id: ''
-                },
-                className: 'btn btn-secondary max'
-            }
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary max'
+        }
         ],
         deferRender: true,
         paging: true,
