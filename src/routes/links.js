@@ -1144,7 +1144,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
          pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
-        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
+        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
         s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
@@ -1202,6 +1202,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Eli(imagenes);
         }
         if (cel) {
+            console.log(cel)
             var body = `_*${fullname.split(" ")[0]}*_\n_Solicitud de pago *RECHAZADA*_\n_Proyecto *${proyect}*_\n_Manzana *${mz}* Lote *${n}*_\n_Cliente *${nombre}*_\n\n_*DESCRIPCIÓN*:_\n_${por}_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
             var sm = `${fullname.split(",")[0]} tu solicitud de pago fue RECHAZADA MZ${mz} LT${n} ${por}`;
             await EnviarWTSAP(cel, body, sm);
@@ -1787,8 +1788,7 @@ async function Estados(S, L, P) {
     const Cuotas = await pool.query(
         `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
          SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, SUM(c.cuota) AS TOTAL
-         FROM preventa pr LEFT JOIN solicitudes s ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
-         FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+         FROM preventa pr LEFT JOIN solicitudes s ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
          INNER JOIN cuotas c ON c.separacion = pr.id WHERE s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
     //console.log(Cuotas)
