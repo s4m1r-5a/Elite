@@ -1497,7 +1497,9 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -1 }],
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -1586,7 +1588,24 @@ if (window.location.pathname == `/links/reportes`) {
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                                 </div>
                                         </div>`
-                        : `<a type="button" class="btn btn-sm btn-outline-dark" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Print</a>`
+                        : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
+                }
+            },
+            {
+                className: "center",
+                data: "imags",
+                render: function (data, method, row) {
+                    if (data) {
+                        var fr = '', p = data.split(",");
+                        p.map((e) => {
+                            console.log(e)
+                            fr += e ? `<a href="${e}" target="_blank" title="Click para ver documento" class="mr-1"><i class="fas fa-address-card"></i></a>`
+                                : ``
+                        })
+                        return fr;
+                    } else {
+                        return `<a title="No posee ningun documento"><i class="fas fa-exclamation-circle"></i></a>`;
+                    }
                 }
             }
         ],
@@ -4512,7 +4531,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             return `<span class="badge badge-pill badge-secondary">sin formato</span>`
                     }
                 }
-            }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" }
         ],
         rowCallback: function (row, data, index) {
             if (data["stado"] == 6) {
@@ -5715,7 +5743,6 @@ if (window.location == `${window.location.origin}/links/cupones`) {
         })
     })
 };
-
 function Unidades(num) {
 
     switch (num) {

@@ -444,7 +444,7 @@ router.get('/pagos/:id', async (req, res) => {
         const client = cliente[0]
         const d = await pool.query(`SELECT p.id, p.ahorro, pd.id lt, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, 
         c.descuento, pr.proyect FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
-        INNER JOIN productos pr ON pd.producto = pr.id WHERE p.cliente = ? OR p.cliente2 = ?`, [client.idc, client.idc]);
+        INNER JOIN productos pr ON pd.producto = pr.id WHERE p.tipobsevacion IS NULL AND (p.cliente = ? OR p.cliente2 = ?)`, [client.idc, client.idc]);
         var c = ''
         if (d.length > 0) {
 
@@ -452,7 +452,7 @@ router.get('/pagos/:id', async (req, res) => {
                 c += `${x > 0 ? ' OR ' : ''}separacion = ${b.id}`
             }) : c = `separacion = ${d[0].id}`;
 
-            const cuotas = await pool.query(`SELECT * FROM cuotas WHERE (estado = 3 OR estado = 5) AND fechs <= CURDATE() AND (${c})`);
+            const cuotas = await pool.query(`SELECT * FROM cuotas WHERE estado IN(3, 5) AND fechs <= CURDATE() AND (${c})`);
             res.send({ d, client, cuotas, status: true });
         } else {
             res.send({ paquete: 'Aun no realiza una separacion, comuniiquece con un asesor', status: false });
@@ -463,15 +463,13 @@ router.get('/pagos/:id', async (req, res) => {
 });
 router.post('/pagos', async (req, res) => {
     const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin } = req.body;
-    console.log(merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin)
     //var nombre = normalize(buyerFullName).toUpperCase();
-    //var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
-    var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
-    //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg'
+    var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
+    //var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
+    //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg' // Para SAMIR
     var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
     var hash = crypto.createHash('md5').update(key).digest("hex");
     var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
-    console.log(ext)
     res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
@@ -979,11 +977,6 @@ router.post('/anular', isLoggedIn, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
         fullname, cel, idc, qhacer, causa, motivo } = req.body
 
-    var options = {
-        method: 'POST',
-        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0'
-    };
-    //console.log(req.body);
     const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND concepto IN('PAGO', 'ABONO') AND lt = ${lote}`);
     if (u.length > 0) {
         req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
@@ -998,28 +991,11 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query('INSERT INTO cupones SET ? ', bono);
             var nombr = nombre.split(" ")[0],
-                movi = movil.indexOf(" ") > 0 ? movil : '57' + movil,
                 fullnam = fullname.split(" ")[0],
-                ce = cel.indexOf(" ") > 0 ? cel : '57' + cel;
-            var M = () => {
-                options.form = {
-                    "phone": movi,
-                    "body": `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(o[0].total)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`
-                }
-                request(options, function (error, response, body) {
-                    if (error) return console.error('Failed: %s', error.message);
-                    console.log('Success: ', body);
-                });
-            }
-            options.form = {
-                "phone": ce,
-                "body": `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
-            }
-            request(options, function (error, response, body) {
-                if (error) return console.error('Failed: %s', error.message);
-                console.log('Success: ', body);
-                M()
-            });
+                body = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(o[0].total)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`,
+                body2 = `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
+            EnviarWTSAP(movil, body)
+            EnviarWTSAP(cel, body2)
 
         } else if (qhacer === 'DEVOLUCION' && o[0].total > 0) {
             const total = o[0].total;
@@ -1034,32 +1010,12 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
-        /*await pool.query(`UPDATE solicitudes s 
-            LEFT JOIN cuotas c ON s.pago = c.id
-            LEFT JOIN preventa p ON s.lt = p.lote  
-            LEFT JOIN cupones cp ON p.cupon = cp.id
-            LEFT JOIN productosd l ON s.lt = l.id 
-            LEFT JOIN productos d ON l.producto  = d.id 
-<<<<<<< HEAD
-            SET ?  WHERE s.lt = ? `,
-            [
-                {
-                    "s.stado": 6, "c.estado": 6, "l.estado": 9, "l.estado": 9,
-                    "l.uno": null, "l.dos": null, "l.tres": null, "l.directa": null,
-                    "l.valor": "d.valmtr2" * "l.mtr2", "cp.estado": 6, "p.tipobsevacion": "ANULADA",
-                    "p.descrip": causa + "-" + motivo, "l.inicial": ("d.valmtr2" * "l.mtr2") * "d.porcentage" / 100,
-
-                }, lote
-            ]
-        );*/
         await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
             LEFT JOIN preventa p ON s.lt = p.lote  
             LEFT JOIN cupones cp ON p.cupon = cp.id
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
-=======
->>>>>>> 58234662e2dad2b5038a04153222ce2030f24499
             SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9,
             l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
             l.valor = d.valmtr2 * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA',
@@ -1075,13 +1031,14 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, 
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags,
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${d} `
 
         const ventas = await pool.query(sql, req.user.id);
         respuesta = { "data": ventas };
+        //console.log(ventas)
         res.send(respuesta);
 
     } else if (id == 'table3') {
@@ -1118,6 +1075,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         const { k, h } = req.body;
         const R = await Estados(k);
+        console.log(R)
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
             [{ 'l.estado': R.std }, k]
         );
@@ -1138,7 +1096,6 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
             const U = u[0] || { fech: h, u: 0 };
             const m = moment(U.fech || h).format('YYYY-MM');
-            console.log(u)
             if ((u.length === 1 && h === m)) {
                 D();
                 await pool.query(`UPDATE productosd SET ?  WHERE id = ? `,
@@ -1185,8 +1142,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
-        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img,
-        pd.valor, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, 
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
+         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
         s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
@@ -1826,15 +1783,16 @@ async function Estados(S, L, P) {
          FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    //console.log(Pagos)
+    //console.log(Pagos, F)
     const Cuotas = await pool.query(
         `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
          SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, SUM(c.cuota) AS TOTAL
+         FROM preventa pr LEFT JOIN solicitudes s ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          INNER JOIN cuotas c ON c.separacion = pr.id WHERE s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
     //console.log(Cuotas)
-    if (Pagos.length > 0) {
+    if (Pagos[0].BONOS || Pagos[0].MONTO) {
         var pagos = Pagos[0].BONOS + Pagos[0].MONTO,
             cuotas = Cuotas[0];
 
@@ -1848,6 +1806,8 @@ async function Estados(S, L, P) {
             return { std: 1, estado: 'PENDIENTE' }
         }
 
+    } else {
+        return { std: 1, estado: 'PENDIENTE' }
     }
 }
 /*async function Pa(S, L, P, fn) {
