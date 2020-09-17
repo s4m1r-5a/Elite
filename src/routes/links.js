@@ -809,10 +809,16 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
-
     const orden = await pool.query(sql, id);
+    const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+            SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+            FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.lt = p.lote
+            WHERE s.concepto IN('PAGO', 'ABONO') AND p.id = ? `, id);
+    var l = r[0].monto1 || 0,
+        k = r[0].monto || 0;
+    var total = l + k;
     //console.log(orden)
-    res.render('links/ordendeseparacion', { orden, id });
+    res.render('links/ordendeseparacion', { orden, id, total });
 })
 router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
@@ -1412,6 +1418,10 @@ router.post('/transferencia', isLoggedIn, async (req, res) => {
         req.flash('success', 'Transacción realizada correctamente');
         res.redirect('/links/ventas');
     }
+});
+/////////////* RECIBOS */////////////////////////////////////
+router.get('/recibos', isLoggedIn, async (req, res) => {
+    res.render('links/recibos');
 });
 //////////////////////* RECARGAS *//////////////////////////
 router.post('/patro', isLoggedIn, async (req, res) => {

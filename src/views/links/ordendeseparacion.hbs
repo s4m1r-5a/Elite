@@ -1,5 +1,6 @@
 <input type="hidden" id="imgQr" value="{{imag.i}}">
 <input type="hidden" id="orden" value="{{id}}">
+<input type="hidden" id="saldofecha" value="{{total}}">
 {{#each orden}}
 <main id="imprimir" class="content">
     <div class="card">
@@ -18,12 +19,12 @@
                             <div class="col-md-9">
                                 <div class="card-body text-primary h4">
                                     <div class="mb-0 float-right">
-                                        <span class="align-middle text-dark">................................8668598-9
+                                        <span class="align-middle text-dark">.........................901311748-3
                                             Nit</span>
                                     </div>
                                     <div class="mb-0">
                                         <i class="align-middle mr-1" data-feather="phone-call"></i>
-                                        <span class="align-middle card-text">+57 301-515-2306</span>
+                                        <span class="align-middle card-text">+57 300-775-3983</span>
                                     </div>
                                     <div class="mb-0">
                                         <i class="align-middle mr-1" data-feather="mail"></i>
@@ -72,8 +73,7 @@
                             <div class="col-md-6">
                                 <div class="card-body text-primary">
                                     <div class="mb-0 float-right">
-                                        <span class="align-middle text-dark"
-                                            id="fechaOrden">{{fecha}}</span>
+                                        <span class="align-middle text-dark" id="fechaOrden">{{fecha}}</span>
                                     </div>
                                     <div class="mb-0">
                                         <i class="align-middle mr-1" data-feather="credit-card"></i>
@@ -190,12 +190,21 @@
                                     <strong class="float-right extrao">{{cuotaextraordinaria}}</strong>
                                 </td>
                             </tr>
-                            <th>
-                                <i class="feather-md" data-feather="calendar"></i> Separacion
-                            </th>
-                            <td>
-                                <strong class="float-right separar">{{separar}}</strong>
-                            </td>
+                            <tr>
+                                <th>
+                                    <i class="feather-md" data-feather="calendar"></i> Separacion
+                                </th>
+                                <td>
+                                    <strong class="float-right separar">{{separar}}</strong>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <i class="feather-md" data-feather="calendar"></i> Total
+                                </th>
+                                <td>
+                                    <strong class="float-right totalote"></strong>
+                                </td>
                             </tr>
                         </tbody>
                     </table>
@@ -218,6 +227,19 @@
                     </tr>
                 </thead>
                 <tbody></tbody>
+            </table>
+            <table id="tbsld" class="table table-striped table-hover table-sm display nowrap" style="width:100%">
+                <tbody>
+                    <tr>
+                        <th class="">
+                            <i class="feather-md" data-feather="calendar"></i>
+                            <label>TOTAL SALDO A LA FECHA</label>
+                        </th>
+                        <td>
+                            <strong class="saldofecha"></strong>
+                        </td>
+                    </tr>
+                </tbody>
             </table>
             <h4 class="card-title">Observaciones</h4>
             {{tipobsevacion}} <small class="text-muted">{{obsevacion}}</small>

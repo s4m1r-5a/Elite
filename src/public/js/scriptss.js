@@ -1366,7 +1366,7 @@ if (window.location.pathname == `/links/pagos`) {
             recibo: {
                 required: true,
                 number: true,
-                maxlength: 7,
+                maxlength: 15,
                 minlength: 3
             },
             formap: {
@@ -2651,7 +2651,11 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         var extrao = Moneda($('.extrao').html())
         var separar = Moneda($('.separar').html())
         var cuota = Moneda($('#cuota').html())
-        $('.totalp').html('Total $' + totalp)
+        var total = parseFloat($('.totalp').html()) - parseFloat($('.ahorro').html());
+        var saldot = total - parseFloat($('#saldofecha').val());
+        $('.totalote').html('$' + Moneda(total));
+        $('.saldofecha').html('$' + Moneda(saldot));
+        $('.totalp').html('Valor $' + totalp)
         $('.m2').text('$' + m2)
         $('.totali').html('Total $' + totali)
         $('.ahorro').html('Ahorro $' + ahorro)
@@ -2667,6 +2671,81 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 } else {
     $('footer').show()
     $('nav').show()
+}
+//////////////////////////////////* RECIBOS */////////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/recibos`) {
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            $('#recibos1').html('');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        `<img src="${e.target.result}" width="70" height="100" class=""
+                        alt="Ashley Briggs">`
+                    );
+                    $('#tablarecibos tbody').append(`
+                    <tr>
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="form-control-no-border edi lugarexpedicion u"
+                             type="text" name="lugarexpedicion"
+                             placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="form-control-no-border edi lugarexpedicion u"
+                             type="text" name="lugarexpedicion"
+                             placeholder="Monto del recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </td>
+                    </tr>`
+                    );
+                }
+            });
+        }
+    }
+
+    $('#Nrecbg').change(function () {
+        var val = $(this).val(), i = 1;
+        $('#tablareci tbody').html('')
+        while (i <= val) {
+            $('#tablareci tbody').append(`
+                    <tr>
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file">
+                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
+                            <polyline points="13 2 13 9 20 9"></polyline>
+                        </svg>
+                        <input class="form-control-no-border edi lugarexpedicion u"
+                             type="text" name="lugarexpedicion" value="${ID(7)}"
+                             placeholder="id del recibo a generar"
+                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                        <td>
+                            <input class="form-control-no-border edi lugarexpedicion u"
+                             type="text" name="lugarexpedicion"
+                             placeholder="Lugar de expedición del documento"
+                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </td>
+                    </tr>`
+            );
+            i++;
+        };
+    });
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
