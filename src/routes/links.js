@@ -473,45 +473,68 @@ router.post('/pagos', async (req, res) => {
     res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibo, ahora, concpto, lt, formap, bono, pin } = req.body;
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE recibo = ? OR pago = ?`, [recibo, id]);
-    if (recibe.length > 0) {
-        req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
-        res.redirect('/links/pagos');
-    } else {
-        var imagenes = ''
-        req.files.map((e) => {
-            imagenes += `/uploads/${e.filename},`
+    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb } = req.body;
+    var rcb = '';
+    if (recibos.indexOf(',')) {
+        var rcbs = recibos.split(',')
+        rcbs.map((s) => {
+            rcb += `recibo LIKE '%${s}%' OR `;
         })
-        const a = await Bonos(bono, lt);
-        if (a) {
-            await pool.query('UPDATE cupones SET ? WHERE id = ?',
-                [{ producto: a, estado: 14 }, pin]
-            );
-        } else if (!a && bono != 0) {
-            req.flash('error', 'Solicitud de pago rechazada, Bono erroneo');
+        rcb = rcb.slice(0, -3);
+    } else {
+        rcb = `recibo LIKE '%${recibos}%'`;
+    }
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE ${rcb} ${id ? 'OR pago = ' + id : ''}`);
+    var sum = 0, excedent = montorcb - total;
+    if (recibe.length > 0) {
+        recibe.filter((a) => {
+            return a.excdnt > 0;
+        }).map((a) => {
+            sum += a.excdnt;
+        });
+        if (sum < total && sum > 1000) {
+            req.flash('error', 'El excedente del anterior pago, no coinside con el moto a pagar de este');
+            return res.redirect('/links/pagos');
+        } else if (sum >= total) {
+            excedent = sum - total;
+        } else {
+            req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
             return res.redirect('/links/pagos');
         }
-        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+    }
+    var imagenes = ''
+    req.files.map((e) => {
+        imagenes += `/uploads/${e.filename},`
+    })
+    const a = await Bonos(bono, lt);
+    if (a) {
+        await pool.query('UPDATE cupones SET ? WHERE id = ?',
+            [{ producto: a, estado: 14 }, pin]
+        );
+    } else if (!a && bono != 0) {
+        req.flash('error', 'Solicitud de pago rechazada, Bono erroneo');
+        return res.redirect('/links/pagos');
+    }
+    const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
         WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lt]);
-        var l = r[0].monto1 || 0,
-            k = r[0].monto || 0;
-        var acumulado = l + k;
+    var l = r[0].monto1 || 0,
+        k = r[0].monto || 0;
+    var acumulado = l + k;
 
-        const pago = {
-            fech: ahora, monto: total, recibo, facturasvenc: factrs, lt, acumulado,
-            concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap
-        }
-        bono != 0 ? pago.bono = pin : '';
-        concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
-            await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
-        await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
-        await pool.query('INSERT INTO solicitudes SET ? ', pago);
-        req.flash('success', 'Solicitud de pago enviada correctamente');
-        res.redirect('/links/pagos');
+    const pago = {
+        fech: ahora, monto: total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
+        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
     }
+    bono != 0 ? pago.bono = pin : '';
+    concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
+        await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
+    await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
+    await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
+    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    req.flash('success', 'Solicitud de pago enviada correctamente');
+    res.redirect('/links/pagos');
     //uploads/
 });
 router.post('/bonus', async (req, res) => {
