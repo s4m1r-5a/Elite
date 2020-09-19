@@ -1079,7 +1079,6 @@ if (window.location.pathname == `/links/pagos`) {
         $('.bonu').val('');
     }
     var validationForm = $("#smartwizard");
-    //validationForm.smartWizard("loader", "show");
     validationForm.smartWizard({
         /*showStepURLhash: false,
         backButtonSupport: false,*/
@@ -1275,15 +1274,17 @@ if (window.location.pathname == `/links/pagos`) {
         }
         return skdt;
     });
+    var cn = 0;
     var Pay = (forma) => {
         var t2 = $('.Total2').val(),
             T2 = $('.Total2').cleanVal(),
             t = $('.Total').html(),
             T = $('.Total').html().replace(/\./g, '');
 
-        if (forma === 'payu') {
+        if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
             var l = parseFloat($('#Total').val())
             var cal = Math.round((l * 3.4 / 100) + 900)
+            $('#rcb').prop('checked', false)
             $('.transaccion').html(Moneda(cal))
             $('.Total3').html(Moneda(l + cal));
             $('#Total, #Total2').val(l + cal);
@@ -1300,17 +1301,98 @@ if (window.location.pathname == `/links/pagos`) {
                     $('#extra').val(data.ext)
                 }
             });
-        } else if (forma === 'recbo' || forma === 'bancolombia') {
-            $('.transaccion').html('0')
+            RCB(false);
+
+        } else if (forma === 'recbo') {
+            RCB(true);
+            $('#pys').prop('checked', false);
+            $('#signature').val('');
+            $('.transaccion').html('0');
             $('.Total3').html(t2 ? t2 : t);
             $('#Total, #Total2').val(T2 ? T2 : T);
         }
         $('.sw-btn-next').on('click', function () {
-            $('#' + forma).validate();
+            //$('#' + forma).validate();
             $('#' + forma).submit();
         })
     }
-
+    var RCB = (n) => {
+        if (n) {
+            $('#trecibo').show('slow');
+            $('#trecib').show('slow');
+            $('#recibos1').show('slow');
+            $('#trsubida').show('slow');
+            $('#trarchivos').show('slow');
+        } else {
+            $('#trecibo').hide('slow');
+            $('#trecib').hide('slow');
+            $('#recibos1').hide('slow');
+            $('#trsubida').hide('slow');
+            $('#trarchivos').hide('slow');
+            $('#recibos1').html('');
+            $('#montorecibos').val('').hide('slow');
+            $('#file2').val('');
+            $('.op').remove();
+        }
+    }
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
+            $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        `<img src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                    );
+                    $('#trarchivos').after(`
+                    <tr class="op">
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>`
+                    );
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                }
+            });
+        }
+    }
     $('#bono').change(function () {
         if ($(this).val() !== bono && $(this).val()) {
             $.ajax({
@@ -1359,60 +1441,42 @@ if (window.location.pathname == `/links/pagos`) {
             SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
         }
     })
-
-    $('#recbo').validate({
-        debug: false,
-        rules: {
-            recibo: {
-                required: true,
-                number: true,
-                maxlength: 15,
-                minlength: 3
-            },
-            formap: {
-                required: true
-            },
-            image: {
-                required: true
-            }/*,
-            weight: {
-                required: {
-                    depends: function (elem) {
-                        return $("#age").val() > 50
-                    }
-                },
-                number: true,
-                min: 0
-            }*/
-        },
-        messages: {
-            recibo: {
-                required: `Introduce la referencia del recibo.`,
-                /*number: `Introduce un código válido.`,
-                maxlength: 'Debe contener max 7 dígitos.',
-                minlength: 'Debe contener min 3 dígitos.'*/
-            },
-            formap: {
-                required: 'Debes escojer una forma de pago.'
-            },
-            image: {
-                required: 'Debes seleccionar una imagen.'
-            },
-        },
-        errorPlacement: function (error, element) {
-            SMSj('info', `${error[0].innerText} GRUPO ELITE`)
-        }
-    });
-    $('form').submit(function (e) {
+    $('#payu').submit(function (e) {
         //e.preventDefault()
         $('input').prop('disabled', false);
         $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-        //var u = $(this).attr('id');
-        $('#ModalEventos').modal({
-            backdrop: 'static',
-            keyboard: true,
-            toggle: true
-        });
+        if (!$('#signature').val()) {
+            e.preventDefault()
+        } else {
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            })
+        };
+    });
+    $('#recbo').submit(function (e) {
+        //e.preventDefault()
+        $('input').prop('disabled', false);
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+
+        if (!$('#montorecibos').val()
+            || !$('#file2').val()
+            || !$(".forma").is(':checked')
+            || !$('#nrbc').val()
+        ) {
+            SMSj('error', 'Debe rellenar todos los campos solicitados');
+            e.preventDefault();
+        } else if (parseFloat($('#montorecibos').val()) < parseFloat($('#Total2').val())) {
+            SMSj('error', 'el monto de los recibos ingresados no corresponde al monto total a pagar');
+            e.preventDefault();
+        } else {
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
     });
 }
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
@@ -2698,19 +2762,19 @@ if (window.location.pathname == `/links/recibos`) {
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
-                        <input class="form-control-no-border edi lugarexpedicion u"
-                             type="text" name="lugarexpedicion"
+                        <input class=""
+                             type="text" name=""
                              placeholder="Recibo"
                              autocomplete="off" style="padding: 1px; width: 50%;" required>
                         </th>
                         <td>
-                            <input class="form-control-no-border edi lugarexpedicion u"
-                             type="text" name="lugarexpedicion"
-                             placeholder="Monto del recibo"
-                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" 
+                             style="padding: 1px; width: 60%;" required>
                         </td>
                     </tr>`
                     );
+                    $('.montos').mask('###,###,###', { reverse: true });
                 }
             });
         }
@@ -2730,19 +2794,19 @@ if (window.location.pathname == `/links/recibos`) {
                             <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
                             <polyline points="13 2 13 9 20 9"></polyline>
                         </svg>
-                        <input class="form-control-no-border edi lugarexpedicion u"
-                             type="text" name="lugarexpedicion" value="${ID(7)}"
+                        <input class=""
+                             type="text" name="" value="${ID(7)}"
                              placeholder="id del recibo a generar"
                              autocomplete="off" style="padding: 1px; width: 60%;" required>
                         </th>
                         <td>
-                            <input class="form-control-no-border edi lugarexpedicion u"
-                             type="text" name="lugarexpedicion"
-                             placeholder="Lugar de expedición del documento"
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto"
                              autocomplete="off" style="padding: 1px; width: 60%;" required>
                         </td>
                     </tr>`
             );
+            $('.montos').mask('###,###,###', { reverse: true });
             i++;
         };
     });

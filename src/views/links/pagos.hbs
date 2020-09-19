@@ -242,7 +242,6 @@
                                 servicio al cliente</p>
                         </div>
                         <div id="arrows-primary-step-3" class="">
-                            <!--<form method="post" action="https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu/">-->
                             <form id="payu" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu/">
                                 <table class="table table-sm my-2">
                                     <tbody>
@@ -327,14 +326,13 @@
                                         value="Pagar">
                                 </div>
                             </form>
-                            <div class="tab tab-vertical tab-dark">
+                            <!--<div class="tab tab-vertical tab-dark">
                                 <ul class="nav nav-tabs" role="tablist">
                                     <li class="nav-item" onclick="Pay('bancolombia')">
                                         <a class="nav-link active" href="#vertical-icon-tab-1" data-toggle="tab"
                                             role="tab" aria-controls="profile" aria-selected="true">
                                             <img src="/img/logos/ban.png" width="40" height="40" class=""
                                                 alt="Ashley Briggs">
-                                            <!--<i class="align-middle" data-feather="home"></i>-->
                                         </a>
                                     </li>
                                     <li class="nav-item" onclick="Pay('payu')">
@@ -342,7 +340,6 @@
                                             aria-controls="profile" aria-selected="false">
                                             <img src="/img/logos/payu4.png" width="40" height="40" class=""
                                                 alt="Ashley Briggs">
-                                            <!--<i class="align-middle" data-feather="settings"></i>-->
                                         </a>
                                     </li>
                                     <li class="nav-item" onclick="Pay('paypal')">
@@ -350,7 +347,6 @@
                                             aria-controls="profile" aria-selected="false">
                                             <img src="/img/logos/pp.png" width="40" height="40" class="rounded-circle"
                                                 alt="Ashley Briggs">
-                                            <!--<i class="align-middle" data-feather="message-square"></i>-->
                                         </a>
                                     </li>
                                     <li class="nav-item" onclick="Pay('recbo')">
@@ -358,7 +354,6 @@
                                             aria-controls="profile" aria-selected="false">
                                             <img src="/img/logos/recibo.jpg" width="40" height="40"
                                                 class="rounded-circle" alt="Ashley Briggs">
-                                            <!--<i class="align-middle" data-feather="message-square"></i>-->
                                         </a>
                                     </li>
                                 </ul>
@@ -458,8 +453,6 @@
                                                     <img src="/img/recibo.gif" class="card-img" alt="...">
                                                 </div>
                                                 <div class="col-md-8">
-                                                    <!--<h5 class="card-title">Sube un Recibo
-                                                        </h5>-->
                                                     <input type="hidden" id="Total2" name="total">
                                                     <input type="hidden" id="factrs" name="factrs">
                                                     <input type="hidden" id="idC" name="id">
@@ -469,33 +462,115 @@
                                                     <input type="hidden" class="bonu" name="pin">
                                                     <input id="ahora" type="hidden" name="ahora">
                                                     <input type="hidden" class="TotalBono" name="bonomonto">
-                                                    <input class="edi float-right mb-3" type="text" id="recibo"
-                                                        placeholder="N° de recibo aqui..." data-toggle="tooltip"
-                                                        data-placement="top" data-container="body"
-                                                        title="Numero de Recibo" autocomplete="off"
-                                                        data-toggle="dropdown" aria-haspopup="true"
-                                                        aria-expanded="false" name="recibo" required>
                                                     <div class="m-sm-4">
                                                         <div class="form-group">
                                                             <input class="form-control-no-border edi" type="file"
                                                                 name="image" id="file" multiple style="width: 100%;"
-                                                                required>
+                                                                onchange="preview(this);" required>
                                                         </div>
                                                     </div>
                                                     <h3 class="card-title mt-2 float-right">Total $
                                                         <strong class="Total3"></strong></h3>
-                                                    <!--<div class="card-footer">
-                                                            <button type="submit" id="enviarpago"
-                                                                class="btn btn-lg btn-primary float-right"
-                                                                style="top: 90%;">Enviar
-                                                                Pago</button>
-                                                        </div>-->
                                                 </div>
                                             </div>
                                         </form>
                                     </div>
                                 </div>
-                            </div>
+                            </div>-->
+                            <table class="table table-sm my-2" id="recibosss">
+                                <thead>
+                                    <tr>
+                                        <th colspan="2">
+                                            <label class="form-check">
+                                                <input type="radio" class="form-check-input" id="pys"
+                                                    onclick="Pay('payu')">
+                                                <span class="form-check-label">
+                                                    <img src="/img/logos/payu4.png" width="40" height="40" class="mr-1"
+                                                        alt="A">payu la mejor forma de hacer
+                                                    pagos</span>
+                                            </label>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th colspan="2">
+                                            <label class="form-check">
+                                                <input type="radio" class="form-check-input" id="rcb"
+                                                    onclick="Pay('recbo')">
+                                                <span class="form-check-label">
+                                                    <img src="/img/logos/recibo.jpg" width="40" height="40"
+                                                        class="rounded-circle mr-1" alt="A">Ingresa aqui tus recibos
+                                                    de pago</span>
+                                            </label>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
+                                    <input type="hidden" id="Total2" name="total">
+                                    <input type="hidden" id="factrs" name="factrs">
+                                    <input type="hidden" id="idC" name="id">
+                                    <input type="hidden" id="concpto" name="concpto">
+                                    <input type="hidden" id="lt" name="lt">
+                                    <input type="hidden" class="bonus" name="bono">
+                                    <input type="hidden" class="bonu" name="pin">
+                                    <input id="ahora" type="hidden" name="ahora">
+                                    <input type="hidden" class="TotalBono" name="bonomonto">
+                                    <tbody>
+                                        <tr style="display: none;" id="trecibo">
+                                            <th>
+                                                <label class="custom-control custom-radio">
+                                                    <input name="formap" type="radio" class="custom-control-input forma"
+                                                        value="CTA-CTE-8509713538" required>
+                                                    <span class="custom-control-label badge badge-primary">
+                                                        CTA CTE 50900011438</span>
+                                                </label>
+                                            </th>
+                                            <td>
+                                                <label class="custom-control custom-radio">
+                                                    <input name="formap" type="radio" class="custom-control-input forma"
+                                                        value="CTA-AHO-8509713538" required>
+                                                    <span class="custom-control-label badge badge-primary">
+                                                        CTA AHO 8509713538</span>
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr style="display: none;" id="trecib">
+                                            <th>
+                                                <label class="custom-control custom-radio">
+                                                    <input name="formap" type="radio" class="custom-control-input forma"
+                                                        value="EFECTIVO" required>
+                                                    <span class="custom-control-label badge badge-primary">
+                                                        EFECTIVO</span>
+                                                </label>
+                                            </th>
+                                            <td>
+                                                <label class="custom-control custom-radio">
+                                                    <input name="formap" type="radio" class="custom-control-input forma"
+                                                        value="CHEQUE" required>
+                                                    <span class="custom-control-label badge badge-primary">
+                                                        CHEQUE</span>
+                                                </label>
+                                            </td>
+                                        </tr>
+                                        <tr style="display: none;" id="trsubida">
+                                            <th colspan="2">
+                                                <i class="feather-md" data-feather="file-plus"></i>
+                                                <input class="form-control-no-border edi" type="file" name="image"
+                                                    data-toggle="tooltip" data-placement="top" data-container="body"
+                                                    title="Selecciones las imagenes de recibos" autocomplete="off"
+                                                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"
+                                                    id="file2" multiple style="width: 50%;" onchange="preview(this);"
+                                                    required>
+                                                <span class="montorecibos badge badge-dark"></span>
+                                                <input type="hidden" name="montorcb" id="montorecibos">
+                                                <input type="hidden" name="recibos" id="nrbc">
+                                            </th>
+                                        </tr>
+                                        <tr style="display: none;" id="trarchivos">
+                                            <th colspan="2" id="recibos1" width="100%" height="200"></th>
+                                        </tr>
+                                    </tbody>
+                                </form>
+                            </table>
                         </div>
                     </div>
                 </div>
