@@ -577,6 +577,9 @@ router.post('/bonus', async (req, res) => {
     }
 });
 //////////////* CUPONES *//////////////////////////////////
+router.put('/saluda', isLoggedIn, async (req, res) => {
+    res.send('samir todo biaen');
+});
 router.get('/cupones', isLoggedIn, async (req, res) => {
     res.render('links/cupones');
 });
@@ -1172,9 +1175,9 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
-         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
+        pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
-        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
+        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id
         s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
@@ -1201,6 +1204,22 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": solicitudes };
         //console.log(solicitudes)
         res.send(respuesta);
+    } else if (id === 'saldo') {
+        const { lote, solicitud, fecha } = req.body;
+        console.log(req.body)
+        const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
+        AND fech < ${fecha} AND lt = ${lote} AND stado = 3`);
+        if (u.length > 0) {
+            return res.send(false);
+        }
+        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lote]);
+        var l = r[0].monto1 || 0,
+            k = r[0].monto || 0;
+        var acumulado = l + k;
+        res.send(acumulado);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
@@ -1208,7 +1227,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     if (req.user.admin != 1) {
         return res.send(false);
     };
-    //return res.send(true);
+    console.log(req.body, req.files)
+    return res.send(true);
     if (id === 'Declinar') {
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
         const r = await Estados(null, null, ids);
