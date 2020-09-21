@@ -1283,7 +1283,8 @@ if (window.location.pathname == `/links/pagos`) {
 
         if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
             var l = parseFloat($('#Total').val())
-            var cal = Math.round((l * 3.4 / 100) + 900)
+            //var cal = Math.round((l * 3.4 / 100) + 900)
+            var cal = Math.round((l * 2.79 / 100) + 800)
             $('#rcb').prop('checked', false)
             $('.transaccion').html(Moneda(cal))
             $('.Total3').html(Moneda(l + cal));
