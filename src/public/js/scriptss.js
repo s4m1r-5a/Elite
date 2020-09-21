@@ -4706,7 +4706,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             },
             { data: "facturasvenc" },
-            { data: "recibo" },
+            {
+                data: "recibo",
+                render: function (data, method, row) {
+                    return data.replace(/~/g, '')
+                }
+            },
             {
                 data: "stado",
                 render: function (data, method, row) {
@@ -4754,7 +4759,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     });
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
-        var data = table.row(fila).data();
+        var data = table.row(fila).data(); console.log(data)
         var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         fila.toggleClass('selected');
         if (Array.isArray(imagenes)) {
@@ -4792,135 +4797,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
         }
-        var doc = new jsPDF('l', 'mm', 'a5');
         if (admin == 1) {
             $('.dropdown-item').show()
             $('#nove').show()
-            var totall = data.valor - data.ahorro;
-            var saldo = totall - data.acumulado;
-            var bon = data.mount === null ? 0 : data.mount;
-            var img2 = new Image();
-            var img = new Image();
-            img.src = '/img/avatars/avatar.png'
-            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
-            var totalPagesExp = '{total_pages_count_string}'
-            //doc.addPage("a3"); 
-            doc.autoTable({
-                head: [
-                    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
-                ],
-                body: [{
-                    id: '',
-                    name: '',
-                    email: '',
-                    city: 'RECIBO DE CAJA',
-                    expenses: data.ids
-                },
-                {
-                    id: 'CLIENTE',
-                    name: data.nombre + ' ' + data.email,
-                    email: 'CC: ' + data.documento,
-                    city: data.movil,
-                    expenses: ''
-                },
-                {
-                    id: 'PRODUCTO',
-                    name: data.proyect,
-                    email: 'MZ. ' + data.mz,
-                    city: 'LT. ' + data.n,
-                    expenses: ''
-                },
-                {
-                    id: 'CONCEPTO',
-                    name: 'ABONO',
-                    email: data.descp,
-                    city: 'CUOTA #',
-                    expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
-                },
-                {
-                    id: 'F PAGO',
-                    name: data.formap,
-                    email: 'R ' + data.recibo,
-                    city: 'MONTO',
-                    expenses: '$' + Moneda(data.monto)
-                },
-                {
-                    id: 'BONO',
-                    name: data.bono === null ? 'NO APLICA' : data.bono,
-                    email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
-                    city: 'MONTO',
-                    expenses: '$' + Moneda(bon)
-                },
-                {
-                    id: 'TOTAL',
-                    name: `${NumeroALetras(parseFloat(data.monto) + bon)} MCT********`,
-                    email: '',
-                    city: '',
-                    expenses: '$' + Moneda(parseFloat(data.monto) + bon)
-                },
-                {
-                    id: 'SLD FECHA',
-                    name: `${NumeroALetras(saldo)} MCT********`,
-                    email: '',
-                    city: '',
-                    expenses: '$' + Moneda(saldo)
-                },
-                {
-                    id: 'TOTAL SLD',
-                    name: `${NumeroALetras(saldo - parseFloat(data.monto) + bon)} MCT********`,
-                    email: '',
-                    city: '',
-                    expenses: '$' + Moneda(saldo - parseFloat(data.monto) + bon)
-                }],
-                //html: '#tablarecibo',
-                showHead: false,
-                columnStyles: {
-                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                    id: { textColor: 0, fontStyle: 'bold' },
-                    0: { cellWidth: '50' },
-                    1: { cellWidth: 'auto' },
-                    2: { cellWidth: 'wrap' },
-                    3: { cellWidth: 'wrap' },
-                },
-                didDrawPage: function (data) {
-                    // Header
-                    doc.setTextColor(0)
-                    doc.setFontStyle('normal')
-                    if (img) {
-                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                        doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
-                    }
-                    doc.setFontSize(15)
-                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
-                    doc.setFontSize(7)
-                    doc.text('2020-08-28', data.settings.margin.left + 170, 8)
-                    doc.setFontSize(10)
-                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
-                    doc.setFontSize(10)
-                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
-                    doc.setFontSize(8)
-                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
-
-                    // Footer
-                    var str = 'Page ' + doc.internal.getNumberOfPages()
-                    // Total page number plugin only available in jspdf v1.0+
-                    if (typeof doc.putTotalPages === 'function') {
-                        str = str + ' of ' + totalPagesExp
-                    }
-                    doc.setFontSize(8)
-
-                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                    var pageSize = doc.internal.pageSize
-                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                    doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
-                },
-                margin: { top: 34 },
-            })
-            // Total page number plugin only available in jspdf v1.0+
-            if (typeof doc.putTotalPages === 'function') {
-                doc.putTotalPages(totalPagesExp)
-            }
-            //doc.output('dataurlnewwindow')
         } else {
             $('.dropdown-item').hide()
         }
@@ -4931,38 +4810,209 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         });
 
         $('.dropdown-item').on('click', function () {
-            var accion = $(this).text(),
-                e = 1, porque = '',
-                blob = doc.output('blob'),
-                fd = new FormData();
-            if (data.pdf) {
-                var mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
-                if (mensaje) {
-                    fd.append('pdf', blob);
-                }
-            } else {
-                fd.append('pdf', blob);
-            }
+            var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
-
-            if (accion === 'Declinar') {
-                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
-                if (porque != null) {
-                    //dts.por = porque;
-                    e = 2
-                    fd.append('img', data.img);
-                    fd.append('por', porque);
-                    fd.append('fullname', data.fullname);
-                    fd.append('cel', data.cel);
-                    fd.append('mz', data.mz);
-                    fd.append('n', data.n);
-                    fd.append('proyect', data.proyect);
-                }
+            if (data.pdf && accion === 'Enviar') {
+                mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
+            } else if (!data.pdf && accion === 'Enviar' && admin == 1) {
+                mensaj = true
             }
-            if ((accion !== 'Declinar' || e === 2) && admin == 1) {
+            if ((accion === 'Aprobar' || mensaje || mensaj) && admin == 1) {
+                $.ajax({
+                    type: 'POST',
+                    url: '/links/solicitudes/saldo',
+                    data: {
+                        solicitud: data.ids,
+                        lote: data.id,
+                        fecha: data.fech
+                    },
+                    async: true,
+                    beforeSend: function (xhr) {
+                        $('#Modalimg').modal('hide');
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (dat) {
+                        /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                        if (dat) {
+                            var acumulad = dat === '0' ? 0 : dat;
+                            var doc = new jsPDF('l', 'mm', 'a5');
+                            var totall = data.valor - data.ahorro;
+                            var saldo = totall - acumulad;
+                            var bon = data.mount === null ? 0 : data.mount;
+                            var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
+                            var img2 = new Image();
+                            var img = new Image();
+                            img.src = '/img/avatars/avatar.png'
+                            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+                            var totalPagesExp = '{total_pages_count_string}'
+                            //doc.addPage("a3"); 
+                            doc.autoTable({
+                                head: [
+                                    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+                                ],
+                                body: [{
+                                    id: '',
+                                    name: '',
+                                    email: '',
+                                    city: 'RECIBO DE CAJA',
+                                    expenses: data.ids
+                                },
+                                {
+                                    id: 'CLIENTE',
+                                    name: data.nombre + ' ' + data.email,
+                                    email: 'CC: ' + data.documento,
+                                    city: data.movil,
+                                    expenses: ''
+                                },
+                                {
+                                    id: 'PRODUCTO',
+                                    name: data.proyect,
+                                    email: 'MZ. ' + data.mz,
+                                    city: 'LT. ' + data.n,
+                                    expenses: ''
+                                },
+                                {
+                                    id: 'CONCEPTO',
+                                    name: 'PAGO',
+                                    email: data.descp,
+                                    city: 'CUOTA #',
+                                    expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+                                },
+                                {
+                                    id: 'F PAGO',
+                                    name: data.formap,
+                                    email: 'R ' + data.recibo,
+                                    city: 'MONTO',
+                                    expenses: '$' + Moneda(data.monto)
+                                },
+                                {
+                                    id: 'BONO',
+                                    name: data.bono === null ? 'NO APLICA' : data.bono,
+                                    email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                                    city: 'MONTO',
+                                    expenses: '$' + Moneda(bon)
+                                },
+                                {
+                                    id: 'TOTAL',
+                                    name: `${NumeroALetras(totl)} MCT********`,
+                                    email: '',
+                                    city: '',
+                                    expenses: '$' + Moneda(totl)
+                                },
+                                {
+                                    id: 'SLD FECHA',
+                                    name: `${NumeroALetras(saldo)} MCT********`,
+                                    email: '',
+                                    city: '',
+                                    expenses: '$' + Moneda(saldo)
+                                },
+                                {
+                                    id: 'TOTAL SLD',
+                                    name: `${NumeroALetras(saldo - totl)} MCT********`,
+                                    email: '',
+                                    city: '',
+                                    expenses: '$' + Moneda(saldo - totl)
+                                }],
+                                //html: '#tablarecibo',
+                                showHead: false,
+                                columnStyles: {
+                                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                                    id: { textColor: 0, fontStyle: 'bold' },
+                                    0: { cellWidth: '50' },
+                                    1: { cellWidth: 'auto' },
+                                    2: { cellWidth: 'wrap' },
+                                    3: { cellWidth: 'wrap' },
+                                },
+                                didDrawPage: function (data) {
+                                    // Header
+                                    doc.setTextColor(0)
+                                    doc.setFontStyle('normal')
+                                    if (img) {
+                                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                        doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                                    }
+                                    doc.setFontSize(15)
+                                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                                    doc.setFontSize(7)
+                                    doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+                                    doc.setFontSize(10)
+                                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                                    doc.setFontSize(10)
+                                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                                    doc.setFontSize(8)
+                                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+
+                                    // Footer
+                                    var str = 'Page ' + doc.internal.getNumberOfPages()
+                                    // Total page number plugin only available in jspdf v1.0+
+                                    if (typeof doc.putTotalPages === 'function') {
+                                        str = str + ' of ' + totalPagesExp
+                                    }
+                                    doc.setFontSize(8)
+
+                                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                                    var pageSize = doc.internal.pageSize
+                                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                                    doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                                },
+                                margin: { top: 34 },
+                            })
+                            // Total page number plugin only available in jspdf v1.0+
+                            if (typeof doc.putTotalPages === 'function') {
+                                doc.putTotalPages(totalPagesExp)
+                            }
+                            var blob = doc.output('blob')
+                            /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                            fd.append('pdf', blob);
+                            fd.append('acumulado', acumulad);
+                            $.ajax({
+                                type: 'PUT',
+                                url: '/links/solicitudes/' + accion,
+                                data: fd,
+                                processData: false,
+                                contentType: false,
+                                beforeSend: function (xhr) {
+                                    /*$('#Modalimg').modal('hide');
+                                    $('#ModalEventos').modal({
+                                        backdrop: 'static',
+                                        keyboard: true,
+                                        toggle: true
+                                    });*/
+                                },
+                                success: function (data) {
+                                    if (data) {
+                                        $('#ModalEventos').one('shown.bs.modal', function () {
+                                        }).modal('hide');
+                                        SMSj('success', `Solicitud procesada correctamente`);
+                                        table.ajax.reload(null, false)
+                                    } else {
+                                        $('#ModalEventos').one('shown.bs.modal', function () {
+                                        }).modal('hide');
+                                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                    }
+                                },
+                                error: function (data) {
+                                    console.log(data);
+                                }
+                            })
+                        } else {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar')
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                })
+            } else if (data.pdf && accion === 'Enviar' && admin == 1) {
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
@@ -4970,6 +5020,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     processData: false,
                     contentType: false,
                     beforeSend: function (xhr) {
+                        alert('aqui')
                         $('#Modalimg').modal('hide');
                         $('#ModalEventos').modal({
                             backdrop: 'static',
@@ -4993,6 +5044,49 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         console.log(data);
                     }
                 })
+            }
+
+            if (accion === 'Declinar' && admin == 1) {
+                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
+                if (porque != null) {
+                    fd.append('img', data.img);
+                    fd.append('por', porque);
+                    fd.append('fullname', data.fullname);
+                    fd.append('cel', data.cel);
+                    fd.append('mz', data.mz);
+                    fd.append('n', data.n);
+                    fd.append('proyect', data.proyect);
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
             }
         })
         $('#Modalimg').one('hidden.bs.modal', function () {
