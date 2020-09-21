@@ -1177,7 +1177,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
-        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id
+        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id,
         s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
@@ -1206,9 +1206,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
     } else if (id === 'saldo') {
         const { lote, solicitud, fecha } = req.body;
-        console.log(req.body)
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
-        AND fech < ${fecha} AND lt = ${lote} AND stado = 3`);
+        AND lt = ${lote} AND stado = 3 AND DATE(fech) < '${fecha}' AND ids != ${solicitud}`);
         if (u.length > 0) {
             return res.send(false);
         }
@@ -1219,7 +1218,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
-        res.send(acumulado);
+        console.log(r, acumulado)
+        res.send(acumulado || '0');
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
