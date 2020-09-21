@@ -4839,7 +4839,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         });
                     },
                     success: function (dat) {
-                        console.log(dat)
                         /////////////////////////////////////////* PDF *//////////////////////////////////////////////
                         if (dat) {
                             var acumulad = dat === '0' ? 0 : dat;
@@ -4847,6 +4846,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             var totall = data.valor - data.ahorro;
                             var saldo = totall - acumulad;
                             var bon = data.mount === null ? 0 : data.mount;
+                            var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
                             var img2 = new Image();
                             var img = new Image();
                             img.src = '/img/avatars/avatar.png'
@@ -4880,7 +4880,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                 },
                                 {
                                     id: 'CONCEPTO',
-                                    name: 'ABONO',
+                                    name: 'PAGO',
                                     email: data.descp,
                                     city: 'CUOTA #',
                                     expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
@@ -4901,10 +4901,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                 },
                                 {
                                     id: 'TOTAL',
-                                    name: `${NumeroALetras(parseFloat(data.monto) + bon)} MCT********`,
+                                    name: `${NumeroALetras(totl)} MCT********`,
                                     email: '',
                                     city: '',
-                                    expenses: '$' + Moneda(parseFloat(data.monto) + bon)
+                                    expenses: '$' + Moneda(totl)
                                 },
                                 {
                                     id: 'SLD FECHA',
@@ -4915,10 +4915,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                 },
                                 {
                                     id: 'TOTAL SLD',
-                                    name: `${NumeroALetras(saldo - parseFloat(data.monto) + bon)} MCT********`,
+                                    name: `${NumeroALetras(saldo - totl)} MCT********`,
                                     email: '',
                                     city: '',
-                                    expenses: '$' + Moneda(saldo - parseFloat(data.monto) + bon)
+                                    expenses: '$' + Moneda(saldo - totl)
                                 }],
                                 //html: '#tablarecibo',
                                 showHead: false,
@@ -4971,6 +4971,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             var blob = doc.output('blob')
                             /////////////////////////////////////////* PDF *//////////////////////////////////////////////
                             fd.append('pdf', blob);
+                            fd.append('acumulado', acumulad);
                             $.ajax({
                                 type: 'PUT',
                                 url: '/links/solicitudes/' + accion,

@@ -1227,8 +1227,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     if (req.user.admin != 1) {
         return res.send(false);
     };
-    console.log(req.body, req.files)
-    return res.send(true);
+    //console.log(req.body, req.files)
+    //return res.send(true);
     if (id === 'Declinar') {
         const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
         const r = await Estados(null, null, ids);
@@ -1276,9 +1276,12 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
     } else {
 
-        const { ids } = req.body
+        const { ids, acumulado } = req.body
         const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
         const R = await PagosAbonos(ids, pdf, req.user.fullname);
+        if (R) {
+            await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
+        }
         res.send(R);
     }
 });
