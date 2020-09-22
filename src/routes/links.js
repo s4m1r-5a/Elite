@@ -577,7 +577,17 @@ router.post('/bonus', async (req, res) => {
     }
 });
 //////////////* CUPONES *//////////////////////////////////
-router.put('/saluda', isLoggedIn, async (req, res) => {
+router.get('/saluda', isLoggedIn, async (req, res) => {
+    const r = await pool.query(`SELECT SUM(s.monto) + 
+    SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS montos, 
+    p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha, 
+    cu.descuento, c.nombre FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
+    INNER JOIN productos pt ON pd.producto = pt.id LEFT JOIN cupones cu ON cu.id = p.cupon 
+    INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+    INNER JOIN solicitudes s ON pd.id = s.lt LEFT JOIN cupones cp ON s.bono = cp.id
+    WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO')
+    GROUP BY p.id`);
+    console.log(r)
     res.send('samir todo biaen');
 });
 router.get('/cupones', isLoggedIn, async (req, res) => {
@@ -1073,19 +1083,19 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         //console.log(ventas)
         res.send(respuesta);
 
-    } else if (id == 'table3') {
+    } else if (id == 'estadosc') {
 
-        d = req.user.id == 15 ? '' : 't.acreedor = ?  AND';
+        sql = `SELECT pd.valor - p.ahorro AS total,
+        SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
+        AS montos, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha,
+        cu.descuento, c.nombre FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
+        INNER JOIN productos pt ON pd.producto = pt.id LEFT JOIN cupones cu ON cu.id = p.cupon 
+        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+        INNER JOIN solicitudes s ON pd.id = s.lt LEFT JOIN cupones cp ON s.bono = cp.id
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO')
+        GROUP BY p.id`
 
-        sql = `SELECT t.id, u.fullname, us.id tu, us.fullname venefactor,
-                t.fecha, t.monto, m.metodo, t.creador, t.estado idestado, e.estado, t.recibo, r.id idrecarga,
-                    r.transaccion, r.fecha fechtrans, r.saldoanterior, r.numeroventas FROM transacciones t
-            INNER JOIN users u ON t.remitente = u.id INNER JOIN users us ON t.acreedor = us.id
-            INNER JOIN recargas r ON r.transaccion = t.id INNER JOIN metodos m ON t.metodo = m.id
-            INNER JOIN estados e ON t.estado = e.id WHERE ${d} YEAR(t.fecha) = YEAR(CURDATE())
-            AND MONTH(t.fecha) BETWEEN 1 and 12`
-
-        const solicitudes = await pool.query(sql, req.user.id);
+        const solicitudes = await pool.query(sql);
         respuesta = { "data": solicitudes };
         res.send(respuesta);
 

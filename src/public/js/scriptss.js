@@ -1501,7 +1501,7 @@ if (window.location.pathname == `/links/reportes`) {
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[8]).getTime();
+                aData._date = new Date(aData[6]).getTime();
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -1555,29 +1555,13 @@ if (window.location.pathname == `/links/reportes`) {
                 orientation: 'landscape'
             }, //<i class="align-middle feather-md" data-feather="calendar"></i>
             {
-                text: `<svg xmlns="http://www.w3.org/2000/svg" 
-                width="36" height="36" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                stroke-linejoin="round" class="feather feather-calendar">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>`,
-                attr: {
-                    title: 'Fecha',
-                    id: 'Date'
-                },
-                className: 'btn btn-secondary fech'
-            },
-            {
                 text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
             placeholder="MZ">`,
                 attr: {
                     title: 'Busqueda por MZ',
                     id: ''
                 },
-                className: 'btn btn-secondary min'
+                className: 'btn btn-secondary'
             },
             {
                 text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
@@ -1586,7 +1570,7 @@ if (window.location.pathname == `/links/reportes`) {
                     title: 'Busqueda por LT',
                     id: ''
                 },
-                className: 'btn btn-secondary max'
+                className: 'btn btn-secondary'
             }
         ],
         deferRender: true,
@@ -1739,7 +1723,98 @@ if (window.location.pathname == `/links/reportes`) {
             .draw();
     });
     //////////////////////* Table3 *///////////////////////    
-    var table3 = $('#datatable3').DataTable({
+    var estadoscuentas = $('#estadoscuentas').DataTable({
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'collection',
+            text: 'Ctrl',
+            orientation: 'landscape',
+            buttons: [{
+                text: 'Copiar',
+                extend: 'copy'
+            },
+            /*{
+                extend: 'pdf',
+                orientation: 'landscape',
+                pageSize: 'LEGAL'
+            },
+            {
+                text: 'Ach plano ',
+                extend: 'csv',
+                orientation: 'landscape'
+            },
+            {
+                text: 'Excel',
+                extend: 'excel',
+                orientation: 'landscape'
+            },*/
+            {
+                text: 'Imprimir',
+                extend: 'print',
+                title: '<h1 class="mt-3">ESTADOS DE CUENTAS</h1><br>',
+                messageTop: 'REPORTES DE ESTADOS DE CUENTAS RESUMEN GRUPO ELITE FINCA RAIZ S.A.S',
+                orientation: 'landscape',
+                exportOptions: {
+                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
+                },
+                customize: function (win) {
+                    $(win.document.body)
+                        .css('font-size', '10pt')
+                        .prepend(
+                            `<img src="https://grupoelitered.com.co/img/avatars/avatar.svg" 
+                                width="5%" height="5%" 
+                                style="position:absolute; 
+                                top:0; 
+                                left:1080;"
+                             />`
+                        );
+
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+                autoPrint: true
+            }/*,
+            {
+                extend: 'colvis',
+                columnText: function (dt, idx, title) {
+                    return (idx + 1) + ': ' + title;
+                }
+            }*/
+            ]
+        },
+        {
+            extend: 'pageLength',
+            text: 'Ver',
+            orientation: 'landscape'
+        },
+        {
+            text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
+            attr: {
+                title: 'Fecha',
+                id: 'Date'
+            },
+            className: 'btn btn-secondary fech'
+        },
+        {
+            text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
+            placeholder="MZ">`,
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        },
+        {
+            text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
+            placeholder="LT">`,
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        }
+        ],
         deferRender: true,
         paging: true,
         search: {
@@ -1755,68 +1830,104 @@ if (window.location.pathname == `/links/reportes`) {
             className: 'control',
             orderable: true,
             targets: 0
-        }],
-        order: [[0, "desc"]],
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, 'asc'], [2, 'asc']],
         language: languag,
         ajax: {
             method: "POST",
-            url: "/links/reportes/table3",
+            url: "/links/reportes/estadosc",
             dataSrc: "data"
         },
         columns: [
-            { data: "id" },
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "mz" },
+            {
+                data: "n",
+                className: 'te'
+            },
+            {
+                data: "mtr2",
+                className: 'te'
+            },
+            {
+                data: "vrmt2",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "nombre",
+                className: 'te'
+            },
             {
                 data: "fecha",
+                className: 'te',
                 render: function (data, method, row) {
-                    return moment.utc(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "fullname" },
-            { data: "venefactor" },
-            {
-                data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "metodo" },
-            { data: "idrecarga" },
-            {
-                data: "fechtrans",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD')
                 }
             },
             {
-                data: "saldoanterior",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
+                data: "valor",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
-            { data: "numeroventas" },
             {
-                data: "estado",
+                data: "descuento",
+                className: 'te',
                 render: function (data, method, row) {
-                    switch (data) {
-                        case 'Aprobada':
-                            return `<span class="badge badge-pill badge-success">${data}</span>`
-                            break;
-                        case 'Declinada':
-                            return `<span class="badge badge-pill badge-danger">${data}</span>`
-                            break;
-                        case 'Procesando':
-                            return `<span class="badge badge-pill badge-info">${data}</span>`
-                            break;
-                        case 'Pendiente':
-                            return `<span class="badge badge-pill badge-warning">${data}</span>`
-                            break;
-                        default:
-                            return `<span class="badge badge-pill badge-secondary">${data}</span>`
-                    }
+                    return data + '%'
                 }
             },
-            { data: "recibo" },
-        ]
+            {
+                data: "ahorro",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "total",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "montos",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                className: 't',
+                data: "montos",
+                render: function (data, method, row) {
+                    return '$' + Moneda(row.total - data) + '.00';
+                }
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            /*if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["estado"] == 12) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["estado"] == 8) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["estado"] == 10) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["estado"] == 1) {
+                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+            } else if (data["estado"] == 13) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+            }*/
+        }
+    });
+    $('.min, .max').on('keyup', function () {
+        var col = $(this).hasClass('min') ? 1 : 2;
+        estadoscuentas
+            .columns(col)
+            .search(this.value)
+            .draw();
     });
     //////////////////////* Table4 *///////////////////////    
     var table4 = $('#datatable4').DataTable({
@@ -1926,9 +2037,7 @@ if (window.location.pathname == `/links/reportes`) {
     }, function (start, end, label) {
         maxDateFilter = end;
         minDateFilter = start;
-        tableOrden.draw();
-        table3.draw();
-        table4.draw();
+        estadoscuentas.draw();
     });
     var datos
     tableOrden.on('click', 'tr', function () {
