@@ -1,4 +1,3 @@
-
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
     maskElements: 'input,td,span,div',
@@ -25,12 +24,12 @@ function Moneda(valor) {
 let languag = {
     "lengthMenu": "Ver 10 filas",
     "sProcessing": "Procesando...",
-    "sLengthMenu": "",
+    "sLengthMenu": "Mostrar _MENU_ registros",
     "sZeroRecords": "No se encontraron resultados",
     "sEmptyTable": "Ningún dato disponible",
-    "sInfo": "",
-    "sInfoEmpty": "",
-    "sInfoFiltered": "",
+    "sInfo": "Mostrando registros del _START_ al _END_ de un total de _TOTAL_ registros",
+    "sInfoEmpty": "Mostrando registros del 0 al 0 de un total de 0 registros",
+    "sInfoFiltered": "(filtrado de un total de _MAX_ registros)",
     "sInfoPostFix": "",
     "sSearch": "Buscar : ",
     "sUrl": "",
@@ -1722,7 +1721,8 @@ if (window.location.pathname == `/links/reportes`) {
             .search(this.value)
             .draw();
     });
-    //////////////////////* Table3 *///////////////////////    
+    //////////////////////* Table3 *///////////////////////
+    var area, productos, descuentos, total, abonos, salds, Fehsi = 'Origenes', Fehsf = 'Actualidad';
     var estadoscuentas = $('#estadoscuentas').DataTable({
         dom: 'Bfrtip',
         buttons: [{
@@ -1733,26 +1733,10 @@ if (window.location.pathname == `/links/reportes`) {
                 text: 'Copiar',
                 extend: 'copy'
             },
-            /*{
-                extend: 'pdf',
-                orientation: 'landscape',
-                pageSize: 'LEGAL'
-            },
-            {
-                text: 'Ach plano ',
-                extend: 'csv',
-                orientation: 'landscape'
-            },
-            {
-                text: 'Excel',
-                extend: 'excel',
-                orientation: 'landscape'
-            },*/
             {
                 text: 'Imprimir',
                 extend: 'print',
-                title: '<h1 class="mt-3">ESTADOS DE CUENTAS</h1><br>',
-                messageTop: 'REPORTES DE ESTADOS DE CUENTAS RESUMEN GRUPO ELITE FINCA RAIZ S.A.S',
+                title: ``,
                 orientation: 'landscape',
                 exportOptions: {
                     columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
@@ -1761,12 +1745,83 @@ if (window.location.pathname == `/links/reportes`) {
                     $(win.document.body)
                         .css('font-size', '10pt')
                         .prepend(
-                            `<img src="https://grupoelitered.com.co/img/avatars/avatar.svg" 
-                                width="5%" height="5%" 
-                                style="position:absolute; 
-                                top:0; 
-                                left:1080;"
-                             />`
+                            `                
+                <div class="card">
+                    <!--<div class="text-right mb-2">
+                        <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
+                    </div>-->
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="card border-primary text-left">
+                                <div class="row no-gutters">
+                                    <div class="col-md-2">
+                                        <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-body text-primary h4">
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
+                                            </div>   
+                                            <div class="mb-0">
+                                                <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">PRODUCTOS</span>
+                                                <span class="align-middle card-text">${productos} LOTES</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">AREA</span>
+                                                <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="col-sm-7">
+                        <div class="card border-primary text-left">
+                        <div class="row no-gutters">
+                            <div class="col-md-6">
+                                <div class="card-body text-primary h4">
+                                    <div class="mb-0">                                          
+                                        <span class="align-middle text-dark">DESCUENTOS</span>
+                                        <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">TOTALES</span>
+                                        <span class="align-middle card-text">$${Moneda(total)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">ABONOS</span>
+                                        <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">SALDOS</span>
+                                        <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                    </div>                                            
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                            <div class="card-body text-primary h4">
+                            <div class="mb-0">
+                                <span class="align-middle text-warning">PRADOS DE PONTEVEDRA</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">CONCEPTO RESUMEN</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">SISTEMA DE REPORTES</span>
+                            </div>                                            
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>`
                         );
 
                     $(win.document.body).find('table')
@@ -1774,13 +1829,7 @@ if (window.location.pathname == `/links/reportes`) {
                         .css('font-size', 'inherit');
                 },
                 autoPrint: true
-            }/*,
-            {
-                extend: 'colvis',
-                columnText: function (dt, idx, title) {
-                    return (idx + 1) + ': ' + title;
-                }
-            }*/
+            }
             ]
         },
         {
@@ -1816,6 +1865,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
         ],
         deferRender: true,
+        footer: true,
         paging: true,
         search: {
             regex: true,
@@ -1831,8 +1881,8 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
+        /*{ responsivePriority: 1, targets: -1 },
+          { responsivePriority: 1, targets: -2 }*/],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, 'asc'], [2, 'asc']],
         language: languag,
@@ -1843,18 +1893,19 @@ if (window.location.pathname == `/links/reportes`) {
         },
         columns: [
             {
+                className: 'control',
+                orderable: true,
                 data: null,
                 defaultContent: ''
             },
-            { data: "mz" },
             {
-                data: "n",
-                className: 'te'
+                data: "mz",
+                render: function (data, method, row) {
+                    return data === 'no' ? 0 : data
+                }
             },
-            {
-                data: "mtr2",
-                className: 'te'
-            },
+            { data: "n" },
+            { data: "mtr2" },
             {
                 data: "vrmt2",
                 className: 'te',
@@ -1904,8 +1955,84 @@ if (window.location.pathname == `/links/reportes`) {
                 render: function (data, method, row) {
                     return '$' + Moneda(row.total - data) + '.00';
                 }
-            }
+            },
+            {
+                data: "proyect",
+                className: 'te'
+            },
         ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+            api.column(1, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="13" class="text-center">MANZANA ${group}</td>
+                        </tr>`
+                    );
+                    last = group;
+                }
+            });
+        },
+        initComplete: function (settings, json) {
+            console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+        },
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api(), data;
+            // Elimine el formato para obtener datos enteros para la suma
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            // Total en todas las páginas
+            area = api
+                .column(3)
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            // Total en esta página
+            /*pageTotal = api
+                .column(4, { page: 'current' })
+                .data()
+                .reduce(function (a, b) {
+                    console.log(a, b)
+                    return intVal(a) + intVal(b);
+                }, 0);*/
+            productos = api
+                .column(4)
+                .data()
+                .reduce(function (a, b, x) {
+                    return x;
+                }, 0);
+            descuentos = api
+                .column(9)
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            total = api
+                .column(10)
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            abonos = api
+                .column(11)
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            // Actualizar pie de página
+            /*$(api.column(13).footer()).html(
+                $('#saldos').val('$' + pageTotal + ' ( $' + total + ' total)')
+
+            );*/
+        },
         rowCallback: function (row, data, index) {
             /*if (data["estado"] == 9) {
                 $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
@@ -2037,6 +2164,8 @@ if (window.location.pathname == `/links/reportes`) {
     }, function (start, end, label) {
         maxDateFilter = end;
         minDateFilter = start;
+        Fehsi = moment(start).format('ll');
+        Fehsf = moment(end).format('ll');
         estadoscuentas.draw();
     });
     var datos
@@ -3452,7 +3581,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                                 </td>
                             </tr>`
                         );
-
                         last = group;
                     }
                 });
@@ -4951,7 +5079,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     success: function (dat) {
                         /////////////////////////////////////////* PDF *//////////////////////////////////////////////
                         if (dat) {
-                            var acumulad = dat === '0' ? 0 : dat;
+                            var acumulad = dat.d === 'NO' ? 0 : dat.d;
                             var doc = new jsPDF('l', 'mm', 'a5');
                             var totall = data.valor - data.ahorro;
                             var saldo = totall - acumulad;

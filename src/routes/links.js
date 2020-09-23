@@ -1085,7 +1085,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
     } else if (id == 'estadosc') {
 
-        sql = `SELECT pd.valor - p.ahorro AS total,
+        sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect,
         SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
         AS montos, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha,
         cu.descuento, c.nombre FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
@@ -1228,8 +1228,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
-        console.log(r, acumulado)
-        res.send(acumulado || '0');
+        res.send({ d: acumulado ? acumulado : 'NO' });
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
