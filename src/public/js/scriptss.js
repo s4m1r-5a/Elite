@@ -1722,160 +1722,42 @@ if (window.location.pathname == `/links/reportes`) {
             .draw();
     });
     //////////////////////* Table3 *///////////////////////
-    var area, productos, descuentos, total, abonos, salds, Fehsi = 'Origenes', Fehsf = 'Actualidad';
-    var estadoscuentas = $('#estadoscuentas').DataTable({
-        dom: 'Bfrtip',
-        buttons: [{
-            extend: 'collection',
-            text: 'Ctrl',
-            orientation: 'landscape',
-            buttons: [{
-                text: 'Copiar',
-                extend: 'copy'
-            },
-            {
-                text: 'Imprimir',
-                extend: 'print',
-                title: ``,
-                orientation: 'landscape',
-                exportOptions: {
-                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12]
-                },
-                customize: function (win) {
-                    $(win.document.body)
-                        .css('font-size', '10pt')
-                        .prepend(
-                            `                
-                <div class="card">
-                    <!--<div class="text-right mb-2">
-                        <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
-                    </div>-->
-                    <div class="row">
-                        <div class="col-sm-5">
-                            <div class="card border-primary text-left">
-                                <div class="row no-gutters">
-                                    <div class="col-md-2">
-                                        <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
-                                    </div>
-                                    <div class="col-md-9">
-                                        <div class="card-body text-primary h4">
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
-                                            </div>   
-                                            <div class="mb-0">
-                                                <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
-                                            </div>
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">PRODUCTOS</span>
-                                                <span class="align-middle card-text">${productos} LOTES</span>
-                                            </div>
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">AREA</span>
-                                                <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
-                                            </div>                                            
-                                        </div>
-                                    </div>
-                                </div>
-                            </div> 
-                        </div>
-                        <div class="col-sm-7">
-                        <div class="card border-primary text-left">
-                        <div class="row no-gutters">
-                            <div class="col-md-6">
-                                <div class="card-body text-primary h4">
-                                    <div class="mb-0">                                          
-                                        <span class="align-middle text-dark">DESCUENTOS</span>
-                                        <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">TOTALES</span>
-                                        <span class="align-middle card-text">$${Moneda(total)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">ABONOS</span>
-                                        <span class="align-middle text-success">$${Moneda(abonos)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">SALDOS</span>
-                                        <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
-                                    </div>                                            
-                                </div>
-                            </div>
-                            <div class="col-md-6">
-                            <div class="card-body text-primary h4">
-                            <div class="mb-0">
-                                <span class="align-middle text-warning">PRADOS DE PONTEVEDRA</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">CONCEPTO RESUMEN</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">SISTEMA DE REPORTES</span>
-                            </div>                                            
-                        </div>
-                            </div>
-                        </div>
-                    </div>
-                        </div>
-                    </div>
-                </div>`
-                        );
-
-                    $(win.document.body).find('table')
-                        .addClass('compact')
-                        .css('font-size', 'inherit');
-                },
-                autoPrint: true
-            }
-            ]
-        },
-        {
-            extend: 'pageLength',
-            text: 'Ver',
-            orientation: 'landscape'
-        },
-        {
-            text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
-            attr: {
-                title: 'Fecha',
-                id: 'Date'
-            },
-            className: 'btn btn-secondary fech'
-        },
-        {
-            text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
-            placeholder="MZ">`,
-            attr: {
-                title: 'Busqueda por MZ',
-                id: ''
-            },
-            className: 'btn btn-secondary'
-        },
-        {
-            text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
-            placeholder="LT">`,
-            attr: {
-                title: 'Busqueda por LT',
-                id: ''
-            },
-            className: 'btn btn-secondary'
+    var area, productos, descuentos, total, abonos, salds,
+        Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
+    var f = [{
+        text: `TODOS`,
+        action: function () {
+            proyct = 'TODOS LOS PROYECTOS'
+            estadoscuentas
+                .columns(-1)
+                .search('')
+                .draw();
         }
-        ],
-        deferRender: true,
-        footer: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: false,
-        },
-        responsive: {
-            details: {
-                type: 'column'
+    }]
+    $.ajax({
+        url: '/links/reportes/proyectos',
+        type: 'POST',
+        async: false,
+        success: function (data) {
+            if (data) {
+                data.map((a) => {
+                    f.push({
+                        text: a.proyect,
+                        action: function () {
+                            proyct = a.proyect
+                            estadoscuentas
+                                .columns(-1)
+                                .search(a.proyect)
+                                .draw();
+                        }
+                    })
+                })
             }
-        },
+        }
+    });
+    var estadoscuentas = $('#estadoscuentas').DataTable({
+        processing: true,
+        autowidth: true,
         columnDefs: [{
             className: 'control',
             orderable: true,
@@ -1885,7 +1767,6 @@ if (window.location.pathname == `/links/reportes`) {
           { responsivePriority: 1, targets: -2 }*/],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, 'asc'], [2, 'asc']],
-        language: languag,
         ajax: {
             method: "POST",
             url: "/links/reportes/estadosc",
@@ -1965,8 +1846,19 @@ if (window.location.pathname == `/links/reportes`) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
             var last = null;
-            api.column(1, { page: 'current' }).data().each(function (group, i) {
+            var total = 0;
+            var filas = api.column(1, { page: 'current' }).data();
+            filas.each(function (group, i) {
                 if (last !== group) {
+                    if (last != null) {
+                        $(rows).eq(i - 1).after(
+                            `<tr class="total">
+                                <td colspan=2>Total:</td>
+                                <td colspan="10">${total}</td>
+                             </tr>`
+                        );
+                        total = 0;
+                    }
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
                             <td colspan="13" class="text-center">MANZANA ${group}</td>
@@ -1974,10 +1866,268 @@ if (window.location.pathname == `/links/reportes`) {
                     );
                     last = group;
                 }
+                total += +$(rows).eq(i).children()[2].textContent;
+                if (i == filas.length - 1) {
+                    $(rows).eq(i).after(
+                        `<tr class="total">
+                            <td colspan=2>Total:</td>
+                            <td colspan="10">${total}</td>
+                        </tr>`
+                    );
+                }
             });
         },
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'collection',
+            text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+            orientation: 'landscape',
+            buttons: [{
+                text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                extend: 'copy'
+            },
+            {
+                text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
+                extend: 'print',
+                title: ``,
+                orientation: 'landscape',
+                footer: true,
+                exportOptions: {
+                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                    //modifier: true
+                },
+                customize: function (win) {
+                    $(win.document.body)
+                        .css('font-size', '10pt')
+                        .prepend(
+                            `                
+                <div class="card">
+                    <!--<div class="text-right mb-2">
+                        <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
+                    </div>-->
+                    <div class="row">
+                        <div class="col-sm-5">
+                            <div class="card border-primary text-left">
+                                <div class="row no-gutters">
+                                    <div class="col-md-2">
+                                        <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                    </div>
+                                    <div class="col-md-9">
+                                        <div class="card-body text-primary h4">
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
+                                            </div>   
+                                            <div class="mb-0">
+                                                <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">PRODUCTOS</span>
+                                                <span class="align-middle card-text">${productos} LOTES</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">AREA</span>
+                                                <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
+                                            </div>                                            
+                                        </div>
+                                    </div>
+                                </div>
+                            </div> 
+                        </div>
+                        <div class="col-sm-7">
+                        <div class="card border-primary text-left">
+                        <div class="row no-gutters">
+                            <div class="col-md-6">
+                                <div class="card-body text-primary h4">
+                                    <div class="mb-0">                                          
+                                        <span class="align-middle text-dark">DESCUENTOS</span>
+                                        <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">TOTALES</span>
+                                        <span class="align-middle card-text">$${Moneda(total)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">ABONOS</span>
+                                        <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle text-dark">SALDOS</span>
+                                        <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                    </div>                                            
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                            <div class="card-body text-primary h4">
+                            <div class="mb-0">
+                                <span class="align-middle text-warning">${proyct}</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">CONCEPTO RESUMEN</span>
+                            </div>
+                            <div class="mb-0">
+                                <span class="align-middle card-text">SISTEMA DE REPORTES</span>
+                            </div>                                            
+                        </div>
+                            </div>
+                        </div>
+                    </div>
+                        </div>
+                    </div>
+                </div>`
+                        );
+
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+                autoPrint: true
+            }
+            ]
+        },
+        {
+            extend: 'pageLength',
+            text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+            orientation: 'landscape'
+        },
+        {
+            extend: 'collection',
+            text: `<i class="align-middle feather-md" data-feather="home"></i>`,
+            //orientation: 'landscape',
+            buttons: f
+        },
+        {
+            text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
+            attr: {
+                title: 'Fecha',
+                id: 'Date'
+            },
+            className: 'btn btn-secondary fech'
+        },
+        {
+            text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
+            placeholder="MZ">`,
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        },
+        {
+            text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
+            placeholder="LT">`,
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        },
+            /*{
+                extend: 'pdfHtml5',
+                text: 'PDF',
+                footer: true,
+                header: true,
+                title: "ESTADOS DE CUENTAS",
+                orientation: 'portrait',
+                customize: function (doc) {
+                    var lastColX = null;
+                    var lastColY = null;
+                    var bod = []; // esto se convertirá en nuestro nuevo cuerpo (una matriz de matrices (líneas))
+                    //Recorre todas las líneas de la tabla
+                    doc.content[1].table.body.forEach(function (line, i) {
+                        //Agrupar según la primera columna (ignorar las celdas vacías)
+                        if(lastColX != line[0].text && line[0].text != ''){
+                            //Agregar línea con encabezado de grupo
+                            bod.push([
+                                {
+                                    text:line[0].text, 
+                                    style:'tableHeader'
+                                },'','','','']);
+                            //Última actualización
+                            lastColX=line[0].text;
+                        }
+                        //Agrupe según la segunda columna (ignore las celdas vacías) con un estilo diferente
+                        if (lastColY != line[1].text && line[1].text != '') {
+                            //Agregar línea con encabezado de grupo
+                            bod.push(['', { text: line[1].text, style: 'subheader' }, '', '', '']);
+                            //Última actualización
+                            lastColY = line[1].text;
+                        }
+                        //Agregar línea con datos excepto datos agrupados
+                        if (i < doc.content[1].table.body.length - 1) {
+                            bod.push(['', '', 
+                                { text: line[2].text, style: 'defaultStyle' },
+                                { text: line[3].text, style: 'defaultStyle' },
+                                { text: line[4].text, style: 'defaultStyle' },
+                                { text: line[5].text, style: 'defaultStyle' },
+                                { text: line[6].text, style: 'defaultStyle' },
+                                { text: line[7].text, style: 'defaultStyle' }
+                            ]);
+                        }
+                        //Haga la última línea en negrita, azul y un poco más grande
+                        else {
+                            bod.push(['', '', { text: line[2].text, style: 'lastLine' },
+                                { text: line[3].text, style: 'lastLine' },
+                                { text: line[4].text, style: 'lastLine' }]);
+                        }
+    
+                    });
+                    //Sobrescriba el cuerpo de la tabla anterior con el nuevo.
+                    doc.content[1].table.headerRows = 12;
+                    doc.content[1].table.widths = [50, 50, 150, 100, 100];
+                    doc.content[1].table.body = bod;
+                    doc.content[1].layout = 'lightHorizontalLines';
+    
+                    doc.styles = {
+                        subheader: {
+                            fontSize: 7,
+                            bold: true,
+                            color: 'black'
+                        },
+                        tableHeader: {
+                            bold: true,
+                            fontSize: 5,
+                            color: 'black'
+                        },
+                        lastLine: {
+                            bold: true,
+                            fontSize: 10,
+                            color: 'blue'
+                        },
+                        defaultStyle: {
+                            fontSize: 5,
+                            color: 'black'
+                        }
+                    }
+                }
+            }*/
+        ],
+        fixedHeader: {
+            headerOffset: -10
+        },
+        ordering: true,
+        language: languag,
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
         initComplete: function (settings, json) {
-            console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+            f.push({
+                text: `wrterywewerytwr`,
+                action: function () {
+                    alert('se activo el boton')
+                }
+            })
+            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
         },
         footerCallback: function (row, data, start, end, display) {
             var api = this.api(), data;
@@ -1988,13 +2138,20 @@ if (window.location.pathname == `/links/reportes`) {
                     typeof i === 'number' ?
                         i : 0;
             };
-            // Total en todas las páginas
+            // Total en todas las páginas visibles (encontradas)
             area = api
-                .column(3)
+                .column(3, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
+            // Total en todas las páginas
+            /*area2 = api
+                .column(3, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);*/
             // Total en esta página
             /*pageTotal = api
                 .column(4, { page: 'current' })
@@ -2004,33 +2161,34 @@ if (window.location.pathname == `/links/reportes`) {
                     return intVal(a) + intVal(b);
                 }, 0);*/
             productos = api
-                .column(4)
+                .column(4, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b, x) {
                     return x;
                 }, 0);
             descuentos = api
-                .column(9)
+                .column(9, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
             total = api
-                .column(10)
+                .column(10, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
             abonos = api
-                .column(11)
+                .column(11, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
+            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
             // Actualizar pie de página
             /*$(api.column(13).footer()).html(
                 $('#saldos').val('$' + pageTotal + ' ( $' + total + ' total)')
-
+    
             );*/
         },
         rowCallback: function (row, data, index) {
@@ -2406,12 +2564,12 @@ if (window.location.pathname == `/links/reportes`) {
             doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
             doc.setFontSize(8)
             doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
-
+ 
             doc.setDrawColor(0, 255, 0)
                 .setLineWidth(1 / 72)
             doc.setFontSize(8)
             doc.text(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, data.settings.margin.left, 40)
-
+ 
             // Footer
             var str = 'Page ' + doc.internal.getNumberOfPages()
             // Total page number plugin only available in jspdf v1.0+
@@ -2419,7 +2577,7 @@ if (window.location.pathname == `/links/reportes`) {
                 str = str + ' of ' + totalPagesExp
             }
             doc.setFontSize(8)
-
+ 
             // jsPDF 1.4+ uses getWidth, <1.4 uses .width
             var pageSize = doc.internal.pageSize
             var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
@@ -4855,7 +5013,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             elemen.addClass('i');
         }
     }
-
     var table = $('#datatable').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [

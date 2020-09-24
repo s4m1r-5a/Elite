@@ -1162,6 +1162,12 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
 
+    } else if (id === 'proyectos') {
+        sql = `SELECT DISTINCT pt.proyect FROM preventa p 
+        INNER JOIN productosd pd ON p.lote = pd.id 
+        INNER JOIN productos pt ON pd.producto = pt.id`
+        const proyectos = await pool.query(sql);
+        res.send(proyectos);
     }
 
 });
@@ -1224,7 +1230,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
-        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lote]);
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?
+        AND DATE(s.fech) < '${fecha}' AND s.ids != ${solicitud}`, [4, lote]);
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
