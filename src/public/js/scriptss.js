@@ -1755,6 +1755,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         }
     });
+    //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////    
     var estadoscuentas = $('#estadoscuentas').DataTable({
         processing: true,
         autowidth: true,
@@ -2121,12 +2122,6 @@ if (window.location.pathname == `/links/reportes`) {
             }
         },
         initComplete: function (settings, json) {
-            f.push({
-                text: `wrterywewerytwr`,
-                action: function () {
-                    alert('se activo el boton')
-                }
-            })
             //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
         },
         footerCallback: function (row, data, start, end, display) {
@@ -2194,16 +2189,6 @@ if (window.location.pathname == `/links/reportes`) {
         rowCallback: function (row, data, index) {
             /*if (data["estado"] == 9) {
                 $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-            } else if (data["estado"] == 12) {
-                $(row).css("background-color", "#00FFFF");
-            } else if (data["estado"] == 8) {
-                $(row).css("background-color", "#FFFFCC");
-            } else if (data["estado"] == 10) {
-                $(row).css("background-color", "#40E0D0");
-            } else if (data["estado"] == 1) {
-                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
-            } else if (data["estado"] == 13) {
-                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
             }*/
         }
     });
@@ -2214,79 +2199,237 @@ if (window.location.pathname == `/links/reportes`) {
             .search(this.value)
             .draw();
     });
-    //////////////////////* Table4 *///////////////////////    
-    var table4 = $('#datatable4').DataTable({
+    //////////////////////* ESTADOS DE CUENTA DETALLADOS *///////////////////////    
+    var estadoscuentas2 = $('#estadoscuentas2').DataTable({
+        processing: true,
+        autowidth: true,
+        columnDefs: [
+            {
+                targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                visible: false,
+                //searchable: true
+            }
+        ],
+        order: [[1, 'asc'], [2, 'asc']],
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/estadosc2",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                className: 'control',
+                data: null,
+                defaultContent: ''
+            },
+            {
+                data: "mz",
+                render: function (data, method, row) {
+                    return data === 'no' ? 0 : data
+                }
+            },
+            { data: "n" },
+            { data: "proyect" },
+            {
+                data: "valor",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "descuento",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data + '%'
+                }
+            },
+            {
+                data: "cupon",
+                className: 'te'
+            },
+            {
+                data: "ahorro",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "total",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            {
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "fech",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            {
+                data: "ids",
+                className: 'te',
+                render: function (data, method, row) {
+                    return 'RC-' + data
+                }
+            },
+            {
+                data: "formap",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data ? data : 'INDEFINIDO'
+                }
+            },
+            {
+                data: "descp",
+                className: 'te'
+            },
+            {
+                data: "monto",
+                className: 'te',
+                render: function (data, method, row) {
+                    return row.formap === 'BONO' ? '$0' : '$' + Moneda(data)
+                }
+            },
+            {
+                data: "bono",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data ? data : 'NO APLICA'
+                }
+            },
+            {
+                data: "mtb",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data ? '$' + Moneda(data) : '$0'
+                }
+            },
+            {
+                data: "mtb",
+                className: 'te',
+                render: function (data, method, row) {
+                    return row.formap === 'BONO' ? '$' + Moneda(data)
+                        : data ? '$' + Moneda(parseFloat(row.monto) + parseFloat(data))
+                            : '$' + Moneda(row.monto)
+                }
+            },
+        ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null, lote = null;
+            var total = 0, vlr = 0;
+            var datos = api.column({ page: 'current' }).data()
+            var filas = api.column(10, { page: 'current' }).data();
+
+            filas.each(function (group, i) {
+                var gt = moment(datos[i].fecha).format('YYYY/M/D');
+                var valr = datos[i].formap === 'BONO' ? parseFloat(datos[i].mtb)
+                    : datos[i].mtb ? parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
+                        : parseFloat(datos[i].monto)
+
+                if (last !== group || lote !== datos[i].n) {
+                    if (last != null) {
+                        $(rows).eq(i - 1).after(
+                            `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
+                            <td colspan="4">SALDO A LA FECHA</td>
+                            <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
+                        </tr>`
+                        );
+                        vlr = 0;
+                    }
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="2" class="text-left">${group}</td>
+                            <td class="text-center">${datos[i].proyect}</td>
+                            <td class="text-center">MZ: ${datos[i].mz} - LT: ${datos[i].n}</td>
+                            <td colspan="11" class="text-right">PRECIO: $${Moneda(datos[i].valor)}</td>
+                        </tr>
+                        <tr class="group" style="background: #FFFFCC; color: #7f8c8d;">
+                            <td class="text-left">SEPARADO: ${gt}</td>
+                            <td class="text-center">DSTO: ${datos[i].descuento}%</td>
+                            <td class="text-center">CUPON: ${datos[i].cupon}</td>
+                            <td class="text-center">AHORRO: $${Moneda(datos[i].ahorro)}</td>
+                            <td colspan="12" class="text-right">TOTAL: $${Moneda(datos[i].total)}</td>
+                        </tr>`
+                    );
+                    last = group;
+                    lote = datos[i].n
+                }
+                vlr += valr
+                if (i == filas.length - 1) {
+                    $(rows).eq(i).after(
+                        `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
+                            <td colspan="4">SALDO A LA FECHA</td>
+                            <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
+                        </tr>`
+                    );
+                }
+            });
+        },
+        dom: 'Bfrtip',
+        buttons: [{
+            text: `<i class="align-middle" data-feather="file-text"></i>`,
+            attr: {
+                title: 'Fecha',
+                id: 'facturar'
+            },
+            className: 'btn btn-secondary',
+            action: function () {
+                alert('Estamos trabajando en este boton')
+            }
+        },
+        {
+            extend: 'pageLength',
+            text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+            orientation: 'landscape'
+        },
+        {
+            text: `<input type="text" class="edi text-center mins" style="width: 30px; padding: 1px;"
+            placeholder="MZ">`,
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        },
+        {
+            text: `<input type="text" class="edi text-center maxs" style="width: 30px; padding: 1px;"
+            placeholder="LT">`,
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary'
+        }
+        ],
+        ordering: true,
+        language: languag,
         deferRender: true,
         paging: true,
         search: {
             regex: true,
             caseInsensitive: false,
         },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        }],
-        order: [[0, "desc"]],
-        language: languag,
-        ajax: {
-            method: "POST",
-            url: "/links/reportes/table4",
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "id" },
-            {
-                data: "fechsolicitud",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "fullname" },
-            {
-                data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "transaccion" },
-            { data: "metodo" },
-            { data: "producto" },
-            {
-                data: "fechadecompra",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') || '' //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "estado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 4:
-                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
-                            break;
-                        case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
-                            break;
-                        case 1:
-                            return `<span class="badge badge-pill badge-info">Procesando</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
-                            break;
-                        default:
-                            return `<span class="badge badge-pill badge-secondary">Indefinida</span>`
-                    }
-                }
-            }
-        ]
+        responsive: true,
     });
-    // Daterangepicker  
+    $('.mins, .maxs').on('keyup', function () {
+        var col = $(this).hasClass('mins') ? 1 : 2;
+        estadoscuentas2
+            .columns(col)
+            .search(this.value)
+            .draw();
+    });
+    ///////////////////// Daterangepicker /////////////////// 
     var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");
     $(".fech").daterangepicker({

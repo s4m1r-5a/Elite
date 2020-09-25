@@ -1099,18 +1099,19 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": solicitudes };
         res.send(respuesta);
 
-    } else if (id == 'table4') {
+    } else if (id == 'estadosc2') {
 
-        d = req.user.id == 15 ? '' : 'v.vendedor = ? AND';
+        sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
+        p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, s.monto,
+        cu.descuento, c.nombre, cp.monto mtb FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+        INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
+        LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
+        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL`
 
-        sql = `SELECT v.id, v.fechadecompra, p.producto, v.transaccion, u.fullname, t.fecha fechsolicitud,
-                t.monto, m.metodo, t.estado FROM ventas v INNER JOIN products p ON v.product = p.id_producto
-            INNER JOIN transacciones t ON v.transaccion = t.id INNER JOIN users u ON t.acreedor = u.id INNER JOIN metodos m ON t.metodo = m.id
-            WHERE ${d} v.product = 25 AND YEAR(v.fechadecompra) = YEAR(CURDATE())
-            AND MONTH(v.fechadecompra) BETWEEN 1 and 12`
-
-        const ventas = await pool.query(sql, req.user.id);
-        respuesta = { "data": ventas };
+        const solicitudes = await pool.query(sql);
+        //console.log(solicitudes)
+        respuesta = { "data": solicitudes };
         res.send(respuesta);
 
     } else if (id == 'eliminar') {
