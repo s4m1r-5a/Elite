@@ -2331,6 +2331,7 @@ if (window.location.pathname == `/links/reportes`) {
             var total = 0, vlr = 0;
             var datos = api.column({ page: 'current' }).data()
             var filas = api.column(10, { page: 'current' }).data();
+            body = [];
 
             filas.each(function (group, i) {
                 var gt = moment(datos[i].fecha).format('YYYY/M/D');
@@ -2346,28 +2347,25 @@ if (window.location.pathname == `/links/reportes`) {
                             <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
                         </tr>`
                         );
-                        vlr = 0;
                         body.push(
                             {
                                 id: {
                                     content: 'SALDO A LA FECHA',
                                     colSpan: 4, styles: {
-                                        halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
-                                        textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
-                                        fillColor: "#F08080"
+                                        halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                        fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
                                     }
                                 },
                                 id5: {
                                     content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
                                     colSpan: 4, styles: {
-                                        halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
-                                        textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
-                                        fillColor: "#F08080"
+                                        halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                        fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
                                     }
                                 }
                             }
                         )
-
+                        vlr = 0;
                     }
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
@@ -2384,31 +2382,32 @@ if (window.location.pathname == `/links/reportes`) {
                             <td colspan="12" class="text-right">TOTAL: $${Moneda(datos[i].total)}</td>
                         </tr>`
                     );
+                    last = group;
+                    lote = datos[i].n
                     body.push(
                         {
                             id: {
                                 content: group, colSpan: 3, styles: {
-                                    halign: 'left', cellWidth: 'wrap', textColor: '#FFFFCC',
-                                    fontStyle: 'bolditalic', fontSize: 10, fillColor: "#7f8c8d"
+                                    halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 10, fillColor: "#FFFFCC"
                                 }
                             },
                             id4: {
                                 content: datos[i].proyect, colSpan: 2, styles: {
-                                    halign: 'center', cellWidth: 'auto', textColor: '#FFFFCC',
-                                    fontStyle: 'bolditalic', fontSize: 9, fillColor: "#7f8c8d"
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 9, fillColor: "#FFFFCC"
                                 }
                             },
                             id6: {
                                 content: 'MZ: ' + datos[i].mz + ' - LT: ' + datos[i].n, styles: {
-                                    halign: 'center', cellWidth: 'auto', textColor: '#FFFFCC',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#7f8c8d"
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
                                 }
                             },
                             id7: {
                                 content: '$' + Moneda(datos[i].valor), colSpan: 2, styles: {
-                                    halign: 'right', cellWidth: 'auto', textColor: '#FFFFCC',
-                                    fontStyle: 'bolditalic', fontSize: 8,
-                                    fillColor: "#7f8c8d"
+                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
                                 }
                             }
                         },
@@ -2445,20 +2444,18 @@ if (window.location.pathname == `/links/reportes`) {
                             }
                         }
                     )
-                    last = group;
-                    lote = datos[i].n
                 }
                 vlr += valr
                 body.push(
                     {
                         id: { content: datos[i].fech, styles: { fontSize: 8, fontStyle: 'bold' } },
                         id2: { content: datos[i].ids, styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id3: { content: datos[i].formap, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id3: { content: datos[i].formap ? datos[i].formap : 'Indefinido', styles: { fontSize: 8, fontStyle: 'bold' } },
                         id4: { content: datos[i].descp, styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id5: { content: '$' + Moneda(datos[i].monto), styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id6: { content: datos[i].bono, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id5: { content: datos[i].formap === 'BONO' ? '$0' : '$' + Moneda(datos[i].monto), styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id6: { content: datos[i].bono ? datos[i].bono : 'No aplica', styles: { fontSize: 8, fontStyle: 'bold' } },
                         id7: { content: datos[i].mtb ? '$' + Moneda(datos[i].mtb) : '$0', styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id8: { content: datos[i].mtb ? '$' + Moneda(datos[i].mtb) : '$0', styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id8: { content: '$' + Moneda(valr), styles: { fontSize: 8, fontStyle: 'bold' } },
                     }
                 )
                 if (i == filas.length - 1) {
@@ -2473,17 +2470,15 @@ if (window.location.pathname == `/links/reportes`) {
                             id: {
                                 content: 'SALDO A LA FECHA',
                                 colSpan: 4, styles: {
-                                    halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
-                                    textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
-                                    fillColor: "#F08080"
+                                    hhalign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
                                 }
                             },
                             id5: {
                                 content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
                                 colSpan: 4, styles: {
-                                    halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
-                                    textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
-                                    fillColor: "#F08080"
+                                    halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
                                 }
                             }
                         }
