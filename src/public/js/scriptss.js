@@ -2200,6 +2200,7 @@ if (window.location.pathname == `/links/reportes`) {
             .draw();
     });
     //////////////////////* ESTADOS DE CUENTA DETALLADOS *///////////////////////    
+    var body = [];
     var estadoscuentas2 = $('#estadoscuentas2').DataTable({
         processing: true,
         autowidth: true,
@@ -2346,6 +2347,27 @@ if (window.location.pathname == `/links/reportes`) {
                         </tr>`
                         );
                         vlr = 0;
+                        body.push(
+                            {
+                                id: {
+                                    content: 'SALDO A LA FECHA',
+                                    colSpan: 4, styles: {
+                                        halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
+                                        textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
+                                        fillColor: "#F08080"
+                                    }
+                                },
+                                id5: {
+                                    content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
+                                    colSpan: 4, styles: {
+                                        halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
+                                        textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
+                                        fillColor: "#F08080"
+                                    }
+                                }
+                            }
+                        )
+
                     }
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
@@ -2362,10 +2384,83 @@ if (window.location.pathname == `/links/reportes`) {
                             <td colspan="12" class="text-right">TOTAL: $${Moneda(datos[i].total)}</td>
                         </tr>`
                     );
+                    body.push(
+                        {
+                            id: {
+                                content: group, colSpan: 3, styles: {
+                                    halign: 'left', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 10, fillColor: "#7f8c8d"
+                                }
+                            },
+                            id4: {
+                                content: datos[i].proyect, colSpan: 2, styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 9, fillColor: "#7f8c8d"
+                                }
+                            },
+                            id6: {
+                                content: 'MZ: ' + datos[i].mz + ' - LT: ' + datos[i].n, styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#7f8c8d"
+                                }
+                            },
+                            id7: {
+                                content: '$' + Moneda(datos[i].valor), colSpan: 2, styles: {
+                                    halign: 'right', cellWidth: 'auto', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 8,
+                                    fillColor: "#7f8c8d"
+                                }
+                            }
+                        },
+                        {
+                            id: {
+                                content: 'Sp. ' + gt, styles: {
+                                    halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id2: {
+                                content: 'Dto. ' + datos[i].descuento + '%', styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id3: {
+                                content: 'Cupon: ' + datos[i].cupon, styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id4: {
+                                content: 'Ahorro: $' + Moneda(datos[i].ahorro), colSpan: 2, styles: {
+                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id6: {
+                                content: 'Total: $' + Moneda(datos[i].total), colSpan: 3, styles: {
+                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            }
+                        }
+                    )
                     last = group;
                     lote = datos[i].n
                 }
                 vlr += valr
+                body.push(
+                    {
+                        id: { content: datos[i].fech, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id2: { content: datos[i].ids, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id3: { content: datos[i].formap, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id4: { content: datos[i].descp, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id5: { content: '$' + Moneda(datos[i].monto), styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id6: { content: datos[i].bono, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id7: { content: datos[i].mtb ? '$' + Moneda(datos[i].mtb) : '$0', styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id8: { content: datos[i].mtb ? '$' + Moneda(datos[i].mtb) : '$0', styles: { fontSize: 8, fontStyle: 'bold' } },
+                    }
+                )
                 if (i == filas.length - 1) {
                     $(rows).eq(i).after(
                         `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
@@ -2373,6 +2468,26 @@ if (window.location.pathname == `/links/reportes`) {
                             <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
                         </tr>`
                     );
+                    body.push(
+                        {
+                            id: {
+                                content: 'SALDO A LA FECHA',
+                                colSpan: 4, styles: {
+                                    halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
+                                    textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
+                                    fillColor: "#F08080"
+                                }
+                            },
+                            id5: {
+                                content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
+                                colSpan: 4, styles: {
+                                    halign: 'right', cellWidth: 'wrap', cellWidth: 'wrap',
+                                    textColor: '#FFFFCC', fontStyle: 'bolditalic', fontSize: 7,
+                                    fillColor: "#F08080"
+                                }
+                            }
+                        }
+                    )
                 }
             });
         },
@@ -2385,7 +2500,58 @@ if (window.location.pathname == `/links/reportes`) {
             },
             className: 'btn btn-secondary',
             action: function () {
-                alert('Estamos trabajando en este boton')
+                var doc = new jsPDF('p', 'mm', [612, 792]);
+                var img = new Image();
+                img.src = '/img/avatars/avatar.png'
+                var totalPagesExp = '{total_pages_count_string}'
+                doc.autoTable({
+                    head: [
+                        { id: 'fechas', id2: 'recibos', id3: 'forma', id4: 'dscp', id5: 'monto', id6: 'bono', id7: 'monto', id8: 'total' },
+                    ],
+                    body,
+                    //html: '#estadoscuentas2',
+                    //showHead: false,
+                    includeHiddenHtml: false,
+                    theme: 'plain',
+                    /*columnStyles: {
+                        //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                        //FECHAS: { textColor: 0, fontStyle: 'bold' },                        
+                        0: { cellWidth: '10', textColor: 0, fontStyle: 'italic', fontSize: 7 },
+                        1: { cellWidth: '50', textColor: 0, fontStyle: 'normal', fontSize: 7 },
+                        2: { cellWidth: 'wrap', textColor: 0, fontStyle: 'normal', fontSize: 7 },
+                        3: { cellWidth: 'wrap', textColor: 0, fontStyle: 'normal', fontSize: 7 },
+                        4: { cellWidth: 'auto', textColor: 0, fontStyle: 'normal', fontSize: 7 },
+                        7: { cellWidth: 'auto', textColor: 0, fontStyle: 'bold', fontSize: 9 },
+                    },*/
+                    didDrawPage: function (data) {
+                        // Header
+                        doc.setTextColor(0)
+                        doc.setFontStyle('normal')
+                        if (img) {
+                            doc.addImage(img, 'png', data.settings.margin.left, 2, 7, 10)
+                        }
+                        doc.setFontSize(10)
+                        doc.text('ESTADOS DE CUENTA DETALLADO', data.settings.margin.left + 9, 9)
+                        // Footer
+                        var str = 'Page ' + doc.internal.getNumberOfPages()
+                        // Total page number plugin only available in jspdf v1.0+
+                        if (typeof doc.putTotalPages === 'function') {
+                            str = str + ' of ' + totalPagesExp
+                        }
+                        //doc.setFontSize(8)
+                        // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                        //var pageSize = doc.internal.pageSize
+                        //var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                        //doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                    },
+                    margin: { top: 13 },
+                })
+                // Total page number plugin only available in jspdf v1.0+
+                //if (typeof doc.putTotalPages === 'function') {
+                //doc.putTotalPages(totalPagesExp)
+                //}
+                doc.output('dataurlnewwindow')
+                //var blob = doc.output('blob')
             }
         },
         {
@@ -2421,6 +2587,9 @@ if (window.location.pathname == `/links/reportes`) {
             caseInsensitive: false,
         },
         responsive: true,
+        initComplete: function (settings, json) {
+            //console.log(body)
+        },
     });
     $('.mins, .maxs').on('keyup', function () {
         var col = $(this).hasClass('mins') ? 1 : 2;
@@ -5297,8 +5466,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     });
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
-        var data = table.row(fila).data(); console.log(data)
+        var data = table.row(fila).data(); //console.log(data)
         var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
+
         fila.toggleClass('selected');
         if (Array.isArray(imagenes)) {
             $("#Modalimg img:not(.foto)").remove();
@@ -5528,11 +5698,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     if (data) {
                                         $('#ModalEventos').one('shown.bs.modal', function () {
                                         }).modal('hide');
+                                        $('#ModalEventos').modal('hide');
                                         SMSj('success', `Solicitud procesada correctamente`);
                                         table.ajax.reload(null, false)
                                     } else {
                                         $('#ModalEventos').one('shown.bs.modal', function () {
                                         }).modal('hide');
+                                        $('#ModalEventos').modal('hide');
                                         SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                                     }
                                 },
