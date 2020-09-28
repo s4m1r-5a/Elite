@@ -1100,6 +1100,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
 
     } else if (id == 'estadosc2') {
+        d = req.user.admin > 0 ? `` : `AND p.asesor = ?`;
 
         sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
         p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, s.monto,
@@ -1107,10 +1108,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
         LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
         INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL`
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`
 
-        const solicitudes = await pool.query(sql);
-        //console.log(solicitudes)
+        const solicitudes = await pool.query(sql, req.user.id);
         respuesta = { "data": solicitudes };
         res.send(respuesta);
 

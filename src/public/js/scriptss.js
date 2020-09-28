@@ -1516,6 +1516,16 @@ if (window.location.pathname == `/links/reportes`) {
         }
     );
     //////////////////////* TABLA DE REPORTES */////////////////////// 
+    if (admin == 1) {
+        $('#resumen').show();
+    }
+    $('#reports').click(function () {
+        $('#stadoreportes').show('slow');
+        $('#stadocuentasd').hide('slow');
+        $('#stadocuentasr').hide('slow');
+        $('#reports').hide('slow');
+        tableOrden.columns.adjust().draw();
+    })
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: [/*{
@@ -1755,7 +1765,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         }
     });
-    //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////    
+    //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////  
     var estadoscuentas = $('#estadoscuentas').DataTable({
         processing: true,
         autowidth: true,
@@ -1764,8 +1774,8 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        /*{ responsivePriority: 1, targets: -1 },
-          { responsivePriority: 1, targets: -2 }*/],
+            /*{ responsivePriority: 1, targets: -1 },
+              { responsivePriority: 1, targets: -2 }*/],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, 'asc'], [2, 'asc']],
         ajax: {
@@ -1854,16 +1864,16 @@ if (window.location.pathname == `/links/reportes`) {
                     if (last != null) {
                         $(rows).eq(i - 1).after(
                             `<tr class="total">
-                                <td colspan=2>Total:</td>
-                                <td colspan="10">${total}</td>
-                             </tr>`
+                                    <td colspan=2>Total:</td>
+                                    <td colspan="10">${total}</td>
+                                 </tr>`
                         );
                         total = 0;
                     }
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="13" class="text-center">MANZANA ${group}</td>
-                        </tr>`
+                                <td colspan="13" class="text-center">MANZANA ${group}</td>
+                            </tr>`
                     );
                     last = group;
                 }
@@ -1871,9 +1881,9 @@ if (window.location.pathname == `/links/reportes`) {
                 if (i == filas.length - 1) {
                     $(rows).eq(i).after(
                         `<tr class="total">
-                            <td colspan=2>Total:</td>
-                            <td colspan="10">${total}</td>
-                        </tr>`
+                                <td colspan=2>Total:</td>
+                                <td colspan="10">${total}</td>
+                            </tr>`
                     );
                 }
             });
@@ -1902,82 +1912,82 @@ if (window.location.pathname == `/links/reportes`) {
                         .css('font-size', '10pt')
                         .prepend(
                             `                
-                <div class="card">
-                    <!--<div class="text-right mb-2">
-                        <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
-                    </div>-->
-                    <div class="row">
-                        <div class="col-sm-5">
-                            <div class="card border-primary text-left">
-                                <div class="row no-gutters">
-                                    <div class="col-md-2">
-                                        <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
-                                    </div>
-                                    <div class="col-md-9">
-                                        <div class="card-body text-primary h4">
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
-                                            </div>   
-                                            <div class="mb-0">
-                                                <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                    <div class="card">
+                        <!--<div class="text-right mb-2">
+                            <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
+                        </div>-->
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="card border-primary text-left">
+                                    <div class="row no-gutters">
+                                        <div class="col-md-2">
+                                            <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="card-body text-primary h4">
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
+                                                </div>   
+                                                <div class="mb-0">
+                                                    <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">PRODUCTOS</span>
+                                                    <span class="align-middle card-text">${productos} LOTES</span>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">AREA</span>
+                                                    <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
+                                                </div>                                            
                                             </div>
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">PRODUCTOS</span>
-                                                <span class="align-middle card-text">${productos} LOTES</span>
-                                            </div>
-                                            <div class="mb-0">
-                                                <span class="align-middle text-dark">AREA</span>
-                                                <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
-                                            </div>                                            
                                         </div>
                                     </div>
+                                </div> 
+                            </div>
+                            <div class="col-sm-7">
+                            <div class="card border-primary text-left">
+                            <div class="row no-gutters">
+                                <div class="col-md-6">
+                                    <div class="card-body text-primary h4">
+                                        <div class="mb-0">                                          
+                                            <span class="align-middle text-dark">DESCUENTOS</span>
+                                            <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">TOTALES</span>
+                                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">ABONOS</span>
+                                            <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">SALDOS</span>
+                                            <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                        </div>                                            
+                                    </div>
                                 </div>
-                            </div> 
-                        </div>
-                        <div class="col-sm-7">
-                        <div class="card border-primary text-left">
-                        <div class="row no-gutters">
-                            <div class="col-md-6">
+                                <div class="col-md-6">
                                 <div class="card-body text-primary h4">
-                                    <div class="mb-0">                                          
-                                        <span class="align-middle text-dark">DESCUENTOS</span>
-                                        <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">TOTALES</span>
-                                        <span class="align-middle card-text">$${Moneda(total)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">ABONOS</span>
-                                        <span class="align-middle text-success">$${Moneda(abonos)}</span>
-                                    </div>
-                                    <div class="mb-0">
-                                        <span class="align-middle text-dark">SALDOS</span>
-                                        <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
-                                    </div>                                            
+                                <div class="mb-0">
+                                    <span class="align-middle text-warning">${proyct}</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">CONCEPTO RESUMEN</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">SISTEMA DE REPORTES</span>
+                                </div>                                            
+                            </div>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                            <div class="card-body text-primary h4">
-                            <div class="mb-0">
-                                <span class="align-middle text-warning">${proyct}</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">CONCEPTO RESUMEN</span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text">SISTEMA DE REPORTES</span>
-                            </div>                                            
                         </div>
                             </div>
                         </div>
-                    </div>
-                        </div>
-                    </div>
-                </div>`
+                    </div>`
                         );
 
                     $(win.document.body).find('table')
@@ -2009,7 +2019,7 @@ if (window.location.pathname == `/links/reportes`) {
         },
         {
             text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
-            placeholder="MZ">`,
+                placeholder="MZ">`,
             attr: {
                 title: 'Busqueda por MZ',
                 id: ''
@@ -2018,7 +2028,7 @@ if (window.location.pathname == `/links/reportes`) {
         },
         {
             text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
-            placeholder="LT">`,
+                placeholder="LT">`,
             attr: {
                 title: 'Busqueda por LT',
                 id: ''
@@ -2199,7 +2209,15 @@ if (window.location.pathname == `/links/reportes`) {
             .search(this.value)
             .draw();
     });
-    //////////////////////* ESTADOS DE CUENTA DETALLADOS *///////////////////////    
+
+    $('#resumen').click(function () {
+        $('#stadoreportes').hide('slow');
+        $('#stadocuentasd').hide('slow');
+        $('#stadocuentasr').show('slow');
+        $('#reports').show('slow');
+        estadoscuentas.columns.adjust().draw();
+    })
+    //////////////////////* ESTADOS DE CUENTA DETALLADOS */////////////////////// 
     var body = [];
     var estadoscuentas2 = $('#estadoscuentas2').DataTable({
         processing: true,
@@ -2593,6 +2611,14 @@ if (window.location.pathname == `/links/reportes`) {
             .search(this.value)
             .draw();
     });
+
+    $('#detalles').click(function () {
+        $('#stadocuentasr').hide('slow');
+        $('#stadoreportes').hide('slow');
+        $('#stadocuentasd').show('slow');
+        $('#reports').show('slow');
+        estadoscuentas2.columns.adjust().draw();
+    })
     ///////////////////// Daterangepicker /////////////////// 
     var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");

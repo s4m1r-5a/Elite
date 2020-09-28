@@ -8,31 +8,37 @@
                 <div class="card">
                     <div class="card-header">
                         <h1 class="text-left">REPORTES</h1>
+                        <button class="btn-outline-dark btn-sm float-right" id="resumen" style="display: none;">Estados
+                            R</button>
+                        <button class="btn-outline-dark btn-sm mr-2 float-right" id="detalles">Estados D</button>
+                        <button class="btn-outline-dark btn-sm mr-2 float-right" id="reports"
+                            style="display: none;">Reportes</button>
                     </div>
                     <div class="card-body">
-                        <table id="datatable2" class="table table-sm table-striped table-hover display nowrap"
-                            style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th style="width:5%;">Id</th>
-                                    <th style="width:10%;">Proyecto</th>
-                                    <th style="width:10%;">Mz</th>
-                                    <th style="width:10%;">Lote</th>
-                                    <th style="width:5%;">Estado</th>
-                                    <th style="width:3%;">Cliente</th>
-                                    <th style="width:15%;">Documento</th>
-                                    <th style="width:15%;">Fecha</th>
-                                    <th style="width:15%;">Asesor</th>
-                                    <th style="width:15%;">Accion</th>
-                                    <th style="width:0.5%;">Doc</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                        <div class="row mt-4" id="stadocuentas">
-                            <!--style="display: none;"-->
-                            <div class="col-12">
+                        <div class="row mt-4">
+                            <div class="col-12" id="stadoreportes">
+                                <table id="datatable2" class="table table-sm table-striped table-hover display nowrap"
+                                    style="width:100%">
+                                    <thead>
+                                        <tr>
+                                            <th></th>
+                                            <th style="width:5%;">Id</th>
+                                            <th style="width:10%;">Proyecto</th>
+                                            <th style="width:10%;">Mz</th>
+                                            <th style="width:10%;">Lote</th>
+                                            <th style="width:5%;">Estado</th>
+                                            <th style="width:3%;">Cliente</th>
+                                            <th style="width:15%;">Documento</th>
+                                            <th style="width:15%;">Fecha</th>
+                                            <th style="width:15%;">Asesor</th>
+                                            <th style="width:15%;">Accion</th>
+                                            <th style="width:0.5%;">Doc</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                            <div class="col-12" id="stadocuentasr" style="display: none;">
                                 <table id="estadoscuentas"
                                     class="table table-sm table-striped table-hover display nowrap" style="width:100%">
                                     <thead>
@@ -56,9 +62,9 @@
                                     <tbody></tbody>
                                 </table>
                             </div>
-                            <div class="col-12">
-                                <table id="estadoscuentas2"
-                                    class="table table-sm table-striped table-hover display" style="width:100%">
+                            <div class="col-12" id="stadocuentasd" style="display: none;">
+                                <table id="estadoscuentas2" class="table table-sm table-striped table-hover display"
+                                    style="width:100%">
                                     <thead>
                                         <tr>
                                             <th></th>
