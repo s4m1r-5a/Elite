@@ -3588,7 +3588,8 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
         $('a.atras').on('click', function () {
-            table2.ajax.reload(null, false)
+            //table2.ajax.reload(null, false)
+            table2.columns.adjust().draw();
             $('.card-footer').show('')
             $("#cuadro2").hide("slow");
             $("#cuadro3").hide("slow");
@@ -4000,25 +4001,28 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     render: function (data, method, row) {
                         switch (data) {
                             case 1:
-                                return `<span class="badge badge-pill badge-info">Procesando</span>`
+                                return `<span class="badge badge-pill badge-info">Pendiente pago</span>`
                                 break;
                             case 8:
-                                return `<span class="badge badge-pill badge-dark">Verificando</span>`
+                                return `<span class="badge badge-pill badge-dark">Tramitando pago</span>`
                                 break;
                             case 9:
                                 return `<span class="badge badge-pill badge-success">Disponible</span>`
                                 break;
                             case 10:
-                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                                return `<span class="badge badge-pill badge-primary">Separado</span>`
                                 break;
                             case 12:
-                                return `<span class="badge badge-pill badge-secondary">Separado</span>`
+                                return `<span class="badge badge-pill badge-secondary">Apartado</span>`
+                                break;
+                            case 13:
+                                return `<span class="badge badge-pill badge-tertiary">Vendido</span>`
                                 break;
                             case 14:
                                 return `<span class="badge badge-pill badge-danger">Tramitando</span>`
                                 break;
                             case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactivo</span>`
+                                return `<span class="badge badge-pill badge-warning">Inactivo</span>` //secondary
                                 break;
                         }
                     }
