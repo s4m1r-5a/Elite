@@ -4052,8 +4052,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
             responsive: true,
             initComplete: function (settings, json) {
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
-                $('#ModalEventos').modal('toggle');
                 $('#ModalEventos').modal('hide')
+                $('#ModalEventos').one('shown.bs.modal', function () {
+                    $('#ModalEventos').modal('hide')
+                }).modal('hide');
                 $('#datatable_filter').hide()
             },
             columnDefs: [
