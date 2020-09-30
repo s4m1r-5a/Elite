@@ -4034,13 +4034,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 {
                     data: "inicial",
                     render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
+                }/*,
                 {
                     data: "tramitando",
                     render: function (data, method, row) {
                         return data ? `<span class="badge badge-danger text-center text-uppercase">${moment(data).format('MMM-D hh:mm A')}</span>` : '';
                     }
-                }
+                }*/
             ],
             deferRender: true,
             autoWidth: true,
