@@ -560,7 +560,8 @@ router.post('/bonus', async (req, res) => {
 
         const pago = {
             fech: ahora, monto: bonomonto, recibo: bono, facturasvenc: factrs, lt,
-            concepto: 'PAGO', stado: 3, descp: concpto, formap: 'BONO', bono: D, acumulado
+            concepto: 'PAGO', stado: 3, descp: concpto, formap: 'BONO', bono: pin,
+            acumulado
         }
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
             await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
@@ -1018,23 +1019,31 @@ router.get('/reportes', isLoggedIn, (req, res) => {
 router.post('/anular', isLoggedIn, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
         fullname, cel, idc, qhacer, causa, motivo } = req.body
-
+    var bonoanular;
     const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND concepto IN('PAGO', 'ABONO') AND lt = ${lote}`);
     if (u.length > 0) {
         req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
         res.redirect('/links/reportes');
     } else {
-        const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, lote);
-        if (qhacer === 'BONO' && o[0].total > 0) {
+        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = ${lote}`);
+        var l = r[0].monto1 || 0,
+            k = r[0].monto || 0;
+        var acumulado = l + k;
+        //const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, lote);
+        if (qhacer === 'BONO' && acumulado > 0) {
             var pin = ID(5);
             const bono = {
                 pin, descuento: 0, estado: 9, clients: idc,
-                tip: qhacer, monto: o[0].total, motivo, concept: causa
+                tip: qhacer, monto: acumulado, motivo, concept: causa
             }
-            await pool.query('INSERT INTO cupones SET ? ', bono);
+            const a = await pool.query('INSERT INTO cupones SET ? ', bono);
+            bonoanular = a.insertId;
             var nombr = nombre.split(" ")[0],
                 fullnam = fullname.split(" ")[0],
-                body = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(o[0].total)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`,
+                body = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(acumulado)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`,
                 body2 = `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
             EnviarWTSAP(movil, body)
             EnviarWTSAP(cel, body2)
@@ -1045,6 +1054,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             const monto = o[0].total * porciento;
             const facturasvenc = o.length;
             const fech = moment(new Date()).format('YYYY-MM-DD');
+            bonoanular = 'DEVOLUCION';
             const devolucion = {
                 fech, monto, concepto: qhacer, stado: 3, descp: causa,
                 porciento, total, lt: lote, retefuente: 0, facturasvenc, recibo: 'NO APLICA',
@@ -1059,8 +1069,8 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
             SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9,
-            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
             l.valor = d.valmtr2 * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA',
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}
             p.descrip = '${causa} - ${motivo}', l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
         );
         res.send(true);
@@ -1231,8 +1241,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
-        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?
-        AND DATE(s.fech) < '${fecha}' AND s.ids != ${solicitud}`, [4, lote]);
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = ${lote}
+        AND DATE(s.fech) < '${fecha}' AND s.ids != ${solicitud}`);
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
@@ -1899,7 +1909,7 @@ async function PagosAbonos(Tid, pdf, user) {
     INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-    WHERE s.ids = ${Tid}`);
+    WHERE  pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
 
     const S = SS[0];
     const T = S.cparacion;
@@ -1907,16 +1917,15 @@ async function PagosAbonos(Tid, pdf, user) {
     const fech = moment(S.fechs).format('YYYY-MM-DD');
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? parseFloat(S.monto) + S.mount : parseFloat(S.monto);
-    //console.log(S, monto)
+    console.log(S, monto)
     if (S.stado === 4 || S.stado === 6) {
         Eli(pdf)
         return false
     };
-
     if (S.concepto === 'ABONO') {
         const Ai = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
             WHERE c.separacion = ${T} AND c.tipo = 'INICIAL' AND c.estado = 3`);
-        //console.log(Ai);
+        console.log(Ai);
         if (Ai.length > 0) {
             var totalinicial = 0,
                 cuotainicial = Ai[0].cuota;
@@ -2040,7 +2049,6 @@ async function PagosAbonos(Tid, pdf, user) {
         } else {
             const Af = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
             WHERE c.separacion = ${T} AND c.estado = 3`)
-            //console.log(Af, 'ESTA ES Af, no encontro en Ai ninguna cuota')
             if (Af.length > 0) {
                 var extraordinaria = Af[0].cuotaextraordinaria,
                     cuotafinanciada = 0,
@@ -2112,7 +2120,6 @@ async function PagosAbonos(Tid, pdf, user) {
             }
         }
     } else if (S.concepto === 'PAGO') {
-        console.log('es un pago')
         var Total = parseFloat(S.cuota), texto = '';
 
         var Ps = async (Total, texto) => {
@@ -2121,7 +2128,6 @@ async function PagosAbonos(Tid, pdf, user) {
             if (S.tipo === 'SEPARACION' && S.incentivo) {
                 //var retefuente = S.incentivo * 0.10
                 //var reteica = S.incentivo * 8 / 1000
-                console.log('es una separacion')
                 var solicitar = {
                     fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 9, descp: 'SEPARACION',
                     asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
@@ -2144,12 +2150,10 @@ async function PagosAbonos(Tid, pdf, user) {
                     }, Tid
                 ]
             );
-            console.log('actualiza el pago')
             if (texto) {
                 await pool.query(`UPDATE cuotas SET ? WHERE ${texto}`, { estado: 13 });
             }
             if (monto > Total) {
-                console.log('monto es mayor al total')
                 const d = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? 
                     AND tipo = 'INICIAL' AND estado = 3 AND fechs > ?`, [T, fech]);
 
@@ -2264,7 +2268,7 @@ async function PagosAbonos(Tid, pdf, user) {
                 } else {
                     const Af = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id
                         WHERE separacion = ? AND tipo = 'FINANCIACION' AND estado = 3 AND fechs > ?`, [T, fech]);
-
+                    console.log(Af)
                     var extraordinaria = Af[0].cuotaextraordinaria,
                         excedenteinicial = Math.round(monto - Total),
                         cuotafinanciada = 0,

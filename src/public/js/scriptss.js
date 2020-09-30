@@ -3451,9 +3451,9 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         $('.saldofecha').html('$' + Moneda(saldot));
         $('.totalp').html('Valor $' + totalp)
         $('.m2').text('$' + m2)
-        $('.totali').html('Total $' + totali)
-        $('.ahorro').html('Ahorro $' + ahorro)
-        $('.extrao').html('Cuota $' + extrao)
+        $('.totali').html('Total inicial $' + totali)
+        $('.ahorro').html('$' + ahorro)
+        $('.extrao').html('$' + extrao)
         $('.separar').html('$' + separar)
         $('#cuota').html('$' + cuota)
 
