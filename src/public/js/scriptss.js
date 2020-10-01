@@ -1687,6 +1687,7 @@ if (window.location.pathname == `/links/reportes`) {
                                                     <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
                                                 </div>
                                         </div>`
                         : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
@@ -2686,6 +2687,28 @@ if (window.location.pathname == `/links/reportes`) {
                     $('#ModalEventos').one('shown.bs.modal', function () {
                     }).modal('hide');
                     SMSj('error', data.m);
+                }
+            }
+        });
+    }
+    var Verificar = (id) => {
+        var D = { k: id, h: moment().format('YYYY-MM') };
+        $.ajax({
+            url: '/links/reportes/verificar',
+            data: D,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    tableOrden.ajax.reload(null, false)
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
                 }
             }
         });

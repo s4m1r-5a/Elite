@@ -1048,19 +1048,19 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             EnviarWTSAP(movil, body)
             EnviarWTSAP(cel, body2)
 
-        } else if (qhacer === 'DEVOLUCION' && o[0].total > 0) {
-            const total = o[0].total;
+        } else if (qhacer === 'DEVOLUCION' && acumulado > 0) {
+            const total = acumulado;
             const porciento = 0.20;
-            const monto = o[0].total * porciento;
-            const facturasvenc = o.length;
+            const monto = acumulado * porciento;
+            const facturasvenc = r.length;
             const fech = moment(new Date()).format('YYYY-MM-DD');
-            bonoanular = 'DEVOLUCION';
+            bonoanular = null;
             const devolucion = {
                 fech, monto, concepto: qhacer, stado: 3, descp: causa,
                 porciento, total, lt: lote, retefuente: 0, facturasvenc, recibo: 'NO APLICA',
                 reteica: 0, pagar: total - monto, formap: 'INDEFINIDA'
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, f);
+            await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
         }
         await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
@@ -1070,7 +1070,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             LEFT JOIN productos d ON l.producto  = d.id 
             SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9,
             l.valor = d.valmtr2 * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA',
-            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
             p.descrip = '${causa} - ${motivo}', l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
         );
         res.send(true);
@@ -1179,6 +1179,14 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos pt ON pd.producto = pt.id`
         const proyectos = await pool.query(sql);
         res.send(proyectos);
+    } else if (id === 'verificar') {
+        const { k, h } = req.body;
+        const r = await Estados(k);
+        var estado = r.pendients ? 8 : r.std
+        await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+        SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]
+        );
+        res.send(true);
     }
 
 });
@@ -1858,39 +1866,57 @@ async function Estados(S, L, P) {
     // S = id de separacion
     // L = id de lote
     // P = id de la solicitud de pago
-    var F = S ? { r: S, m: `AND pr.id = ${S}` }
-        : L ? { r: L, m: `AND pd.id = ${L}` }
-            : { r: P, m: `AND s.ids = ${P}` };
+    var F
+    if (P) {
+        const g = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote 
+        WHERE pr.tipobsevacion IS NULL AND s.ids = ${P} LIMIT 1`);
+        F = { r: g[0].id, m: `AND pr.id = ${g[0].id}` }
+    } else if (L) {
+        F = { r: L, m: `AND pd.id = ${L}` }
+    } else {
+        F = { r: S, m: `AND pr.id = ${S}` }
+    }
 
     const Pagos = await pool.query(
         `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, SUM(s.monto) AS MONTO
          FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
-         LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
+         LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    //console.log(Pagos, F)
-    const Cuotas = await pool.query(
-        `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
-         SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, SUM(c.cuota) AS TOTAL
-         FROM preventa pr LEFT JOIN solicitudes s ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
-         INNER JOIN cuotas c ON c.separacion = pr.id WHERE s.concepto IN('PAGO', 'ABONO') ${F.m}`
+    /*const Cuotas = await pool.query(
+        `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, 
+        SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
+         SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, 
+         SUM(c.cuota) AS TOTAL FROM preventa pr INNER JOIN productosd pd ON pr.lote = pd.id
+         INNER JOIN cuotas c ON c.separacion = pr.id WHERE pr.tipobsevacion IS NULL ${F.m}`
+    );*/
+    const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
+    (l.valor - pr.ahorro) * pr.iniciar /100 AS INICIAL, 
+    (l.valor - pr.ahorro) * (100 - pr.iniciar) /100 AS FINANCIACION,
+    l.valor - pr.ahorro AS TOTAL FROM preventa pr INNER JOIN productosd l 
+    ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
+
+    const Pendientes = await pool.query(
+        `SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote 
+         INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN cupones cp ON s.bono = cp.id 
+         WHERE s.stado = 3 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    //console.log(Cuotas)
+    var pendients = Pendientes.length;
     if (Pagos[0].BONOS || Pagos[0].MONTO) {
         var pagos = Pagos[0].BONOS + Pagos[0].MONTO,
             cuotas = Cuotas[0];
 
-        if (pagos >= cuotas.FINANCIACION) {
-            return { std: 13, estado: 'VENDIDO' }
+        if (pagos >= cuotas.TOTAL) {
+            return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.FINANCIACION) {
-            return { std: 10, estado: 'SEPARADO' }
+            return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
-            return { std: 12, estado: 'APARTADO' }
+            return { std: 12, estado: 'APARTADO', pendients }
         } else {
-            return { std: 1, estado: 'PENDIENTE' }
+            return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
     } else {
-        return { std: 1, estado: 'PENDIENTE' }
+        return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }
 /*async function Pa(S, L, P, fn) {
