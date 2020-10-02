@@ -5901,7 +5901,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             {
                 data: "porciento",
                 render: function (data, method, row) {
-                    return '%' + (parseFloat(data) * 100) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return `%${(data * 100).toFixed(1)}` //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             }, {
                 data: "retefuente",
@@ -6208,6 +6208,300 @@ if (window.location == `${window.location.origin}/links/red`) {
         } else {
             elemen.css('background-color', '#FFFFCC');
             elemen.addClass('i');
+        }
+    }
+    var red2 = $('#red2').DataTable({
+        processing: true,
+        autowidth: true,
+        columnDefs: [
+            { responsivePriority: 1, targets: -1 },
+            { responsivePriority: 1, targets: -2 }],
+        order: [1, 'asc'],
+        ajax: {
+            method: "POST",
+            url: "/links/reds",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                className: 'control',
+                orderable: true,
+                data: null,
+                defaultContent: ''
+            },
+            { data: "pin" },
+            { data: "fullname" },
+            { data: "cel" },
+            { data: "username" },
+            { data: "cli" },
+            {
+                data: "sucursal",
+                render: function (data, method, row) {
+                    return `<input type="text" class="text-center edir" id="${row.pin}"
+                    data-toggle="tooltip" data-placement="top" data-container="body" onClick="this.select();"
+                    title="Digite porcentage" autocomplete="off" value="${data ? (data * 100).toFixed(1) : 'Red'}"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onchange="Porcentag(this);">`
+                }
+            },
+            {
+                data: "nrango",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-tertiary">Presidente</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="3">Gerente</option>
+                                <option value="4">Director</option>
+                                <option value="5">Inversionista</option>
+                            </select>`
+                            break;
+                        case 2:
+                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="2">Vicepresidente</option>
+                                <option value="1">Presidente</option>
+                                <option value="3">Gerente</option>
+                                <option value="4">Director</option>
+                                <option value="5">Inversionista</option>
+                            </select>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-primary">Gerente</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="3">Gerente</option>
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="4">Director</option>
+                                <option value="5">Inversionista</option>
+                            </select>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">Inversionista</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="5">Inversionista</option>
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="3">Gerente</option>
+                                <option value="4">Director</option>
+                            </select>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-secondary">Director</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="4">Director</option>
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="3">Gerente</option>
+                                <option value="5">Inversionista</option>
+                            </select>`
+                            break;
+                        case 7:
+                            return `<span class="badge badge-pill badge-dark">Independiente</span>`
+                            break;
+                        default:
+                            return ``
+                    }
+                }
+            },
+        ],
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'collection',
+            text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+            orientation: 'landscape',
+            buttons: [{
+                text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                extend: 'copy'
+            },
+            {
+                text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
+                extend: 'print',
+                title: ``,
+                orientation: 'landscape',
+                footer: true,
+                exportOptions: {
+                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                    //modifier: true
+                },
+                customize: function (win) {
+                    $(win.document.body)
+                        .css('font-size', '10pt')
+                        .prepend(
+                            `                
+                    <div class="card">
+                        <!--<div class="text-right mb-2">
+                            <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
+                        </div>-->
+                        <div class="row">
+                            <div class="col-sm-5">
+                                <div class="card border-primary text-left">
+                                    <div class="row no-gutters">
+                                        <div class="col-md-2">
+                                            <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                        </div>
+                                        <div class="col-md-9">
+                                            <div class="card-body text-primary h4">
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
+                                                </div>   
+                                                <div class="mb-0">
+                                                    <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">PRODUCTOS</span>
+                                                    <span class="align-middle card-text">${productos} LOTES</span>
+                                                </div>
+                                                <div class="mb-0">
+                                                    <span class="align-middle text-dark">AREA</span>
+                                                    <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
+                                                </div>                                            
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div> 
+                            </div>
+                            <div class="col-sm-7">
+                            <div class="card border-primary text-left">
+                            <div class="row no-gutters">
+                                <div class="col-md-6">
+                                    <div class="card-body text-primary h4">
+                                        <div class="mb-0">                                          
+                                            <span class="align-middle text-dark">DESCUENTOS</span>
+                                            <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">TOTALES</span>
+                                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">ABONOS</span>
+                                            <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                        </div>
+                                        <div class="mb-0">
+                                            <span class="align-middle text-dark">SALDOS</span>
+                                            <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                        </div>                                            
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                <div class="card-body text-primary h4">
+                                <div class="mb-0">
+                                    <span class="align-middle text-warning">${proyct}</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">CONCEPTO RESUMEN</span>
+                                </div>
+                                <div class="mb-0">
+                                    <span class="align-middle card-text">SISTEMA DE REPORTES</span>
+                                </div>                                            
+                            </div>
+                                </div>
+                            </div>
+                        </div>
+                            </div>
+                        </div>
+                    </div>`
+                        );
+
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
+                },
+                autoPrint: true
+            }
+            ]
+        },
+        {
+            extend: 'pageLength',
+            text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+            orientation: 'landscape'
+        }
+        ],
+        ordering: true,
+        language: languag,
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        initComplete: function (settings, json) {
+            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+        },
+        rowCallback: function (row, data, index) {
+            /*if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            }*/
+        }
+    });
+    red2.on('change', 'tr select', function () {
+        var fila = $(this).parents('tr');
+        var data = red2.row(fila).data();
+        var dato = $(this).val()
+        $.ajax({
+            type: 'PUT',
+            url: '/links/red',
+            data: { S: 1, F: data.pin, U: dato },
+            beforeSend: function (xhr) {
+            },
+            success: function (dat) {
+                if (dat) {
+                    red2.ajax.reload(null, false)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        })
+    })
+    red2.on('click', 'tr span', function () {
+        var fila = $(this).parents('tr');
+        var data = red2.row(fila).data();
+        if (data.nrango !== 7) {
+            var este = $(this), aquel = $(this).siblings()
+            este.hide()
+            aquel.fadeToggle(2000)
+            setTimeout(function () {
+                aquel.hide()
+                este.fadeToggle(2000)
+            }, 9000);
+        }
+    })
+    function Porcentag(F) {
+        //console.log(F, F.id, F.value / 100)
+        if (!isNaN(F.value)) {
+            $.ajax({
+                type: 'PUT',
+                url: '/links/red',
+                data: { S: null, F: F.id, U: F.value / 100 },
+                beforeSend: function (xhr) {
+                },
+                success: function (dat) {
+                    if (dat) {
+                        red2.ajax.reload(null, false)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        } else {
+            alert('digite un numero para el porcentage valido')
         }
     }
     var red = $('#red').DataTable({

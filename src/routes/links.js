@@ -254,11 +254,11 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
     }
 });
 //////////////* RED *//////////////////////////////////
-router.get('/red', isLoggedIn, (req, res) => {
+router.get('/red', isLoggedIn, async (req, res) => {
     res.render('links/red');
 });
 router.post('/red', async (req, res) => {
-    const red = await pool.query(`SELECT u.fullname, 
+    const red = await pool.query(`SELECT u.fullname,
     u.nrango, u.admin, u1.fullname nombre1, u1.nrango rango1, 
     u1.admin admin1, u2.fullname nombre2, u2.nrango rango2, 
     u2.admin admin2, u3.fullname nombre3, u3.nrango rango3, 
@@ -273,6 +273,26 @@ router.post('/red', async (req, res) => {
     ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : ''}`);
     respuesta = { "data": red };
     res.send(respuesta);
+});
+router.post('/reds', async (req, res) => {
+    if (req.user.admin == 1) {
+        const red = await pool.query(`SELECT * FROM users u 
+            INNER JOIN rangos r ON u.nrango = r.id`);
+        respuesta = { "data": red };
+        res.send(respuesta);
+    }
+});
+router.put('/red', async (req, res) => {
+    if (req.user.admin == 1) {
+        const { S, U, F } = req.body
+        console.log(S, U, F)
+        if (!S) {
+            await pool.query(`UPDATE users SET ? WHERE pin = ?`, [{ nrango: U == 0 ? 5 : 7, sucursal: U == 0 ? null : U }, F]);
+        } else {
+            await pool.query(`UPDATE users SET ? WHERE pin = ?`, [{ nrango: U, }, F]);
+        }
+        res.send(true);
+    }
 });
 ///////////////////* CLIENTES *///////////////////////////
 router.get('/clientes', isLoggedIn, (req, res) => {
@@ -1227,10 +1247,10 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         us.id, us.fullname, cl.nombre, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE (s.concepto = 'COMISION DIRECTA' OR s.concepto = 'COMISION INDIRECTA')
-        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')
+        AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes };
-        //console.log(solicitudes)
+        console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'bono') {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
@@ -1878,8 +1898,8 @@ async function Estados(S, L, P) {
     }
 
     const Pagos = await pool.query(
-        `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, SUM(s.monto) AS MONTO
-         FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+        `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, SUM(s.monto) AS MONTO,
+         pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
     /*const Cuotas = await pool.query(
@@ -1906,8 +1926,10 @@ async function Estados(S, L, P) {
             cuotas = Cuotas[0];
 
         if (pagos >= cuotas.TOTAL) {
+            Desendentes(Pagos[0].asesor, 10)
             return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.FINANCIACION) {
+            Desendentes(Pagos[0].asesor, 10)
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
             return { std: 12, estado: 'APARTADO', pendients }
@@ -1919,11 +1941,18 @@ async function Estados(S, L, P) {
         return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }
-/*async function Pa(S, L, P, fn) {
-    var u = await fn(S, L, P)
+async function Prueva(S) {
+    await pool.query(`UPDATE productosd SET ? WHERE estado IN(10, 13)`, { fechar: S, uno: null, dos: null, tres: null, directa: null });
+    return S
+}
+async function Pa(S, fn) {
+    var month = moment().subtract(S, 'month').format('YYYY-MM-DD HH:mm')
+    var u = await fn(month)
     console.log(u)
-}*/
-//Pa(null, null, 313, Estados)
+}
+
+//Pa(2, Prueva);
+//Desendentes('15', 10)
 
 async function PagosAbonos(Tid, pdf, user) {
 
@@ -1951,7 +1980,6 @@ async function PagosAbonos(Tid, pdf, user) {
     if (S.concepto === 'ABONO') {
         const Ai = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
             WHERE c.separacion = ${T} AND c.tipo = 'INICIAL' AND c.estado = 3`);
-        console.log(Ai);
         if (Ai.length > 0) {
             var totalinicial = 0,
                 cuotainicial = Ai[0].cuota;
@@ -1974,7 +2002,7 @@ async function PagosAbonos(Tid, pdf, user) {
                             'c.estado': 13,
                             'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
                             'l.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                            'l.estado': estados
+                            'l.estado': 10
                         }, Tid
                     ]
                 );
@@ -2010,7 +2038,6 @@ async function PagosAbonos(Tid, pdf, user) {
                                     's.stado': 4,
                                     'c.estado': 13,
                                     'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                    'l.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
                                     'l.estado': 13
                                 }, Tid
                             ]
@@ -2050,10 +2077,8 @@ async function PagosAbonos(Tid, pdf, user) {
                         );
                     }
                 }
-                await Desendentes(S.pin, estados);
-
+                Estados(null, null, Tid)
             } else {
-                //console.log('no alcanso para toda la inicial porque monto es menor que la cuota inicial, y paso por aqui')
                 var cuota = cuotainicial - Math.round(monto / Ai.length)
                 await pool.query(
                     `UPDATE cuotas c 
@@ -2102,7 +2127,6 @@ async function PagosAbonos(Tid, pdf, user) {
                                 's.stado': 4,
                                 'c.estado': 13,
                                 'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                'l.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
                                 'l.estado': 13
                             }, Tid
                         ]
@@ -2171,7 +2195,6 @@ async function PagosAbonos(Tid, pdf, user) {
                         's.stado': 4,
                         'c.estado': 13,
                         'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                        'o.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
                         'o.estado': 12
                     }, Tid
                 ]
@@ -2242,7 +2265,6 @@ async function PagosAbonos(Tid, pdf, user) {
                                             's.stado': 4,
                                             'c.estado': 13,
                                             'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                            'l.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
                                             'l.estado': 13
                                         }, T, fech
                                     ]
@@ -2282,6 +2304,9 @@ async function PagosAbonos(Tid, pdf, user) {
 
                             EnviarWTSAP(S.movil, bodi);
                         }
+
+                        Estados(null, null, Tid)
+
                     } else if (excedente === iniciales) {
                         estados = 10
                         await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${T} AND tipo = 'INICIAL' 
@@ -2323,7 +2348,6 @@ async function PagosAbonos(Tid, pdf, user) {
                                     's.stado': 4,
                                     'c.estado': 13,
                                     'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                    'l.fechar': moment(fech2).format('YYYY-MM-DD HH:mm'),
                                     'l.estado': 13
                                 }, T, fech
                             ]
@@ -2421,222 +2445,277 @@ async function Desendentes(pin, stados) {
     var venta = 0, bono = 0, bonop = 0, personal = 0
 
     const asesor = await pool.query(`SELECT * FROM pines p INNER JOIN users u ON p.acreedor = u.id 
-    INNER JOIN rangos r ON u.nrango = r.id WHERE p.id = ? LIMIT 1`, pin);
+    INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ? LIMIT 1`, pin);
 
     var j = asesor[0]
-    const directas = await pool.query(`SELECT * FROM preventa p 
-    INNER JOIN productosd l ON p.lote = l.id
-    INNER JOIN productos o ON l.producto = o.id
-    INNER JOIN users u ON p.asesor = u.id
-    INNER JOIN clientes c ON p.cliente = c.idc
-    WHERE p.asesor = ? AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
+    if (j.sucursal) {
 
-    if (directas.length > 0) {
-        await directas.map(async (a, x) => {
-            var val = a.valor - a.ahorro
-            var monto = val * j.comision
-            var retefuente = monto * 0.10
-            var reteica = monto * 8 / 1000
-            personal += val
-            if (a.directa === null) {
-                bonop += val
+        const directas = await pool.query(`SELECT * FROM preventa p 
+            INNER JOIN productosd l ON p.lote = l.id
+            INNER JOIN productos o ON l.producto = o.id
+            INNER JOIN users u ON p.asesor = u.id
+            INNER JOIN clientes c ON p.cliente = c.idc
+            WHERE p.asesor = ? AND l.estado IN(10, 13) 
+            AND p.tipobsevacion IS NULL AND l.directa IS NULL`, j.acreedor);
+
+        if (directas.length > 0) {
+            await directas.map(async (a, x) => {
+                var val = a.valor - a.ahorro
+                var monto = val * j.sucursal
+                var retefuente = monto * 0.10
+                var reteica = monto * 8 / 1000
                 var f = {
                     fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
-                    asesor: j.acreedor, porciento: j.comision, total: val, lt: a.lote, retefuente,
+                    asesor: j.acreedor, porciento: j.sucursal, total: val, lt: a.lote, retefuente,
                     reteica, pagar: monto - (retefuente + reteica)
                 }
                 await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
                 await pool.query(`INSERT INTO solicitudes SET ?`, f);
-            }
-        })
-    }
+            })
+        }
+        return true
+    } else {
+        const directas = await pool.query(`SELECT * FROM preventa p 
+            INNER JOIN productosd l ON p.lote = l.id
+            INNER JOIN productos o ON l.producto = o.id
+            INNER JOIN users u ON p.asesor = u.id
+            INNER JOIN clientes c ON p.cliente = c.idc
+            WHERE p.asesor = ? AND l.estado IN(10, 13) 
+            AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
 
-    const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND usuario IS NOT NULL`, j.acreedor);
-
-    if (lineaUno.length > 0) {
-        await lineaUno.map((p, x) => {
-            lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
-            linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
-        });
-
-        const reporte = await pool.query(`SELECT * FROM preventa p 
-    INNER JOIN productosd l ON p.lote = l.id
-    INNER JOIN productos o ON l.producto = o.id
-    INNER JOIN users u ON p.asesor = u.id
-    INNER JOIN clientes c ON p.cliente = c.idc
-    WHERE (${lDesc}) AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
-
-        if (reporte.length > 0) {
-            await reporte.map(async (a, x) => {
+        if (directas.length > 0) {
+            await directas.map(async (a, x) => {
                 var val = a.valor - a.ahorro
-                var monto = val * j.nivel1
+                var monto = val * j.comision
                 var retefuente = monto * 0.10
                 var reteica = monto * 8 / 1000
-                venta += val
-                if (a.uno === null) {
-                    bono += val
+                personal += val
+                if (a.directa === null) {
+                    bonop += val
                     var f = {
-                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'PRIMERA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel1, total: val, lt: a.lote, retefuente,
+                        fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
+                        asesor: j.acreedor, porciento: j.comision, total: val, lt: a.lote, retefuente,
                         reteica, pagar: monto - (retefuente + reteica)
                     }
-                    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
+                    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
                 }
             })
         }
 
-        const lineaDos = await pool.query(`SELECT * FROM pines WHERE ${linea}`);
-        lDesc = '', linea = '';
-        await lineaDos.map((p, x) => {
-            lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
-            linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
-        });
+        const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND usuario IS NOT NULL`, j.acreedor);
 
-        const reporte2 = await pool.query(`SELECT * FROM preventa p 
-    INNER JOIN productosd l ON p.lote = l.id
-    INNER JOIN productos o ON l.producto = o.id
-    INNER JOIN users u ON p.asesor = u.id
-    INNER JOIN clientes c ON p.cliente = c.idc
-    WHERE (${lDesc}) AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+        if (lineaUno.length > 0) {
+            await lineaUno.map((p, x) => {
+                lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+                linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+            });
 
-        if (reporte2.length > 0) {
-            await reporte2.map(async (a, x) => {
-                var val = a.valor - a.ahorro
-                var monto = val * j.nivel2
+            const reporte = await pool.query(`SELECT * FROM preventa p 
+                INNER JOIN productosd l ON p.lote = l.id
+                INNER JOIN productos o ON l.producto = o.id
+                INNER JOIN users u ON p.asesor = u.id
+                INNER JOIN clientes c ON p.cliente = c.idc
+                WHERE (${lDesc}) AND l.estado IN(10, 13) 
+                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+
+            if (reporte.length > 0) {
+                await reporte.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    venta += val
+                    if (a.uno === null) {
+                        bono += val
+                    }
+                })
+            }
+
+            const lineaDos = await pool.query(`SELECT * FROM pines WHERE ${linea}`);
+            lDesc = '', linea = '';
+            await lineaDos.map((p, x) => {
+                lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+                linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+            });
+
+            const reporte2 = await pool.query(`SELECT * FROM preventa p 
+                INNER JOIN productosd l ON p.lote = l.id
+                INNER JOIN productos o ON l.producto = o.id
+                INNER JOIN users u ON p.asesor = u.id
+                INNER JOIN clientes c ON p.cliente = c.idc
+                WHERE (${lDesc}) AND l.estado IN(10, 13) 
+                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+
+            if (reporte2.length > 0) {
+                await reporte2.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    venta += val
+                    if (a.dos === null) {
+                        bono += val
+                    }
+                })
+            }
+
+            const lineaTres = await pool.query(`SELECT * FROM pines WHERE ${linea}`);
+            lDesc = '', linea = '';
+            await lineaTres.map((p, x) => {
+                lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+            });
+            const reporte3 = await pool.query(`SELECT * FROM preventa p 
+                INNER JOIN productosd l ON p.lote = l.id
+                INNER JOIN productos o ON l.producto = o.id
+                INNER JOIN users u ON p.asesor = u.id
+                INNER JOIN clientes c ON p.cliente = c.idc
+                WHERE (${lDesc}) AND l.estado IN(10, 13) 
+                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+
+            if (reporte3.length > 0) {
+                await reporte3.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    venta += val
+                    if (a.tres === null) {
+                        bono += val
+                    }
+                })
+            }
+            /////////////////////////* PREMIOS *///////////////////////////////////
+            var rango = j.nrango;
+            var tot = venta + personal
+            if (personal >= j.venta && tot >= j.ventas) {
+                if (tot >= 500000000 && tot < 1000000000) {
+                    var retefuente = j.premio * 0.10
+                    var reteica = j.premio * 8 / 1000
+                    var f = {
+                        fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
+                        descp: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot, retefuente,
+                        reteica, pagar: j.premio - (retefuente + reteica)
+                    }
+                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 4 }, j.acreedor]);
+                    rango = 4
+
+                } else if (tot >= 1000000000 && tot < 2000000000) {
+                    var retefuente = j.premio * 0.10
+                    var reteica = j.premio * 8 / 1000
+                    var f = {
+                        fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
+                        descp: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot, retefuente,
+                        reteica, pagar: j.premio - (retefuente + reteica)
+                    }
+                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 3 }, j.acreedor]);
+                    rango = 3
+
+                } else if (tot >= 2000000000 && tot < 3000000000) {
+                    var retefuente = j.premio * 0.10
+                    var reteica = j.premio * 8 / 1000
+                    var f = {
+                        fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
+                        descp: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
+                        reteica, pagar: j.premio - (retefuente + reteica)
+                    }
+                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 2 }, j.acreedor]);
+                    rango = 2
+
+                } else if (tot >= 300000000) {
+                    var retefuente = j.premio * 0.10
+                    var reteica = j.premio * 8 / 1000
+                    var f = {
+                        fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
+                        descp: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
+                        reteica, pagar: j.premio - (retefuente + reteica)
+                    }
+                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 1 }, j.acreedor]);
+                    rango = 1
+                }
+            }
+            /////////////////////////* BONOS *///////////////////////////////////
+
+            if (rango !== j.nrango) {
+                const asesor = await pool.query(`SELECT * FROM pines p INNER JOIN users u ON p.acreedor = u.id 
+                    INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ? LIMIT 1`, pin);
+                j = asesor[0]
+                rango = j.nrango
+            }
+            var bonus = j.bono
+
+            if (rango === 3) {
+                var monto = bonop * bonus
                 var retefuente = monto * 0.10
                 var reteica = monto * 8 / 1000
-                venta += val
-                if (a.dos === null) {
-                    bono += val
-                    var f = {
-                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'SEGUNDA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel2, total: val, lt: a.lote, retefuente,
-                        reteica, pagar: monto - (retefuente + reteica)
-                    }
-                    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ dos: j.acreedor }, a.lote]);
-                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                var f = {
+                    fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
+                    descp: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop, retefuente,
+                    reteica, pagar: monto - (retefuente + reteica)
                 }
-            })
-        }
+                await pool.query(`INSERT INTO solicitudes SET ?`, f);
 
-        const lineaTres = await pool.query(`SELECT * FROM pines WHERE ${linea}`);
-        lDesc = '', linea = '';
-        await lineaTres.map((p, x) => {
-            lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
-        });
-        const reporte3 = await pool.query(`SELECT * FROM preventa p 
-    INNER JOIN productosd l ON p.lote = l.id
-    INNER JOIN productos o ON l.producto = o.id
-    INNER JOIN users u ON p.asesor = u.id
-    INNER JOIN clientes c ON p.cliente = c.idc
-    WHERE (${lDesc}) AND l.estado = 10 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
-
-        if (reporte3.length > 0) {
-            await reporte3.map(async (a, x) => {
-                var val = a.valor - a.ahorro
-                var monto = val * j.nivel3
+            } else if (rango === 2 || rango === 1) {
+                var monto = (bonop + bono) * bonus
                 var retefuente = monto * 0.10
                 var reteica = monto * 8 / 1000
-                venta += val
-                if (a.tres === null) {
-                    bono += val
-                    var f = {
-                        fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'TERCERA LINEA',
-                        asesor: j.acreedor, porciento: j.nivel3, total: val, lt: a.lote, retefuente,
-                        reteica, pagar: monto - (retefuente + reteica)
-                    }
-                    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ tres: j.acreedor }, a.lote]);
-                    await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                var f = {
+                    fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
+                    descp: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono, retefuente,
+                    reteica, pagar: monto - (retefuente + reteica)
                 }
-            })
-        }
-    }
-    var rango = j.nrango;
-    var tot = venta + personal
-    if (personal >= j.venta && tot >= j.ventas) {
-        if (tot >= 500000000 && tot < 1000000000) {
-            var retefuente = j.premio * 0.10
-            var reteica = j.premio * 8 / 1000
-            var f = {
-                fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A DIRECTOR', asesor: j.acreedor, total: tot, retefuente,
-                reteica, pagar: j.premio - (retefuente + reteica)
+                await pool.query(`INSERT INTO solicitudes SET ?`, f);
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, f);
-            await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 4 }, j.acreedor]);
-            rango = 4
-
-        } else if (tot >= 1000000000 && tot < 2000000000) {
-            var retefuente = j.premio * 0.10
-            var reteica = j.premio * 8 / 1000
-            var f = {
-                fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A GERENTE', asesor: j.acreedor, total: tot, retefuente,
-                reteica, pagar: j.premio - (retefuente + reteica)
+            /////////////////////////* COMISIONES *///////////////////////////////////
+            if (reporte.length > 0 && rango !== 5) {
+                await reporte.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    var monto = val * j.nivel1
+                    var retefuente = monto * 0.10
+                    var reteica = monto * 8 / 1000
+                    if (a.uno === null) {
+                        var f = {
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'PRIMERA LINEA',
+                            asesor: j.acreedor, porciento: j.nivel1, total: val, lt: a.lote, retefuente,
+                            reteica, pagar: monto - (retefuente + reteica)
+                        }
+                        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
+                        await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    }
+                })
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, f);
-            await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 3 }, j.acreedor]);
-            rango = 3
-
-        } else if (tot >= 2000000000 && tot < 3000000000) {
-            var retefuente = j.premio * 0.10
-            var reteica = j.premio * 8 / 1000
-            var f = {
-                fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A VICEPRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
-                reteica, pagar: j.premio - (retefuente + reteica)
+            if (reporte2.length > 0 && rango !== 5) {
+                await reporte2.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    var monto = val * j.nivel2
+                    var retefuente = monto * 0.10
+                    var reteica = monto * 8 / 1000
+                    if (a.dos === null) {
+                        var f = {
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'SEGUNDA LINEA',
+                            asesor: j.acreedor, porciento: j.nivel2, total: val, lt: a.lote, retefuente,
+                            reteica, pagar: monto - (retefuente + reteica)
+                        }
+                        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ dos: j.acreedor }, a.lote]);
+                        await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    }
+                })
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, f);
-            await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 2 }, j.acreedor]);
-            rango = 2
-
-        } else if (tot >= 300000000) {
-            var retefuente = j.premio * 0.10
-            var reteica = j.premio * 8 / 1000
-            var f = {
-                fech: hoy, monto: j.premio, concepto: 'PREMIACION', stado: 9,
-                descp: 'ASENSO A PRESIDENTE', asesor: j.acreedor, total: tot, retefuente,
-                reteica, pagar: j.premio - (retefuente + reteica)
+            if (reporte3.length > 0 && rango !== 5) {
+                await reporte3.map(async (a, x) => {
+                    var val = a.valor - a.ahorro
+                    var monto = val * j.nivel3
+                    var retefuente = monto * 0.10
+                    var reteica = monto * 8 / 1000
+                    if (a.tres === null) {
+                        var f = {
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 9, descp: 'TERCERA LINEA',
+                            asesor: j.acreedor, porciento: j.nivel3, total: val, lt: a.lote, retefuente,
+                            reteica, pagar: monto - (retefuente + reteica)
+                        }
+                        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ tres: j.acreedor }, a.lote]);
+                        await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    }
+                })
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, f);
-            await pool.query(`UPDATE users SET ? WHERE id = ?`, [{ nrango: 1 }, j.acreedor]);
-            rango = 1
         }
+        return true
     }
-    var bonus = j.bono
-    if (rango !== j.nrango) {
-        const ucr = await pool.query(`SELECT * FROM users WHERE id = ?`, j.acreedor);
-        rango = ucr[0].nrango
-        bonus = ucr[0].bono
-    }
-
-    if (rango === 5) {
-        await pool.query(`DELETE FROM solicitudes WHERE concepto = 'COMISION INDIRECTA' AND asesor = ?`, j.acreedor);
-
-    } else if (rango === 3) {
-        var monto = bonop * bonus
-        var retefuente = monto * 0.10
-        var reteica = monto * 8 / 1000
-        var f = {
-            fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
-            descp: 'BONO GERENCIAL', asesor: j.acreedor, total: bonop, retefuente,
-            reteica, pagar: monto - (retefuente + reteica)
-        }
-        await pool.query(`INSERT INTO solicitudes SET ?`, f);
-
-    } else if (rango === 2 || rango === 1) {
-        var monto = (bonop + bono) * bonus
-        var retefuente = monto * 0.10
-        var reteica = monto * 8 / 1000
-        var f = {
-            fech: hoy, monto, concepto: 'BONO', stado: 9, porciento: bonus,
-            descp: 'BONO PRESIDENCIAL', asesor: j.acreedor, total: bonop + bono, retefuente,
-            reteica, pagar: monto - (retefuente + reteica)
-        }
-        await pool.query(`INSERT INTO solicitudes SET ?`, f);
-    }
-    return true
 };
 async function Eli(img) {
     fs.exists(img, function (exists) {
