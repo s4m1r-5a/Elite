@@ -6253,57 +6253,74 @@ if (window.location == `${window.location.origin}/links/red`) {
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="1">Presidente</option>
                                 <option value="2">Vicepresidente</option>
-                                <option value="3">Gerente</option>
-                                <option value="4">Director</option>
-                                <option value="5">Inversionista</option>
+                                <option value="3">Gerente Elite</option>
+                                <option value="4">Gerente</option>
+                                <option value="5">Director</option>
+                                <option value="6">Inversionista</option>
                             </select>`
                             break;
                         case 2:
-                            return `<span class="badge badge-pill badge-success">Vicepresidente</span>
+                            return `<span class="badge badge-pill badge-primary">Vicepresidente</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="2">Vicepresidente</option>
                                 <option value="1">Presidente</option>
-                                <option value="3">Gerente</option>
-                                <option value="4">Director</option>
-                                <option value="5">Inversionista</option>
+                                <option value="3">Gerente Elite</option>
+                                <option value="4">Gerente</option>
+                                <option value="5">Director</option>
+                                <option value="6">Inversionista</option>
                             </select>`
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-primary">Gerente</span>
+                            return `<span class="badge badge-pill badge-info">Gerente Elite</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
-                                <option value="3">Gerente</option>
+                                <option value="3">Gerente Elite</option>
                                 <option value="1">Presidente</option>
                                 <option value="2">Vicepresidente</option>
-                                <option value="4">Director</option>
-                                <option value="5">Inversionista</option>
-                            </select>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Inversionista</span>
-                            <select class="form-control-no-border estado" name="estado"
-                            style="padding: 1px; width: 100%; display: none;">
-                                <option value="5">Inversionista</option>
-                                <option value="1">Presidente</option>
-                                <option value="2">Vicepresidente</option>
-                                <option value="3">Gerente</option>
-                                <option value="4">Director</option>
+                                <option value="4">Gerente</option>
+                                <option value="5">Director</option>
+                                <option value="6">Inversionista</option>
                             </select>`
                             break;
                         case 4:
+                            return `<span class="badge badge-pill badge-success">Gerente</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="4">Gerente</option>
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="3">Gerente Elite</option>
+                                <option value="5">Director</option>
+                                <option value="6">Inversionista</option>
+                            </select>`
+                            break;
+                        case 5:
                             return `<span class="badge badge-pill badge-secondary">Director</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
-                                <option value="4">Director</option>
+                                <option value="5">Director</option>
                                 <option value="1">Presidente</option>
                                 <option value="2">Vicepresidente</option>
-                                <option value="3">Gerente</option>
-                                <option value="5">Inversionista</option>
+                                <option value="3">Gerente Elite</option>
+                                <option value="4">Gerente</option>
+                                <option value="6">Inversionista</option>
+                            </select>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-dark">Inversionista</span>
+                            <select class="form-control-no-border estado" name="estado"
+                            style="padding: 1px; width: 100%; display: none;">
+                                <option value="6">Inversionista</option>
+                                <option value="1">Presidente</option>
+                                <option value="2">Vicepresidente</option>
+                                <option value="3">Gerente Elite</option>
+                                <option value="4">Gerente</option>
+                                <option value="5">Director</option>
                             </select>`
                             break;
                         case 7:
-                            return `<span class="badge badge-pill badge-dark">Independiente</span>`
+                            return `<span class="badge badge-pill badge-danger">Independiente</span>`
                             break;
                         default:
                             return ``
