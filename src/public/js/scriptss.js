@@ -1613,7 +1613,9 @@ if (window.location.pathname == `/links/reportes`) {
                 data: null,
                 defaultContent: ''
             },
-            { data: "id" },
+            {
+                data: "id"
+            },
             {
                 data: "proyecto",
                 className: 'te'
@@ -1625,6 +1627,21 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "n",
                 className: 'te'
+            },
+            {
+                data: "promesa",
+                className: 'gr',
+                render: function (data, method, row) {
+                    var h = [row]
+                    if (data) {
+                        return row.autoriza.split('-')[0] == 1 ? `<a ondblclick="Promesa(${row.id}, 2)" title="Promesa realizada \na la espera que el \ncliente autentique \n\n${row.autoriza.split('-')[1]}"><i class="far fa-check-circle" style="color:green;"></i></a>`
+                            : row.autoriza.split('-')[0] == 2 ? `<a ondblclick="Promesa(${row.id}, 3)" title="Promesa autenticada \npor el cliente \n\n${row.autoriza.split('-')[1]}"><i class="fas fa-check-circle" style="color:green;"></i></a>`
+                                : row.autoriza.split('-')[0] == 3 ? `<a ondblclick="Promesa(${row.id}, 0)" title="Promesa autenticada \npor ambas partes \n\n${row.autoriza.split('-')[1]}"><i class="fas fa-certificate" style="color:green;"></i></a>`
+                                    : `<a ondblclick="Promesa(${row.id}, 1)" title="Promesa anulada por \n${row.autoriza.split('-')[1]}"><i class="fas fa-exclamation-circle"></i></a>`;
+                    } else {
+                        return `<a ondblclick="Promesa(${row.id}, 1)" title="No posee promesa todavia \ndoble click para confirmar \npromesa"><i class="fas fa-exclamation-circle"></i></a>`;
+                    }
+                }
             },
             {
                 data: "estado",
@@ -2690,6 +2707,30 @@ if (window.location.pathname == `/links/reportes`) {
                 }
             }
         });
+    }
+    var Promesa = (id, aut) => {
+        if (admin == 1) {
+            var D = { k: id, h: aut };
+            $.ajax({
+                url: '/links/reportes/estadopromesas',
+                data: D,
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        tableOrden.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                    }
+                }
+            });
+        }
     }
     var Verificar = (id) => {
         var D = { k: id, h: moment().format('YYYY-MM') };

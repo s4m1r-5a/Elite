@@ -310,7 +310,7 @@ router.put('/clientes/:id', async (req, res) => {
     const TOKEN_PATH = 'token.json';
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
-        fechanacimiento, estadocivil, email, movil, direccion, asesors
+        fechanacimiento, estadocivil, email, movil, direccion, asesors, id
     } = req.body;
     var imagenes = ''
     req.files.map((e) => {
@@ -355,6 +355,10 @@ router.put('/clientes/:id', async (req, res) => {
             await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             res.send(true);
         }
+    } else if (req.params.id === 'actualizar') {
+
+    } else if (req.params.id === 'eliminar') {
+
     }
 
     function authorize(credentials, callback) {
@@ -1103,8 +1107,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags,
-            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa,
+            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${d} `
 
@@ -1207,6 +1211,17 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]
         );
         res.send(true);
+
+    } else if (id === 'estadopromesas') {
+        const { k, h } = req.body;
+        sql = `SELECT * FROM preventa p 
+        INNER JOIN clientes c ON p.cliente = c.idc 
+        INNER JOIN users u ON p.asesor = u.id`
+        //const personas = await pool.query(sql);
+        await pool.query(`UPDATE preventa SET ? WHERE id = ?`,
+            [{ promesa: 1, autoriza: h + '-' + req.user.fullname }, k]
+        );
+        res.send(true);
     }
 
 });
@@ -1250,7 +1265,6 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')
         AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes };
-        console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'bono') {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
@@ -1964,16 +1978,16 @@ async function Pa(S, fn) {
 //Desendentes('15', 10)
 
 async function PagosAbonos(Tid, pdf, user) {
-
-    const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, 
-    pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, 
-    pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, 
+    //u.
+    const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, u.nrango, 
+    pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, 
+    pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
     pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
     s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
     INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-    INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-    WHERE  pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
+    INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
+    LEFT JOIN cupones cp ON s.bono = cp.id WHERE  pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
 
     const S = SS[0];
     const T = S.cparacion;
@@ -2184,9 +2198,7 @@ async function PagosAbonos(Tid, pdf, user) {
         var Ps = async (Total, texto) => {
             var inicial = (S.valor - S.ahorro) * S.iniciar / 100
 
-            if (S.tipo === 'SEPARACION' && S.incentivo) {
-                //var retefuente = S.incentivo * 0.10
-                //var reteica = S.incentivo * 8 / 1000
+            if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo) {
                 var solicitar = {
                     fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 9, descp: 'SEPARACION',
                     asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
