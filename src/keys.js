@@ -34,12 +34,12 @@ module.exports = {
     },
     dataSet: {},
     Google: {
-        client_id: "358691758390-ea426ocipho2d13q7aku48q3gmo9ktal.apps.googleusercontent.com",
+        client_id: "507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com",
         project_id: "still-toolbox-253319",
         auth_uri: "https://accounts.google.com/o/oauth2/auth",
         token_uri: "https://oauth2.googleapis.com/token",
         auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-        client_secret: "lIFar1pydYRrcArlKxTe3S8h",
+        client_secret: "QRAaQqm5PmIA55bw6N2-hpE2",
         redirect_uris: [
             "https://redflixx.herokuapp.com/auth/google/callback",
             "http://localhost:3000/auth/google/callback"
@@ -64,8 +64,8 @@ module.exports = {
         v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`
     },
     Contactos: {
-        client_secret: 'lIFar1pydYRrcArlKxTe3S8h',
-        client_id: '358691758390-ea426ocipho2d13q7aku48q3gmo9ktal.apps.googleusercontent.com',
+        client_secret: 'QRAaQqm5PmIA55bw6N2-hpE2',
+        client_id: '507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com',
         redirect_uris: 'http://localhost:3000/contactos'
     }
 };

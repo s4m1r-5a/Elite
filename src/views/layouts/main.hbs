@@ -45,6 +45,7 @@
     #destination-input:focus {
       border-color: #4d90fe;
     }
+
     @media print {
       #imprimir {
         background-color: white;
@@ -58,6 +59,7 @@
         font-size: 14px;
         line-height: 18px;
       }
+
       .card-footer {
         position: fixed;
         /* Set the navbar to fixed position */
@@ -67,6 +69,7 @@
         /* Full width */
       }
     }
+
     .zoom {
       -webkit-transition: all .9s ease;
       /* Safari y Chrome */
@@ -78,6 +81,7 @@
       /* Opera */
       width: 100%;
     }
+
     .zoom:hover {
       -webkit-transform: scale(1.25);
       -moz-transform: scale(1.25);
@@ -97,6 +101,9 @@
       {{>footer}}
     </div>
   </div>
+  <script
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_2TwyNJiGQwKXDVHOM4_I3jg69qvHc-Y&libraries=places&callback=initMap"
+    async defer></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
