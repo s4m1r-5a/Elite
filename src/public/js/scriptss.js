@@ -1632,12 +1632,11 @@ if (window.location.pathname == `/links/reportes`) {
                 data: "promesa",
                 className: 'gr',
                 render: function (data, method, row) {
-                    var h = [row]
-                    if (data) {
-                        return row.autoriza.split('-')[0] == 1 ? `<a ondblclick="Promesa(${row.id}, 2)" title="Promesa realizada \na la espera que el \ncliente autentique \n\n${row.autoriza.split('-')[1]}"><i class="far fa-check-circle" style="color:green;"></i></a>`
-                            : row.autoriza.split('-')[0] == 2 ? `<a ondblclick="Promesa(${row.id}, 3)" title="Promesa autenticada \npor el cliente \n\n${row.autoriza.split('-')[1]}"><i class="fas fa-check-circle" style="color:green;"></i></a>`
-                                : row.autoriza.split('-')[0] == 3 ? `<a ondblclick="Promesa(${row.id}, 0)" title="Promesa autenticada \npor ambas partes \n\n${row.autoriza.split('-')[1]}"><i class="fas fa-certificate" style="color:green;"></i></a>`
-                                    : `<a ondblclick="Promesa(${row.id}, 1)" title="Promesa anulada por \n${row.autoriza.split('-')[1]}"><i class="fas fa-exclamation-circle"></i></a>`;
+                    if (data || row.autoriza) {
+                        return row.status == 1 ? `<a ondblclick="Promesa(${row.id}, 2)" title="Promesa realizada \na la espera que el \ncliente autentique \n\n${row.autoriza}"><i class="far fa-check-circle" style="color:green;"></i></a>`
+                            : row.status == 2 ? `<a ondblclick="Promesa(${row.id}, 3)" title="Promesa autenticada \npor el cliente \n\n${row.autoriza}"><i class="fas fa-check-circle" style="color:green;"></i></a>`
+                                : row.status == 3 ? `<a ondblclick="Promesa(${row.id}, 0)" title="Promesa autenticada \npor ambas partes \n\n${row.autoriza}"><i class="fas fa-certificate" style="color:green;"></i></a>`
+                                    : `<a ondblclick="Promesa(${row.id}, 1)" title="Promesa anulada por \n${row.autoriza}"><i class="fas fa-exclamation-circle"></i></a>`;
                     } else {
                         return `<a ondblclick="Promesa(${row.id}, 1)" title="No posee promesa todavia \ndoble click para confirmar \npromesa"><i class="fas fa-exclamation-circle"></i></a>`;
                     }
@@ -2710,7 +2709,7 @@ if (window.location.pathname == `/links/reportes`) {
     }
     var Promesa = (id, aut) => {
         if (admin == 1) {
-            var D = { k: id, h: aut };
+            var D = { k: id, h: aut, f: moment().format('YYYY-MM-DD') };
             $.ajax({
                 url: '/links/reportes/estadopromesas',
                 data: D,
@@ -2724,9 +2723,16 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 success: function (data) {
                     if (data) {
-                        tableOrden.ajax.reload(null, false)
                         $('#ModalEventos').one('shown.bs.modal', function () {
+                            $('#ModalEventos').modal('hide');
                         }).modal('hide');
+                        tableOrden.ajax.reload(null, false)
+                    } else {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                            $('#ModalEventos').modal('hide');
+                        }).modal('hide');
+                        tableOrden.ajax.reload(null, false)
+                        SMSj('error', 'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor')
                     }
                 }
             });

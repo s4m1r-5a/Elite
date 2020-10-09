@@ -1107,7 +1107,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa,
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${d} `
@@ -1213,15 +1213,31 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
 
     } else if (id === 'estadopromesas') {
-        const { k, h } = req.body;
-        sql = `SELECT * FROM preventa p 
+        const { k, h, f } = req.body;
+        //h = parseFloat(h);
+        sql = `SELECT * FROM preventa p
+        INNER JOIN productosd l ON p.lote = l.id 
         INNER JOIN clientes c ON p.cliente = c.idc 
-        INNER JOIN users u ON p.asesor = u.id`
-        //const personas = await pool.query(sql);
-        await pool.query(`UPDATE preventa SET ? WHERE id = ?`,
-            [{ promesa: 1, autoriza: h + '-' + req.user.fullname }, k]
-        );
-        res.send(true);
+        INNER JOIN users u ON p.asesor = u.id WHERE p.id = ?`
+        const pers = await pool.query(sql, k);
+        const p = pers[0];
+        if (!p.directa || h >= 2) {
+            await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+                [{
+                    'p.status': h,
+                    'p.promesa': h,
+                    'p.autoriza': req.user.fullname,
+                    'l.fechar': h == 2 && !p.directa ? f : p.fechar
+                }, k]
+            );
+            var bod = `_*${p.nombre}*. RED ELITE a generado tu *PROMESA DE COMPRA VENTA* la cual te sera enviada al correo *${p.email}* una ves la halla autenticado dirijase a una de nuestras oficinas con el documento_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+            h == 1 ? await EnviarWTSAP(p.movil, bod) : '';
+            var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${p.mz} LT ${p.n}* la cual le sera enviada al correo *${p.email}*, se recomienda realizar seguimiento al cliente para que haga la autenticacion en el menor tiempo posible_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+            h == 1 ? await EnviarWTSAP(p.cel, bo) : '';
+            res.send(true);
+        } else {
+            res.send(false);
+        }
     }
 
 });
@@ -1403,7 +1419,6 @@ router.post('/cedulav', isLoggedIn, async (req, res) => {
     } else {
         getCI(cedula)
     }
-
 });
 /////////////* VENTAS */////////////////////////////////////
 router.get('/ventas2', isLoggedIn, async (req, res) => {
@@ -2477,7 +2492,7 @@ async function Desendentes(pin, stados) {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.asesor = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND l.directa IS NULL`, j.acreedor);
+            AND p.tipobsevacion IS NULL AND status = 2 AND l.directa IS NULL`, j.acreedor);
 
         if (directas.length > 0) {
             await directas.map(async (a, x) => {
@@ -2503,7 +2518,7 @@ async function Desendentes(pin, stados) {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.asesor = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
+            AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
 
         if (directas.length > 0) {
             await directas.map(async (a, x) => {
@@ -2539,7 +2554,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte.length > 0) {
                 await reporte.map(async (a, x) => {
@@ -2564,7 +2579,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte2.length > 0) {
                 await reporte2.map(async (a, x) => {
@@ -2587,7 +2602,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte3.length > 0) {
                 await reporte3.map(async (a, x) => {
