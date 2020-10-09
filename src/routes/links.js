@@ -2492,7 +2492,7 @@ async function Desendentes(pin, stados) {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.asesor = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.promesa IS NOT NULL AND l.directa IS NULL`, j.acreedor);
+            AND p.tipobsevacion IS NULL AND status = 2 AND l.directa IS NULL`, j.acreedor);
 
         if (directas.length > 0) {
             await directas.map(async (a, x) => {
@@ -2518,7 +2518,7 @@ async function Desendentes(pin, stados) {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.asesor = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.promesa IS NOT NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
+            AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`, j.acreedor);
 
         if (directas.length > 0) {
             await directas.map(async (a, x) => {
@@ -2554,7 +2554,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND p.promesa IS NOT NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte.length > 0) {
                 await reporte.map(async (a, x) => {
@@ -2579,7 +2579,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND p.promesa IS NOT NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte2.length > 0) {
                 await reporte2.map(async (a, x) => {
@@ -2602,7 +2602,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN users u ON p.asesor = u.id
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
-                AND p.tipobsevacion IS NULL AND p.promesa IS NOT NULL AND l.fechar BETWEEN '${month}' and '${hoy}'`);
+                AND p.tipobsevacion IS NULL AND p.status = 2 AND l.fechar BETWEEN '${month}' and '${hoy}'`);
 
             if (reporte3.length > 0) {
                 await reporte3.map(async (a, x) => {
