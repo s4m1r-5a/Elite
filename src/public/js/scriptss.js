@@ -3536,21 +3536,294 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('footer').show()
     $('nav').show()
 }
-//////////////////////////////////* RECIBOS */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/recibos`) {
+//////////////////////////////////* CARTERA */////////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/cartera`) {
+    minDateFilter = "";
+    maxDateFilter = "";
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            if (typeof aData._date == 'undefined') {
+                aData._date = new Date(aData[6]).getTime();
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
+    var ya = moment(new Date()).format('YYYY-MM-DD')
+    $('#PagO').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+    });
+    var cartera = $('#cartera').DataTable({
+        dom: 'Bfrtip',
+        buttons: [/*{
+            extend: 'collection',
+            text: 'Ctrl',
+            orientation: 'landscape',
+            buttons: [{
+                text: 'Copiar',
+                extend: 'copy'
+            },
+            {
+                extend: 'pdf',
+                orientation: 'landscape',
+                pageSize: 'LEGAL'
+            },
+            {
+                text: 'Ach plano ',
+                extend: 'csv',
+                orientation: 'landscape'
+            },
+            {
+                text: 'Excel',
+                extend: 'excel',
+                orientation: 'landscape'
+            },
+            {
+                text: 'Imprimir',
+                extend: 'print',
+                orientation: 'landscape'
+            }
+            ]
+        },*/
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+            {
+                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
+            placeholder="MZ">`,
+                attr: {
+                    title: 'Busqueda por MZ',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            },
+            {
+                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
+            placeholder="LT">`,
+                attr: {
+                    title: 'Busqueda por LT',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            data: { h: ya },
+            url: "/links/cartera",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            {
+                data: "id"
+            },
+            {
+                data: "proyecto",
+                className: 'te'
+            },
+            {
+                data: "mz",
+                className: 'te'
+            },
+            {
+                data: "n",
+                className: 'te'
+            },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            {
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "documento",
+                className: 'te'
+            },
+            {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "fullname",
+                className: 'te'
+            },
+            {
+                className: 't',
+                data: "id",
+                render: function (data, method, row) {
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                             aria-haspopup="true" aria-expanded="false">Acción</button>
+                                                <div class="dropdown-menu">
+                                                    <a class="dropdown-item" href="/links/ordn/${data}"><i class="fas fa-edit"></i> Ediar</a>
+                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
+                                                    <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                                    <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
+                                                    <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
+                                                </div>
+                                        </div>`
+                        : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
+                }
+            }, //std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
+            {
+                data: "std",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 3:
+                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
+                            break;
+                    }
+                }
+            },
+            {
+                data: "tipo",
+                className: 'te'
+            },
+            {
+                data: "ncuota",
+                className: 'te'
+            },
+            {
+                data: "fechs",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "cuota",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "abono",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "mora",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["estado"] == 12) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["estado"] == 8) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["estado"] == 10) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["estado"] == 1) {
+                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+            } else if (data["estado"] == 13) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+            }
+        }
+    });
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 3 : 4;
+        cartera
+            .columns(col)
+            .search(this.value)
+            .draw();
+    });
     window.preview = function (input) {
         if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
             $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
             $(input.files).each(function () {
                 var reader = new FileReader();
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        `<img src="${e.target.result}" width="70" height="100" class=""
-                        alt="Ashley Briggs">`
+                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                        `<div class="image" style="
+                            width: ${marg}%;
+                            padding-top: calc(100% / (16/9));
+                            background-image: url('${e.target.result}');
+                            background-size: 100%;
+                            background-position: center;
+                            background-repeat: no-repeat;float: left;"></div>`
                     );
-                    $('#tablarecibos tbody').append(`
-                    <tr>
+                    $('#trarchivos').after(`
+                    <tr class="op">
                         <th>                     
                         <svg xmlns="http://www.w3.org/2000/svg" 
                         width="24" height="24" viewBox="0 0 24 24" fill="none" 
@@ -3562,54 +3835,73 @@ if (window.location.pathname == `/links/recibos`) {
                             <line x1="16" y1="17" x2="8" y2="17"></line>
                             <polyline points="10 9 9 9 8 9"></polyline>
                         </svg>
-                        <input class=""
-                             type="text" name=""
-                             placeholder="Recibo"
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
                              autocomplete="off" style="padding: 1px; width: 50%;" required>
                         </th>
                         <td>
                             <input class="montos text-center" type="text" name=""
-                             placeholder="Monto" autocomplete="off" 
-                             style="padding: 1px; width: 60%;" required>
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
                         </td>
                     </tr>`
                     );
-                    $('.montos').mask('###,###,###', { reverse: true });
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                    var zom = 200
+                    $(".image").on({
+                        mousedown: function () {
+                            zom += 50
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseup: function () {
+
+                        },
+                        mousewheel: function (e) {
+                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mousemove: function (e) {
+                            let width = this.offsetWidth;
+                            let height = this.offsetHeight;
+                            let mouseX = e.offsetX;
+                            let mouseY = e.offsetY;
+
+                            let bgPosX = (mouseX / width * 100);
+                            let bgPosY = (mouseY / height * 100);
+
+                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                        },
+                        mouseenter: function (e) {
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseleave: function () {
+                            $(this).css("background-size", "100%")
+                            this.style.backgroundPosition = "center";
+                        }
+                    });
                 }
             });
         }
-    }
 
-    $('#Nrecbg').change(function () {
-        var val = $(this).val(), i = 1;
-        $('#tablareci tbody').html('')
-        while (i <= val) {
-            $('#tablareci tbody').append(`
-                    <tr>
-                        <th>                     
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                        stroke-linejoin="round" class="feather feather-file">
-                            <path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path>
-                            <polyline points="13 2 13 9 20 9"></polyline>
-                        </svg>
-                        <input class=""
-                             type="text" name="" value="${ID(7)}"
-                             placeholder="id del recibo a generar"
-                             autocomplete="off" style="padding: 1px; width: 60%;" required>
-                        </th>
-                        <td>
-                            <input class="montos text-center" type="text" name=""
-                             placeholder="Monto"
-                             autocomplete="off" style="padding: 1px; width: 60%;" required>
-                        </td>
-                    </tr>`
-            );
-            $('.montos').mask('###,###,###', { reverse: true });
-            i++;
-        };
-    });
+    }
+    //{ total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb }
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
@@ -4184,7 +4476,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $('#datatable2').on('click', '.to button', function () {
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
-        if ($(this).parent().prev().val().indexOf(",") > 0) {
+        if ($(this).parent().prev().val().indexOf(".") > 0) {
             var datos = { valor: $(this).parent().prev().cleanVal() };
             $('#ModalConfir').modal('toggle');
             $('#bt').on('click', function () {
@@ -4245,7 +4537,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     });
     $('#datatable2').on('click', '.to', function () {
-        $(this).find('input').mask('000,000,000', { reverse: true });
+        $(this).find('input').mask('#.##$', { reverse: true });
         $(this).find('input').select()
     });
     var table2 = $('#datatable2').DataTable({
@@ -5505,9 +5797,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             { data: "descp" },
             {
                 data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data))
-                }
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             { data: "facturasvenc" },
             {
@@ -5649,6 +5939,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             var acumulad = dat.d === 'NO' ? 0 : dat.d;
                             var doc = new jsPDF('l', 'mm', 'a5');
                             var totall = data.valor - data.ahorro;
+                            var fech = data.fech
                             var saldo = totall - acumulad;
                             var bon = data.mount === null ? 0 : data.mount;
                             var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
@@ -5746,7 +6037,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     doc.setFontSize(15)
                                     doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
                                     doc.setFontSize(7)
-                                    doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+                                    doc.text(fech, data.settings.margin.left + 165, 8)
                                     doc.setFontSize(10)
                                     doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
                                     doc.setFontSize(10)
