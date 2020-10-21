@@ -255,3 +255,135 @@
         </div>
     </div>
 </div>
+
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="PagO" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Adjuntar Documento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <table class="table table-sm my-2">
+                    <tbody>
+                        <tr>
+                            <th>
+                                <span id="pryec"></span>
+                            </th>
+                            <td>
+                                <span id="mzlt"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <span id="clnt"></span>
+                            </th>
+                            <td>
+                                <span id="docu"></span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th colspan="2">
+                                <span id="asesor"></span>
+                                <span class="badge badge-dark">Asesor</span>
+                            </th>
+                        </tr>
+                    </tbody>
+                </table>
+                <table id="cartra" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Proyecto</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
+                            <th>StdLt</th>
+                            <th>Cliente</th>
+                            <th>Documento</th>
+                            <th>Fecha</th>
+                            <th>Asesor</th>
+                            <th>StdCT</th>
+                            <th>Tipo</th>
+                            <th>NCuota</th>
+                            <th>Venc</th>
+                            <th>Cuota</th>
+                            <th>Abono</th>
+                            <th>Mora</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <table class="table table-sm my-2" id="recibosss">
+                    <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
+                        <input type="hidden" id="Total2" name="total">
+                        <input type="hidden" id="factrs" name="factrs">
+                        <input type="hidden" id="idC" name="id">
+                        <input type="hidden" id="concpto" name="concpto">
+                        <input type="hidden" id="lt" name="lt">
+                        <input type="hidden" class="bonus" name="bono">
+                        <input type="hidden" class="bonu" name="pin">
+                        <input id="ahora" type="hidden" name="ahora">
+                        <input type="hidden" class="TotalBono" name="bonomonto">
+                        <tbody>
+                            <tr>
+                                <th>
+                                    <label class="custom-control custom-radio">
+                                        <input name="formap" type="radio" class="custom-control-input forma"
+                                            value="CTA-CTE-50900011438" required>
+                                        <span class="custom-control-label badge badge-primary">
+                                            CTA CTE 50900011438</span>
+                                    </label>
+                                </th>
+                                <td>
+                                    <label class="custom-control custom-radio">
+                                        <input name="formap" type="radio" class="custom-control-input forma"
+                                            value="CHEQUE" required>
+                                        <span class="custom-control-label badge badge-primary">
+                                            CHEQUE</span>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>
+                                    <label class="custom-control custom-radio">
+                                        <input name="formap" type="radio" class="custom-control-input forma"
+                                            value="EFECTIVO" required>
+                                        <span class="custom-control-label badge badge-primary">
+                                            EFECTIVO</span>
+                                    </label>
+                                </th>
+                                <td>
+                                    <label class="custom-control custom-radio">
+                                        <input name="formap" type="radio" class="custom-control-input forma"
+                                            value="OTRO" required>
+                                        <span class="custom-control-label badge badge-primary">
+                                            OTRO</span>
+                                    </label>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th colspan="2">
+                                    <i class="feather-md" data-feather="file-plus"></i>
+                                    <input class="form-control-no-border edi" type="file" name="image"
+                                        data-toggle="tooltip" data-placement="top" data-container="body"
+                                        title="Selecciones las imagenes de recibos" autocomplete="off"
+                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="file2"
+                                        multiple style="width: 50%;" onchange="preview(this);" required>
+                                    <span class="montorecibos badge badge-dark"></span>
+                                    <input type="hidden" name="montorcb" id="montorecibos">
+                                    <input type="hidden" name="recibos" id="nrbc">
+                                </th>
+                            </tr>
+                            <tr id="trarchivos">
+                                <th colspan="2" class="image-wrap" id="recibos1" width="100%" height="200"></th>
+                            </tr>
+                        </tbody>
+                    </form>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
