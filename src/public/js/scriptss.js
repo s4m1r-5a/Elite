@@ -3558,7 +3558,12 @@ if (window.location.pathname == `/links/cartera`) {
             return true;
         }
     );
-    var ya = moment(Date()).format('YYYY-MM-DD')
+    var ya = moment(new Date()).format('YYYY-MM-DD')
+    $('#PagO').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+    });
     var cartera = $('#cartera').DataTable({
         dom: 'Bfrtip',
         buttons: [/*{
@@ -3797,6 +3802,106 @@ if (window.location.pathname == `/links/cartera`) {
             .search(this.value)
             .draw();
     });
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
+            $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                        `<div class="image" style="
+                            width: ${marg}%;
+                            padding-top: calc(100% / (16/9));
+                            background-image: url('${e.target.result}');
+                            background-size: 100%;
+                            background-position: center;
+                            background-repeat: no-repeat;float: left;"></div>`
+                    );
+                    $('#trarchivos').after(`
+                    <tr class="op">
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>`
+                    );
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                    var zom = 200
+                    $(".image").on({
+                        mousedown: function () {
+                            zom += 50
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseup: function () {
+
+                        },
+                        mousewheel: function (e) {
+                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mousemove: function (e) {
+                            let width = this.offsetWidth;
+                            let height = this.offsetHeight;
+                            let mouseX = e.offsetX;
+                            let mouseY = e.offsetY;
+
+                            let bgPosX = (mouseX / width * 100);
+                            let bgPosY = (mouseY / height * 100);
+
+                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                        },
+                        mouseenter: function (e) {
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseleave: function () {
+                            $(this).css("background-size", "100%")
+                            this.style.backgroundPosition = "center";
+                        }
+                    });
+                }
+            });
+        }
+
+    }
+    //{ total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb }
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {

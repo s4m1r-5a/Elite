@@ -699,6 +699,91 @@ router.post('/bonus', async (req, res) => {
         res.send(false);
     }
 });
+/////////////* CARTERAS */////////////////////////////////////
+router.get('/cartera', isLoggedIn, async (req, res) => {
+    res.render('links/cartera');
+});
+router.post('/cartera', isLoggedIn, async (req, res) => {
+    const { h } = req.body;
+    sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
+            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
+            t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
+            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+            INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
+            AND t.estado IN(3,5) AND t.fechs < '${h}'`
+
+    const cuotas = await pool.query(sql);
+    respuesta = { "data": cuotas };
+    //console.log(cuotas.length, h)
+    res.send(respuesta);
+
+});
+router.post('/pago', async (req, res) => {
+    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb } = req.body;
+    var rcb = '';
+    if (recibos.indexOf(',')) {
+        var rcbs = recibos.split(',')
+        rcbs.map((s) => {
+            rcb += `recibo LIKE '%${s}%' OR `;
+        })
+        rcb = rcb.slice(0, -3);
+    } else {
+        rcb = `recibo LIKE '%${recibos}%'`;
+    }
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE ${rcb} ${id ? 'OR pago = ' + id : ''}`);
+    var sum = 0, excedent = montorcb - total;
+    if (recibe.length > 0) {
+        recibe.filter((a) => {
+            return a.excdnt > 0;
+        }).map((a) => {
+            sum += a.excdnt;
+        });
+        if (sum < total && sum > 1000) {
+            req.flash('error', 'El excedente del anterior pago, no coinside con el moto a pagar de este');
+            return res.redirect('/links/pagos');
+        } else if (sum >= total) {
+            excedent = sum - total;
+        } else {
+            req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
+            return res.redirect('/links/pagos');
+        }
+    }
+    var imagenes = ''
+    req.files.map((e) => {
+        imagenes += `/uploads/${e.filename},`
+    })
+    const a = await Bonos(bono, lt);
+    if (a) {
+        await pool.query('UPDATE cupones SET ? WHERE id = ?',
+            [{ producto: a, estado: 14 }, pin]
+        );
+    } else if (!a && bono != 0) {
+        req.flash('error', 'Solicitud de pago rechazada, Bono erroneo');
+        return res.redirect('/links/pagos');
+    }
+    const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lt]);
+    var l = r[0].monto1 || 0,
+        k = r[0].monto || 0;
+    var acumulado = l + k;
+
+    const pago = {
+        fech: ahora, monto: total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
+        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
+    }
+    bono != 0 ? pago.bono = pin : '';
+    concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
+        await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
+    await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
+    await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
+    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    req.flash('success', 'Solicitud de pago enviada correctamente');
+    res.redirect('/links/pagos');
+    //uploads/
+});
 //////////////* CUPONES *//////////////////////////////////
 router.get('/saluda', isLoggedIn, async (req, res) => {
     const r = await pool.query(`SELECT SUM(s.monto) + 
@@ -1647,26 +1732,7 @@ router.post('/transferencia', isLoggedIn, async (req, res) => {
         res.redirect('/links/ventas');
     }
 });
-/////////////* CARTERAS */////////////////////////////////////
-router.get('/cartera', isLoggedIn, async (req, res) => {
-    res.render('links/cartera');
-});
-router.post('/cartera', isLoggedIn, async (req, res) => {
-    const { h } = req.body;
-    sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
-            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
-            t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
-            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-            INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
-            AND t.estado IN(3,5) AND t.fechs < '${h}'`
 
-    const cuotas = await pool.query(sql);
-    respuesta = { "data": cuotas };
-    console.log(cuotas.length, h)
-    res.send(respuesta);
-
-});
 //////////////////////* RECARGAS *//////////////////////////
 router.post('/patro', isLoggedIn, async (req, res) => {
     const { quien } = req.body;
