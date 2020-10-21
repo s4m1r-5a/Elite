@@ -1421,6 +1421,20 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         } else {
             res.send(false);
         }
+    } else if (id === 'cartera') {
+        const { k, h } = req.body;
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
+            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
+            t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
+            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+            INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
+            AND t.estado IN(3,5) AND t.fechs < '${h}' AND p.id = ${k}`
+
+        const cuotas = await pool.query(sql);
+        respuesta = { "data": cuotas };
+        //console.log(cuotas.length, h)
+        res.send(respuesta);
     }
 
 });
@@ -1475,7 +1489,9 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'saldo') {
         const { lote, solicitud, fecha } = req.body;
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
-        AND lt = ${lote} AND stado = 3 AND DATE(fech) < '${fecha}' AND ids != ${solicitud}`);
+        AND lt = ${lote} AND stado = 3 AND DATE(fech) < '${fecha}' AND TIME(fech) < TIME('${fecha}') 
+        AND ids != ${solicitud}`);
+        
         if (u.length > 0) {
             return res.send(false);
         }
@@ -1483,7 +1499,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
         WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = ${lote}
-        AND DATE(s.fech) < '${fecha}' AND s.ids != ${solicitud}`);
+        AND DATE(s.fech) < '${fecha}' AND TIME(s.fech) < TIME('${fecha}') AND s.ids != ${solicitud}`);
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
@@ -2595,7 +2611,7 @@ async function PagosAbonos(Tid, pdf, user) {
         }
         const Totales = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado IN(3,5) AND fechs < '${fech}'`);
         if (Totales.length > 0 && monto > S.cuota && S.facturasvenc > 1) {
-            pas.map((c, x) => {
+            Totales.map((c, x) => {
                 Total += c.cuota + c.mora;
                 texto += x === 0 ? `id = ${c.id}` : ` AND id = ${c.id}`;
             });

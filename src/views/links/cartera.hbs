@@ -51,32 +51,30 @@
                 </button>
             </div>
             <div class="modal-body">
-                <table class="table table-sm my-2" id="recibosss">
+                <table id="cartra" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
                     <thead>
                         <tr>
-                            <th colspan="2">
-                                <label class="form-check">
-                                    <input type="radio" class="form-check-input" id="pys" onclick="Pay('payu')">
-                                    <span class="form-check-label">
-                                        <img src="/img/logos/payu4.png" width="40" height="40" class="mr-1" alt="A">payu
-                                        la
-                                        mejor forma de hacer
-                                        pagos</span>
-                                </label>
-                            </th>
-                        </tr>
-                        <tr>
-                            <th colspan="2">
-                                <label class="form-check">
-                                    <input type="radio" class="form-check-input" id="rcb" onclick="Pay('recbo')">
-                                    <span class="form-check-label">
-                                        <img src="/img/logos/recibo.jpg" width="40" height="40"
-                                            class="rounded-circle mr-1" alt="A">Ingresa aqui tus recibos
-                                        de pago</span>
-                                </label>
-                            </th>
+                            <th></th>
+                            <th>Proyecto</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
+                            <th>StdLt</th>
+                            <th>Cliente</th>
+                            <th>Documento</th>
+                            <th>Fecha</th>
+                            <th>Asesor</th>
+                            <th>StdCT</th>
+                            <th>Tipo</th>
+                            <th>NCuota</th>
+                            <th>Venc</th>
+                            <th>Cuota</th>
+                            <th>Abono</th>
+                            <th>Mora</th>
                         </tr>
                     </thead>
+                    <tbody></tbody>
+                </table>
+                <table class="table table-sm my-2" id="recibosss">
                     <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
                         <input type="hidden" id="Total2" name="total">
                         <input type="hidden" id="factrs" name="factrs">

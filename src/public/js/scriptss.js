@@ -1704,6 +1704,7 @@ if (window.location.pathname == `/links/reportes`) {
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                                     <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
+                                                    <a class="dropdown-item" onclick="Cartera(${data})"><i class="fas fa-business-time"></i> Cartera</a>
                                                 </div>
                                         </div>`
                         : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
@@ -2778,6 +2779,180 @@ if (window.location.pathname == `/links/reportes`) {
             }
         });
     }
+    var Cartera = (id, proyc) => {
+        var D = { k: id, h: moment().format('YYYY-MM-DD') };
+        var cartra = $('#cartra').DataTable({
+            dom: '',
+            deferRender: true,
+            paging: true,
+            search: {
+                regex: true,
+                caseInsensitive: false,
+            },
+            responsive: {
+                details: {
+                    type: 'column'
+                }
+            },
+            columnDefs: [{
+                className: 'control',
+                orderable: true,
+                targets: 0
+            },
+            { responsivePriority: 1, targets: -1 },
+            { responsivePriority: 1, targets: -2 }],
+            //{className: "dt-center", targets: "_all"}],
+            order: [[1, "desc"]],
+            language: false,
+            ajax: {
+                method: "POST",
+                data: D,
+                url: "/links/reportes/cartera",
+                dataSrc: "data"
+            },
+            columns: [
+                {
+                    data: null,
+                    defaultContent: ''
+                },
+                {
+                    data: "proyecto",
+                    className: 'te'
+                },
+                {
+                    data: "mz",
+                    className: 'te'
+                },
+                {
+                    data: "n",
+                    className: 'te'
+                },
+                {
+                    data: "estado",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        switch (data) {
+                            case 1:
+                                return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                                break;
+                            case 8:
+                                return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                                break;
+                            case 9:
+                                return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                                break;
+                            case 10:
+                                return `<span class="badge badge-pill badge-success">Separado</span>`
+                                break;
+                            case 12:
+                                return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                                break;
+                            case 13:
+                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: "nombre",
+                    className: 'te'
+                },
+                {
+                    data: "documento",
+                    className: 'te'
+                },
+                {
+                    data: "fecha",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                    }
+                },
+                {
+                    data: "fullname",
+                    className: 'te'
+                },
+                {
+                    data: "std",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        switch (data) {
+                            case 3:
+                                return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                                break;
+                            case 5:
+                                return `<span class="badge badge-pill badge-danger">VencidaR</span>`
+                                break;
+                        }
+                    }
+                },
+                {
+                    data: "tipo",
+                    className: 'te'
+                },
+                {
+                    data: "ncuota",
+                    className: 'te'
+                },
+                {
+                    data: "fechs",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                    }
+                },
+                {
+                    data: "cuota",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "abono",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "mora",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                }
+            ],
+            initComplete: function (settings, json) {
+                var api = this.api();
+                var datos = api.column().data() //{ page: 'current' }
+                $('#pryec').html(datos[0].proyecto)
+                $('#mzlt').html(`Mz ${datos[0].mz} - LT ${datos[0].n}`)
+                $('#clnt').html(datos[0].nombre)
+                $('#docu').html(datos[0].documento)
+                $('#asesor').html(datos[0].fullname)
+                //api.columns.adjust().draw();
+            },
+            rowCallback: function (row, data, index) {
+                if (data["estado"] == 9) {
+                    $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+                } else if (data["estado"] == 12) {
+                    $(row).css("background-color", "#00FFFF");
+                } else if (data["estado"] == 8) {
+                    $(row).css("background-color", "#FFFFCC");
+                } else if (data["estado"] == 10) {
+                    $(row).css("background-color", "#40E0D0");
+                } else if (data["estado"] == 1) {
+                    $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+                } else if (data["estado"] == 13) {
+                    $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+                }
+            }
+        });
+        $('#PagO').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+        cartra.columns.adjust().draw();
+    }
     $('#enanul').submit(function (e) {
         e.preventDefault();
         datos.causa = $('#causa').val();
@@ -3563,6 +3738,161 @@ if (window.location.pathname == `/links/cartera`) {
         backdrop: 'static',
         keyboard: true,
         toggle: true
+    });
+    var cartra = $('#cartra').DataTable({
+        dom: '',
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
+        language: false,
+        ajax: {
+            method: "POST",
+            data: { h: ya },
+            url: "/links/cartera",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            {
+                data: "proyecto",
+                className: 'te'
+            },
+            {
+                data: "mz",
+                className: 'te'
+            },
+            {
+                data: "n",
+                className: 'te'
+            },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            {
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "documento",
+                className: 'te'
+            },
+            {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "fullname",
+                className: 'te'
+            },
+            {
+                data: "std",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 3:
+                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
+                            break;
+                    }
+                }
+            },
+            {
+                data: "tipo",
+                className: 'te'
+            },
+            {
+                data: "ncuota",
+                className: 'te'
+            },
+            {
+                data: "fechs",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "cuota",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "abono",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "mora",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["estado"] == 12) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["estado"] == 8) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["estado"] == 10) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["estado"] == 1) {
+                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+            } else if (data["estado"] == 13) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+            }
+        }
     });
     var cartera = $('#cartera').DataTable({
         dom: 'Bfrtip',
