@@ -669,7 +669,7 @@ router.post('/recibo', async (req, res) => {
     if (g) {
         return res.send({ std: true, msj: 'Solicitud de pago enviada correctamente' });
     } else {
-        req.flash('error', 'Solicitud de pago enviada correctamente');
+        req.flash('success', 'Solicitud de pago enviada correctamente');
         return res.redirect('/links/pagos');
     }
     //uploads/
