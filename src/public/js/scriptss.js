@@ -1335,7 +1335,7 @@ if (window.location.pathname == `/links/pagos`) {
             $('.op').remove();
         }
     }
-    window.preview = function (input) {
+    /*window.preview = function (input) {
         if (input.files && input.files[0]) {
             var marg = 100 / $('#file2')[0].files.length;
             $('#recibos1').html('');
@@ -1392,6 +1392,105 @@ if (window.location.pathname == `/links/pagos`) {
                 }
             });
         }
+    }*/
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
+            $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                        `<div class="image" style="
+                            width: ${marg}%;
+                            padding-top: calc(100% / (16/9));
+                            background-image: url('${e.target.result}');
+                            background-size: 100%;
+                            background-position: center;
+                            background-repeat: no-repeat;float: left;"></div>`
+                    );
+                    $('#trarchivos').after(`
+                    <tr class="op">
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>`
+                    );
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                    var zom = 200
+                    $(".image").on({
+                        mousedown: function () {
+                            zom += 50
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseup: function () {
+
+                        },
+                        mousewheel: function (e) {
+                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mousemove: function (e) {
+                            let width = this.offsetWidth;
+                            let height = this.offsetHeight;
+                            let mouseX = e.offsetX;
+                            let mouseY = e.offsetY;
+
+                            let bgPosX = (mouseX / width * 100);
+                            let bgPosY = (mouseY / height * 100);
+
+                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                        },
+                        mouseenter: function (e) {
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseleave: function () {
+                            $(this).css("background-size", "100%")
+                            this.style.backgroundPosition = "center";
+                        }
+                    });
+                }
+            });
+        }
+
     }
     $('#bono').change(function () {
         if ($(this).val() !== bono && $(this).val()) {
@@ -2779,180 +2878,216 @@ if (window.location.pathname == `/links/reportes`) {
             }
         });
     }
-    var Cartera = (id, proyc) => {
-        var D = { k: id, h: moment().format('YYYY-MM-DD') };
-        var cartra = $('#cartra').DataTable({
-            dom: '',
-            deferRender: true,
-            paging: true,
-            search: {
-                regex: true,
-                caseInsensitive: false,
-            },
-            responsive: {
-                details: {
-                    type: 'column'
-                }
-            },
-            columnDefs: [{
-                className: 'control',
-                orderable: true,
-                targets: 0
-            },
-            { responsivePriority: 1, targets: -1 },
-            { responsivePriority: 1, targets: -2 }],
-            //{className: "dt-center", targets: "_all"}],
-            order: [[1, "desc"]],
-            language: false,
-            ajax: {
-                method: "POST",
-                data: D,
-                url: "/links/reportes/cartera",
-                dataSrc: "data"
-            },
-            columns: [
-                {
-                    data: null,
-                    defaultContent: ''
-                },
-                {
-                    data: "proyecto",
-                    className: 'te'
-                },
-                {
-                    data: "mz",
-                    className: 'te'
-                },
-                {
-                    data: "n",
-                    className: 'te'
-                },
-                {
-                    data: "estado",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        switch (data) {
-                            case 1:
-                                return `<span class="badge badge-pill badge-warning">Pendiente</span>`
-                                break;
-                            case 8:
-                                return `<span class="badge badge-pill badge-info">Tramitando</span>`
-                                break;
-                            case 9:
-                                return `<span class="badge badge-pill badge-danger">Anulada</span>`
-                                break;
-                            case 10:
-                                return `<span class="badge badge-pill badge-success">Separado</span>`
-                                break;
-                            case 12:
-                                return `<span class="badge badge-pill badge-dark">Apartado</span>`
-                                break;
-                            case 13:
-                                return `<span class="badge badge-pill badge-primary">Vendido</span>`
-                                break;
-                            case 15:
-                                return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
-                                break;
-                        }
-                    }
-                },
-                {
-                    data: "nombre",
-                    className: 'te'
-                },
-                {
-                    data: "documento",
-                    className: 'te'
-                },
-                {
-                    data: "fecha",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                    }
-                },
-                {
-                    data: "fullname",
-                    className: 'te'
-                },
-                {
-                    data: "std",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        switch (data) {
-                            case 3:
-                                return `<span class="badge badge-pill badge-danger">Vencida</span>`
-                                break;
-                            case 5:
-                                return `<span class="badge badge-pill badge-danger">VencidaR</span>`
-                                break;
-                        }
-                    }
-                },
-                {
-                    data: "tipo",
-                    className: 'te'
-                },
-                {
-                    data: "ncuota",
-                    className: 'te'
-                },
-                {
-                    data: "fechs",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                    }
-                },
-                {
-                    data: "cuota",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "abono",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "mora",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                }
-            ],
-            initComplete: function (settings, json) {
-                var api = this.api();
-                var datos = api.column().data() //{ page: 'current' }
-                $('#pryec').html(datos[0].proyecto)
-                $('#mzlt').html(`Mz ${datos[0].mz} - LT ${datos[0].n}`)
-                $('#clnt').html(datos[0].nombre)
-                $('#docu').html(datos[0].documento)
-                $('#asesor').html(datos[0].fullname)
-                //api.columns.adjust().draw();
-            },
-            rowCallback: function (row, data, index) {
-                if (data["estado"] == 9) {
-                    $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-                } else if (data["estado"] == 12) {
-                    $(row).css("background-color", "#00FFFF");
-                } else if (data["estado"] == 8) {
-                    $(row).css("background-color", "#FFFFCC");
-                } else if (data["estado"] == 10) {
-                    $(row).css("background-color", "#40E0D0");
-                } else if (data["estado"] == 1) {
-                    $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
-                } else if (data["estado"] == 13) {
-                    $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
-                }
+    var D = ''
+    var cartra = $('#cartra').DataTable({
+        dom: '',
+        deferRender: true,
+        paging: true,
+        select: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
             }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },],
+        //{ responsivePriority: 1, targets: -1 },
+        //{ responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "asc"]],
+        language: false,
+        ajax: {
+            method: "POST",
+            data: function (d) {
+                d.h = moment().format('YYYY-MM-DD');
+                d.k = D
+            },
+            url: "/links/reportes/cartera",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            {
+                data: "tipo",
+                className: 'te'
+            },
+            {
+                data: "ncuota",
+                className: 'te'
+            },
+            {
+                data: "fechs",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "cuota",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },/*
+            {
+                data: "abono",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },*/
+            {
+                data: "mora",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            }/*,
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "std",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 3:
+                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            break;
+                        case 5:
+                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
+                            break;
+                    }
+                }
+            }  */
+        ],
+        initComplete: function (settings, json) {
+        },
+        rowCallback: function (row, data, index) {
+            if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["estado"] == 12) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["estado"] == 8) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["estado"] == 10) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["estado"] == 1) {
+                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+            } else if (data["estado"] == 13) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+            }
+        }
+    });
+    var Cartera = (id, proyc) => {
+        D = id//{ k: id, h: moment().format('YYYY-MM-DD') };
+        cartra.ajax.url("/links/reportes/cartera").load(function () {
+            cartra.columns.adjust().draw();
+            var dato = cartra.rows().data() //{ page: 'current' }
+            $('#pryec').html(dato[0].proyecto)
+            $('#mzlt').html(`Mz ${dato[0].mz} - LT ${dato[0].n}`)
+            $('#clnt').html(dato[0].nombre)
+            $('#docu').html(dato[0].documento)
+            $('#asesor').html(dato[0].fullname)
         });
         $('#PagO').modal({
             backdrop: 'static',
             keyboard: true,
             toggle: true
         });
-        cartra.columns.adjust().draw();
     }
+    cartra.on('click', 'tr', function () {
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+        }
+        else {
+            cartra.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+        }
+        dato = cartra.row(this).data();
+        $('#idC').val(dato.idcuota);
+        $('#factrs').val(cartra.rows().data().length);
+        $('#Total').val(dato.cuota);
+        $('#totl').html('$' + Moneda(dato.cuota));
+        $('#concpto').val(dato.tipo);
+        $('#lt').val(dato.lote);
+    })
+    $('#recbo').submit(function (e) {
+        e.preventDefault();
+        var dat = new FormData(this); //$('#recbo').serialize();
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        $('#g').val(1);
+        $.ajax({
+            type: 'POST',
+            url: '/links/recibo',
+            data: dat,
+            //async: true,
+            processData: false,
+            contentType: false,
+            beforeSend: function (xhr) {
+                $('#PagO').modal('hide');
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data.std) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('success', data.msj);
+                    //table.ajax.reload(null, false)
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('error', data.msj)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    });
     $('#enanul').submit(function (e) {
         e.preventDefault();
         datos.causa = $('#causa').val();
@@ -2968,8 +3103,285 @@ if (window.location.pathname == `/links/reportes`) {
     $('#Anulacion').on('hidden.bs.modal', function (e) {
         Enviar(datos);
     })
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
+            $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                        `<div class="image" style="
+                            width: ${marg}%;
+                            padding-top: calc(100% / (16/9));
+                            background-image: url('${e.target.result}');
+                            background-size: 100%;
+                            background-position: center;
+                            background-repeat: no-repeat;float: left;"></div>`
+                    );
+                    $('#trarchivos').after(`
+                    <tr class="op">
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>`
+                    );
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                    var zom = 200
+                    $(".image").on({
+                        mousedown: function () {
+                            zom += 50
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseup: function () {
 
+                        },
+                        mousewheel: function (e) {
+                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mousemove: function (e) {
+                            let width = this.offsetWidth;
+                            let height = this.offsetHeight;
+                            let mouseX = e.offsetX;
+                            let mouseY = e.offsetY;
 
+                            let bgPosX = (mouseX / width * 100);
+                            let bgPosY = (mouseY / height * 100);
+
+                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                        },
+                        mouseenter: function (e) {
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseleave: function () {
+                            $(this).css("background-size", "100%")
+                            this.style.backgroundPosition = "center";
+                        }
+                    });
+                }
+            });
+        }
+
+    }
+    var comisiones = $('#comisiones').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            },
+            {
+                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
+                        placeholder="MZ">`,
+                attr: {
+                    title: 'Busqueda por MZ',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            },
+            {
+                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
+                        placeholder="LT">`,
+                attr: {
+                    title: 'Busqueda por LT',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
+                            <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path>
+                            <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path>
+                            <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path>
+                            <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path>
+                            <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path>
+                            <path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
+                            <path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path>
+                            <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>`,
+                attr: {
+                    title: 'Generar cuenta de cobro',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    tabledit.ajax.url("/links/productos/0").load(function () {
+                        tabledit.columns.adjust().draw();
+                    });
+                    $('#ideditar').val('')
+                    $('.datatabledit').hide()
+                    $('#cuadro3 input').val('')
+                    $("#cuadro1").hide("slow");
+                    $("#cuadro3").show("slow");
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/comision",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "ids" },
+            { data: "nam" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-tertiary">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item">Aprobar</a>
+                                            <a class="dropdown-item">Declinar</a>
+                                        </div>
+                                    </div>` : ''
+            }
+        ]
+    });
+    comisiones.on('click', 'td:not(.control)', function () {
+        var fila = $(this).parents('tr');
+        var data = comisiones.row(fila).data(); //console.log(data)
+
+        fila.toggleClass('selected');
+    });
     /*
         var doc = new jsPDF()
         var img2 = new Image();
@@ -5424,17 +5836,88 @@ if (window.location.pathname == `/links/orden`) {
         var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
         months += extra
         fechs = new Date(moment(fechs).add(extra, 'month'));
-        if (months > 42) {
+
+        if (months > 102) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        <option value="24">24 Cuotas</option>
-        <option value="30">30 Cuotas</option>
-        <option value="36">36 Cuotas</option>
-        <option value="42">42 Cuotas</option>
-        <option value="48">48 Cuotas</option>
-        `)
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            <option value="60">60 Cuotas</option>
+            <option value="72">72 Cuotas</option>
+            <option value="90">90 Cuotas</option>
+            <option value="102">102 Cuotas</option>
+            <option value="114">114 Cuotas</option>
+            `)
+        } else if (months > 90) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            <option value="60">60 Cuotas</option>
+            <option value="72">72 Cuotas</option>
+            <option value="90">90 Cuotas</option>
+            <option value="102">102 Cuotas</option>
+            `)
+        } else if (months > 72) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            <option value="60">60 Cuotas</option>
+            <option value="72">72 Cuotas</option>
+            <option value="90">90 Cuotas</option>
+            `)
+        } else if (months > 60) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            <option value="60">60 Cuotas</option>
+            <option value="72">72 Cuotas</option>
+            `)
+        } else if (months > 48) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            <option value="60">60 Cuotas</option>
+            `)
+        } else if (months > 42) {
+            $('#ncuotas').html(`
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            <option value="48">48 Cuotas</option>
+            `)
         } else if (months > 36) {
             $('#ncuotas').html(`
         <option value="6">6 Cuotas</option>

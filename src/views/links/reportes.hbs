@@ -94,6 +94,37 @@
                                 </table>
                             </div>
                         </div>
+                        <h3>COMISIONES</h3>
+                        <table id="comisiones" class="table table-sm table-striped table-hover display nowrap"
+                            style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Id</th>
+                                    <th>Asesor</th>
+                                    <th>Fecha</th>
+                                    <th>Benefactor</th>
+                                    <th>Cliente</th>
+                                    <th>Venta</th>
+                                    <th>Monto</th>
+                                    <th>%</th>
+                                    <th>Retefuente</th>
+                                    <th>Reteica</th>
+                                    <th>Total</th>
+                                    <th>Concepto</th>
+                                    <th>Descp</th>
+                                    <th>Proyct</th>
+                                    <th>Mz</th>
+                                    <th>Lt</th>
+                                    <th data-priority="2">Estado</th>
+                                    <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+                                    <th data-priority="1">Accion</th>
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                        <hr>
                     </div>
                 </div>
             </div>
@@ -286,31 +317,32 @@
                             </td>
                         </tr>
                         <tr>
-                            <th colspan="2">
+                            <th>
                                 <span id="asesor"></span>
-                                <span class="badge badge-dark">Asesor</span>
                             </th>
+                            <td>
+                                <span class="badge badge-dark">Asesor comercial</span>
+                            </td>
+                        </tr>
+                        <tr>
+                            <th>
+                                <span>Valor a pagar</span>
+                            </th>
+                            <td>
+                                <span id="totl"></span>
+                            </td>
                         </tr>
                     </tbody>
                 </table>
-                <table id="cartra" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
+                <table id="cartra" class="table table-sm table-striped table-hover display nowrap select"
+                    style="width:100%">
                     <thead>
                         <tr>
                             <th></th>
-                            <th>Proyecto</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th>StdLt</th>
-                            <th>Cliente</th>
-                            <th>Documento</th>
-                            <th>Fecha</th>
-                            <th>Asesor</th>
-                            <th>StdCT</th>
                             <th>Tipo</th>
-                            <th>NCuota</th>
+                            <th>#C</th>
                             <th>Venc</th>
                             <th>Cuota</th>
-                            <th>Abono</th>
                             <th>Mora</th>
                         </tr>
                     </thead>
@@ -318,15 +350,14 @@
                 </table>
                 <table class="table table-sm my-2" id="recibosss">
                     <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
-                        <input type="hidden" id="Total2" name="total">
+                        <input type="hidden" id="Total" name="total">
                         <input type="hidden" id="factrs" name="factrs">
                         <input type="hidden" id="idC" name="id">
                         <input type="hidden" id="concpto" name="concpto">
                         <input type="hidden" id="lt" name="lt">
-                        <input type="hidden" class="bonus" name="bono">
-                        <input type="hidden" class="bonu" name="pin">
                         <input id="ahora" type="hidden" name="ahora">
-                        <input type="hidden" class="TotalBono" name="bonomonto">
+                        <input type="hidden" class="bonus" name="bono" value="0">
+                        <input id="g" type="hidden" name="g">
                         <tbody>
                             <tr>
                                 <th>
@@ -379,6 +410,11 @@
                             </tr>
                             <tr id="trarchivos">
                                 <th colspan="2" class="image-wrap" id="recibos1" width="100%" height="200"></th>
+                            </tr>
+                            <tr>
+                                <th colspan="2">
+                                    <button type="submit" class="btn btn-primary btn-sm float-right">Enviar</button>
+                                </th>
                             </tr>
                         </tbody>
                     </form>
