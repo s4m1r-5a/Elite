@@ -7331,34 +7331,34 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             {
                 data: "total",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             },
             {
                 data: "monto",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             },
             {
                 data: "porciento",
                 render: function (data, method, row) {
-                    return `%${(data * 100).toFixed(1)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             }, {
                 data: "retefuente",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             }, {
                 data: "reteica",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             }, {
                 data: "pagar",
                 render: function (data, method, row) {
-                    return '$' + Moneda(parseFloat(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             },
             { data: "concepto" },
