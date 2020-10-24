@@ -7371,16 +7371,22 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 4:
-                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
                             break;
                         case 6:
                             return `<span class="badge badge-pill badge-danger">Declinada</span>`
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-tertiary">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
                             break;
                         default:
-                            return `<span class="badge badge-pill badge-dark">Disponible</span>`
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
                     }
                 }
             },
