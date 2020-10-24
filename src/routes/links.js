@@ -1498,8 +1498,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         us.id, us.fullname, cl.nombre, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')
-        AND pr.tipobsevacion IS NULL AND stado = 3 ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')  
+        AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
         respuesta = { "data": solicitudes };
         res.send(respuesta);
     } else if (id === 'bono') {

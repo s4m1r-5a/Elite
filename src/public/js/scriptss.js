@@ -3246,14 +3246,306 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    tabledit.ajax.url("/links/productos/0").load(function () {
-                        tabledit.columns.adjust().draw();
-                    });
-                    $('#ideditar').val('')
-                    $('.datatabledit').hide()
-                    $('#cuadro3 input').val('')
-                    $("#cuadro1").hide("slow");
-                    $("#cuadro3").show("slow");
+                    var doc = new jsPDF('p', 'mm', 'a4');
+                    var NOMBRE = '', EMAIL = '', MOVIL = '', TOTAL = 0, MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0;
+                    var img2 = new Image();
+                    var img = new Image();
+                    img.src = '/img/avatars/avatar.png'
+                    img2.src = `http://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
+                    var totalPagesExp = '{total_pages_count_string}'
+                    //doc.addPage("a3"); 
+                    var cuerpo = [];
+                    comisiones
+                        .rows('.selected')
+                        .data()
+                        .filter(function (value, index) {
+                            console.log(value.proyect, value, index)
+                            if (index < 1) {
+                                NOMBRE = value.nam
+                                EMAIL = value.mail
+                                MOVIL = value.clu
+                            }
+                            TOTAL += value.total;
+                            MONTO += parseFloat(value.monto);
+                            PAGAR += value.pagar;
+                            RETEFUENTE += value.retefuente;
+                            RETEICA += value.reteica;
+                            cuerpo.push({
+                                id: {
+                                    content: value.ids, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                fecha: {
+                                    content: value.fech, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                concepto: {
+                                    content: value.concepto, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                descp: {
+                                    content: value.descp, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                porciento: {
+                                    content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                benefactor: {
+                                    content: value.fullname, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                proyecto: {
+                                    content: value.proyect, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                mz: {
+                                    content: value.mz, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                lt: {
+                                    content: value.n, colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                total: {
+                                    content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                },
+                                monto: {
+                                    content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
+                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                                    }
+                                }
+                            })
+                        });
+                    cuerpo.push({
+                        concepto: {
+                            content: 'TOTALES:', colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        total: {
+                            content: '$' + Moneda(Math.round(TOTAL)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        monto: {
+                            content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    cuerpo.push({
+                        id: {
+                            content: '', colSpan: 11, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    cuerpo.push({
+                        id: {
+                            content: 'TOTAL COMISION:', colSpan: 3, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        descp: {
+                            content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        benefactor: {
+                            content: `${NumeroALetras(MONTO)} MCT********`, colSpan: 6, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    cuerpo.push({
+                        id: {
+                            content: 'RETEFUENTE:', colSpan: 3, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        descp: {
+                            content: '-$' + Moneda(Math.round(RETEFUENTE)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        benefactor: {
+                            content: `${NumeroALetras(RETEFUENTE)} MCT********`, colSpan: 6, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    cuerpo.push({
+                        id: {
+                            content: 'RETEICA:', colSpan: 3, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        descp: {
+                            content: '-$' + Moneda(Math.round(RETEICA)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        benefactor: {
+                            content: `${NumeroALetras(RETEICA)} MCT********`, colSpan: 6, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    cuerpo.push({
+                        id: {
+                            content: 'PAGAR:', colSpan: 3, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                            }
+                        },
+                        descp: {
+                            content: '$' + Moneda(Math.round(PAGAR)), colSpan: 1, styles: {
+                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC" `${NumeroALetras(totl)} MCT********`
+                            }
+                        },
+                        benefactor: {
+                            content: `${NumeroALetras(PAGAR)} MCT********`, colSpan: 6, styles: {
+                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                            }
+                        }
+                    })
+                    doc.autoTable({
+                        head: [
+                            {
+                                id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
+                                benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
+                            },
+                        ],
+                        body: cuerpo,
+                        didDrawPage: function (data) {
+                            // Header
+                            doc.setTextColor(0)
+                            doc.setFontStyle('normal')
+                            if (img) {
+                                doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
+                            }
+                            doc.setFontSize(15)
+                            doc.text('CUENTA DE COBRO', 105, 25, null, null, "center");
+                            doc.setFontSize(9)
+                            doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
+                            doc.setFontSize(12)
+                            doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
+                            doc.setFontSize(10)
+                            doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
+                            doc.setFontSize(8)
+                            doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
+
+                            doc.setFontSize(10)
+                            doc.text('DEBE A:', data.settings.margin.left, 63)
+                            doc.setFontSize(12)
+                            doc.text(NOMBRE, data.settings.margin.left, 70)
+                            doc.setFontSize(10)
+                            doc.text(MOVIL, data.settings.margin.left, 75)
+                            doc.setFontSize(8)
+                            doc.text(EMAIL, data.settings.margin.left, 78)
+
+                            doc.setFontSize(9)
+                            doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
+
+
+                            // Footer
+                            var str = 'Page ' + doc.internal.getNumberOfPages()
+                            // Total page number plugin only available in jspdf v1.0+
+                            if (typeof doc.putTotalPages === 'function') {
+                                str = str + ' of ' + totalPagesExp
+                            }
+                            doc.setFontSize(8)
+
+                            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                            var pageSize = doc.internal.pageSize
+                            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                            doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
+                            doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
+                            doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
+                        },
+                        margin: { top: 95 },
+                    })
+                    // Total page number plugin only available in jspdf v1.0+
+                    if (typeof doc.putTotalPages === 'function') {
+                        doc.putTotalPages(totalPagesExp)
+                    }
+                    doc.output('save', 'CUENTA DE COBRO.pdf')
+                    //var blob = doc.output('blob')
+                    /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                    //fd.append('pdf', blob);
+                    //fd.append('acumulado', acumulad);
+                    //doc.output('dataurlnewwindow')
+                    /*$.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })*/
                 }
             }
         ],
@@ -3379,8 +3671,7 @@ if (window.location.pathname == `/links/reportes`) {
     comisiones.on('click', 'td:not(.control)', function () {
         var fila = $(this).parents('tr');
         var data = comisiones.row(fila).data(); //console.log(data)
-
-        fila.toggleClass('selected');
+        data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
     });
     /*
         var doc = new jsPDF()
