@@ -1535,9 +1535,19 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             acredor: usuario, deuda: total, fechas, descuentos, cuentacobro: pdf
         }
         var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
-        await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, [{ cuentadecobro: ctas.insertId, stado: 3 }]);
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, { cuentadecobro: ctas.insertId, stado: 3 });
         //console.log(req.body, req.files)
         res.send(true);
+    } else if (id == 'eliminar') {
+
+        const { k, pdf, porque, nombre, movil } = req.body;
+        Eli(pdf);
+        await pool.query(`UPDATE solicitudes SET ? WHERE cuentadecobro = ?`, [{ stado: 9 }, k]);
+        await pool.query(`DELETE FROM pagos WHERE id = ?`, k);
+        var bod = `_*${nombre}*. Hemos decidido declina la cuenta por cobrar *${k}* porque: *${porque}*_\n\n*_RED ELITE_*`;
+        await EnviarWTSAP(movil, bod);
+        res.send({ r: true, m: 'Cuenta de cobro eliminada correctamente' });
+
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
