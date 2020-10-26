@@ -1527,6 +1527,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             k = r[0].monto || 0;
         var acumulado = l + k;
         res.send({ d: acumulado ? acumulado : 'NO' });
+
     } else if (id === 'cuentacobro') {
         const { total, descuentos, solicitudes, usuario, fechas } = req.body;
         var pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
@@ -1535,7 +1536,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         }
         var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
         await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, [{ cuentadecobro: ctas.insertId, stado: 3 }]);
-        console.log(req.body, req.files)
+        //console.log(req.body, req.files)
+        res.send(true);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {

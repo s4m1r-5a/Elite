@@ -3543,7 +3543,7 @@ if (window.location.pathname == `/links/reportes`) {
                                 }).modal('hide');
                                 $('#ModalEventos').modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
-                                table.ajax.reload(null, false)
+                                comisiones.ajax.reload(null, false)
                             } else {
                                 $('#ModalEventos').one('shown.bs.modal', function () {
                                 }).modal('hide');
