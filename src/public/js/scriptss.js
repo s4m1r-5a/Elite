@@ -3246,21 +3246,24 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
+                    var fd = new FormData();
                     var doc = new jsPDF('p', 'mm', 'a4');
-                    var NOMBRE = '', EMAIL = '', MOVIL = '', TOTAL = 0, MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0;
+                    var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', TOTAL = 0, MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0;
                     var img2 = new Image();
                     var img = new Image();
                     img.src = '/img/avatars/avatar.png'
-                    img2.src = `http://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
+                    img2.src = `https://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
                     var totalPagesExp = '{total_pages_count_string}'
                     //doc.addPage("a3"); 
-                    var cuerpo = [];
+                    var cuerpo = [], Ids = [];
                     comisiones
                         .rows('.selected')
                         .data()
                         .filter(function (value, index) {
                             console.log(value.proyect, value, index)
                             if (index < 1) {
+                                RG = value.idu
+                                //CC = value.docu
                                 NOMBRE = value.nam
                                 EMAIL = value.mail
                                 MOVIL = value.clu
@@ -3270,6 +3273,7 @@ if (window.location.pathname == `/links/reportes`) {
                             PAGAR += value.pagar;
                             RETEFUENTE += value.retefuente;
                             RETEICA += value.reteica;
+                            Ids.push(value.ids)
                             cuerpo.push({
                                 id: {
                                     content: value.ids, colSpan: 1, styles: {
@@ -3509,14 +3513,19 @@ if (window.location.pathname == `/links/reportes`) {
                         doc.putTotalPages(totalPagesExp)
                     }
                     doc.output('save', 'CUENTA DE COBRO.pdf')
-                    //var blob = doc.output('blob')
+                    var blob = doc.output('blob')
                     /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-                    //fd.append('pdf', blob);
-                    //fd.append('acumulado', acumulad);
-                    //doc.output('dataurlnewwindow')
-                    /*$.ajax({
-                        type: 'PUT',
-                        url: '/links/solicitudes/' + accion,
+                    fd.append('pdf', blob)
+                    fd.append('total', PAGAR)
+                    fd.append('descuentos', RETEFUENTE + RETEICA)
+                    fd.append('solicitudes', Ids)
+                    fd.append('usuario', RG)
+                    fd.append('fechas', moment().format('YYYY-MM-DD HH:mm'))
+                    /*fd.append('acumulado', acumulad);
+                    doc.output('dataurlnewwindow')*/
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/solicitudes/cuentacobro',
                         data: fd,
                         processData: false,
                         contentType: false,
@@ -3545,7 +3554,7 @@ if (window.location.pathname == `/links/reportes`) {
                         error: function (data) {
                             console.log(data);
                         }
-                    })*/
+                    })
                 }
             }
         ],
@@ -7307,6 +7316,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 type: 'column'
             }
         },
+        columnDefs: [
+            { "visible": false, "targets": 1 }
+        ],
         order: [[0, "desc"]],
         language: languag,
         ajax: {
@@ -7319,7 +7331,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         },*/
         columns: [
             { data: "ids" },
-            { data: "nam" },
+            { data: "cuentadecobro" },
             {
                 data: "fech",
                 render: function (data, method, row) {
@@ -7389,19 +7401,53 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             return `<span class="badge badge-pill badge-primary">Sin info</span>`
                     }
                 }
-            },
-            {
-                className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
-                                        </div>
-                                    </div>` : ''
             }
-        ]
+        ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+
+            api.column(1, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    var dato = api.row(i).data()
+                    console.log(dato)
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="1">
+                                <div class="text-center">
+                                    ${group}
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <div class="text-center">
+                                    ${dato.nam} 
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    $${Moneda(dato.deuda)}
+                                </div>
+                            </td>
+                            <td colspan="12">
+                                <div class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                         aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="${dato.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
+                                            <a class="dropdown-item" href="#comisiones" onclick="Eliminar(${group})"><i class="fas fa-trash-alt"></i> Declinar</a>
+                                            <a class="dropdown-item" href="#comisiones" onclick="PagarCB(${group})"><i class="fas fa-business-time"></i> Pagar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>`
+                    );
+                    last = group;
+                }
+            });
+        }
     });
     var bonos = $('#bonos').DataTable({
         deferRender: true,
@@ -7572,6 +7618,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         ]
     });
+    /*$('button').click(function () {
+        var data = table.$('input, select').serialize();
+        alert(
+            "The following data would have been submitted to the server: \n\n" +
+            data.substr(0, 120) + '...'
+        );
+        return false;
+    });*/
     // Daterangepicker
     /*var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");*/

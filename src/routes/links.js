@@ -1493,13 +1493,13 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
 
     } else if (id === 'comision') {
-        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, 
-        s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar,
-        us.id, us.fullname, cl.nombre, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
-        INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
+        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, pg.stads, s.cuentadecobro,
+        s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, pg.deuda, pg.cuentacobro,
+        pg.fechas, pg.descuentos, us.id, us.fullname, cl.nombre, p.proyect FROM pagos pg INNER JOIN solicitudes s ON s.cuentadecobro = pg.id
+        INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')  
-        AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
+        AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
         respuesta = { "data": solicitudes };
         res.send(respuesta);
     } else if (id === 'bono') {
@@ -1527,6 +1527,15 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             k = r[0].monto || 0;
         var acumulado = l + k;
         res.send({ d: acumulado ? acumulado : 'NO' });
+    } else if (id === 'cuentacobro') {
+        const { total, descuentos, solicitudes, usuario, fechas } = req.body;
+        var pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+        var cuenta = {
+            acredor: usuario, deuda: total, fechas, descuentos, cuentacobro: pdf
+        }
+        var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, [{ cuentadecobro: ctas.insertId, stado: 3 }]);
+        console.log(req.body, req.files)
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
