@@ -7436,7 +7436,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                          aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="${dato.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
-                                            <a class="dropdown-item" href="#comisiones" onclick="Eliminar(${group})"><i class="fas fa-trash-alt"></i> Declinar</a>
+                                            <a class="dropdown-item" href="#comisiones" onclick="Eliminar(${group}, '${dato.cuentacobro}', '${dato.nam}', '${dato.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
                                             <a class="dropdown-item" href="#comisiones" onclick="PagarCB(${group})"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
                                     </div>
@@ -7449,6 +7449,37 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             });
         }
     });
+    var Eliminar = (id, pdf, nombre, movil) => {
+        var porque = '';
+        porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
+        if (porque != null) {
+            var D = { k: id, pdf, porque, nombre, movil };
+            $.ajax({
+                url: '/links/solicitudes/eliminar',
+                data: D,
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data.r) {
+                        comisiones.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('success', data.m);
+                    } else {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('error', data.m);
+                    }
+                }
+            });
+        }
+    }
     var bonos = $('#bonos').DataTable({
         deferRender: true,
         paging: true,
