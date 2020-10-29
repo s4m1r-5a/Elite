@@ -2781,31 +2781,35 @@ if (window.location.pathname == `/links/reportes`) {
         datos = tableOrden.row(this).data();
     })
     var Eliminar = (eli) => {
-        var D = { k: eli, h: moment().format('YYYY-MM') };
-        $.ajax({
-            url: '/links/reportes/eliminar',
-            data: D,
-            type: 'POST',
-            beforeSend: function (xhr) {
-                $('#ModalEventos').modal({
-                    backdrop: 'static',
-                    keyboard: true,
-                    toggle: true
-                });
-            },
-            success: function (data) {
-                if (data.r) {
-                    tableOrden.ajax.reload(null, false)
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    SMSj('success', data.m);
-                } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    SMSj('error', data.m);
+        if (confirm("Seguro deseas eliminar esta separacion?")) {
+            txt = "You pressed OK!";
+
+            var D = { k: eli, h: moment().format('YYYY-MM') };
+            $.ajax({
+                url: '/links/reportes/eliminar',
+                data: D,
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data.r) {
+                        tableOrden.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('success', data.m);
+                    } else {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('error', data.m);
+                    }
                 }
-            }
-        });
+            });
+        }
     }
     var Promesa = (id, aut) => {
         if (admin == 1) {
@@ -3017,7 +3021,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     });
     var Cartera = (id, proyc) => {
-        D = id//{ k: id, h: moment().format('YYYY-MM-DD') };
+        D = { k: id, h: moment().format('YYYY-MM-DD') };
         cartra.ajax.url("/links/reportes/cartera").load(function () {
             cartra.columns.adjust().draw();
             var dato = cartra.rows().data() //{ page: 'current' }
@@ -3027,6 +3031,7 @@ if (window.location.pathname == `/links/reportes`) {
             $('#docu').html(dato[0].documento)
             $('#asesor').html(dato[0].fullname)
         });
+
         $('#PagO').modal({
             backdrop: 'static',
             keyboard: true,
@@ -3081,6 +3086,48 @@ if (window.location.pathname == `/links/reportes`) {
                     }).modal('hide');
                     $('#ModalEventos').modal('hide');
                     SMSj('error', data.msj)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    });
+    $('#bank').submit(function (e) {
+        e.preventDefault();
+        var dat = $(this).serialize(); //new FormData(this);
+        //dat.append('id', data.pdf);
+        $.ajax({
+            type: 'POST',
+            url: '/links/reportes/bank',
+            data: dat,
+            //async: true,
+            beforeSend: function (xhr) {
+                $('#BANK').modal('hide');
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('success', 'Cuenta Bancaria registrada correctamente');
+                    comisiones.ajax.reload(null, false)
+                    /*comisiones.ajax.reload(function (json) {
+                        comisiones.columns.adjust().draw();
+                        SMSj('success', 'Actualizacion exitosa')
+                        CuentaCobro()
+                    })*/
+
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('error', 'Error al tratar de registrar la cuenta bancaria')
                 }
             },
             error: function (data) {
@@ -3246,315 +3293,7 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    var fd = new FormData();
-                    var doc = new jsPDF('p', 'mm', 'a4');
-                    var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', TOTAL = 0, MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0;
-                    var img2 = new Image();
-                    var img = new Image();
-                    img.src = '/img/avatars/avatar.png'
-                    img2.src = `https://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
-                    var totalPagesExp = '{total_pages_count_string}'
-                    //doc.addPage("a3"); 
-                    var cuerpo = [], Ids = [];
-                    comisiones
-                        .rows('.selected')
-                        .data()
-                        .filter(function (value, index) {
-                            console.log(value.proyect, value, index)
-                            if (index < 1) {
-                                RG = value.idu
-                                //CC = value.docu
-                                NOMBRE = value.nam
-                                EMAIL = value.mail
-                                MOVIL = value.clu
-                            }
-                            TOTAL += value.total;
-                            MONTO += parseFloat(value.monto);
-                            PAGAR += value.pagar;
-                            RETEFUENTE += value.retefuente;
-                            RETEICA += value.reteica;
-                            Ids.push(value.ids)
-                            cuerpo.push({
-                                id: {
-                                    content: value.ids, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                fecha: {
-                                    content: value.fech, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                concepto: {
-                                    content: value.concepto, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                descp: {
-                                    content: value.descp, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                porciento: {
-                                    content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                benefactor: {
-                                    content: value.fullname, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                proyecto: {
-                                    content: value.proyect, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                mz: {
-                                    content: value.mz, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                lt: {
-                                    content: value.n, colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                total: {
-                                    content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                },
-                                monto: {
-                                    content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
-                                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                                    }
-                                }
-                            })
-                        });
-                    cuerpo.push({
-                        concepto: {
-                            content: 'TOTALES:', colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        total: {
-                            content: '$' + Moneda(Math.round(TOTAL)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        monto: {
-                            content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    cuerpo.push({
-                        id: {
-                            content: '', colSpan: 11, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    cuerpo.push({
-                        id: {
-                            content: 'TOTAL COMISION:', colSpan: 3, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        descp: {
-                            content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        benefactor: {
-                            content: `${NumeroALetras(MONTO)} MCT********`, colSpan: 6, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    cuerpo.push({
-                        id: {
-                            content: 'RETEFUENTE:', colSpan: 3, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        descp: {
-                            content: '-$' + Moneda(Math.round(RETEFUENTE)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        benefactor: {
-                            content: `${NumeroALetras(RETEFUENTE)} MCT********`, colSpan: 6, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    cuerpo.push({
-                        id: {
-                            content: 'RETEICA:', colSpan: 3, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        descp: {
-                            content: '-$' + Moneda(Math.round(RETEICA)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        benefactor: {
-                            content: `${NumeroALetras(RETEICA)} MCT********`, colSpan: 6, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    cuerpo.push({
-                        id: {
-                            content: 'PAGAR:', colSpan: 3, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
-                            }
-                        },
-                        descp: {
-                            content: '$' + Moneda(Math.round(PAGAR)), colSpan: 1, styles: {
-                                halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC" `${NumeroALetras(totl)} MCT********`
-                            }
-                        },
-                        benefactor: {
-                            content: `${NumeroALetras(PAGAR)} MCT********`, colSpan: 6, styles: {
-                                halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
-                            }
-                        }
-                    })
-                    doc.autoTable({
-                        head: [
-                            {
-                                id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
-                                benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
-                            },
-                        ],
-                        body: cuerpo,
-                        didDrawPage: function (data) {
-                            // Header
-                            doc.setTextColor(0)
-                            doc.setFontStyle('normal')
-                            if (img) {
-                                doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                                doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
-                            }
-                            doc.setFontSize(15)
-                            doc.text('CUENTA DE COBRO', 105, 25, null, null, "center");
-                            doc.setFontSize(9)
-                            doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
-                            doc.setFontSize(12)
-                            doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
-                            doc.setFontSize(10)
-                            doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
-                            doc.setFontSize(8)
-                            doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
-
-                            doc.setFontSize(10)
-                            doc.text('DEBE A:', data.settings.margin.left, 63)
-                            doc.setFontSize(12)
-                            doc.text(NOMBRE, data.settings.margin.left, 70)
-                            doc.setFontSize(10)
-                            doc.text(MOVIL, data.settings.margin.left, 75)
-                            doc.setFontSize(8)
-                            doc.text(EMAIL, data.settings.margin.left, 78)
-
-                            doc.setFontSize(9)
-                            doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
-
-
-                            // Footer
-                            var str = 'Page ' + doc.internal.getNumberOfPages()
-                            // Total page number plugin only available in jspdf v1.0+
-                            if (typeof doc.putTotalPages === 'function') {
-                                str = str + ' of ' + totalPagesExp
-                            }
-                            doc.setFontSize(8)
-
-                            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                            var pageSize = doc.internal.pageSize
-                            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                            doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
-                            doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
-                            doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
-                        },
-                        margin: { top: 95 },
-                    })
-                    // Total page number plugin only available in jspdf v1.0+
-                    if (typeof doc.putTotalPages === 'function') {
-                        doc.putTotalPages(totalPagesExp)
-                    }
-                    doc.output('save', 'CUENTA DE COBRO.pdf')
-                    var blob = doc.output('blob')
-                    /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-                    fd.append('pdf', blob)
-                    fd.append('total', PAGAR)
-                    fd.append('descuentos', RETEFUENTE + RETEICA)
-                    fd.append('solicitudes', Ids)
-                    fd.append('usuario', RG)
-                    fd.append('fechas', moment().format('YYYY-MM-DD HH:mm'))
-                    /*fd.append('acumulado', acumulad);
-                    doc.output('dataurlnewwindow')*/
-                    $.ajax({
-                        type: 'POST',
-                        url: '/links/solicitudes/cuentacobro',
-                        data: fd,
-                        processData: false,
-                        contentType: false,
-                        beforeSend: function (xhr) {
-                            $('#Modalimg').modal('hide');
-                            $('#ModalEventos').modal({
-                                backdrop: 'static',
-                                keyboard: true,
-                                toggle: true
-                            });
-                        },
-                        success: function (data) {
-                            if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                $('#ModalEventos').modal('hide');
-                                SMSj('success', `Solicitud procesada correctamente`);
-                                comisiones.ajax.reload(null, false)
-                            } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                $('#ModalEventos').modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                            }
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    })
+                    CuentaCobro();
                 }
             }
         ],
@@ -3682,6 +3421,352 @@ if (window.location.pathname == `/links/reportes`) {
         var data = comisiones.row(fila).data(); //console.log(data)
         data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
     });
+
+    var CuentaCobro = () => {
+        var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', CC = '',
+            ID = '', BANCO = '', TCTA = '', NCTA = '', TOTAL = 0,
+            MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0,
+            cuerpo = [], Ids = [];
+
+        comisiones
+            .rows('.selected')
+            .data()
+            .filter(function (value, index) {
+                console.log(value.proyect, value, index)
+                if (index < 1) {
+                    ID = value.i;
+                    RG = value.idu;
+                    CC = value.docu;
+                    NOMBRE = value.nam;
+                    EMAIL = value.mail;
+                    MOVIL = value.clu;
+                    BANCO = value.bank;
+                    TCTA = value.tipocta;
+                    NCTA = value.numerocuenta;
+                }
+                TOTAL += value.total;
+                MONTO += parseFloat(value.monto);
+                PAGAR += value.pagar;
+                RETEFUENTE += value.retefuente;
+                RETEICA += value.reteica;
+                Ids.push(value.ids);
+                cuerpo.push({
+                    id: {
+                        content: value.ids, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    fecha: {
+                        content: value.fech, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    concepto: {
+                        content: value.concepto, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    descp: {
+                        content: value.descp, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    porciento: {
+                        content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    benefactor: {
+                        content: value.fullname, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    proyecto: {
+                        content: value.proyect, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    mz: {
+                        content: value.mz, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    lt: {
+                        content: value.n, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    total: {
+                        content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    monto: {
+                        content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    }
+                })
+            });
+        if (BANCO) {
+            var fd = new FormData();
+            var doc = new jsPDF('p', 'mm', 'a4');
+            var img2 = new Image();
+            var img = new Image();
+            var totalPagesExp = '{total_pages_count_string}'
+            //doc.addPage("a3"); 
+            img.src = '/img/avatars/avatar.png'
+            img2.src = `https://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
+            cuerpo.push({
+                concepto: {
+                    content: 'TOTALES:', colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                },
+                total: {
+                    content: '$' + Moneda(Math.round(TOTAL)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                },
+                monto: {
+                    content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: '', colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'TOTAL COMISION:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(MONTO)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'RETEFUENTE:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '-$' + Moneda(Math.round(RETEFUENTE)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(RETEFUENTE)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'RETEICA:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '-$' + Moneda(Math.round(RETEICA)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(RETEICA)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'PAGAR:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '$' + Moneda(Math.round(PAGAR)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC" `${NumeroALetras(totl)} MCT********`
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(PAGAR)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: '', colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: `Depositar el DINERO a la siguieinte CUENTA ${BANCO.toUpperCase()} ${TCTA} ${NCTA}`, colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            doc.autoTable({
+                head: [
+                    {
+                        id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
+                        benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
+                    },
+                ],
+                body: cuerpo,
+                didDrawPage: function (data) {
+                    // Header
+                    doc.setTextColor(0)
+                    doc.setFontStyle('normal')
+                    if (img) {
+                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                        doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
+                    }
+                    doc.setFontSize(15)
+                    doc.text('CUENTA DE COBRO', 105, 25, null, null, "center");
+                    doc.setFontSize(9)
+                    doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
+                    doc.setFontSize(12)
+                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
+                    doc.setFontSize(10)
+                    doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
+                    doc.setFontSize(8)
+                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
+
+                    doc.setFontSize(10)
+                    doc.text('DEBE A:', data.settings.margin.left, 63)
+                    doc.setFontSize(12)
+                    doc.text(NOMBRE, data.settings.margin.left, 70)
+                    doc.setFontSize(10)
+                    doc.text('CC: ' + CC, data.settings.margin.left, 75)
+                    doc.setFontSize(10)
+                    doc.text(MOVIL, data.settings.margin.left, 78)
+                    doc.setFontSize(8)
+                    doc.text(EMAIL, data.settings.margin.left, 81)
+
+                    doc.setFontSize(9)
+                    doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
+
+
+                    // Footer
+                    var str = 'Page ' + doc.internal.getNumberOfPages()
+                    // Total page number plugin only available in jspdf v1.0+
+                    if (typeof doc.putTotalPages === 'function') {
+                        str = str + ' of ' + totalPagesExp
+                    }
+                    doc.setFontSize(8)
+
+                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                    var pageSize = doc.internal.pageSize
+                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                    doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
+                    doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
+                    doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
+                },
+                margin: { top: 95 },
+            })
+            // Total page number plugin only available in jspdf v1.0+
+            if (typeof doc.putTotalPages === 'function') {
+                doc.putTotalPages(totalPagesExp)
+            }
+            doc.output('save', 'CUENTA DE COBRO.pdf')
+            var blob = doc.output('blob')
+            /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+            fd.append('pdf', blob)
+            fd.append('total', PAGAR)
+            fd.append('descuentos', RETEFUENTE + RETEICA)
+            fd.append('solicitudes', Ids)
+            fd.append('usuario', RG)
+            fd.append('fechas', moment().format('YYYY-MM-DD HH:mm'))
+            /*fd.append('acumulado', acumulad);
+            doc.output('dataurlnewwindow')*/
+            $.ajax({
+                type: 'POST',
+                url: '/links/solicitudes/cuentacobro',
+                data: fd,
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#Modalimg').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        $('#ModalEventos').modal('hide');
+                        SMSj('success', `Solicitud procesada correctamente`);
+                        comisiones.ajax.reload(null, false)
+                    } else {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        $('#ModalEventos').modal('hide');
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        } else {
+            $('#idbank').val(ID)
+            $('#BANK').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
+    }
     /*
         var doc = new jsPDF()
         var img2 = new Image();
@@ -5381,7 +5466,20 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     },
                     className: 'btn btn-secondary max'
                 },
-                'pageLength'
+                {
+                    extend: 'pageLength',
+                    text: 'Ver',
+                    orientation: 'landscape'
+                },
+                {
+                    extend: 'collection',
+                    text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+                    orientation: 'landscape',
+                    buttons: [{
+                        text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                        extend: 'copy'
+                    }]
+                }
             ],
             language: languag2,
             ajax: {
@@ -5438,13 +5536,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 {
                     data: "inicial",
                     render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                }/*,
+                },
                 {
-                    data: "tramitando",
+                    data: "mtr2",
                     render: function (data, method, row) {
-                        return data ? `<span class="badge badge-danger text-center text-uppercase">${moment(data).format('MMM-D hh:mm A')}</span>` : '';
+                        return '$' + Moneda(Math.round(row.valor / data));
                     }
-                }*/
+                }
             ],
             deferRender: true,
             autoWidth: true,
@@ -7437,7 +7535,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="${dato.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
                                             <a class="dropdown-item" href="#comisiones" onclick="Eliminar(${group}, '${dato.cuentacobro}', '${dato.nam}', '${dato.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
-                                            <a class="dropdown-item" href="#comisiones" onclick="PagarCB(${group})"><i class="fas fa-business-time"></i> Pagar</a>
+                                            <a class="dropdown-item" href="#comisiones" onclick="PagarCB(${group}, '${dato.cuentacobro}', '${dato.nam}', '${dato.clu}')"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
                                     </div>
                                 </div>
@@ -7469,6 +7567,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     if (data.r) {
                         comisiones.ajax.reload(null, false)
                         $('#ModalEventos').one('shown.bs.modal', function () {
+                            $('#ModalEventos').modal('hide');
                         }).modal('hide');
                         SMSj('success', data.m);
                     } else {
@@ -7479,6 +7578,23 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             });
         }
+    }
+    var PagarCB = (id, pdf, nombre, movil) => {
+        D = { k: id, h: moment().format('YYYY-MM-DD') };
+        //cartra.ajax.url("/links/reportes/cartera").load(function () {
+        //cartra.columns.adjust().draw();
+        //var dato = cartra.rows().data() //{ page: 'current' }
+        $('#pryec').html(nam)
+        $('#mzlt').html(ids)
+        $('#clnt').html(dato[0].nombre)
+        $('#docu').html(dato[0].documento)
+        $('#asesor').html(dato[0].fullname)
+        //});
+        $('#PagOCC').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
     }
     var bonos = $('#bonos').DataTable({
         deferRender: true,
@@ -7649,6 +7765,144 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         ]
     });
+    $('#recbo').submit(function (e) {
+        e.preventDefault();
+        var dat = new FormData(this); //$('#recbo').serialize();
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        $('#g').val(1);
+        $.ajax({
+            type: 'POST',
+            url: '/links/recibo',
+            data: dat,
+            //async: true,
+            processData: false,
+            contentType: false,
+            beforeSend: function (xhr) {
+                $('#PagO').modal('hide');
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data.std) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('success', data.msj);
+                    //table.ajax.reload(null, false)
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('error', data.msj)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    });
+    window.preview = function (input) {
+        if (input.files && input.files[0]) {
+            var marg = 100 / $('#file2')[0].files.length;
+            $('#recibos1').html('');
+            $('.op').remove();
+            $('#montorecibos').val('').hide('slow');
+            $(input.files).each(function () {
+                var reader = new FileReader();
+                reader.readAsDataURL(this);
+                reader.onload = function (e) {
+                    $('#recibos1').append(
+                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
+                        `<div class="image" style="
+                            width: ${marg}%;
+                            padding-top: calc(100% / (16/9));
+                            background-image: url('${e.target.result}');
+                            background-size: 100%;
+                            background-position: center;
+                            background-repeat: no-repeat;float: left;"></div>`
+                    );
+                    $('#trarchivos').after(`
+                    <tr class="op">
+                        <th>                     
+                        <svg xmlns="http://www.w3.org/2000/svg" 
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                        stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                            <polyline points="10 9 9 9 8 9"></polyline>
+                        </svg>
+                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        </th>
+                        <td>
+                            <input class="montos text-center" type="text" name=""
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>`
+                    );
+                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').on('change', function () {
+                        var avl = 0;
+                        $('#montorecibos').show('slow')
+                        $('.montos').map(function () {
+                            s = parseFloat($(this).cleanVal()) || 0
+                            avl = avl + s;
+                        });
+                        $('.montorecibos').html(Moneda(avl))
+                        $('#montorecibos').val(avl);
+                    })
+                    $('.recis').on('change', function () {
+                        var avl = '';
+                        $('.recis').map(function () {
+                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                            avl += s;
+                        });
+                        $('#nrbc').val(avl.slice(0, -1));
+                    })
+                    var zom = 200
+                    $(".image").on({
+                        mousedown: function () {
+                            zom += 50
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseup: function () {
+
+                        },
+                        mousewheel: function (e) {
+                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mousemove: function (e) {
+                            let width = this.offsetWidth;
+                            let height = this.offsetHeight;
+                            let mouseX = e.offsetX;
+                            let mouseY = e.offsetY;
+
+                            let bgPosX = (mouseX / width * 100);
+                            let bgPosY = (mouseY / height * 100);
+
+                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                        },
+                        mouseenter: function (e) {
+                            $(this).css("background-size", zom + "%")
+                        },
+                        mouseleave: function () {
+                            $(this).css("background-size", "100%")
+                            this.style.backgroundPosition = "center";
+                        }
+                    });
+                }
+            });
+        }
+
+    }
     /*$('button').click(function () {
         var data = table.$('input, select').serialize();
         alert(
@@ -8384,6 +8638,15 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
         buttons: [
+            {
+                extend: 'collection',
+                text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+                orientation: 'landscape',
+                buttons: [{
+                    text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                    extend: 'copy'
+                }]
+            },
             {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>

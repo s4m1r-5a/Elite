@@ -1438,28 +1438,34 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'cartera') {
         const { k, h } = req.body;
         var f = k ? `AND p.id = ${k}` : ''
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,   
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
             t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora, t.id idcuota
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-            INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
+            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
             AND t.estado IN(3,5) AND t.fechs < '${h}' ${f}`
         const cuotas = await pool.query(sql);
         respuesta = { "data": cuotas };
         res.send(respuesta);
     } else if (id === 'comision') {
-        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, 
-        s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar,
-        us.id, us.fullname, cl.nombre, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+        s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
+        u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
+        cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS')
-        AND pr.tipobsevacion IS NULL AND u.id = ${req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}
+        INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
+        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS')
+        AND pr.tipobsevacion IS NULL AND u.id = ${req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
+
         respuesta = { "data": solicitudes };
         res.send(respuesta);
+    } else if (id === 'bank') {
+        const { banco, cta, idbank, numero } = req.body;
+        await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [{ bank: banco, tipocta: cta, numerocuenta: numero }, idbank]);
+        console.log(req.body)
+        res.send(true);
     }
-
 });
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
@@ -2013,6 +2019,7 @@ function ID(lon) {
     };
     return code;
 };
+Eli('uploads/3xcy-02nj3ptv8wt7r5-7235y48fk7ihmz.pdf');
 function ID2(lon) {
     let chars = "1234567890",
         code = "";
@@ -2817,7 +2824,7 @@ async function Desendentes(pin, stados) {
                 var retefuente = monto * 0.10;
                 var reteica = monto * 8 / 1000;
                 var f = {
-                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 9, descp: 'VENTA DIRECTA',
+                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 15, descp: 'VENTA DIRECTA',
                     asesor: j.acreedor, porciento: j.sucursal, total: val, lt: a.lote, retefuente,
                     reteica, pagar: monto - (retefuente + reteica)
                 }
