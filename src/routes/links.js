@@ -1089,7 +1089,7 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
     LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
     INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
-    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.id = ?`
+    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ? LIMIT 1`
 
     const orden = await pool.query(sql, id);
     var abono = 0;
@@ -1102,6 +1102,7 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
         req.flash('error', 'Esta separacion no es posible editarla ya que tiene un ABONO aprobado');
         res.redirect('/links/reportes');
     } else {
+        //console.log(orden)
         res.render('links/ordn', { orden, id });
     }
 

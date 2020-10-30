@@ -4020,7 +4020,7 @@ margin + oneLineHeight
 if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/')[3]}`) {
     var table = $('#datatable').DataTable({
         paging: false,
-        ordering: false,
+        //ordering: false,
         info: false,
         searching: false,
         //deferRender: true,
@@ -4145,7 +4145,7 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
         columnDefs: [
             { "visible": false, "targets": 0 }
         ],
-        order: [[1, 'asc']],
+        order: [[0, "desc"], [1, 'asc']],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
@@ -4155,11 +4155,7 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
                 if (last !== group) {
                     $(rows).eq(i).before(
                         `<tr class="group">
-                            <td colspan="8">
-                                <div class="text-right text-muted">
-                                    ${group}
-                                </div>
-                            </td>
+                            <td colspan="8" class="text-right text-muted">${group}</td>
                         </tr>`
                     );
                     last = group;
@@ -4239,12 +4235,9 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
         var Recorre = (v, i, s, e, vrm2) => {
             var pagos = 0, separa = 0, inicial = 0, financiacion = 0,
                 pagoss = 0, pagosi = 0, pagosf = 0;
-            var u = table
-                .rows()
-                .data()
-                .filter(function (value, index) {
-                    return value
-                });
+            var u = table.rows().data().filter(function (value, index) {
+                return value
+            });
             u.map((a) => {
                 if (a.tipo === "SEPARACION" && a.estado !== 3 && separar != a.cuota) {
                     $('.separar').val(a.cuota).mask('$$$.$$$.$$$', { reverse: true }).prop('disabled', true);
@@ -4254,9 +4247,9 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
                 a.estado === 13 ? pagos += a.cuota : '';
                 a.estado2 === 13 ? pagos += a.cuota2 : '';
                 a.estado === 13 && a.tipo === "SEPARACION" ? pagoss += a.cuota : '';
+                a.estado === 13 && a.tipo === "INICIAL" ? pagosi += a.cuota : '';
                 a.estado2 === 13 && a.tipo === "INICIAL" ? pagosi += a.cuota2 : '';
-                a.estado2 === 13 && a.tipo === "INICIAL" ? pagosi += a.cuota2 : '';
-                a.estado2 === 13 && a.tipo === "FINANCIACION" ? pagosf += a.cuota2 : '';
+                a.estado === 13 && a.tipo === "FINANCIACION" ? pagosf += a.cuota : '';
                 a.estado2 === 13 && a.tipo === "FINANCIACION" ? pagosf += a.cuota2 : '';
                 a.estado === 3 && a.tipo === "SEPARACION" ? separa++ : '';
                 a.estado === 3 && a.tipo === "INICIAL" ? inicial++ : '';
@@ -4264,6 +4257,7 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
                 a.estado === 3 && a.tipo === "FINANCIACION" ? financiacion++ : '';
                 a.estado2 === 3 && a.tipo === "FINANCIACION" ? financiacion++ : '';
             })
+
             var j = financiacion - mxr
             if (e == 1) {
                 v = v - pagos;
@@ -4278,6 +4272,8 @@ if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/
                 s = s - pagoss;
                 cuota = Math.round((v - ni - pagosf - (extrao * mxr)) / j);
             }
+            console.log('pagos ' + pagos, 'separa ' + separa, 'inicial ' + inicial, 'financiacion ' + financiacion,
+                'pagoss ' + pagoss, 'pagosi ' + pagosi, 'pagosf ' + pagosf, 'v ' + v, 'ni ' + ni, 'ini ' + ini, 'f ' + f, 'cuota ' + cuota, 's ' + s)
             //console.log(s, f, ni, i, cuota, separa, ini, pagos, inicial, j, separa > 0);
             Dts(s, f, ni, i, cuota, separa, vrm2);
         }
@@ -4360,7 +4356,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('nav').hide()
     var table = $('#datatable').DataTable({
         paging: false,
-        ordering: false,
+        //ordering: false,
         info: false,
         searching: false,
         //deferRender: true,
@@ -4451,7 +4447,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         columnDefs: [
             { "visible": false, "targets": 0 }
         ],
-        order: [[1, 'asc']],
+        order: [[0, "desc"], [1, 'asc']],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
