@@ -2830,13 +2830,14 @@ if (window.location.pathname == `/links/reportes`) {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                             $('#ModalEventos').modal('hide');
                         }).modal('hide');
-                        tableOrden.ajax.reload(null, false)
+                        tableOrden.ajax.reload(null, false);
+                        comisiones.ajax.reload(null, false);
                     } else {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                             $('#ModalEventos').modal('hide');
                         }).modal('hide');
-                        tableOrden.ajax.reload(null, false)
-                        SMSj('error', 'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor')
+                        tableOrden.ajax.reload(null, false);
+                        SMSj('error', 'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor');
                     }
                 }
             });
@@ -2858,6 +2859,7 @@ if (window.location.pathname == `/links/reportes`) {
             success: function (data) {
                 if (data) {
                     tableOrden.ajax.reload(null, false)
+                    comisiones.ajax.reload(null, false)
                     $('#ModalEventos').one('shown.bs.modal', function () {
                     }).modal('hide');
                 }
@@ -3021,7 +3023,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     });
     var Cartera = (id, proyc) => {
-        D = { k: id, h: moment().format('YYYY-MM-DD') };
+        D = id
         cartra.ajax.url("/links/reportes/cartera").load(function () {
             cartra.columns.adjust().draw();
             var dato = cartra.rows().data() //{ page: 'current' }
@@ -3056,9 +3058,9 @@ if (window.location.pathname == `/links/reportes`) {
     })
     $('#recbo').submit(function (e) {
         e.preventDefault();
-        var dat = new FormData(this); //$('#recbo').serialize();
-        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
         $('#g').val(1);
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        var dat = new FormData(this); //$('#recbo').serialize();
         $.ajax({
             type: 'POST',
             url: '/links/recibo',
@@ -7413,7 +7415,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         columnDefs: [
             { "visible": false, "targets": 1 }
         ],
-        order: [[0, "desc"]],
+        order: [[1, "desc"]],
         language: languag,
         ajax: {
             method: "POST",

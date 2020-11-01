@@ -107,9 +107,13 @@ cron.schedule("0 0 1 * *", async () => {
             }
         })
     }
+    var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    await EnviarWTSAP('57 3007753983', bod);
 });
 cron.schedule("0 0 5 * SAT", async () => {
     await pool.query(`SELECT solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION') AND stado = 15`);
+    var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS* del dia *SABADO O DEL 5* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    await EnviarWTSAP('57 3007753983', bod);
 });
 cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var hoy = moment().format('YYYY-MM-DD');
@@ -146,6 +150,8 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
             }
         })
     }
+    var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+    await EnviarWTSAP('57 3007753983', bod);
 });
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
@@ -1428,16 +1434,25 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                     'l.fechar': h == 2 && !p.directa ? f : p.fechar
                 }, k]
             );
-            var bod = `_*${p.nombre}*. RED ELITE a generado tu *PROMESA DE COMPRA VENTA* la cual te sera enviada al correo *${p.email}* una ves la halla autenticado dirijase a una de nuestras oficinas con el documento_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-            h == 1 ? await EnviarWTSAP(p.movil, bod) : '';
-            var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${p.mz} LT ${p.n}* la cual le sera enviada al correo *${p.email}*, se recomienda realizar seguimiento al cliente para que haga la autenticacion en el menor tiempo posible_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-            h == 1 ? await EnviarWTSAP(p.cel, bo) : '';
+            if (h == 1) {
+                var bod = `_*${p.nombre}*. RED ELITE a generado tu *PROMESA DE COMPRA VENTA* la cual te sera enviada al correo *${p.email}* una ves la halla autenticado dirijase a una de nuestras oficinas con el documento_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+                var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${p.mz} LT ${p.n}* la cual le sera enviada al correo *${p.email}*, se recomienda realizar seguimiento al cliente para que haga la autenticacion en el menor tiempo posible_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+                await EnviarWTSAP(p.movil, bod);
+                await EnviarWTSAP(p.cel, bo);
+            } else if (h > 1) {
+                const r = await Estados(k);
+                var estado = r.pendients ? 8 : r.std
+                await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+                    SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]
+                );
+            }
             res.send(true);
         } else {
             res.send(false);
         }
     } else if (id === 'cartera') {
         const { k, h } = req.body;
+        console.log(req.body, k)
         var f = k ? `AND p.id = ${k}` : ''
         sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,   
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
@@ -1445,6 +1460,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
             AND t.estado IN(3,5) AND t.fechs < '${h}' ${f}`
+        console.log(sql)
         const cuotas = await pool.query(sql);
         respuesta = { "data": cuotas };
         res.send(respuesta);
@@ -1457,7 +1473,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
         WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS')
-        AND pr.tipobsevacion IS NULL AND u.id = ${req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
+        AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
 
         respuesta = { "data": solicitudes };
         res.send(respuesta);
@@ -2020,7 +2036,7 @@ function ID(lon) {
     };
     return code;
 };
-Eli('uploads/3xcy-02nj3ptv8wt7r5-7235y48fk7ihmz.pdf');
+//Eli('uploads/3xcy-02nj3ptv8wt7r5-7235y48fk7ihmz.pdf');
 function ID2(lon) {
     let chars = "1234567890",
         code = "";
@@ -2276,7 +2292,7 @@ async function PagosAbonos(Tid, pdf, user) {
                 totalinicial += c.cuota;
             })
             if (monto >= totalinicial) {
-                estados = 10
+                //estados = 10
                 await pool.query(
                     `UPDATE cuotas c 
                             INNER JOIN preventa p ON c.separacion = p.id 
@@ -2358,14 +2374,14 @@ async function PagosAbonos(Tid, pdf, user) {
                                 {
                                     's.aprueba': user,
                                     's.stado': 4,
-                                    'c.cuota': cuota,
-                                    'l.estado': estados
+                                    'c.cuota': cuota//,
+                                    //'l.estado': estados
                                 }, Tid
                             ]
                         );
                     }
                 }
-                Estados(null, null, Tid)
+                //Estados(null, null, Tid)
             } else {
                 var cuota = cuotainicial - Math.round(monto / Ai.length)
                 await pool.query(
@@ -2463,7 +2479,8 @@ async function PagosAbonos(Tid, pdf, user) {
         var Ps = async (Total, texto) => {
             var inicial = (S.valor - S.ahorro) * S.iniciar / 100
             if (monto < S.cuota) {
-                var st = await Estados(null, null, Tid)
+                //var st = await Estados(null, null, Tid)
+                var cta = S.cuota - monto
                 await pool.query(
                     `UPDATE solicitudes s 
                         INNER JOIN cuotas c ON s.pago = c.id 
@@ -2474,15 +2491,16 @@ async function PagosAbonos(Tid, pdf, user) {
                             's.aprueba': user,
                             's.stado': 4,
                             'c.estado': 3,
-                            'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                            'o.estado': st.std
+                            'c.cuota': cta,
+                            'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm')//,
+                            //'o.estado': st.std
                         }, Tid
                     ]
                 );
             } else {
                 if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo) {
                     var solicitar = {
-                        fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 9, descp: 'SEPARACION',
+                        fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION',
                         asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
                     }
                     await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
@@ -2608,14 +2626,14 @@ async function PagosAbonos(Tid, pdf, user) {
                                 EnviarWTSAP(S.movil, bodi);
                             }
 
-                            Estados(null, null, Tid)
+                            //Estados(null, null, Tid)
 
                         } else if (excedente === iniciales) {
-                            estados = 10
+                            //estados = 10
                             await pool.query(`UPDATE cuotas SET ? WHERE separacion = ${T} AND tipo = 'INICIAL' 
                             AND estado = 3 AND fechs > '${fech}'`, { estado: 13, fechapago: fech2 });
                         } else {
-                            estados = 12
+                            //estados = 12
                             cuotas = valorcuota - Math.round(excedente / d.length)
                             await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND tipo = 'INICIAL' AND estado = 3 AND fechs > ?`, [{ cuota: cuotas }, T, fech]);
                         }
@@ -2690,8 +2708,18 @@ async function PagosAbonos(Tid, pdf, user) {
             Ps(Total, texto);
         }
     }
-    await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, Tid]);
-    Desendentes(S.pin, estados)
+    var st = await Estados(null, null, Tid)
+    await pool.query(`UPDATE solicitudes s 
+        INNER JOIN productosd l ON s.lt = l.id 
+        SET ? WHERE s.ids = ?`,
+        [
+            {
+                'l.estado': st.std, 's.pdf': pdf
+            }, Tid
+        ]
+    );
+    //await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, Tid]);
+    //Desendentes(S.pin, st.std)
 
     var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${S.recibo}* Monto *${Moneda(monto)}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
@@ -3064,11 +3092,11 @@ function EnviarWTSAP(movil, body, smsj) {
             body
         }
     };
-    request(options, function (error, response, body) {
+    /*request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
-    smsj ? sms(cel, smsj) : '';
+    smsj ? sms(cel, smsj) : '';*/
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
