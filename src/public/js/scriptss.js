@@ -3407,23 +3407,61 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                data: "ids",
+                //defaultContent: 
+                render: function (data, method, row) {
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item">Aprobar</a>
-                                            <a class="dropdown-item">Declinar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
                                         </div>
                                     </div>` : ''
+                }
             }
         ]
     });
-    comisiones.on('click', 'td:not(.control)', function () {
+    comisiones.on('click', 'td:not(.control, .t)', function () {
         var fila = $(this).parents('tr');
         var data = comisiones.row(fila).data(); //console.log(data)
         data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
     });
-
+    var EstadoCC = (id, std, actualstd) => {
+        if (actualstd === 9 || actualstd === 15) {
+            $.ajax({
+                type: 'POST',
+                url: '/links/reportes/std',
+                data: { ids: id, std },
+                beforeSend: function (xhr) {
+                    $('#Modalimg').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        $('#ModalEventos').modal('hide');
+                        SMSj('success', `Solicitud procesada correctamente`);
+                        comisiones.ajax.reload(null, false)
+                    } else {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        $('#ModalEventos').modal('hide');
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        }
+    }
     var CuentaCobro = () => {
         var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', CC = '',
             ID = '', BANCO = '', TCTA = '', NCTA = '', TOTAL = 0,
@@ -7413,7 +7451,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         },
         columnDefs: [
-            { "visible": false, "targets": 1 }
+            //{ "visible": false, "targets": 1 }
         ],
         order: [[1, "desc"]],
         language: languag,
@@ -7421,6 +7459,50 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             method: "POST",
             url: "/links/solicitudes/comision",
             dataSrc: "data"
+        },
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+            api.rows({ page: 'current' }).data().each(function (group, i) {
+                if (last !== group.cuentadecobro) {
+                    //var dato = api.rows(i, { page: 'current' }).data()
+                    //console.log(group)
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="1">
+                                <div class="text-center">
+                                    ${group.cuentadecobro}
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <div class="text-center">
+                                    ${group.nam} 
+                                </div>
+                            </td>
+                            <td>
+                                <div class="text-center">
+                                    $${Moneda(group.deuda)}
+                                </div>
+                            </td>
+                            <td colspan="12">
+                                <div class="text-center">
+                                    <div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                         aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" href="${group.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
+                                            <a class="dropdown-item" onclick="Eliminar(${group.cuentadecobro}, '${group.cuentacobro}', '${group.nam}', '${group.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
+                                            <a class="dropdown-item" onclick="PagarCB(${group.cuentadecobro}, '${group.cuentacobro}', '${group.nam}', '${group.clu}')"><i class="fas fa-business-time"></i> Pagar</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>`
+                    );
+                    last = group.cuentadecobro;
+                }
+            });
         },
         /*initComplete: function (settings, json, row) {
                                         alert(row);
@@ -7498,52 +7580,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     }
                 }
             }
-        ],
-        drawCallback: function (settings) {
-            var api = this.api();
-            var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-
-            api.column(1, { page: 'current' }).data().each(function (group, i) {
-                if (last !== group) {
-                    var dato = api.row(i).data()
-                    console.log(dato)
-                    $(rows).eq(i).before(
-                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="1">
-                                <div class="text-center">
-                                    ${group}
-                                </div>
-                            </td>
-                            <td colspan="2">
-                                <div class="text-center">
-                                    ${dato.nam} 
-                                </div>
-                            </td>
-                            <td>
-                                <div class="text-center">
-                                    $${Moneda(dato.deuda)}
-                                </div>
-                            </td>
-                            <td colspan="12">
-                                <div class="text-center">
-                                    <div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                         aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="${dato.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
-                                            <a class="dropdown-item" href="#comisiones" onclick="Eliminar(${group}, '${dato.cuentacobro}', '${dato.nam}', '${dato.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
-                                            <a class="dropdown-item" href="#comisiones" onclick="PagarCB(${group}, '${dato.cuentacobro}', '${dato.nam}', '${dato.clu}')"><i class="fas fa-business-time"></i> Pagar</a>
-                                        </div>
-                                    </div>
-                                </div>
-                            </td>
-                        </tr>`
-                    );
-                    last = group;
-                }
-            });
-        }
+        ]
     });
     var Eliminar = (id, pdf, nombre, movil) => {
         var porque = '';
@@ -7901,6 +7938,74 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
 
     }
+    var Banco = $('#BancoExt').DataTable({
+        //paging: false,
+        //ordering: false,
+        //info: false,
+        //searching: false,
+        //deferRender: true,
+        //autoWidth: true,
+        //responsive: false,
+        //columnDefs: [
+        /*{
+            render: function (data, type, row) {
+                return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
+            },
+            targets: 1
+        },
+        {
+            render: function (data, type, row) {
+                return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
+            },
+            targets: 10
+        },
+        { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }*/
+        //],
+        //order: [[1, "desc"]],
+        //language: languag,
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: false,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [
+            //{ "visible": false, "targets": 1 }
+        ],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/extractos",
+            dataSrc: "data"
+        },
+        columns: [
+            { data: "id" },
+            {
+                data: "date",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            { data: "description" },
+            { data: "lugar" },
+            { data: "concpt1" },
+            { data: "concpt2" },
+            {
+                data: "consignado",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            }
+        ]
+    });
     /*$('button').click(function () {
         var data = table.$('input, select').serialize();
         alert(

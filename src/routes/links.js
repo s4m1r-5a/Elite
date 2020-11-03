@@ -39,7 +39,7 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 });*/
 /*request(url, function (error, response, body) {
     if (error) return console.error('Failed: %s', error.message);
-
+¿
     console.log('Success: ', body);
 });*/
 cron.schedule("59 23 * * *", async () => {
@@ -194,7 +194,7 @@ router.get('/prueba', async (req, res) => {
         console.log('Success: ', body);
     });*/
 
-    var options = {
+    /*var options = {
         method: 'POST',
         url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
         headers:
@@ -225,10 +225,23 @@ router.get('/prueba', async (req, res) => {
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
-    });
-
+    });*/
 
     res.send(true);
+})
+//////////////////* BANCO */////////////////////
+router.post('/extrabank', async (req, res) => {
+    const { date, description, lugar, concpt1, concpt2, otro, consignado, cont } = req.body;
+    //var f = moment(Date(date)).format('YYYY-MM-DD');
+    const b = {
+        date, description, lugar: lugar ? lugar : null,
+        concpt1: concpt1 ? concpt1 : null, concpt2: concpt2 ? concpt2 : null,
+        otro: otro ? otro : null, consignado: consignado ? consignado.replace(/[\$,]/g, '') * 1 : 0
+    };
+    pool.query('INSERT INTO extrabanco SET ? ', b);
+    //console.log(b, cont) //, bank.insertId
+    //res.send(cont);
+    res.send(consignado);
 })
 //////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
@@ -1452,7 +1465,6 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         }
     } else if (id === 'cartera') {
         const { k, h } = req.body;
-        console.log(req.body, k)
         var f = k ? `AND p.id = ${k}` : ''
         sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,   
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
@@ -1460,7 +1472,6 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
             AND t.estado IN(3,5) AND t.fechs < '${h}' ${f}`
-        console.log(sql)
         const cuotas = await pool.query(sql);
         respuesta = { "data": cuotas };
         res.send(respuesta);
@@ -1480,10 +1491,22 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'bank') {
         const { banco, cta, idbank, numero } = req.body;
         await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [{ bank: banco, tipocta: cta, numerocuenta: numero }, idbank]);
-        console.log(req.body)
+        //console.log(req.body)
+        res.send(true);
+    } else if (id === 'std') {
+        const { ids, std } = req.body;
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
         res.send(true);
     }
 });
+router.post('/std/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    if (id === 'bank') {
+
+    } else if (id === 'bank') {
+        res.send(true);
+    }
+})
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
@@ -1571,6 +1594,16 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         await EnviarWTSAP(movil, bod);
         res.send({ r: true, m: 'Cuenta de cobro eliminada correctamente' });
 
+    } else if (id == 'extractos') {
+        if (req.user.admin != 1) {
+            return res.send(false);
+        };       
+        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt 
+        FROM extrabanco e LEFT JOIN solicitudes s ON s.extrabank = e.id LEFT JOIN productosd pd ON s.lt = pd.id LEFT JOIN preventa pr ON pr.lote = pd.id 
+        LEFT JOIN productos p ON pd.producto = p.id LEFT JOIN clientes cl ON pr.cliente = cl.idc`);
+        //console.log(solicitudes)
+        respuesta = { "data": solicitudes };
+        res.send(respuesta);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
