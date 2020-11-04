@@ -1597,8 +1597,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     } else if (id == 'extractos') {
         if (req.user.admin != 1) {
             return res.send(false);
-        };       
-        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt 
+        };
+        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt, s.extrabank
         FROM extrabanco e LEFT JOIN solicitudes s ON s.extrabank = e.id LEFT JOIN productosd pd ON s.lt = pd.id LEFT JOIN preventa pr ON pr.lote = pd.id 
         LEFT JOIN productos p ON pd.producto = p.id LEFT JOIN clientes cl ON pr.cliente = cl.idc`);
         //console.log(solicitudes)
@@ -1660,11 +1660,11 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
     } else {
 
-        const { ids, acumulado } = req.body
+        const { ids, acumulado, extrabank } = req.body
         const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
         const R = await PagosAbonos(ids, pdf, req.user.fullname);
         if (R) {
-            await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
+            await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado, extrabank }, ids]);
         }
         res.send(R);
     }
@@ -3125,11 +3125,11 @@ function EnviarWTSAP(movil, body, smsj) {
             body
         }
     };
-    /*request(options, function (error, response, body) {
+    request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
-    smsj ? sms(cel, smsj) : '';*/
+    smsj ? sms(cel, smsj) : '';
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
