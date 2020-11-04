@@ -6922,10 +6922,12 @@ if (window.location.pathname == `/links/orden`) {
 if (window.location == `${window.location.origin}/links/solicitudes`) {
     minDateFilter = "";
     maxDateFilter = "";
+    tiem = 0;
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[3]).getTime();
+                aData._date = new Date(aData[3]).getTime() //tiem === 1 ? new Date(aData[3]).getTime() : tiem === 2 ? new Date(aData[1]).getTime() : '';
+                //console.log(tiem)
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -7105,21 +7107,43 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
 
         fila.toggleClass('selected');
         if (Array.isArray(imagenes)) {
-            $("#Modalimg img:not(.foto)").remove();
-            $("#Modalimg .foto").hide()
+            var marg = 100 / (imagenes.length - 1);
+            //$("#Modalimg img:not(.foto)").remove();
+            $("#Modalimg .foto").remove();
             imagenes.map((e) => {
-                $("#Modalimg .fotos").append(`<img src="${e}" class="card-img" alt="...">`);
+                if (e) {
+                    $("#Modalimg .fotos").append(
+                        `<div class="foto" style="
+                        width: ${marg}%;
+                        padding-top: calc(100% / (16/9));
+                        background-image: url('${e}');
+                        background-size: 100%;
+                        background-position: center;
+                        background-repeat: no-repeat;float: left;">
+                    </div>`);
+                }
             })
         } else if (imagenes) {
-            $("#Modalimg .foto").attr('src', data.img).show();
+            $("#Modalimg .fotos").append(
+                `<div class="foto" style="
+                    width: 100%;
+                    padding-top: calc(100% / (16/9));
+                    background-image: url('${data.img}');
+                    background-size: 100%;
+                    background-position: center;
+                    background-repeat: no-repeat;float: left;">
+                </div>`);
         }
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
         $('#Modalimg .cliente').html(data.nombre);
         $('#Modalimg .proyecto').html(data.proyect);
         $('#Modalimg .mz').html('MZ: ' + data.mz);
-        $('#Modalimg .lote').html('LOTE: ' + data.n);
-        $('#Modalimg .recibo').html('RECIBO: ' + data.recibo);
-        $('#Modalimg .fatvc').html('FAT.VEC: ' + data.facturasvenc);
+        $('#Modalimg .lote').html('LT: ' + data.n);
+        $('#Modalimg .recibo').html('RCB ' + data.recibo.replace(/~/g, ' ')).parents('tr').css({ "background-color": "#162723", "color": "#FFFFFF" });
+        $('#Modalimg .fatvc').html(data.facturasvenc); //'FAT.VEC: ' + 
+        $('#Modalimg .monto').html('$' + Moneda(data.monto)).parents('td').css({ "background-color": "#162723", "color": "#FFFFFF" });;
+        $('#Modalimg .bonoo').html(data.bono || 'NO APLICA');
+        $('#Modalimg .bonom').html('$' + Moneda(data.mount || 0));
         $('#apde').attr('data-toggle', "dropdown");
         $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
         switch (data.stado) {
@@ -7139,6 +7163,39 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
         }
+        var zoom = 200
+        $(".foto").on({
+            mousedown: function () {
+                zoom += 50
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseup: function () {
+
+            },
+            mousewheel: function (e) {
+                //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
+                $(this).css("background-size", zoom + "%")
+            },
+            mousemove: function (e) {
+                let width = this.offsetWidth;
+                let height = this.offsetHeight;
+                let mouseX = e.offsetX;
+                let mouseY = e.offsetY;
+
+                let bgPosX = (mouseX / width * 100);
+                let bgPosY = (mouseY / height * 100);
+
+                this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+            },
+            mouseenter: function (e) {
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseleave: function () {
+                $(this).css("background-size", "100%")
+                this.style.backgroundPosition = "center";
+            }
+        });
         if (admin == 1) {
             $('.dropdown-item').show()
             $('#nove').show()
@@ -7150,247 +7207,257 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-
+        console.log(!$('#extr').val())
+        /*if (!$('#extr').val()) {
+            SMSj('error', 'Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
+            return false;
+        }*/
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
-            if (data.pdf && accion === 'Enviar') {
-                mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
-            } else if (!data.pdf && accion === 'Enviar' && admin == 1) {
-                mensaj = true
-            }
-            if ((accion === 'Aprobar' || mensaje || mensaj) && admin == 1) {
-                $.ajax({
-                    type: 'POST',
-                    url: '/links/solicitudes/saldo',
-                    data: {
-                        solicitud: data.ids,
-                        lote: data.id,
-                        fecha: data.fech
-                    },
-                    async: true,
-                    beforeSend: function (xhr) {
-                        $('#Modalimg').modal('hide');
-                        $('#ModalEventos').modal({
-                            backdrop: 'static',
-                            keyboard: true,
-                            toggle: true
-                        });
-                    },
-                    success: function (dat) {
-                        /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-                        if (dat) {
-                            var acumulad = dat.d === 'NO' ? 0 : dat.d;
-                            var doc = new jsPDF('l', 'mm', 'a5');
-                            var totall = data.valor - data.ahorro;
-                            var fech = data.fech
-                            var saldo = totall - acumulad;
-                            var bon = data.mount === null ? 0 : data.mount;
-                            var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
-                            var img2 = new Image();
-                            var img = new Image();
-                            img.src = '/img/avatars/avatar.png'
-                            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
-                            var totalPagesExp = '{total_pages_count_string}'
-                            //doc.addPage("a3"); 
-                            doc.autoTable({
-                                head: [
-                                    { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
-                                ],
-                                body: [{
-                                    id: '',
-                                    name: '',
-                                    email: '',
-                                    city: 'RECIBO DE CAJA',
-                                    expenses: data.ids
-                                },
-                                {
-                                    id: 'CLIENTE',
-                                    name: data.nombre + ' ' + data.email,
-                                    email: 'CC: ' + data.documento,
-                                    city: data.movil,
-                                    expenses: ''
-                                },
-                                {
-                                    id: 'PRODUCTO',
-                                    name: data.proyect,
-                                    email: 'MZ. ' + data.mz,
-                                    city: 'LT. ' + data.n,
-                                    expenses: ''
-                                },
-                                {
-                                    id: 'CONCEPTO',
-                                    name: 'PAGO',
-                                    email: data.descp,
-                                    city: 'CUOTA #',
-                                    expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
-                                },
-                                {
-                                    id: 'F PAGO',
-                                    name: data.formap,
-                                    email: 'R ' + data.recibo,
-                                    city: 'MONTO',
-                                    expenses: '$' + Moneda(data.monto)
-                                },
-                                {
-                                    id: 'BONO',
-                                    name: data.bono === null ? 'NO APLICA' : data.bono,
-                                    email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
-                                    city: 'MONTO',
-                                    expenses: '$' + Moneda(bon)
-                                },
-                                {
-                                    id: 'TOTAL',
-                                    name: `${NumeroALetras(totl)} MCT********`,
-                                    email: '',
-                                    city: '',
-                                    expenses: '$' + Moneda(totl)
-                                },
-                                {
-                                    id: 'SLD FECHA',
-                                    name: `${NumeroALetras(saldo)} MCT********`,
-                                    email: '',
-                                    city: '',
-                                    expenses: '$' + Moneda(saldo)
-                                },
-                                {
-                                    id: 'TOTAL SLD',
-                                    name: `${NumeroALetras(saldo - totl)} MCT********`,
-                                    email: '',
-                                    city: '',
-                                    expenses: '$' + Moneda(saldo - totl)
-                                }],
-                                //html: '#tablarecibo',
-                                showHead: false,
-                                columnStyles: {
-                                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                                    id: { textColor: 0, fontStyle: 'bold' },
-                                    0: { cellWidth: '50' },
-                                    1: { cellWidth: 'auto' },
-                                    2: { cellWidth: 'wrap' },
-                                    3: { cellWidth: 'wrap' },
-                                },
-                                didDrawPage: function (data) {
-                                    // Header
-                                    doc.setTextColor(0)
-                                    doc.setFontStyle('normal')
-                                    if (img) {
-                                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                                        doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
-                                    }
-                                    doc.setFontSize(15)
-                                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
-                                    doc.setFontSize(7)
-                                    doc.text(fech, data.settings.margin.left + 165, 8)
-                                    doc.setFontSize(10)
-                                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
-                                    doc.setFontSize(10)
-                                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
-                                    doc.setFontSize(8)
-                                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
-
-                                    // Footer
-                                    var str = 'Page ' + doc.internal.getNumberOfPages()
-                                    // Total page number plugin only available in jspdf v1.0+
-                                    if (typeof doc.putTotalPages === 'function') {
-                                        str = str + ' of ' + totalPagesExp
-                                    }
-                                    doc.setFontSize(8)
-
-                                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                                    var pageSize = doc.internal.pageSize
-                                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                                    doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
-                                },
-                                margin: { top: 34 },
-                            })
-                            // Total page number plugin only available in jspdf v1.0+
-                            if (typeof doc.putTotalPages === 'function') {
-                                doc.putTotalPages(totalPagesExp)
-                            }
-                            var blob = doc.output('blob')
+            fd.append('extrabank', $('#extr').val());
+            if (!$('#extr').val() && accion === 'Aprobar') {
+                //SMSj('error', 'Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
+                alert('Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
+                //return false;
+            } else {
+                if (data.pdf && accion === 'Enviar') {
+                    mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
+                } else if (!data.pdf && accion === 'Enviar' && admin == 1) {
+                    mensaj = true
+                }
+                if ((accion === 'Aprobar' || mensaje || mensaj) && admin == 1) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/solicitudes/saldo',
+                        data: {
+                            solicitud: data.ids,
+                            lote: data.id,
+                            fecha: data.fech
+                        },
+                        async: true,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (dat) {
                             /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-                            fd.append('pdf', blob);
-                            fd.append('acumulado', acumulad);
-                            $.ajax({
-                                type: 'PUT',
-                                url: '/links/solicitudes/' + accion,
-                                data: fd,
-                                processData: false,
-                                contentType: false,
-                                beforeSend: function (xhr) {
-                                    /*$('#Modalimg').modal('hide');
-                                    $('#ModalEventos').modal({
-                                        backdrop: 'static',
-                                        keyboard: true,
-                                        toggle: true
-                                    });*/
-                                },
-                                success: function (data) {
-                                    if (data) {
-                                        $('#ModalEventos').one('shown.bs.modal', function () {
-                                        }).modal('hide');
-                                        $('#ModalEventos').modal('hide');
-                                        SMSj('success', `Solicitud procesada correctamente`);
-                                        table.ajax.reload(null, false)
-                                    } else {
-                                        $('#ModalEventos').one('shown.bs.modal', function () {
-                                        }).modal('hide');
-                                        $('#ModalEventos').modal('hide');
-                                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                                    }
-                                },
-                                error: function (data) {
-                                    console.log(data);
-                                }
-                            })
-                        } else {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
-                            SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar')
-                        }
-                    },
-                    error: function (data) {
-                        console.log(data);
-                    }
-                })
-            } else if (data.pdf && accion === 'Enviar' && admin == 1) {
-                $.ajax({
-                    type: 'PUT',
-                    url: '/links/solicitudes/' + accion,
-                    data: fd,
-                    processData: false,
-                    contentType: false,
-                    beforeSend: function (xhr) {
-                        alert('aqui')
-                        $('#Modalimg').modal('hide');
-                        $('#ModalEventos').modal({
-                            backdrop: 'static',
-                            keyboard: true,
-                            toggle: true
-                        });
-                    },
-                    success: function (data) {
-                        if (data) {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
-                            SMSj('success', `Solicitud procesada correctamente`);
-                            table.ajax.reload(null, false)
-                        } else {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
-                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                        }
-                    },
-                    error: function (data) {
-                        console.log(data);
-                    }
-                })
-            }
+                            if (dat) {
+                                var acumulad = dat.d === 'NO' ? 0 : dat.d;
+                                var doc = new jsPDF('l', 'mm', 'a5');
+                                var totall = data.valor - data.ahorro;
+                                var fech = data.fech
+                                var saldo = totall - acumulad;
+                                var bon = data.mount === null ? 0 : data.mount;
+                                var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
+                                var img2 = new Image();
+                                var img = new Image();
+                                img.src = '/img/avatars/avatar.png'
+                                img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+                                var totalPagesExp = '{total_pages_count_string}'
+                                //doc.addPage("a3"); 
+                                doc.autoTable({
+                                    head: [
+                                        { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+                                    ],
+                                    body: [{
+                                        id: '',
+                                        name: '',
+                                        email: '',
+                                        city: 'RECIBO DE CAJA',
+                                        expenses: data.ids
+                                    },
+                                    {
+                                        id: 'CLIENTE',
+                                        name: data.nombre + ' ' + data.email,
+                                        email: 'CC: ' + data.documento,
+                                        city: data.movil,
+                                        expenses: ''
+                                    },
+                                    {
+                                        id: 'PRODUCTO',
+                                        name: data.proyect,
+                                        email: 'MZ. ' + data.mz,
+                                        city: 'LT. ' + data.n,
+                                        expenses: ''
+                                    },
+                                    {
+                                        id: 'CONCEPTO',
+                                        name: 'PAGO',
+                                        email: data.descp,
+                                        city: 'CUOTA #',
+                                        expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+                                    },
+                                    {
+                                        id: 'F PAGO',
+                                        name: data.formap,
+                                        email: 'R ' + data.recibo,
+                                        city: 'MONTO',
+                                        expenses: '$' + Moneda(data.monto)
+                                    },
+                                    {
+                                        id: 'BONO',
+                                        name: data.bono === null ? 'NO APLICA' : data.bono,
+                                        email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                                        city: 'MONTO',
+                                        expenses: '$' + Moneda(bon)
+                                    },
+                                    {
+                                        id: 'TOTAL',
+                                        name: `${NumeroALetras(totl)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(totl)
+                                    },
+                                    {
+                                        id: 'SLD FECHA',
+                                        name: `${NumeroALetras(saldo)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(saldo)
+                                    },
+                                    {
+                                        id: 'TOTAL SLD',
+                                        name: `${NumeroALetras(saldo - totl)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(saldo - totl)
+                                    }],
+                                    //html: '#tablarecibo',
+                                    showHead: false,
+                                    columnStyles: {
+                                        //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                                        id: { textColor: 0, fontStyle: 'bold' },
+                                        0: { cellWidth: '50' },
+                                        1: { cellWidth: 'auto' },
+                                        2: { cellWidth: 'wrap' },
+                                        3: { cellWidth: 'wrap' },
+                                    },
+                                    didDrawPage: function (data) {
+                                        // Header
+                                        doc.setTextColor(0)
+                                        doc.setFontStyle('normal')
+                                        if (img) {
+                                            doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                            doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                                        }
+                                        doc.setFontSize(15)
+                                        doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                                        doc.setFontSize(7)
+                                        doc.text(fech, data.settings.margin.left + 165, 8)
+                                        doc.setFontSize(10)
+                                        doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                                        doc.setFontSize(10)
+                                        doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                                        doc.setFontSize(8)
+                                        doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
 
+                                        // Footer
+                                        var str = 'Page ' + doc.internal.getNumberOfPages()
+                                        // Total page number plugin only available in jspdf v1.0+
+                                        if (typeof doc.putTotalPages === 'function') {
+                                            str = str + ' of ' + totalPagesExp
+                                        }
+                                        doc.setFontSize(8)
+
+                                        // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                                        var pageSize = doc.internal.pageSize
+                                        var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                                        doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                                    },
+                                    margin: { top: 34 },
+                                })
+                                // Total page number plugin only available in jspdf v1.0+
+                                if (typeof doc.putTotalPages === 'function') {
+                                    doc.putTotalPages(totalPagesExp)
+                                }
+                                var blob = doc.output('blob')
+                                /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                                fd.append('pdf', blob);
+                                fd.append('acumulado', acumulad);
+                                $.ajax({
+                                    type: 'PUT',
+                                    url: '/links/solicitudes/' + accion,
+                                    data: fd,
+                                    processData: false,
+                                    contentType: false,
+                                    beforeSend: function (xhr) {
+                                        /*$('#Modalimg').modal('hide');
+                                        $('#ModalEventos').modal({
+                                            backdrop: 'static',
+                                            keyboard: true,
+                                            toggle: true
+                                        });*/
+                                    },
+                                    success: function (data) {
+                                        if (data) {
+                                            $('#ModalEventos').one('shown.bs.modal', function () {
+                                            }).modal('hide');
+                                            $('#ModalEventos').modal('hide');
+                                            SMSj('success', `Solicitud procesada correctamente`);
+                                            table.ajax.reload(null, false)
+                                        } else {
+                                            $('#ModalEventos').one('shown.bs.modal', function () {
+                                            }).modal('hide');
+                                            $('#ModalEventos').modal('hide');
+                                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                    }
+                                })
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar')
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                } else if (data.pdf && accion === 'Enviar' && admin == 1) {
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            alert('aqui')
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+            }
             if (accion === 'Declinar' && admin == 1) {
                 porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
                 if (porque != null) {
@@ -7938,44 +8005,34 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
 
     }
-    var Banco = $('#BancoExt').DataTable({
-        //paging: false,
-        //ordering: false,
-        //info: false,
-        //searching: false,
-        //deferRender: true,
-        //autoWidth: true,
-        //responsive: false,
-        //columnDefs: [
-        /*{
-            render: function (data, type, row) {
-                return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
-            },
-            targets: 1
-        },
-        {
-            render: function (data, type, row) {
-                return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
-            },
-            targets: 10
-        },
-        { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }*/
-        //],
-        //order: [[1, "desc"]],
-        //language: languag,
-        deferRender: true,
-        paging: true,
+    var BancoExt = $('#BancoExt').DataTable({
+        scrollY: "200px",
+        //scrollCollapse: true,
+        paging: false,
         search: {
             regex: true,
             caseInsensitive: false,
         },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
+        //ordering: false,
+        //info: false,
+        //searching: false,
+        //deferRender: true,
+        autoWidth: true,
+        //responsive: false,
         columnDefs: [
-            //{ "visible": false, "targets": 1 }
+            /*{
+                render: function (data, type, row) {
+                    return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
+                },
+                targets: 1
+            },
+            {
+                render: function (data, type, row) {
+                    return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
+                },
+                targets: 10
+            },
+            { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }*/
         ],
         order: [[1, "desc"]],
         language: languag,
@@ -7983,6 +8040,28 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             method: "POST",
             url: "/links/solicitudes/extractos",
             dataSrc: "data"
+        },
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+            api.rows({ page: 'current' }).data().each(function (group, i) {
+                if (last !== group.extrabank && group.extrabank !== null) {
+                    $(rows).eq(i).css("background-color", "#40E0D0");
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            <td colspan="7">
+                                <div class="text-center">
+                                    ${'Este Pago tiene un excedente de $' + Moneda(group.excdnt)}
+                                </div>
+                            </td>
+                        </tr>`
+                    );
+                    last = group.extrabank;
+                } else if (last === group.extrabank && group.extrabank !== null) {
+                    $(rows).eq(i).css("background-color", "#40E0D0");
+                }
+            });
         },
         columns: [
             { data: "id" },
@@ -7995,7 +8074,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             { data: "description" },
             { data: "lugar" },
             { data: "concpt1" },
-            { data: "concpt2" },
             {
                 data: "consignado",
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
@@ -8005,6 +8083,19 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
             }
         ]
+    });
+    BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
+        var data = BancoExt.row(this).data();
+
+        if ($(this).hasClass('selected')) {
+            $(this).removeClass('selected');
+            $('#extr').val('')
+        }
+        else {
+            BancoExt.$('tr.selected').removeClass('selected');
+            $(this).addClass('selected');
+            $('#extr').val(data.id)
+        }
     });
     /*$('button').click(function () {
         var data = table.$('input, select').serialize();
@@ -8052,9 +8143,52 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
         }
     }, function (start, end, label) {
+        tiem = 1
         maxDateFilter = end;
         minDateFilter = start;
         table.draw();
+        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    });
+    $(".fechs").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        //autoApply: false,
+        startDate: moment().subtract(29, "days"),
+        endDate: moment(),
+        ranges: {
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")],
+            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
+            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
+            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        }
+    }, function (start, end, label) {
+        tiem = 2
+        //alert(t)
+        maxDateFilter = end;
+        minDateFilter = start;
+        BancoExt.draw();
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     });
 };

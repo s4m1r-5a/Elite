@@ -130,58 +130,89 @@
                 </div>
             </div>
             <div class="modal-body">
+                <input type="hidden" id="extr">
                 <div class="row no-gutters">
-                    <div class="col-md-6 fotos">
-                        <img src="" class="card-img foto" alt="...">
+                    <div class="col-md-8 fotos" width="100%" height="200">
+                        <!--<img src="" class="card-img foto" alt="...">-->
                     </div>
-                    <div class="col-md-6">
-                        <div class="card-body text-primary h4">
-                            <div class="mb-0 float-right">
-                                <small class="text-muted fecha"></small><br>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text cliente"></span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text proyecto"></span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text mz"></span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text lote"></span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text recibo"></span>
-                            </div>
-                            <div class="mb-0">
-                                <span class="align-middle card-text fatvc"></span>
-                            </div>
-                            <p class="card-text estado">
-                            </p>
-                            <div class="mb-0 float-right">
-                                <div class="btn-group btn-group-sm" style="display: none;" id="nove">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
-                                        aria-haspopup="true" aria-expanded="false">Acción</button>
-                                    <div class="dropdown-menu"></div>
-                                </div>
-                            </div>
-                        </div>
+                    <div class="col-md-4">
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th colspan="2">
+                                        <small class="text-muted fecha float-right"></small>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="cliente"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="proyecto"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span class="mz"></span>
+                                    </th>
+                                    <td>
+                                        <span class="lote"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="recibo"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>FAT.VEC:</span>
+                                    </th>
+                                    <td>
+                                        <span class="badge badge-dark fatvc"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>MONTO:</span>
+                                    </th>
+                                    <td>
+                                        <span class="monto"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>BONO:</span>
+                                    </th>
+                                    <td>
+                                        <span class="bonoo"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>BONO VR.:</span>
+                                    </th>
+                                    <td>
+                                        <span class="bonom"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <div class="btn-group btn-group-sm float-right" style="display: none;"
+                                            id="nove">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
+                                                aria-haspopup="true" aria-expanded="false">Acción</button>
+                                            <div class="dropdown-menu"></div>
+                                        </div>
+                                    </th>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                     <div class="col-12">
-                        <table id="BancoExt" class="table table-sm h7" style="width:100%;font-size:9px;">
-                            <thead>
-                                <tr>
-                                    <th>ID</th>
-                                    <th>FECHA</th>
-                                    <th>DESCRP</th>
-                                    <th>LUGAR</th>
-                                    <th>DETALLE</th>
-                                    <th>CONCEP</th>
-                                    <th data-priority="1">MONTO</th>
-                                    <th data-priority="2">PAGO</th>
-                                </tr>
-                            </thead>
+                        <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
                             <tbody></tbody>
                         </table>
                     </div>
