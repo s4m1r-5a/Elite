@@ -2782,8 +2782,7 @@ if (window.location.pathname == `/links/reportes`) {
     })
     var Eliminar = (eli) => {
         if (confirm("Seguro deseas eliminar esta separacion?")) {
-            txt = "You pressed OK!";
-
+            //txt = "You pressed OK!";
             var D = { k: eli, h: moment().format('YYYY-MM') };
             $.ajax({
                 url: '/links/reportes/eliminar',
@@ -6922,7 +6921,22 @@ if (window.location.pathname == `/links/orden`) {
 if (window.location == `${window.location.origin}/links/solicitudes`) {
     minDateFilter = "";
     maxDateFilter = "";
-    tiem = 0;
+    var extr = [], imge = 0;
+    var totalasociados = 0, IDS;
+    var Seleccion = () => {
+        extr = [];
+        totalasociados = 0;
+        var x = BancoExt
+            .rows('.selected')
+            .data()
+            .filter(function (value, index) {
+                extr.push(value.id);
+                totalasociados += value.consignado;
+                return true;
+            });
+        return x
+    };
+
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
@@ -6973,7 +6987,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             extend: 'pageLength',
             text: 'Ver',
             orientation: 'landscape'
-        }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+        },
         {
             text: `<svg xmlns="http://www.w3.org/2000/svg" 
                 width="36" height="36" viewBox="0 0 24 24" fill="none" 
@@ -7007,7 +7021,26 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 id: ''
             },
             className: 'btn btn-secondary max'
-        }
+        }, //<i class="align-middle feather-md" data-feather="calendar"></i> src\public\bank\Movimientos.xlsm
+        admin === '1' ? {
+            text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+            stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>`,
+            attr: {
+                title: 'Descargar movimientos bacarios'
+            },
+            className: 'btn btn-secondary',
+            action: function () {
+                const link = document.createElement('a');
+                link.href = '/bank/Movimientos.xlsm';
+                link.download = "Movimientos.xlsm";
+                link.dispatchEvent(new MouseEvent('click'));
+            }
+        } : ''
         ],
         deferRender: true,
         paging: true,
@@ -7104,10 +7137,27 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data(); //console.log(data)
         var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
-
+        IDS = data.ids
+        var Buscar = (id) => {
+            var h = BancoExt.rows().data().filter(function (value, index) {
+                if (value.ids === id) {
+                    return true
+                }
+            });
+            if (h.length > 0) {
+                BancoExt.columns(6).search(id).draw();
+                $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
+                                        <a class="dropdown-item">Enviar</a>`);
+            } else {
+                BancoExt.columns(6).search('').draw();
+                $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
+                                        <a class="dropdown-item">Enviar</a>`);
+            }
+        }
         fila.toggleClass('selected');
         if (Array.isArray(imagenes)) {
             var marg = 100 / (imagenes.length - 1);
+            imge = imagenes.length - 1
             //$("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").remove();
             imagenes.map((e) => {
@@ -7124,6 +7174,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             })
         } else if (imagenes) {
+            imge = 1
             $("#Modalimg .fotos").append(
                 `<div class="foto" style="
                     width: 100%;
@@ -7134,6 +7185,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     background-repeat: no-repeat;float: left;">
                 </div>`);
         }
+        BancoExt.$('tr.selected').removeClass('selected');
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
         $('#Modalimg .cliente').html(data.nombre);
         $('#Modalimg .proyecto').html(data.proyect);
@@ -7142,13 +7194,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg .recibo').html('RCB ' + data.recibo.replace(/~/g, ' ')).parents('tr').css({ "background-color": "#162723", "color": "#FFFFFF" });
         $('#Modalimg .fatvc').html(data.facturasvenc); //'FAT.VEC: ' + 
         $('#Modalimg .monto').html('$' + Moneda(data.monto)).parents('td').css({ "background-color": "#162723", "color": "#FFFFFF" });;
+        $('#montopago').val(data.monto);
         $('#Modalimg .bonoo').html(data.bono || 'NO APLICA');
         $('#Modalimg .bonom').html('$' + Moneda(data.mount || 0));
         $('#apde').attr('data-toggle', "dropdown");
         $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
+        $('#stadopago').val(data.stado);
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
+                Buscar(data.ids);
                 break;
             case 6:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
@@ -7157,8 +7212,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
                 //$('#apde').attr('data-toggle', "dropdown");
                 $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
-                                        <a class="dropdown-item">Declinar</a>
-                                        <a class="dropdown-item">Enviar</a>`);
+                                        <a class="dropdown-item">Declinar</a>`);
                 break;
             default:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
@@ -7207,22 +7261,141 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        console.log(!$('#extr').val())
         /*if (!$('#extr').val()) {
             SMSj('error', 'Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
             return false;
         }*/
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
+            var w = Seleccion();
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
-            fd.append('extrabank', $('#extr').val());
-            if (!$('#extr').val() && accion === 'Aprobar') {
-                //SMSj('error', 'Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
-                alert('Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
-                //return false;
+            fd.append('extr', extr);
+            //console.log(extr, !extr);
+            if (totalasociados < data.monto && accion !== 'Declinar' && accion !== 'Desasociar') {
+                alert('Los valores ha asociar son menores al monto ha aprobar')
+                return false;
+            }
+            if (w.length < imge) {
+                alert('El numero de extractos no puede ser diferente al numero de recibos que halla');
+                return false;
+            }
+            if (!extr && (accion === 'Aprobar' || accion === 'Asociar')) {
+                alert('Debe asociar un extrato del banco con la solicitud de pago');
+            } else if (accion === 'Declinar' && admin == 1) {
+                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
+                if (porque != null) {
+                    fd.append('img', data.img);
+                    fd.append('por', porque);
+                    fd.append('fullname', data.fullname);
+                    fd.append('cel', data.cel);
+                    fd.append('mz', data.mz);
+                    fd.append('n', data.n);
+                    fd.append('proyect', data.proyect);
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+            } else if (accion === 'Asociar' && admin == 1) {
+                $.ajax({
+                    type: 'PUT',
+                    url: '/links/solicitudes/' + accion,
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (xhr) {
+                        $('#Modalimg').modal('hide');
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (data) {
+                        if (data) {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('success', `Solicitud procesada correctamente`);
+                            table.ajax.reload(null, false)
+                            BancoExt.ajax.reload(null, false)
+                        } else {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                })
+            } else if (accion === 'Desasociar' && admin == 1) {
+                console.log(extr)
+                if (!extr) {
+                    alert('Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción');
+                } else if (confirm("Seguro deseas desasociar este extrato del pago?")) {
+                    var ed = data.ids;
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                                BancoExt.ajax.reload(null, false)
+                                Buscar(ed);
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
             } else {
                 if (data.pdf && accion === 'Enviar') {
                     mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
@@ -7458,48 +7631,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     })
                 }
             }
-            if (accion === 'Declinar' && admin == 1) {
-                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
-                if (porque != null) {
-                    fd.append('img', data.img);
-                    fd.append('por', porque);
-                    fd.append('fullname', data.fullname);
-                    fd.append('cel', data.cel);
-                    fd.append('mz', data.mz);
-                    fd.append('n', data.n);
-                    fd.append('proyect', data.proyect);
-                    $.ajax({
-                        type: 'PUT',
-                        url: '/links/solicitudes/' + accion,
-                        data: fd,
-                        processData: false,
-                        contentType: false,
-                        beforeSend: function (xhr) {
-                            $('#Modalimg').modal('hide');
-                            $('#ModalEventos').modal({
-                                backdrop: 'static',
-                                keyboard: true,
-                                toggle: true
-                            });
-                        },
-                        success: function (data) {
-                            if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                SMSj('success', `Solicitud procesada correctamente`);
-                                table.ajax.reload(null, false)
-                            } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                            }
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    })
-                }
-            }
+
         })
         $('#Modalimg').one('hidden.bs.modal', function () {
             fila.toggleClass('selected');
@@ -8044,11 +8176,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
+            var xtrato = null;
+            var pagos = null;
             api.rows({ page: 'current' }).data().each(function (group, i) {
-                if (last !== group.extrabank && group.extrabank !== null) {
+                //console.log(api.row(i).data())
+                if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
-                    $(rows).eq(i).before(
+                    /*$(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
                             <td colspan="7">
                                 <div class="text-center">
@@ -8056,9 +8190,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                 </div>
                             </td>
                         </tr>`
-                    );
-                    last = group.extrabank;
-                } else if (last === group.extrabank && group.extrabank !== null) {
+                    );*/
+                    pagos = group.pagos;
+                    xtrato = group.xtrabank;
+                } else if ((xtrato === group.xtrabank || pagos === group.pagos) && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
                 }
             });
@@ -8078,6 +8213,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 data: "consignado",
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
+            { data: "ids" },
             {
                 data: "monto",
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
@@ -8086,15 +8222,35 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     });
     BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
         var data = BancoExt.row(this).data();
-
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-            $('#extr').val('')
-        }
-        else {
-            BancoExt.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-            $('#extr').val(data.id)
+        var monto = parseFloat($('#montopago').val());
+        var stad = parseFloat($('#stadopago').val());
+        var acum = 0, acu = 0, U = false;
+        BancoExt
+            //.column(6)
+            .rows()
+            .data()
+            .filter(function (value, index) {
+                if (value.ids === data.ids) {
+                    acum += value.consignado;
+                }
+                if (value.id === data.id) {
+                    acu += value.monto;
+                }
+                if (value.ids === IDS) {
+                    U = true;
+                }
+            });
+        if ((acum - acu) >= monto || U) {
+            $(this).toggleClass('selected');
+            var w = Seleccion(); //console.log(w.length);
+            if (w.length > imge) {
+                alert('El numero de extractos debe ser igual al numero de recibos que halla');
+                $(this).toggleClass('selected');
+                Seleccion();
+            }
+            //console.log(extr)
+        } else {
+            alert('El monto ha aprobar excede el excedente acumulado de los pagos');
         }
     });
     /*$('button').click(function () {
