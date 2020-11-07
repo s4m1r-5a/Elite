@@ -1618,6 +1618,16 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         //console.log(solicitudes)
         respuesta = { "data": solicitudes };
         res.send(respuesta);
+    } else if (id == 'rcbcc') {
+        if (req.user.admin != 1) {
+            return res.send(false);
+        };
+        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt, x.xtrabank, x.pagos
+        FROM extrabanco e LEFT JOIN extratos x ON x.xtrabank = e.id LEFT JOIN solicitudes s ON x.pagos = s.ids LEFT JOIN productosd pd ON s.lt = pd.id 
+        LEFT JOIN preventa pr ON pr.lote = pd.id LEFT JOIN productos p ON pd.producto = p.id LEFT JOIN clientes cl ON pr.cliente = cl.idc`);
+        //console.log(solicitudes)
+        respuesta = { "data": solicitudes };
+        res.send(respuesta);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
