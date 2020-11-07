@@ -40,7 +40,7 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 /*request(url, function (error, response, body) {
     if (error) return console.error('Failed: %s', error.message);
 ¿
-    console.log('Success: ', body);
+    console.log('Success: ', body); 
 });*/
 cron.schedule("59 23 * * *", async () => {
     /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
@@ -228,6 +228,10 @@ router.get('/prueba', async (req, res) => {
     });*/
 
     res.send(true);
+})
+router.post('/desendentes', async (req, res) => {
+    var y = await Desendentes(req.user.id, 10)
+    res.send(y);
 })
 //////////////////* BANCO */////////////////////
 router.post('/extrabank', async (req, res) => {

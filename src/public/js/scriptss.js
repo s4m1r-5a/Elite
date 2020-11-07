@@ -3296,6 +3296,48 @@ if (window.location.pathname == `/links/reportes`) {
                 action: function () {
                     CuentaCobro();
                 }
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>`,
+                attr: {
+                    title: 'Inspeccion de linea desendente',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/desendentes',
+                        beforeSend: function (xhr) {
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                comisiones.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
             }
         ],
         deferRender: true,
@@ -7160,8 +7202,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             imge = imagenes.length - 1
             //$("#Modalimg img:not(.foto)").remove();
             $("#Modalimg .foto").remove();
+            $("#descargaimg .imag").remove();
             imagenes.map((e) => {
                 if (e) {
+                    $("#descargaimg").append(`<a class="imag mr-2" href="${e}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
                     $("#Modalimg .fotos").append(
                         `<div class="foto" style="
                         width: ${marg}%;
@@ -7175,6 +7219,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             })
         } else if (imagenes) {
             imge = 1
+            $("#descargaimg").html(`<a class="imag" href="${data.img}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
             $("#Modalimg .fotos").append(
                 `<div class="foto" style="
                     width: 100%;
@@ -7185,6 +7230,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     background-repeat: no-repeat;float: left;">
                 </div>`);
         }
+        $('.imag').on('click', function () {
+            const link = document.createElement('a');
+            link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
+            link.download = "recibo" + data.ids + ".jpg";
+            link.dispatchEvent(new MouseEvent('click'));
+        });
         BancoExt.$('tr.selected').removeClass('selected');
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
         $('#Modalimg .cliente').html(data.nombre);
@@ -7692,7 +7743,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" href="${group.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
                                             <a class="dropdown-item" onclick="Eliminar(${group.cuentadecobro}, '${group.cuentacobro}', '${group.nam}', '${group.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
-                                            <a class="dropdown-item" onclick="PagarCB(${group.cuentadecobro}, '${group.cuentacobro}', '${group.nam}', '${group.clu}')"><i class="fas fa-business-time"></i> Pagar</a>
+                                            <a class="dropdown-item" onclick="PagarCB(${group.cuentadecobro}, '${group.nam}')"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
                                     </div>
                                 </div>
@@ -7813,16 +7864,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             });
         }
     }
-    var PagarCB = (id, pdf, nombre, movil) => {
+    var PagarCB = (id, nombre) => {
+        alert('ksdfjsdjl')
         D = { k: id, h: moment().format('YYYY-MM-DD') };
-        //cartra.ajax.url("/links/reportes/cartera").load(function () {
-        //cartra.columns.adjust().draw();
-        //var dato = cartra.rows().data() //{ page: 'current' }
-        $('#pryec').html(nam)
-        $('#mzlt').html(ids)
-        $('#clnt').html(dato[0].nombre)
-        $('#docu').html(dato[0].documento)
-        $('#asesor').html(dato[0].fullname)
+        $('#nombr').html(nombre)
+        $('#ids').html(id)
         //});
         $('#PagOCC').modal({
             backdrop: 'static',
