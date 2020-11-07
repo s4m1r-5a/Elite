@@ -8084,6 +8084,45 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         });
     });
+    $('#recboCC').submit(function (e) {
+        e.preventDefault();
+        var dat = new FormData(this); //$('#recbo').serialize();
+        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+        $('#g').val(1);
+        $.ajax({
+            type: 'POST',
+            url: '/links/solicitudes/rcbcc',
+            data: dat,
+            //async: true,
+            processData: false,
+            contentType: false,
+            beforeSend: function (xhr) {
+                $('#PagO').modal('hide');
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data.std) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('success', data.msj);
+                    //table.ajax.reload(null, false)
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    SMSj('error', data.msj)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    });
     window.preview = function (input) {
         if (input.files && input.files[0]) {
             var marg = 100 / $('#file2')[0].files.length;
