@@ -3470,7 +3470,7 @@ if (window.location.pathname == `/links/reportes`) {
         data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
     });
     var EstadoCC = (id, std, actualstd) => {
-        if (actualstd === 9 || actualstd === 15) {
+        if (actualstd === 9 || actualstd === 15 || actualstd === 3) {
             $.ajax({
                 type: 'POST',
                 url: '/links/reportes/std',
@@ -3750,7 +3750,7 @@ if (window.location.pathname == `/links/reportes`) {
                         doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
                     }
                     doc.setFontSize(15)
-                    doc.text('CUENTA DE COBRO', 105, 25, null, null, "center");
+                    doc.text('CUENTA DE COBRO ', 105, 25, null, null, "center");
                     doc.setFontSize(9)
                     doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
                     doc.setFontSize(12)

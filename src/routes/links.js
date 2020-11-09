@@ -1509,6 +1509,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'std') {
         const { ids, std } = req.body;
+        console.log(ids, std)
         await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
         res.send(true);
     }
@@ -3178,11 +3179,11 @@ function EnviarWTSAP(movil, body, smsj) {
             body
         }
     };
-    /*request(options, function (error, response, body) {
+    request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
     });
-    smsj ? sms(cel, smsj) : '';*/
+    smsj ? sms(cel, smsj) : '';
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
