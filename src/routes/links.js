@@ -1622,12 +1622,12 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         if (req.user.admin != 1) {
             return res.send(false);
         };
-        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt, x.xtrabank, x.pagos
-        FROM extrabanco e LEFT JOIN extratos x ON x.xtrabank = e.id LEFT JOIN solicitudes s ON x.pagos = s.ids LEFT JOIN productosd pd ON s.lt = pd.id 
-        LEFT JOIN preventa pr ON pr.lote = pd.id LEFT JOIN productos p ON pd.producto = p.id LEFT JOIN clientes cl ON pr.cliente = cl.idc`);
-        //console.log(solicitudes)
-        respuesta = { "data": solicitudes };
-        res.send(respuesta);
+        const { ids, montorcb, recibos } = req.body;
+        var t = {
+            rcbs: '/uploads/' + req.files[0].filename, stads: 4, rbc: recibos, monto: montorcb
+        }
+        await pool.query('UPDATE pagos SET ? WHERE id = ?', [t, ids]);
+        res.send(true);
     }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {

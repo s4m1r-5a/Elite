@@ -7865,10 +7865,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
     }
     var PagarCB = (id, nombre) => {
-        alert('ksdfjsdjl')
-        D = { k: id, h: moment().format('YYYY-MM-DD') };
         $('#nombr').html(nombre)
-        $('#ids').html(id)
+        $('#ids').val(id)
         //});
         $('#PagOCC').modal({
             backdrop: 'static',
@@ -8087,8 +8085,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     $('#recboCC').submit(function (e) {
         e.preventDefault();
         var dat = new FormData(this); //$('#recbo').serialize();
-        $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-        $('#g').val(1);
         $.ajax({
             type: 'POST',
             url: '/links/solicitudes/rcbcc',
@@ -8097,7 +8093,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             processData: false,
             contentType: false,
             beforeSend: function (xhr) {
-                $('#PagO').modal('hide');
+                $('#PagOCC').modal('hide');
                 $('#ModalEventos').modal({
                     backdrop: 'static',
                     keyboard: true,
@@ -8109,13 +8105,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     $('#ModalEventos').one('shown.bs.modal', function () {
                     }).modal('hide');
                     $('#ModalEventos').modal('hide');
-                    SMSj('success', data.msj);
-                    //table.ajax.reload(null, false)
+                    SMSj('success', `Solicitud procesada correctamente`);
+                    comisiones.ajax.reload(null, false)
                 } else {
                     $('#ModalEventos').one('shown.bs.modal', function () {
                     }).modal('hide');
                     $('#ModalEventos').modal('hide');
-                    SMSj('error', data.msj)
                 }
             },
             error: function (data) {
