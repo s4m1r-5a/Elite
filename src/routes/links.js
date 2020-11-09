@@ -1626,7 +1626,14 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         var t = {
             rcbs: '/uploads/' + req.files[0].filename, stads: 4, rbc: recibos, monto: montorcb
         }
-        await pool.query('UPDATE pagos SET ? WHERE id = ?', [t, ids]);
+        await pool.query('UPDATE pagos p INNER JOIN solicitudes s ON p.id = s.cuentadecobro SET ? WHERE p.id = ?',
+            [
+                {
+                    'p.rcbs': '/uploads/' + req.files[0].filename, 'p.stads': 4,
+                    'p.rbc': recibos, 'p.monto': montorcb, 's.stado': 4
+                }, ids
+            ]
+        );
         res.send(true);
     }
 });
