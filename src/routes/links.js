@@ -1325,9 +1325,8 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             LEFT JOIN cupones cp ON p.cupon = cp.id
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
-            SET s.stado = 6, c.estado = 6, l.estado = 9, l.estado = 9,
-            l.valor = d.valmtr2 * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA',
-            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = d.valmtr2 * l.mtr2, 
+            cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
             p.descrip = '${causa} - ${motivo}', l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
         );
         res.send(true);
@@ -1384,7 +1383,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         const { k, h } = req.body;
         const R = await Estados(k);
-        console.log(R)
+        //console.log(R)
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
             [{ 'l.estado': R.std }, k]
         );
@@ -1407,9 +1406,14 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             const m = moment(U.fech || h).format('YYYY-MM');
             if ((u.length === 1 && h === m)) {
                 D();
-                await pool.query(`UPDATE productosd SET ?  WHERE id = ? `,
+                /*await pool.query(`UPDATE productosd SET ?  WHERE id = ? `,
                     [{ estado: 9, uno: null, dos: null, tres: null, directa: null }, U.lote]
-                );
+                );*/
+                await pool.query(`UPDATE productosd l
+                    INNER JOIN productos p ON l.producto  = p.id 
+                    SET l.estado = 9, l.valor = p.valmtr2 * l.mtr2,
+                    l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
+                    l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100 WHERE l.id = ?`, U.lote);
                 await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
                 res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
 
@@ -1422,9 +1426,14 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 });
             }
         } else {
-            await pool.query(`UPDATE productosd SET ?  WHERE id = ? `,
+            /*await pool.query(`UPDATE productosd SET ?  WHERE id = ? `,
                 [{ estado: 9, uno: null, dos: null, tres: null, directa: null }, i[0].lote]
-            );
+            );*/
+            await pool.query(`UPDATE productosd l
+                    INNER JOIN productos p ON l.producto  = p.id 
+                    SET l.estado = 9, l.valor = p.valmtr2 * l.mtr2,
+                    l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
+                    l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100 WHERE l.id = ?`, i[0].lote);
             await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
