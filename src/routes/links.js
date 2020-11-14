@@ -110,9 +110,9 @@ cron.schedule("0 0 1 * *", async () => {
     var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 0 5 * SAT", async () => {
-    await pool.query(`SELECT solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION') AND stado = 15`);
-    var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS* del dia *SABADO O DEL 5* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+cron.schedule("2 0 * * 5", async () => {
+    await pool.query(`UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION') AND stado = 15`);
+    var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS* del dia *SABADO O DEL 5*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
 cron.schedule("0 1 1 1,4,7,10 *", async () => {
@@ -1186,7 +1186,7 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { p, i } = req.body;
-    sql = `SELECT * FROM cuotas WHERE separacion = ?`
+    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
     const orden = await pool.query(sql, id);
     var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
@@ -1196,6 +1196,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(orden)
     w = await orden
         .map((t, c) => {
+            //console.log(t, u, e, v)
             if (t.tipo === 'SEPARACION') {
                 s = {
                     id2: '',
@@ -1357,7 +1358,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos pt ON pd.producto = pt.id LEFT JOIN cupones cu ON cu.id = p.cupon 
         INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
         INNER JOIN solicitudes s ON pd.id = s.lt LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO')
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL
         GROUP BY p.id`
 
         const solicitudes = await pool.query(sql);
@@ -1590,15 +1591,20 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send({ d: acumulado ? acumulado : 'NO' });
 
     } else if (id === 'cuentacobro') {
-        const { total, descuentos, solicitudes, usuario, fechas } = req.body;
-        var pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
-        var cuenta = {
-            acredor: usuario, deuda: total, fechas, descuentos, cuentacobro: pdf
+        const { total, descuentos, solicitudes, usuario, fechas, ID } = req.body;
+        if (ID) {
+            var pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+            await pool.query(`UPDATE pagos SET ? WHERE id = ?`, [{ cuentacobro: pdf }, ID]);
+            res.send(true);
+        } else {
+            var cuenta = {
+                acredor: usuario, deuda: total, fechas, descuentos//, cuentacobro: pdf
+            }
+            var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
+            await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, { cuentadecobro: ctas.insertId, stado: 3 });
+            console.log(ctas.insertId)
+            res.send({ id: ctas.insertId });
         }
-        var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
-        await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, { cuentadecobro: ctas.insertId, stado: 3 });
-        //console.log(req.body, req.files)
-        res.send(true);
     } else if (id == 'eliminar') {
 
         const { k, pdf, porque, nombre, movil } = req.body;

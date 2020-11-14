@@ -3464,10 +3464,25 @@ if (window.location.pathname == `/links/reportes`) {
             }
         ]
     });
+    var aasesor = null, iid = null;
     comisiones.on('click', 'td:not(.control, .t)', function () {
         var fila = $(this).parents('tr');
         var data = comisiones.row(fila).data(); //console.log(data)
-        data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
+        if (!aasesor && data.stado === 9) {
+            aasesor = data.nam;
+            iid = data.ids;
+            fila.toggleClass('selected');
+            console.log('YA NO ES NULL');
+        } else if (iid === data.ids) {
+            $(fila).removeClass('selected');
+            aasesor = null;
+            iid = null;
+        } else if (aasesor !== data.nam && aasesor) {
+            console.log('NOMBRE DIFERENTE')
+            SMSj('error', 'No puede seleccionar este pago ya que no pertenece al asesor')
+        } else {
+            data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
+        }
     });
     var EstadoCC = (id, std, actualstd) => {
         if (actualstd === 9 || actualstd === 15 || actualstd === 3) {
@@ -3513,7 +3528,7 @@ if (window.location.pathname == `/links/reportes`) {
             .rows('.selected')
             .data()
             .filter(function (value, index) {
-                console.log(value.proyect, value, index)
+                //console.log(value.proyect, value, index)
                 if (index < 1) {
                     ID = value.i;
                     RG = value.idu;
@@ -3733,73 +3748,7 @@ if (window.location.pathname == `/links/reportes`) {
                     }
                 }
             })
-            doc.autoTable({
-                head: [
-                    {
-                        id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
-                        benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
-                    },
-                ],
-                body: cuerpo,
-                didDrawPage: function (data) {
-                    // Header
-                    doc.setTextColor(0)
-                    doc.setFontStyle('normal')
-                    if (img) {
-                        doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                        doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
-                    }
-                    doc.setFontSize(15)
-                    doc.text('CUENTA DE COBRO ', 105, 25, null, null, "center");
-                    doc.setFontSize(9)
-                    doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
-                    doc.setFontSize(12)
-                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
-                    doc.setFontSize(10)
-                    doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
-                    doc.setFontSize(8)
-                    doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
-
-                    doc.setFontSize(10)
-                    doc.text('DEBE A:', data.settings.margin.left, 63)
-                    doc.setFontSize(12)
-                    doc.text(NOMBRE, data.settings.margin.left, 70)
-                    doc.setFontSize(10)
-                    doc.text('CC: ' + CC, data.settings.margin.left, 75)
-                    doc.setFontSize(10)
-                    doc.text(MOVIL, data.settings.margin.left, 78)
-                    doc.setFontSize(8)
-                    doc.text(EMAIL, data.settings.margin.left, 81)
-
-                    doc.setFontSize(9)
-                    doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
-
-
-                    // Footer
-                    var str = 'Page ' + doc.internal.getNumberOfPages()
-                    // Total page number plugin only available in jspdf v1.0+
-                    if (typeof doc.putTotalPages === 'function') {
-                        str = str + ' of ' + totalPagesExp
-                    }
-                    doc.setFontSize(8)
-
-                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                    var pageSize = doc.internal.pageSize
-                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                    doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
-                    doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
-                    doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
-                },
-                margin: { top: 95 },
-            })
-            // Total page number plugin only available in jspdf v1.0+
-            if (typeof doc.putTotalPages === 'function') {
-                doc.putTotalPages(totalPagesExp)
-            }
-            doc.output('save', 'CUENTA DE COBRO.pdf')
-            var blob = doc.output('blob')
             /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-            fd.append('pdf', blob)
             fd.append('total', PAGAR)
             fd.append('descuentos', RETEFUENTE + RETEICA)
             fd.append('solicitudes', Ids)
@@ -3821,13 +3770,93 @@ if (window.location.pathname == `/links/reportes`) {
                         toggle: true
                     });
                 },
-                success: function (data) {
-                    if (data) {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
-                        $('#ModalEventos').modal('hide');
-                        SMSj('success', `Solicitud procesada correctamente`);
-                        comisiones.ajax.reload(null, false)
+                success: function (dat) {
+                    if (dat) {
+                        doc.autoTable({
+                            head: [
+                                {
+                                    id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
+                                    benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
+                                },
+                            ],
+                            body: cuerpo,
+                            didDrawPage: function (data) {
+                                // Header
+                                doc.setTextColor(0)
+                                doc.setFontStyle('normal')
+                                if (img) {
+                                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                    doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
+                                }
+                                doc.setFontSize(15)
+                                doc.text('CUENTA DE COBRO ' + dat.id, 105, 25, null, null, "center");
+                                doc.setFontSize(9)
+                                doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
+                                doc.setFontSize(12)
+                                doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
+                                doc.setFontSize(10)
+                                doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
+                                doc.setFontSize(8)
+                                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
+
+                                doc.setFontSize(10)
+                                doc.text('DEBE A:', data.settings.margin.left, 63)
+                                doc.setFontSize(12)
+                                doc.text(NOMBRE, data.settings.margin.left, 70)
+                                doc.setFontSize(10)
+                                doc.text('CC: ' + CC, data.settings.margin.left, 75)
+                                doc.setFontSize(10)
+                                doc.text(MOVIL, data.settings.margin.left, 78)
+                                doc.setFontSize(8)
+                                doc.text(EMAIL, data.settings.margin.left, 81)
+
+                                doc.setFontSize(9)
+                                doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
+
+
+                                // Footer
+                                var str = 'Page ' + doc.internal.getNumberOfPages()
+                                // Total page number plugin only available in jspdf v1.0+
+                                if (typeof doc.putTotalPages === 'function') {
+                                    str = str + ' of ' + totalPagesExp
+                                }
+                                doc.setFontSize(8)
+
+                                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                                var pageSize = doc.internal.pageSize
+                                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                                doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
+                                doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
+                                doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
+                            },
+                            margin: { top: 95 },
+                        })
+                        // Total page number plugin only available in jspdf v1.0+
+                        if (typeof doc.putTotalPages === 'function') {
+                            doc.putTotalPages(totalPagesExp)
+                        }
+                        doc.output('save', 'CUENTA DE COBRO ' + dat.id + '.pdf')
+                        var blob = doc.output('blob')
+                        fd.append('pdf', blob)
+                        fd.append('ID', dat.id)
+                        $.ajax({
+                            type: 'POST',
+                            url: '/links/solicitudes/cuentacobro',
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                comisiones.ajax.reload(null, false)
+                            },
+                            error: function (data) {
+                                console.log(data);
+                            }
+                        });
+
                     } else {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                         }).modal('hide');
@@ -7318,6 +7347,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }*/
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
+            console.log(accion)
             var w = Seleccion();
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
@@ -7329,7 +7359,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 alert('Los valores ha asociar son menores al monto ha aprobar')
                 return false;
             }
-            if (w.length < imge) {
+            if (w.length < imge && accion !== 'Declinar' && accion !== 'Desasociar') {
                 alert('El numero de extractos no puede ser diferente al numero de recibos que halla');
                 return false;
             }
