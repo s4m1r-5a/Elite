@@ -1,3 +1,4 @@
+
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
     maskElements: 'input,td,span,div',
@@ -5888,6 +5889,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             },
             {
+                className: 'lista',
+                data: "id",
+                render: function (data, method, row) {
+                    return `<a href="javascript:LISTAS(${data}, '${row.fechaini}', '${row.fechafin}', '${row.proyect}');" title="Click aqui para descargar lista de lotes disponibles"><i class="fas fa-file-alt"></i></a>`
+                }
+            },
+            {
                 className: 'restablecer',
                 orderable: false,
                 data: null,
@@ -9596,6 +9604,202 @@ function ID(lon) {
         code += chars.substr(rand, 1);
     };
     return code;
+};
+var LISTA = '';
+function LISTAS(n, fi, ff, p) {
+    var fch = new Date();
+    var FI = moment(fi).format('YYYY-MM-DD'), FF = moment(ff).format('YYYY-MM-DD')
+    var fechs = new Date(ff);
+    var months = fechs.getMonth() - fch.getMonth() + (12 * (fechs.getFullYear() - fch.getFullYear()));
+    var maxcuotas = 0;
+
+    if (months > 102) { maxcuotas = 114; } else if (months > 90) { maxcuotas = 102; } else if (months > 72) { maxcuotas = 90; } else if (months > 60) { maxcuotas = 72; }
+    else if (months > 48) { maxcuotas = 60; } else if (months > 42) { maxcuotas = 48; } else if (months > 36) { maxcuotas = 42; } else if (months > 30) { maxcuotas = 36; }
+    else if (months > 24) { maxcuotas = 30; } else if (months > 18) { maxcuotas = 24; } else if (months > 12) { maxcuotas = 18; } else if (months > 6) { maxcuotas = 12; }
+    else { maxcuotas = 6; };
+    var PDF = () => {
+        var doc = new jsPDF('p', 'mm', 'a4');
+        var img = new Image();
+        var totalPagesExp = '{total_pages_count_string}'
+        img.src = '/img/avatars/avatar.png'
+
+        doc.autoTable({
+            html: '#listas',
+            useCss: true,
+            didDrawPage: function (data) {
+                // Header
+                doc.setTextColor(0)
+                doc.setFontStyle('normal')
+                if (img) {
+                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                }
+                doc.setFontSize(9)
+                doc.text(moment().format('lll'), data.settings.margin.left + 157, 10)
+                doc.setFontSize(15)
+                doc.text('GRUPO ELITE FINCA RAÍZ S.A.S', 105, 15, null, null, "center");
+                doc.setFontSize(12)
+                doc.text(p, 105, 20, null, null, "center")
+                doc.setFontSize(9)
+                doc.text('LISTADO DE PRODUCTOS', 105, 25, null, null, "center")
+                doc.setFontSize(8)
+                doc.text(`Proyecto iniciado en ${FI} y proyectado a finalizar en ${FF}`, data.settings.margin.left, 33)
+
+                // Footer
+                var str = 'Page ' + doc.internal.getNumberOfPages()
+                // Total page number plugin only available in jspdf v1.0+
+                if (typeof doc.putTotalPages === 'function') {
+                    str = str + ' of ' + totalPagesExp
+                }
+                doc.setFontSize(8)
+
+                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                var pageSize = doc.internal.pageSize
+                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                //doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
+                doc.text(/*str*/ `Debe tener en cuenta que esta informacion no es cien por ciento veras, ya que en cualquier instante puede cambiar el estado de un producto.\nRED ELITE recomienda hacer uso del sistema el cual si posee el estado veras del producto, con el fin de no mal informar al cliente inetresado.\nLos productos demarcados con azul estan pedientes por pagos pasados 24 horas habil volveran a estar disponibles en caso que no se confirme`, data.settings.margin.left, pageHeight - 15)
+                doc.text(str, data.settings.margin.right, pageHeight - 5)
+            },
+            margin: { top: 35 },
+        })
+        // Total page number plugin only available in jspdf v1.0+
+        if (typeof doc.putTotalPages === 'function') {
+            doc.putTotalPages(totalPagesExp)
+        }
+        doc.output('save', `LISTADO ${p}.pdf`)
+        $('#ModalEventos').one('shown.bs.modal', function () {
+        }).modal('hide');
+        $('#ModalEventos').modal('hide');
+        SMSj('success', `Lista de ${p} descargada exitosamente`);
+    }
+    $.ajax({
+        type: 'POST',
+        url: "/links/productos/" + n,
+        beforeSend: function (xhr) {
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        },
+        success: function (dat) {
+            if (dat && !LISTA) {
+                LISTA = $('#listas').DataTable({
+                    lengthMenu: [-1],
+                    ajax: {
+                        method: "POST",
+                        url: "/links/productos/" + n,
+                        dataSrc: "data"
+                    },
+                    columns: [
+                        { data: "mz" },
+                        { data: "n" },
+                        { data: "mtr2" },
+                        {
+                            data: "estado",
+                            className: 'c',
+                            render: function (data, method, row) {
+                                switch (data) {
+                                    case 1:
+                                        return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                                        break;
+                                    case 8:
+                                        return `<span class="badge badge-pill badge-dark">Tramitando</span>`
+                                        break;
+                                    case 9:
+                                        return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                        break;
+                                    case 10:
+                                        return `<span class="badge badge-pill badge-primary">Separado</span>`
+                                        break;
+                                    case 12:
+                                        return `<span class="badge badge-pill badge-secondary">Apartado</span>`
+                                        break;
+                                    case 13:
+                                        return `<span class="badge badge-pill badge-tertiary">Vendido</span>`
+                                        break;
+                                    case 14:
+                                        return `<span class="badge badge-pill badge-danger">Tramitando</span>`
+                                        break;
+                                    case 15:
+                                        return `<span class="badge badge-pill badge-warning">Inactivo</span>` //secondary
+                                        break;
+                                }
+                            }
+                        },
+                        {
+                            data: "valor",
+                            render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                        },
+                        {
+                            data: "inicial",
+                            render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                        },
+                        {
+                            data: "mtr2",
+                            render: function (data, method, row) {
+                                return '$' + Moneda(Math.round(row.valor / data));
+                            }
+                        },
+                        {
+                            data: null,
+                            defaultContent: maxcuotas
+                        },
+                        {
+                            data: "valor",
+                            render: function (data, method, row) {
+                                return '$' + Moneda(Math.round((data - row.inicial) / (maxcuotas - 1)));
+                            }
+                        }
+                    ],
+                    //autoWidth: true,
+                    //responsive: true,
+                    initComplete: function (settings, json) {
+                        PDF()
+                    },
+                    search: false,
+                    info: false,
+                    paging: false,
+                    order: [[0, 'asc'], [1, 'asc']],
+                    drawCallback: function (settings) {
+                        var api = this.api();
+                        var rows = api.rows({ page: 'current' }).nodes();
+                        var last = null;
+
+                        api.column(0, { page: 'current' }).data().each(function (group, i) {
+                            if (last !== group) {
+                                $(rows).eq(i).before(
+                                    `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                                        <td colspan="10">
+                                            <div class="text-center">
+                                                ${group != '0' ? 'MANZANA "' + group + '"' : ''}
+                                            </div>
+                                        </td>
+                                    </tr>`
+                                );
+                                last = group;
+                            }
+                        });
+                    },
+                    rowCallback: function (row, data, index) {
+                        if (data["estado"] == 15) {
+                            $(row).css("background-color", "#FFFFCC");
+                        } else if (data["estado"] == 1) {
+                            $(row).css("background-color", "#00FFFF");
+                        } else if (data["estado"] == 9) {
+                            $(row).css("background-color", "#40E0D0");
+                        }
+                    }
+                });
+            } else {
+                LISTA.ajax.url("/links/productos/" + n).load(function () {
+                    PDF()
+                });
+            }
+        },
+        error: function (data) {
+            console.log(data);
+        }
+    })
 };
 //Usage example:
 /*urltoFile('data:text/plain;base64,aGVsbG8gd29ybGQ=', 'hello.txt','text/plain')
