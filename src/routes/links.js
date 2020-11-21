@@ -42,6 +42,10 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 ¿
     console.log('Success: ', body); 
 });*/
+router.post('/desarrollo', (req, res) => {
+    console.log(req.body, 'si llego el mensaje')
+    res.send(true);
+});
 cron.schedule("59 23 * * *", async () => {
     /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
     SET l.estado = 9, l.tramitando = NULL WHERE MONTH(p.fecha) = MONTH(NOW()) 
