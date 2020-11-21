@@ -639,8 +639,10 @@ router.post('/recibo', async (req, res) => {
     } else {
         rcb = `recibo LIKE '%${recibos}%'`;
     }
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE ${rcb} ${id ? 'OR pago = ' + id : ''}`);
-    var sum = 0, excedent = montorcb - total;
+    var excd = montorcb - total;
+    var sum = 0, excedent = Math.sign(excd) >= 0 ? excd : 0;
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE ${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''}`);
+    console.log(req.body, recibe, excd, excedent, rcb)
     if (recibe.length > 0) {
         recibe.filter((a) => {
             return a.excdnt > 0;
@@ -690,8 +692,8 @@ router.post('/recibo', async (req, res) => {
         k = r[0].monto || 0;
     var acumulado = l + k;
     const pago = {
-        fech: ahora, monto: total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
-        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
+        fech: ahora, monto: Math.sign(excd) < 0 ? montorcb : total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
+        concepto: 'PAGO', stado: 3, img: imagenes, descp: Math.sign(excd) < 0 ? concpto + 'A' : concpto, formap, excdnt: excedent
     }
     bono != 0 ? pago.bono = pin : '';
     concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
@@ -1597,7 +1599,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
-        
+
         res.send({ d: acumulado ? acumulado : 'NO' });
 
     } else if (id === 'cuentacobro') {
@@ -1918,7 +1920,6 @@ router.post('/transferencia', isLoggedIn, async (req, res) => {
         res.redirect('/links/ventas');
     }
 });
-
 //////////////////////* RECARGAS *//////////////////////////
 router.post('/patro', isLoggedIn, async (req, res) => {
     const { quien } = req.body;
@@ -2366,7 +2367,7 @@ async function PagosAbonos(Tid, pdf, user) {
     const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, u.nrango, 
     pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, 
     pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
-    pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto,
+    pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono,
     s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
     INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
@@ -2595,8 +2596,8 @@ async function PagosAbonos(Tid, pdf, user) {
                             's.stado': 4,
                             'c.estado': 3,
                             'c.cuota': cta,
-                            'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm')//,
-                            //'o.estado': st.std
+                            'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
+                            'c.abono': S.abono + monto
                         }, Tid
                     ]
                 );
