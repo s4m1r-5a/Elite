@@ -326,15 +326,15 @@ router.post('/actualiza', isLoggedIn, async (req, res) => {
 
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
-    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, mz, n, mtr2, valor, inicial,
+    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, lts, std, mz, n, mtr2, vrlt, vri, vmtr2,
         separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
         cta, numero, mail, direccion, tel, web, descripcion, editar } = req.body;
-    //console.log(req.body)
-    const produc = {
+    console.log(req.body)
+    const produc = {                                                           //mzs cantidad
         categoria, proveedor, socio, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
-        valproyect, mzs: mzs ? mzs : 0, cantidad, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.replace(/\./g, ''),
-        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : ''
+        valproyect, mzs, cantidad: lts, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0
     };
     if (proveedor == '0' || socio == '0') {
         const proveedr = {
@@ -375,9 +375,9 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
         res.send(true);
     } else {
         const datos = await pool.query('INSERT INTO productos SET ? ', produc);
-        var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, valor, inicial) VALUES ';
+        var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
         await n.map((t, i) => {
-            producdata += `(${datos.insertId}, '${mz ? mz[i].toUpperCase() : 'no'}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${estado[i] === undefined ? 15 : estado[i]}, ${valor[i]}, ${inicial[i]}),`;
+            producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${std[i]}, ${vmtr2[i].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(/\./g, '')}),`;
         });
         await pool.query(producdata.slice(0, -1));
         req.flash('success', 'Producto registrado exitosamente');
@@ -1325,9 +1325,9 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             LEFT JOIN cupones cp ON p.cupon = cp.id
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
-            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = d.valmtr2 * l.mtr2, 
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, 
             cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
-            p.descrip = '${causa} - ${motivo}', l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
+            p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
         );
         res.send(true);
     }
@@ -1411,9 +1411,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 );*/
                 await pool.query(`UPDATE productosd l
                     INNER JOIN productos p ON l.producto  = p.id 
-                    SET l.estado = 9, l.valor = p.valmtr2 * l.mtr2,
+                    SET l.estado = 9, l.valor = l.mtr * l.mtr2,
                     l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
-                    l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100 WHERE l.id = ?`, U.lote);
+                    l.inicial = (l.mtr * l.mtr2) * p.porcentage / 100 WHERE l.id = ?`, U.lote);
                 await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
                 res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
 
@@ -1431,9 +1431,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             );*/
             await pool.query(`UPDATE productosd l
                     INNER JOIN productos p ON l.producto  = p.id 
-                    SET l.estado = 9, l.valor = p.valmtr2 * l.mtr2,
+                    SET l.estado = 9, l.valor = l.mtr * l.mtr2,
                     l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
-                    l.inicial = (d.valmtr2 * l.mtr2) * d.porcentage / 100 WHERE l.id = ?`, i[0].lote);
+                    l.inicial = (l.mtr * l.mtr2) * p.porcentage / 100 WHERE l.id = ?`, i[0].lote);
             await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
@@ -1585,7 +1585,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
         AND lt = ${lote} AND stado = 3 AND DATE(fech) < '${fecha}' AND TIME(fech) < TIME('${fecha}') 
         AND ids != ${solicitud}`);
-
+        //SELECT * FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = 650 AND DATE(s.fech) < '2020-11-20 10:50' AND TIME(s.fech) < TIME('2020-11-20 10:50') AND s.ids != 978
         if (u.length > 0) {
             return res.send(false);
         }
@@ -1593,10 +1593,11 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
         WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = ${lote}
-        AND DATE(s.fech) < '${fecha}' AND TIME(s.fech) < TIME('${fecha}') AND s.ids != ${solicitud}`);
+        AND TIMESTAMP(s.fech) < '${fecha}' AND s.ids != ${solicitud}`);
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
+        
         res.send({ d: acumulado ? acumulado : 'NO' });
 
     } else if (id === 'cuentacobro') {

@@ -5211,228 +5211,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 this.select();
             }
         });
-        $('#MANZANAS').change(function () {
-            if ($(this).prop('checked')) {
-                $('#mzs').css({
-                    background: '#FFFFCC',
-                    color: '#7f8c8d'
-                })
-                $('#mzs').prop('disabled', false);
-                $('#lts').val('');
-                $('#lts').prop('disabled', true);
-                $('#lts').css({
-                    background: '#7f8c8d',
-                    color: '#FFFFCC'
-                });
-                $('#sololotes tr').remove();
-                $('#sololotes2 tr').remove();
-                $('#mzs').focus().select()
-            } else {
-                $('#lts').css({
-                    background: '#FFFFCC',
-                    color: '#7f8c8d'
-                })
-                $('#lts').prop('disabled', false);
-                $('#lts').val('');
-                $('#mzs').val('');
-                $('#mzs').prop('disabled', true);
-                $('#mzs').css({
-                    background: '#7f8c8d',
-                    color: '#FFFFCC'
-                });
-                $('#datosproducto table').remove();
-                $('#datosproducto2 table').remove();
-                $('#lts').focus()
-            }
-        });
-        $('#mzs').change(function () {
-            var val = $(this).val(), i = 1;
-            $('#datosproducto table').remove();
-            $('#datosproducto2 table').remove();
-            /*$('#datosproducto table:last').remove();*/
-            while (i <= val) {
-                if (i % 2 === 1) {
-                    $('#datosproducto').append(`
-                <table class="table table-sm my-2" id="tabla${i}">
-                    <thead style="background: #7f8c8d; color: #FFFFCC;">
-                        <tr>
-                            <th>
-                                <div class="text-left">                                    
-                                    MANZANA 
-                                    <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
-                                </div>
-                            </th>
-                            <th>
-                                <div class="text-left">
-                                    LOTES 
-                                    <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                               </div>
-                            </th>  
-                            <th>                                
-                                <div class="custom-control custom-switch float-right">
-                                    <input type="checkbox" class="custom-control-input estado" id="estado${i}">
-                                    <label class="custom-control-label" for="estado${i}">.</label>
-                                </div>
-                            </th>  
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>`);
-                } else {
-                    $('#datosproducto2').append(`
-                <table class="table table-sm my-2" id="tabla${i}">
-                    <thead style="background: #7f8c8d; color: #FFFFCC;">
-                        <tr>
-                            <th>
-                                <div class="text-left">                                    
-                                    MANZANA 
-                                    <input class="form-control-no-border text-uppercase text-center mzs" type="text" placeholder="'a'" style="padding: 1px; width: 40px; background-color: #FFFFCC;">
-                                </div>
-                            </th>
-                            <th>
-                                <div class="text-left">
-                                    LOTES 
-                                    <input class="form-control-no-border text-center lts" type="number" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;">
-                               </div>
-                            </th>  
-                            <th>                                
-                                <div class="custom-control custom-switch float-right">
-                                    <input type="checkbox" class="custom-control-input estado" id="estado${i}">
-                                    <label class="custom-control-label" for="estado${i}">.</label>
-                                </div>
-                            </th>  
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>`);
-                }
-                i++;
-            };
-        });
-        $('#datosproducto, #datosproducto2').on('change', 'table .estado', function () {
-            var padre = $(this).parents('table').attr('id');
-            var abuelo = $(this).parents('table').parent().attr('id');
-
-            if ($(`#${abuelo} #${padre} .estado`).prop('checked')) {
-
-                $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
-                    $(this).val(9)
-                });
-            } else {
-                $(`#${abuelo} #${padre} tbody .estados`).each(function (index, element) {
-                    $(this).val(15)
-                });
-            }
-        });
-        $('#datosproducto, #datosproducto2').on('change', 'table .lts', function () {
-            var padre = $(this).parents('table').attr('id');
-            var abuelo = $(this).parents('table').parent().attr('id');
-            if ($(`#${abuelo} #${padre} .mzs`).val()) {
-                var val = $(this).val(), i = 0, e;
-                if ($(`#${abuelo} #${padre} tr`).length > 0) {
-                    $(`#${abuelo} #${padre} tr`).each(function (index, element) {
-                        e = index;
-                        i++;
-                    });
-                }
-                e + 1;
-                if (e > val) {
-                    while (e != val) {
-                        $(`#${abuelo} #${padre} tr:last`).remove();
-                        e--;
-                    };
-                }
-                while (i <= val) {
-                    $(`#${abuelo} #${padre} tbody`).append(`
-                        <tr>
-                            <th>
-                                <input type="hidden" name="mz" value="${$(`#${abuelo} #${padre} .mzs`).val()}">
-                                <input type="hidden" class="estados" name="estado" value="${$(`#${abuelo} #${padre} .estado`).prop('checked') ? 9 : 15}">
-                                <div class="text-left">                                    
-                                    <i class="feather-md" data-feather="heart"></i> LT 
-                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="text-left">
-                                    <i class="feather-md" data-feather="heart"></i> MT² 
-                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
-                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
-                                    <input type="hidden" name="valor" value="">
-                                    <input type="hidden" name="inicial" value="">
-                               </div>
-                            </th>  
-                            <th>
-                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
-                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
-                            </th>  
-                        </tr>
-                    `);
-                    i++;
-                };
-                $('#lts').val($('.lt').length);
-            } else {
-                SMSj('info', 'Debe establecer una "LETRA" a la mazana')
-            }
-        });
-        $('#lts').change(function () {
-            var val = $(this).val(), i = 1, e;
-            $('#sololotes tr').remove();
-            $('#sololotes2 tr').remove();
-            while (i <= val) {
-                if (i % 2 === 1) {
-                    $('#sololotes tbody').append(`
-                        <tr>
-                            <th>
-                                <div class="text-left">                                    
-                                    <i class="feather-md" data-feather="heart"></i> LT 
-                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="text-left">
-                                MT² <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
-                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
-                                    <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
-                                    <input type="hidden" name="valor">
-                                    <input type="hidden" name="inicial" value="">
-                               </div>
-                            </th>  
-                            <th>
-                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
-                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
-                            </th>
-                        </tr>
-                    `);
-                } else {
-                    $('#sololotes2 tbody').append(`
-                        <tr>
-                            <th>
-                                <div class="text-left">                                    
-                                    <i class="feather-md" data-feather="heart"></i> LT 
-                                    <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
-                                </div>
-                            </th>
-                            <th>
-                                <div class="text-left">
-                                    <i class="feather-md" data-feather="heart"></i> MT² 
-                                    <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
-                                    <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
-                                    <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
-                                    <input type="hidden" name="valor">
-                                    <input type="hidden" name="inicial" value="">
-                               </div>
-                            </th>  
-                            <th>
-                                <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
-                                name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
-                            </th>  
-                        </tr>
-                    `);
-                }
-                i++;
-            };
-        });
         $('#pro').submit(function (e) {
             if ($('#ideditar').val()) {
                 e.preventDefault()
@@ -5443,19 +5221,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     backdrop: 'static',
                     keyboard: true,
                 });
-                /*var metroscuadrados = 0;
-                $('.mt2').each(function (index, element) {
-                    metroscuadrados += parseFloat($(this).val())
-                });
-                if ($('#tmt2').val() != metroscuadrados) {
-                    e.preventDefault()
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                        $('#ModalEventos').modal('hide')
-                    }).modal('show');
-                    SMSj('error', 'los datos no concuerdan con la totalidad de los metros cuadrados que se registro, rectifique e intentelo nuevamente')
-                } else {
-                    $('#lts').prop('disabled', false);
-                }*/
                 $('#lts').prop('disabled', false);
             }
         })
@@ -5477,44 +5242,202 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 })
             } else {
                 $('.mt2').each(function (index, element) {
+                    var fila = $(this).parents('tr');
                     if ($(this).val()) {
-                        valor = $(this).val() * $('#vmt2').cleanVal();
+                        valor = $(this).val() * fila.find('.vmt2').cleanVal();
                         inicial = valor * $('#porcentage').val() / 100;
-                        $(this).siblings('input[name="valor"]').val(valor);
-                        $(this).siblings('input[name="inicial"]').val(inicial);
+                        fila.find('.vrlt').val(Moneda(valor))
+                        fila.find('.vri').val(Moneda(inicial))
                         $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
                     }
                 });
             }
         });
-        $('#datosproducto, #datosproducto2, #sololotes, #sololotes2').on('change', 'table tbody .mt2', function () {
-            if ($('#vmt2').val()) {
-                var valor = $(this).val() * $('#vmt2').cleanVal();
-                var inicial = valor * $('#porcentage').val() / 100;
-                var sum = 0;
-                $(this).siblings('input[name="valor"]').val(valor);
-                $(this).siblings('input[name="inicial"]').val(inicial);
-                $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
-                $('.mt2').each(function (index, element) {
-                    if ($(this).val()) {
-                        sum += parseFloat($(this).val())
-                    }
-                });
-                $('#calculom').text(sum)
-                $('#tmt2').val(sum)
-                var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
-                $('#valproyect').val(valor);
-                $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
-            } else {
-                SMSj('info', 'Establezaca primero los valores del proyecto');
-                $(this).val('');
-                $('#vmt2').focus();
-            }
+        $('#agregar').click(function () {
+            var data = lotes.$('input, select').serialize();
+            console.log(data)
+            alert(
+                "The following data would have been submitted to the server: \n\n" +
+                data.substr(0, 120) + '...'
+            );
+            return false;
         });
         var start = moment(), end = moment().add(2, 'year');
         $('#inicio').val(start.format("YYYY-MM-DD"))
         $('#fin').val(end.format("YYYY-MM-DD"))
-
+        var counter = 1, loteo = 1;
+        var lotes = $('#crearlotes').DataTable({
+            dom: 'Bfrtip',
+            buttons: [
+                {
+                    text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg> Agr. MZ <input class="text-center" type="text" id="agmz" value="no" style="width: 40px;">`,
+                    attr: { title: 'Agregar MZ', id: "agrmz" },
+                    className: 'btn btn-secondary min',
+                    action: function () {
+                        if (parseFloat($('#agrmz').find('input').val()) > 0) {
+                            counter++
+                            loteo = 1;
+                            $('#agrmz').find('input').val(counter)
+                        } else {
+                            counter = 1;
+                        }
+                    }
+                },
+                {
+                    text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                    stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle">
+                        <circle cx="12" cy="12" r="10"></circle>
+                        <line x1="12" y1="8" x2="12" y2="16"></line>
+                        <line x1="8" y1="12" x2="16" y2="12"></line>
+                    </svg> Agr. LT`,
+                    attr: { title: 'Agregar Lotes' },
+                    className: 'btn btn-secondary min',
+                    action: function () {
+                        LOTEO()
+                    }
+                }
+            ],
+            searching: false,
+            language: languag2,
+            lengthMenu: [-1],
+            deferRender: true,
+            info: false,
+            autoWidth: false,
+            paging: true,
+            order: [[1, 'asc'], [2, 'asc']],
+            responsive: true,
+            columnDefs: [
+                { className: 'control', orderable: true, targets: 0 },
+                { responsivePriority: 1, targets: [1, 2, 3, 4, 7] },
+                { responsivePriority: 2, targets: 5 },
+                { responsivePriority: 10003, targets: 6 },
+                { responsivePriority: 10002, targets: 8 }
+            ],
+            initComplete: function (settings, json) {
+                $('#agrmz').find('input').val('no');
+            },
+            createdRow: function (row, data, dataIndex) {
+                /*console.log(data, row)
+                if (!data[2]) {
+                    $(row).find('td').attr('colspan', '8');
+                }*/
+            }
+        });
+        var LOTEO = () => {
+            var q = 'no', cont = 0;
+            if (!$('#agrmz').find('input').val()) {
+                $('#agrmz').find('input').val('no')
+            } else if (parseFloat($('#agrmz').find('input').val()) > 0) {
+                q = counter
+            }
+            lotes.row.add([
+                '',
+                `<input class="text-center mz" type="text" value="${q}" name="mz" style="width: 100%;" required>`,
+                `<input class="text-center lt" type="text" value="${loteo}" name="n" style="width: 100%;" required>`,
+                `<input class="text-center mt2" type="text" name="mtr2" style="width: 100%;" required>`,
+                `<input class="text-center vmt2" type="text" value="${$('#vmt2').val()}" name="vmtr2" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<input class="text-center vrlt" type="text" name="vrlt" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<input class="text-center vri" type="text" name="vri" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<select size="1" class="text-center std" name="std" required>
+                    <option value="9" selected="selected">Disponible</option>
+                    <option value="15">Inactivo</option>
+                    <option value="13">Vendido</option>
+                </select>`,
+                `<textarea class="linderos" placeholder="Estipula aqui los linderos del lote" 
+                name="descripcion" rows="1" autocomplete="off" style="width: 100%;"></textarea>`,
+                `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg></a>`
+            ]).columns.adjust().draw(false);
+            $('.vmt2, .vrlt, .vri').mask('#.##$', { reverse: true, selectOnFocus: true });
+            loteo++
+            lotes
+                .column(2)
+                .data()
+                .filter(function (value, index) {
+                    cont++
+                    $('#lts').val(cont);
+                });
+        }
+        $('#agmz').on({
+            focus: function () {
+                this.select();
+            },
+            change: function () {
+                $('#mzs').val($(this).val())
+                if ($(this).val() == 1) {
+                    loteo = 1;
+                    lotes.rows().remove().draw(false);
+                    LOTEO()
+                } else if ($(this).val() === 'no') {
+                    loteo = 1;
+                    lotes.rows().remove().draw(false);
+                    $('#mzs').val(0)
+                    LOTEO()
+                }
+            }
+        });
+        lotes.on('change', 'tr .mt2, .vmt2', function () {
+            var sum = 0, vrproy = 0, valor = 0, fila = $(this).parents('tr');
+            if ($(this).hasClass('vmt2')) {
+                valor = fila.find('.mt2').val() * $(this).cleanVal();
+            } else {
+                valor = $(this).val() * fila.find('.vmt2').cleanVal();
+            }
+            var inicial = valor * $('#porcentage').val() / 100;
+            fila.find('.vrlt').val(Moneda(valor))
+            fila.find('.vri').val(Moneda(inicial))
+            $('.mt2').each(function (index, element) {
+                if ($(this).val()) {
+                    sum += parseFloat($(this).val())
+                }
+            });
+            $('.vrlt').each(function (index, element) {
+                if ($(this).val()) {
+                    vrproy += parseFloat($(this).cleanVal())
+                }
+            });
+            $('#tmt2').val(sum)
+            $('#valproyect').val(Math.round(vrproy));
+            $('.valproyect').html('$ ' + Moneda(Math.round(vrproy)));
+        });
+        lotes.on('click', 'tr a', function () {
+            var sum = 0, vrproy = 0, fila = $(this).parents('tr'), cont = 0, mz = null;
+            lotes.row(fila).remove().draw(false);
+            $('.mt2').each(function (index, element) {
+                if ($(this).val()) {
+                    sum += parseFloat($(this).val())
+                }
+            });
+            $('.vrlt').each(function (index, element) {
+                if ($(this).val() !== mz) { mz++ }
+            });
+            $('.mz').each(function (index, element) {
+                if ($(this).val()) {
+                    vrproy += $(this).cleanVal()
+                }
+            });
+            $('#tmt2').val(sum)
+            $('#valproyect').val(Math.round(vrproy));
+            $('.valproyect').html('$ ' + Moneda(Math.round(vrproy)));
+            loteo--;
+            lotes
+                .column(2)
+                .data()
+                .filter(function (value, index) {
+                    cont++
+                    $('#lts').val(cont);
+                });
+        });
         function cb(start, end) {
             $("#reportrange span").html(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
             $('#inicio').val(start.format("YYYY-MM-DD"))
@@ -5803,9 +5726,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     tabledit.ajax.url("/links/productos/0").load(function () {
                         tabledit.columns.adjust().draw();
                     });
-                    $('#ideditar').val('')
-                    $('.datatabledit').hide()
-                    $('#cuadro3 input').val('')
+                    $('#ideditar').val('');
+                    $('.datatabledit').hide();
+                    $('#cuadro3 input').val('');
+                    $('#vmt2').val('0');
+                    $('input[name="incentivo"]').val('0');
+                    $('#mzs').val(0);
+                    $('#lts').val(0);
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").show("slow");
                 }
@@ -6323,25 +6250,70 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
     });
+
+    /*
+    $('#lts').change(function () {
+        var val = $(this).val(), i = 1, e;
+        $('#sololotes tr').remove();
+        $('#sololotes2 tr').remove();
+        while (i <= val) {
+            if (i % 2 === 1) {
+                $('#sololotes tbody').append(`
+                    <tr>
+                        <th>
+                            <div class="text-left">                                    
+                                <i class="feather-md" data-feather="heart"></i> LT 
+                                <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
+                            </div>
+                        </th>
+                        <th>
+                            <div class="text-left">
+                            MT² <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
+                                <input type="hidden" name="valor">
+                                <input type="hidden" name="inicial" value="">
+                           </div>
+                        </th>  
+                        <th>
+                            <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                            name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
+                        </th>
+                    </tr>
+                `);
+            } else {
+                $('#sololotes2 tbody').append(`
+                    <tr>
+                        <td>
+                            <div class="text-left">                                    
+                                <i class="feather-md" data-feather="heart"></i> LT 
+                                <input class="form-control-no-border text-center lt" value="${i}" type="text" style="padding: 1px; width: 30px; background-color: #FFFFCC;" name="n" required>
+                            </div>
+                        </td>
+                        <td>
+                            <div class="text-left">
+                                <i class="feather-md" data-feather="heart"></i> MT² 
+                                <input class="form-control-no-border text-center mt2" type="text" placeholder="0" style="padding: 1px; width: 50px; background-color: #FFFFCC;" name="mtr2" required>
+                                <span class="badge badge-dark text-center text-md-center float-right">$0.000.000.000</span>
+                                <input type="checkbox" class="float-right mr-1" name="estado" value="9" checked>
+                                <input type="hidden" name="valor">
+                                <input type="hidden" name="inicial" value="">
+                           </div>
+                        </td>  
+                        <td>
+                            <textarea class="form-control-no-border float-right mr-1" placeholder="Estipula aqui los linderos del lote" 
+                            name="descripcion" cols="60" rows="1" autocomplete="off" style="background-color: #FFFFCC;"></textarea>
+                        </td>  
+                    </tr>
+                `);
+            }
+            i++;
+        };
+    });
+    */
 };
 /////////////////////////////* ORDEN */////////////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden`) {
-    /*$.jMaskGlobals = {
-        maskElements: 'input,td,span,div',
-        dataMaskAttr: '*[data-mask]',
-        dataMask: true,
-        watchInterval: 300,
-        watchInputs: true,
-        watchDataMask: false,
-        byPassKeys: [9, 16, 17, 18, 36, 37, 38, 39, 40, 91],
-        translation: {
-            '$': { pattern: /\d/ },
-            '*': { pattern: /\d/, optional: true },
-            '#': { pattern: /\d/, recursive: true },
-            'A': { pattern: /[a-zA-Z0-9]/ },
-            'S': { pattern: /[a-zA-Z]/ }
-        }
-    };*/
     var fch = new Date();
     var Meses = (extra) => {
         var fechs = new Date($('#fechs').val());
@@ -6495,9 +6467,12 @@ if (window.location.pathname == `/links/orden`) {
     var jun = 0;
     var fcha = moment(fch).startOf('month').format('YYYY-MM-DD');
     var h = 1;
-    var separacion = parseFloat($('#separacion').val());
+    var sprcn = parseFloat($('#separacion').val());
     var porcentage = parseFloat($('#porcentage').val());
     var precio = parseFloat($('#vrlote').cleanVal());
+    var cpara = sprcn.length > 3 ? sprcn : precio * sprcn / 100;
+    var separacion = sprcn.length > 3 ? sprcn : precio * sprcn / 100;
+    $('#abono').val(separacion).mask('#.##$', { reverse: true });
     var inicial = parseFloat($('#cuotainicial').cleanVal());
     var cuota = precio - inicial;
     var cuotaextrao;
@@ -6590,17 +6565,6 @@ if (window.location.pathname == `/links/orden`) {
                                 $(`#${card} .pais option[value='57']`).prop("selected", true);
                             $(`#${card} .email`).val(data[0].email);
                             $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
-                            /*data[0].tipo === "Cedula de ciudadania" || data[0].tipo === "Tarjeta de identidad" || !data[0].tipo ?
-                                $(`#${card} .documento`).val(data[0].documento).mask('#.##$', { reverse: true }) :
-                                $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');*/
-                            //$(`#${card} .lugarexpedicion`).val(data[0].lugarexpedicion);
-                            //$(`#${card} .espedida`).val(moment(data[0].fechaexpedicion).format('YYYY-MM-DD'));
-                            //$(`#${card} .nacido`).val(moment(data[0].fechanacimiento).format('YYYY-MM-DD'));
-                            //$(`#${card} .estadocivil option[value='${data[0].estadocivil}']`).attr("selected", true);
-                            /*!data[0].tipo ? $(`#${card} .tipod option[value='Cedula de ciudadania']`).attr("selected", true) :
-                                $(`#${card} .tipod option[value='${data[0].tipo}']`).attr("selected", true);*/
-                            //$(`#${card} .direccion`).val(data[0].direccion);
-                            //$(`#${card} .parentesco option[value='${data[0].parentesco}']`).attr("selected", true);
                             $(`#${card} .movil`).mask("57 ***-***-****");
                         } else {
                             SMSj('info', 'Cliente no encontrado, proceda con el registro')
@@ -6758,8 +6722,8 @@ if (window.location.pathname == `/links/orden`) {
             N = parseFloat($('#ncuotas').val());
 
             if ($(this).attr('id') === 'abono') {
-                if (parseFloat($(this).cleanVal()) < parseFloat($('#separacion').val()) || !$('#abono').val()) {
-                    $('#abono').val(Moneda($('#separacion').val()))
+                if (parseFloat($(this).cleanVal()) < cpara || !$('#abono').val()) {
+                    $('#abono').val(Moneda(cpara))
                     SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
                 }
             }
@@ -7349,13 +7313,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        /*if (!$('#extr').val()) {
-            SMSj('error', 'Debe relacionar un extrato del banco con esta solicitud de pago que desea aprobar')
-            return false;
-        }*/
+        
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
-            console.log(accion)
+            //console.log(accion)
             var w = Seleccion();
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
@@ -7363,15 +7324,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fd.append('nombre', data.nombre);
             fd.append('extr', extr);
             //console.log(extr, !extr);
-            if (totalasociados < data.monto && accion !== 'Declinar' && accion !== 'Desasociar') {
+            if (totalasociados < data.monto && accion === 'Asociar' && accion === 'Aprobar') {
                 alert('Los valores ha asociar son menores al monto ha aprobar')
                 return false;
             }
-            if (w.length < imge && accion !== 'Declinar' && accion !== 'Desasociar') {
+            if (w.length < imge && accion === 'Asociar' && accion === 'Aprobar') {
                 alert('El numero de extractos no puede ser diferente al numero de recibos que halla');
                 return false;
             }
-            if (!extr && (accion === 'Aprobar' || accion === 'Asociar')) {
+            if (!extr && (accion === 'Aprobar' || accion === 'Asociar') && accion !== 'Enviar') {
                 alert('Debe asociar un extrato del banco con la solicitud de pago');
             } else if (accion === 'Declinar' && admin == 1) {
                 porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
