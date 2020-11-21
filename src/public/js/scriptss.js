@@ -112,6 +112,13 @@ function SMSj(tipo, mensaje) {
 };
 $(document).ready(function () {
     moment.locale('es');
+    if (window.location.hostname === "localhost") {
+        $.ajax({
+            url: '/links/desarrollo',
+            data: { actividad: true },
+            type: 'POST'
+        })
+    }
     if ($('#nivel').html() == 'Inversionista') {
         $('#nivel').addClass('badge-warning')
     } else if ($('#nivel').html() == 'Director') {
