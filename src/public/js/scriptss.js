@@ -6470,8 +6470,8 @@ if (window.location.pathname == `/links/orden`) {
     var sprcn = parseFloat($('#separacion').val());
     var porcentage = parseFloat($('#porcentage').val());
     var precio = parseFloat($('#vrlote').cleanVal());
-    var cpara = sprcn.length > 3 ? sprcn : precio * sprcn / 100;
-    var separacion = sprcn.length > 3 ? sprcn : precio * sprcn / 100;
+    var cpara = sprcn.toString().length > 3 ? sprcn : precio * sprcn / 100;
+    var separacion = sprcn.toString().length > 3 ? sprcn : precio * sprcn / 100;
     $('#abono').val(separacion).mask('#.##$', { reverse: true });
     var inicial = parseFloat($('#cuotainicial').cleanVal());
     var cuota = precio - inicial;
@@ -7313,7 +7313,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             keyboard: true,
             toggle: true
         });
-        
+
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
             //console.log(accion)
