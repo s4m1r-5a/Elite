@@ -2887,6 +2887,13 @@ if (window.location.pathname == `/links/reportes`) {
                         SMSj('success', 'Orden anulada correctamente')
                     }).modal('hide');
                     data = null
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide')
+                        tableOrden.ajax.reload(null, false)
+                        SMSj('error', 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar')
+                    }).modal('hide');
+                    data = null
                 }
             }
         });
@@ -5653,7 +5660,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $('#datatable2').on('click', '.to button', function () {
         var fila = $(this).parents('tr');
         var data = $('#datatable2').DataTable().row(fila).data();
-        if ($(this).parent().prev().val().indexOf(".") > 0) {
+        if ($(this).parent().prev().val().indexOf(".") > 0 && data.valmtr2 > 0) {
             var datos = { valor: $(this).parent().prev().cleanVal() };
             $('#ModalConfir').modal('toggle');
             $('#bt').on('click', function () {
@@ -5675,6 +5682,10 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         })
                     }
                 })
+            })
+        } else if (data.valmtr2 == 0) {
+            $("#datatable2").DataTable().ajax.reload(function (json) {
+                SMSj('error', 'En este PROYECTO no es posible cambiar el valor del MTR2 ya que varia en los SUBPRODUCTOS de el')
             })
         } else {
             SMSj('error', 'Debe digitar un precio antes de actualizar los datos')

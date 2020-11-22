@@ -30,7 +30,7 @@ const transpoter = nodemailer.createTransport({
     }
 })
 moment.locale('es');
-
+var desarrollo = false;
 var url = 'https://bin.chat-api.com/1bd03zz1'
 /*request(url, función(error, respuesta, cuerpo) {
     if(!error) {
@@ -42,8 +42,10 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 ¿
     console.log('Success: ', body); 
 });*/
-router.post('/desarrollo', (req, res) => {
-    console.log(req.body, 'si llego el mensaje')
+router.post('/desarrollo', async (req, res) => {
+    desarrollo = req.body.actividad;
+    console.log(desarrollo)
+    //await pool.query(`UPDATE productosd SET mtr = ROUND(valor / mtr2) WHERE mtr IS NULL`);
     res.send(true);
 });
 cron.schedule("59 23 * * *", async () => {
@@ -284,7 +286,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(fila[0]);
     } else if (id === 'nuevo') {
         const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
-        console.log(req.body)
+        //console.log(req.body)
         const nuevo = { producto, mz: mz ? mz.toUpperCase() : 'no', n, mtr2, estado, valor, inicial, descripcion }
         const fila = await pool.query('INSERT INTO productosd SET ? ', nuevo);
         await pool.query(`UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`)
@@ -297,7 +299,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'update') {
         const { id, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
         d = {
-            mz, n, mtr2, estado, valor: valor.replace(/\./g, ''),
+            mz, n, mtr: Math.round(parseFloat(valor.replace(/\./g, '')) / mtr2), mtr2, estado, valor: valor.replace(/\./g, ''),
             inicial: inicial.replace(/\./g, ''), descripcion
         }
         await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])
@@ -321,7 +323,7 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { valor } = req.body;
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
     SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, 
-    p.valproyect = p.totalmtr2 * ${valor}  WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`)
+    p.valproyect = p.totalmtr2 * ${valor}, pd.mtr = ${valor} WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`)
     res.send(respuesta);
 });
 router.post('/actualiza', isLoggedIn, async (req, res) => {
@@ -871,21 +873,11 @@ router.post('/cupon', isLoggedIn, async (req, res) => {
         const encargado = await pool.query(`SELECT u.fullname, u.cel, u.username FROM encargos e INNER JOIN users u ON e.user = u.id  WHERE e.cargo = 'CUPONES'`);
         const en = encargado[0]
         var nom = en.fullname.split(" ")[0];
-        var cl = en.cel.indexOf(" ") > 0 ? en.cel : '57' + en.cel
 
-        var options = {
-            method: 'POST',
-            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-            form: {
-                "phone": cl,
-                "body": `_*${nom}* tienes una solicitu de un *CUPON ${pin}* del *${cupon.descuento}%* por aprobar de *${klint[0].nombre}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`
-            }
-        };
-        request(options, function (error, response, body) {
-            if (error) return console.error('Failed: %s', error.message);
-            console.log('Success: ', body);
-        });
-        await sms(cl, `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`);
+        EnviarWTSAP(en.cel,
+            `_*${nom}* tienes una solicitu de un *CUPON ${pin}* del *${cupon.descuento}%* por aprobar de *${klint[0].nombre}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
+            `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`
+        );
         res.send({ tipo: 'success', msj: 'Solicitud de cupon enviada correctamente' });
     } else {
         res.send({ tipo: 'error', msj: 'Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud' });
@@ -907,21 +899,11 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
     const { d } = req.params;
     const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
     if (d === 'Aprobar') {
-        var cel = movil.indexOf(" ") > 0 ? movil : '57' + movil
         await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
-        var options = {
-            method: 'POST',
-            url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-            form: {
-                "phone": cel,
-                "body": `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`
-            }
-        };
-        request(options, function (error, response, body) {
-            if (error) return console.error('Failed: %s', error.message);
-            console.log('Success: ', body);
-        });
-        await sms(cel, `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`);
+        EnviarWTSAP(movil,
+            `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
+            `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
+        );
         res.send(true);
     }
 });
@@ -1000,21 +982,11 @@ router.get('/cel/:id', async (req, res) => {
 });
 router.post('/codigo', isLoggedIn, async (req, res) => {
     const { movil } = req.body;
-    var cel = movil.indexOf(" ") > 0 ? movil : '57' + movil
     const codigo = ID2(5);
-    var options = {
-        method: 'POST',
-        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-        form: {
-            "phone": cel,
-            "body": `_*Grupo Elite* te da la Bienvenida, usa este codigo *${codigo}* para confirmar tu separacion_ \n\n_*GRUPO ELITE FICA RAÍZ*_`
-        }
-    };
-    request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    });
-    await sms(cel, `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`);
+    EnviarWTSAP(movil,
+        `_*Grupo Elite* te da la Bienvenida, usa este codigo *${codigo}* para confirmar tu separacion_ \n\n_*GRUPO ELITE FICA RAÍZ*_`,
+        `GRUPO ELITE te da la Bienvenida, usa este codigo ${codigo} para confirmar tu separacion`
+    );
     res.send(codigo);
 });
 router.post('/tabla/:id', async (req, res) => {
@@ -1103,7 +1075,7 @@ router.post('/tabla/:id', async (req, res) => {
     }
 });
 router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
-    console.log(req.params)
+    //console.log(req.params)
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
@@ -1147,7 +1119,7 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
 
 })
 router.post('/editarorden', isLoggedIn, async (req, res) => {
-    console.log(req.body);
+    //console.log(req.body);
     const { orden, separacion, cuotaInicial, vrm2, cuotaFinanciacion, separar,
         ahorro, idpin, mxr, mss, porcentage, inicial, valor } = req.body;
     const actualizar = {
@@ -1186,7 +1158,7 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
     INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
 
     const ordn = await pool.query(sql, orden);
-    console.log(ordn)
+    //console.log(ordn)
     res.send(ordn);
 });
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
@@ -1283,6 +1255,9 @@ router.post('/anular', isLoggedIn, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
         fullname, cel, idc, qhacer, causa, motivo } = req.body
     var bonoanular;
+    if (estado == 1) {
+        return res.send(false)
+    }
     const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND concepto IN('PAGO', 'ABONO') AND lt = ${lote}`);
     if (u.length > 0) {
         req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
@@ -1325,6 +1300,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
         }
+        console.log(`UPDATE solicitudes s LEFT JOIN cuotas c ON s.pago = c.id LEFT JOIN preventa p ON s.lt = p.lote LEFT JOIN cupones cp ON p.cupon = cp.id LEFT JOIN productosd l ON s.lt = l.id LEFT JOIN productos d ON l.producto  = d.id SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ${lote}`)
         await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
             LEFT JOIN preventa p ON s.lt = p.lote  
@@ -1978,28 +1954,17 @@ router.post('/afiliado', async (req, res) => {
     const { movil, cajero } = req.body;
     var pin = ID(13);
     var cel = movil.replace(/-/g, "");
-    var options = {
-        method: 'POST',
-        url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-        form: {
-            "phone": '57' + cel,
-            "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-                *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
-        }
-    };
+    var boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
+    *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+
     const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
     if (h.length > 0) {
         pin = h[0].id
-        options.form = {
-            "phone": '57' + cel,
-            "body": `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
+        boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
                 *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
-        }
+
         if (h[0].acreedor !== null) {
-            options.form = {
-                "phone": '57' + cel,
-                "body": `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*https://grupoelitered.com.co/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
-            }
+            boidy = `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*https://grupoelitered.com.co/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
         }
     } else {
         const nuevoPin = {
@@ -2010,14 +1975,9 @@ router.post('/afiliado', async (req, res) => {
         }
         await pool.query('INSERT INTO pines SET ? ', nuevoPin);
     }
-
-    ////////////////////* chat-api *////////////////////////////
-    request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    });
-
-    sms('57' + movil, `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`);
+    EnviarWTSAP(movil, boidy,
+        `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`
+    )
     req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
     res.redirect('/tablero');
 });
@@ -3190,21 +3150,21 @@ function Moneda(valor) {
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
     return valor;
 }
-function EnviarWTSAP(movil, body, smsj) {
+async function EnviarWTSAP(movil, body, smsj) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
-            phone: cel,
+            phone: desarrollo ? '57 3012673944' : cel,
             body
         }
     };
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
+        console.log('Success: ', body, desarrollo ? '57 3012673944' : cel, desarrollo);
     });
-    smsj ? sms(cel, smsj) : '';
+    smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
@@ -3212,7 +3172,7 @@ function EnvWTSAP_FILE(movil, body, filename, caption) {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
         form: {
-            phone: cel,
+            phone: desarrollo ? '57 3012673944' : cel,
             body,           //`https://grupoelitered.com.co/uploads/0erdlw-york61mn26n46v141lap-gvk-ro.pdf`,
             filename,
             caption
