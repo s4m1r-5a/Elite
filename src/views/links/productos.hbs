@@ -103,401 +103,214 @@
                 </div>
                 <form id="pro" action="/links/regispro" method="POST">
                     <div class="card-body">
-                        <div class="row">
-                            <input type="hidden" class="client" value="" name="client">
-                            <input type="hidden" id="ideditar" value="" name="editar">
-                            <div class="col-12 col-lg-6">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>
-                                                PRODUCTO
-                                            </th>
-                                            <td>
-                                                <select class="form-control-no-border edi" name="categoria"
-                                                    style="padding: 1px; width: 100%;" required>
-                                                    <option value="PROYECTO CAMPESTRE">PROYECTO CAMPESTRE</option>
-                                                    <option value="CONSTUCCION">CONSTRUCCIÓN</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="credit-card"></i>
-                                                NOMBRE PDO
-                                            </th>
-                                            <td>
-                                                <input class="form-control-no-border edi text-uppercase" type="text"
-                                                    placeholder="NOMBRE DEL PROYECTO" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="title" required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <br>
-                                                <div class="text-center">
-                                                    <h6>TOTAL MTR²</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <input class="form-control-no-border text-center v" type="text"
-                                                        name="totalmtr2" autocomplete="off" id="tmt2"
-                                                        placeholder="Digite total de mtr²"
-                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                        required>
-                                                </div>
-                                            </th>
-                                            <th>
-                                                <br>
-                                                <div class="text-center">
-                                                    <h6>VALOR MTR²</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <input class="form-control-no-border text-center v" type="text"
-                                                        name="valmtr2" id="vmt2" autocomplete="off" value="0"
-                                                        placeholder="Digite el precio del mtr²"
-                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                        data-mask="000.000.000" data-mask-reverse="true"
-                                                        data-mask-selectonfocus="true" required>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <div class="text-center">
-                                                    <h6>SEPARACION</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <input class="form-control-no-border text-center v"
-                                                        name="separacion" autocomplete="off" type="text"
-                                                        placeholder="Monto de separacion"
-                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                        data-mask="000.000.000" data-mask-reverse="true"
-                                                        data-mask-selectonfocus="true" required>
-                                                </div>
-                                            </th>
-                                            <th>
-                                                <div class="text-center">
-                                                    <h6>INSENTIVO</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <input class="form-control-no-border text-center v" name="incentivo"
-                                                        autocomplete="off" type="text" value="0"
-                                                        placeholder="Insentivo por separacion"
-                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                        data-mask="000.000.000" data-mask-reverse="true"
-                                                        data-mask-selectonfocus="true" required>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                COSTE DEL PROYEYO
-                                            </th>
-                                            <td>
-                                                <div class="text-center">
-                                                    <span
-                                                        class="badge badge-dark text-center text-md-center valproyect">$0.000.000.000</span>
-                                                </div>
-
-                                                <input type="hidden" name="valproyect" id="valproyect">
-
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="calendar"></i> INICIO Y TERMINACÍON
-                                            </th>
-                                            <td>
-                                                <input type="hidden" id="inicio" name="fecha">
-                                                <input type="hidden" id="fin" name="fechafin">
-                                                <div id="reportrange" class="overflow-hidden form-control">
-                                                    <i class="far fa-calendar"></i>&nbsp;
-                                                    <span></span> <i class="fas fa-caret-down"></i>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="heart"></i>
-                                                CUOTA INICIAL
-                                            </th>
-                                            <td>
-                                                <select class="form-control-no-border edi" id="porcentage"
-                                                    name="porcentage"
-                                                    style="padding: 1px; width: 100%;text-align:center;" required>
-                                                    <option value="15">15%</option>
-                                                    <option value="20">20%</option>
-                                                    <option value="25">25%</option>
-                                                    <option value="30">30%</option>
-                                                    <option value="35">35%</option>
-                                                    <option value="40">40%</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="heart"></i>
-                                                PROVEEDOR
-                                            </th>
-                                            <td>
-                                                <select class="form-control-no-border edi v proveedor" name="proveedor"
-                                                    style="padding: 1px; width: 100%;" required>
-                                                    {{#each proveedores}}
-                                                    <option value="{{id}}">{{empresa}}</option>
-                                                    {{/each}}
-                                                    <option value="0">OTRO</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="users"></i>
-                                                SOCIO C
-                                            </th>
-                                            <td>
-                                                <select class="form-control-no-border edi v socio" name="socio"
-                                                    style="padding: 1px; width: 100%;" required>
-                                                    {{#each proveedores}}
-                                                    <option value="{{id}}">{{empresa}}</option>
-                                                    {{/each}}
-                                                    <option value="0">OTRO</option>
-                                                </select>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <div class="text-center">MZS
-                                                    <input class="form-control-no-border text-center" name="mzs"
-                                                        autocomplete="off" type="text" id="mzs"
-                                                        style="padding: 1px; width: 30px; background-color: #FFFFCC;"
-                                                        required>
-                                                </div>
-                                            </th>
-                                            <th>
-                                                <div class="text-center">LTS
-                                                    <input class="form-control-no-border text-center" name="lts"
-                                                        autocomplete="off" type="text" id="lts"
-                                                        style="padding: 1px; width: 30px; background-color: #FFFFCC;"
-                                                        required>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                        <!--<div class="form-group col-md-1">
-                            <input type="number" name="mz" class="form-control" placeholder="MZ" style="text-align:center">
-                        </div>
-                        <div class="form-group col-md-4 inic">
-                            <input type="text" name="inicial" class="form-control" placeholder="CUOTA INICIAL" style="text-align:center" disabled>
-                        </div>-->
-
-                        <div class="row datos mt-3" id="datosproveedor" style="display: none;">
-                            <div class="col-12 text-center">
-                                <h2 id="titu"></h2>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>
-                                                REPRESENTANTE
-                                            </th>
-                                            <td>
-                                                <input class="form-control-no-border edi text-uppercase nombres u"
-                                                    type="text" placeholder="Nombre completo" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="nombres" disabled required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="credit-card"></i>
-                                                DOCUMENTO
-                                            </th>
-                                            <td>
-                                                <input class="form-control-no-border edi documento u" type="text"
-                                                    placeholder="DOCUMENTO DE IDENTIDAD" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="documento" disabled
-                                                    required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>
-                                                <input class="form-control-no-border edi text-center text-uppercase"
-                                                    type="text" placeholder="EMPRESA" autocomplete="off"
-                                                    style="padding: 1px; width: 80%;" name="empresa" disabled required>
-                                            </th>
-                                            <td>
-                                                <i class="feather-md" data-feather="credit-card"></i>
-                                                <input class="form-control-no-border edi text-center" type="text"
-                                                    placeholder="DIGITE EL NIT" autocomplete="off"
-                                                    style="padding: 1px; width: 80%;" name="nit" disabled required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <br>
-                                                <div class="text-center">
-                                                    <h6>BANCO</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <select class="form-control-no-border edi" name="banco"
-                                                        style="padding: 1px; width: 80%;" disabled required>
-                                                        <option value="nada">SELECCIONE UN BANCO</option>
-                                                        <option value="Banco Agrario de Colombia">Banco Agrario de
-                                                            Colombia
-                                                        </option>
-                                                        <option value="Banco AV Villas">Banco AV Villas</option>
-                                                        <option value="Banco Caja Social">Banco Caja Social</option>
-                                                        <option value="Banco de Occidente">Banco de Occidente</option>
-                                                        <option value="Banco Popular">Banco Popular</option>
-                                                        <option value="Banco Falabella">Banco Falabella</option>
-                                                        <option value="Banco Finandina">Banco Finandina</option>
-                                                        <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca
-                                                        </option>
-                                                        <option value="Banco Santander">Banco Santander</option>
-                                                        <option value="Banco de Occidente">Banco de Occidente</option>
-                                                        <option value="Bancóldex">Bancóldex</option>
-                                                        <option value="Bancolombia">Bancolombia</option>
-                                                        <option value="BBVA Colombia">BBVA Colombia</option>
-                                                        <option value="Banco de Bogotá">Banco de Bogotá</option>
-                                                        <option value="Citi Colombia">Citi Colombia</option>
-                                                        <option value="Citibank">Citibank</option>
-                                                        <option value="Colpatria">Colpatria</option>
-                                                        <option value="Davivienda">Davivienda</option>
-                                                        <option value="GNB Sudameris">GNB Sudameris</option>
-                                                        <option value="Multibank S.A.">Multibank S.A.</option>
-                                                        <option value="Mundo mujer">Mundo mujer</option>
-                                                        <option value="Red Multibanca Colpatria">Red Multibanca
-                                                            Colpatria
-                                                        </option>
-                                                    </select>
-                                                </div>
-                                            </th>
-                                            <th>
-                                                <br>
-                                                <div class="text-center">
-                                                    <h6>TIPO DE CUENTA</h6>
-                                                </div>
-                                                <div class="text-center">
-                                                    <select class="form-control-no-border edi" name="cta"
-                                                        style="padding: 1px; width: 80%;" disabled required>
-                                                        <option value="nada">TIPO CTA.</option>
-                                                        <option value="CTE">CTE</option>
-                                                        <option value="AHO">AHO</option>
-                                                    </select>
-                                                </div>
-                                            </th>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                CUENTA
-                                            </th>
-                                            <td>
-                                                <input class="form-control-no-border edi text-center text-uppercase"
-                                                    type="text" placeholder="CUENTA" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="numero" disabled required>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                M. MERCANTIL
-                                            </th>
-                                            <td>
-                                                <input type="text" name="mercantil" class="form-control-no-border edi"
-                                                    placeholder="MATRICULA M" style="padding: 1px; width: 100%;"
-                                                    disabled required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                F. MERCANTIL
-                                            </th>
-                                            <td>
-                                                <input type="date" name="fechaM" class="form-control-no-border edi"
-                                                    style="padding: 1px; width: 100%;" disabled required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                EMAIL
-                                            </th>
-                                            <td>
-                                                <input type="email" name="mail"
-                                                    class="form-control-no-border edi text-lowercase"
-                                                    placeholder="EMAIL" style="padding: 1px; width: 100%;" disabled
-                                                    required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="phone-call"></i>
-                                                MOVIL
-                                            </th>
-                                            <td>
-                                                <input class="form-control-no-border edi text-lowercase" type="text"
-                                                    name="tel" autocomplete="off" placeholder="MOVIL"
-                                                    style="padding: 1px; width: 80%;" data-mask="000-000-0000" disabled
-                                                    required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                DIRECCION
-                                            </th>
-                                            <td>
-                                                <input type="text" name="direccion"
-                                                    class="form-control-no-border edi text-lowercase"
-                                                    placeholder="DIRECCION" style="padding: 1px; width: 100%;" disabled
-                                                    required>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="map-pin"></i>
-                                                WEB
-                                            </th>
-                                            <td>
-                                                <input type="url" name="web"
-                                                    class="form-control-no-border edi text-lowercase"
-                                                    placeholder="DOMINIO" style="padding: 1px; width: 100%;" disabled
-                                                    required>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                            <div class="col-12 col-lg-6">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
                         <table id="crearlotes" class="table table-striped table-sm table-hover responsive">
                             <thead>
+                                <tr>
+                                    <th colspan="10">
+                                        <div class="row">
+                                            <input type="hidden" class="client" value="" name="client">
+                                            <div class="col-12 col-lg-6">
+                                                <table class="table table-sm my-2">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="user"></i>
+                                                                PRODUCTO
+                                                            </th>
+                                                            <td>
+                                                                <select class="form-control-no-border edi"
+                                                                    name="categoria" style="padding: 1px; width: 100%;"
+                                                                    required>
+                                                                    <option value="PROYECTO CAMPESTRE">PROYECTO
+                                                                        CAMPESTRE</option>
+                                                                    <option value="CONSTUCCION">CONSTRUCCIÓN</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="credit-card"></i>
+                                                                NOMBRE PDO
+                                                            </th>
+                                                            <td>
+                                                                <input class="form-control-no-border edi text-uppercase"
+                                                                    type="text" placeholder="NOMBRE DEL PROYECTO"
+                                                                    autocomplete="off"
+                                                                    style="padding: 1px; width: 100%;" name="title"
+                                                                    required>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <br>
+                                                                <div class="text-center">
+                                                                    <h6>TOTAL MTR²</h6>
+                                                                </div>
+                                                                <div class="text-center">
+                                                                    <input class="form-control-no-border text-center v"
+                                                                        type="text" name="totalmtr2" autocomplete="off"
+                                                                        id="tmt2" placeholder="Digite total de mtr²"
+                                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                        required>
+                                                                </div>
+                                                            </th>
+                                                            <th>
+                                                                <br>
+                                                                <div class="text-center">
+                                                                    <h6>VALOR MTR²</h6>
+                                                                </div>
+                                                                <div class="text-center">
+                                                                    <input class="form-control-no-border text-center v"
+                                                                        type="text" name="valmtr2" id="vmt2"
+                                                                        autocomplete="off" value="0"
+                                                                        placeholder="Digite el precio del mtr²"
+                                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                                        data-mask-selectonfocus="true" required>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <div class="text-center">
+                                                                    <h6>SEPARACION</h6>
+                                                                </div>
+                                                                <div class="text-center">
+                                                                    <input class="form-control-no-border text-center v"
+                                                                        name="separacion" autocomplete="off" type="text"
+                                                                        placeholder="Monto de separacion"
+                                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                                        data-mask-selectonfocus="true" required>
+                                                                </div>
+                                                            </th>
+                                                            <th>
+                                                                <div class="text-center">
+                                                                    <h6>INSENTIVO</h6>
+                                                                </div>
+                                                                <div class="text-center">
+                                                                    <input class="form-control-no-border text-center v"
+                                                                        name="incentivo" autocomplete="off" type="text"
+                                                                        value="0" placeholder="Insentivo por separacion"
+                                                                        style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                        data-mask="000.000.000" data-mask-reverse="true"
+                                                                        data-mask-selectonfocus="true" required>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-12 col-lg-6">
+                                                <table class="table table-sm my-2">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="map-pin"></i>
+                                                                COSTE DEL PROYEYO
+                                                            </th>
+                                                            <td>
+                                                                <div class="text-center">
+                                                                    <span
+                                                                        class="badge badge-dark text-center text-md-center valproyect">$0.000.000.000</span>
+                                                                </div>
+
+                                                                <input type="hidden" name="valproyect" id="valproyect">
+
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="calendar"></i>
+                                                                INICIO Y TERMINACÍON
+                                                            </th>
+                                                            <td>
+                                                                <input type="hidden" id="inicio" name="fecha">
+                                                                <input type="hidden" id="fin" name="fechafin">
+                                                                <div id="reportrange"
+                                                                    class="overflow-hidden form-control">
+                                                                    <i class="far fa-calendar"></i>&nbsp;
+                                                                    <span></span> <i class="fas fa-caret-down"></i>
+                                                                </div>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="heart"></i>
+                                                                CUOTA INICIAL
+                                                            </th>
+                                                            <td>
+                                                                <select class="form-control-no-border edi"
+                                                                    id="porcentage" name="porcentage"
+                                                                    style="padding: 1px; width: 100%;text-align:center;"
+                                                                    required>
+                                                                    <option value="15">15%</option>
+                                                                    <option value="20">20%</option>
+                                                                    <option value="25">25%</option>
+                                                                    <option value="30">30%</option>
+                                                                    <option value="35">35%</option>
+                                                                    <option value="40">40%</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="heart"></i>
+                                                                PROVEEDOR
+                                                            </th>
+                                                            <td>
+                                                                <select class="form-control-no-border edi v proveedor"
+                                                                    name="proveedor" style="padding: 1px; width: 100%;"
+                                                                    required>
+                                                                    {{#each proveedores}}
+                                                                    <option value="{{id}}">{{empresa}}</option>
+                                                                    {{/each}}
+                                                                    <option value="0">OTRO</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <i class="feather-md" data-feather="users"></i>
+                                                                SOCIO C
+                                                            </th>
+                                                            <td>
+                                                                <select class="form-control-no-border edi v socio"
+                                                                    name="socio" style="padding: 1px; width: 100%;"
+                                                                    required>
+                                                                    {{#each proveedores}}
+                                                                    <option value="{{id}}">{{empresa}}</option>
+                                                                    {{/each}}
+                                                                    <option value="0">OTRO</option>
+                                                                </select>
+                                                            </td>
+                                                        </tr>
+                                                        <tr>
+                                                            <th>
+                                                                <div class="text-center">MZS
+                                                                    <input class="form-control-no-border text-center"
+                                                                        name="mzs" autocomplete="off" type="text"
+                                                                        id="mzs"
+                                                                        style="padding: 1px; width: 30px; background-color: #FFFFCC;"
+                                                                        required>
+                                                                </div>
+                                                            </th>
+                                                            <th>
+                                                                <div class="text-center">LTS
+                                                                    <input class="form-control-no-border text-center"
+                                                                        name="lts" autocomplete="off" type="text"
+                                                                        id="lts"
+                                                                        style="padding: 1px; width: 30px; background-color: #FFFFCC;"
+                                                                        required>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </th>
+                                </tr>
                                 <tr>
                                     <th></th>
                                     <th>MZ</th>
@@ -513,45 +326,6 @@
                             </thead>
                             <tbody></tbody>
                         </table>
-                        <div class="row">
-                            <div class="col-12 col-lg-6 datos" id="datosproducto"></div>
-                            <div class="col-12 col-lg-6 datos" id="datosproducto2"></div>
-                            <div class="col-12 col-lg-6 datos" id="sololotes">
-                                <table class="table table-sm my-2">
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                            <div class="col-12 col-lg-6 datos" id="sololotes2">
-                                <table class="table table-sm my-2">
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                            <div class="col-12 datatabledit" style="display: none;">
-                                <table id="datatabledit" class="table table-sm table-striped table-hover display"
-                                    cellspacing="0" width="100%">
-                                    <thead>
-                                        <tr>
-                                            <th>MZ</th>
-                                            <th>LT</th>
-                                            <th>MT2</th>
-                                            <th>ESTADO</th>
-                                            <th>VALOR</th>
-                                            <th>CUOTA I</th>
-                                            <th>DSCP</th>
-                                            <th style="width:1%;">
-                                                <a class="nav-icon" href="#" data-toggle="modal"
-                                                    data-target="#Modaledit">
-                                                    <div class="position-relative">
-                                                        <i class="align-middle" data-feather="plus-circle"></i>
-                                                    </div>
-                                                </a>
-                                            </th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
                     </div>
                     <div class="card-footer mb-4">
                         <button type="submit" class="btn btn-primary float-right">Ingresar</button>
@@ -561,8 +335,319 @@
             </div>
         </div>
     </div>
-
-
+    <div class="row" id="cuadro4" style="display: none;">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="card-title">EDICION DE PRODUCTOS</h5>
+                    <h6 class="card-subtitle text-muted">Productos Elite</h6>
+                    <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                        <a class="r atras"><i class="feather-lg mr-0" data-feather="arrow-left-circle"></i></a>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <table id="datatabledit" class="table table-sm table-striped table-hover responsive">
+                        <thead>
+                            <tr class="cabezal">
+                                <th colspan="9" id="cabezal">
+                                    <div class="row">
+                                        <input type="hidden" class="alterable" value="" name="alterable">
+                                        <input type="hidden" id="ideditar" value="" name="editar">
+                                        <div class="col-12 col-lg-6">
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>
+                                                            <i class="feather-md" data-feather="user"></i>
+                                                            PRODUCTO
+                                                        </th>
+                                                        <td>
+                                                            <select class="form-control-no-border edi" name="categoria"
+                                                                style="padding: 1px; width: 100%;" required>
+                                                                <option value="PROYECTO CAMPESTRE">PROYECTO
+                                                                    CAMPESTRE</option>
+                                                                <option value="CONSTUCCION">CONSTRUCCIÓN
+                                                                </option>
+                                                            </select>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            <i class="feather-md" data-feather="credit-card"></i>
+                                                            NOMBRE PDO
+                                                        </th>
+                                                        <td>
+                                                            <input
+                                                                class="form-control-no-border edi text-uppercase title"
+                                                                type="text" placeholder="NOMBRE DEL PROYECTO"
+                                                                autocomplete="off" style="padding: 1px; width: 100%;"
+                                                                name="title" required>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            <br>
+                                                            <div class="text-center">
+                                                                <h6>TOTAL MTR²</h6>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <input class="form-control-no-border text-center c"
+                                                                    type="text" name="totalmtr2" autocomplete="off"
+                                                                    id="totalmtrs2" placeholder="Digite total de mtr²"
+                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                    required>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <br>
+                                                            <div class="text-center">
+                                                                <h6>VALOR MTR²</h6>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <input class="form-control-no-border text-center c"
+                                                                    type="text" name="valmtr2" id="valmtr2"
+                                                                    autocomplete="off" value="0"
+                                                                    placeholder="Digite el precio del mtr²"
+                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                    data-mask="000.000.000" data-mask-reverse="true"
+                                                                    data-mask-selectonfocus="true" required>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            <div class="text-center">
+                                                                <h6>SEPARACION</h6>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <input class="form-control-no-border text-center c"
+                                                                    name="separacion" autocomplete="off" type="text"
+                                                                    placeholder="Monto de separacion"
+                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                    data-mask="000.000.000" data-mask-reverse="true"
+                                                                    data-mask-selectonfocus="true" required>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="text-center">
+                                                                <h6>INSENTIVO</h6>
+                                                            </div>
+                                                            <div class="text-center">
+                                                                <input class="form-control-no-border text-center c"
+                                                                    name="incentivo" autocomplete="off" type="text"
+                                                                    value="0" placeholder="Insentivo por separacion"
+                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                    data-mask="000.000.000" data-mask-reverse="true"
+                                                                    data-mask-selectonfocus="true" required>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                        <div class="col-12 col-lg-6">
+                                            <table class="table table-sm">
+                                                <tbody>
+                                                    <tr>
+                                                        <th>
+                                                            <div class="text-center">
+                                                                COSTE
+                                                                <input
+                                                                    class="form-control-no-border text-center edi totalproyect"
+                                                                    type="text" name="totalmtr2" autocomplete="off"
+                                                                    placeholder="Digite total de mtr²"
+                                                                    value="$0.000.000.000"
+                                                                    style="padding: 1px; width: 115px; background-color: #FFFFCC;"
+                                                                    disabled>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="text-center">
+                                                                INICIAL
+                                                                <select class="form-control-no-border edi" id="xcntag"
+                                                                    name="porcentage"
+                                                                    style="padding: 1px; width: 115px;text-align:center;"
+                                                                    required>
+                                                                    <option value="15">15%</option>
+                                                                    <option value="20">20%</option>
+                                                                    <option value="25">25%</option>
+                                                                    <option value="30">30%</option>
+                                                                    <option value="35">35%</option>
+                                                                    <option value="40">40%</option>
+                                                                </select>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            INICIO & FIN
+                                                        </th>
+                                                        <td>
+                                                            <input type="hidden" id="finicio" name="fecha">
+                                                            <input type="hidden" id="ffin" name="fechafin">
+                                                            <div id="rangofechas" class="overflow-hidden form-control">
+                                                                <i class="far fa-calendar"></i>&nbsp;
+                                                                <span class="t"></span> <i
+                                                                    class="fas fa-caret-down"></i>
+                                                            </div>
+                                                        </td>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            <div class="text-center">MZS
+                                                                <input
+                                                                    class="form-control-no-border text-center edi mzs"
+                                                                    name="mzs" autocomplete="off" type="text"
+                                                                    style="padding: 1px; width: 30px; background-color: #FFFFCC;"
+                                                                    required>
+                                                            </div>
+                                                        </th>
+                                                        <th>
+                                                            <div class="text-center">LTS
+                                                                <input
+                                                                    class="form-control-no-border text-center edi lts"
+                                                                    name="lts" autocomplete="off" type="text"
+                                                                    style="padding: 1px; width: 30px; background-color: #FFFFCC;"
+                                                                    required>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th>
+                                                            COMISIONES EN RED Y DIRECTAS
+                                                        </th>
+                                                        <th>
+                                                            <div class="text-center row">
+                                                                <div class="col-6">
+                                                                    COMISION²
+                                                                    <select class="form-control-no-border c comision"
+                                                                        style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="comision"
+                                                                        required>
+                                                                        <option value="0.0100">1%</option>
+                                                                        <option value="0.0200">2%</option>
+                                                                        <option value="0.0300">3%</option>
+                                                                        <option value="0.0400">4%</option>
+                                                                        <option value="0.0500">5%</option>
+                                                                        <option value="0.0600">6%</option>
+                                                                        <option value="0.0700">7%</option>
+                                                                        <option value="0.0700">8%</option>
+                                                                        <option value="0.0700">9%</option>
+                                                                        <option value="0.0700">10%</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-6">
+                                                                    MAXCOMI²
+                                                                    <select class="form-control-no-border c maxcomis"
+                                                                        style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="maxcomis"
+                                                                        required>
+                                                                        <option value="0.0100">1%</option>
+                                                                        <option value="0.0200">2%</option>
+                                                                        <option value="0.0300">3%</option>
+                                                                        <option value="0.0400">4%</option>
+                                                                        <option value="0.0500">5%</option>
+                                                                        <option value="0.0600">6%</option>
+                                                                        <option value="0.0700">7%</option>
+                                                                        <option value="0.0700">8%</option>
+                                                                        <option value="0.0700">9%</option>
+                                                                        <option value="0.0700">10%</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                    <tr>
+                                                        <th colspan="2">
+                                                            <div class="text-center row">
+                                                                <div class="col-4">
+                                                                    NIVEL1
+                                                                    <select class="form-control-no-border c linea1"
+                                                                        style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea1"
+                                                                        required>
+                                                                        <option value="0.0025">0.25%</option>
+                                                                        <option value="0.0050">0.50%</option>
+                                                                        <option value="0.0075">0.75%</option>
+                                                                        <option value="0.0100">1.00%</option>
+                                                                        <option value="0.0125">1.25%</option>
+                                                                        <option value="0.0150">1.50%</option>
+                                                                        <option value="0.0175">1.75%</option>
+                                                                        <option value="0.0200">2.00%</option>
+                                                                        <option value="0.0225">2.25%</option>
+                                                                        <option value="0.0250">2.50%</option>
+                                                                        <option value="0.0275">2.75%</option>
+                                                                        <option value="0.0300">3.00%</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    NIVEL2
+                                                                    <select class="form-control-no-border c linea2"
+                                                                        style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea2"
+                                                                        required>
+                                                                        <option value="0.0025">0.25%</option>
+                                                                        <option value="0.0050">0.50%</option>
+                                                                        <option value="0.0075">0.75%</option>
+                                                                        <option value="0.0100">1.00%</option>
+                                                                        <option value="0.0125">1.25%</option>
+                                                                        <option value="0.0150">1.50%</option>
+                                                                        <option value="0.0175">1.75%</option>
+                                                                        <option value="0.0200">2.00%</option>
+                                                                        <option value="0.0225">2.25%</option>
+                                                                        <option value="0.0250">2.50%</option>
+                                                                        <option value="0.0275">2.75%</option>
+                                                                        <option value="0.0300">3.00%</option>
+                                                                    </select>
+                                                                </div>
+                                                                <div class="col-4">
+                                                                    NIVEL3
+                                                                    <select class="form-control-no-border c linea3"
+                                                                        style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea3"
+                                                                        required>
+                                                                        <option value="0.0025">0.25%</option>
+                                                                        <option value="0.0050">0.50%</option>
+                                                                        <option value="0.0075">0.75%</option>
+                                                                        <option value="0.0100">1.00%</option>
+                                                                        <option value="0.0125">1.25%</option>
+                                                                        <option value="0.0150">1.50%</option>
+                                                                        <option value="0.0175">1.75%</option>
+                                                                        <option value="0.0200">2.00%</option>
+                                                                        <option value="0.0225">2.25%</option>
+                                                                        <option value="0.0250">2.50%</option>
+                                                                        <option value="0.0275">2.75%</option>
+                                                                        <option value="0.0300">3.00%</option>
+                                                                    </select>
+                                                                </div>
+                                                            </div>
+                                                        </th>
+                                                    </tr>
+                                                </tbody>
+                                            </table>
+                                        </div>
+                                    </div>
+                                </th>
+                                <!--<th rowspan="2">X</th>-->
+                            </tr>
+                            <tr>
+                                <th>MZ</th>
+                                <th>LT</th>
+                                <th>MT2</th>
+                                <th>VALORMT2</th>
+                                <th>ESTADO</th>
+                                <th>VALOR</th>
+                                <th>CUOTA I</th>
+                                <th style="width:100%;">DSCP</th>
+                                <th>X</th>
+                            </tr>
+                        </thead>
+                        <tbody></tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
     <table id="listas" class="table table-striped table-sm table-hover responsive" style="display: none;">
         <tbody></tbody>
     </table>
@@ -700,3 +785,180 @@
         </div>
     </div>
 </div>
+
+<!--<div class="row datos mt-3" id="datosproveedor" style="display: none;">
+    <div class="col-12 col-lg-6">
+        <table class="table table-sm my-2">
+            <tbody>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="user"></i>
+                        REPRESENTANTE
+                    </th>
+                    <td>
+                        <input class="form-control-no-border edi text-uppercase nombres u" type="text"
+                            placeholder="Nombre completo" autocomplete="off" style="padding: 1px; width: 100%;"
+                            name="nombres" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="credit-card"></i>
+                        DOCUMENTO
+                    </th>
+                    <td>
+                        <input class="form-control-no-border edi documento u" type="text"
+                            placeholder="DOCUMENTO DE IDENTIDAD" autocomplete="off" style="padding: 1px; width: 100%;"
+                            name="documento" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="user"></i>
+                        <input class="form-control-no-border edi text-center text-uppercase" type="text"
+                            placeholder="EMPRESA" autocomplete="off" style="padding: 1px; width: 80%;" name="empresa"
+                            disabled required>
+                    </th>
+                    <td>
+                        <i class="feather-md" data-feather="credit-card"></i>
+                        <input class="form-control-no-border edi text-center" type="text" placeholder="DIGITE EL NIT"
+                            autocomplete="off" style="padding: 1px; width: 80%;" name="nit" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <br>
+                        <div class="text-center">
+                            <h6>BANCO</h6>
+                        </div>
+                        <div class="text-center">
+                            <select class="form-control-no-border edi" name="banco" style="padding: 1px; width: 80%;"
+                                disabled required>
+                                <option value="nada">SELECCIONE UN BANCO</option>
+                                <option value="Banco Agrario de Colombia">Banco Agrario de
+                                    Colombia
+                                </option>
+                                <option value="Banco AV Villas">Banco AV Villas</option>
+                                <option value="Banco Caja Social">Banco Caja Social</option>
+                                <option value="Banco de Occidente">Banco de Occidente</option>
+                                <option value="Banco Popular">Banco Popular</option>
+                                <option value="Banco Falabella">Banco Falabella</option>
+                                <option value="Banco Finandina">Banco Finandina</option>
+                                <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca
+                                </option>
+                                <option value="Banco Santander">Banco Santander</option>
+                                <option value="Banco de Occidente">Banco de Occidente</option>
+                                <option value="Bancóldex">Bancóldex</option>
+                                <option value="Bancolombia">Bancolombia</option>
+                                <option value="BBVA Colombia">BBVA Colombia</option>
+                                <option value="Banco de Bogotá">Banco de Bogotá</option>
+                                <option value="Citi Colombia">Citi Colombia</option>
+                                <option value="Citibank">Citibank</option>
+                                <option value="Colpatria">Colpatria</option>
+                                <option value="Davivienda">Davivienda</option>
+                                <option value="GNB Sudameris">GNB Sudameris</option>
+                                <option value="Multibank S.A.">Multibank S.A.</option>
+                                <option value="Mundo mujer">Mundo mujer</option>
+                                <option value="Red Multibanca Colpatria">Red Multibanca
+                                    Colpatria
+                                </option>
+                            </select>
+                        </div>
+                    </th>
+                    <th>
+                        <br>
+                        <div class="text-center">
+                            <h6>TIPO DE CUENTA</h6>
+                        </div>
+                        <div class="text-center">
+                            <select class="form-control-no-border edi" name="cta" style="padding: 1px; width: 80%;"
+                                disabled required>
+                                <option value="nada">TIPO CTA.</option>
+                                <option value="CTE">CTE</option>
+                                <option value="AHO">AHO</option>
+                            </select>
+                        </div>
+                    </th>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        CUENTA
+                    </th>
+                    <td>
+                        <input class="form-control-no-border edi text-center text-uppercase" type="text"
+                            placeholder="CUENTA" autocomplete="off" style="padding: 1px; width: 100%;" name="numero"
+                            disabled required>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="col-12 col-lg-6">
+        <table class="table table-sm my-2">
+            <tbody>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        M. MERCANTIL
+                    </th>
+                    <td>
+                        <input type="text" name="mercantil" class="form-control-no-border edi" placeholder="MATRICULA M"
+                            style="padding: 1px; width: 100%;" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        F. MERCANTIL
+                    </th>
+                    <td>
+                        <input type="date" name="fechaM" class="form-control-no-border edi"
+                            style="padding: 1px; width: 100%;" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        EMAIL
+                    </th>
+                    <td>
+                        <input type="email" name="mail" class="form-control-no-border edi text-lowercase"
+                            placeholder="EMAIL" style="padding: 1px; width: 100%;" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="phone-call"></i>
+                        MOVIL
+                    </th>
+                    <td>
+                        <input class="form-control-no-border edi text-lowercase" type="text" name="tel"
+                            autocomplete="off" placeholder="MOVIL" style="padding: 1px; width: 80%;"
+                            data-mask="000-000-0000" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        DIRECCION
+                    </th>
+                    <td>
+                        <input type="text" name="direccion" class="form-control-no-border edi text-lowercase"
+                            placeholder="DIRECCION" style="padding: 1px; width: 100%;" disabled required>
+                    </td>
+                </tr>
+                <tr>
+                    <th>
+                        <i class="feather-md" data-feather="map-pin"></i>
+                        WEB
+                    </th>
+                    <td>
+                        <input type="url" name="web" class="form-control-no-border edi text-lowercase"
+                            placeholder="DOMINIO" style="padding: 1px; width: 100%;" disabled required>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>-->

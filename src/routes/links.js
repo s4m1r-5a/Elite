@@ -286,7 +286,6 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(fila[0]);
     } else if (id === 'nuevo') {
         const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
-        //console.log(req.body)
         const nuevo = { producto, mz: mz ? mz.toUpperCase() : 'no', n, mtr2, estado, valor, inicial, descripcion }
         const fila = await pool.query('INSERT INTO productosd SET ? ', nuevo);
         await pool.query(`UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`)
@@ -298,11 +297,12 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'update') {
         const { id, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
-        d = {
+        console.log(req.body)
+        /*d = {
             mz, n, mtr: Math.round(parseFloat(valor.replace(/\./g, '')) / mtr2), mtr2, estado, valor: valor.replace(/\./g, ''),
             inicial: inicial.replace(/\./g, ''), descripcion
-        }
-        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])
+        }*/
+        //await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])
         res.send(true);
     } else {
         const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
@@ -647,7 +647,7 @@ router.post('/recibo', async (req, res) => {
     }
     var excd = montorcb - total;
     var sum = 0, excedent = Math.sign(excd) >= 0 ? excd : 0;
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE ${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''}`);
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE stado != 6 AND (${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''})`);
     console.log(req.body, recibe, excd, excedent, rcb)
     if (recibe.length > 0) {
         recibe.filter((a) => {
