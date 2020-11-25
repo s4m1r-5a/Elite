@@ -2471,7 +2471,7 @@ if (window.location.pathname == `/links/reportes`) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
             var last = null, lote = null;
-            var total = 0, vlr = 0;
+            var total = 0, vlr = 0, totaloteanterior = 0;
             var datos = api.column({ page: 'current' }).data()
             var filas = api.column(10, { page: 'current' }).data();
             body = [];
@@ -2487,7 +2487,7 @@ if (window.location.pathname == `/links/reportes`) {
                         $(rows).eq(i - 1).after(
                             `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
                             <td colspan="4">SALDO A LA FECHA</td>
-                            <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
+                            <td colspan="11">$${Moneda(totaloteanterior - vlr)}</td>
                         </tr>`
                         );
                         body.push(
@@ -2500,7 +2500,7 @@ if (window.location.pathname == `/links/reportes`) {
                                     }
                                 },
                                 id5: {
-                                    content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
+                                    content: '$' + Moneda(totaloteanterior - vlr),
                                     colSpan: 4, styles: {
                                         halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
                                         fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
@@ -2508,6 +2508,7 @@ if (window.location.pathname == `/links/reportes`) {
                                 }
                             }
                         )
+                        console.log(datos[i], vlr, totaloteanterior)
                         vlr = 0;
                     }
                     $(rows).eq(i).before(
@@ -2627,9 +2628,14 @@ if (window.location.pathname == `/links/reportes`) {
                         }
                     )
                 }
+                totaloteanterior = parseFloat(datos[i].total);
             });
         },
         dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
         buttons: [{
             text: `<i class="align-middle" data-feather="file-text"></i>`,
             attr: {
@@ -5178,25 +5184,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         }
     );
     $(document).ready(function () {
-
-        /*$('.proveedor, .socio').change(function () {
-            if ($(this).val() === '0') {
-                $('#datosproveedor').show('slow');
-                $("#datosproveedor input, #datosproveedor select").prop('disabled', false)
-                if ($(this).hasClass("socio")) {
-                    $('#titu').html('DATOS SOCIO COMERCIAL');
-                    $(`.proveedor select option[value='1']`).attr("selected", true);
-                } else {
-                    $('#titu').html('DATOS PROVEEDOR');
-                    $(`.socio select option[value='1']`).attr("selected", true);
-                }
-            } else {
-                $('#datosproveedor').hide('slow');
-                $('#datosproveedor input').val('');
-                $(`#datosproveedor select option[value='nada']`).attr("selected", true);
-                $("#datosproveedor input, #datosproveedor select").prop('disabled', true)
-            }
-        })*/
         $('a.atras').on('click', function () {
             //table2.ajax.reload(null, false)
             table2.columns.adjust().draw();
@@ -5231,33 +5218,19 @@ if (window.location == `${window.location.origin}/links/productos`) {
             });
         })
         $('#vmt2, #porcentage').change(function () {
-            var valor, inicial;
-            if ($(this).attr('id') === 'porcentage' && $('#ideditar').val()) {
-                var datos = { valor: $(this).val() }
-                $.ajax({
-                    type: "PUT",
-                    url: "/links/produc/" + $('#ideditar').val(),
-                    data: datos,
-                    async: false,
-                    success: function (data) {
-                        if (data) {
-                            tabledit.ajax.reload(null, false);
-                            SMSj('success', 'Nuevo porcentage establecido correctamente');
-                        }
-                    }
-                })
-            } else {
-                $('.mt2').each(function (index, element) {
-                    var fila = $(this).parents('tr');
-                    if ($(this).val()) {
-                        valor = $(this).val() * fila.find('.vmt2').cleanVal();
-                        inicial = valor * $('#porcentage').val() / 100;
-                        fila.find('.vrlt').val(Moneda(valor))
-                        fila.find('.vri').val(Moneda(inicial))
-                        $(this).next('span').text('$ ' + Moneda(Math.round(valor)));
-                    }
-                });
+            if ($(this).attr('id') === 'vmt2') {
+                $('#crearlotes .vmt2').val($(this).val());
+                console.log('si cruso')
             }
+            $('#crearlotes .mt2').each(function (index, element) {
+                var fila = $(this).parents('tr');
+                if ($(this).val()) {
+                    valor = $(this).val() * fila.find('.vmt2').cleanVal();
+                    inicial = valor * $('#porcentage').val() / 100;
+                    fila.find('.vrlt').val(Moneda(valor))
+                    fila.find('.vri').val(Moneda(inicial))
+                }
+            });
         });
         var start = moment(), end = moment().add(2, 'year');
         $('#inicio').val(start.format("YYYY-MM-DD"))
@@ -5387,6 +5360,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         lotes.on('change', 'tr .mt2, .vmt2', function () {
             var sum = 0, vrproy = 0, valor = 0, fila = $(this).parents('tr');
             if ($(this).hasClass('vmt2')) {
+                $('#vmt2').val(0);
                 valor = fila.find('.mt2').val() * $(this).cleanVal();
             } else {
                 valor = $(this).val() * fila.find('.vmt2').cleanVal();
@@ -6127,7 +6101,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             data: a,
             async: true,
             beforeSend: function (xhr) {
-                tabledit.state.save();
+                //tabledit.state.save();
             },
             success: function (data) {
                 if (data) {
@@ -6230,7 +6204,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 data: d,
                 async: true,
                 beforeSend: function (xhr) {
-                    tabledit.state.save();
+                    //tabledit.state.save();
                 },
                 success: function (data) {
                     if (data) {
@@ -6256,13 +6230,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
             fila.find(`.descripcion`).val(data.descripcion)
         }
     });
-    function ccb(strt, fend) {
-        $("#rangofechas span").html(strt.format("ll") + " - " + fend.format("ll"));
-        $('#finicio').val(strt.format("YYYY-MM-DD"))
-        $('#ffin').val(fend.format("YYYY-MM-DD"))
-        alert('sjñxjvljf')
-        Recorrer()
-    }
     table2.on('click', '.editar', function () {
         var fila = $(this).parents('tr');
         var data = table2.row(fila).data();
@@ -6287,7 +6254,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#totalmtrs2').val(data.totalmtr2)
                     $('#valmtr2').val(Moneda(data.valmtr2)).prop('disabled', true)
                     $('.alterable').val(data.valmtr2 ? 'no' : 'si')
-                    console.log(data.valmtr2 ? true : false)
+                    $('.lts').val(data.cantidad)
+                    $('.mzs').val(data.mzs)
+                    $(`#datatabledit .comision option[value='${data.comision}']`).attr("selected", true);
+                    $(`#datatabledit .maxcomis option[value='${data.maxcomis}']`).attr("selected", true);
+                    $(`#datatabledit .linea1 option[value='${data.linea1}']`).attr("selected", true);
+                    $(`#datatabledit .linea2 option[value='${data.linea2}']`).attr("selected", true);
+                    $(`#datatabledit .linea3 option[value='${data.linea3}']`).attr("selected", true);
                     $(`#datatabledit input[name="separacion"]`).val(Moneda(data.separaciones))
                     $(`#datatabledit input[name="incentivo"]`).val(Moneda(data.incentivo) || 0)
                     $('.totalproyect').val('$' + Moneda(data.valproyect))
@@ -6298,6 +6271,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#finicio').val(fi.format("YYYY-MM-DD"))
                     $('#ffin').val(ff.format("YYYY-MM-DD"))
                     $(`#xcntag option[value='${data.porcentage}']`).attr("selected", true);
+                    console.log(data.porcentage, data.comision)
                     $("#cuadro2").hide("slow");
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").hide("slow");
