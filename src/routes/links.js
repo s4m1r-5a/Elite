@@ -296,7 +296,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`)
         res.send(true);
     } else if (id === 'update') {
-        const { id, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
+        const { id, mz, n, mtr, mtr2, estado, valor, inicial, descripcion } = req.body;
         console.log(req.body)
         /*d = {
             mz, n, mtr: Math.round(parseFloat(valor.replace(/\./g, '')) / mtr2), mtr2, estado, valor: valor.replace(/\./g, ''),
