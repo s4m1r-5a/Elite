@@ -2259,16 +2259,9 @@ async function Estados(S, L, P) {
          pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    /*const Cuotas = await pool.query(
-        `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, 
-        SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
-         SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, 
-         SUM(c.cuota) AS TOTAL FROM preventa pr INNER JOIN productosd pd ON pr.lote = pd.id
-         INNER JOIN cuotas c ON c.separacion = pr.id WHERE pr.tipobsevacion IS NULL ${F.m}`
-    );*/
     const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
-    (l.valor - pr.ahorro) * pr.iniciar /100 AS INICIAL, 
-    (l.valor - pr.ahorro) * (100 - pr.iniciar) /100 AS FINANCIACION,
+    ROUND((l.valor - pr.ahorro) * pr.iniciar /100) AS INICIAL, 
+    ROUND((l.valor - pr.ahorro) * (100 - pr.iniciar) /100) AS FINANCIACION,
     l.valor - pr.ahorro AS TOTAL FROM preventa pr INNER JOIN productosd l 
     ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
 
@@ -2284,17 +2277,22 @@ async function Estados(S, L, P) {
 
         if (pagos >= cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
+            console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
             return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.FINANCIACION) {
             Desendentes(Pagos[0].asesor, 10)
+            console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
+            console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
+            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
     } else {
+        console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
         return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }
