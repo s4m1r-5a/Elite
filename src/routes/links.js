@@ -296,14 +296,34 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`)
         res.send(true);
     } else if (id === 'update') {
-        const { id, mz, n, mtr, mtr2, estado, valor, inicial, descripcion } = req.body;
-        console.log(req.body)
-        /*d = {
-            mz, n, mtr: Math.round(parseFloat(valor.replace(/\./g, '')) / mtr2), mtr2, estado, valor: valor.replace(/\./g, ''),
-            inicial: inicial.replace(/\./g, ''), descripcion
-        }*/
-        //await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [d, id])
-        res.send(true);
+        const { alterable, editar, categoria, title, totalmtr2, separacion, incentivo, mzs, lts,
+            porcentage, fecha, fechafin, comision, maxcomis, linea1, linea2, linea3, idlote, mtr,
+            mz, n, mtr2, estado, valor, inicial, descripcion, valorproyect } = req.body;
+
+        if (idlote === undefined) {
+            const produc = {
+                categoria, proyect: title.toUpperCase(), porcentage, totalmtr2, valproyect: valorproyect, mzs, cantidad: lts,
+                estados: 7, fechaini: fecha, fechafin, separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+                incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0, comision, maxcomis, linea1, linea2, linea3
+            };
+            const datos = await pool.query('UPDATE productos SET ? WHERE id = ?', [produc, editar]);
+            res.send(true);
+
+        } else {
+            await pool.query(`UPDATE productosd l INNER JOIN productos p ON l.producto = p.id 
+            SET ? WHERE l.id = ?`, [
+                {
+                    'l.mz': mz, 'l.n': n, 'l.mtr': mtr.replace(/\./g, ''), 'l.mtr2': mtr2, 'l.estado': estado, 'l.valor': valor,
+                    'l.inicial': inicial, 'l.descripcion': descripcion, 'p.categoria': categoria, 'p.proyect': title.toUpperCase(),
+                    'p.porcentage': porcentage, 'p.totalmtr2': totalmtr2, 'p.valproyect': valorproyect, 'p.mzs': mzs, 'p.cantidad': lts,
+                    'p.estados': 7, 'p.fechaini': fecha, 'p.fechafin': fechafin, 'p.separaciones': separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+                    'p.incentivo': incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0, 'p.comision': comision, 'p.maxcomis': maxcomis, 'p.linea1': linea1, 'p.linea2': linea2,
+                    'p.linea3': linea3, 'l.ediitado': req.user.fullname
+                }, idlote]
+            );
+            res.send(true);
+        }
+
     } else {
         const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
         respuesta = { "data": fila };
@@ -333,62 +353,22 @@ router.post('/actualiza', isLoggedIn, async (req, res) => {
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, lts, std, mz, n, mtr2, vrlt, vri, vmtr2,
-        separacion, incentivo, fecha, fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco,
-        cta, numero, mail, direccion, tel, web, descripcion, editar } = req.body;
-    console.log(req.body)
+        separacion, incentivo, fecha, fechafin, descripcion, comision, maxcomis, linea1, linea2, linea3 } = req.body;
     const produc = {                                                           //mzs cantidad
-        categoria, proveedor, socio, proyect: title.toUpperCase(),
+        categoria, proyect: title.toUpperCase(),
         porcentage, totalmtr2, valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
         valproyect, mzs, cantidad: lts, estados: 7, fechaini: fecha, fechafin, separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
-        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0
+        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0, comision, maxcomis, linea1, linea2, linea3
     };
-    if (proveedor == '0' || socio == '0') {
-        const proveedr = {
-            representante: null,
-            matricula: mercantil,
-            fecha: fechaM,
-            empresa: empresa.toUpperCase(),
-            nit, banco: banco.toUpperCase(),
-            cta, numero,
-            mail: mail.toLowerCase(),
-            direccion, tel: tel.replace(/-/g, ""),
-            web: web.toLowerCase()
-        }
-        const newclient = await pool.query('SELECT * FROM clientes WHERE documento = ?', documento);
-        if (newclient.length > 0) {
-            proveedr.representante = newclient[0].id
-        } else {
-            const cliente = {
-                nombre: nombres.toUpperCase(),
-                documento,
-                movil: tel.replace(/-/g, ""),
-                email: mail.toLowerCase(),
-                direccion: direccion.toLowerCase()
-            }
-            const newcliente = await pool.query('INSERT INTO clientes SET ? ', cliente);
-            proveedr.representante = newcliente.insertId
-        }
-
-        const newprovee = await pool.query('INSERT INTO proveedores SET ? ', proveedr);
-        if (proveedor == '0') {
-            produc.proveedor = newprovee.insertId
-        } else if (socio == '0') {
-            produc.socio = newprovee.insertId
-        }
-    }
-    if (editar) {
-        await pool.query(`UPDATE productos SET ? WHERE id = ?`, [produc, editar]);
-        res.send(true);
-    } else {
-        const datos = await pool.query('INSERT INTO productos SET ? ', produc);
-        var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
-        await n.map((t, i) => {
-            producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${std[i]}, ${vmtr2[i].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(/\./g, '')}),`;
-        });
-        await pool.query(producdata.slice(0, -1));
-        req.flash('success', 'Producto registrado exitosamente');
-        res.redirect('/links/productos');
-    }
+    //console.log(req.body, produc)
+    const datos = await pool.query('INSERT INTO productos SET ? ', produc);
+    var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
+    await n.map((t, i) => {
+        producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${std[i]}, ${vmtr2[i].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(/\./g, '')}),`;
+    });
+    await pool.query(producdata.slice(0, -1));
+    req.flash('success', 'Producto registrado exitosamente');
+    res.redirect('/links/productos');
 });
 //////////////* RED *//////////////////////////////////
 router.get('/red', isLoggedIn, async (req, res) => {
@@ -699,7 +679,7 @@ router.post('/recibo', async (req, res) => {
     var acumulado = l + k;
     const pago = {
         fech: ahora, monto: Math.sign(excd) < 0 ? montorcb : total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
-        concepto: 'PAGO', stado: 3, img: imagenes, descp: Math.sign(excd) < 0 ? concpto + 'A' : concpto, formap, excdnt: excedent
+        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
     }
     bono != 0 ? pago.bono = pin : '';
     concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
@@ -758,6 +738,11 @@ router.post('/bonus', async (req, res) => {
 /////////////* CARTERAS */////////////////////////////////////
 router.get('/cartera', isLoggedIn, async (req, res) => {
     res.render('links/cartera');
+});
+router.post('/cartera/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    const fila = await pool.query('SELECT * FROM productosd WHERE id = ?', id);
+    res.send(fila[0]);
 });
 router.post('/cartera', isLoggedIn, async (req, res) => {
     const { h } = req.body;
@@ -840,6 +825,17 @@ router.post('/pago', async (req, res) => {
     res.redirect('/links/pagos');
     //uploads/
 });
+router.post('/prodlotes', isLoggedIn, async (req, res) => {
+    const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
+    WHERE v.tipobsevacion = 'ANULADA' OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`);
+    const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
+    const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+    res.send({ productos, asesores, clientes });
+
+});
+router.post('/crearcartera', isLoggedIn, async (req, res) => {
+    console.log(req.body)
+})
 //////////////* CUPONES *//////////////////////////////////
 router.get('/saluda', isLoggedIn, async (req, res) => {
     const r = await pool.query(`SELECT SUM(s.monto) + 
@@ -2263,16 +2259,9 @@ async function Estados(S, L, P) {
          pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    /*const Cuotas = await pool.query(
-        `SELECT SUM(if (c.tipo = 'SEPARACION', c.cuota, 0)) AS SEPARACION, 
-        SUM(if (c.tipo = 'INICIAL', c.cuota, 0)) AS INICIAL,
-         SUM(if (c.tipo = 'FINANCIACION', c.cuota, 0)) AS FINANCIACION, 
-         SUM(c.cuota) AS TOTAL FROM preventa pr INNER JOIN productosd pd ON pr.lote = pd.id
-         INNER JOIN cuotas c ON c.separacion = pr.id WHERE pr.tipobsevacion IS NULL ${F.m}`
-    );*/
     const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
-    (l.valor - pr.ahorro) * pr.iniciar /100 AS INICIAL, 
-    (l.valor - pr.ahorro) * (100 - pr.iniciar) /100 AS FINANCIACION,
+    ROUND((l.valor - pr.ahorro) * pr.iniciar /100) AS INICIAL, 
+    ROUND((l.valor - pr.ahorro) * (100 - pr.iniciar) /100) AS FINANCIACION,
     l.valor - pr.ahorro AS TOTAL FROM preventa pr INNER JOIN productosd l 
     ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
 
@@ -2288,17 +2277,22 @@ async function Estados(S, L, P) {
 
         if (pagos >= cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
+            console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
             return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.FINANCIACION) {
             Desendentes(Pagos[0].asesor, 10)
+            console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
+            console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
+            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
     } else {
+        console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
         return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }
