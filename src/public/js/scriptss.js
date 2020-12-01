@@ -4657,204 +4657,214 @@ if (window.location.pathname == `/links/cartera`) {
             return true;
         }
     );
-    var ya = moment(new Date()).format('YYYY-MM-DD')
-    $('#PagO').modal({
-        backdrop: 'static',
-        keyboard: true,
-        toggle: true
-    });
-    var cartra = $('#cartra').DataTable({
-        dom: '',
-        deferRender: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: false,
-        },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
-        //{className: "dt-center", targets: "_all"}],
-        order: [[1, "desc"]],
-        language: false,
-        ajax: {
-            method: "POST",
-            data: { h: ya },
-            url: "/links/cartera",
-            dataSrc: "data"
-        },
-        columns: [
-            {
-                data: null,
-                defaultContent: ''
-            },
-            {
-                data: "proyecto",
-                className: 'te'
-            },
-            {
-                data: "mz",
-                className: 'te'
-            },
-            {
-                data: "n",
-                className: 'te'
-            },
-            {
-                data: "estado",
-                className: 'te',
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
-                            break;
-                        case 8:
-                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
-                            break;
-                        case 9:
-                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
-                            break;
-                        case 10:
-                            return `<span class="badge badge-pill badge-success">Separado</span>`
-                            break;
-                        case 12:
-                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
-                            break;
-                        case 13:
-                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
-                            break;
-                        case 15:
-                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
-                            break;
+    var ya = moment(new Date()).format('YYYY-MM-DD');
+    $(document).ready(function () {
+        var bono = 0;
+        $(".select2").each(function () {
+            $(this)
+                .wrap("<div class=\"position-relative\"></div>")
+                .select2({
+                    placeholder: "Selecciona un Producto",
+                    dropdownParent: $(this).parent()
+                });
+        })
+        $('#proyectos').change(function () {
+            $.ajax({
+                type: 'POST',
+                url: '/links/cartera/' + $(this).val(),
+                //async: true,
+                beforeSend: function (xhr) {
+                    //tabledit.state.save();
+                },
+                success: function (data) {
+                    if (data) {
+                        var porg = data.inicial * 100 / data.valor;
+                        $('#mtr2').val(data.mtr2);
+                        $('#idlote').val(data.id);
+                        $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        $('#inicial').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        $('#total').val(Moneda(Math.round(data.valor)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        $(`#xcntag option[value='${porg}']`).attr("selected", true);
+                        $('#ini').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        $('#fnc').val(Moneda(Math.round(data.valor - data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        if ($('#Separar').val()) {
+                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                        } else {
+                            CONT()
+                        }
                     }
                 }
-            },
-            {
-                data: "nombre",
-                className: 'te'
-            },
-            {
-                data: "documento",
-                className: 'te'
-            },
-            {
-                data: "fecha",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "fullname",
-                className: 'te'
-            },
-            {
-                data: "std",
-                className: 'te',
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 3:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
-                            break;
+            })
+        })
+        $('#financiacion-btn').click(function () {
+            var c = 1;
+            crearcartera
+                .rows()
+                .data()
+                .filter((x, c) => {
+                    return $(x[3]).val() === 'FINANCIACION';
+                }).map((x, j) => {
+                    c = j + 2;
+                })
+            $('#financiacion').val(c)
+            if ($('#Separar').val()) {
+                FINANCIAR('FINANCIACION', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+            } else {
+                FINANCIAR('FINANCIACION', c, 0)
+            }
+        })
+        $('#inicialcuotas-btn').click(function () {
+            var c = 1;
+            crearcartera
+                .rows()
+                .data()
+                .filter((x, c) => {
+                    return $(x[3]).val() === 'INICIAL';
+                }).map((x, j) => {
+                    c = j + 2;
+                })
+            $('#inicialcuotas').val(c)
+            if ($('#Separar').val()) {
+                FINANCIAR('INICIAL', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+            } else {
+                FINANCIAR('INICIAL', c, 0)
+            }
+        })
+        $('#cupon').change(function () {
+            if ($(this).val() !== bono && $(this).val()) {
+                $.ajax({
+                    url: '/links/bono/' + $(this).val(),
+                    type: 'GET',
+                    async: false,
+                    success: function (data) {
+                        if (data.length) {
+                            var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
+                            if (data[0].producto != null) {
+                                SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
+                                $(this).val('')
+                            } else if (fecha < new Date()) {
+                                SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                                $(this).val('')
+                            } else if (data[0].estado != 9) {
+                                SMSj('error', 'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
+                                $(this).val('') //L0X66
+                            } else {
+                                var precio = parseFloat($('#total').cleanVal());
+                                var porcentage = parseFloat($('#xcntag').val());
+                                var ahorr = Math.round(precio * data[0].descuento / 100)
+                                $('#idbono').val(data[0].id);
+                                $('#ahorro').val(Moneda(ahorr));
+                                precio = precio - ahorr;
+                                inicial = precio * porcentage / 100;
+                                $('#cuponx100to').val(data[0].descuento + '%');
+                                $('#desinicial').val(Moneda(Math.round(inicial)))
+                                $('#destotal').val(Moneda(Math.round(precio)));
+                                $('#ini').val(Moneda(Math.round(inicial)))
+                                $('#fnc').val(Moneda(Math.round(precio - inicial)));
+                                if ($('#Separar').val()) {
+                                    CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                                } else {
+                                    CONT()
+                                }
+                            }
+                            bono = data[0].pin;
+                        } else {
+                            SMSj('error', 'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado')
+                        }
                     }
-                }
-            },
-            {
-                data: "tipo",
-                className: 'te'
-            },
-            {
-                data: "ncuota",
-                className: 'te'
-            },
-            {
-                data: "fechs",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "cuota",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "abono",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "mora",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                });
+            } else {
+                SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
+                bono !== 0 ? $(this).val(bono) : '';
             }
-        ],
-        rowCallback: function (row, data, index) {
-            if (data["estado"] == 9) {
-                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-            } else if (data["estado"] == 12) {
-                $(row).css("background-color", "#00FFFF");
-            } else if (data["estado"] == 8) {
-                $(row).css("background-color", "#FFFFCC");
-            } else if (data["estado"] == 10) {
-                $(row).css("background-color", "#40E0D0");
-            } else if (data["estado"] == 1) {
-                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
-            } else if (data["estado"] == 13) {
-                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+        })
+        $('#xcntag').change(function () {
+            var porcntg = $(this).val();
+            var total = $('#total').val().replace(/\./g, '');
+            var totaldesc = $('#destotal').val().replace(/\./g, '');
+            var inicl = total * porcntg / 100;
+            console.log(inicl, total, porcntg, totaldesc)
+            $('#inicial').val(Moneda(Math.round(inicl)));
+            if (totaldesc) {
+                inicl = totaldesc * porcntg / 100;
+                total = totaldesc;
+                $('#desinicial').val(Moneda(Math.round(inicl)));
             }
-        }
+            $('#ini').val(Moneda(Math.round(inicl)));
+            $('#fnc').val(Moneda(Math.round(total - inicl)));
+            if ($('#Separar').val()) {
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+            } else {
+                CONT()
+            }
+        })
+        $('#vmtr2').change(function () {
+            //alert('jhdsfjodsjfo')
+            var vmtr = $(this).val().replace(/\./g, '');
+            var mtr = $('#mtr2').val();
+            var porcntg = $('#xcntag').val();
+            var total = vmtr * mtr;
+            var inicl = total * porcntg / 100;
+            var totaldesc = $('#destotal').val().replace(/\./g, '');
+            $('#total').val(Moneda(Math.round(total)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            $('#inicial').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            if (totaldesc) {
+                var ahorro = $('#ahorro').val().replace(/\./g, '');
+                total = total - ahorro;
+                inicl = total * porcntg / 100;
+                $('#destotal').val(Moneda(Math.round(total)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                $('#desinicial').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            }
+            $('#ini').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            $('#fnc').val(Moneda(Math.round(total - inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            //alert('jhdsfjodsjfo')
+            if ($('#Separar').val()) {
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+            } else {
+                CONT()
+            }
+        })
+    })
+    var proyectos = $('#proyectos');
+    var asesores = $('#asesores');
+    var clientes = $('#clientes');
+    var realcuotai = 0;
+    var realcuotaf = 0;
+    var cont = 0, cuota = 0;
+    $.ajax({
+        type: 'POST',
+        url: '/links/prodlotes'
+    }).then(function (data) {
+        var proyecto = null;
+        var parent = null;
+        var option = null;
+        data.productos.map((x, v) => {
+            if (x.proyect !== proyecto) {
+                parent = document.createElement("optgroup");
+                parent.setAttribute("label", x.proyect);
+                proyectos.append(parent)
+                proyecto = x.proyect;
+            }
+            option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, false, false);
+            parent.append(option)
+        });
+        asesores.append(new Option(`Selecciona un Asesor`, false, true, true))
+        data.asesores.map((x, v) => {
+            asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, false, false))
+        });
+        clientes.append(new Option(`Selecciona un Cliente`, false, true, true))
+        data.clientes.map((x, v) => {
+            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
+        });
     });
     var cartera = $('#cartera').DataTable({
         dom: 'Bfrtip',
-        buttons: [/*{
-            extend: 'collection',
-            text: 'Ctrl',
-            orientation: 'landscape',
-            buttons: [{
-                text: 'Copiar',
-                extend: 'copy'
-            },
-            {
-                extend: 'pdf',
-                orientation: 'landscape',
-                pageSize: 'LEGAL'
-            },
-            {
-                text: 'Ach plano ',
-                extend: 'csv',
-                orientation: 'landscape'
-            },
-            {
-                text: 'Excel',
-                extend: 'excel',
-                orientation: 'landscape'
-            },
-            {
-                text: 'Imprimir',
-                extend: 'print',
-                orientation: 'landscape'
-            }
-            ]
-        },*/
+        buttons: [
             {
                 extend: 'pageLength',
                 text: 'Ver',
                 orientation: 'landscape'
-            }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+            },
             {
                 text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
             placeholder="MZ">`,
@@ -4872,6 +4882,33 @@ if (window.location.pathname == `/links/cartera`) {
                     id: ''
                 },
                 className: 'btn btn-secondary'
+            },
+            {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
+                        </div>`,
+                attr: {
+                    title: 'Fecha',
+                    id: 'facturar'
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    /*tabledit.ajax.url("/links/productos/0").load(function () {
+                        tabledit.columns.adjust().draw();
+                    });*/
+                    //$('#ideditar').val('');
+                    //$('.datatabledit').hide();
+                    //$('#cuadro3 input').val('');
+                    //$('#vmt2').val('0');
+                    //$('input[name="incentivo"]').val('0');
+                    //$('#mzs').val(0);
+                    //$('#lts').val(0);
+                    $("#cuadro1").hide("slow");
+                    $("#cuadro2").show("slow");
+                    //$("#reportrange span").html(start.format("ll") + " - " + end.format("ll"));
+                    //$('#inicio').val(start.format("YYYY-MM-DD"))
+                    //$('#fin').val(end.format("YYYY-MM-DD"))
+                }
             }
         ],
         deferRender: true,
@@ -5056,6 +5093,251 @@ if (window.location.pathname == `/links/cartera`) {
             .search(this.value)
             .draw();
     });
+    var crearcartera = $('#crearcartera').DataTable({
+        searching: false,
+        language: languag2,
+        lengthMenu: [-1],
+        deferRender: true,
+        info: false,
+        autoWidth: false,
+        paging: false,
+        order: [[1, 'asc'], [2, 'asc']],
+        responsive: true,
+        columnDefs: [
+            { className: 'control', orderable: true, targets: 0 },
+            //{ "visible": false, "targets": 3 }
+            /*{ responsivePriority: 1, targets: [1, 2, 3, 4, 7] },
+            { responsivePriority: 2, targets: 5 },
+            { responsivePriority: 10003, targets: 6 },
+            { responsivePriority: 10002, targets: 8 }*/
+        ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+
+            api.column(3, { page: 'current' }).data().each(function (group, i) {
+                if (last !== group) {
+                    $(rows).eq(i).before(
+                        '<tr class="group"><td colspan="8">' + $(group).val() + '</td></tr>'
+                    );
+
+                    last = group;
+                }
+            });
+        },
+        initComplete: function (settings, json) {
+            $('#agrmz').find('input').val('no');
+        },
+        createdRow: function (row, data, dataIndex) {
+            /*console.log(data, row)
+            if (!data[2]) {
+                $(row).find('td').attr('colspan', '8');
+            }*/
+        }
+    });
+    crearcartera.on('click', 'tr a', function () {
+        var fila = $(this).parents('tr');
+        var tipo = fila.find(`.tipo`).val();
+        crearcartera.row(fila).remove().draw(false);
+        var cuotai = $('#inicialcuotas').val() - 1;
+        var cuotaf = $('#financiacion').val() - 1;
+        tipo === 'INICIAL' ? $('#inicialcuotas').val(cuotai) : $('#financiacion').val(cuotaf);
+        if ($('#Separar').val()) {
+            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+        } else {
+            CONT()
+        }
+    });
+    crearcartera.on('click', '.tabl .cuota', function () {
+        $(this).mask('#.##$', { reverse: true, selectOnFocus: true });
+    })
+    crearcartera.on('change', '.tabl .cuota', function () {
+        var fila = $(this).parents('tr');
+        var tipo = fila.find(`.tipo`).val();
+        var total = 0, valor = 0, num = 0;
+
+        if (tipo === 'INICIAL') {
+            $('#crearcartera .tabl tr').filter((c, i) => {
+                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai;
+            }).map((c, i) => {
+                num = c + 1;
+                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                valor += parseFloat(e);
+            })
+
+            var n = $('#inicialcuotas').val() - num;
+            var ini = $('#ini').val().replace(/\./g, '');
+            total = ini - valor;
+            cuota = Math.round(total / n);
+            if (n > 0) {
+                $('#crearcartera .tabl tr').each((e, i) => {
+                    var tpo = $(i).find(`.tipo`).val()
+                    if (tpo === 'INICIAL') {
+                        var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                        if (parseFloat(c) === realcuotai) {
+                            $(i).find(`.cuota`).val(Moneda(cuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                        }
+                    }
+                })
+            }
+            realcuotai = cuota;
+        } else if (tipo === 'FINANCIACION') {
+            $('#crearcartera .tabl tr').filter((c, i) => {
+                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) !== realcuotaf;
+            }).map((c, i) => {
+                num = c + 1;
+                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                valor += parseFloat(e);
+            })
+
+            var n = $('#financiacion').val() - num;
+            var fnc = $('#fnc').val().replace(/\./g, '');
+            total = fnc - valor;
+            cuota = Math.round(total / n);
+            if (n > 0) {
+                $('#crearcartera .tabl tr').each((e, i) => {
+                    var tpo = $(i).find(`.tipo`).val()
+                    if (tpo === 'FINANCIACION') {
+                        var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                        if (parseFloat(c) === realcuotaf) {
+                            $(i).find(`.cuota`).val(Moneda(cuota));
+                        }
+                    }
+                })
+            }
+            realcuotaf = cuota;
+        }
+        //$(this).val(Moneda(estacuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+    });
+    crearcartera.on('change', '#Separar', function () {
+        if ($(this).val().length > 3) {
+            CONT(parseFloat($(this).val().replace(/\./g, '')))
+        } else {
+            $(this).val(0)
+            CONT()
+        }
+    })
+    crearcartera.on('change', '.tabl .fecha', function () {
+        var t = moment().format('YYYY-MM-DD')
+        var fech = $(this).val() ? $(this).val() : t;
+        var f = null, n = 0;
+        $('#crearcartera .tabl tr').map((c, i) => {
+            var e = $(i).find(`.fecha`).val() ? $(i).find(`.fecha`).val() : 12;
+            if ($(i).find(`.fecha`).val() !== undefined && e === fech) {
+                f = true;
+            } else if ($(i).find(`.fecha`).val() !== undefined && f) {
+                n++;
+                s = moment(fech).add(n, 'month').format('YYYY-MM-DD')
+                $(i).find(`.fecha`).val(s);
+            }
+        })
+    })
+
+    var CONT = (separa) => {
+        var p = separa > 0 ? parseFloat(separa) : 0
+        var ini = parseFloat($('#ini').val().replace(/\./g, '')) - p;
+        var fnc = $('#fnc').val().replace(/\./g, '');
+        var cuotai = parseFloat(ini) / $('#inicialcuotas').val();
+        var cuotaf = parseFloat(fnc) / $('#financiacion').val();
+        $('#crearcartera .tabl tr').each((e, i) => {
+            var tpo = $(i).find(`.tipo`).val()
+            if (tpo === 'INICIAL') {
+                $(i).find(`.n`).val(e - 2);
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            }
+            if (tpo === 'FINANCIACION') {
+                var co = parseFloat($('#inicialcuotas').val()) + 3;
+                $(i).find(`.n`).val(e - co)
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            }
+        })
+        realcuotai = Math.round(cuotai);
+        realcuotaf = Math.round(cuotaf);
+        $(".fecha").daterangepicker({
+            locale: {
+                'format': 'YYYY-MM-DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10) + 5,
+        });
+    }
+    var FINANCIAR = (tipo, cnt, separ) => {
+        var table = new $.fn.dataTable.Api('#crearcartera');
+        var datos = table.rows({ page: 'current' }).data()
+        if (!datos.length) {
+            datos.push([
+                '',
+                `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+                `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+                `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
+                `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<select size="1" class="text-center std" name="std" required>
+                <option value="3" selected="selected">Pendiente</option>
+                <option value="13">Pagada</option>
+                </select>`,
+                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg>`
+            ])
+        }
+        datos.push([
+            '',
+            `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+            `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
+            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+            `<select size="1" class="text-center std" name="std" required>
+            <option value="3" selected="selected">Pendiente</option>
+            <option value="13">Pagada</option>
+            </select>`,
+            `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                <polyline points="3 6 5 6 21 6"></polyline>
+                <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                <line x1="10" y1="11" x2="10" y2="17"></line>
+                <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg></a>`
+        ])
+        crearcartera.clear().draw(false);
+        var dat = []
+        datos.filter((x, c) => {
+            return $(x[3]).val() === 'SEPARACION';
+        }).map((x, c) => {
+            dat.push(x)
+        })
+        datos.filter((x, c) => {
+            return $(x[3]).val() === 'INICIAL';
+        }).map((x, c) => {
+            dat.push(x)
+        })
+        datos.filter((x, c) => {
+            return $(x[3]).val() === 'FINANCIACION';
+        }).map((x, c) => {
+            dat.push(x)
+        })
+        crearcartera.rows.add(dat).draw(false);
+        separ ? $('#Separar').val(Moneda(separ)) : '';
+        CONT(separ)
+    }
     window.preview = function (input) {
         if (input.files && input.files[0]) {
             var marg = 100 / $('#file2')[0].files.length;
@@ -5070,6 +5352,7 @@ if (window.location.pathname == `/links/cartera`) {
                         //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
                         `<div class="image" style="
                             width: ${marg}%;
+                            min-width: 25%;
                             padding-top: calc(100% / (16/9));
                             background-image: url('${e.target.result}');
                             background-size: 100%;
@@ -5155,7 +5438,6 @@ if (window.location.pathname == `/links/cartera`) {
         }
 
     }
-    //{ total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb }
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {
@@ -5183,41 +5465,17 @@ if (window.location == `${window.location.origin}/links/productos`) {
             return true;
         }
     );
+    var start = moment(), end = moment().add(2, 'year');
     $(document).ready(function () {
         $('a.atras').on('click', function () {
-            //table2.ajax.reload(null, false)
+            table2.ajax.reload(null, false)
             table2.columns.adjust().draw();
-            //$('.card-footer').show('')
             $("#cuadro2").hide("slow");
             $("#cuadro3").hide("slow");
             $("#cuadro4").hide("slow");
             $("#cuadro1").show("slow");
-            /*$('#lts').prop('disabled', false);
-            $('#tmt2').prop('disabled', false);
-            $('#vmt2').prop('disabled', false);
-            $('#MANZANAS').prop('disabled', false);
-            $('#MANZANAS').prop("checked", false)*/
         });
         $('.v').change(function () {
-            if ($('#tmt2').val() && $('#vmt2').val()) {
-                var valor = $('#tmt2').val() * $('#vmt2').cleanVal();
-                $('#valproyect').val(valor);
-                $('.valproyect').html('$ ' + Moneda(Math.round(valor)));
-            }
-        });
-        $("form input:not(.edi)").on({
-            focus: function () {
-                this.select();
-            }
-        });
-        $('#pro').submit(function (e) {
-            $('#ModalEventos').modal({
-                toggle: true,
-                backdrop: 'static',
-                keyboard: true,
-            });
-        })
-        $('#vmt2, #porcentage').change(function () {
             if ($(this).attr('id') === 'vmt2') {
                 $('#crearlotes .vmt2').val($(this).val());
                 console.log('si cruso')
@@ -5232,9 +5490,18 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 }
             });
         });
-        var start = moment(), end = moment().add(2, 'year');
-        $('#inicio').val(start.format("YYYY-MM-DD"))
-        $('#fin').val(end.format("YYYY-MM-DD"))
+        $("form input:not(.edi)").on({
+            focus: function () {
+                this.select();
+            }
+        });
+        $('#pro').submit(function (e) {
+            $('#ModalEventos').modal({
+                toggle: true,
+                backdrop: 'static',
+                keyboard: true,
+            });
+        })
         var counter = 1, loteo = 1;
         //var da = lotes.$('input, select').serialize();
         var lotes = $('#crearlotes').DataTable({
@@ -5410,12 +5677,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#lts').val(cont);
                 });
         });
-        function cb(start, end) {
-            $("#reportrange span").html(start.format("MMMM D, YYYY") + " - " + end.format("MMMM D, YYYY"));
-            $('#inicio').val(start.format("YYYY-MM-DD"))
-            $('#fin').val(end.format("YYYY-MM-DD"))
-            //Dts()
-        }
+
         $("#reportrange").daterangepicker({
             locale: {
                 'format': 'YYYY/MM/DD',
@@ -5442,8 +5704,12 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 '3 Años y medio': [moment(), moment().add(41, 'month')],
                 '4 Años': [moment(), moment().add(4, 'year')]
             }
-        }, cb(start, end));
-        //cb(start, end);
+        }, function (start, end, l) {
+            $("#reportrange span").html(start.format("ll") + " - " + end.format("ll"));
+            $('#inicio').val(start.format("YYYY-MM-DD"))
+            $('#fin').val(end.format("YYYY-MM-DD"))
+            SMSj('success', 'La fecha se establecio en ' + l)
+        });
     });
     // Math.floor()
     function Dtas(n) {
@@ -5711,7 +5977,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $('#mzs').val(0);
                     $('#lts').val(0);
                     $("#cuadro1").hide("slow");
+                    $("#cuadro4").hide("slow");
                     $("#cuadro3").show("slow");
+                    $("#reportrange span").html(start.format("ll") + " - " + end.format("ll"));
+                    $('#inicio').val(start.format("YYYY-MM-DD"))
+                    $('#fin').val(end.format("YYYY-MM-DD"))
                 }
             } : 'print',
         ],
@@ -5895,13 +6165,13 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-info" title="Editado por \nultima ves \n${row.ediitado}">Pendiente</span>`
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-dark">Tramitando pago</span>`
+                            return `<span class="badge badge-pill badge-dark" title="Editado por \nultima ves \n${row.ediitado}">Tramitando pago</span>`
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-success">Disponible</span>
+                            return `<span class="badge badge-pill badge-success" title="Editado por \nultima ves \n${row.ediitado}">Disponible</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="9">Disponible</option>
@@ -5909,16 +6179,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             </select>`
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-primary">Separado</span>`
+                            return `<span class="badge badge-pill badge-primary" title="Editado por \nultima ves \n${row.ediitado}">Separado</span>`
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-secondary">Apartado</span>`
+                            return `<span class="badge badge-pill badge-secondary" title="Editado por \nultima ves \n${row.ediitado}">Apartado</span>`
                             break;
                         case 13:
-                            return `<span class="badge badge-pill badge-tertiary">Vendido</span>`
+                            return `<span class="badge badge-pill badge-tertiary" title="Editado por \nultima ves \n${row.ediitado}">Vendido</span>`
                             break;
                         case 14:
-                            return `<span class="badge badge-pill badge-danger">Tramitando</span>
+                            return `<span class="badge badge-pill badge-danger" title="Editado por \nultima ves \n${row.ediitado}">Tramitando</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="9">Disponible</option>
@@ -5926,7 +6196,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                             </select>`
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-warning">Inactivo</span>
+                            return `<span class="badge badge-pill badge-warning" title="Editado por \nultima ves \n${row.ediitado}">Inactivo</span>
                             <select class="form-control-no-border estado" name="estado"
                             style="padding: 1px; width: 100%; display: none;">
                                 <option value="15">Inactivo</option>
@@ -6066,12 +6336,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $('#Modaledit .edi, #Modaledit textarea').val('')
         Recorre(0)
     })
-    /*
-        tabledit
-            .row(fila)
-            .css('color', 'red')
-            .animate({ color: 'black' });
-    */
+
     var Recorrer = (n) => {
         var totalmetros2 = 0, totalotes = 0, totalmzs = 0, valorproyecto = 0;
         tabledit
@@ -6090,7 +6355,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $('#datatabledit .lts').val(totalotes)
         $('#datatabledit .mzs').val(totalmzs)
         $('#totalmtrs2').val(totalmetros2.toFixed(3))
-        $('#totalproyect').val(Math.round(valorproyecto));
+        $('#valorproyect').val(Math.round(valorproyecto));
         $('#datatabledit .totalproyect').val('$' + Moneda(Math.round(valorproyecto)));
 
         var a = $('#cabezal').find('input, textarea, select').serialize();
@@ -6193,8 +6458,11 @@ if (window.location == `${window.location.origin}/links/productos`) {
             $('#datatabledit .lts').val(totalotes)
             $('#datatabledit .mzs').val(totalmzs)
             $('#totalmtrs2').val(totalmetros2.toFixed(3))
-            $('#totalproyect').val(Math.round(valorproyecto));
+            $('#valorproyect').val(Math.round(valorproyecto));
             $('#datatabledit .totalproyect').val('$' + Moneda(Math.round(valorproyecto)));
+            //fila.find('.mtr').prop('disabled')
+            //fila.find('.mtr').is(':disabled') ? j = true : '';
+            fila.find('.mtr').prop('disabled', false);
             var a = $('#cabezal').find('input, textarea, select').serialize();
             var b = fila.find('input, textarea, select').serialize();
             var d = a + '&idlote=' + data.id + '&' + b;
@@ -6209,10 +6477,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 success: function (data) {
                     if (data) {
                         tabledit.ajax.reload(null, false)
-                        /*tabledit.ajax.reload(function (json) {
-                            tabledit.columns.adjust().draw();
-                            SMSj('success', 'Actualizacion exitosa')
-                        })*/
                         SMSj('success', 'Actualizacion exitosa')
                     }
                 }

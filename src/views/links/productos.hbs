@@ -108,7 +108,6 @@
                                 <tr>
                                     <th colspan="10">
                                         <div class="row">
-                                            <input type="hidden" class="client" value="" name="client">
                                             <div class="col-12 col-lg-6">
                                                 <table class="table table-sm my-2">
                                                     <tbody>
@@ -240,7 +239,7 @@
                                                                 CUOTA INICIAL
                                                             </th>
                                                             <td>
-                                                                <select class="form-control-no-border edi"
+                                                                <select class="form-control-no-border edi v"
                                                                     id="porcentage" name="porcentage"
                                                                     style="padding: 1px; width: 100%;text-align:center;"
                                                                     required>
@@ -253,37 +252,126 @@
                                                                 </select>
                                                             </td>
                                                         </tr>
+
                                                         <tr>
                                                             <th>
-                                                                <i class="feather-md" data-feather="heart"></i>
-                                                                PROVEEDOR
+                                                                COMISIONES EN RED Y DIRECTAS
                                                             </th>
-                                                            <td>
-                                                                <select class="form-control-no-border edi v proveedor"
-                                                                    name="proveedor" style="padding: 1px; width: 100%;"
-                                                                    required>
-                                                                    {{#each proveedores}}
-                                                                    <option value="{{id}}">{{empresa}}</option>
-                                                                    {{/each}}
-                                                                    <option value="0">OTRO</option>
-                                                                </select>
-                                                            </td>
+                                                            <th>
+                                                                <div class="text-center row">
+                                                                    <div class="col-sm-6">
+                                                                        COMISION
+                                                                        <select
+                                                                            class="form-control-no-border c comision"
+                                                                            style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="comision"
+                                                                            required>
+                                                                            <option value="0">0%</option>
+                                                                            <option value="0.01">1%</option>
+                                                                            <option value="0.02">2%</option>
+                                                                            <option value="0.03" selected>3%</option>
+                                                                            <option value="0.04">4%</option>
+                                                                            <option value="0.05">5%</option>
+                                                                            <option value="0.06">6%</option>
+                                                                            <option value="0.07">7%</option>
+                                                                            <option value="0.08">8%</option>
+                                                                            <option value="0.09">9%</option>
+                                                                            <option value="0.1">10%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm-6">
+                                                                        MAXCOMI.
+                                                                        <select
+                                                                            class="form-control-no-border c maxcomis"
+                                                                            style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="maxcomis"
+                                                                            required>
+                                                                            <option value="0">0%</option>
+                                                                            <option value="0.01">1%</option>
+                                                                            <option value="0.02">2%</option>
+                                                                            <option value="0.03">3%</option>
+                                                                            <option value="0.04">4%</option>
+                                                                            <option value="0.05">5%</option>
+                                                                            <option value="0.06">6%</option>
+                                                                            <option value="0.07">7%</option>
+                                                                            <option value="0.08" selected>8%</option>
+                                                                            <option value="0.09">9%</option>
+                                                                            <option value="0.1">10%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
                                                         </tr>
                                                         <tr>
-                                                            <th>
-                                                                <i class="feather-md" data-feather="users"></i>
-                                                                SOCIO C
+                                                            <th colspan="2">
+                                                                <div class="text-center row">
+                                                                    <div class="col-sm-4">
+                                                                        NIVEL1
+                                                                        <select class="form-control-no-border c linea1"
+                                                                            style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea1"
+                                                                            required>
+                                                                            <option value="0">0.00%</option>
+                                                                            <option value="0.0025">0.25%</option>
+                                                                            <option value="0.005">0.50%</option>
+                                                                            <option value="0.0075">0.75%</option>
+                                                                            <option value="0.01" selected>1.00%</option>
+                                                                            <option value="0.0125">1.25%</option>
+                                                                            <option value="0.015">1.50%</option>
+                                                                            <option value="0.0175">1.75%</option>
+                                                                            <option value="0.02">2.00%</option>
+                                                                            <option value="0.0225">2.25%</option>
+                                                                            <option value="0.025">2.50%</option>
+                                                                            <option value="0.0275">2.75%</option>
+                                                                            <option value="0.03">3.00%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        NIVEL2
+                                                                        <select class="form-control-no-border c linea2"
+                                                                            style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea2"
+                                                                            required>
+                                                                            <option value="0">0.00%</option>
+                                                                            <option value="0.0025">0.25%</option>
+                                                                            <option value="0.005" selected>0.50%
+                                                                            </option>
+                                                                            <option value="0.0075">0.75%</option>
+                                                                            <option value="0.01">1.00%</option>
+                                                                            <option value="0.0125">1.25%</option>
+                                                                            <option value="0.015">1.50%</option>
+                                                                            <option value="0.0175">1.75%</option>
+                                                                            <option value="0.02">2.00%</option>
+                                                                            <option value="0.0225">2.25%</option>
+                                                                            <option value="0.025">2.50%</option>
+                                                                            <option value="0.0275">2.75%</option>
+                                                                            <option value="0.03">3.00%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                    <div class="col-sm-4">
+                                                                        NIVEL3
+                                                                        <select class="form-control-no-border c linea3"
+                                                                            style="padding: 1px; width: 70px;text-align:center; 
+                                                                        background-color: #FFFFCC;" name="linea3"
+                                                                            required>
+                                                                            <option value="0">0.00%</option>
+                                                                            <option value="0.0025" selected>0.25%
+                                                                            </option>
+                                                                            <option value="0.005">0.50%</option>
+                                                                            <option value="0.0075">0.75%</option>
+                                                                            <option value="0.01">1.00%</option>
+                                                                            <option value="0.0125">1.25%</option>
+                                                                            <option value="0.015">1.50%</option>
+                                                                            <option value="0.0175">1.75%</option>
+                                                                            <option value="0.02">2.00%</option>
+                                                                            <option value="0.0225">2.25%</option>
+                                                                            <option value="0.025">2.50%</option>
+                                                                            <option value="0.0275">2.75%</option>
+                                                                            <option value="0.03">3.00%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
                                                             </th>
-                                                            <td>
-                                                                <select class="form-control-no-border edi v socio"
-                                                                    name="socio" style="padding: 1px; width: 100%;"
-                                                                    required>
-                                                                    {{#each proveedores}}
-                                                                    <option value="{{id}}">{{empresa}}</option>
-                                                                    {{/each}}
-                                                                    <option value="0">OTRO</option>
-                                                                </select>
-                                                            </td>
                                                         </tr>
                                                         <tr>
                                                             <th>
@@ -485,12 +573,13 @@
                                                                     COSTE
                                                                     <input
                                                                         class="form-control-no-border text-center edi totalproyect"
-                                                                        type="text" name="valorproyect"
-                                                                        autocomplete="off"
+                                                                        type="text" autocomplete="off"
                                                                         placeholder="Digite total de mtr²"
                                                                         value="$0.000.000.000"
                                                                         style="padding: 1px; width: 115px; background-color: #FFFFCC;"
                                                                         disabled>
+                                                                    <input type="hidden" id="valorproyect"
+                                                                        name="valorproyect">
                                                                 </div>
                                                                 <div class="col-6">
                                                                     INICIAL
