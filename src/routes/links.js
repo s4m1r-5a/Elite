@@ -679,7 +679,7 @@ router.post('/recibo', async (req, res) => {
     var acumulado = l + k;
     const pago = {
         fech: ahora, monto: Math.sign(excd) < 0 ? montorcb : total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
-        concepto: 'PAGO', stado: 3, img: imagenes, descp: Math.sign(excd) < 0 ? concpto + 'A' : concpto, formap, excdnt: excedent
+        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
     }
     bono != 0 ? pago.bono = pin : '';
     concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
