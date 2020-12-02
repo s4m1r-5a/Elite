@@ -1160,7 +1160,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Ahorro').html(Moneda(r.ahorro));
                                 $('#Proyecto').html(Moneda(r.valor));
                                 $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
-                                $('#lt').val(Moneda(r.lt));
+                                $('#lt').val(r.lt);
                                 Description = r.proyect + ' Mz ' + r.mz + ' Lote: ' + r.n;
                             })
                             data.cuotas.filter((r) => {
@@ -4661,13 +4661,21 @@ if (window.location.pathname == `/links/cartera`) {
     $(document).ready(function () {
         var bono = 0;
         $(".select2").each(function () {
+            var texto = $(this).attr('id') === 'clientes' ? "Seleccion de Clientes" : "Selecciona un Producto";
             $(this)
                 .wrap("<div class=\"position-relative\"></div>")
                 .select2({
-                    placeholder: "Selecciona un Producto",
-                    dropdownParent: $(this).parent()
+                    placeholder: texto,
+                    dropdownParent: $(this).parent(),
+                    maximumSelectionLength: 4,
+                    allowClear: true
                 });
         })
+        /*$('#clientes').select2({
+            placeholder: "Seleccion de Clientes",
+            dropdownParent: $(this).parent(),
+
+        });*/
         $('#proyectos').change(function () {
             $.ajax({
                 type: 'POST',
@@ -4824,6 +4832,21 @@ if (window.location.pathname == `/links/cartera`) {
                 CONT()
             }
         })
+        $('#cuadro2').submit(function (e) {
+            var asesors = $('#asesores').val();
+            var clients = $('#clientes').val();
+            if (asesors == 0 || clients == 0) {
+                e.preventDefault();
+                SMSj('error', 'Debe seleccionar un CLIENTE o ASESOR');
+                return false;
+            }
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+            $('#cuadro2').find('input, select').prop('disabled', false);
+        })
     })
     var proyectos = $('#proyectos');
     var asesores = $('#asesores');
@@ -4834,29 +4857,30 @@ if (window.location.pathname == `/links/cartera`) {
     $.ajax({
         type: 'POST',
         url: '/links/prodlotes'
-    }).then(function (data) {
-        var proyecto = null;
-        var parent = null;
-        var option = null;
-        data.productos.map((x, v) => {
-            if (x.proyect !== proyecto) {
-                parent = document.createElement("optgroup");
-                parent.setAttribute("label", x.proyect);
-                proyectos.append(parent)
-                proyecto = x.proyect;
-            }
-            option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, false, false);
-            parent.append(option)
+    })
+        .then(function (data) {
+            var proyecto = null;
+            var parent = null;
+            var option = null;
+            data.productos.map((x, v) => {
+                if (x.proyect !== proyecto) {
+                    parent = document.createElement("optgroup");
+                    parent.setAttribute("label", x.proyect);
+                    proyectos.append(parent)
+                    proyecto = x.proyect;
+                }
+                option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, false, false);
+                parent.append(option)
+            });
+            asesores.append(new Option(`Selecciona un Asesor`, 0, true, true))
+            data.asesores.map((x, v) => {
+                asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, false, false))
+            });
+            //clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
+            data.clientes.map((x, v) => {
+                clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
+            });
         });
-        asesores.append(new Option(`Selecciona un Asesor`, false, true, true))
-        data.asesores.map((x, v) => {
-            asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, false, false))
-        });
-        clientes.append(new Option(`Selecciona un Cliente`, false, true, true))
-        data.clientes.map((x, v) => {
-            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
-        });
-    });
     var cartera = $('#cartera').DataTable({
         dom: 'Bfrtip',
         buttons: [
@@ -5242,8 +5266,9 @@ if (window.location.pathname == `/links/cartera`) {
         var fnc = $('#fnc').val().replace(/\./g, '');
         var cuotai = parseFloat(ini) / $('#inicialcuotas').val();
         var cuotaf = parseFloat(fnc) / $('#financiacion').val();
+        var montorecibos = parseFloat($('#montorecibos').val()) || 0;
         $('#crearcartera .tabl tr').each((e, i) => {
-            var tpo = $(i).find(`.tipo`).val()
+            var tpo = $(i).find(`.tipo`).val();
             if (tpo === 'INICIAL') {
                 $(i).find(`.n`).val(e - 2);
                 $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
@@ -5252,6 +5277,22 @@ if (window.location.pathname == `/links/cartera`) {
                 var co = parseFloat($('#inicialcuotas').val()) + 3;
                 $(i).find(`.n`).val(e - co)
                 $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+            }
+            var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
+            if (montorecibos > 0 && tpo !== undefined) {
+                if (montorecibos >= cuota) {
+                    $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
+                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    montorecibos = montorecibos - cuota;
+
+                } else if (montorecibos < cuota) {
+                    $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
+                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    montorecibos = 0;
+                }
+            } else {
+                $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
+                $(i).find(`.std option[value='3']`).attr("selected", true);
             }
         })
         realcuotai = Math.round(cuotai);
@@ -5286,7 +5327,8 @@ if (window.location.pathname == `/links/cartera`) {
                 `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
                 `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
                 `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-                `<select size="1" class="text-center std" name="std" required>
+                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
+                `<select size="1" class="text-center std" name="std" disabled>
                 <option value="3" selected="selected">Pendiente</option>
                 <option value="13">Pagada</option>
                 </select>`,
@@ -5305,7 +5347,8 @@ if (window.location.pathname == `/links/cartera`) {
             `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
             `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
             `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-            `<select size="1" class="text-center std" name="std" required>
+            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
+            `<select size="1" class="text-center std" name="std" disabled>
             <option value="3" selected="selected">Pendiente</option>
             <option value="13">Pagada</option>
             </select>`,
@@ -5349,7 +5392,6 @@ if (window.location.pathname == `/links/cartera`) {
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
                         `<div class="image" style="
                             width: ${marg}%;
                             min-width: 25%;
@@ -5391,6 +5433,11 @@ if (window.location.pathname == `/links/cartera`) {
                         });
                         $('.montorecibos').html(Moneda(avl))
                         $('#montorecibos').val(avl);
+                        if ($('#Separar').val()) {
+                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                        } else {
+                            CONT()
+                        }
                     })
                     $('.recis').on('change', function () {
                         var avl = '';
@@ -5438,6 +5485,7 @@ if (window.location.pathname == `/links/cartera`) {
         }
 
     }
+
 }
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/productos`) {

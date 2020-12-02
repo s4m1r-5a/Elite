@@ -834,7 +834,90 @@ router.post('/prodlotes', isLoggedIn, async (req, res) => {
 
 });
 router.post('/crearcartera', isLoggedIn, async (req, res) => {
-    console.log(req.body)
+    const { idlote, idbono, proyecto, asesor, cliente, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100,
+        ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
+        std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo } = req.body;
+    var d = {
+        idlote: '274',
+        idbono: '183',
+        proyecto: '274',
+        asesor: '37066000630727405609',
+        cliente: '2394',
+        mtr2: '404',
+        vmtr2: '170.000',
+        inicial: '13.736.000',
+        total: ['68.680.000', ''],
+        cupon: 'KLUA3',
+        xcntag: '20',
+        cuponx100: '5%',
+        ahorro: '3.434.000',
+        desinicial: '13.049.200',
+        destotal: '65.246.000',
+        inicialcuotas: '3',
+        financiacion: '10',
+        tini: '13.049.200',
+        tfnc: '52.196.800',
+        fecha: ['2020-12-02', '2021-01-02', '2021-02-02', '2021-03-02', '2021-04-02', '2021-05-02', '2021-06-02',
+            '2021-07-02', '2021-08-02', '2021-09-02', '2021-10-02', '2021-11-02', '2021-12-02', '2022-01-02'],
+        n: ['1', '1', '2', '3', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
+        tipo: ['SEPARACION', 'INICIAL', 'INICIAL', 'INICIAL', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION',
+            'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION'],
+        cuota: ['1.000.000', '4.016.400', '4.016.400', '4.016.400', '5.219.680', '5.219.680', '5.219.680',
+            '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680'],
+        rcuota: ['500.000', '4.016.400', '4.016.400', '4.016.400', '5.219.680', '5.219.680', '5.219.680',
+            '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680'],
+        std: ['3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3'],
+        concpto: '',
+        ahora: '',
+        montorcb: '500000',
+        recibos: '~5464~',
+        formap: 'CTA-CTE-50900011438',
+        nrecibo: '5464'
+    }
+    console.log(req.body, req.files)
+    /*const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
+        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
+        estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
+    //console.log(req.body)
+    const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
+    if (!fp.length) {
+        req.flash('error', 'Separación no realizada a existe una orden con este lote');
+        res.redirect(`/links/orden?id=${lote}&h=${ahora}`);
+    } else {
+        const separ = {
+            lote,
+            cliente: client[0],
+            cliente2: client[1] ? client[1] : null,
+            cliente3: client[2] ? client[2] : null,
+            cliente4: client[3] ? client[3] : null,
+            asesor: req.user.id,
+            numerocuotaspryecto,
+            extraordinariameses: extraordinariameses ? extraordinariameses : 0,
+            cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
+            cupon: cupon ? cupon : 1,
+            inicialdiferida: inicialdiferida || null,
+            ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
+            separar: separacion.replace(/\./g, ''),
+            extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
+            iniciar, cuot
+        };
+        //console.log(separ)
+        const h = await pool.query('INSERT INTO preventa SET ? ', separ);
+        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
+        cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
+
+
+        var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
+        await ncuota.map((t, i) => {
+            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
+        });
+        await pool.query(cuotas.slice(0, -1));
+
+        req.flash('success', 'Separación realizada exitosamente');
+        res.redirect('/links/cartera');
+    }*/
+    req.flash('success', 'Creacion de cartera exitosa');
+    res.redirect('/links/cartera');
 })
 //////////////* CUPONES *//////////////////////////////////
 router.get('/saluda', isLoggedIn, async (req, res) => {
