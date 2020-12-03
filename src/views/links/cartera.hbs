@@ -37,7 +37,7 @@
                         </div>
                         <form id="cuadro2" enctype="multipart/form-data" action="/links/crearcartera" method="POST"
                             style="display: none;">
-                            <input type="hidden" id="idlote" name="idlote">
+                            <input type="hidden" id="cuot" name="cuot">
                             <input type="hidden" id="idbono" name="idbono">
                             <table id="crearcartera" class="table table-striped table-sm table-hover responsive">
                                 <thead>
@@ -51,7 +51,7 @@
                                                                 <th colspan="2">
                                                                     <select id="proyectos"
                                                                         class="form-control-no-border select2"
-                                                                        name="proyecto" required>
+                                                                        name="lt" required>
                                                                     </select>
                                                                 </th>
                                                             </tr>
@@ -67,7 +67,7 @@
                                                                 <th colspan="2">
                                                                     <select id="clientes"
                                                                         class="form-control-no-border select2"
-                                                                        name="cliente" multiple required>
+                                                                        name="clientes" multiple required>
                                                                     </select>
                                                                 </th>
                                                             </tr>
@@ -346,7 +346,6 @@
                                                         <!--<form enctype="multipart/form-data" id="recbo"
                                                         action="/links/recibo" method="POST">-->
                                                         <input type="hidden" id="concpto" name="concpto">
-                                                        <input type="hidden" id="lt" name="lt">
                                                         <input id="ahora" type="hidden" name="ahora">
                                                         <tbody>
                                                             <tr>
