@@ -849,8 +849,9 @@ router.post('/prodlotes', isLoggedIn, async (req, res) => {
 router.post('/crearcartera', isLoggedIn, async (req, res) => {
     const { idbono, asesor, clientes, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100, cuot,
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
-        std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo } = req.body;
+        std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa } = req.body;
     //console.log(req.body, req.files)
+
     var separ = {
         lote: lt, asesor: asesor, iniciar: xcntag, obsevacion: 'CARTERA', cuot,
         numerocuotaspryecto: parseFloat(inicialcuotas) + parseFloat(financiacion),
@@ -858,6 +859,11 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
         inicialdiferida: inicialcuotas, ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
         separar: cuota[0].replace(/\./g, ''), extran: 0, vrmt2: vmtr2.replace(/\./g, '')
     };
+    if (promesa) {
+        separ.promesa = promesa
+        separ.autoriza = req.user.fullname
+        separ.status = promesa
+    }
     if (Array.isArray(clientes)) {
         clientes.map((e, i) => {
             i === 0 ? separ.cliente = e
@@ -2340,7 +2346,7 @@ async function Estados(S) {
             Desendentes(Pagos[0].asesor, 10)
             console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
             return { std: 13, estado: 'VENDIDO', pendients }
-        } else if (pagos >= cuotas.INICIAL && pagos < cuotas.FINANCIACION) {
+        } else if (pagos >= cuotas.INICIAL && pagos < cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
             console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
@@ -2348,12 +2354,12 @@ async function Estados(S) {
             console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
-            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
+            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
     } else {
-        console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients });
+        console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'aqui');
         return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }

@@ -5153,6 +5153,7 @@ if (window.location.pathname == `/links/cartera`) {
         var fila = $(this).parents('tr');
         var tipo = fila.find(`.tipo`).val();
         var total = 0, valor = 0, num = 0;
+        var montorecibos = parseFloat($('#montorecibos').val()) || 0;
 
         if (tipo === 'INICIAL') {
             $('#crearcartera .tabl tr').filter((c, i) => {
@@ -5207,6 +5208,25 @@ if (window.location.pathname == `/links/cartera`) {
             }
             realcuotaf = cuota;
         }
+        $('#crearcartera .tabl tr').each((e, i) => {
+            var tpo = $(i).find(`.tipo`).val();
+            var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
+            if (montorecibos > 0 && tpo !== undefined) {
+                if (montorecibos >= cuota) {
+                    $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
+                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    montorecibos = montorecibos - cuota;
+
+                } else if (montorecibos < cuota) {
+                    $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
+                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    montorecibos = 0;
+                }
+            } else {
+                $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
+                $(i).find(`.std option[value='3']`).attr("selected", true);
+            }
+        })
         //$(this).val(Moneda(estacuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
     });
     crearcartera.on('change', '#Separar', function () {
@@ -5233,7 +5253,7 @@ if (window.location.pathname == `/links/cartera`) {
         })
     })
 
-    var CONT = (separa) => {
+    var CONT = (separa, g) => {
         var p = separa > 0 ? parseFloat(separa) : 0
         var ini = parseFloat($('#ini').val().replace(/\./g, '')) - p;
         var fnc = $('#fnc').val().replace(/\./g, '');
@@ -5243,14 +5263,14 @@ if (window.location.pathname == `/links/cartera`) {
         $('#cuot').val(cuotaf);
         $('#crearcartera .tabl tr').each((e, i) => {
             var tpo = $(i).find(`.tipo`).val();
-            if (tpo === 'INICIAL') {
+            if (tpo === 'INICIAL' && !g) {
                 $(i).find(`.n`).val(e - 2);
-                $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))
             }
-            if (tpo === 'FINANCIACION') {
+            if (tpo === 'FINANCIACION' && !g) {
                 var co = parseFloat($('#inicialcuotas').val()) + 3;
                 $(i).find(`.n`).val(e - co)
-                $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))
             }
             var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
             if (montorecibos > 0 && tpo !== undefined) {
@@ -5408,9 +5428,9 @@ if (window.location.pathname == `/links/cartera`) {
                         $('.montorecibos').html(Moneda(avl))
                         $('#montorecibos').val(avl);
                         if ($('#Separar').val()) {
-                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')), true)
                         } else {
-                            CONT()
+                            CONT(0, true)
                         }
                     })
                     $('.recis').on('change', function () {
