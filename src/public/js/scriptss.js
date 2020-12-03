@@ -1635,44 +1635,19 @@ if (window.location.pathname == `/links/reportes`) {
     })
     var tableOrden = $('#datatable2').DataTable({
         dom: 'Bfrtip',
-        buttons: [/*{
-            extend: 'collection',
-            text: 'Ctrl',
-            orientation: 'landscape',
-            buttons: [{
-                text: 'Copiar',
-                extend: 'copy'
-            },
-            {
-                extend: 'pdf',
-                orientation: 'landscape',
-                pageSize: 'LEGAL'
-            },
-            {
-                text: 'Ach plano ',
-                extend: 'csv',
-                orientation: 'landscape'
-            },
-            {
-                text: 'Excel',
-                extend: 'excel',
-                orientation: 'landscape'
-            },
-            {
-                text: 'Imprimir',
-                extend: 'print',
-                orientation: 'landscape'
-            }
-            ]
-        },*/
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [
             {
                 extend: 'pageLength',
                 text: 'Ver',
                 orientation: 'landscape'
-            }, //<i class="align-middle feather-md" data-feather="calendar"></i>
+            },
             {
                 text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-            placeholder="MZ">`,
+                        placeholder="MZ">`,
                 attr: {
                     title: 'Busqueda por MZ',
                     id: ''
@@ -1681,7 +1656,7 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-            placeholder="LT">`,
+                        placeholder="LT">`,
                 attr: {
                     title: 'Busqueda por LT',
                     id: ''
@@ -4658,6 +4633,7 @@ if (window.location.pathname == `/links/cartera`) {
         }
     );
     var ya = moment(new Date()).format('YYYY-MM-DD');
+    var R = true;
     $(document).ready(function () {
         var bono = 0;
         $(".select2").each(function () {
@@ -4670,12 +4646,7 @@ if (window.location.pathname == `/links/cartera`) {
                     maximumSelectionLength: 4,
                     allowClear: true
                 });
-        })
-        /*$('#clientes').select2({
-            placeholder: "Seleccion de Clientes",
-            dropdownParent: $(this).parent(),
-
-        });*/
+        });
         $('#proyectos').change(function () {
             $.ajax({
                 type: 'POST',
@@ -4688,7 +4659,6 @@ if (window.location.pathname == `/links/cartera`) {
                     if (data) {
                         var porg = data.inicial * 100 / data.valor;
                         $('#mtr2').val(data.mtr2);
-                        $('#idlote').val(data.id);
                         $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         $('#inicial').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         $('#total').val(Moneda(Math.round(data.valor)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
@@ -4840,12 +4810,15 @@ if (window.location.pathname == `/links/cartera`) {
                 SMSj('error', 'Debe seleccionar un CLIENTE o ASESOR');
                 return false;
             }
+            if (!R) { e.preventDefault(); return false; }
             $('#ModalEventos').modal({
                 backdrop: 'static',
                 keyboard: true,
                 toggle: true
             });
+            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
             $('#cuadro2').find('input, select').prop('disabled', false);
+
         })
     })
     var proyectos = $('#proyectos');
@@ -5267,6 +5240,7 @@ if (window.location.pathname == `/links/cartera`) {
         var cuotai = parseFloat(ini) / $('#inicialcuotas').val();
         var cuotaf = parseFloat(fnc) / $('#financiacion').val();
         var montorecibos = parseFloat($('#montorecibos').val()) || 0;
+        $('#cuot').val(cuotaf);
         $('#crearcartera .tabl tr').each((e, i) => {
             var tpo = $(i).find(`.tipo`).val();
             if (tpo === 'INICIAL') {
@@ -5440,12 +5414,30 @@ if (window.location.pathname == `/links/cartera`) {
                         }
                     })
                     $('.recis').on('change', function () {
-                        var avl = '';
-                        $('.recis').map(function () {
-                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
-                            avl += s;
+                        var input = $(this);
+                        $.ajax({
+                            url: '/links/rcb',
+                            data: { rcb: '~' + $(this).val().replace(/^0+/, '') + '~' },
+                            type: 'POST',
+                            beforeSend: function (xhr) {
+                                R = false;
+                            },
+                            success: function (data) {
+                                if (data) {
+                                    var avl = '';
+                                    $('.recis').map(function () {
+                                        s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+                                        avl += s;
+                                    });
+                                    $('#nrbc').val(avl.slice(0, -1));
+                                    R = true;
+                                } else {
+                                    input.val('');
+                                    SMSj('error', 'Recibo rechazado se encuentra duplicado');
+                                }
+                            }
                         });
-                        $('#nrbc').val(avl.slice(0, -1));
+
                     })
                     var zom = 200
                     $(".image").on({

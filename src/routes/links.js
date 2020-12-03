@@ -44,18 +44,24 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 });*/
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
-    console.log(desarrollo)
     //await pool.query(`UPDATE productosd SET mtr = ROUND(valor / mtr2) WHERE mtr IS NULL`);
+    /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    console.log('liberados exitosamente', Dia);
+    await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
+    SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+
+    await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
+    WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
     res.send(true);
 });
 cron.schedule("59 23 * * *", async () => {
-    /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
-    SET l.estado = 9, l.tramitando = NULL WHERE MONTH(p.fecha) = MONTH(NOW()) 
-    AND DAY(p.fecha) < DAY(NOW()) AND p.tipobsevacion IS NULL AND l.estado = 1`);
+    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
+    SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
+    AND p.tipobsevacion IS NULL AND l.estado = 1`);
 
-    await pool.query(`DELETE FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
-    WHERE MONTH(p.fecha) = MONTH(NOW()) AND DAY(p.fecha) < DAY(NOW()) 
-    AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
+    await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
+    WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);
 
     /*await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
     WHERE p.cupon IS NULL`)*/
@@ -627,8 +633,8 @@ router.post('/recibo', async (req, res) => {
     }
     var excd = montorcb - total;
     var sum = 0, excedent = Math.sign(excd) >= 0 ? excd : 0;
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE stado != 6 AND (${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''})`);
-    console.log(req.body, recibe, excd, excedent, rcb)
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''})`); //stado != 6 AND 
+    //console.log(req.body, recibe, excd, excedent, rcb)
     if (recibe.length > 0) {
         recibe.filter((a) => {
             return a.excdnt > 0;
@@ -760,8 +766,15 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 
 });
-router.post('/pago', async (req, res) => {
-    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb } = req.body;
+router.post('/rcb', async (req, res) => {
+    const { rcb } = req.body; console.log(req.body)
+    const recibo = await pool.query(`SELECT * FROM solicitudes WHERE recibo LIKE '%${rcb}%'`);
+    if (recibo.length > 0) {
+        res.send(false);
+    } else {
+        res.send(true);
+    }
+    /*const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb } = req.body;
     var rcb = '';
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
@@ -822,7 +835,7 @@ router.post('/pago', async (req, res) => {
     await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
     await pool.query('INSERT INTO solicitudes SET ? ', pago);
     req.flash('success', 'Solicitud de pago enviada correctamente');
-    res.redirect('/links/pagos');
+    res.redirect('/links/pagos');*/
     //uploads/
 });
 router.post('/prodlotes', isLoggedIn, async (req, res) => {
@@ -834,89 +847,52 @@ router.post('/prodlotes', isLoggedIn, async (req, res) => {
 
 });
 router.post('/crearcartera', isLoggedIn, async (req, res) => {
-    const { idlote, idbono, proyecto, asesor, cliente, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100,
+    const { idbono, asesor, clientes, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100, cuot,
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
         std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo } = req.body;
-    var d = {
-        idlote: '274',
-        idbono: '183',
-        proyecto: '274',
-        asesor: '37066000630727405609',
-        cliente: '2394',
-        mtr2: '404',
-        vmtr2: '170.000',
-        inicial: '13.736.000',
-        total: ['68.680.000', ''],
-        cupon: 'KLUA3',
-        xcntag: '20',
-        cuponx100: '5%',
-        ahorro: '3.434.000',
-        desinicial: '13.049.200',
-        destotal: '65.246.000',
-        inicialcuotas: '3',
-        financiacion: '10',
-        tini: '13.049.200',
-        tfnc: '52.196.800',
-        fecha: ['2020-12-02', '2021-01-02', '2021-02-02', '2021-03-02', '2021-04-02', '2021-05-02', '2021-06-02',
-            '2021-07-02', '2021-08-02', '2021-09-02', '2021-10-02', '2021-11-02', '2021-12-02', '2022-01-02'],
-        n: ['1', '1', '2', '3', '1', '2', '3', '4', '5', '6', '7', '8', '9', '10'],
-        tipo: ['SEPARACION', 'INICIAL', 'INICIAL', 'INICIAL', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION',
-            'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION', 'FINANCIACION'],
-        cuota: ['1.000.000', '4.016.400', '4.016.400', '4.016.400', '5.219.680', '5.219.680', '5.219.680',
-            '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680'],
-        rcuota: ['500.000', '4.016.400', '4.016.400', '4.016.400', '5.219.680', '5.219.680', '5.219.680',
-            '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680', '5.219.680'],
-        std: ['3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3', '3'],
-        concpto: '',
-        ahora: '',
-        montorcb: '500000',
-        recibos: '~5464~',
-        formap: 'CTA-CTE-50900011438',
-        nrecibo: '5464'
-    }
-    console.log(req.body, req.files)
-    /*const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
-        cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
-        estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
-    //console.log(req.body)
-    const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
-    if (!fp.length) {
-        req.flash('error', 'Separación no realizada a existe una orden con este lote');
-        res.redirect(`/links/orden?id=${lote}&h=${ahora}`);
+    //console.log(req.body, req.files)
+    var separ = {
+        lote: lt, asesor: asesor, iniciar: xcntag, obsevacion: 'CARTERA', cuot,
+        numerocuotaspryecto: parseFloat(inicialcuotas) + parseFloat(financiacion),
+        extraordinariameses: 0, cuotaextraordinaria: 0, cupon: idbono ? idbono : 1,
+        inicialdiferida: inicialcuotas, ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
+        separar: cuota[0].replace(/\./g, ''), extran: 0, vrmt2: vmtr2.replace(/\./g, '')
+    };
+    if (Array.isArray(clientes)) {
+        clientes.map((e, i) => {
+            i === 0 ? separ.cliente = e
+                : i === 1 ? separ.cliente2 = e
+                    : i === 2 ? separ.cliente3 = e
+                        : i === 3 ? separ.cliente4 = e
+                            : '';
+        })
     } else {
-        const separ = {
-            lote,
-            cliente: client[0],
-            cliente2: client[1] ? client[1] : null,
-            cliente3: client[2] ? client[2] : null,
-            cliente4: client[3] ? client[3] : null,
-            asesor: req.user.id,
-            numerocuotaspryecto,
-            extraordinariameses: extraordinariameses ? extraordinariameses : 0,
-            cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
-            cupon: cupon ? cupon : 1,
-            inicialdiferida: inicialdiferida || null,
-            ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
-            separar: separacion.replace(/\./g, ''),
-            extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
-            iniciar, cuot
-        };
-        //console.log(separ)
-        const h = await pool.query('INSERT INTO preventa SET ? ', separ);
-        await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
-        cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
+        separ.cliente = clientes
+    }
+    //console.log(separ)
+    const h = await pool.query('INSERT INTO preventa SET ? ', separ);
+    idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
+    await n.map((t, i) => {
+        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}),`;
+    });
+    await pool.query(cuotas.slice(0, -1));
 
+    var imagenes = ''
+    req.files.map((e) => {
+        imagenes += `/uploads/${e.filename},`
+    })
 
-        var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
-        await ncuota.map((t, i) => {
-            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
-        });
-        await pool.query(cuotas.slice(0, -1));
+    const pago = {
+        fech: ahora, monto: montorcb, recibo: recibos, facturasvenc: 0, lt, acumulado: 0,
+        concepto: 'ABONO', stado: 4, img: imagenes, descp: 'ABONO', formap, excdnt: 0
+    }
 
-        req.flash('success', 'Separación realizada exitosamente');
-        res.redirect('/links/cartera');
-    }*/
-    req.flash('success', 'Creacion de cartera exitosa');
+    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    const S = await Estados(h.insertId);
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: S.std, tramitando: ahora }, lt]);
+
+    req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
     res.redirect('/links/cartera');
 })
 //////////////* CUPONES *//////////////////////////////////
@@ -2322,11 +2298,11 @@ async function Rango(id) {
     };
     return 4;*/
 };
-async function Estados(S, L, P) {
+async function Estados(S) {
     // S = id de separacion
     // L = id de lote
     // P = id de la solicitud de pago
-    var F
+    /*var F
     if (P) {
         const g = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote 
         WHERE pr.tipobsevacion IS NULL AND s.ids = ${P} LIMIT 1`);
@@ -2335,7 +2311,9 @@ async function Estados(S, L, P) {
         F = { r: L, m: `AND pd.id = ${L}` }
     } else {
         F = { r: S, m: `AND pr.id = ${S}` }
-    }
+    }*/
+
+    var F = { r: S, m: `AND pr.id = ${S}` };
 
     const Pagos = await pool.query(
         `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, SUM(s.monto) AS MONTO,
@@ -2997,8 +2975,9 @@ async function Desendentes(pin, stados) {
                 var monto = val * i;
                 var retefuente = monto * 0.10;
                 var reteica = monto * 8 / 1000;
+                var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                 var f = {
-                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 15, descp: 'VENTA DIRECTA',
+                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: std, descp: 'VENTA DIRECTA',
                     asesor: j.acreedor, porciento: j.sucursal, total: val, lt: a.lote, retefuente,
                     reteica, pagar: monto - (retefuente + reteica)
                 }
@@ -3025,9 +3004,10 @@ async function Desendentes(pin, stados) {
                 var reteica = monto * 8 / 1000
                 personal += val
                 if (a.directa === null) {
+                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                     bonop += val
                     var f = {
-                        fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: 15, descp: 'VENTA DIRECTA',
+                        fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: std, descp: 'VENTA DIRECTA',
                         asesor: j.acreedor, porciento: a.comision, total: val, lt: a.lote, retefuente,
                         reteica, pagar: monto - (retefuente + reteica)
                     }
@@ -3069,9 +3049,10 @@ async function Desendentes(pin, stados) {
                     var reteica = monto * 8 / 1000
                     venta += val
                     if (a.uno === null) {
+                        var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                         bono += val;
                         var f = {
-                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 15, descp: 'PRIMERA LINEA',
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'PRIMERA LINEA',
                             asesor: j.acreedor, porciento: a.linea1, total: val, lt: a.lote, retefuente,
                             reteica, pagar: monto - (retefuente + reteica)
                         }
@@ -3110,9 +3091,10 @@ async function Desendentes(pin, stados) {
                     var reteica = monto * 8 / 1000
                     venta += val
                     if (a.dos === null) {
+                        var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                         bono += val
                         var f = {
-                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 15, descp: 'SEGUNDA LINEA',
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'SEGUNDA LINEA',
                             asesor: j.acreedor, porciento: a.linea2, total: val, lt: a.lote, retefuente,
                             reteica, pagar: monto - (retefuente + reteica)
                         }
@@ -3149,9 +3131,10 @@ async function Desendentes(pin, stados) {
                     var reteica = monto * 8 / 1000
                     venta += val
                     if (a.tres === null) {
+                        var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                         bono += val
                         var f = {
-                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: 15, descp: 'TERCERA LINEA',
+                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'TERCERA LINEA',
                             asesor: j.acreedor, porciento: a.linea3, total: val, lt: a.lote, retefuente,
                             reteica, pagar: monto - (retefuente + reteica)
                         }
