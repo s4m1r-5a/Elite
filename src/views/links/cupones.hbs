@@ -12,65 +12,94 @@
                                     </div>
                                     <hr style="width: 90%;" />
                                 </div>
-                                <input type="hidden" class="ya" value="" name="ahora">
-                                <div class="col-12">
-                                    <table class="table table-sm my-2">
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm">
                                         <tbody>
                                             <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="heart"></i>
-                                                    Responsable
+                                                <th colspan="2">
+                                                    <div class="text-center row">
+                                                        <div class="col-6">
+                                                            TIPO
+                                                            <select class="form-control-no-border"
+                                                                style="padding: 1px;text-align:center;" id="promesa"
+                                                                name="promesa" required>
+                                                                <option value="BONO">BONO</option>
+                                                                <option value="CUPON">CUPON</option>
+                                                            </select>
+                                                        </div>
+                                                        <div class="col-6">
+                                                            PIN
+                                                            <input
+                                                                class="form-control-no-border text-center text-uppercase"
+                                                                type="text" autocomplete="off" name="pin" id="pin"
+                                                                placeholder="Cupon"
+                                                                style="padding: 1px; width: 125px; background-color: #FFFFCC;">
+                                                        </div>
+                                                    </div>
                                                 </th>
-                                                <td>
-                                                    <select class="form-control-no-border edi estadocivil u"
-                                                        name="estadocivil" style="padding: 1px; width: 100%;" required>
-                                                        <option value="">Situación sentimental?</option>
-                                                    </select>
-                                                </td>
                                             </tr>
                                             <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="mail"></i>
-                                                    Monto
+                                                <th colspan="2">
+                                                    <div class="text-center row">
+                                                        <div class="col-4">
+                                                            $ O %
+                                                            <input
+                                                                class="form-control-no-border text-center text-uppercase"
+                                                                type="text" autocomplete="off" name="desmonto"
+                                                                id="desmonto" placeholder="$ - %"
+                                                                style="padding: 1px; width: 125px; background-color: #FFFFCC;">
+                                                        </div>
+                                                        <div class="col-8">
+                                                            <select id="client" class="form-control-no-border select2"
+                                                                name="client">
+                                                            </select>
+                                                        </div>
+                                                    </div>
                                                 </th>
-                                                <td>
-                                                    <input class="form-control-no-border edi text-lowercase email u"
-                                                        type="email" placeholder="Correo electrónico" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="email" required>
-                                                </td>
                                             </tr>
                                             <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="phone-call"></i>
-                                                    Motivo
+                                                <th colspan="2">
+                                                    <div class="text-center row">
+                                                        <div class="col-sm-6">
+                                                            SELECIONA LAS PARTES A QUIEN DESEAS NOTIFICAR
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="cliente">
+                                                                <label class="custom-control-label"
+                                                                    for="cliente">CLIENTE</label>
+                                                            </div>
+                                                        </div>
+                                                        <div class="col-sm-3">
+                                                            <div class="custom-control custom-switch">
+                                                                <input type="checkbox" class="custom-control-input"
+                                                                    id="asesor">
+                                                                <label class="custom-control-label"
+                                                                    for="asesor">ASESOR</label>
+                                                            </div>
+                                                        </div>
+                                                    </div>
                                                 </th>
-                                                <td>
-                                                    <input class="form-control-no-border edi movil u text-center"
-                                                        type="text" placeholder="Numero celular"
-                                                        style="padding: 1px; width: 100%;" autocomplete="off"
-                                                        name="movil" id="movil" required>
-                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="col-12 col-lg-6">
+                                    <table class="table table-sm">
+                                        <tbody>
+                                            <tr>
+                                                <th colspan="2">
+                                                    <textarea id="motivo" name="motivo"
+                                                        placeholder="DEJA EN CLARO EL MOTIVO DE POR QUE CREAS ESTE BONO O CUPON"
+                                                        style="width: 100%;"></textarea>
+                                                </th>
                                             </tr>
                                             <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Dirección
+                                                <th colspan="2">
+                                                    <button class="btn-outline-dark float-right btn-sm"
+                                                        type="submit">CREAR</button>
                                                 </th>
-                                                <td>
-                                                    <input class="form-control-no-border edi direccion u" type="text"
-                                                        placeholder="Dirección de residencia" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="direccion" required>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="user-plus"></i>
-                                                </th>
-                                                <td>
-                                                    <button class="btn btn-outline-dark btn-sm float-right mr-3 guard"
-                                                        type="submit"><i class="fas fa-fw fa-user-plus"></i>
-                                                        Guardar</button>
-                                                </td>
                                             </tr>
                                         </tbody>
                                     </table>
