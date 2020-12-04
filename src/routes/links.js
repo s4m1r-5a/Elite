@@ -906,7 +906,15 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
 
     await pool.query('INSERT INTO solicitudes SET ? ', pago);
     const S = await Estados(h.insertId);
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: S.std, tramitando: ahora }, lt]);
+    await pool.query('UPDATE productosd set ? WHERE id = ?',
+        [
+            {
+                estado: S.std, mtr: vmtr2.replace(/\./g, ''),
+                inicial: inicial.replace(/\./g, ''),
+                valor: total.replace(/\./g, ''), tramitando: ahora
+            }, lt
+        ]
+    );
 
     req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
     res.redirect('/links/cartera');
