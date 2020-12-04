@@ -537,6 +537,16 @@ router.post('/adjuntar', async (req, res) => {
     await pool.query('UPDATE clientes SET ? WHERE idc = ?', [{ imags: imagenes }, req.body.idc]);
     res.send(true);
 })
+router.post('/elicliente', async (req, res) => {
+    const { id } = req.body;
+    try {
+        await pool.query(`DELETE FROM clientes WHERE idc = ?`, id);
+        res.send(true);
+    }
+    catch (e) {
+        res.send(false);
+    }
+})
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
     var options = {
@@ -958,14 +968,29 @@ router.post('/cupones', isLoggedIn, async (req, res) => {
 });
 router.post('/cupones/:d', isLoggedIn, async (req, res) => {
     const { d } = req.params;
-    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
-    if (d === 'Aprobar') {
-        await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
-        EnviarWTSAP(movil,
-            `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
-            `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
-        );
-        res.send(true);
+    if (d === 'BONO') {
+        const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+        const bono = {
+            pin, descuento: 0, estado: 9, cliente: idc,
+            tip: qhacer, monto: acumulado, motivo, concept: causa
+        }
+        const a = await pool.query('INSERT INTO cupones SET ? ', bono);
+
+    } else if (d === 'CUPON') {
+
+    } else if (d === 'clientes') {
+        const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+        res.send({ clientes });
+    } else {
+        const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+        if (d === 'Aprobar') {
+            await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
+            EnviarWTSAP(movil,
+                `_*${nombre.split(" ")[0]}* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
+                `${nombre.split(" ")[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
+            );
+            res.send(true);
+        }
     }
 });
 router.get('/bono/:id', async (req, res) => {

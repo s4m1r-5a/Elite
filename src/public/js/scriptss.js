@@ -9588,6 +9588,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>
+                                            <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                         </div>
                                     </div>` : `<a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>`
                 }
@@ -9630,10 +9631,48 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             });
         });
     }
+    function Eliminar(id) {
+        if (confirm("Seguro deseas eliminar esta separacion?")) {
+            $.ajax({
+                url: '/links/elicliente',
+                data: { id },
+                type: 'POST',
+                success: function (data) {
+                    if (data) {
+                        clientes.ajax.reload(null, false)
+                        SMSj('success', 'Documento agregado exitosamente')
+                    } else {
+                        SMSj('error', 'No es posible eliminar este cliente ya que cuenta conuna separacion')
+                    }
+                }
+            });
+        }
+    }
 };
 /////////////////////////////* CUPONES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/cupones`) {
 
+    var clientes = $('#client');
+    $.ajax({
+        type: 'POST',
+        url: '/links/cupones/clientes'
+    })
+        .then(function (data) {
+            clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
+            data.clientes.map((x, v) => {
+                clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
+            });
+        });
+    $(document).ready(function () {
+        $(".select2").each(function () {
+            $(this)
+                .wrap("<div class=\"position-relative\"></div>")
+                .select2({
+                    placeholder: 'Selecciona un Cliente',
+                    dropdownParent: $(this).parent()
+                });
+        });
+    })
     var cupones = $('#tablacupones').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [
