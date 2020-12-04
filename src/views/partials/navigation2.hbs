@@ -213,14 +213,17 @@
 							reciviras un WhatsApp con el cupon</p>
 					</div>
 					<div class="col-sm-3 text-center">
+						{{#if user.admin}}
+						<input type="text" id="porcntgd" class="form-control form-control-lg" data-mask="00"
+							style="text-align:center" />
+						{{else}}
 						<select id="porcntgd" style="text-align-last:center;">
 							<option value="3">3%</option>
 							<option value="5" selected>5%</option>
 							<option value="7">7%</option>
 							<option value="10">10%</option>
-							<option value="15">15%</option>
-							<option value="20">20%</option>
 						</select>
+						{{/if}}
 					</div>
 				</div>
 				<button type="button" id="pedircupon" class="btn btn-sm btn-outline-dark float-right"
