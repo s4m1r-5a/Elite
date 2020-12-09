@@ -1394,17 +1394,29 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
         }
-        console.log(`UPDATE solicitudes s LEFT JOIN cuotas c ON s.pago = c.id LEFT JOIN preventa p ON s.lt = p.lote LEFT JOIN cupones cp ON p.cupon = cp.id LEFT JOIN productosd l ON s.lt = l.id LEFT JOIN productos d ON l.producto  = d.id SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ${lote}`)
-        await pool.query(`UPDATE solicitudes s 
+        //console.log(`UPDATE solicitudes s LEFT JOIN cuotas c ON s.pago = c.id LEFT JOIN preventa p ON s.lt = p.lote LEFT JOIN cupones cp ON p.cupon = cp.id LEFT JOIN productosd l ON s.lt = l.id LEFT JOIN productos d ON l.producto  = d.id SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ${lote}`)
+        /*await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id
             LEFT JOIN preventa p ON s.lt = p.lote  
             LEFT JOIN cupones cp ON p.cupon = cp.id
             LEFT JOIN productosd l ON s.lt = l.id 
             LEFT JOIN productos d ON l.producto  = d.id 
-            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, 
+            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = IF (parametro>0) THEN
+            l.mtr * l.mtr2 END IF , 
             cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
             p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
-        );
+        ); */
+        await pool.query(`UPDATE solicitudes s 
+        LEFT JOIN cuotas c ON s.pago = c.id
+        LEFT JOIN preventa p ON s.lt = p.lote  
+        LEFT JOIN cupones cp ON p.cupon = cp.id
+        LEFT JOIN productosd l ON s.lt = l.id 
+        LEFT JOIN productos d ON l.producto  = d.id 
+        SET s.stado = 6, c.estado = 6, l.estado = 9, 
+        l.valor = if (d.valmtr2 != 0, d.valmtr2 * l.mtr2, l.mtr * l.mtr2),
+        l.inicial = if (d.valmtr2 != 0, (d.valmtr2 * l.mtr2) * d.porcentage / 100, (l.mtr * l.mtr2) * d.porcentage / 100),
+        cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
+        s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}' WHERE s.lt = ?`, lote);
         res.send(true);
     }
     //respuesta = { "data": ventas };
@@ -1487,9 +1499,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 );*/
                 await pool.query(`UPDATE productosd l
                     INNER JOIN productos p ON l.producto  = p.id 
-                    SET l.estado = 9, l.valor = l.mtr * l.mtr2,
-                    l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
-                    l.inicial = (l.mtr * l.mtr2) * p.porcentage / 100 WHERE l.id = ?`, U.lote);
+                    SET l.estado = 9, l.valor = if (p.valmtr2 != 0, p.valmtr2 * l.mtr2, l.mtr * l.mtr2),
+                    l.inicial = if (p.valmtr2 != 0, (p.valmtr2 * l.mtr2) * p.porcentage / 100, (l.mtr * l.mtr2) * p.porcentage / 100),
+                    l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, U.lote);
                 await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
                 res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
 
@@ -1506,10 +1518,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 [{ estado: 9, uno: null, dos: null, tres: null, directa: null }, i[0].lote]
             );*/
             await pool.query(`UPDATE productosd l
-                    INNER JOIN productos p ON l.producto  = p.id 
-                    SET l.estado = 9, l.valor = l.mtr * l.mtr2,
-                    l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, 
-                    l.inicial = (l.mtr * l.mtr2) * p.porcentage / 100 WHERE l.id = ?`, i[0].lote);
+            INNER JOIN productos p ON l.producto  = p.id 
+            SET l.estado = 9, l.valor = if (p.valmtr2 != 0, p.valmtr2 * l.mtr2, l.mtr * l.mtr2),
+            l.inicial = if (p.valmtr2 != 0, (p.valmtr2 * l.mtr2) * p.porcentage / 100, (l.mtr * l.mtr2) * p.porcentage / 100),
+            l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, i[0].lote);
             await pool.query(`DELETE FROM preventa WHERE id = ?`, k);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
