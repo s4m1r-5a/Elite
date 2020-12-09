@@ -7356,7 +7356,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     minDateFilter = "";
     maxDateFilter = "";
     var extr = [], imge = 0;
-    var totalasociados = 0, IDS;
+    var totalasociados = 0;
     var Seleccion = () => {
         extr = [];
         totalasociados = 0;
@@ -8700,17 +8700,19 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             .rows()
             .data()
             .filter(function (value, index) {
-                if (value.ids === data.ids) {
+                if (value.ids === data.ids && data.ids) {
                     acum += value.consignado;
+                    console.log(value)
                 }
                 if (value.id === data.id) {
-                    acu += value.monto;
+                    acu += parseFloat(value.monto);
                 }
                 if (value.ids === IDS) {
                     U = true;
                 }
             });
-        if ((acum - acu) >= monto || U) {
+        console.log('monto ' + monto, 'acum ' + acum, 'acu ' + acu, U, data.id)
+        if ((acum - acu) >= monto || U || !data.ids) {
             $(this).toggleClass('selected');
             var w = Seleccion(); //console.log(w.length);
             if (w.length > imge) {
