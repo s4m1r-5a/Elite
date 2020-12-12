@@ -88,6 +88,7 @@ $(".fechas").daterangepicker({
     opens: "right",
 });
 var admin = $('#usuarioadmin').val()
+var USERADMIN = $('#usuariofullname').val();
 var cli = $('#cli').val()
 if (!cli) {
     $('#AddClientes').modal({
@@ -1776,7 +1777,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return admin == 1 && USERADMIN === 'HABIB SALDARRIAGA' ? `<div class="btn-group btn-group-sm">
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
@@ -6055,7 +6056,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         responsive: true,
         order: [[1, "desc"]],
         columnDefs: [
-            { "visible": admin === '1' ? true : false, "targets": [7, 5, -1] },
+            { "visible": admin === '1' && USERADMIN === 'HABIB SALDARRIAGA' ? true : false, "targets": [7, 5, -1] },
             { responsivePriority: 1, targets: -1 },
             { responsivePriority: 2, targets: 3 },
             { responsivePriority: 3, targets: 7 },
@@ -6087,7 +6088,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "valmtr2", className: 'to',
                 render: function (data, method, row) {
-                    return admin === '1' ? `<div class="input-group">
+                    return admin === '1' && USERADMIN === 'HABIB SALDARRIAGA' ? `<div class="input-group">
                                 <input type="text" class="form-control-no-border text-center edi"
                                     autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
                                 <span class="input-group-append">
@@ -8711,7 +8712,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     U = true;
                 }
             });
-        console.log('monto ' + monto, 'acum ' + acum, 'acu ' + acu, U, data.id)
         if ((acum - acu) >= monto || U || !data.ids) {
             $(this).toggleClass('selected');
             var w = Seleccion(); //console.log(w.length);
