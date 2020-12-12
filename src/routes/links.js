@@ -1610,7 +1610,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
-        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS')
+        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
         AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
 
         respuesta = { "data": solicitudes };
@@ -1672,7 +1672,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         pg.fechas, pg.descuentos, us.id, us.fullname, cl.nombre, p.proyect FROM pagos pg INNER JOIN solicitudes s ON s.cuentadecobro = pg.id
         INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')  
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONO EXTRA')  
         AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
         respuesta = { "data": solicitudes }; //console.log(solicitudes)
         res.send(respuesta);
@@ -3079,6 +3079,17 @@ async function Desendentes(pin, stados) {
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    if (a.bonoextra > 0.0000) {
+                        monto = val * a.bonoextra;
+                        retefuente = monto * 0.10;
+                        reteica = monto * 8 / 1000;
+                        var g = {
+                            fech: hoy, monto, concepto: 'BONO EXTRA', stado: std, descp: 'VENTA DIRECTA',
+                            asesor: j.acreedor, porciento: a.bonoextra, total: val, lt: a.lote, retefuente,
+                            reteica, pagar: monto - (retefuente + reteica)
+                        }
+                        await pool.query(`INSERT INTO solicitudes SET ?`, g);
+                    }
                 }
                 if (a.mes === mes || a.pagobono) {
                     cortp += val;
