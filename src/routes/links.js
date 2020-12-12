@@ -70,16 +70,20 @@ cron.schedule("59 23 * * *", async () => {
         dumpToFile: './elite.sql',
         //compressFile: true,
     });
-    /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
-    await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
+    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
     SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
     AND p.tipobsevacion IS NULL AND l.estado = 1`);
 
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
-
+    const f = await pool.query(`SELECT p.* FROM productosd l INNER JOIN preventa p ON l.id = p.lote 
+    WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     /*await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
     WHERE p.cupon IS NULL`)*/
+
+    var body = `_*${Dia}\n\n${f.join(' - ')}*_`;
+    await EnviarWTSAP('57 3012673944', body);
 });
 cron.schedule("0 0 1 * *", async () => {
     let m = new Date();
@@ -1610,7 +1614,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
-        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS')
+        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
         AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
 
         respuesta = { "data": solicitudes };
@@ -1672,7 +1676,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         pg.fechas, pg.descuentos, us.id, us.fullname, cl.nombre, p.proyect FROM pagos pg INNER JOIN solicitudes s ON s.cuentadecobro = pg.id
         INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')  
+        INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONO EXTRA')  
         AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
         respuesta = { "data": solicitudes }; //console.log(solicitudes)
         res.send(respuesta);
@@ -1786,7 +1790,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             Eli(imagenes);
         }
         if (cel) {
-            console.log(cel)
+            //console.log(cel)
             var body = `_*${fullname.split(" ")[0]}*_\n_Solicitud de pago *RECHAZADA*_\n_Proyecto *${proyect}*_\n_Manzana *${mz}* Lote *${n}*_\n_Cliente *${nombre}*_\n\n_*DESCRIPCIÓN*:_\n_${por}_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
             var sm = `${fullname.split(",")[0]} tu solicitud de pago fue RECHAZADA MZ${mz} LT${n} ${por}`;
             await EnviarWTSAP(cel, body, sm);
@@ -3079,6 +3083,17 @@ async function Desendentes(pin, stados) {
                     }
                     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
                     await pool.query(`INSERT INTO solicitudes SET ?`, f);
+                    if (a.bonoextra > 0.0000) {
+                        monto = val * a.bonoextra;
+                        retefuente = monto * 0.10;
+                        reteica = monto * 8 / 1000;
+                        var g = {
+                            fech: hoy, monto, concepto: 'BONO EXTRA', stado: std, descp: 'VENTA DIRECTA',
+                            asesor: j.acreedor, porciento: a.bonoextra, total: val, lt: a.lote, retefuente,
+                            reteica, pagar: monto - (retefuente + reteica)
+                        }
+                        await pool.query(`INSERT INTO solicitudes SET ?`, g);
+                    }
                 }
                 if (a.mes === mes || a.pagobono) {
                     cortp += val;
