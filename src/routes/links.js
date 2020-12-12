@@ -17,6 +17,7 @@ const nodemailer = require('nodemailer');
 const { isNull } = require('util');
 const { Console } = require('console');
 const { send } = require('process');
+const mysqldump = require('mysqldump')
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -32,6 +33,8 @@ const transpoter = nodemailer.createTransport({
 moment.locale('es');
 var desarrollo = false;
 var url = 'https://bin.chat-api.com/1bd03zz1'
+
+//////////////////////////////////////////////////////////// REPLACE INTO cuotas SELECT * FROM elite.cuotas; /////////////////////////////////////
 /*request(url, función(error, respuesta, cuerpo) {
     if(!error) {
         console.log(body);
@@ -42,6 +45,7 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 ¿
     console.log('Success: ', body); 
 });*/
+/**/
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
     //await pool.query(`UPDATE productosd SET mtr = ROUND(valor / mtr2) WHERE mtr IS NULL`);
@@ -55,13 +59,24 @@ router.post('/desarrollo', async (req, res) => {
     res.send(true);
 });
 cron.schedule("59 23 * * *", async () => {
-    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    mysqldump({
+        connection: {
+            host: '96.43.143.58',
+            user: 'samir',
+            password: 'Abcd1234@',
+            database: 'pruebasElite',
+            port: 3306
+        },
+        dumpToFile: './elite.sql',
+        //compressFile: true,
+    });
+    /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
     SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
     AND p.tipobsevacion IS NULL AND l.estado = 1`);
 
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
-    WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);
+    WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
 
     /*await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
     WHERE p.cupon IS NULL`)*/
@@ -1659,7 +1674,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA')  
         AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
-        respuesta = { "data": solicitudes };
+        respuesta = { "data": solicitudes }; //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'bono') {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
