@@ -48,15 +48,18 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
 /**/
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
-    //await pool.query(`UPDATE productosd SET mtr = ROUND(valor / mtr2) WHERE mtr IS NULL`);
-    /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
-    console.log('liberados exitosamente', Dia);
-    await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
-    SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-
-    await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
-    WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
+    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+    INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+    var body = `_*${Dia}*_\n\n${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*_\n\n`;
+    f.map((x) => {
+        body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
+    })
+    await EnviarWTSAP('57 3012673944', body);
+    //console.log(f, f.length)
     res.send(true);
+
+
 });
 cron.schedule("59 23 * * *", async () => {
     mysqldump({
@@ -77,12 +80,12 @@ cron.schedule("59 23 * * *", async () => {
 
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
-    const f = await pool.query(`SELECT p.* FROM productosd l INNER JOIN preventa p ON l.id = p.lote 
-    WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-    /*await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
-    WHERE p.cupon IS NULL`)*/
-
-    var body = `_*${Dia}\n\n${f.join(' - ')}*_`;
+    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+    INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+    var body = `_*${Dia}*_\n\n${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}* Madrugada_\n\n`;
+    f.map((x) => {
+        body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
+    })
     await EnviarWTSAP('57 3012673944', body);
 });
 cron.schedule("0 0 1 * *", async () => {
@@ -649,8 +652,8 @@ router.post('/pagos', async (req, res) => {
     res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g } = req.body;
-    var rcb = '';
+    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora } = req.body;
+    var rcb = ''; console.log(req.body)
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
         rcbs.map((s) => {
@@ -661,7 +664,9 @@ router.post('/recibo', async (req, res) => {
         rcb = `recibo LIKE '%${recibos}%'`;
     }
     var excd = montorcb - total;
-    var sum = 0, excedent = Math.sign(excd) >= 0 ? excd : 0;
+    var sum = 0
+    var excedent = Math.sign(excd) >= 0 ? excd : 0;
+
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb} ${id && Math.sign(excd) >= 0 ? 'OR pago = ' + id : ''})`); //stado != 6 AND 
     //console.log(req.body, recibe, excd, excedent, rcb)
     if (recibe.length > 0) {
@@ -716,6 +721,7 @@ router.post('/recibo', async (req, res) => {
         fech: ahora, monto: Math.sign(excd) < 0 ? montorcb : total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
         concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, excdnt: excedent
     }
+    mora != 0 ? pago.moras = mora : '';
     bono != 0 ? pago.bono = pin : '';
     concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
         await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);

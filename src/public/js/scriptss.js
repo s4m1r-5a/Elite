@@ -113,10 +113,10 @@ function SMSj(tipo, mensaje) {
 };
 $(document).ready(function () {
     moment.locale('es');
-    if (window.location.hostname === "localhost") {
+    if (window.location.hostname !== "grupoelitered.com.co") {
         $.ajax({
             url: '/links/desarrollo',
-            data: { actividad: true },
+            data: { actividad: true, sitio: window.location.hostname },
             type: 'POST'
         })
     }
@@ -1139,7 +1139,7 @@ if (window.location.pathname == `/links/pagos`) {
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    console.log(data)
+                    //console.log(data)
                     if (data.status) {
                         cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
@@ -1177,6 +1177,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Cuotan').html(Moneda(r.ncuota));
                                 $('#Cuota').html(Moneda(r.cuota));
                                 $('#Mora').html(Moneda(mor));
+                                $('#mora').val(mor);
                                 $('#Facturas').html(x + 1);
                                 $('.Totalf').html(Moneda(r.cuota + mor));
                                 $('.Total, .Total3').html(Moneda(c));
@@ -1212,10 +1213,10 @@ if (window.location.pathname == `/links/pagos`) {
                             var totl2 = parseFloat($(this).cleanVal())
                             var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
                             var totl = parseFloat($('.Total').html().replace(/\./g, ''))
-                            if (totl2 === totalf || totl2 > totl) {
-                                $('.Total3').html(Moneda(totl2));
-                                $('#Total, #Total2').val(totl2);
-                            } else if (totl2) {
+                            //if (totl2 === totalf || totl2 > totl) {
+                            $('.Total3').html(Moneda(totl2));
+                            $('#Total, #Total2').val(totl2);
+                            /*} else if (totl2) {
                                 $(this).val('')
                                 SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
                                 $('.Total3').html(Moneda(totl));
@@ -1223,7 +1224,7 @@ if (window.location.pathname == `/links/pagos`) {
                             } else {
                                 $('.Total3').html(Moneda(totl));
                                 $('#Total, #Total2').val(totl);
-                            }
+                            }*/
                         })
                         skdt = true;
                     } else {
@@ -1424,23 +1425,34 @@ if (window.location.pathname == `/links/pagos`) {
                     );
                     $('#trarchivos').after(`
                     <tr class="op">
-                        <th>                     
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                        stroke-linejoin="round" class="feather feather-file-text">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
-                             autocomplete="off" style="padding: 1px; width: 50%;" required>
+                        <th>                
+                            <div class="input-group">
+                                <div class="input-group-prepend">
+								    <div class="input-group-text">
+                                        <svg xmlns="http://www.w3.org/2000/svg" 
+                                         width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                                         stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                                         stroke-linejoin="round" class="feather feather-file-text">
+                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                                            <polyline points="14 2 14 8 20 8"></polyline>
+                                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                                            <polyline points="10 9 9 9 8 9"></polyline>
+                                        </svg>
+									</div>
+								</div>
+                                <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
+                                 autocomplete="off" style="padding: 1px; width: 50%;" required>
+								<div class="input-group-prepend">
+									<div class="input-group-text">
+									    <input type="radio" name="rcbexcdnt" required>
+									</div>
+								</div>
+							</div>
                         </th>
                         <td>
                             <input class="montos text-center" type="text" name=""
-                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 70%;" required>                           
                         </td>
                     </tr>`
                     );
@@ -1456,6 +1468,7 @@ if (window.location.pathname == `/links/pagos`) {
                         $('#montorecibos').val(avl);
                     })
                     $('.recis').on('change', function () {
+                        $(this).find('input').val('~' + $(this).val() + '~');
                         var avl = '';
                         $('.recis').map(function () {
                             s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
