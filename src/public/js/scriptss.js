@@ -1139,7 +1139,7 @@ if (window.location.pathname == `/links/pagos`) {
                 type: 'GET',
                 async: false,
                 success: function (data) {
-                    //console.log(data)
+                    console.log(data)
                     if (data.status) {
                         cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
@@ -1167,11 +1167,12 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
-                                mor = r.mora;
+                                mor = r.mora; console.log(r, x)
                                 mora += mor;
                                 cuot += r.cuota;
                                 c = mora + cuot;
                                 tsinbono = c;
+                                x === 0 ? $('#idC').val(r.id) : '';
                                 $('#Concepto').html(r.tipo);
                                 $('#concpto').val(r.tipo)
                                 $('#Cuotan').html(Moneda(r.ncuota));
@@ -1185,7 +1186,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
-                                $('#idC').val(r.id);
+                                //$('#idC').val(r.id);
                                 cont++
                             })
                             if (cont === 0) {
@@ -1216,6 +1217,9 @@ if (window.location.pathname == `/links/pagos`) {
                             //if (totl2 === totalf || totl2 > totl) {
                             $('.Total3').html(Moneda(totl2));
                             $('#Total, #Total2').val(totl2);
+                            if (totl2 < totl) {
+                                $('#idC').val(idC);
+                            }
                             /*} else if (totl2) {
                                 $(this).val('')
                                 SMSj('error', `Recuerde que el monto debe ser igual a la factura actual o mayor al valor total estipulado, para mas informacion comuniquese con GRUPO ELITE`)
@@ -1322,7 +1326,7 @@ if (window.location.pathname == `/links/pagos`) {
             $('#Total, #Total2').val(T2 ? T2 : T);
         }
         $('.sw-btn-next').on('click', function () {
-            //$('#' + forma).validate();
+            $('#' + forma).validate();
             $('#' + forma).submit();
         })
     }
@@ -1445,7 +1449,7 @@ if (window.location.pathname == `/links/pagos`) {
                                  autocomplete="off" style="padding: 1px; width: 50%;" required>
 								<div class="input-group-prepend">
 									<div class="input-group-text">
-									    <input type="radio" name="rcbexcdnt" required>
+									    <input type="radio" name="rcbexcd" class="rcbexcdnt" disabled>
 									</div>
 								</div>
 							</div>
@@ -1458,7 +1462,7 @@ if (window.location.pathname == `/links/pagos`) {
                     );
                     $('.montos').mask('###.###.###', { reverse: true });
                     $('.montos').on('change', function () {
-                        var avl = 0;
+                        var avl = 0, TO = parseFloat($('#Total').val());
                         $('#montorecibos').show('slow')
                         $('.montos').map(function () {
                             s = parseFloat($(this).cleanVal()) || 0
@@ -1466,9 +1470,14 @@ if (window.location.pathname == `/links/pagos`) {
                         });
                         $('.montorecibos').html(Moneda(avl))
                         $('#montorecibos').val(avl);
+                        avl > TO ? $('.rcbexcdnt').prop({ disabled: false, required: true })
+                            : $('.rcbexcdnt').prop({ disabled: true, checked: false }), $('#rcbexcdnt').val('');
+                    })
+                    $('.rcbexcdnt').on('change', function () {
+                        $('#rcbexcdnt').val($(this).val());
                     })
                     $('.recis').on('change', function () {
-                        $(this).find('input').val('~' + $(this).val() + '~');
+                        $(this).next("div").find('.rcbexcdnt').val('~' + $(this).val() + '~');// console.log($(this).next("div").find('.rcbexcdnt').val())
                         var avl = '';
                         $('.recis').map(function () {
                             s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
@@ -1577,14 +1586,18 @@ if (window.location.pathname == `/links/pagos`) {
         };
     });
     $('#recbo').submit(function (e) {
-        //e.preventDefault()
-        $('input').prop('disabled', false);
+        $('input:not(.rcbexcdnt)').prop('disabled', false);
         $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-
+        /*$(':required').each(function (f) {
+            console.log(this, f)
+        });*/
         if (!$('#montorecibos').val()
             || !$('#file2').val()
             || !$(".forma").is(':checked')
             || !$('#nrbc').val()
+            || (!$(".rcbexcdnt").is(':disabled')
+                && !$(".rcbexcdnt").is(':checked')
+            )
         ) {
             SMSj('error', 'Debe rellenar todos los campos solicitados');
             e.preventDefault();
