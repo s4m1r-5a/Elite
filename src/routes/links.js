@@ -3409,7 +3409,8 @@ async function EnviarWTSAP(movil, body, smsj) {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
-            phone: desarrollo ? '57 3012673944' : cel,
+            //phone: desarrollo ? '57 3012673944' : cel,
+            phone: cel,
             body
         }
     };
@@ -3425,7 +3426,7 @@ function EnvWTSAP_FILE(movil, body, filename, caption) {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
         form: {
-            phone: desarrollo ? '57 3012673944' : cel,
+            phone: cel,
             body,           //`https://grupoelitered.com.co/uploads/0erdlw-york61mn26n46v141lap-gvk-ro.pdf`,
             filename,
             caption
