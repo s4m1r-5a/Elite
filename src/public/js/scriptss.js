@@ -1140,6 +1140,7 @@ if (window.location.pathname == `/links/pagos`) {
                 async: false,
                 success: function (data) {
                     console.log(data)
+                    var idC = 0;
                     if (data.status) {
                         cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
@@ -1167,12 +1168,12 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
-                                mor = r.mora; console.log(r, x)
+                                mor = r.mora; console.log(r, x, !x ? r.id : 'no hay nada')
                                 mora += mor;
                                 cuot += r.cuota;
                                 c = mora + cuot;
                                 tsinbono = c;
-                                x === 0 ? $('#idC').val(r.id) : '';
+                                !x ? idC = r.id : '';
                                 $('#Concepto').html(r.tipo);
                                 $('#concpto').val(r.tipo)
                                 $('#Cuotan').html(Moneda(r.ncuota));
@@ -1186,6 +1187,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
+                                $('#idC').val(idC)
                                 //$('#idC').val(r.id);
                                 cont++
                             })

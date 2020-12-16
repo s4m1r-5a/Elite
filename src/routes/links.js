@@ -666,7 +666,7 @@ router.post('/recibo', async (req, res) => {
     var excd = false;
     var sum = 0, saldo = montorcb - total;
     //var excedent = Math.sign(excd) >= 0 ? excd : 0;
-
+    console.log(rcb, id)
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb} ${id ? 'OR pago = ' + id : ''})`); //stado != 6 AND 
     if (recibe.length > 0) {
         recibe.filter((a) => {
