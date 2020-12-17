@@ -1140,7 +1140,7 @@ if (window.location.pathname == `/links/pagos`) {
                 async: false,
                 success: function (data) {
                     //console.log(data)
-                    //var idC = 0;
+                    var idC = 0;
                     if (data.status) {
                         cliente = data.client.idc;
                         $('.Cliente').html(data.client.nombre);
@@ -1175,7 +1175,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 tsinbono = c;
                                 //!x ? idC = r.id : '';
                                 if (!x) {
-                                    $('#idC').val(r.id);
+                                    idC = r.id;
                                     $('#concpto').val(r.tipo);
                                 }
                                 $('#Concepto').html(r.tipo);
@@ -1190,7 +1190,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
-                                //$('#idC').val(idC)
+                                $('#idC').val(idC)
                                 //$('#idC').val(r.id);
                                 cont++
                             })
