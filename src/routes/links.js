@@ -725,7 +725,8 @@ router.post('/recibo', async (req, res) => {
         fech: ahora, monto: total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
         concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, motorecibos: montorcb
     }
-    !rcbexcdnt || !excd ? '' : pago.rcbexcdnt = rcbexcdnt, pago.excdnt = 1;
+    !rcbexcdnt || !excd ? '' : pago.excdnt = 1;
+    !rcbexcdnt ? '' : pago.rcbexcdnt = rcbexcdnt;
     mora != 0 ? pago.moras = mora : '';
     bono != 0 ? pago.bono = pin : ''; //console.log(pago);
     concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
@@ -1615,7 +1616,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`); //LEFT JOIN extratos x ON x.pagos = s.ids 
+        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);
         respuesta = { "data": so };
         res.send(respuesta);
 
