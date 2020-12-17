@@ -1168,7 +1168,7 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
-                                mor = r.mora; console.log(r, x, !x ? r.id : 'no hay nada')
+                                mor = r.mora; //console.log(r, x, !x ? r.id : 'no hay nada')
                                 mora += mor;
                                 cuot += r.cuota;
                                 c = mora + cuot;

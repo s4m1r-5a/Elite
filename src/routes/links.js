@@ -2468,7 +2468,7 @@ async function PagosAbonos(Tid, pdf, user) {
     pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, 
     pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
     pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono,
-    s.ids, s.descp, pr.id cparacion, s.pago FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
+    s.ids, s.descp, pr.id cparacion, s.pago, c.estado std FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
     INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
@@ -2913,7 +2913,7 @@ async function PagosAbonos(Tid, pdf, user) {
             Eli(pdf);
             return false;
         }
-        if (monto > cuota) {
+        if (monto > cuota || S.std === 13) {
             const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
             var montocuotas = monto;
             if (Cuotas.length > 0) {
