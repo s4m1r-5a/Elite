@@ -5804,9 +5804,16 @@ if (window.location == `${window.location.origin}/links/productos`) {
         });
     });
     // Math.floor()
+    var STAD = (std) => {
+        $('#datatable').DataTable().columns(4).search(std).draw();
+    }
     function Dtas(n) {
         var table = $('#datatable').DataTable({
             dom: 'Bfrtip',
+            lengthMenu: [
+                [10, 25, 50, -1],
+                ['10 filas', '25 filas', '50 filas', 'Ver todo']
+            ],
             buttons: [
                 {
                     text: `<input id="min" type="text" class="edi text-center" style="width: 60px; padding: 1px;"
@@ -5828,17 +5835,61 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 },
                 {
                     extend: 'pageLength',
-                    text: 'Ver',
+                    text: 'VER',
                     orientation: 'landscape'
                 },
                 {
                     extend: 'collection',
-                    text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+                    text: 'STDS',
                     orientation: 'landscape',
-                    buttons: [{
-                        text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-                        extend: 'copy'
-                    }]
+                    buttons: [
+                        {
+                            text: 'COPIAR',
+                            extend: 'copy'
+                        },
+                        {
+                            text: `DISPONIBLES`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('Disponible');
+                            }
+                        },
+                        {
+                            text: `INACTIVOS`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('Inactivo');
+                            }
+                        },
+                        {
+                            text: `APARTADOS`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('Apartado');
+                            }
+                        },
+                        {
+                            text: `SEPARADOS`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('Separado');
+                            }
+                        },
+                        {
+                            text: `VENDIDOS`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('Vendido');
+                            }
+                        },
+                        {
+                            text: `TODOS`,
+                            className: 'btn btn-secondary',
+                            action: function () {
+                                STAD('');
+                            }
+                        }
+                    ]
                 }
             ],
             language: languag2,

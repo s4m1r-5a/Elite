@@ -810,7 +810,7 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
 router.post('/rcb', async (req, res) => {
     const { rcb } = req.body; console.log(req.body)
     const recibo = await pool.query(`SELECT * FROM solicitudes WHERE recibo LIKE '%${rcb}%'`);
-    console.log(recibo)
+    //console.log(recibo)
     if (recibo.length > 0) {
         res.send(false);
     } else {
