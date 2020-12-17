@@ -653,7 +653,7 @@ router.post('/pagos', async (req, res) => {
 });
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt } = req.body;
-    var rcb = ''; //console.log(req.body, rcbexcdnt ? 'si' : 'no')
+    var rcb = ''; console.log(req.body, rcbexcdnt ? 'si' : 'no')
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
         rcbs.map((s) => {
@@ -664,7 +664,7 @@ router.post('/recibo', async (req, res) => {
         rcb = `recibo LIKE '%${recibos}%'`;
     }
     var excd = false;
-    var sum = 0, saldo = montorcb - total;
+    var sum = 0, saldo = montorcb;
     //var excedent = Math.sign(excd) >= 0 ? excd : 0;
     console.log(rcb, id)
     const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb} ${id ? 'OR pago = ' + id : ''})`); //stado != 6 AND 
@@ -675,7 +675,7 @@ router.post('/recibo', async (req, res) => {
             sum += a.monto;
         });
         saldo = montorcb - sum;
-        //console.log(recibe, sum, saldo, montorcb, total)
+        console.log(recibe, sum, saldo, montorcb, total)
         if (saldo < parseFloat(total) && sum > 1) {
             if (g) {
                 return res.send({ std: false, msj: 'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum) });
@@ -690,11 +690,11 @@ router.post('/recibo', async (req, res) => {
                 req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
                 return res.redirect('/links/pagos');
             }
-        } else if (saldo > parseFloat(total)) {
-            excd = true;
         }
     }
-
+    if (saldo > parseFloat(total)) {
+        excd = true;
+    }
     //console.log(sum, saldo, montorcb, total)
     var imagenes = ''
     req.files.map((e) => {
