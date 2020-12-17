@@ -631,7 +631,7 @@ router.get('/pagos/:id', async (req, res) => {
                 c += `${x > 0 ? ' OR ' : ''}separacion = ${b.id}`
             }) : c = `separacion = ${d[0].id}`;
 
-            const cuotas = await pool.query(`SELECT * FROM cuotas WHERE estado IN(3, 5) AND fechs <= CURDATE() AND (${c}) ORDER BY TIMESTAMP(fechs) ASC`);
+            const cuotas = await pool.query(`SELECT * FROM cuotas WHERE estado = 3 AND fechs <= CURDATE() AND (${c}) ORDER BY TIMESTAMP(fechs) ASC`);
             res.send({ d, client, cuotas, status: true });
         } else {
             res.send({ paquete: 'Aun no realiza una separacion, comuniiquece con un asesor', status: false });
