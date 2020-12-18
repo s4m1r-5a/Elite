@@ -65,14 +65,14 @@ URL;type=WORK;CHARSET=UTF-8:admin@retfly.co
 END:VCARD*/
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
-    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
     f.map((x) => {
         body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     })
-    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us'); //, 'true_573002851046-1593217257@g.us_3EB01486B9FB9A592E32'
+    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us'); *///, 'true_573002851046-1593217257@g.us_3EB01486B9FB9A592E32'
     //console.log(body)
     res.send(true);
 
