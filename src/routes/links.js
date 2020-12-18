@@ -44,23 +44,50 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
     if (error) return console.error('Failed: %s', error.message);
 ¿
     console.log('Success: ', body); 
-});*/
-/**/
+});                                            573007753983-1593217257@g.us 573002851046-1593217257@g.us	*/
+/*BEGIN:VCARD
+VERSION:3.0
+N:SALDARRIAGA;SAMIR
+FN:SAMIR SALDARRIAGA
+TEL;TYPE=CELL;waid=573007753983:+573007753983
+NICKNAME:SAM
+BDAY:31.12.1190
+X-GENDER:M
+NOTE:Area de sistemas
+ADR;TYPE=home:;;Colombia;Bolivar;Turbaco;la granja;
+EMAIL;CHARSET=UTF-8;type=HOME,INTERNET:s4m1r.5a@gmail.com
+URL;CHARSET=UTF-8:redelite.co
+ORG:GRUPO ELITE
+TITLE:GRUPO ELITE
+ADR;TYPE=work_:;;Colombia;Bolivar;Turbaco;la granja;
+TEL;TYPE=WORK,VOICE:3012673944
+URL;type=WORK;CHARSET=UTF-8:admin@retfly.co
+END:VCARD*/
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
     var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-    var body = `_*${Dia}*_\n\n${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*_\n\n`;
+    var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
     f.map((x) => {
         body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     })
-    //await EnviarWTSAP('57 3012673944', body);
-    console.log(body)
+    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us'); //, 'true_573002851046-1593217257@g.us_3EB01486B9FB9A592E32'
+    //console.log(body)
     res.send(true);
 
 
 });
+cron.schedule("7 10 * * *", async () => {
+    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+    INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+    var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
+    f.map((x) => {
+        body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
+    })
+    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+})
 cron.schedule("59 23 * * *", async () => {
     mysqldump({
         connection: {
@@ -82,11 +109,11 @@ cron.schedule("59 23 * * *", async () => {
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-    var body = `_*${Dia}*_\n\n${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}* Madrugada_\n\n`;
+    var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
     f.map((x) => {
         body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     })
-    await EnviarWTSAP('57 3012673944', body);
+    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
 });
 cron.schedule("0 0 1 * *", async () => {
     let m = new Date();
@@ -3341,20 +3368,22 @@ function Moneda(valor) {
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
     return valor;
 }
-async function EnviarWTSAP(movil, body, smsj) {
-    var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
+async function EnviarWTSAP(movil, body, smsj, chatid, q) {
+    var cel = 0;
+    movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
             //phone: desarrollo ? '57 3012673944' : cel,
-            phone: cel,
             body
         }
     };
+    q ? options.form.quotedMsgId = q : '';
+    chatid ? options.form.chatId = chatid : options.form.phone = cel;
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body, desarrollo ? '57 3012673944' : cel, desarrollo);
+        console.log('Success: ', body);
     });
     smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
 }
