@@ -6104,7 +6104,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 } else if (data["estado"] == 1) {
                     $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
                 } else if (data["estado"] == 13) {
-                    $(row).css({ "background-color": "#0CEB8C", "color": "#FFFFFF" });
+                    $(row).css("background-color", "#40E0D0");
                 } else if (data["estado"] == 15) {
                     $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
                 }
