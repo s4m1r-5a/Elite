@@ -1555,7 +1555,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
 
     } else if (id == 'eliminar') {
-        const { k, code } = req.body; console.log(req.body)
+        const { k, code } = req.body; //console.log(req.body)
         const R = await Estados(k);
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
             [{ 'l.estado': R.std }, k]
@@ -1589,7 +1589,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 res.send({ r: false, m: 'Codigo enviado' });
 
             } else if (CODE === code.toUpperCase()) {
-                CODE = null; console.log(code.toUpperCase())
+                CODE = null; 
                 await pool.query(`UPDATE productosd l
                 INNER JOIN productos p ON l.producto  = p.id 
                 SET l.estado = 9, l.valor = if (p.valmtr2 != 0, p.valmtr2 * l.mtr2, l.mtr * l.mtr2),
