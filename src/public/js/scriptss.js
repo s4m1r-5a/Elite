@@ -1694,6 +1694,53 @@ if (window.location.pathname == `/links/reportes`) {
                     id: ''
                 },
                 className: 'btn btn-secondary'
+            },
+            {
+                extend: 'collection',
+                text: 'Stds',
+                orientation: 'landscape',
+                buttons: [
+                    {
+                        text: 'COPIAR',
+                        extend: 'copy'
+                    },
+                    {
+                        text: `CARTERA`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD(13, 'CARTERA');
+                            //tableOrden.columns(13).search('CARTERA').draw();
+                        }
+                    },
+                    {
+                        text: `APARTADOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD(6, 'Apartado');
+                        }
+                    },
+                    {
+                        text: `SEPARADOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD(6, 'Separado');
+                        }
+                    },
+                    {
+                        text: `VENDIDOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD(6, 'Vendido');
+                        }
+                    },
+                    {
+                        text: `TODOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD('', '');
+                        }
+                    }
+                ]
             }
         ],
         deferRender: true,
@@ -1712,8 +1759,9 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
+        { responsivePriority: 1, targets: -2 },
+        { responsivePriority: 1, targets: -3 },
+        { targets: [-1], visible: false, searchable: true }],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, "desc"]],
         language: languag,
@@ -1728,7 +1776,8 @@ if (window.location.pathname == `/links/reportes`) {
                 defaultContent: ''
             },
             {
-                data: "id"
+                data: "id",
+                className: 'ids'
             },
             {
                 data: "proyecto",
@@ -1818,6 +1867,7 @@ if (window.location.pathname == `/links/reportes`) {
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                                     <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
+                                                    <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
                                                     <a class="dropdown-item" onclick="Cartera(${data})"><i class="fas fa-business-time"></i> Cartera</a>
                                                 </div>
                                         </div>`
@@ -1838,7 +1888,8 @@ if (window.location.pathname == `/links/reportes`) {
                         return `<a title="No posee ningun documento"><i class="fas fa-exclamation-circle"></i></a>`;
                     }
                 }
-            }
+            },
+            { data: "obsevacion" }
         ],
         rowCallback: function (row, data, index) {
             if (data["estado"] == 9) {
@@ -1854,8 +1905,14 @@ if (window.location.pathname == `/links/reportes`) {
             } else if (data["estado"] == 13) {
                 $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
             }
+            if (data["obsevacion"] === 'CARTERA') {
+                row, $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+            }
         }
     });
+    var STAD = (col, std) => {
+        tableOrden.columns(col).search(std).draw();
+    }
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 3 : 4;
         tableOrden
@@ -2515,7 +2572,7 @@ if (window.location.pathname == `/links/reportes`) {
                                 }
                             }
                         )
-                        console.log(datos[i], vlr, totaloteanterior)
+                        //console.log(datos[i], vlr, totaloteanterior)
                         vlr = 0;
                     }
                     $(rows).eq(i).before(
@@ -2822,6 +2879,32 @@ if (window.location.pathname == `/links/reportes`) {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                         }).modal('hide');
                         SMSj('success', data.m);
+                    } else if (data.m === 'Codigo enviado') {
+                        var Code = prompt("Digite el codigo de autorizacion para realizar la eliminacion de la orden");
+                        if (Code) {
+                            D.code = Code;
+                            $.ajax({
+                                url: '/links/reportes/eliminar',
+                                data: D,
+                                type: 'POST',
+                                success: function (data) {
+                                    if (data.r) {
+                                        tableOrden.ajax.reload(null, false)
+                                        $('#ModalEventos').one('shown.bs.modal', function () {
+                                        }).modal('hide');
+                                        SMSj('success', data.m);
+                                    } else {
+                                        $('#ModalEventos').one('shown.bs.modal', function () {
+                                        }).modal('hide');
+                                        SMSj('error', data.m);
+                                    }
+                                }
+                            });
+                        } else {
+                            $('#ModalEventos').one('shown.bs.modal', function () {
+                            }).modal('hide');
+                            SMSj('error', 'ERROR DE AUTORIZACION');
+                        }
                     } else {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                         }).modal('hide');
@@ -2885,6 +2968,33 @@ if (window.location.pathname == `/links/reportes`) {
                 }
             }
         });
+    }
+    var Proyeccion = (id) => {
+        if (admin == 1 && USERADMIN === 'HABIB SALDARRIAGA') {
+            var D = { k: id, h: moment().format('YYYY-MM') };
+            $.ajax({
+                url: '/links/reportes/proyeccion',
+                data: D,
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        tableOrden.ajax.reload(null, false)
+                        comisiones.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                    }
+                }
+            });
+        } else {
+            SMSj('error', 'No posees permisos para ejecuutar esta accion')
+        }
     }
     var Enviar = (datos) => {
         $.ajax({
