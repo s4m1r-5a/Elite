@@ -1913,13 +1913,6 @@ if (window.location.pathname == `/links/reportes`) {
     var STAD = (col, std) => {
         tableOrden.columns(col).search(std).draw();
     }
-    $('#min, #max').on('keyup', function () {
-        var col = $(this).attr('id') === 'min' ? 3 : 4;
-        tableOrden
-            .columns(col)
-            .search(this.value)
-            .draw();
-    });
     //////////////////////* Table3 *///////////////////////
     var area, productos, descuentos, total, abonos, salds,
         Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
@@ -3397,24 +3390,6 @@ if (window.location.pathname == `/links/reportes`) {
                 orientation: 'landscape'
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-                        placeholder="MZ">`,
-                attr: {
-                    title: 'Busqueda por MZ',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-                        placeholder="LT">`,
-                attr: {
-                    title: 'Busqueda por LT',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
                 text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
                         stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
@@ -4015,6 +3990,18 @@ if (window.location.pathname == `/links/reportes`) {
             });
         }
     }
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 3 : 4;
+        var col2 = $(this).attr('id') === 'min' ? 16 : 17;
+        tableOrden
+            .columns(col)
+            .search(this.value)
+            .draw();
+        comisiones
+            .columns(col2)
+            .search(this.value)
+            .draw();
+    });
     /*
         var doc = new jsPDF()
         var img2 = new Image();
@@ -6113,7 +6100,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 } else if (data["estado"] == 8) {
                     $(row).css("background-color", "#FFFFCC");
                 } else if (data["estado"] == 10) {
-                    $(row).css("background-color", "#40E0D0"); 
+                    $(row).css("background-color", "#40E0D0");
                 } else if (data["estado"] == 1) {
                     $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
                 } else if (data["estado"] == 13) {
