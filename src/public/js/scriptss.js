@@ -3992,7 +3992,7 @@ if (window.location.pathname == `/links/reportes`) {
     }
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 3 : 4;
-        var col2 = $(this).attr('id') === 'min' ? 16 : 17;
+        var col2 = $(this).attr('id') === 'min' ? 15 : 16;
         tableOrden
             .columns(col)
             .search(this.value)
