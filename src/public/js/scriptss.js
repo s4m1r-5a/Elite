@@ -1811,25 +1811,25 @@ if (window.location.pathname == `/links/reportes`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\n\nLote ${row.lote}">Pendiente</span>`
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\n\nLote ${row.lote}">Tramitando</span>`
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\n\nLote ${row.lote}">Separado</span>`
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\n\nLote ${row.lote}">Apartado</span>`
                             break;
                         case 13:
-                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\n\nLote ${row.lote}">Vendido</span>`
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
                             break;
                     }
                 }
@@ -1913,13 +1913,6 @@ if (window.location.pathname == `/links/reportes`) {
     var STAD = (col, std) => {
         tableOrden.columns(col).search(std).draw();
     }
-    $('#min, #max').on('keyup', function () {
-        var col = $(this).attr('id') === 'min' ? 3 : 4;
-        tableOrden
-            .columns(col)
-            .search(this.value)
-            .draw();
-    });
     //////////////////////* Table3 *///////////////////////
     var area, productos, descuentos, total, abonos, salds,
         Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
@@ -3397,24 +3390,6 @@ if (window.location.pathname == `/links/reportes`) {
                 orientation: 'landscape'
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-                        placeholder="MZ">`,
-                attr: {
-                    title: 'Busqueda por MZ',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-                        placeholder="LT">`,
-                attr: {
-                    title: 'Busqueda por LT',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
                 text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
                         viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
                         stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
@@ -4015,6 +3990,18 @@ if (window.location.pathname == `/links/reportes`) {
             });
         }
     }
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 3 : 4;
+        var col2 = $(this).attr('id') === 'min' ? 16 : 17;
+        tableOrden
+            .columns(col)
+            .search(this.value)
+            .draw();
+        comisiones
+            .columns(col2)
+            .search(this.value)
+            .draw();
+    });
     /*
         var doc = new jsPDF()
         var img2 = new Image();
@@ -6024,28 +6011,28 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     render: function (data, method, row) {
                         switch (data) {
                             case 1:
-                                return `<span class="badge badge-pill badge-info">Pendiente pago</span>`
+                                return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.id}">Pendiente</span>`
                                 break;
                             case 8:
-                                return `<span class="badge badge-pill badge-dark">Tramitando pago</span>`
+                                return `<span class="badge badge-pill badge-secondary" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.id}">Tramitando</span>`
                                 break;
                             case 9:
-                                return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                return `<span class="badge badge-pill badge-success" title="Disponible para la venta\nLote ${row.id}">Disponible</span>`
                                 break;
                             case 10:
-                                return `<span class="badge badge-pill badge-primary">Separado</span>`
+                                return `<span class="badge badge-pill badge-info" title="Pago total del valor de la cuota inicial del lote\nLote ${row.id}">Separado</span>`
                                 break;
                             case 12:
-                                return `<span class="badge badge-pill badge-secondary">Apartado</span>`
+                                return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.id}">Apartado</span>`
                                 break;
                             case 13:
-                                return `<span class="badge badge-pill badge-tertiary">Vendido</span>`
+                                return `<span class="badge badge-pill badge-tertiary" title="Pago total del valor del lote\nLote ${row.id}">Vendido</span>`
                                 break;
                             case 14:
                                 return `<span class="badge badge-pill badge-danger">Tramitando</span>`
                                 break;
                             case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactivo</span>` //secondary
+                                return `<span class="badge badge-pill badge-warning" title="No posee ninguna orden en el sistema\nLote ${row.id}">Inactivo</span>` //secondary
                                 break;
                         }
                     }
@@ -6104,6 +6091,23 @@ if (window.location == `${window.location.origin}/links/productos`) {
                         last = group;
                     }
                 });
+            },
+            rowCallback: function (row, data, index) {
+                if (data["estado"] == 9) {
+                    $(row).css({ "background-color": "#0CDDEB", "color": "#FFFFFF" });
+                } else if (data["estado"] == 12) {
+                    $(row).css("background-color", "#00FFFF");
+                } else if (data["estado"] == 8) {
+                    $(row).css("background-color", "#FFFFCC");
+                } else if (data["estado"] == 10) {
+                    $(row).css("background-color", "#40E0D0");
+                } else if (data["estado"] == 1) {
+                    $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+                } else if (data["estado"] == 13) {
+                    $(row).css({ "background-color": "#0CEB8C", "color": "#FFFFFF" });
+                } else if (data["estado"] == 15) {
+                    $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+                }
             }
         });
         $('#min, #max').on('keyup', function () {

@@ -2308,10 +2308,11 @@ async function ProyeccionPagos(S) {
     const financiacion = Math.round(total - (inicial + x.separar));
 
     if (Cartera !== 'CARTERA') {
-        const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran); console.log('no debe ser una cartera') //c.separacion
+        const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran);
         const cuotaordi = x.cuotaextraordinaria;
-        const cuotaini = Math.round(inicial / x.inicialdiferida);
-        const nfnc = x.numerocuotaspryecto - x.inicialdiferida - x.extran;
+        const nini = x.inicialdiferida ? x.inicialdiferida : 0;
+        const nfnc = x.numerocuotaspryecto - nini - x.extran;
+        const cuotaini = inicial ? Math.round(inicial / nini) : 0;
         const cuotafnc = Math.round((financiacion - extraordinarias) / nfnc);
         const cf = x.extraordinariameses;
         mes6 = cuotafnc;
@@ -2323,7 +2324,7 @@ async function ProyeccionPagos(S) {
                 : cf == 2 ? mes12 = cuotaordi
                     : mes6 = cuotaordi, mes12 = cuotaordi;
         };
-
+        
         await pool.query(`UPDATE cuotas SET 
         estado = 3, cuota = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
