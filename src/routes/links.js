@@ -889,7 +889,12 @@ router.post('/bonus', async (req, res) => {
 });
 /////////////* CARTERAS */////////////////////////////////////
 router.get('/cartera', isLoggedIn, async (req, res) => {
-    res.render('links/cartera');
+    if (req.user.admin == 1) {
+        res.render('links/cartera');
+    } else {
+        req.flash('error', 'No tienes permisos para acceder al modulo CARTERA');
+        res.redirect('/links/reportes');
+    }
 });
 router.post('/cartera/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -962,9 +967,9 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     //console.log(separ)
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
-    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
     await n.map((t, i) => {
-        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}),`;
+        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}), ${cuota[i].replace(/\./g, '')}`;
     });
     await pool.query(cuotas.slice(0, -1));
 
@@ -1133,9 +1138,9 @@ router.post('/orden', isLoggedIn, async (req, res) => {
         cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
 
-        var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado) VALUES ';
+        var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
         await ncuota.map((t, i) => {
-            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}),`;
+            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}, ${cuota[i]}),`;
         });
         await pool.query(cuotas.slice(0, -1));
 
@@ -1589,7 +1594,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 res.send({ r: false, m: 'Codigo enviado' });
 
             } else if (CODE === code.toUpperCase()) {
-                CODE = null; 
+                CODE = null;
                 await pool.query(`UPDATE productosd l
                 INNER JOIN productos p ON l.producto  = p.id 
                 SET l.estado = 9, l.valor = if (p.valmtr2 != 0, p.valmtr2 * l.mtr2, l.mtr * l.mtr2),
