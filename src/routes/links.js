@@ -1565,7 +1565,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
             [{ 'l.estado': R.std }, k]
         );
-        const i = await pool.query(`SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id WHERE pd.estado != 9 AND p.id = ?`, k);
+        const i = await pool.query(`SELECT pd.estado, p.lote, p.id, pd.n, pd.mz, pl.proyect 
+        FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
+        INNER JOIN productos pl ON pd.producto = pl.id 
+        WHERE pd.estado != 9 AND p.id = ?`, k);
+
         if (i[0].estado !== 1) {
             var D = () => {
                 var imagenes = U.img === null ? '' : U.img.indexOf(",") > 0 ? U.img.split(",") : U.img
@@ -1605,10 +1609,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 await EnviarWTSAP('57 3002851046', `Orden de separacion *${k}* eliminada correctamente`);
                 res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
             } else {
-                res.send({
-                    r: false,
-                    m: `Codigo de autorizacion invalido`
-                });
+                res.send({ r: false, m: `Codigo de autorizacion invalido` });
             }
         } else {
             await pool.query(`UPDATE productosd l
@@ -1618,6 +1619,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, i[0].lote);
 
             await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.lt = p.lote WHERE p.id = ?`, k);
+            await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}`);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
 
@@ -2324,7 +2326,7 @@ async function ProyeccionPagos(S) {
                 : cf == 2 ? mes12 = cuotaordi
                     : mes6 = cuotaordi, mes12 = cuotaordi;
         };
-        
+
         await pool.query(`UPDATE cuotas SET 
         estado = 3, cuota = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
@@ -2656,7 +2658,6 @@ async function PagosAbonos(Tid, pdf, user) {
         var cuota = S.cuota + S.mora;
         var Total = monto < S.cuota ? monto : S.cuota, texto = '';
 
-
         var Ps = async (Total, texto) => {
             //var inicial = (S.valor - S.ahorro) * S.iniciar / 100
             if (monto < S.cuota) {
@@ -2889,8 +2890,8 @@ async function PagosAbonos(Tid, pdf, user) {
             return false;
         }
         if (monto >= cuota || S.std === 13) {
-            const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
             var montocuotas = monto - cuota;
+            console.log(S.pago, Tid, T, montocuotas);
             await pool.query(`UPDATE cuotas c 
                 INNER JOIN preventa p ON c.separacion = p.id 
                 INNER JOIN productosd l ON p.lote = l.id 
@@ -2907,13 +2908,14 @@ async function PagosAbonos(Tid, pdf, user) {
                     }, S.pago
                 ]
             );
+            const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
+
             if (Cuotas.length > 0 && montocuotas > 0) {
                 var sql = `UPDATE cuotas SET estado = 13, mora = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
                 var sql2 = '', idS = '';
+
                 Cuotas.map((c) => {
                     var cuot = c.cuota + c.mora;
-                    console.log(c, cuota, cuot, montocuotas, montocuotas >= cuot, 'arriba')
-
                     if (montocuotas >= cuot) {
                         idS += c.id.toString() + ', ';
                         montocuotas = montocuotas - (c.cuota + c.mora);
@@ -2923,15 +2925,13 @@ async function PagosAbonos(Tid, pdf, user) {
                         var cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
                         sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', cuota = ` + cuo + ', mora = ' + mor + ', abono = ' + c.abono + montocuotas + ' WHERE id = ' + c.id;
                         montocuotas = 0;
-                        console.log(c, cuota, montocuotas, 'menor')
                     }
                 })
                 idS = idS.slice(0, -2);
                 sql += ' WHERE id IN(' + idS + ')';
-                console.log(sql, sql2)
                 try {
-                    await pool.query(sql);
-                    sql2 ? await pool.query(sql2) : '';
+                    idS ? await pool.query(sql) : console.log(sql, 'no sql');
+                    sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
                 }
                 catch (e) {
                     console.log(e);
@@ -3298,7 +3298,7 @@ async function Desendentes(pin, stados) {
             : corte === 2 ? v.corte2 = cort
                 : corte === 3 ? v.corte3 = cort : '';
 
-        console.log(v, rangoniveles, Math.max(...rangoniveles), venta, personal)
+        //console.log(v, rangoniveles, Math.max(...rangoniveles), venta, personal)
         await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]);
         return true
     }
@@ -3362,7 +3362,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
         }
     };
     q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = cel;
+    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944'
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
@@ -3370,7 +3370,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
-    console.log(movil, body, filename, caption)
+    //console.log(movil, body, filename, caption)
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
     var options = {
         method: 'POST',

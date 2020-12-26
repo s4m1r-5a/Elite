@@ -1811,22 +1811,22 @@ if (window.location.pathname == `/links/reportes`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\n\nLote ${row.lote}">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\n\nLote ${row.lote}">Tramitando</span>`
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
                             break;
                         case 9:
                             return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\n\nLote ${row.lote}">Separado</span>`
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\n\nLote ${row.lote}">Apartado</span>`
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
                             break;
                         case 13:
-                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\n\nLote ${row.lote}">Vendido</span>`
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
                             break;
                         case 15:
                             return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
@@ -3546,7 +3546,7 @@ if (window.location.pathname == `/links/reportes`) {
                             return `<span class="badge badge-pill badge-danger">Declinada</span>`
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-tertiary">Pendiente</span>`
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
                             break;
                         case 15:
                             return `<span class="badge badge-pill badge-warning">Inactiva</span>`
@@ -3575,7 +3575,18 @@ if (window.location.pathname == `/links/reportes`) {
                                     </div>` : ''
                 }
             }
-        ]
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+            } else if (data["stado"] == 9) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["stado"] == 15) {
+                $(row).css("background-color", "#FFFFCC");
+            }
+        }
     });
     var aasesor = null, iid = null;
     comisiones.on('click', 'td:not(.control, .t)', function () {
@@ -6080,7 +6091,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
                 api.column(1, { page: 'current' }).data().each(function (group, i) {
                     if (last !== group) {
                         $(rows).eq(i).before(
-                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                            `<tr class="group" style="background: #EB0C5A; color: #FFFFCC;">
                                 <td colspan="8">
                                     <div class="text-center">
                                         ${group != '0' ? 'MANZANA "' + group + '"' : ''}
@@ -6105,9 +6116,9 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
                 } else if (data["estado"] == 13) {
                     $(row).css("background-color", "#40E0D0");
-                } else if (data["estado"] == 15) {
+                } /*else if (data["estado"] == 15) {
                     $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-                }
+                }*/
             }
         });
         $('#min, #max').on('keyup', function () {
@@ -7591,9 +7602,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $("#Date_search").html("");
         $('a.toggle-vis').on('click', function (e) {
             e.preventDefault();
-            // Get the column API object
             var column = table.column($(this).attr('data-column'));
-            // Toggle the visibility
             column.visible(!column.visible());
         });
 
@@ -7903,7 +7912,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         });
 
         $('.dropdown-item').on('click', function () {
-            var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = '', mensaj = false;
+            var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = false;
             //console.log(accion)
             var w = Seleccion();
             fd.append('pdef', data.pdf);
@@ -7911,20 +7920,19 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
             fd.append('extr', extr);
-            //console.log(extr, !extr);
-            if (totalasociados < data.monto && accion === 'Asociar' && accion === 'Aprobar') {
-                alert('Los valores ha asociar son menores al monto ha aprobar')
+            //console.log(w.length, imge, accion, totalasociados);
+
+            if (totalasociados < data.monto && (accion === 'Asociar' || accion === 'Aprobar')) {
+                alert('Los valores de los extractos ha asociar son menores al monto ha aprobar')
+                return false;
+            } else if (w.length < imge && (accion === 'Asociar' || accion === 'Aprobar')) {
+                alert('El numero de extractos no puede ser diferente al numero de recibos que halla en la solicitud');
                 return false;
             }
-            if (w.length < imge && accion === 'Asociar' && accion === 'Aprobar') {
-                alert('El numero de extractos no puede ser diferente al numero de recibos que halla');
-                return false;
-            }
-            if (!extr && (accion === 'Aprobar' || accion === 'Asociar') && accion !== 'Enviar') {
-                alert('Debe asociar un extrato del banco con la solicitud de pago');
-            } else if (accion === 'Declinar' && admin == 1) {
-                porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
-                if (porque != null) {
+
+            if (accion === 'Declinar' && admin == 1) {
+                porque = prompt("Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago", "Solicitud rechazada por que");
+                if (porque) {
                     fd.append('img', data.img);
                     fd.append('por', porque);
                     fd.append('fullname', data.fullname);
@@ -8034,13 +8042,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         }
                     })
                 }
-            } else {
-                if (data.pdf && accion === 'Enviar') {
-                    mensaje = confirm("Esta solicitud ya tiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente");
-                } else if (!data.pdf && accion === 'Enviar' && admin == 1) {
-                    mensaj = true
-                }
-                if ((accion === 'Aprobar' || mensaje || mensaj) && admin == 1) {
+            } else if ((accion === 'Enviar' || accion === 'Aprobar') && admin == 1) {
+                data.pdf ? mensaje = confirm("Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente")
+                    : mensaje = true;
+
+                if (mensaje) {
                     $.ajax({
                         type: 'POST',
                         url: '/links/solicitudes/saldo',
@@ -8235,7 +8241,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             console.log(data);
                         }
                     })
-                } else if (data.pdf && accion === 'Enviar' && admin == 1) {
+                } else {
                     $.ajax({
                         type: 'PUT',
                         url: '/links/solicitudes/' + accion,
@@ -8559,7 +8565,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         ]
     });
     var premios = $('#premios').DataTable({
-        deferRender: true,
+        /*deferRender: true,
         paging: true,
         search: {
             regex: true,
@@ -8577,9 +8583,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             url: "/links/solicitudes/premio",
             dataSrc: "data"
         },
-        /*initComplete: function (settings, json, row) {
+        initComplete: function (settings, json, row) {
                                         alert(row);
-        },*/
+        },
         columns: [
             { data: "ids" },
             { data: "nombre" },
@@ -8628,7 +8634,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         </div>
                                     </div>` : ''
             }
-        ]
+        ]*/
     });
     $('#recbo').submit(function (e) {
         e.preventDefault();
