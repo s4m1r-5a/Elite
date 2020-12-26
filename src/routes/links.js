@@ -1291,6 +1291,35 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     }
 
 })
+router.get('/editordn/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params
+    /*sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
+    p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
+    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
+    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, s.concepto, s.stado
+    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
+    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+    LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+    INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
+    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ? LIMIT 1`
+
+    const orden = await pool.query(sql, id);
+    var abono = 0;
+    orden.map((x) => {
+        if (x.concepto === 'ABONO' && x.stado == 4) {
+            abono = 1;
+        }
+    })
+    if (abono === 1) {
+        req.flash('error', 'Esta separacion no es posible editarla ya que tiene un ABONO aprobado');
+        res.redirect('/links/reportes');
+    } else {
+        //console.log(orden)
+        res.render('links/editordn', { orden, id });
+    }*/
+    res.render('links/editordn', { id });
+
+})
 router.post('/editarorden', isLoggedIn, async (req, res) => {
     //console.log(req.body);
     const { orden, separacion, cuotaInicial, vrm2, cuotaFinanciacion, separar,
@@ -3017,7 +3046,6 @@ var normalize = (function () {
 
 })();
 async function Desendentes(pin, stados) {
-
     if (stados != 10) {
         return false
     }
