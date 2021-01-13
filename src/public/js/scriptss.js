@@ -1465,7 +1465,7 @@ if (window.location.pathname == `/links/pagos`) {
                         </td>
                     </tr>`
                     );
-                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
                     $('.montos').on('change', function () {
                         var avl = 0, TO = parseFloat($('#Total').val());
                         $('#montorecibos').show('slow')
@@ -2414,7 +2414,7 @@ if (window.location.pathname == `/links/reportes`) {
         autowidth: true,
         columnDefs: [
             {
-                targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10],
+                targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
                 visible: false,
                 //searchable: true
             }
@@ -2531,18 +2531,61 @@ if (window.location.pathname == `/links/reportes`) {
                             : '$' + Moneda(row.monto)
                 }
             },
+            {
+                data: "date",
+                className: 'f',
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : 'INDEFINIDA'
+                }
+            },
+            {
+                data: "rcb",
+                className: 'te'
+            },
+            {
+                data: "formapg",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data === 'CTA-CTE-50900011438' ? 'CTA-CTE-1438' : data
+                }
+            },
+            {
+                data: "id",
+                className: 'te'
+            },
+            {
+                data: "mounto",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data ? '$' + Moneda(data) : '$0'
+                }
+            },
+            {
+                data: "observacion",
+                className: 'te'
+            },
+            {
+                data: "bonus",
+                className: 'te'
+            },
+            {
+                orderable: false,
+                data: null,
+                defaultContent: `<a class="no float-right"><i class="align-middle mr-2 fas fa-fw fa-trash"></i></i></a>`
+            }
         ],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
-            var last = null, lote = null;
+            var last = null, lote = null, pago = null;
             var total = 0, vlr = 0, totaloteanterior = 0;
             var datos = api.column({ page: 'current' }).data()
             var filas = api.column(10, { page: 'current' }).data();
             body = [];
-
+            //console.log(datos[0], filas, rows)
             filas.each(function (group, i) {
                 var gt = moment(datos[i].fecha).format('YYYY/M/D');
+                var gt2 = moment(datos[i].fech).format('YYYY/M/D');
                 var valr = datos[i].formap === 'BONO' ? parseFloat(datos[i].mtb)
                     : datos[i].mtb ? parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
                         : parseFloat(datos[i].monto)
@@ -2551,6 +2594,9 @@ if (window.location.pathname == `/links/reportes`) {
                     if (last != null) {
                         $(rows).eq(i - 1).after(
                             `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
+                            <td colspan="4">TOTAL ABONADO</td>
+                            <td colspan="11">$${Moneda(vlr)}</td>
+                            </tr><tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
                             <td colspan="4">SALDO A LA FECHA</td>
                             <td colspan="11">$${Moneda(totaloteanterior - vlr)}</td>
                         </tr>`
@@ -2589,10 +2635,21 @@ if (window.location.pathname == `/links/reportes`) {
                             <td class="text-center">CUPON: ${datos[i].cupon}</td>
                             <td class="text-center">AHORRO: $${Moneda(datos[i].ahorro)}</td>
                             <td colspan="12" class="text-right">TOTAL: $${Moneda(datos[i].total)}</td>
+                        </tr>
+                        <tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${datos[i].img}', '${datos[i].id}')">
+                            <td class="text-left">${gt2}</td>
+                            <td colspan="2" class="text-center">RC-${datos[i].ids}</td>
+                            <td class="text-center">${datos[i].descp}</td>
+                            <td colspan="12" class="text-right">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                            : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                : Moneda(datos[i].monto)}</td>
                         </tr>`
                     );
+
+                    vlr += valr
                     last = group;
                     lote = datos[i].n
+                    pago = datos[i].ids;
                     body.push(
                         {
                             id: {
@@ -2653,8 +2710,20 @@ if (window.location.pathname == `/links/reportes`) {
                             }
                         }
                     )
+                } else if (pago !== datos[i].ids) {
+                    //("background-color", "#40E0D0");
+                    $(rows).eq(i - 1).after(
+                        `<tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${datos[i].img}', '${datos[i].id}')">
+                    <td class="text-left">${gt2}</td>
+                    <td colspan="2" class="text-center">RC-${datos[i].ids}</td>
+                    <td class="text-center">${datos[i].descp}</td>
+                    <td colspan="12" class="text-right">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                            : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                : Moneda(datos[i].monto)}</td>
+                    </tr>`)
+                    pago = datos[i].ids;
+                    vlr += valr
                 }
-                vlr += valr
                 body.push(
                     {
                         id: { content: datos[i].fech, styles: { fontSize: 8, fontStyle: 'bold' } },
@@ -2667,9 +2736,14 @@ if (window.location.pathname == `/links/reportes`) {
                         id8: { content: '$' + Moneda(valr), styles: { fontSize: 8, fontStyle: 'bold' } },
                     }
                 )
+                //console.log(pago, datos[i].ids)
+
                 if (i == filas.length - 1) {
                     $(rows).eq(i).after(
                         `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
+                        <td colspan="4">TOTAL ABONADO</td>
+                        <td colspan="11">$${Moneda(vlr)}</td>
+                        </tr><tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
                             <td colspan="4">SALDO A LA FECHA</td>
                             <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
                         </tr>`
@@ -2797,7 +2871,25 @@ if (window.location.pathname == `/links/reportes`) {
         },
         responsive: true,
         initComplete: function (settings, json) {
-            //console.log(body)
+            /*$(".f").daterangepicker({
+                locale: {
+                    'format': 'YYYY-MM-DD',
+                    'separator': ' - ',
+                    'applyLabel': 'Aplicar',
+                    'cancelLabel': 'Cancelar',
+                    'fromLabel': 'De',
+                    'toLabel': '-',
+                    'customRangeLabel': 'Personalizado',
+                    'weekLabel': 'S',
+                    'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                    'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    'firstDay': 1
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 2017,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+            });*/
         },
     });
     $('.mins, .maxs').on('keyup', function () {
@@ -2808,7 +2900,186 @@ if (window.location.pathname == `/links/reportes`) {
             .search(buscar, true, false, true)
             .draw();
     });
+    estadoscuentas2.on('click', 'tr', function () {
+        //var fila = $(this).parents('tr');
+        var data = estadoscuentas2.row(this).data(); console.log(data)
+        imge = 1
+        $("#descargaimg").html(`<a class="imag" href="${data.baucher}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
+        $("#Modalimg .fotos").html(
+            `<div class="foto" style="
+                        width: 100%;
+                        padding-top: calc(100% / (16/9));
+                        background-image: url('${data.baucher}');
+                        background-size: 100%;
+                        background-position: center;
+                        background-repeat: no-repeat;float: left;">
+                        <div class="card">
+                        <table class="table table-sm tablarcb"><tbody>
+                    <tr class="op">
+                        <th> 
+                        <input type="hidden" name="img" value="${data.baucher}">
+                        <input type="hidden" name="id" value="${data.id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        <input class="recis text-center" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>                     
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
+                            <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <input class="montos text-center" type="text" name="montos"
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                        </td>
+                    </tr>
+                    <tr class="op">
+                        <th>                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <input class="fec text-center" type="text" name="feh" placeholder="Fecha" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <select class="form-control-no-border forma" style="padding: 1px;text-align:center; width: 60%;" name="formap" required>
+                                <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                <option value="BONO CTA CRUSADA">BONO CTA CRUSADA</option>
+                                <option value="BONO EFECTIVO">BONO EFECTIVO</option>
+                                <option value="BONO PREMUTA">BONO PREMUTA</option>
+                                <option value="EFECTIVO">EFECTIVO</option>
+                                <option value="CHEQUE">CHEQUE</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                        <textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;"></textarea>
+                        </th>
+                    </tr></tbody></table></div></div>`);
 
+        $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+        $('.forma').on('change', function () {
+            if ($(this).val().indexOf('BONO') === 0) {
+                var bono = ID(5);
+                var anc = $(this).parents('tbody');
+                anc.find('.recis').val(bono);
+            }
+        })
+        $(".fec").daterangepicker({
+            locale: {
+                'format': 'YYYY-MM-DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10),
+        });
+        $('.imag').on('click', function () {
+            const link = document.createElement('a');
+            link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
+            link.download = "recibo" + id + ".jpg";
+            link.dispatchEvent(new MouseEvent('click'));
+        });
+
+        var zoom = 200
+        $(".foto").on({
+            mousedown: function () {
+                zoom += 50
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseup: function () {
+
+            },
+            mousewheel: function (e) {
+                //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
+                $(this).css("background-size", zoom + "%")
+            },
+            mousemove: function (e) {
+                let width = this.offsetWidth;
+                let height = this.offsetHeight;
+                let mouseX = e.offsetX;
+                let mouseY = e.offsetY;
+
+                let bgPosX = (mouseX / width * 100);
+                let bgPosY = (mouseY / height * 100);
+
+                this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+            },
+            mouseenter: function (e) {
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseleave: function () {
+                $(this).css("background-size", "100%")
+                this.style.backgroundPosition = "center";
+            }
+        });
+        $('#Modalimg').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+    })
+    estadoscuentas2.on('click', '.no', function () {
+        var fila = $(this).parents('tr');
+        var data = estadoscuentas2.row(fila).data();
+        if (data.id) {
+            var mensaje = confirm("¿Seguro deseas eliminar este RECIBO DEL PAGO?");
+            if (mensaje) {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+                var datos = { id: data.id };
+                $.ajax({
+                    type: 'POST',
+                    url: '/links/reportes/emili',
+                    data: datos,
+                    beforeSend: function (xhr) {
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (data) {
+                        if (data) {
+                            estadoscuentas2.ajax.reload(null, false);
+                            $('#ModalEventos').modal('hide')
+                            SMSj('error', 'RECIBO ELIMINADO CORRECTAMENTE')
+                        }
+                    }
+                })
+            }
+        } else {
+            SMSj('error', 'No existe RECIBO alguno para eliminar')
+        }
+    });
     $('#detalles').click(function () {
         $('#stadocuentasr').hide('slow');
         $('#stadoreportes').hide('slow');
@@ -2859,6 +3130,266 @@ if (window.location.pathname == `/links/reportes`) {
     var datos
     tableOrden.on('click', 'tr', function () {
         datos = tableOrden.row(this).data();
+    })
+    var Pago = (id, img, rcb) => {
+        if (rcb === 'null') {
+            var imagenes = img === null ? '' : img.indexOf(",") > 0 ? img.split(",") : img
+            if (Array.isArray(imagenes)) {
+                var marg = 100 / (imagenes.length - 1);
+                imge = imagenes.length - 1
+                //$("#Modalimg img:not(.foto)").remove();
+                $("#Modalimg .foto").remove();
+                $("#descargaimg .imag").remove();
+                imagenes.map((e) => {
+                    if (e) {
+                        $("#descargaimg").append(`<a class="imag mr-2" href="${e}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
+                        $("#Modalimg .fotos").append(
+                            `<div class="foto" style="
+                        width: ${marg}%;
+                        padding-top: calc(100% / (16/9));
+                        background-image: url('${e}');
+                        background-size: 100%;
+                        background-position: center;
+                        background-repeat: no-repeat;float: left;">
+                        <div class="card">
+                        <table class="table table-sm tablarcb"><tbody>
+                    <tr class="op">
+                        <th> 
+                        <input type="hidden" name="img" value="${e}">
+                        <input type="hidden" name="id" value="${id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        <input class="recis text-center" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>                     
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
+                            <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <input class="montos text-center" type="text" name="montos"
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                        </td>
+                    </tr>
+                    <tr class="op">
+                        <th>                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <input class="fec text-center" type="text" name="feh" placeholder="Fecha" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <select class="form-control-no-border forma" style="padding: 1px;text-align:center; width: 60%;" name="formap" required>
+                                <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                <option value="BONO CTA CRUSADA">BONO CTA CRUSADA</option>
+                                <option value="BONO EFECTIVO">BONO EFECTIVO</option>
+                                <option value="BONO PREMUTA">BONO PREMUTA</option>
+                                <option value="EFECTIVO">EFECTIVO</option>
+                                <option value="CHEQUE">CHEQUE</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                        <textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;"></textarea>
+                        </th>
+                    </tr></tbody></table></div>
+                    </div>`);
+                        /*<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline>
+                            </svg>*/
+                    }
+                })
+            } else if (imagenes) {
+                imge = 1
+                $("#descargaimg").html(`<a class="imag" href="${img}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
+                $("#Modalimg .fotos").append(
+                    `<div class="foto" style="
+                        width: 100%;
+                        padding-top: calc(100% / (16/9));
+                        background-image: url('${img}');
+                        background-size: 100%;
+                        background-position: center;
+                        background-repeat: no-repeat;float: left;">
+                        <div class="card">
+                        <table class="table table-sm tablarcb"><tbody>
+                    <tr class="op">
+                        <th> 
+                        <input type="hidden" name="img" value="${img}">
+                        <input type="hidden" name="id" value="${id}">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
+                        stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag">
+                        <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
+                        <line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
+                        <input class="recis text-center" type="text" name="nrecibo" placeholder="Recibo"
+                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>                     
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
+                            <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
+                            <input class="montos text-center" type="text" name="montos"
+                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                        </td>
+                    </tr>
+                    <tr class="op">
+                        <th>                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <input class="fec text-center" type="text" name="feh" placeholder="Fecha" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <select class="form-control-no-border forma" style="padding: 1px;text-align:center; width: 60%;" name="formap" required>
+                                <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                <option value="BONO CTA CRUSADA">BONO CTA CRUSADA</option>
+                                <option value="BONO EFECTIVO">BONO EFECTIVO</option>
+                                <option value="BONO PREMUTA">BONO PREMUTA</option>
+                                <option value="EFECTIVO">EFECTIVO</option>
+                                <option value="CHEQUE">CHEQUE</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
+                        </th>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                        <textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;"></textarea>
+                        </th>
+                    </tr></tbody></table></div>
+                    </div>`);
+            }
+            $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+            $('.forma').on('change', function () {
+                if ($(this).val().indexOf('BONO') === 0) {
+                    var bono = ID(5);
+                    var anc = $(this).parents('tbody');
+                    anc.find('.recis').val(bono);
+                }
+            })
+            $(".fec").daterangepicker({
+                locale: {
+                    'format': 'YYYY-MM-DD',
+                    'separator': ' - ',
+                    'applyLabel': 'Aplicar',
+                    'cancelLabel': 'Cancelar',
+                    'fromLabel': 'De',
+                    'toLabel': '-',
+                    'customRangeLabel': 'Personalizado',
+                    'weekLabel': 'S',
+                    'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                    'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    'firstDay': 1
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 2017,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+            });
+            $('.imag').on('click', function () {
+                const link = document.createElement('a');
+                link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
+                link.download = "recibo" + id + ".jpg";
+                link.dispatchEvent(new MouseEvent('click'));
+            });
+
+            var zoom = 200
+            $(".foto").on({
+                mousedown: function () {
+                    zoom += 50
+                    $(this).css("background-size", zoom + "%")
+                },
+                mouseup: function () {
+
+                },
+                mousewheel: function (e) {
+                    //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                    if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
+                    $(this).css("background-size", zoom + "%")
+                },
+                mousemove: function (e) {
+                    let width = this.offsetWidth;
+                    let height = this.offsetHeight;
+                    let mouseX = e.offsetX;
+                    let mouseY = e.offsetY;
+
+                    let bgPosX = (mouseX / width * 100);
+                    let bgPosY = (mouseY / height * 100);
+
+                    this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                },
+                mouseenter: function (e) {
+                    $(this).css("background-size", zoom + "%")
+                },
+                mouseleave: function () {
+                    $(this).css("background-size", "100%")
+                    this.style.backgroundPosition = "center";
+                }
+            });
+            $('#Modalimg').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
+    }
+    $('#grecibos').on('click', function () {
+        var datoss = $('#datos input, select, textarea').serialize();
+        $.ajax({
+            url: '/links/reportes/registrarcb',
+            data: datoss,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                /*$('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });*/
+                $('#Modalimg').modal('hide');
+            },
+            success: function (data) {
+                if (data) {
+                    estadoscuentas2.ajax.reload(null, false);
+                }
+                /*if (data.r) {
+                    estadoscuentas2.ajax.reload(null, false)
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    SMSj('success', data.m);
+                } else {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                    }).modal('hide');
+                    SMSj('error', data.m);
+                }*/
+            }
+        });
     })
     var Eliminar = (eli) => {
         if (confirm("Seguro deseas eliminar esta separacion?")) {
@@ -3333,7 +3864,7 @@ if (window.location.pathname == `/links/reportes`) {
                         </td>
                     </tr>`
                     );
-                    $('.montos').mask('###.###.###', { reverse: true });
+                    $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
                     $('.montos').on('change', function () {
                         var avl = 0;
                         $('#montorecibos').show('slow')
@@ -6183,15 +6714,19 @@ if (window.location.pathname == `/links/cartera`) {
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        `<div class="image" style="
-                            width: ${marg}%;
-                            min-width: 25%;
-                            padding-top: calc(100% / (16/9));
-                            background-image: url('${e.target.result}');
-                            background-size: 100%;
-                            background-position: center;
-                            background-repeat: no-repeat;float: left;"></div>`
+                        `<div class="image container" style="width: ${marg}%; min-width: 25%; padding-top: 
+                        calc(100% / (16/9)); background-image: url('${e.target.result}'); background-size: 100%; 
+                        background-position: center; background-repeat: no-repeat;float: left;"></div>`
                     );
+                    /*<div class="card">
+                        <table class="table table-sm"><tbody><tr><th><div class="text-center"><input type="text" 
+                        class="recis text-center" name="nrecibo" placeholder="Recibo" autocomplete="off" required>
+                        </div></th></tr><tr><th><div class="text-center"><input class="montos text-center" type="text" 
+                        placeholder="Monto" autocomplete="off" required></div></th></tr><tr><th><div class="text-center">
+                        <select name="formap" class="form-control-no-border forma" style="text-align:center;" required>
+                        <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option><option value="CHEQUE">CHEQUE
+                        </option><option value="EFECTIVO">EFECTIVO</option><option value="OTRO">OTRO</option></select>
+                        </div></th></tr></tbody></table></div>*/
                     $('#trarchivos').after(`
                     <tr class="op">
                         <th>                     
@@ -6209,11 +6744,61 @@ if (window.location.pathname == `/links/cartera`) {
                              autocomplete="off" style="padding: 1px; width: 50%;" required>
                         </th>
                         <td>
-                            <input class="montos text-center" type="text" name=""
+                            <input class="montos text-center" type="text" name="montos"
                              placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>
+                    <tr class="op">
+                        <th>                            
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-calendar">
+                            <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
+                            <line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            <span>FECHA</span>
+                        </th>
+                        <td>
+                            <input class="fech text-center" type="text" name="feh" autocomplete="off" style="padding: 1px; width: 100%;" required>
+                        </td>
+                    </tr>
+                    <tr class="op">
+                        <th>
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                            stroke-linecap="round" stroke-linejoin="round" class="feather feather-check-circle">
+                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                            </svg>
+                            <span>FORMA DE PAGO</span>
+                        </th>
+                        <td>
+                            <select class="form-control-no-border forma" style="padding: 1px;text-align:center;" name="formap" required>
+                                <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                <option value="CHEQUE">CHEQUE</option>
+                                <option value="EFECTIVO">EFECTIVO</option>
+                                <option value="OTRO">OTRO</option>
+                            </select>
                         </td>
                     </tr>`
                     );
+                    $(".fech").daterangepicker({
+                        locale: {
+                            'format': 'YYYY-MM-DD',
+                            'separator': ' - ',
+                            'applyLabel': 'Aplicar',
+                            'cancelLabel': 'Cancelar',
+                            'fromLabel': 'De',
+                            'toLabel': '-',
+                            'customRangeLabel': 'Personalizado',
+                            'weekLabel': 'S',
+                            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                            'firstDay': 1
+                        },
+                        singleDatePicker: true,
+                        showDropdowns: true,
+                        minYear: 2017,
+                        maxYear: parseInt(moment().format('YYYY'), 10),
+                    });
                     $('.montos').mask('###.###.###', { reverse: true });
                     $('.montos').on('change', function () {
                         var avl = 0;

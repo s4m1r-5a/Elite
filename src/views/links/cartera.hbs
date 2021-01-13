@@ -158,7 +158,9 @@
                                                                             <select class="form-control-no-border"
                                                                                 style="padding: 1px;text-align:center;"
                                                                                 id="promesa" name="promesa" required>
-                                                                                <option value="">SIN PROMESA</option>
+                                                                                <option value="">SELECT STD PROMESA</option>
+                                                                                <option value="0">SIN PROMESA
+                                                                                </option>
                                                                                 <option value="1">PROMESA GENERADA
                                                                                 </option>
                                                                                 <option value="2">PROMESA AUTENTICADA
@@ -398,7 +400,19 @@
                                                 <div class="col-12 col-lg-4">
                                                     <table class="table table-sm">
                                                         <tbody>
-                                                            <tr>
+                                                            <tr id="trarchivos">
+                                                                <th>
+                                                                    <input class="custom-control-input" type="radio"
+                                                                        name="nrecibo" disabled>
+                                                                    <input class="custom-control-input" type="radio"
+                                                                        name="montos" disabled>
+                                                                    <input class="custom-control-input" type="radio"
+                                                                        name="formap" disabled>
+                                                                    <input class="custom-control-input" type="radio"
+                                                                        name="fech" disabled>
+                                                                </th>
+                                                            </tr>
+                                                            <!--<tr>
                                                                 <th>
                                                                     <label class="custom-control custom-radio">
                                                                         <input name="formap" type="radio"
@@ -437,7 +451,7 @@
                                                                             OTRO</span>
                                                                     </label>
                                                                 </td>
-                                                            </tr>
+                                                            </tr>-->
                                                         </tbody>
                                                     </table>
                                                 </div>
