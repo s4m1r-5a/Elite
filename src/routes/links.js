@@ -969,7 +969,7 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
     var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
     await n.map((t, i) => {
-        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}), ${cuota[i].replace(/\./g, '')}`;
+        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[i].replace(/\./g, '')}),`;
     });
     await pool.query(cuotas.slice(0, -1));
 
@@ -1648,7 +1648,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, i[0].lote);
 
             await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.lt = p.lote WHERE p.id = ?`, k);
-            await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}`);
+            await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}_`);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
 
