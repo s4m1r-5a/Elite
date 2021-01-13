@@ -758,7 +758,7 @@ router.post('/pagos', async (req, res) => {
 });
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt } = req.body;
-    var rcb = ''; console.log(req.body, rcbexcdnt ? 'si' : 'no')
+    var rcb = ''; //console.log(req.body, rcbexcdnt ? 'si' : 'no')
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
         rcbs.map((s) => {
@@ -771,8 +771,8 @@ router.post('/recibo', async (req, res) => {
     var excd = false;
     var sum = 0, saldo = montorcb;
     //var excedent = Math.sign(excd) >= 0 ? excd : 0;
-    console.log(rcb, id)
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb} ${id ? 'OR pago = ' + id : ''})`); //stado != 6 AND 
+    //console.log(rcb, id)
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb})`); //stado != 6 AND 
     if (recibe.length > 0) {
         recibe.filter((a) => {
             return a.rcbexcdnt && a.excdnt;
@@ -780,7 +780,7 @@ router.post('/recibo', async (req, res) => {
             sum += a.monto;
         });
         saldo = montorcb - sum;
-        console.log(recibe, sum, saldo, montorcb, total)
+        //console.log(recibe, sum, saldo, montorcb, total)
         if (saldo < parseFloat(total) && sum > 1) {
             if (g) {
                 return res.send({ std: false, msj: 'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum) });
@@ -938,8 +938,9 @@ router.post('/prodlotes', isLoggedIn, async (req, res) => {
 router.post('/crearcartera', isLoggedIn, async (req, res) => {
     const { idbono, asesor, clientes, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100, cuot,
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
-        std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa } = req.body;
-    //console.log(req.body, req.files)
+        std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa, feh, montos } = req.body;
+
+    console.log(req.body, req.files, req.body.promesa ? 'si' : 'no')
 
     var separ = {
         lote: lt, asesor: asesor, iniciar: xcntag, obsevacion: 'CARTERA', cuot,
@@ -948,7 +949,7 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
         inicialdiferida: inicialcuotas, ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
         separar: cuota[0].replace(/\./g, ''), extran: 0, vrmt2: vmtr2.replace(/\./g, '')
     };
-    if (promesa) {
+    if (promesa && promesa !== '0') {
         separ.promesa = promesa
         separ.autoriza = req.user.fullname
         separ.status = promesa
@@ -968,8 +969,9 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
     var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+    var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher) VALUES ';
     await n.map((t, i) => {
-        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}), ${cuota[i].replace(/\./g, '')}`;
+        cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[i].replace(/\./g, '')}),`;
     });
     await pool.query(cuotas.slice(0, -1));
 
@@ -977,13 +979,16 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     req.files.map((e) => {
         imagenes += `/uploads/${e.filename},`
     })
-
+    var fpago = Array.isArray(formap) ? formap[0] : formap;
     const pago = {
         fech: ahora, monto: montorcb, recibo: recibos, facturasvenc: 0, lt, acumulado: 0,
-        concepto: 'ABONO', stado: 4, img: imagenes, descp: 'ABONO', formap, excdnt: 0
+        concepto: 'ABONO', stado: 4, img: imagenes, descp: 'ABONO', formap: fpago, excdnt: 0
     }
-
-    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    await nrecibo.map((t, i) => {
+        reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}'),`;
+    }); //console.log(reci.slice(0, -1))
+    await pool.query(reci.slice(0, -1));
     const S = await Estados(h.insertId);
     await pool.query('UPDATE productosd set ? WHERE id = ?',
         [
@@ -1576,17 +1581,56 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     } else if (id == 'estadosc2') {
         d = req.user.admin > 0 ? `` : `AND p.asesor = ?`;
 
-        sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
+        /*sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
         p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, s.monto,
         cu.descuento, c.nombre, cp.monto mtb FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
         INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
         LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
         INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`*/
 
+        sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
+        p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
+        s.monto, s.img, cu.descuento, c.nombre, cp.monto mtb, r.id, r.date, r.formapg, r.rcb, 
+        r.monto mounto, r.observacion, r.baucher, r.bono bonus FROM solicitudes s 
+        LEFT JOIN recibos r ON s.ids = r.registro INNER JOIN productosd pd ON s.lt = pd.id 
+        INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
+        LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
+        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`
         const solicitudes = await pool.query(sql, req.user.id);
         respuesta = { "data": solicitudes };
+
+        /*const solicitudes2 = await pool.query(`SELECT s.ids, s.formap, REPLACE(s.recibo,'~','') recibo, s.monto, REPLACE(s.img,',','') img, s.bono, c.pin, c.motivo, 
+        DATE_FORMAT(c.fecha, '%Y-%m-%d') fecha, c.tip, c.monto mounto FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id WHERE s.concepto IN('PAGO', 'ABONO')`);
+
+        //console.log(solicitudes2)
+        var sql = 'INSERT INTO recibos (registro, formapg, rcb, monto, baucher) VALUES ';
+        var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher, bono) VALUES ';
+        solicitudes2.map((c) => {
+            var rcb = c.recibo.indexOf(",") < 0 ? true : false;
+            if (rcb) {                
+
+                if (c.bono && c.formap && c.formap !== 'BONO') {
+                    sql2 += `\n(${c.ids}, '${c.fecha}', 'BONO', '${c.pin}', ${c.mounto}, '${c.motivo}', '/img/bonos.png', ${c.bono}),`;
+                    sql += `\n(${c.ids}, '${c.formap ? c.formap : 'INDEFINIDO'}', '${c.recibo}', ${c.monto}, '${c.img ? c.img : '/img/bonos.png'}'),`;
+                } else if (c.bono && c.formap === 'BONO') {
+                    sql2 += `\n(${c.ids}, '${c.fecha}', 'BONO', '${c.pin}', ${c.mounto}, '${c.motivo}', '/img/bonos.png', ${c.bono}),`;
+                } else {
+                    sql += `\n(${c.ids}, '${c.formap ? c.formap : 'INDEFINIDO'}', '${c.recibo}', ${c.monto}, '${c.img ? c.img : '/img/bonos.png'}'),`;
+                }
+            }
+        })
+        try {
+            console.log(sql2.slice(0, -1));
+            await pool.query(sql.slice(0, -1));
+            await pool.query(sql2.slice(0, -1));
+        }
+        catch (e) {
+            console.log(e);
+        }*/
         res.send(respuesta);
+        //res.send(true);
 
     } else if (id == 'eliminar') {
         const { k, code } = req.body; //console.log(req.body)
@@ -1648,7 +1692,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, i[0].lote);
 
             await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.lt = p.lote WHERE p.id = ?`, k);
-            await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}`);
+            await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}_`);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
 
@@ -1745,6 +1789,25 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         const { ids, std } = req.body;
         console.log(ids, std)
         await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
+        res.send(true);
+    } else if (id === 'registrarcb') {
+        const { img, id, nrecibo, montos, feh, formap, observacion } = req.body;
+        var sql1 = 'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
+        var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
+        var sql3 = '';
+        id.map((x, i) => {
+            if (formap[i].indexOf('BONO') === 0) {
+                sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${formap[i]}'),`;
+                sql2 += `(${x}, '${feh[i]}', 'BONO', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${formap[i] + ' - ' + observacion[i]}', '/img/bonos.png'),`;
+            } else {
+                sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${img[i]}'),`;
+            }
+        });
+
+        //console.log(req.body, sql1 + sql3, sql2)
+        sql3 ? await pool.query(sql1 + sql3.slice(0, -1)) : '';
+        await pool.query(sql2.slice(0, -1));
+
         res.send(true);
     }
 });
@@ -2920,7 +2983,7 @@ async function PagosAbonos(Tid, pdf, user) {
         }
         if (monto >= cuota || S.std === 13) {
             var montocuotas = monto - cuota;
-            console.log(S.pago, Tid, T, montocuotas);
+            //console.log(S.pago, Tid, T, montocuotas);
             await pool.query(`UPDATE cuotas c 
                 INNER JOIN preventa p ON c.separacion = p.id 
                 INNER JOIN productosd l ON p.lote = l.id 
@@ -3390,7 +3453,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
         }
     };
     q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944'
+    chatid ? options.form.chatId = chatid : options.form.phone = '573012673944' //cel; //
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
