@@ -3453,7 +3453,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
         }
     };
     q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = '573012673944' //cel; //
+    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944' // //
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
