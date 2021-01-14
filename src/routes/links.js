@@ -1791,23 +1791,32 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
         res.send(true);
     } else if (id === 'registrarcb') {
-        const { img, id, nrecibo, montos, feh, formap, observacion } = req.body;
-        var sql1 = 'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
-        var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
-        var sql3 = '';
-        id.map((x, i) => {
-            if (formap[i].indexOf('BONO') === 0) {
-                sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${formap[i]}'),`;
-                sql2 += `(${x}, '${feh[i]}', 'BONO', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${formap[i] + ' - ' + observacion[i]}', '/img/bonos.png'),`;
-            } else {
-                sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${img[i]}'),`;
-            }
-        });
+        const { img, id, nrecibo, montos, feh, formap, observacion, j } = req.body; console.log(req.body, j)
+        if (j) {
+            const rcb = { date: feh, formapg: formap, rcb: nrecibo, monto: montos.replace(/\./g, ''), observacion, baucher: img }
+            await pool.query(`UPDATE recibos SET ? WHERE id = ?`, [rcb, j]);
+        } else {
+            var sql1 = 'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
+            var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
+            var sql3 = '';
+            id.map((x, i) => {
+                if (formap[i].indexOf('BONO') === 0) {
+                    sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${formap[i]}'),`;
+                    sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '/img/bonos.png'),`;
+                } else {
+                    sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${img[i]}'),`;
+                }
+            });
 
-        //console.log(req.body, sql1 + sql3, sql2)
-        sql3 ? await pool.query(sql1 + sql3.slice(0, -1)) : '';
-        await pool.query(sql2.slice(0, -1));
-
+            //console.log(req.body, sql1 + sql3, sql2)
+            sql3 ? await pool.query(sql1 + sql3.slice(0, -1)) : '';
+            await pool.query(sql2.slice(0, -1));
+        }
+        res.send(true);
+    } else if (id === 'fechas') {
+        const { id, fecha } = req.body; console.log(req.body)
+        const date = { fecha };
+        await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [date, id]);
         res.send(true);
     }
 });

@@ -1851,7 +1851,7 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 data: "fecha",
-                className: 'te',
+                className: 'te fi',
                 render: function (data, method, row) {
                     return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
@@ -1864,21 +1864,22 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 && USERADMIN === 'HABIB SALDARRIAGA' ? `<div class="btn-group btn-group-sm">
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
-                                                    <a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Ediar</a>
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
+                                                ${USERADMIN === 'HABIB SALDARRIAGA' ?
+                            `<a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
+                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
+                             <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>` : ''}
                                                     <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
-                                                    <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
-                                                    <a class="dropdown-item" onclick="Cartera(${data})"><i class="fas fa-business-time"></i> Cartera</a>
+                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
                                                 </div>
                                         </div>`
                         : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
+                    //<a class="dropdown-item" onclick="Cartera(${data})"><i class="fas fa-business-time"></i> Cartera</a>
                 }
             },
             {
@@ -1914,6 +1915,43 @@ if (window.location.pathname == `/links/reportes`) {
             }
             if (data["obsevacion"] === 'CARTERA') {
                 row, $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+            }
+        },
+        initComplete: function (settings, json) {
+            if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'GISELLE VERONICA SANTAMARIA') {
+                $(".fi").daterangepicker({
+                    locale: {
+                        'format': 'YYYY-MM-DD',
+                        'separator': ' - ',
+                        'applyLabel': 'Aplicar',
+                        'cancelLabel': 'Cancelar',
+                        'fromLabel': 'De',
+                        'toLabel': '-',
+                        'customRangeLabel': 'Personalizado',
+                        'weekLabel': 'S',
+                        'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                        'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                        'firstDay': 1
+                    },
+                    singleDatePicker: true,
+                    showDropdowns: true,
+                    minYear: 2017,
+                    maxYear: parseInt(moment().format('YYYY'), 10),
+                }, function (start, end, label) {
+                    var fila = this.element.parent();
+                    var data = tableOrden.row(fila).data();
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/reportes/fechas',
+                        data: { id: data.id, fecha: moment(start).format('YYYY-MM-DD') },
+                        success: function (data) {
+                            if (data) {
+                                tableOrden.ajax.reload(null, false);
+                                SMSj('success', 'Fecha actualizada correctamente')
+                            }
+                        }
+                    })
+                });
             }
         }
     });
@@ -2900,13 +2938,15 @@ if (window.location.pathname == `/links/reportes`) {
             .search(buscar, true, false, true)
             .draw();
     });
-    estadoscuentas2.on('click', 'tr', function () {
-        //var fila = $(this).parents('tr');
-        var data = estadoscuentas2.row(this).data(); console.log(data)
-        imge = 1
-        $("#descargaimg").html(`<a class="imag" href="${data.baucher}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
-        $("#Modalimg .fotos").html(
-            `<div class="foto" style="
+    estadoscuentas2.on('click', 'tr:not(.pago)', function () {
+        var data = estadoscuentas2.row(this).data();
+        $("#Modalimg .foto").remove();
+        $("#descargaimg .imag").remove();
+        if (data.rcb && admin == 1) {
+            imge = 1;
+            $("#descargaimg").html(`<a class="imag" href="${data.baucher}" target="_blank"><span class="badge badge-dark">Img</span></a>`);
+            $("#Modalimg .fotos").html(
+                `<div class="foto" style="
                         width: 100%;
                         padding-top: calc(100% / (16/9));
                         background-image: url('${data.baucher}');
@@ -2917,14 +2957,15 @@ if (window.location.pathname == `/links/reportes`) {
                         <table class="table table-sm tablarcb"><tbody>
                     <tr class="op">
                         <th> 
-                        <input type="hidden" name="img" value="${data.baucher}">
-                        <input type="hidden" name="id" value="${data.id}">
+                        <input type="hidden" name="img" class="imag" value="${data.baucher}">
+                        <input type="hidden" name="id" value="${data.ids}">
+                        <input type="hidden" name="j" value="${data.id}">
                         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" 
                         stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-tag">
                         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                         <line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                         <input class="recis text-center" type="text" name="nrecibo" placeholder="Recibo"
-                             autocomplete="off" style="padding: 1px; width: 60%;" required>
+                         autocomplete="off" style="padding: 1px; width: 60%;" value="${data.rcb}" required>
                         </th>
                     </tr>
                     <tr class="op">
@@ -2932,7 +2973,7 @@ if (window.location.pathname == `/links/reportes`) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
                             <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                            <input class="montos text-center" type="text" name="montos"
+                            <input class="montos text-center" type="text" name="montos" value="${Moneda(data.mounto)}"
                              placeholder="Monto" autocomplete="off" style="padding: 1px; width: 60%;" required>
                         </th>
                         </td>
@@ -2944,7 +2985,7 @@ if (window.location.pathname == `/links/reportes`) {
                             <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
                             <line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line>
                             <line x1="3" y1="10" x2="21" y2="10"></line></svg>
-                            <input class="fec text-center" type="text" name="feh" placeholder="Fecha" autocomplete="off" style="padding: 1px; width: 60%;" required>
+                            <input class="fec text-center" type="text" name="feh" value="${data.date ? data.date : ''}" autocomplete="off" style="padding: 1px; width: 60%;" required>
                         </th>
                     </tr>
                     <tr class="op">
@@ -2954,100 +2995,110 @@ if (window.location.pathname == `/links/reportes`) {
                                 <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
                                 <polyline points="22 4 12 14.01 9 11.01"></polyline>
                             </svg>
-                            <select class="form-control-no-border forma" style="padding: 1px;text-align:center; width: 60%;" name="formap" required>
+                            <select class="form-control-no-border forma" id="forma" style="padding: 1px;text-align:center; width: 60%;" name="formap" required>
                                 <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
                                 <option value="BONO CTA CRUSADA">BONO CTA CRUSADA</option>
                                 <option value="BONO EFECTIVO">BONO EFECTIVO</option>
                                 <option value="BONO PREMUTA">BONO PREMUTA</option>
                                 <option value="EFECTIVO">EFECTIVO</option>
                                 <option value="CHEQUE">CHEQUE</option>
+                                <option value="BONO">BONO</option>
                                 <option value="OTRO">OTRO</option>
                             </select>
                         </th>
                     </tr>
                     <tr class="op">
                         <th>
-                        <textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;"></textarea>
+                ${data.observacion ? `<textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;">${data.observacion}</textarea>`
+                    : `<textarea id="d" name="observacion" rows="2" placeholder="Observación" style="padding: 1px;text-align:center; width: 100%;"></textarea>`}
+                        
                         </th>
                     </tr></tbody></table></div></div>`);
 
-        $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
-        $('.forma').on('change', function () {
-            if ($(this).val().indexOf('BONO') === 0) {
-                var bono = ID(5);
-                var anc = $(this).parents('tbody');
-                anc.find('.recis').val(bono);
-            }
-        })
-        $(".fec").daterangepicker({
-            locale: {
-                'format': 'YYYY-MM-DD',
-                'separator': ' - ',
-                'applyLabel': 'Aplicar',
-                'cancelLabel': 'Cancelar',
-                'fromLabel': 'De',
-                'toLabel': '-',
-                'customRangeLabel': 'Personalizado',
-                'weekLabel': 'S',
-                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-                'firstDay': 1
-            },
-            singleDatePicker: true,
-            showDropdowns: true,
-            minYear: 2017,
-            maxYear: parseInt(moment().format('YYYY'), 10),
-        });
-        $('.imag').on('click', function () {
-            const link = document.createElement('a');
-            link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
-            link.download = "recibo" + id + ".jpg";
-            link.dispatchEvent(new MouseEvent('click'));
-        });
+            $(`#forma option[value='${data.formapg}']`).prop("selected", true);
+            $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+            $('.forma').on('change', function () {
+                if ($(this).val().indexOf('BONO') === 0) {
+                    var bono = ID(5);
+                    var anc = $(this).parents('tbody');
+                    anc.find('.recis').val(bono);
+                    $("#Modalimg .imag").val('/img/bonos.png');
+                    $("#Modalimg .imag").prop('href', '/img/bonos.png');
+                    $("#Modalimg .foto").css('background-image', "url('/img/bonos.png')");
+                } else {
+                    $("#Modalimg .foto").css('background-image', `url('${data.baucher}')`);
+                }
+            })
+            $(".fec").daterangepicker({
+                locale: {
+                    'format': 'YYYY-MM-DD',
+                    'separator': ' - ',
+                    'applyLabel': 'Aplicar',
+                    'cancelLabel': 'Cancelar',
+                    'fromLabel': 'De',
+                    'toLabel': '-',
+                    'customRangeLabel': 'Personalizado',
+                    'weekLabel': 'S',
+                    'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                    'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                    'firstDay': 1
+                },
+                singleDatePicker: true,
+                showDropdowns: true,
+                minYear: 2017,
+                maxYear: parseInt(moment().format('YYYY'), 10),
+            });
+            $('.imag').on('click', function () {
+                const link = document.createElement('a');
+                link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
+                link.download = "recibo" + data.id + ".jpg";
+                link.dispatchEvent(new MouseEvent('click'));
+            });
 
-        var zoom = 200
-        $(".foto").on({
-            mousedown: function () {
-                zoom += 50
-                $(this).css("background-size", zoom + "%")
-            },
-            mouseup: function () {
+            var zoom = 200
+            $(".foto").on({
+                mousedown: function () {
+                    zoom += 50
+                    $(this).css("background-size", zoom + "%")
+                },
+                mouseup: function () {
 
-            },
-            mousewheel: function (e) {
-                //console.log(e.deltaX, e.deltaY, e.deltaFactor);
-                if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
-                $(this).css("background-size", zoom + "%")
-            },
-            mousemove: function (e) {
-                let width = this.offsetWidth;
-                let height = this.offsetHeight;
-                let mouseX = e.offsetX;
-                let mouseY = e.offsetY;
+                },
+                mousewheel: function (e) {
+                    //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                    if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
+                    $(this).css("background-size", zoom + "%")
+                },
+                mousemove: function (e) {
+                    let width = this.offsetWidth;
+                    let height = this.offsetHeight;
+                    let mouseX = e.offsetX;
+                    let mouseY = e.offsetY;
 
-                let bgPosX = (mouseX / width * 100);
-                let bgPosY = (mouseY / height * 100);
+                    let bgPosX = (mouseX / width * 100);
+                    let bgPosY = (mouseY / height * 100);
 
-                this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
-            },
-            mouseenter: function (e) {
-                $(this).css("background-size", zoom + "%")
-            },
-            mouseleave: function () {
-                $(this).css("background-size", "100%")
-                this.style.backgroundPosition = "center";
-            }
-        });
-        $('#Modalimg').modal({
-            backdrop: 'static',
-            keyboard: true,
-            toggle: true
-        });
+                    this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+                },
+                mouseenter: function (e) {
+                    $(this).css("background-size", zoom + "%")
+                },
+                mouseleave: function () {
+                    $(this).css("background-size", "100%")
+                    this.style.backgroundPosition = "center";
+                }
+            });
+            $('#Modalimg').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
     })
     estadoscuentas2.on('click', '.no', function () {
         var fila = $(this).parents('tr');
         var data = estadoscuentas2.row(fila).data();
-        if (data.id) {
+        if (data.id && admin == 1) {
             var mensaje = confirm("¿Seguro deseas eliminar este RECIBO DEL PAGO?");
             if (mensaje) {
                 $('#ModalEventos').modal({
@@ -3132,7 +3183,7 @@ if (window.location.pathname == `/links/reportes`) {
         datos = tableOrden.row(this).data();
     })
     var Pago = (id, img, rcb) => {
-        if (rcb === 'null') {
+        if (rcb === 'null' && admin == 1) {
             var imagenes = img === null ? '' : img.indexOf(",") > 0 ? img.split(",") : img
             if (Array.isArray(imagenes)) {
                 var marg = 100 / (imagenes.length - 1);
@@ -3367,27 +3418,13 @@ if (window.location.pathname == `/links/reportes`) {
             data: datoss,
             type: 'POST',
             beforeSend: function (xhr) {
-                /*$('#ModalEventos').modal({
-                    backdrop: 'static',
-                    keyboard: true,
-                    toggle: true
-                });*/
                 $('#Modalimg').modal('hide');
             },
             success: function (data) {
                 if (data) {
                     estadoscuentas2.ajax.reload(null, false);
+                    SMSj('success', 'Recibos generados exitosamente');
                 }
-                /*if (data.r) {
-                    estadoscuentas2.ajax.reload(null, false)
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    SMSj('success', data.m);
-                } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    SMSj('error', data.m);
-                }*/
             }
         });
     })
@@ -4149,7 +4186,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     });
     var EstadoCC = (id, std, actualstd) => {
-        if (actualstd === 9 || actualstd === 15 || actualstd === 3) {
+        if ((actualstd === 4 && USERADMIN === 'HABIB SALDARRIAGA') || actualstd !== 4) {
             $.ajax({
                 type: 'POST',
                 url: '/links/reportes/std',
@@ -4180,6 +4217,8 @@ if (window.location.pathname == `/links/reportes`) {
                     console.log(data);
                 }
             })
+        } else {
+            SMSj('error', `Solicitud no pude ser procesada, no cuentas con los permisos`)
         }
     }
     var CuentaCobro = () => {
