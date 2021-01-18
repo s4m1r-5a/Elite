@@ -8055,6 +8055,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             data: datos,
             async: true,
             beforeSend: function (xhr) {
+                $("#datatabledit select option[value='0']").prop("selected", true);
                 $('#ModalEventos').modal({
                     backdrop: 'static',
                     keyboard: true,
@@ -8064,18 +8065,19 @@ if (window.location == `${window.location.origin}/links/productos`) {
             success: function (data) {
                 if (data) {
                     $('#ideditar').val(data.id)
-                    $(`#datatabledit select[name="categoria"] option[value='${data.categoria}']`).attr("selected", true);
+                    $(`#datatabledit select[name="categoria"] option[value='${data.categoria}']`).prop("selected", true);
+                    $(`#datatabledit .comision option[value='${data.comision.toString()}']`).prop("selected", true);
+                    $(`#datatabledit .maxcomis option[value='${data.maxcomis.toString()}']`).prop("selected", true);
+                    $(`#datatabledit .linea1 option[value='${data.linea1.toString()}']`).prop("selected", true);
+                    $(`#datatabledit .linea2 option[value='${data.linea2.toString()}']`).prop("selected", true);
+                    $(`#datatabledit .linea3 option[value='${data.linea3.toString()}']`).prop("selected", true);
+                    $(`#xcntag option[value='${data.porcentage.toString()}']`).prop("selected", true);
                     $(`.title`).val(data.proyect);
                     $('#totalmtrs2').val(data.totalmtr2)
                     $('#valmtr2').val(Moneda(data.valmtr2)).prop('disabled', true)
                     $('.alterable').val(data.valmtr2 ? 'no' : 'si')
                     $('.lts').val(data.cantidad)
                     $('.mzs').val(data.mzs)
-                    $(`#datatabledit .comision option[value='${data.comision}']`).attr("selected", true);
-                    $(`#datatabledit .maxcomis option[value='${data.maxcomis}']`).attr("selected", true);
-                    $(`#datatabledit .linea1 option[value='${data.linea1}']`).attr("selected", true);
-                    $(`#datatabledit .linea2 option[value='${data.linea2}']`).attr("selected", true);
-                    $(`#datatabledit .linea3 option[value='${data.linea3}']`).attr("selected", true);
                     $(`#datatabledit input[name="separacion"]`).val(Moneda(data.separaciones))
                     $(`#datatabledit input[name="incentivo"]`).val(Moneda(data.incentivo) || 0)
                     $('.totalproyect').val('$' + Moneda(data.valproyect))
@@ -8085,8 +8087,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
                     $("#rangofechas span").html(fi.format("ll") + " - " + ff.format("ll"));
                     $('#finicio').val(fi.format("YYYY-MM-DD"))
                     $('#ffin').val(ff.format("YYYY-MM-DD"))
-                    $(`#xcntag option[value='${data.porcentage}']`).attr("selected", true);
-                    console.log(data.porcentage, data.comision)
                     $("#cuadro2").hide("slow");
                     $("#cuadro1").hide("slow");
                     $("#cuadro3").hide("slow");
