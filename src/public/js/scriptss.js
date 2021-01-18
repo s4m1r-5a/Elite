@@ -111,6 +111,33 @@ function SMSj(tipo, mensaje) {
         timeOut: 7500
     });
 };
+////////////////////////////////* CHATS */////////////////////////////////////
+$('#btn-mas').on('change', function () {
+    if ($(this).is(':checked')) {
+        $('.center').css({
+            'opacity': '1', 'visibility': 'visible',
+            'margin-bottom': '1px'/*,
+    transform: 'translate(-50%, -50%)'*/
+        });
+        $('.contacts').css({
+            opacity: '1', visibility: 'visible'
+        });
+    } else {
+        $('.center').css({
+            'opacity': '0', 'visibility': 'hidden',
+            'margin-bottom': '-50px'/*
+    transform: 'translate(-50%, -50%)'*/
+        });
+        $('.contacts').css({
+            opacity: '0', visibility: 'hidden'
+        });
+    }
+})
+
+var chat = document.getElementById('chat');
+chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+
+/////////////////////////////////////////////////////////////////////////////
 $(document).ready(function () {
     moment.locale('es');
     if (window.location.hostname !== "grupoelitered.com.co") {
@@ -1354,64 +1381,6 @@ if (window.location.pathname == `/links/pagos`) {
             $('.op').remove();
         }
     }
-    /*window.preview = function (input) {
-        if (input.files && input.files[0]) {
-            var marg = 100 / $('#file2')[0].files.length;
-            $('#recibos1').html('');
-            $('.op').remove();
-            $('#montorecibos').val('').hide('slow');
-            $(input.files).each(function () {
-                var reader = new FileReader();
-                reader.readAsDataURL(this);
-                reader.onload = function (e) {
-                    $('#recibos1').append(
-                        `<img src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
-                    );
-                    $('#trarchivos').after(`
-                    <tr class="op">
-                        <th>                     
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                        stroke-linejoin="round" class="feather feather-file-text">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
-                             autocomplete="off" style="padding: 1px; width: 50%;" required>
-                        </th>
-                        <td>
-                            <input class="montos text-center" type="text" name=""
-                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
-                        </td>
-                    </tr>`
-                    );
-                    $('.montos').mask('###.###.###', { reverse: true });
-                    $('.montos').on('change', function () {
-                        var avl = 0;
-                        $('#montorecibos').show('slow')
-                        $('.montos').map(function () {
-                            s = parseFloat($(this).cleanVal()) || 0
-                            avl = avl + s;
-                        });
-                        $('.montorecibos').html(Moneda(avl))
-                        $('#montorecibos').val(avl);
-                    })
-                    $('.recis').on('change', function () {
-                        var avl = '';
-                        $('.recis').map(function () {
-                            s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
-                            avl += s;
-                        });
-                        $('#nrbc').val(avl.slice(0, -1));
-                    })
-                }
-            });
-        }
-    }*/
     window.preview = function (input) {
         if (input.files && input.files[0]) {
             var marg = 100 / $('#file2')[0].files.length;
@@ -1617,6 +1586,7 @@ if (window.location.pathname == `/links/pagos`) {
             });
         }
     });
+
 }
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
@@ -2620,7 +2590,7 @@ if (window.location.pathname == `/links/reportes`) {
             var datos = api.column({ page: 'current' }).data()
             var filas = api.column(10, { page: 'current' }).data();
             body = [];
-            //console.log(datos[0], filas, rows)
+
             filas.each(function (group, i) {
                 var gt = moment(datos[i].fecha).format('YYYY/M/D');
                 var gt2 = moment(datos[i].fech).format('YYYY/M/D');
@@ -2657,7 +2627,6 @@ if (window.location.pathname == `/links/reportes`) {
                                 }
                             }
                         )
-                        //console.log(datos[i], vlr, totaloteanterior)
                         vlr = 0;
                     }
                     $(rows).eq(i).before(
@@ -2710,6 +2679,38 @@ if (window.location.pathname == `/links/reportes`) {
                             },
                             id7: {
                                 content: '$' + Moneda(datos[i].valor), colSpan: 2, styles: {
+                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            }
+                        },
+                        {
+                            id: {
+                                content: 'Sp. ' + gt, styles: {
+                                    halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id2: {
+                                content: 'Dto. ' + datos[i].descuento + '%', styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id3: {
+                                content: 'Cupon: ' + datos[i].cupon, styles: {
+                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id4: {
+                                content: 'Ahorro: $' + Moneda(datos[i].ahorro), colSpan: 2, styles: {
+                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
+                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id6: {
+                                content: 'Total: $' + Moneda(datos[i].total), colSpan: 3, styles: {
                                     halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
                                     fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
                                 }
