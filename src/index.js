@@ -17,6 +17,9 @@ const crypto = require('crypto')
 const nodemailer = require('nodemailer')
 const multer = require('multer');
 const config = require("./config.js");
+const io = require('socket.io');
+const events = require('events');
+const emitter = new events.EventEmitter();
 const token = config.token, apiUrl = config.apiUrl;
 
 const transpoter = nodemailer.createTransport({
@@ -115,10 +118,18 @@ app.use('/links', require('./routes/links'));
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Starting
-app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), () => {
   console.log('Server is in port', app.get('port'));
 
 });
+
+const socket = io(server);
+require('./chats')(socket, emitter);
+
+module.exports = (chat, msg) => {
+  emitter.emit(chat, msg, 200)
+}
+
 async function apiChatApi(method, params) {
   const options = {};
   options['method'] = "POST";
