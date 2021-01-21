@@ -112,12 +112,98 @@ function SMSj(tipo, mensaje) {
     });
 };
 ////////////////////////////////* CHATS */////////////////////////////////////
+$(document).ready(function () {
+    moment.locale('es-mx');
+    $.ajax({
+        url: '/links/chats',
+        type: 'GET',
+        beforeSend: function (xhr) {
+
+        },
+        success: function (data) {
+            if (data.dialogs) {
+                var id = data.dialogs[0].id;
+                var i = `url('${data.dialogs[0].image ? data.dialogs[0].image : 'https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png'})`;
+                var name = data.dialogs[0].name;
+                var tiempo = data.dialogs[0].last_time * 1000;
+                Chatid(id, i, name, tiempo)
+
+                data.dialogs.map((x, i) => {
+                    var fecha = moment(x.last_time * 1000).fromNow()
+                    $('#contactos').append(
+                        `<div class="contact" id="${x.id}">
+                            <div class="pic rogers" style="background-image: url('${x.image ? x.image : 'https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png'}');"></div>
+                            <div class="badge"></div>
+                            <div class="name">${x.name}</div>
+                            <div class="message">${x.metadata.isGroup ? 'Group' : 'Person'} 🍑 ${fecha}</div>
+                            <input type="hidden" class="tiempo" value="${x.last_time * 1000}">
+                        </div>`);
+                });
+                $('.contact').on('click', function () {
+                    var id = $(this).attr('id');
+                    var i = $(this).find('.pic').css('background-image');
+                    var name = $(this).find('.name').html();
+                    var tiempo = $(this).find('.tiempo').val();
+                    Chatid(id, i, name, tiempo)
+                })
+            }
+        }
+    });
+
+})
+var Chatid = (id, img, name, tiempo) => {
+    $.ajax({
+        url: '/links/chats/' + id,
+        type: 'GET',
+        beforeSend: function (xhr) {
+
+        },
+        success: function (data) {
+            if (data.messages) {
+                var fech = null;
+                $('#chat').html('');
+                $('.bar .pic').css('background-image', img)
+                $('.bar .name').html(name);
+                $('.bar .seen').html(moment(parseFloat(tiempo)).fromNow());
+                data.messages.map((x, i) => {
+                    var segundos = x.time * 1000;
+                    var fecha = moment(segundos).calendar()
+                    var indic = fecha.indexOf(' a las');
+                    var dia = indic != -1 ? fecha.substr(0, indic) : fecha; //.format('MM-DD HH:mm');
+                    var f = moment(segundos).format('LT');
+                    $('#chat').prepend(
+                        `${dia !== fech ? `<div class="time">${dia}</div>` : ``}
+                        ${x.fromMe ? `<div class="message parker" id="${x.id}">${x.body} <small class="float-right"> ${f}</small></div>`
+                            : `<div class="message stark" id="${x.id}">${x.body} <small class="float-right"> ${f}</small></div>`}`);
+                    fech = dia;
+                });
+                $('#chat').scrollTop($('#chat').prop('scrollHeight'));
+                /*`<div class="message stark">
+                <div class="typing typing-1"></div>
+                <div class="typing typing-2"></div>
+                <div class="typing typing-3"></div>
+            </div>
+            //Le agrego otro ''Mensaje''
+    $('#divu').append('<div class="chatMessage"></div>');
+    //Fijo el scroll al fondo usando añadiendo una animación (animate)
+    $("#divu").animate({ scrollTop: $('#divu').prop("scrollHeight")}, 1000);`*/
+            }
+        }
+    });
+}
+var socket = io();
+socket.on('chat:message', function (data) {
+    console.log(data.username, data.message);
+});
+
+socket.on('chat:typing', function (data) {
+    console.log(data);
+});
 $('#btn-mas').on('change', function () {
     if ($(this).is(':checked')) {
         $('.center').css({
             'opacity': '1', 'visibility': 'visible',
-            'margin-bottom': '1px'/*,
-    transform: 'translate(-50%, -50%)'*/
+            'margin-bottom': '1px'
         });
         $('.contacts').css({
             opacity: '1', visibility: 'visible'
@@ -125,8 +211,7 @@ $('#btn-mas').on('change', function () {
     } else {
         $('.center').css({
             'opacity': '0', 'visibility': 'hidden',
-            'margin-bottom': '-50px'/*
-    transform: 'translate(-50%, -50%)'*/
+            'margin-bottom': '-50px'
         });
         $('.contacts').css({
             opacity: '0', visibility: 'hidden'
@@ -134,12 +219,22 @@ $('#btn-mas').on('change', function () {
     }
 })
 
+
+/* `<div class="time">
+Today at 11:41
+</div>
+<div class="message parker">
+Hey, man! What's up, Mr Stark? 👋
+</div>
+<div class="message stark">
+Kid, where'd you come from?
+</div>`*/
+
 var chat = document.getElementById('chat');
 chat.scrollTop = chat.scrollHeight - chat.clientHeight;
 
 /////////////////////////////////////////////////////////////////////////////
 $(document).ready(function () {
-    moment.locale('es');
     if (window.location.hostname !== "grupoelitered.com.co") {
         $.ajax({
             url: '/links/desarrollo',
@@ -1853,7 +1948,7 @@ if (window.location.pathname == `/links/reportes`) {
                 }
             },
             {
-                className: "center",
+                className: "centr",
                 data: "imags",
                 render: function (data, method, row) {
                     if (data) {

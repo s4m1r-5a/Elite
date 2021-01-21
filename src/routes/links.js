@@ -9,6 +9,7 @@ const { registro, dataSet, Contactos } = require('../keys');
 const request = require('request');
 const cron = require("node-cron");
 const axios = require('axios');
+const fetch = require('node-fetch');
 const fs = require('fs');
 const readline = require('readline');
 const { google } = require('googleapis');
@@ -371,6 +372,46 @@ router.get('/proyecciones', async (req, res) => {
     sql += ' END' + cuotaa + ' WHERE id IN(' + ID + ')';
     await pool.query(sql);
     res.send(true);
+})
+//////////////////* CHATS */////////////////////
+router.get('/chats', async (req, res) => {
+    const cliente = await pool.query(`SELECT movil FROM clientes`);
+    var moviles = cliente.map((x) => {
+        return x.movil.replace(/ /g, '').length === 10 ? '57' + x.movil.replace(/ /g, '') + '@c.us' : x.movil.replace(/ /g, '') + '@c.us';
+    })
+    async function chats() {
+        const options = { method: 'GET' };
+        const url = 'https://api.chat-api.com/instance107218/dialogs?token=5jn3c5dxvcj27fm0&limit=50&page=0'
+
+        const apiRes = await fetch(url, options);
+        const jsonResponse = await apiRes.json();
+        return jsonResponse;
+    }
+    var b = await chats()
+    var a = await b.dialogs.map((x) => {
+        if (moviles.indexOf(x.id) != -1) {
+            return x
+        }
+    })
+    res.send({ dialogs: a.filter(Boolean) });
+
+})
+router.get('/chats/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    if (id === 'bank') {
+
+    } else {
+        async function chats() {
+            const options = { method: 'GET' };
+            const url = `https://api.chat-api.com/instance107218/messagesHistory?token=5jn3c5dxvcj27fm0&page=0&count=50&chatId=${id}`
+
+            const apiRes = await fetch(url, options);
+            const jsonR = await apiRes.json();
+            return jsonR;
+        }
+        var b = await chats()
+        res.send(b);
+    }
 })
 //////////////////* BANCO */////////////////////
 router.post('/extrabank', async (req, res) => {
