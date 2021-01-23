@@ -175,7 +175,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
                 data.messages.map((x, i) => {
                     var segundos = x.time * 1000;
                     var fecha = moment(segundos).calendar()
-                    var indic = fecha.indexOf(' a las');
+                    var indic = fecha.indexOf(' a la');
                     var dia = indic != -1 ? fecha.substr(0, indic) : fecha; //.format('MM-DD HH:mm');
                     var f = moment(segundos).format('LT');
                     var body = x.body.replace(/[^a-zA-Z 0-9]+/g, '');
@@ -186,7 +186,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
                             : `<div class="message stark" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${x.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
 
                     fech = dia;
-                $('#diah').val(dia);
+                $('#diah').val(`${dia}`);
                 });
                 $('#chat').scrollTop($('#chat').prop('scrollHeight'));
                 /*`<div class="message stark">
@@ -211,7 +211,7 @@ socket.on('messages', function (data) {
         var day = $('#diah').val(); 
         var segundos = data.time * 1000;
         var fecha = moment(segundos).calendar()
-        var indic = fecha.indexOf(' a las');
+        var indic = fecha.indexOf(' a la');
         var dia = indic != -1 ? fecha.substr(0, indic) : fecha; //.format('MM-DD HH:mm');
         var f = moment(segundos).format('LT');
         var body = data.body.replace(/[^a-zA-Z 0-9]+/g, '');
@@ -222,7 +222,7 @@ socket.on('messages', function (data) {
             ${data.fromMe ? `<div class="message parker" id="${t}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
                 : `<div class="message stark" id="${t}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
         $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
-        $('#diah').val(dia);
+        $('#diah').val(`${dia}`);
 
     } else if ($(chatId).length > 0) {
 
