@@ -321,17 +321,6 @@ $('#btn-mas').on('change', function () {
     }
 })
 
-
-/* `<div class="time">
-Today at 11:41
-</div>
-<div class="message parker">
-Hey, man! What's up, Mr Stark? 👋
-</div>
-<div class="message stark">
-Kid, where'd you come from?
-</div>`*/
-
 var chat = document.getElementById('chat');
 chat.scrollTop = chat.scrollHeight - chat.clientHeight;
 
@@ -8173,7 +8162,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     tabledit.on('change', '.cabezal', function () {
         Recorrer()
     });
-    tabledit.on('change', 'tr input:not(.edi, .c), textarea, select:not(.edi, .c)', function () {
+    tabledit.on('change, dblclick', 'tr input:not(.edi, .c), textarea, select:not(.edi, .c)', function () {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
         if (data.estado == 9 || data.estado == 15) {
