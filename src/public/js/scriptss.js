@@ -207,6 +207,7 @@ const socket = io();
 socket.on('messages', function (data) {
     var chatId = "#" + data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
     var t = data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
+    var p = data.id.replace(/[^a-zA-Z 0-9]+/g, '');
     if (t === $('#ChatActivo').val()) {
 
         var day = $('#diah').val();
@@ -220,8 +221,8 @@ socket.on('messages', function (data) {
         $('#typing').length > 0 ? $('#typing').remove() : '';
         $('#chat').append(
             `${dia !== day ? `<div class="time">${dia}</div>` : ``}
-            ${data.fromMe ? `<div class="message parker" id="${t}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
-                : `<div class="message stark" id="${t}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
+            ${data.fromMe ? `<div class="message parker" id="${p}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
+                : `<div class="message stark" id="${p}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
         $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
         $('#diah').val(`${dia}`);
 
