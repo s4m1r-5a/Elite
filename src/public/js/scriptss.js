@@ -169,6 +169,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
                 $('#chat').html('');
                 $('#ChatActivo').val(id2);
                 $('#ChatActivOrg').val(id);
+                $("#" + id2).find('.badge').html(null)
                 img ? $('.bar .pic').css('background-image', img) : '';
                 $('.bar .name').html(name);
                 $('.bar .seen').html(moment(parseFloat(tiempo)).fromNow());
@@ -186,7 +187,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
                             : `<div class="message stark" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${x.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
 
                     fech = dia;
-                $('#diah').val(`${dia}`);
+                    $('#diah').val(`${dia}`);
                 });
                 $('#chat').scrollTop($('#chat').prop('scrollHeight'));
                 /*`<div class="message stark">
@@ -208,7 +209,7 @@ socket.on('messages', function (data) {
     var t = data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
     if (t === $('#ChatActivo').val()) {
 
-        var day = $('#diah').val(); 
+        var day = $('#diah').val();
         var segundos = data.time * 1000;
         var fecha = moment(segundos).calendar()
         var indic = fecha.indexOf(' a la');
