@@ -238,6 +238,7 @@ socket.on('messages', function (data) {
                 <div class="name">${name}</div>
                 <div class="message">${item}</div>
                 <input type="hidden" class="tiempo" value="${tiempo}">
+                <input type="hidden" class="idOrg" value="${data.chatId}">
             </div>`);
         $(chatId).find('.pic').css('background-image', pic)
         $('.contact').on('click', function () {
@@ -259,6 +260,7 @@ socket.on('messages', function (data) {
                 <div class="name">${data.chatName}</div>
                 <div class="message">Person 🍑 ${fecha}</div>
                 <input type="hidden" class="tiempo" value="${data.time * 1000}">
+                <input type="hidden" class="idOrg" value="${data.chatId}">
             </div>`);
         $('.contact').on('click', function () {
             var id = $(this).find('.idOrg').val();
