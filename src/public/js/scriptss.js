@@ -205,8 +205,9 @@ var Chatid = (id, id2, img, name, tiempo) => {
 const socket = io();
 socket.on('messages', function (data) {
     var chatId = "#" + data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
-    if (data.chatId.replace(/[^a-zA-Z 0-9]+/g, '') === $('#ChatActivo').val()) {
-        console.log('esta activo');
+    var t = data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
+    if (t === $('#ChatActivo').val()) {
+
         var day = $('#dia').val();
         var segundos = data.time * 1000;
         var fecha = moment(segundos).calendar()
@@ -216,12 +217,12 @@ socket.on('messages', function (data) {
         var body = data.body.replace(/[^a-zA-Z 0-9]+/g, '');
         var icons = data.id.substr(0, 4) === 'false' ? 'far' : 'fas';
         $('#typing').length > 0 ? $('#typing').remove() : '';
-        $('#chat').prepend(
+        $('#chat').append(
             `${dia !== day ? `<div class="time">${dia}</div>` : ``}
-            ${data.fromMe ? `<div class="message parker" id="${data.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
-                : `<div class="message stark" id="${data.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
+            ${data.fromMe ? `<div class="message parker" id="${t}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
+                : `<div class="message stark" id="${t}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
         $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
-
+        
     } else if ($(chatId).length > 0) {
 
         var num = parseFloat($(chatId).find('.badge').html() || 0) + 1;
@@ -232,7 +233,7 @@ socket.on('messages', function (data) {
 
         $(chatId).remove();
         $('#contactos').find(".contact").first().before(
-            `<div class="contact" id="${data.chatId.replace(/[^a-zA-Z 0-9]+/g, '')}">
+            `<div class="contact" id="${t}">
                 <div class="pic rogers"></div>
                 <div class="badge">${num}</div>
                 <div class="name">${name}</div>
@@ -254,7 +255,7 @@ socket.on('messages', function (data) {
 
         var fecha = moment(data.time * 1000).fromNow()
         $('#contactos').find(".contact").first().before(
-            `<div class="contact" id="${data.chatId.replace(/[^a-zA-Z 0-9]+/g, '')}">
+            `<div class="contact" id="${t}">
                 <div class="pic rogers" style="background-image: url('https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png');"></div>
                 <div class="badge">1</div>
                 <div class="name">${data.chatName}</div>
@@ -286,7 +287,7 @@ $("#send").keypress(function (e) {
             id: $('#ChatActivOrg').val(),
             body: $(this).val()
         });
-        $('#chat').prepend(
+        $('#chat').append(
             `<div class="message stark" id="typing">
                 <div class="typing typing-1"></div>
                 <div class="typing typing-2"></div>
