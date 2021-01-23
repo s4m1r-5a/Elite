@@ -114,44 +114,49 @@ function SMSj(tipo, mensaje) {
 ////////////////////////////////* CHATS */////////////////////////////////////
 $(document).ready(function () {
     moment.locale('es-mx');
-    $.ajax({
-        url: '/links/chats',
-        type: 'GET',
-        beforeSend: function (xhr) {
+    var Chats = () => {
+        $.ajax({
+            url: '/links/chats',
+            type: 'GET',
+            beforeSend: function (xhr) {
 
-        },
-        success: function (data) {
-            if (data.dialogs) {
-                var id = data.dialogs[0].id;
-                var i = `url('${data.dialogs[0].image ? data.dialogs[0].image : 'https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png'})`;
-                var name = data.dialogs[0].name;
-                var tiempo = data.dialogs[0].last_time * 1000;
-                Chatid(id, i, name, tiempo)
+            },
+            success: function (data) {
+                if (data.dialogs) {
+                    var id = data.dialogs[0].id;
+                    var id2 = data.dialogs[0].id.replace(/[^a-zA-Z 0-9]+/g, '');
+                    var i = data.dialogs[0].image || null;
+                    var name = data.dialogs[0].name;
+                    var tiempo = data.dialogs[0].last_time * 1000;
+                    Chatid(id, id2, i, name, tiempo)
 
-                data.dialogs.map((x, i) => {
-                    var fecha = moment(x.last_time * 1000).fromNow()
-                    $('#contactos').append(
-                        `<div class="contact" id="${x.id}">
+                    data.dialogs.map((x, i) => {
+                        var fecha = moment(x.last_time * 1000).fromNow()
+                        $('#contactos').append(
+                            `<div class="contact" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">
                             <div class="pic rogers" style="background-image: url('${x.image ? x.image : 'https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png'}');"></div>
                             <div class="badge"></div>
                             <div class="name">${x.name}</div>
                             <div class="message">${x.metadata.isGroup ? 'Group' : 'Person'} 🍑 ${fecha}</div>
                             <input type="hidden" class="tiempo" value="${x.last_time * 1000}">
+                            <input type="hidden" class="idOrg" value="${x.id}">
                         </div>`);
-                });
-                $('.contact').on('click', function () {
-                    var id = $(this).attr('id');
-                    var i = $(this).find('.pic').css('background-image');
-                    var name = $(this).find('.name').html();
-                    var tiempo = $(this).find('.tiempo').val();
-                    Chatid(id, i, name, tiempo)
-                })
+                    });
+                    $('.contact').on('click', function () {
+                        var id = $(this).find('.idOrg').val();
+                        var id2 = $(this).attr('id');
+                        var i = $(this).find('.pic').css('background-image');
+                        var name = $(this).find('.name').html();
+                        var tiempo = $(this).find('.tiempo').val();
+                        Chatid(id, id2, i, name, tiempo)
+                    })
+                }
             }
-        }
-    });
-
+        });
+    }
+    Chats();
 })
-var Chatid = (id, img, name, tiempo) => {
+var Chatid = (id, id2, img, name, tiempo) => {
     $.ajax({
         url: '/links/chats/' + id,
         type: 'GET',
@@ -162,7 +167,9 @@ var Chatid = (id, img, name, tiempo) => {
             if (data.messages) {
                 var fech = null;
                 $('#chat').html('');
-                $('.bar .pic').css('background-image', img)
+                $('#ChatActivo').val(id2);
+                $('#ChatActivOrg').val(id);
+                img ? $('.bar .pic').css('background-image', img) : '';
                 $('.bar .name').html(name);
                 $('.bar .seen').html(moment(parseFloat(tiempo)).fromNow());
                 data.messages.map((x, i) => {
@@ -171,12 +178,16 @@ var Chatid = (id, img, name, tiempo) => {
                     var indic = fecha.indexOf(' a las');
                     var dia = indic != -1 ? fecha.substr(0, indic) : fecha; //.format('MM-DD HH:mm');
                     var f = moment(segundos).format('LT');
+                    var body = x.body.replace(/[^a-zA-Z 0-9]+/g, '');
+                    var icons = x.id.substr(0, 4) === 'false' ? 'far' : 'fas';
                     $('#chat').prepend(
                         `${dia !== fech ? `<div class="time">${dia}</div>` : ``}
-                        ${x.fromMe ? `<div class="message parker" id="${x.id}">${x.body} <small class="float-right"> ${f}</small></div>`
-                            : `<div class="message stark" id="${x.id}">${x.body} <small class="float-right"> ${f}</small></div>`}`);
+                        ${x.fromMe ? `<div class="message parker" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
+                            : `<div class="message stark" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${x.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
+
                     fech = dia;
                 });
+                $('#dia').val(fech);
                 $('#chat').scrollTop($('#chat').prop('scrollHeight'));
                 /*`<div class="message stark">
                 <div class="typing typing-1"></div>
@@ -184,21 +195,106 @@ var Chatid = (id, img, name, tiempo) => {
                 <div class="typing typing-3"></div>
             </div>
             //Le agrego otro ''Mensaje''
-    $('#divu').append('<div class="chatMessage"></div>');
+    $('#chat').append('<div class="chatMessage"></div>');
     //Fijo el scroll al fondo usando añadiendo una animación (animate)
-    $("#divu").animate({ scrollTop: $('#divu').prop("scrollHeight")}, 1000);`*/
+    $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight")}, 1000);`*/
             }
         }
     });
 }
-var socket = io();
-socket.on('chat:message', function (data) {
-    console.log(data.username, data.message);
+const socket = io();
+socket.on('messages', function (data) {
+    var chatId = "#" + data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
+    if (data.chatId.replace(/[^a-zA-Z 0-9]+/g, '') === $('#ChatActivo').val()) {
+        console.log('esta activo');
+        var day = $('#dia').val();
+        var segundos = data.time * 1000;
+        var fecha = moment(segundos).calendar()
+        var indic = fecha.indexOf(' a las');
+        var dia = indic != -1 ? fecha.substr(0, indic) : fecha; //.format('MM-DD HH:mm');
+        var f = moment(segundos).format('LT');
+        var body = data.body.replace(/[^a-zA-Z 0-9]+/g, '');
+        var icons = data.id.substr(0, 4) === 'false' ? 'far' : 'fas';
+        $('#typing').length > 0 ? $('#typing').remove() : '';
+        $('#chat').prepend(
+            `${dia !== day ? `<div class="time">${dia}</div>` : ``}
+            ${data.fromMe ? `<div class="message parker" id="${data.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
+                : `<div class="message stark" id="${data.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
+        $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
+
+    } else if ($(chatId).length > 0) {
+
+        var num = parseFloat($(chatId).find('.badge').html() || 0) + 1;
+        var pic = $(chatId).find('.pic').css('background-image'),
+            name = $(chatId).find('.name').html(),
+            item = $(chatId).find('.message').html(),
+            tiempo = $(chatId).find('.tiempo').val();
+
+        $(chatId).remove();
+        $('#contactos').find(".contact").first().before(
+            `<div class="contact" id="${data.chatId.replace(/[^a-zA-Z 0-9]+/g, '')}">
+                <div class="pic rogers"></div>
+                <div class="badge">${num}</div>
+                <div class="name">${name}</div>
+                <div class="message">${item}</div>
+                <input type="hidden" class="tiempo" value="${tiempo}">
+            </div>`);
+        $(chatId).find('.pic').css('background-image', pic)
+        $('.contact').on('click', function () {
+            var id = $(this).find('.idOrg').val();
+            var id2 = $(this).attr('id');
+            var i = $(this).find('.pic').css('background-image');
+            var name = $(this).find('.name').html();
+            var tiempo = $(this).find('.tiempo').val();
+            Chatid(id, id2, i, name, tiempo)
+        })
+
+    } else {
+
+        var fecha = moment(data.time * 1000).fromNow()
+        $('#contactos').find(".contact").first().before(
+            `<div class="contact" id="${data.chatId.replace(/[^a-zA-Z 0-9]+/g, '')}">
+                <div class="pic rogers" style="background-image: url('https://c0.klipartz.com/pngpicture/719/903/gratis-png-iconos-de-computadora-avatar-icono-de-avatar.png');"></div>
+                <div class="badge">1</div>
+                <div class="name">${data.chatName}</div>
+                <div class="message">Person 🍑 ${fecha}</div>
+                <input type="hidden" class="tiempo" value="${data.time * 1000}">
+            </div>`);
+        $('.contact').on('click', function () {
+            var id = $(this).find('.idOrg').val();
+            var id2 = $(this).attr('id');
+            var i = $(this).find('.pic').css('background-image');
+            var name = $(this).find('.name').html();
+            var tiempo = $(this).find('.tiempo').val();
+            Chatid(id, id2, i, name, tiempo)
+        })
+    }
 });
 
-socket.on('chat:typing', function (data) {
-    console.log(data);
+socket.on('typing', function (data) {
+    if (data.chatId.replace(/[^a-zA-Z 0-9]+/g, '') === $('#ChatActivo').val()) {
+        $("#" + data.id.replace(/[^a-zA-Z 0-9]+/g, '')).find('.fa-copyright').removeClass("fas").addClass('far');
+    }
 });
+
+$("#send").keypress(function (e) {
+    var code = (e.keyCode ? e.keyCode : e.which);
+    if (code == 13) {
+        socket.emit('message', {
+            id: $('#ChatActivOrg').val(),
+            body: $(this).val()
+        });
+        $('#chat').prepend(
+            `<div class="message stark" id="typing">
+                <div class="typing typing-1"></div>
+                <div class="typing typing-2"></div>
+                <div class="typing typing-3"></div>
+            </div>`);
+        $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
+        $(this).val('');
+    }
+});
+
 $('#btn-mas').on('change', function () {
     if ($(this).is(':checked')) {
         $('.center').css({

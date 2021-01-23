@@ -5,6 +5,7 @@ const nodemailer = require('nodemailer')
 const pool = require('../database');
 const crypto = require('crypto');
 const sms = require('../sms.js');
+const MSGS = require('../index.js');
 
 router.get('/', async (req, res) => {
     res.render('index');
@@ -16,96 +17,101 @@ router.get('/condiciones', async (req, res) => {
     res.render('condiciones');
 });
 router.post('/webhook', async function (req, res) {
-    const { messages, ack } = req.body;
+    const { messages, ack, chatUpdate, previous_substatus } = req.body;
     console.log(ack ? 'bien' : 'nada');
-    require('../index.js')('samir', 'todo se encuentra muy bien carajo ');
-    [{
-        id: 'false_573175386881@c.us_3A46E3BC12D770B30A20',
-        body:
-            'Les agradezco hacer llegar los recibos por este medio o por correo electrónico',
-        fromMe: false,
-        self: 0,
-        isForwarded: 0,
-        author: '573175386881@c.us',
-        time: 1611176338,
-        chatId: '573175386881@c.us',
-        messageNumber: 26637,
-        type: 'chat',
-        senderName: 'VICTOR MANUEL FORBES OROZCO',
-        caption: null,
-        quotedMsgBody: null,
-        quotedMsgId: null,
-        quotedMsgType: null,
-        chatName: 'VICTOR MANUEL FORBES OROZCO'
-    },
-    {
-        "messages": [
-            {
-                "id": "false_17472822486@c.us_DF38E6A25B42CC8CCE57EC40F",
-                "body": "Ok!",
-                "type": "chat",
-                "senderName": "Ilya",
-                "fromMe": true,
-                "author": "17472822486@c.us",
-                "time": 1504208593,
-                "chatId": "17472822486@c.us",
-                "messageNumber": 100
-            }
-        ]
-    },
-    {
-        "chatUpdate": [
-            {
-                "old": {
-                    "id": "1493046918-13216468942@g.us",
-                    "name": "Ok!",
-                    "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
-                    "metadata": {
-                        "groupInviteLink": null,
-                        "isGroup": true,
-                        "participants": [
-                            "17162266665@c.us",
-                            "17162277775@c.us"
-                        ]
-                    },
-                    "last_time": 0
-                },
-                "new": {
-                    "id": "1493046918-13216468942@g.us",
-                    "name": "Ok!",
-                    "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
-                    "metadata": {
-                        "groupInviteLink": null,
-                        "isGroup": true,
-                        "participants": [
-                            "17162266665@c.us",
-                            "17162277775@c.us"
-                        ]
-                    },
-                    "last_time": 0
+    [
+        {
+            "messages": [
+                {
+                    "id": "false_17472822486@c.us_DF38E6A25B42CC8CCE57EC40F",
+                    "body": "Ok!",
+                    "type": "chat",
+                    "senderName": "Ilya",
+                    "fromMe": true,
+                    "author": "17472822486@c.us",
+                    "time": 1504208593,
+                    "chatId": "17472822486@c.us",
+                    "messageNumber": 100
                 }
-            }
-        ]
-    },
-    {
-        "ack": [
-            {
-                "id": "false_17472822486@c.us_DF38E6A25B42CC8CCE57EC40F",
-                "queueNumber": 100,
-                "chatId": "17472822486@c.us",
-                "status": "viewed"
-            }
-        ]
-    },
-    {
-        "status": "authenticated",
-        "previous_status": "authenticated",
-        "substatus": "normal",
-        "previous_substatus": "battery_low_2",
-        "instanceId": "107218"
-    }]
-
-    for (var i in data.messages) {
+            ]
+        },
+        {
+            "chatUpdate": [
+                {
+                    "old": {
+                        "id": "1493046918-13216468942@g.us",
+                        "name": "Ok!",
+                        "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
+                        "metadata": {
+                            "groupInviteLink": null,
+                            "isGroup": true,
+                            "participants": [
+                                "17162266665@c.us",
+                                "17162277775@c.us"
+                            ]
+                        },
+                        "last_time": 0
+                    },
+                    "new": {
+                        "id": "1493046918-13216468942@g.us",
+                        "name": "Ok!",
+                        "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
+                        "metadata": {
+                            "groupInviteLink": null,
+                            "isGroup": true,
+                            "participants": [
+                                "17162266665@c.us",
+                                "17162277775@c.us"
+                            ]
+                        },
+                        "last_time": 0
+                    }
+                }
+            ]
+        },
+        {
+            "ack": [
+                {
+                    "id": "true573175386881@c.us_3EB0DA8B4C1A96DA52C3",
+                    "queueNumber": 100,
+                    "chatId": "573175386881@c.us",
+                    "status": "viewed"
+                }
+            ]
+        },
+        {
+            "status": "authenticated",
+            "previous_status": "authenticated",
+            "substatus": "normal",
+            "previous_substatus": "battery_low_2",
+            "instanceId": "107218"
+        }]
+    if (messages) {
+        messages
+            /*.filter((x) => {
+                return !x.fromMe;
+            })*/
+            .map((x) => {
+                /*const author = x.author;
+                const body = x.body.replace(/[^a-zA-Z 0-9.,?!¡¿]+/g, '');
+                const chatId = x.chatId;
+                const senderName = x.senderName;*/
+                require('../index.js')('messages', x);
+            });
+    } else if (chatUpdate) {
+        chatUpdate.map((x) => {
+            require('../index.js')('chatUpdate', x);
+        });
+    } else if (ack) {
+        ack.map((x) => {
+            require('../index.js')('typing', x);
+        });
+    } else if (previous_substatus) {
+        previous_substatus
+    }
+    res.send(true);
+    res.end();
+    /*for (var i in data.messages) {
         const author = data.messages[i].author;
         const body = data.messages[i].body;
         const chatId = data.messages[i].chatId;
@@ -165,8 +171,7 @@ router.post('/webhook', async function (req, res) {
             🔙 Para volver al menú, envíame "#"`
             await apiChatApi('message', { chatId: chatId, body: text });
         }
-    }
-    res.send('Ok');
+    }*/
 });
 
 const transpoter = nodemailer.createTransport({
@@ -339,6 +344,18 @@ router.post(`/venta`, async (req, res) => {
 
     }
 });
+async function apiChatApi(method, params) {
+    const options = {};
+    options['method'] = "POST";
+    options['body'] = JSON.stringify(params);
+    options['headers'] = { 'Content-Type': 'application/json' };
+
+    const url = `${apiUrl}/${method}?token=${token}`;
+
+    const apiResponse = await fetch(url, options);
+    const jsonResponse = await apiResponse.json();
+    return jsonResponse;
+}
 
 function EnviarWTSAP(movil, body, smsj) {
     var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
