@@ -186,6 +186,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
                             : `<div class="message stark" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${x.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
 
                     fech = dia;
+                $('#dia').val(dia);
                 });
                 $('#dia').val(fech);
                 $('#chat').scrollTop($('#chat').prop('scrollHeight'));
@@ -208,7 +209,7 @@ socket.on('messages', function (data) {
     var t = data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
     if (t === $('#ChatActivo').val()) {
 
-        var day = $('#dia').val();
+        var day = $('#dia').val(); 
         var segundos = data.time * 1000;
         var fecha = moment(segundos).calendar()
         var indic = fecha.indexOf(' a las');
@@ -222,7 +223,8 @@ socket.on('messages', function (data) {
             ${data.fromMe ? `<div class="message parker" id="${t}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
                 : `<div class="message stark" id="${t}">${data.body} &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`}`);
         $("#chat").animate({ scrollTop: $('#chat').prop("scrollHeight") }, 1000);
-        
+        $('#dia').val(dia);
+
     } else if ($(chatId).length > 0) {
 
         var num = parseFloat($(chatId).find('.badge').html() || 0) + 1;
