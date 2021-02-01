@@ -2024,7 +2024,7 @@ if (window.location.pathname == `/links/reportes`) {
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
-                                                ${USERADMIN === 'HABIB SALDARRIAGA' ?
+                                                ${USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO' ?
                             `<a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
                              <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
                              <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>` : ''}
@@ -9443,7 +9443,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 this.style.backgroundPosition = "center";
             }
         });
-        if (admin == 1 && USERADMIN === 'ARELYS SAAVEDRA ALVAREZ') {
+        if (admin == 1 && (USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'HERLYS CASSERES HENRY')) {
             $('.dropdown-item').show()
             $('#nove').show()
         } else {
