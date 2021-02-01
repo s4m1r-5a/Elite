@@ -1311,7 +1311,7 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 })
 router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
-    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
+    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto,
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
     p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
     c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, s.concepto, s.stado
@@ -1339,18 +1339,26 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
 })
 router.get('/editordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
-    /*sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, 
+    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
     p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
-    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, s.concepto, s.stado
-    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id 
-    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, COUNT(s.ids) AS t, 
+    SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, s.monto)) AS Montos, p.status 
+    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc  
     LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
     INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
-    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ? LIMIT 1`
+    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ?
+    GROUP BY p.id;`;
+    sql2 = `SELECT SUM(IF(c.tipo = 'SEPARACION', 1, '')) AS SEPARACION,
+    SUM(IF(c.tipo = 'INICIAL', 1, '')) AS INICIAL,
+    SUM(IF(c.tipo = 'FINANCIACION', 1, '')) AS FINANCIACION
+    FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id 
+    WHERE p.tipobsevacion IS NULL AND p.id = ?`;
 
     const orden = await pool.query(sql, id);
-    var abono = 0;
+    const cuotas = await pool.query(sql2, id);
+    /*var abono = 0;
     orden.map((x) => {
         if (x.concepto === 'ABONO' && x.stado == 4) {
             abono = 1;
@@ -1363,9 +1371,108 @@ router.get('/editordn/:id', isLoggedIn, async (req, res) => {
         //console.log(orden)
         res.render('links/editordn', { orden, id });
     }*/
-    res.render('links/editordn', { id });
-
+    res.render('links/editordn', { id, orden, cuotas });
 })
+router.post('/ordn/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
+    const orden = await pool.query(sql, id);
+    console.log(orden)
+    body = { "data": orden };
+    res.send(body);
+})
+router.post('/ordne/', isLoggedIn, async (req, res) => {
+    const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota,
+        xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo,
+        cuota, rcuota, std, preventa } = req.body;
+
+    var orden = {
+        lote: lt, vrmt2: vmtr2.replace(/\./g, ''),
+        cliente: Array.isArray(clientes) ? clientes[0] : clientes,
+        asesor, numerocuotaspryecto: parseFloat(inicialcuotas) + parseFloat(financiacion),
+        cupon: idbono ? idbono : 1,
+        inicialdiferida: inicialcuotas,
+        ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
+        separar: rcuota[0].replace(/\./g, ''),
+        iniciar: xcntag, cuot: Math.round(cuot)
+    }
+
+    if (promesa) {
+        orden.promesa = promesa;
+        orden.autoriza = req.user.fullname;
+        orden.status = promesa;
+    }
+    if (Array.isArray(clientes)) {
+        switch (clientes.length) {
+            case 2:
+                orden.cliente2 = clientes[1];
+                break;
+            case 3:
+                orden.cliente2 = clientes[1];
+                orden.cliente3 = clientes[2];
+                break;
+            case 4:
+                orden.cliente2 = clientes[1];
+                orden.cliente3 = clientes[2];
+                orden.cliente4 = clientes[3];
+                break;
+        }
+    }
+    await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [orden, preventa]);
+
+
+
+    var ID = '', kuotas = 'UPDATE cuotas SET cuota = CASE id ',
+        numeros = '', rkuotas = '', fechas = '', stds = '', kuot = false;
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+
+    id.map((c, i) => {
+        if (c == '0') {
+            kuot = true;
+            cuotas += `(${preventa}, '${tipo[i]}', ${n[i]}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[i].replace(/\./g, '')}),`;
+        } else {
+            ID += c + ', ';
+            kuotas += ' WHEN ' + c + ' THEN ' + rcuota[i].replace(/\./g, '');
+            numeros += ' WHEN ' + c + ' THEN ' + n[i];
+            rkuotas += ' WHEN ' + c + ' THEN ' + cuota[i].replace(/\./g, '');
+            fechas += ' WHEN ' + c + ' THEN ' + `'${fecha[i]}'`;
+            stds += ' WHEN ' + c + ' THEN ' + std[i];
+        }
+    });
+    ID = ID.slice(0, -2);
+    kuotas += ' END, ncuota = CASE id ' + numeros + ' END, proyeccion = CASE id ' + rkuotas + ' END, fechs = CASE id ' + fechas + ' END, estado = CASE id ' + stds + ' END WHERE id IN(' + ID + ')';
+
+    var eli = 'DELETE FROM cuotas WHERE ';
+    if (Array.isArray(idcuota)) {
+        idcuota.map((c, i) => {
+            i === 0 ? eli += 'id = ' + c : eli += ' AND id = ' + c;
+        });
+    } else {
+        eli += 'id = ' + idcuota;
+    }
+    //console.log(req.body, kuotas, cuotas, orden, eli, idcuota ? idcuota : 'nada')
+    await pool.query(kuotas);
+    kuot ? await pool.query(cuotas.slice(0, -1)) : '';
+    idcuota ? await pool.query(eli) : '';
+    res.send(true);
+})
+router.post('/separacion/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    const fila = await pool.query(`SELECT p.extraordinariameses, p.cuotaextraordinaria, p.extran, 
+    p.separar, p.vrmt2, p.iniciar, p.cupon, p.ahorro, p.obsevacion, c.descuento, c.pin FROM preventa p  
+    LEFT JOIN cupones c ON p.cupon = c.id WHERE p.id = ?`, id);
+    res.send(fila[0]);
+});
+router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params
+    const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
+    WHERE v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`, id);
+    const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
+    const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+    const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`, id);
+    res.send({ productos, asesores, clientes, orden });
+
+});
 router.post('/editarorden', isLoggedIn, async (req, res) => {
     //console.log(req.body);
     const { orden, separacion, cuotaInicial, vrm2, cuotaFinanciacion, separar,
