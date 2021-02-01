@@ -9443,7 +9443,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 this.style.backgroundPosition = "center";
             }
         });
-        if (admin == 1) {
+        if (admin == 1 && USERADMIN === 'ARELYS SAAVEDRA ALVAREZ') {
             $('.dropdown-item').show()
             $('#nove').show()
         } else {
