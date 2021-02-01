@@ -4360,13 +4360,11 @@ if (window.location.pathname == `/links/reportes`) {
             aasesor = data.nam;
             iid = data.ids;
             fila.toggleClass('selected');
-            console.log('YA NO ES NULL');
         } else if (iid === data.ids) {
             $(fila).removeClass('selected');
             aasesor = null;
             iid = null;
         } else if (aasesor !== data.nam && aasesor) {
-            console.log('NOMBRE DIFERENTE')
             SMSj('error', 'No puede seleccionar este pago ya que no pertenece al asesor')
         } else {
             data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');

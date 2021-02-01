@@ -2048,7 +2048,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'cuentacobro') {
         const { total, descuentos, solicitudes, usuario, fechas, ID } = req.body;
         if (ID) {
-            var pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+            var pdf = '/uploads/' + req.files[0].filename;  //'https://grupoelitered.com.co/uploads/' + 
             await pool.query(`UPDATE pagos SET ? WHERE id = ?`, [{ cuentacobro: pdf }, ID]);
             res.send(true);
         } else {
