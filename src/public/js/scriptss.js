@@ -5385,8 +5385,38 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             return true;
         }
     );
+    var cuotaextraordinaria = parseFloat($('#cuotaextraordinaria').val());
+    var extraordinariameses = parseFloat($('#extraordinariameses').val());
+    var Montos = parseFloat($('#Montos').val());
+    var Pagos = parseFloat($('#Pagos').val());
+    var vrmt2 = parseFloat($('#vrmt2').val());
+    var mtro2 = parseFloat($('#mtro2').val());
+    var iniciar = parseFloat($('#iniciar').val());
+    var separar = parseFloat($('#separar').val());
+    var descuento = parseFloat($('#descuento').val());
+    var extran = parseFloat($('#extran').val());
+    var ncal = parseFloat($('#ncal').val());
+    var financia = parseFloat($('#financia').val());
+    var valor = vrmt2 * mtro2
+    var status = $('#status').val();
+    var kupon = $('#kupon').val();
+    var cuota = $('#cuota').val();
+    var pin = $('#pin').val();
+    pin = pin === 'NO' || !pin ? 0 : pin;
+    var OrdnSepr = $('#ID-Sep').val();
+    var prodct = $('#prodct').val() || 0;
+    var ecesr = $('#ecesr').val() || 0;
+    var c1 = $('#clent1').val() || 0;
+    var c2 = $('#clent2').val() || 0;
+    var c3 = $('#clent3').val() || 0;
+    var c4 = $('#clent4').val() || 0;
     var ya = moment(new Date()).format('YYYY-MM-DD');
-    var R = true;
+    var R = true, T = true, eliminar = '';
+    $('#ModalEventos').modal({
+        toggle: true,
+        backdrop: 'static',
+        keyboard: true,
+    });
     $(document).ready(function () {
         var bono = 0;
         $(".select2").each(function () {
@@ -5401,64 +5431,132 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 });
         });
         $('#proyectos').change(function () {
-            $.ajax({
-                type: 'POST',
-                url: '/links/cartera/' + $(this).val(),
-                //async: true,
-                beforeSend: function (xhr) {
-                    //tabledit.state.save();
-                },
-                success: function (data) {
-                    if (data) {
-                        var porg = data.inicial * 100 / data.valor;
-                        $('#mtr2').val(data.mtr2);
-                        $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        $('#inicial').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        $('#total').val(Moneda(Math.round(data.valor)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        $(`#xcntag option[value='${porg}']`).attr("selected", true);
-                        $('#ini').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        $('#fnc').val(Moneda(Math.round(data.valor - data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        if ($('#Separar').val()) {
-                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
-                        } else {
-                            CONT()
+            var pr = prodct == $(this).val() ? true : false;
+            if (pr) {
+                var ini = iniciar * valor / 100;
+                $('#mtr2').val(mtro2);
+                $('#vmtr2').val(Moneda(Math.round(vrmt2)));
+                $('#inicial').val(Moneda(Math.round(ini)));
+                $('#total').val(Moneda(Math.round(valor)));
+                $(`#xcntag option[value='${iniciar}']`).attr("selected", true);
+                $(`#promesa option[value='${status}']`).prop("selected", true);
+                $('#ini').val(Moneda(Math.round(ini)));
+                $('#fnc').val(Moneda(Math.round(valor - ini)));
+                if (pin) {
+                    $('.quitar').show('slow');
+                    var precio = valor;
+                    var ahorr = Math.round(valor * descuento / 100)
+                    $('#idbono').val(kupon);
+                    $('#cupon').val(pin);
+                    $('#ahorro').val(Moneda(ahorr));
+                    precio = precio - ahorr;
+                    inicial = precio * iniciar / 100;
+                    $('#cuponx100to').val(descuento + '%');
+                    $('#desinicial').val(Moneda(Math.round(inicial)))
+                    $('#destotal').val(Moneda(Math.round(precio)));
+                    $('#ini').val(Moneda(Math.round(inicial)))
+                    $('#fnc').val(Moneda(Math.round(precio - inicial)));
+                }
+                $('#ModalEventos').modal('hide')
+                /*$('#ModalEventos').one('shown.bs.modal', function () {
+                    $('#ModalEventos').modal('hide')
+                }).modal('hide');*/
+                if (T) {
+                    CONT(separar);
+                    T = false;
+                } else {
+                    FINANCIAR(1, '', $('#Separar').val().replace(/\./g, ''));
+                }
+            } else {
+                var link = '/links/cartera/' + $(this).val();
+                $.ajax({
+                    type: 'POST',
+                    url: link,
+                    beforeSend: function (xhr) {
+                        //tabledit.state.save();
+                    },
+                    success: function (data) {
+                        if (data) {
+                            if (data.valor >= valor) {
+                                var porg = data.inicial * 100 / data.valor;
+                                $('#mtr2').val(data.mtr2);
+                                $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                                $('#inicial').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                                $('#total').val(Moneda(Math.round(data.valor)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                                $(`#xcntag option[value='${porg}']`).attr("selected", true);
+                                $('#ini').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                                $('#fnc').val(Moneda(Math.round(data.valor - data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                                if (pin) {
+                                    var precio = data.valor;
+                                    var ahorr = Math.round(data.valor * descuento / 100)
+                                    $('#idbono').val(kupon);
+                                    $('#cupon').val(pin);
+                                    $('#ahorro').val(Moneda(ahorr));
+                                    precio = precio - ahorr;
+                                    inicial = precio * iniciar / 100;
+                                    $('#cuponx100to').val(descuento + '%');
+                                    $('#desinicial').val(Moneda(Math.round(inicial)))
+                                    $('#destotal').val(Moneda(Math.round(precio)));
+                                    $('#ini').val(Moneda(Math.round(inicial)))
+                                    $('#fnc').val(Moneda(Math.round(precio - inicial)));
+                                } else {
+                                    $('#idbono').val('');
+                                    $('#cupon').val('');
+                                    $('#ahorro').val('');
+                                    $('#cuponx100to').val('');
+                                    $('#desinicial').val('')
+                                    $('#destotal').val('');
+                                }
+                                FINANCIAR(1, '', $('#Separar').val().replace(/\./g, ''));
+                            } else {
+                                SMSj('error', 'No es posible cambiar el producto por uno de menor valor');
+                                proyectos.val(prodct).trigger('change');
+                            }
                         }
                     }
-                }
-            })
+                })
+            }
         })
         $('#financiacion-btn').click(function () {
-            var c = 1;
-            crearcartera
-                .rows()
-                .data()
-                .filter((x, c) => {
-                    return $(x[3]).val() === 'FINANCIACION';
-                }).map((x, j) => {
-                    c = j + 2;
-                })
-            $('#financiacion').val(c)
-            if ($('#Separar').val()) {
-                FINANCIAR('FINANCIACION', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+            if (eliminar) {
+                SMSj('info', 'No es posible agregar cuotas despues de haber eliminado una, actualiza el modulo y agrega las cuotas luego si podras eliminar las cuotas que desees');
             } else {
-                FINANCIAR('FINANCIACION', c, 0)
+                var c = 1;
+                crearcartera
+                    .rows()
+                    .data()
+                    .filter((x, c) => {
+                        return $(x[4]).val() === 'FINANCIACION';
+                    }).map((x, j) => {
+                        c = j + 2;
+                    })
+                $('#financiacion').val(c)
+                if ($('#Separar').val()) {
+                    FINANCIAR('FINANCIACION', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+                } else {
+                    FINANCIAR('FINANCIACION', c, 0)
+                }
             }
         })
         $('#inicialcuotas-btn').click(function () {
-            var c = 1;
-            crearcartera
-                .rows()
-                .data()
-                .filter((x, c) => {
-                    return $(x[3]).val() === 'INICIAL';
-                }).map((x, j) => {
-                    c = j + 2;
-                })
-            $('#inicialcuotas').val(c)
-            if ($('#Separar').val()) {
-                FINANCIAR('INICIAL', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+            if (eliminar) {
+                SMSj('info', 'No es posible agregar cuotas despues de haber eliminado una, actualiza el modulo y agrega las cuotas que desees primero luego si podras eliminar las cuotas que desees');
             } else {
-                FINANCIAR('INICIAL', c, 0)
+                var c = 1;
+                crearcartera
+                    .rows()
+                    .data()
+                    .filter((x, c) => {
+                        return $(x[4]).val() === 'INICIAL';
+                    }).map((x, j) => {
+                        c = j + 2;
+                    })
+                $('#inicialcuotas').val(c)
+                if ($('#Separar').val()) {
+                    FINANCIAR('INICIAL', c, parseFloat($('#Separar').val().replace(/\./g, '')))
+                } else {
+                    FINANCIAR('INICIAL', c, 0);
+                }
             }
         })
         $('#cupon').change(function () {
@@ -5493,9 +5591,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                                 $('#ini').val(Moneda(Math.round(inicial)))
                                 $('#fnc').val(Moneda(Math.round(precio - inicial)));
                                 if ($('#Separar').val()) {
-                                    CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                                    CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
                                 } else {
-                                    CONT()
+                                    CONT(0, 1);
                                 }
                             }
                             bono = data[0].pin;
@@ -5514,7 +5612,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             var total = $('#total').val().replace(/\./g, '');
             var totaldesc = $('#destotal').val().replace(/\./g, '');
             var inicl = total * porcntg / 100;
-            console.log(inicl, total, porcntg, totaldesc)
+
             $('#inicial').val(Moneda(Math.round(inicl)));
             if (totaldesc) {
                 inicl = totaldesc * porcntg / 100;
@@ -5524,9 +5622,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#ini').val(Moneda(Math.round(inicl)));
             $('#fnc').val(Moneda(Math.round(total - inicl)));
             if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
             } else {
-                CONT()
+                CONT(0, 1)
             }
         })
         $('#vmtr2').change(function () {
@@ -5548,9 +5646,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#ini').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
             $('#fnc').val(Moneda(Math.round(total - inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
             if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
             } else {
-                CONT()
+                CONT(0, 1)
             }
         })
         $('#cuadro2').submit(function (e) {
@@ -5569,7 +5667,6 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             });
             $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
             $('#cuadro2').find('input, select').prop('disabled', false);
-
         })
     })
     var proyectos = $('#proyectos');
@@ -5580,11 +5677,41 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     var cont = 0, cuota = 0;
     $.ajax({
         type: 'POST',
-        url: '/links/prodlotes'
+        url: '/links/prodlotes/' + OrdnSepr
     }).then(function (data) {
         var proyecto = null;
         var parent = null;
         var option = null;
+
+        var f = data.orden.map((x, v) => {
+            return [
+                '',
+                `<input class="text-center id" type="text" name="id" style="width: 100%;" value="${x.id}" disabled>`,
+                `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" value="${x.fechs}" required>`,
+                `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${x.ncuota}" required>`,
+                `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${x.tipo}">`,
+                `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;"  ${!v ? 'id="Separar"' : ''} 
+                data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" value="${Moneda(x.cuota)}" required>`,
+                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" value="${Moneda(x.cuota)}" disabled>`,
+                `<select size="1" class="text-center std" name="std" disabled>
+                <option value="3" selected="selected">Pendiente</option>
+                <option value="13">Pagada</option>
+                </select>`,
+                `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                    <polyline points="3 6 5 6 21 6"></polyline>
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                    <line x1="10" y1="11" x2="10" y2="17"></line>
+                    <line x1="14" y1="11" x2="14" y2="17"></line>
+                </svg></a>`
+            ]
+        });
+        $('#inicialcuotas').val(ncal);
+        $('#financiacion').val(financia);
+        crearcartera.rows.add(f).draw(false);
+        $('#Separar').val(Moneda(separar));
+
+
         data.productos.map((x, v) => {
             if (x.proyect !== proyecto) {
                 parent = document.createElement("optgroup");
@@ -5592,18 +5719,25 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 proyectos.append(parent)
                 proyecto = x.proyect;
             }
-            option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, false, false);
+            var pd = prodct == x.id ? true : false;
+            option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, pd, pd);
             parent.append(option)
         });
-        asesores.append(new Option(`Selecciona un Asesor`, 0, true, true))
+        proyectos.val(prodct).trigger('change');
         data.asesores.map((x, v) => {
-            asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, false, false))
+            var pd = ecesr == x.id ? true : false;
+            asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, pd, pd))
         });
-        //clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
+        asesores.val(ecesr).trigger('change');
         data.clientes.map((x, v) => {
-            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
+            var pd = c1 == x.idc ? true : false;
+            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, pd, pd))
         });
+        clientes.val([c1, c2, c3, c4]).trigger('change');
+
+        CONT(separar)
     });
+
     var crearcartera = $('#crearcartera').DataTable({
         searching: false,
         language: languag2,
@@ -5627,10 +5761,10 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             var rows = api.rows({ page: 'current' }).nodes();
             var last = null;
 
-            api.column(3, { page: 'current' }).data().each(function (group, i) {
+            api.column(4, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
                     $(rows).eq(i).before(
-                        '<tr class="group"><td colspan="8">' + $(group).val() + '</td></tr>'
+                        '<tr class="group"><td colspan="8">' + $(group).val() || group + '</td></tr>'
                     );
 
                     last = group;
@@ -5650,24 +5784,94 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     crearcartera.on('click', 'tr a', function () {
         var fila = $(this).parents('tr');
         var tipo = fila.find(`.tipo`).val();
+        var id = fila.find(`.id`).val();
         crearcartera.row(fila).remove().draw(false);
         var cuotai = $('#inicialcuotas').val() - 1;
         var cuotaf = $('#financiacion').val() - 1;
+        eliminar += `&acion=eliminar&idcuota=${id}`;
         tipo === 'INICIAL' ? $('#inicialcuotas').val(cuotai) : $('#financiacion').val(cuotaf);
         if ($('#Separar').val()) {
-            CONT(parseFloat($('#Separar').val().replace(/\./g, '')))
+            CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
         } else {
-            CONT()
+            CONT(0, 1)
         }
     });
     crearcartera.on('click', '.tabl .cuota', function () {
         $(this).mask('#.##$', { reverse: true, selectOnFocus: true });
+    });
+    crearcartera.on('click', '.quitar', function () {
+        if ($(this).html() === 'Quitar Bono') {
+            var inc = parseFloat($('#inicial').val().replace(/\./g, ''));
+            var to = parseFloat($('#total').val().replace(/\./g, ''));
+            $('#idbono').val('');
+            $('#cupon').val('');
+            $('#ahorro').val('');
+            $('#cuponx100to').val('');
+            $('#desinicial').val('')
+            $('#destotal').val('');
+            $('#ini').val($('#inicial').val())
+            $('#fnc').val(Moneda(Math.round(to - inc)));
+            $(this).html('Restablecer Bono');
+            if ($('#Separar').val()) {
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
+            } else {
+                CONT(0, 1);
+            }
+        } else {
+            $(this).html('Quitar Bono');
+            var precio = parseFloat($('#total').cleanVal());
+            var porcentage = parseFloat($('#xcntag').val());
+            var ahorr = Math.round(precio * descuento / 100)
+            $('#idbono').val(kupon);
+            $('#cupon').val(pin);
+            $('#ahorro').val(Moneda(ahorr));
+            precio = precio - ahorr;
+            inicial = precio * porcentage / 100;
+            $('#cuponx100to').val(descuento + '%');
+            $('#desinicial').val(Moneda(Math.round(inicial)))
+            $('#destotal').val(Moneda(Math.round(precio)));
+            $('#ini').val(Moneda(Math.round(inicial)))
+            $('#fnc').val(Moneda(Math.round(precio - inicial)));
+            if ($('#Separar').val()) {
+                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
+            } else {
+                CONT(0, 1);
+            }
+        }
     })
+    crearcartera.on('click', '.guardar', function () {
+        $('#crearcartera').find('.id, .rcuota, .std, #ahorro, #inicialcuotas, #financiacion').prop('disabled', false);
+        var datos = $('#crearcartera thead').find(`input, select`).serialize();
+        datos += '&' + crearcartera.$('input, select').serialize();
+        datos += eliminar;
+        crearcartera.$('.id, .rcuota, .std').prop('disabled', true);
+        //console.log(datos) 
+        $.ajax({
+            type: 'POST',
+            url: '/links/ordne',
+            data: datos,
+            async: true,
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    toggle: true,
+                    backdrop: 'static',
+                    keyboard: true,
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    SMSj('success', 'Datos actualizados correctamente')
+                    $('#ModalEventos').modal('hide')
+                    eliminar = '';
+                }
+            }
+        })
+    });
     crearcartera.on('change', '.tabl .cuota', function () {
         var fila = $(this).parents('tr');
         var tipo = fila.find(`.tipo`).val();
         var total = 0, valor = 0, num = 0;
-        var montorecibos = parseFloat($('#montorecibos').val()) || 0;
+        var montorecibos = Montos || 0; //console.log(realcuotai, realcuotaf)
 
         if (tipo === 'INICIAL') {
             $('#crearcartera .tabl tr').filter((c, i) => {
@@ -5745,10 +5949,10 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     });
     crearcartera.on('change', '#Separar', function () {
         if ($(this).val().length > 3) {
-            CONT(parseFloat($(this).val().replace(/\./g, '')))
+            CONT(parseFloat($(this).val().replace(/\./g, '')), 1)
         } else {
             $(this).val(0)
-            CONT()
+            CONT(0, 1)
         }
     })
     crearcartera.on('change', '.tabl .fecha', function () {
@@ -5767,21 +5971,24 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         })
     })
 
-    var CONT = (separa, g) => {
-        var p = separa > 0 ? parseFloat(separa) : 0
+    var CONT = (sepa, typo) => {
+        var p = sepa > 0 ? parseFloat(sepa) : 0
         var ini = parseFloat($('#ini').val().replace(/\./g, '')) - p;
         var fnc = $('#fnc').val().replace(/\./g, '');
         var cuotai = parseFloat(ini) / $('#inicialcuotas').val();
         var cuotaf = parseFloat(fnc) / $('#financiacion').val();
-        var montorecibos = parseFloat($('#montorecibos').val()) || 0;
+        var montorecibos = Montos || 0;
+        var fecha = $('#crearcartera .tabl tr').find(`.fecha`)[0].value;
+        var n = 0, s;
         $('#cuot').val(cuotaf);
         $('#crearcartera .tabl tr').each((e, i) => {
+            var fe = $(i).find(`.fecha`).val();
             var tpo = $(i).find(`.tipo`).val();
-            if (tpo === 'INICIAL' && !g) {
+            if (tpo === 'INICIAL' && typo) { // && typo === tpo 
                 $(i).find(`.n`).val(e - 2);
                 $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))
             }
-            if (tpo === 'FINANCIACION' && !g) {
+            if (tpo === 'FINANCIACION' && typo) {// && typo === tpo
                 var co = parseFloat($('#inicialcuotas').val()) + 3;
                 $(i).find(`.n`).val(e - co)
                 $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))
@@ -5801,6 +6008,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             } else {
                 $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
                 $(i).find(`.std option[value='3']`).attr("selected", true);
+            } //console.log(fe !== undefined && typo && fe !== fecha, fe , typo, fecha, n)
+            if (fe !== undefined && typo && fe !== fecha) {
+                n++;
+                s = moment(fecha).add(n, 'month').format('YYYY-MM-DD')
+                $(i).find(`.fecha`).val(s);
             }
         })
         realcuotai = Math.round(cuotai);
@@ -5831,6 +6043,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         if (!datos.length) {
             datos.push([
                 '',
+                `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
                 `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
                 `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
                 `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
@@ -5849,8 +6062,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 </svg>`
             ])
         }
-        datos.push([
+        tipo != 1 ? datos.push([
             '',
+            `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
             `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
             `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
             `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
@@ -5867,149 +6081,28 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
             </svg></a>`
-        ])
+        ]) : '';
         crearcartera.clear().draw(false);
-        var dat = []
+        var dat = [];
         datos.filter((x, c) => {
-            return $(x[3]).val() === 'SEPARACION';
+            return $(x[4]).val() === 'SEPARACION';
         }).map((x, c) => {
-            dat.push(x)
+            dat.push(x);
         })
         datos.filter((x, c) => {
-            return $(x[3]).val() === 'INICIAL';
+            return $(x[4]).val() === 'INICIAL';
         }).map((x, c) => {
-            dat.push(x)
+            dat.push(x);
         })
         datos.filter((x, c) => {
-            return $(x[3]).val() === 'FINANCIACION';
+            return $(x[4]).val() === 'FINANCIACION';
         }).map((x, c) => {
-            dat.push(x)
+            dat.push(x);
         })
+
         crearcartera.rows.add(dat).draw(false);
         separ ? $('#Separar').val(Moneda(separ)) : '';
-        CONT(separ)
-    }
-    window.preview = function (input) {
-        if (input.files && input.files[0]) {
-            var marg = 100 / $('#file2')[0].files.length;
-            $('#recibos1').html('');
-            $('.op').remove();
-            $('#montorecibos').val('').hide('slow');
-            $(input.files).each(function () {
-                var reader = new FileReader();
-                reader.readAsDataURL(this);
-                reader.onload = function (e) {
-                    $('#recibos1').append(
-                        `<div class="image" style="
-                            width: ${marg}%;
-                            min-width: 25%;
-                            padding-top: calc(100% / (16/9));
-                            background-image: url('${e.target.result}');
-                            background-size: 100%;
-                            background-position: center;
-                            background-repeat: no-repeat;float: left;"></div>`
-                    );
-                    $('#trarchivos').after(`
-                    <tr class="op">
-                        <th>                     
-                        <svg xmlns="http://www.w3.org/2000/svg" 
-                        width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                        stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                        stroke-linejoin="round" class="feather feather-file-text">
-                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                            <polyline points="14 2 14 8 20 8"></polyline>
-                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                            <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                        <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
-                             autocomplete="off" style="padding: 1px; width: 50%;" required>
-                        </th>
-                        <td>
-                            <input class="montos text-center" type="text" name=""
-                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 100%;" required>
-                        </td>
-                    </tr>`
-                    );
-                    $('.montos').mask('###.###.###', { reverse: true });
-                    $('.montos').on('change', function () {
-                        var avl = 0;
-                        $('#montorecibos').show('slow')
-                        $('.montos').map(function () {
-                            s = parseFloat($(this).cleanVal()) || 0
-                            avl = avl + s;
-                        });
-                        $('.montorecibos').html(Moneda(avl))
-                        $('#montorecibos').val(avl);
-                        if ($('#Separar').val()) {
-                            CONT(parseFloat($('#Separar').val().replace(/\./g, '')), true)
-                        } else {
-                            CONT(0, true)
-                        }
-                    })
-                    $('.recis').on('change', function () {
-                        var input = $(this);
-                        $.ajax({
-                            url: '/links/rcb',
-                            data: { rcb: '~' + $(this).val().replace(/^0+/, '') + '~' },
-                            type: 'POST',
-                            beforeSend: function (xhr) {
-                                R = false;
-                            },
-                            success: function (data) {
-                                if (data) {
-                                    var avl = '';
-                                    $('.recis').map(function () {
-                                        s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
-                                        avl += s;
-                                    });
-                                    $('#nrbc').val(avl.slice(0, -1));
-                                    R = true;
-                                } else {
-                                    input.val('');
-                                    SMSj('error', 'Recibo rechazado se encuentra duplicado');
-                                }
-                            }
-                        });
-
-                    })
-                    var zom = 200
-                    $(".image").on({
-                        mousedown: function () {
-                            zom += 50
-                            $(this).css("background-size", zom + "%")
-                        },
-                        mouseup: function () {
-
-                        },
-                        mousewheel: function (e) {
-                            //console.log(e.deltaX, e.deltaY, e.deltaFactor);
-                            if (e.deltaY > 0) { zom += 50 } else { zom < 150 ? zom = 100 : zom -= 50 }
-                            $(this).css("background-size", zom + "%")
-                        },
-                        mousemove: function (e) {
-                            let width = this.offsetWidth;
-                            let height = this.offsetHeight;
-                            let mouseX = e.offsetX;
-                            let mouseY = e.offsetY;
-
-                            let bgPosX = (mouseX / width * 100);
-                            let bgPosY = (mouseY / height * 100);
-
-                            this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
-                        },
-                        mouseenter: function (e) {
-                            $(this).css("background-size", zom + "%")
-                        },
-                        mouseleave: function () {
-                            $(this).css("background-size", "100%")
-                            this.style.backgroundPosition = "center";
-                        }
-                    });
-                }
-            });
-        }
-
+        CONT(separ, tipo);
     }
 
 }
@@ -6318,7 +6411,7 @@ if (window.location.pathname == `/links/cartera`) {
             var total = $('#total').val().replace(/\./g, '');
             var totaldesc = $('#destotal').val().replace(/\./g, '');
             var inicl = total * porcntg / 100;
-            console.log(inicl, total, porcntg, totaldesc)
+            //console.log(inicl, total, porcntg, totaldesc)
             $('#inicial').val(Moneda(Math.round(inicl)));
             if (totaldesc) {
                 inicl = totaldesc * porcntg / 100;
@@ -6356,24 +6449,6 @@ if (window.location.pathname == `/links/cartera`) {
             } else {
                 CONT()
             }
-        })
-        $('#cuadro2').submit(function (e) {
-            var asesors = $('#asesores').val();
-            var clients = $('#clientes').val();
-            if (asesors == 0 || clients == 0) {
-                e.preventDefault();
-                SMSj('error', 'Debe seleccionar un CLIENTE o ASESOR');
-                return false;
-            }
-            if (!R) { e.preventDefault(); return false; }
-            $('#ModalEventos').modal({
-                backdrop: 'static',
-                keyboard: true,
-                toggle: true
-            });
-            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-            $('#cuadro2').find('input, select').prop('disabled', false);
-
         })
     })
     var proyectos = $('#proyectos');
@@ -8039,41 +8114,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         }
     });
-    $('#Modaledit').on('click', '#mas', function (e) {
-        e.preventDefault()
-        var datos = $('#Modaledit #mast').serialize();
-        $('#Modaledit').modal('toggle');
-        $.ajax({
-            type: 'POST',
-            url: '/links/productos/nuevo',
-            data: datos,
-            async: true,
-            success: function (data) {
-                if (data) {
-                    //tabledit.ajax.reload(null, false)
-                    tabledit.ajax.reload(function (json) {
-                        tabledit.columns.adjust().draw();
-                        Recorre(0)
-                        SMSj('success', 'Subproducto agregado correctamente')
-                    })
-                }
-            }
-        })
-    })
-    $('#Modaledit').on('change', '.mt2', function () {
-        var valor = $(this).val() * $('#vmt2').cleanVal();
-        var inicial = valor * $('#porcentage').val() / 100;
-        $('#Modaledit input[name="valor"]').val(valor);
-        $('#Modaledit input[name="inicial"]').val(inicial);
-        $('#Modaledit #va').html('$ ' + Moneda(Math.round(valor)));
-        $('#Modaledit #in').html('$ ' + Moneda(Math.round(inicial)));
-        Recorre($(this).val() || 0)
-    });
-    $('#Modaledit').one('hidden.bs.modal', function () {
-        $('#Modaledit .edi, #Modaledit textarea').val('')
-        Recorre(0)
-    })
-
     var Recorrer = (n) => {
         var totalmetros2 = 0, totalotes = 0, totalmzs = 0, valorproyecto = 0;
         tabledit
@@ -8113,6 +8153,41 @@ if (window.location == `${window.location.origin}/links/productos`) {
             }
         })
     }
+    $('#Modaledit').on('click', '#mas', function (e) {
+        e.preventDefault()
+        var datos = $('#Modaledit #mast').serialize();
+        $('#Modaledit').modal('toggle');
+        $.ajax({
+            type: 'POST',
+            url: '/links/productos/nuevo',
+            data: datos,
+            async: true,
+            success: function (data) {
+                if (data) {
+                    //tabledit.ajax.reload(null, false)
+                    tabledit.ajax.reload(function (json) {
+                        tabledit.columns.adjust().draw();
+                        Recorre(0)
+                        SMSj('success', 'Subproducto agregado correctamente')
+                    })
+                }
+            }
+        })
+    })
+    $('#Modaledit').on('change', '.mt2', function () {
+        alert('sdfksdfl')
+        var valor = $(this).val() * $('#vmt2').cleanVal();
+        var inicial = valor * $('#porcentage').val() / 100;
+        $('#Modaledit input[name="valor"]').val(valor);
+        $('#Modaledit input[name="inicial"]').val(inicial);
+        $('#Modaledit #va').html('$ ' + Moneda(Math.round(valor)));
+        $('#Modaledit #in').html('$ ' + Moneda(Math.round(inicial)));
+        Recorre($(this).val() || 0)
+    });
+    $('#Modaledit').one('hidden.bs.modal', function () {
+        $('#Modaledit .edi, #Modaledit textarea').val('')
+        Recorre(0)
+    })
     tabledit.on('click', '.no', function () {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
@@ -8162,7 +8237,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     tabledit.on('change', '.cabezal', function () {
         Recorrer()
     });
-    tabledit.on('change, dblclick', 'tr input:not(.edi, .c), textarea, select:not(.edi, .c)', function () {
+    tabledit.on('change', 'tr input:not(.edi, .c), textarea, select:not(.edi, .c)', function () {
         var fila = $(this).parents('tr');
         var data = tabledit.row(fila).data();
         if (data.estado == 9 || data.estado == 15) {

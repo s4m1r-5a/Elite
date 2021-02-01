@@ -4,423 +4,364 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header">
-
+                        {{#each orden}} 
+                        <input type="hidden" id="ecesr" value="{{asesor}}">
+                        <input type="hidden" id="status" value="{{status}}">
+                        <input type="hidden" id="clent1" value="{{cliente}}">
+                        <input type="hidden" id="clent2" value="{{cliente2}}">
+                        <input type="hidden" id="clent3" value="{{cliente3}}">
+                        <input type="hidden" id="clent4" value="{{cliente4}}">
+                        <input type="hidden" id="prodct" value="{{lote}}">
+                        <input type="hidden" id="Montos" value="{{Montos}}">
+                        <input type="hidden" id="Pagos" value="{{t}}">
+                        <input type="hidden" id="mtro2" value="{{mtr2}}">
+                        <input type="hidden" id="iniciar" value="{{iniciar}}">
+                        <input type="hidden" id="vrmt2" value="{{vrmt2}}">
+                        <input type="hidden" id="separar" value="{{separar}}">
+                        <input type="hidden" id="cuotaextraordinaria" value="{{cuotaextraordinaria}}">
+                        <input type="hidden" id="extraordinariameses" value="{{extraordinariameses}}">
+                        <input type="hidden" id="kupon" value="{{cupon}}">
+                        <input type="hidden" id="cuota" value="{{cuot}}">
+                        <input type="hidden" id="pin" value="{{pin}}">
+                        <input type="hidden" id="descuento" value="{{descuento}}">
+                        {{/each}}
+                        {{#each cuotas}}
+                        <input type="hidden" id="separacion" value="{{SEPARACION}}">
+                        <input type="hidden" id="ncal" value="{{INICIAL}}">
+                        <input type="hidden" id="financia" value="{{FINANCIACION}}">
+                        {{/each}}                        
                     </div>
-                    <div class="card-body">
-                        <form id="cuadro" enctype="multipart/form-data" action="/links/crearcartera" method="POST">
-                            <input type="hidden" id="cuot" name="cuot">
-                            <input type="hidden" id="idbono" name="idbono">
-                            <table id="crearcartera" class="table table-striped table-sm table-hover responsive">
-                                <thead>
-                                    <tr>
-                                        <th colspan="8">
-                                            <div class="row">
-                                                <div class="col-12 col-lg-6">
-                                                    <table class="table table-sm">
-                                                        <tbody>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <select id="proyectos"
-                                                                        class="form-control-no-border select2" name="lt"
-                                                                        required>
-                                                                    </select>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <select id="asesores"
-                                                                        class="form-control-no-border select2"
-                                                                        name="asesor" required>
-                                                                    </select>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <select id="clientes"
-                                                                        class="form-control-no-border select2"
-                                                                        name="clientes" multiple required>
-                                                                    </select>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="row">
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>MTR²</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    type="text" name="mtr2"
-                                                                                    autocomplete="off" id="mtr2"
-                                                                                    placeholder="Digite total de mtr²"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    disabled>
-                                                                            </div>
+                    <div class="card-body" id="cuadro2">
+                        <table id="crearcartera" class="table table-striped table-sm table-hover responsive">
+                            <thead>
+                                <input type="hidden" id="ID-Sep" name="preventa" value="{{id}}">
+                                <input type="hidden" id="cuot" name="cuot">
+                                <input type="hidden" id="idbono" name="idbono">
+                                <tr>
+                                    <th colspan="9">
+                                        <div class="row">
+                                            <div class="col-12 col-lg-6">
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <select id="proyectos"
+                                                                    class="form-control-no-border select2" name="lt"
+                                                                    style="width: 100%;" required>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <select id="asesores"
+                                                                    class="form-control-no-border select2" name="asesor"
+                                                                    style="width: 100%;" required>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <select id="clientes"
+                                                                    class="form-control-no-border select2"
+                                                                    name="clientes" style="width: 100%;" multiple
+                                                                    required>
+                                                                </select>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="row">
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>MTR²</h6>
                                                                         </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>VMTR²</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    type="text" name="vmtr2" id="vmtr2"
-                                                                                    autocomplete="off"
-                                                                                    placeholder="Digite el precio del mtr²"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    required>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>INICIAL</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="inicial" autocomplete="off"
-                                                                                    type="text" id="inicial"
-                                                                                    placeholder="Monto de separacion"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>TOTAL</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="total" autocomplete="off"
-                                                                                    type="text" id="total"
-                                                                                    placeholder="Insentivo por separacion"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </th>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                                <div class="col-12 col-lg-6">
-                                                    <table class="table table-sm">
-                                                        <tbody>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="text-center row">
-                                                                        <div class="col-4">
-                                                                            ESTADO DE PROMESA:
-                                                                        </div>
-                                                                        <div class="col-8">
-                                                                            <select class="form-control-no-border"
-                                                                                style="padding: 1px;text-align:center;"
-                                                                                id="promesa" name="promesa" required>
-                                                                                <option value="">SIN PROMESA</option>
-                                                                                <option value="1">PROMESA GENERADA
-                                                                                </option>
-                                                                                <option value="2">PROMESA AUTENTICADA
-                                                                                    POR CLIENTE</option>
-                                                                                <option value="3">PROMESA AUTENTICADA
-                                                                                    POR AMBOS</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="text-center row">
-                                                                        <div class="col-6">
-                                                                            CUPON
+                                                                        <div class="text-center">
                                                                             <input
-                                                                                class="form-control-no-border text-center text-uppercase"
-                                                                                type="text" autocomplete="off"
-                                                                                name="cupon" id="cupon"
+                                                                                class="form-control-no-border text-center"
+                                                                                type="text" name="mtr2"
+                                                                                autocomplete="off" id="mtr2"
+                                                                                placeholder="Digite total de mtr²"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>VMTR²</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                type="text" name="vmtr2" id="vmtr2"
+                                                                                autocomplete="off"
+                                                                                placeholder="Digite el precio del mtr²"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" required>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>INICIAL</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="inicial" autocomplete="off"
+                                                                                type="text" id="inicial"
+                                                                                placeholder="Monto de separacion"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>TOTAL</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="total" autocomplete="off"
+                                                                                type="text" id="total"
+                                                                                placeholder="Insentivo por separacion"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                            <div class="col-12 col-lg-6">
+                                                <table class="table table-sm">
+                                                    <tbody>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="text-center row">
+                                                                    <div class="col-4">
+                                                                        ESTADO DE PROMESA:
+                                                                    </div>
+                                                                    <div class="col-8">
+                                                                        <select class="form-control-no-border"
+                                                                            style="padding: 1px;text-align:center;"
+                                                                            id="promesa" name="promesa" required>
+                                                                            <option value="">SIN PROMESA</option>
+                                                                            <option value="1">PROMESA GENERADA
+                                                                            </option>
+                                                                            <option value="2">PROMESA AUTENTICADA
+                                                                                POR CLIENTE</option>
+                                                                            <option value="3">PROMESA AUTENTICADA
+                                                                                POR AMBOS</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="text-center row">
+                                                                    <div class="col-6">
+                                                                        CUPON
+                                                                        <input
+                                                                            class="form-control-no-border text-center text-uppercase"
+                                                                            type="text" autocomplete="off" name="cupon"
+                                                                            id="cupon" placeholder="Cupon"
+                                                                            style="padding: 1px; width: 115px; background-color: #FFFFCC;">
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        INICIAL
+                                                                        <select class="form-control-no-border"
+                                                                            style="padding: 1px; width: 115px;text-align:center;"
+                                                                            id="xcntag" name="xcntag" required>
+                                                                            <option value="15">15%</option>
+                                                                            <option value="20">20%</option>
+                                                                            <option value="25">25%</option>
+                                                                            <option value="30">30%</option>
+                                                                            <option value="35">35%</option>
+                                                                            <option value="40">40%</option>
+                                                                        </select>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="row">
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>CUPON</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                type="text" name="cuponx100"
+                                                                                autocomplete="off" id="cuponx100to"
                                                                                 placeholder="Cupon"
-                                                                                style="padding: 1px; width: 115px; background-color: #FFFFCC;">
-                                                                        </div>
-                                                                        <div class="col-6">
-                                                                            INICIAL
-                                                                            <select class="form-control-no-border"
-                                                                                style="padding: 1px; width: 115px;text-align:center;"
-                                                                                id="xcntag" name="xcntag" required>
-                                                                                <option value="15">15%</option>
-                                                                                <option value="20">20%</option>
-                                                                                <option value="25">25%</option>
-                                                                                <option value="30">30%</option>
-                                                                                <option value="35">35%</option>
-                                                                                <option value="40">40%</option>
-                                                                            </select>
-                                                                        </div>
-                                                                    </div>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="row">
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>CUPON</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    type="text" name="cuponx100"
-                                                                                    autocomplete="off" id="cuponx100to"
-                                                                                    placeholder="Cupon"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>AHORRO</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    type="text" name="ahorro"
-                                                                                    id="ahorro" autocomplete="off"
-                                                                                    placeholder="Ahorro"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>INICIAL</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="desinicial" autocomplete="off"
-                                                                                    type="text" id="desinicial"
-                                                                                    placeholder="Inicial"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-6 col-sm-3">
-                                                                            <div class="text-center">
-                                                                                <h6>TOTAL</h6>
-                                                                            </div>
-                                                                            <div class="text-center">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="destotal" autocomplete="off"
-                                                                                    type="text" id="destotal"
-                                                                                    placeholder="Total"
-                                                                                    style="padding: 1px; width: 80%; background-color: #FFFFCC;"
-                                                                                    data-mask="000.000.000"
-                                                                                    data-mask-reverse="true"
-                                                                                    data-mask-selectonfocus="true"
-                                                                                    disabled>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="text-center row">
-                                                                        <div class="col-sm-6">
-                                                                            ESTABLECE LAS CUOTAS DE LA INICIAL Y
-                                                                            FINANCIACION
-                                                                        </div>
-                                                                        <div class="col-sm-3">
-                                                                            <div class="input-group mb-2">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="inicialcuotas"
-                                                                                    autocomplete="off" type="text"
-                                                                                    id="inicialcuotas" placeholder="INI"
-                                                                                    style="width: 40px; background-color: #FFFFCC;"
-                                                                                    disabled>
-                                                                                <span class="input-group-append">
-                                                                                    <button class="btn btn-secondary"
-                                                                                        id="inicialcuotas-btn"
-                                                                                        type="button">+</button>
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                        <div class="col-sm-3">
-                                                                            <div class="input-group">
-                                                                                <input
-                                                                                    class="form-control-no-border text-center"
-                                                                                    name="financiacion"
-                                                                                    autocomplete="off" type="text"
-                                                                                    id="financiacion" placeholder="FNC"
-                                                                                    style="width: 40px; background-color: #FFFFCC;"
-                                                                                    disabled>
-                                                                                <span class="input-group-append">
-                                                                                    <button class="btn btn-secondary"
-                                                                                        id="financiacion-btn"
-                                                                                        type="button">+</button>
-                                                                                </span>
-                                                                            </div>
-                                                                        </div>
-                                                                    </div>
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <div class="text-center row">
-                                                                        <div class="col-6">
-                                                                            TOTAL INI
-                                                                            <input
-                                                                                class="form-control-no-border text-center text-uppercase"
-                                                                                type="text" autocomplete="off"
-                                                                                name="tini" id="ini" placeholder="20%"
-                                                                                style="padding: 1px; width: 115px; background-color: #FFFFCC;"
-                                                                                disabled>
-                                                                        </div>
-                                                                        <div class="col-6">
-                                                                            TOTAL FNC
-                                                                            <input
-                                                                                class="form-control-no-border text-center text-uppercase"
-                                                                                type="text" autocomplete="off"
-                                                                                name="tfnc" id="fnc" placeholder="80%"
-                                                                                style="padding: 1px; width: 115px; background-color: #FFFFCC;"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
                                                                                 disabled>
                                                                         </div>
                                                                     </div>
-                                                                </th>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>AHORRO</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                type="text" name="ahorro" id="ahorro"
+                                                                                autocomplete="off" placeholder="Ahorro"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>INICIAL</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="desinicial" autocomplete="off"
+                                                                                type="text" id="desinicial"
+                                                                                placeholder="Inicial"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-6 col-sm-3">
+                                                                        <div class="text-center">
+                                                                            <h6>TOTAL</h6>
+                                                                        </div>
+                                                                        <div class="text-center">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="destotal" autocomplete="off"
+                                                                                type="text" id="destotal"
+                                                                                placeholder="Total"
+                                                                                style="padding: 1px; width: 80%; background-color: #FFFFCC;"
+                                                                                data-mask="000.000.000"
+                                                                                data-mask-reverse="true"
+                                                                                data-mask-selectonfocus="true" disabled>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="text-center row">
+                                                                    <div class="col-sm-6">
+                                                                        ESTABLECE LAS CUOTAS DE LA INICIAL Y
+                                                                        FINANCIACION
+                                                                    </div>
+                                                                    <div class="col-sm-3">
+                                                                        <div class="input-group mb-2">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="inicialcuotas" autocomplete="off"
+                                                                                type="text" id="inicialcuotas"
+                                                                                placeholder="INI"
+                                                                                style="width: 40px; background-color: #FFFFCC;"
+                                                                                disabled>
+                                                                            <span class="input-group-append">
+                                                                                <button class="btn btn-secondary"
+                                                                                    id="inicialcuotas-btn"
+                                                                                    type="button">+</button>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                    <div class="col-sm-3">
+                                                                        <div class="input-group">
+                                                                            <input
+                                                                                class="form-control-no-border text-center"
+                                                                                name="financiacion" autocomplete="off"
+                                                                                type="text" id="financiacion"
+                                                                                placeholder="FNC"
+                                                                                style="width: 40px; background-color: #FFFFCC;"
+                                                                                disabled>
+                                                                            <span class="input-group-append">
+                                                                                <button class="btn btn-secondary"
+                                                                                    id="financiacion-btn"
+                                                                                    type="button">+</button>
+                                                                            </span>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                        <tr>
+                                                            <th colspan="2">
+                                                                <div class="text-center row">
+                                                                    <div class="col-6">
+                                                                        TOTAL INI
+                                                                        <input
+                                                                            class="form-control-no-border text-center text-uppercase"
+                                                                            type="text" autocomplete="off" name="tini"
+                                                                            id="ini" placeholder="20%"
+                                                                            style="padding: 1px; width: 115px; background-color: #FFFFCC;"
+                                                                            disabled>
+                                                                    </div>
+                                                                    <div class="col-6">
+                                                                        TOTAL FNC
+                                                                        <input
+                                                                            class="form-control-no-border text-center text-uppercase"
+                                                                            type="text" autocomplete="off" name="tfnc"
+                                                                            id="fnc" placeholder="80%"
+                                                                            style="padding: 1px; width: 115px; background-color: #FFFFCC;"
+                                                                            disabled>
+                                                                    </div>
+                                                                </div>
+                                                            </th>
+                                                        </tr>
+                                                    </tbody>
+                                                </table>
                                             </div>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th></th>
-                                        <th>FECHA</th>
-                                        <th>#</th>
-                                        <th>T</th>
-                                        <th>CUOTA</th>
-                                        <th>TOTAL</th>
-                                        <th>STD.</th>
-                                        <th>X</th>
-                                    </tr>
-                                </thead>
-                                <tbody class="tabl"></tbody>
-                                <tfoot>
-                                    <tr>
-                                        <th colspan="8" class="text-center">
-                                            <h3>A CONTINUACION INGRESA TODOS LOS RECIBO DE PAGO QUE TENGA ESTE CLIENTE
-                                            </h3>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="8">
-                                            <div class="row">
-                                                <div class="col-12 col-lg-8">
-                                                    <table class="table table-sm" id="recibosss">
-                                                        <!--<form enctype="multipart/form-data" id="recbo"
-                                                        action="/links/recibo" method="POST">-->
-                                                        <input type="hidden" id="concpto" name="concpto">
-                                                        <input id="ahora" type="hidden" name="ahora">
-                                                        <tbody>
-                                                            <tr>
-                                                                <th colspan="2">
-                                                                    <i class="feather-md" data-feather="file-plus"></i>
-                                                                    <input class="form-control-no-border edi"
-                                                                        type="file" name="image" data-toggle="tooltip"
-                                                                        data-placement="top" data-container="body"
-                                                                        title="Selecciones las imagenes de recibos"
-                                                                        autocomplete="off" data-toggle="dropdown"
-                                                                        aria-haspopup="true" aria-expanded="false"
-                                                                        id="file2" multiple style="width: 50%;"
-                                                                        onchange="preview(this);" required>
-                                                                    <span class="montorecibos badge badge-dark"></span>
-                                                                    <input type="hidden" name="montorcb"
-                                                                        id="montorecibos">
-                                                                    <input type="hidden" name="recibos" id="nrbc">
-                                                                </th>
-                                                            </tr>
-                                                            <tr>
-                                                                <th colspan="2" class="image-wrap" id="recibos1"
-                                                                    width="100%" height="50"></th>
-                                                            </tr>
-                                                        </tbody>
-                                                        <!--</form>-->
-                                                    </table>
-                                                </div>
-                                                <div class="col-12 col-lg-4">
-                                                    <table class="table table-sm">
-                                                        <tbody>
-                                                            <tr>
-                                                                <th>
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="formap" type="radio"
-                                                                            class="custom-control-input forma"
-                                                                            value="CTA-CTE-50900011438" required>
-                                                                        <span class="custom-control-label">
-                                                                            CTA CTE 50900011438</span>
-                                                                    </label>
-                                                                </th>
-                                                                <td>
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="formap" type="radio"
-                                                                            class="custom-control-input forma"
-                                                                            value="CHEQUE" required>
-                                                                        <span class="custom-control-label">
-                                                                            CHEQUE</span>
-                                                                    </label>
-                                                                </td>
-                                                            </tr>
-                                                            <tr id="trarchivos">
-                                                                <th>
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="formap" type="radio"
-                                                                            class="custom-control-input forma"
-                                                                            value="EFECTIVO" required>
-                                                                        <span class="custom-control-label">
-                                                                            EFECTIVO</span>
-                                                                    </label>
-                                                                </th>
-                                                                <td>
-                                                                    <label class="custom-control custom-radio">
-                                                                        <input name="formap" type="radio"
-                                                                            class="custom-control-input forma"
-                                                                            value="OTRO" required>
-                                                                        <span class="custom-control-label">
-                                                                            OTRO</span>
-                                                                    </label>
-                                                                </td>
-                                                            </tr>
-                                                        </tbody>
-                                                    </table>
-                                                </div>
-                                            </div>
-                                        </th>
-                                    </tr>
-                                </tfoot>
-                            </table>
-
-                            <button type="submit" class="btn btn-primary float-right">Ingresar</button>
-                            <button type="reset" class="btn btn-danger float-right mr-1">Cancelar</button>
-                        </form>
+                                        </div>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="9">
+                                        <button type="button" class="btn btn-primary btn-sm float-right guardar">Guardar
+                                            Cambios</button>
+                                        <button type="button" class="btn btn-primary btn-sm float-right quitar mr-2"
+                                            style="display: none;">Quitar Bono</button>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th></th>
+                                    <th style="width: 5%;">ID</th>
+                                    <th>FECHA</th>
+                                    <th style="width: 3%;">#</th>
+                                    <th>T</th>
+                                    <th>CUOTA</th>
+                                    <th>TOTAL</th>
+                                    <th>STD.</th>
+                                    <th>X</th>
+                                </tr>
+                            </thead>
+                            <tbody class="tabl"></tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="9" class="text-center">
+                                        <button type="button" class="btn btn-primary btn-sm float-right guardar">Guardar
+                                            Cambios</button>
+                                    </th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                        <!--<button type="submit" class="btn btn-primary float-right">Ingresar</button>
+                            <button type="reset" class="btn btn-danger float-right mr-1">Cancelar</button>-->
                     </div>
                 </div>
             </div>
