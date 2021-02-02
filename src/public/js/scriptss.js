@@ -6448,6 +6448,24 @@ if (window.location.pathname == `/links/cartera`) {
                 CONT()
             }
         })
+        $('#cuadro2').submit(function (e) {
+            var asesors = $('#asesores').val();
+            var clients = $('#clientes').val();
+            if (asesors == 0 || clients == 0) {
+                e.preventDefault();
+                SMSj('error', 'Debe seleccionar un CLIENTE o ASESOR');
+                return false;
+            }
+            if (!R) { e.preventDefault(); return false; }
+            $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+            $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+            $('#cuadro2').find('input, select').prop('disabled', false);
+
+        })
     })
     var proyectos = $('#proyectos');
     var asesores = $('#asesores');

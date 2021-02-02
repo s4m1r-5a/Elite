@@ -981,7 +981,7 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
         std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa, feh, montos } = req.body;
 
-    console.log(req.body, req.files, req.body.promesa ? 'si' : 'no')
+    //console.log(req.body, req.files, req.body.promesa ? 'si' : 'no')
 
     var separ = {
         lote: lt, asesor: asesor, iniciar: xcntag, obsevacion: 'CARTERA', cuot,
@@ -1026,9 +1026,13 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
         concepto: 'ABONO', stado: 4, img: imagenes, descp: 'ABONO', formap: fpago, excdnt: 0
     }
     const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
-    await nrecibo.map((t, i) => {
-        reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}'),`;
-    }); //console.log(reci.slice(0, -1))
+    if (Array.isArray(nrecibo)) {
+        await nrecibo.map((t, i) => {
+            reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}'),`;
+        }); 
+    } else {
+        reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${req.files[0].filename}'),`;
+    }
     await pool.query(reci.slice(0, -1));
     const S = await Estados(h.insertId);
     await pool.query('UPDATE productosd set ? WHERE id = ?',
