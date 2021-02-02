@@ -715,6 +715,11 @@ router.post('/elicliente', async (req, res) => {
         res.send(false);
     }
 })
+router.post('/movil', async (req, res) => {
+    const { movil } = req.body;
+    const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
+    res.send(cliente);
+});
 /////////////////////////////////////////////////////
 router.get('/social', isLoggedIn, (req, res) => {
     var options = {
@@ -741,23 +746,6 @@ router.get('/social', isLoggedIn, (req, res) => {
         console.log('Success: ', body);
     });
     res.render('links/social');
-});
-router.post('/add', async (req, res) => {
-    const { title, url, description } = req.body;
-    const newLink = {
-        title,
-        url,
-        description,
-        user_id: req.user.id
-    };
-    await pool.query('INSERT INTO links set ?', [newLink]);
-    req.flash('success', 'Link Saved Successfully');
-    res.redirect('/links');
-});
-router.post('/movil', async (req, res) => {
-    const { movil } = req.body;
-    const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
-    res.send(cliente);
 });
 //////////////* PAGOS *//////////////////////////////////
 router.get('/pagos', async (req, res) => {
@@ -2193,16 +2181,16 @@ router.post('/afiliado', async (req, res) => {
     var pin = ID(13);
     var cel = movil.replace(/-/g, "");
     var boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-    *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+    *_Registrarte_* _en:_\n*${req.headers.origin}/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*${req.headers.origin}/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
 
     const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
     if (h.length > 0) {
         pin = h[0].id
         boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-                *_Registrarte_* _en:_\n*https://grupoelitered.com.co/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*https://grupoelitered.com.co/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+                *_Registrarte_* _en:_\n*${req.headers.origin}/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*${req.headers.origin}/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
 
         if (h[0].acreedor !== null) {
-            boidy = `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*https://grupoelitered.com.co/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
+            boidy = `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*${req.headers.origin}/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`
         }
     } else {
         const nuevoPin = {
@@ -2228,109 +2216,6 @@ router.post('/id', async (req, res) => {
     } else {
         res.send('Pin de registro invalido, comuniquese con su distribuidor!');
     }
-});
-///////////////////////* */////////////////////////////////////////////////////////
-router.post('/canjear', async (req, res) => {
-    const { pin } = req.body;
-    const rows = await pool.query(`SELECT v.pin, v.client, p.producto, p.precio, p.dias
-            FROM ventas v INNER JOIN products p ON v.product = p.id_producto WHERE pin = ? `, pin);
-    if (rows.length > 0 && rows[0].client === null) {
-        res.send(rows);
-    } else if (rows.length > 0 && rows[0].client !== null) {
-        res.send('Este pin ya fue canjeado!');
-    } else {
-        res.send('Pin invalido!');
-    }
-});
-router.post('/cliente', async (req, res) => {
-    let respuesta = "",
-        dat;
-    const { telephone, buyerFullName, buyerEmail, merchantId, amount, referenceCode, actualizar } = req.body;
-
-    var nombre = normalize(buyerFullName).toUpperCase();
-    const newLink = {
-        nombre: nombre,
-        movil: telephone,
-        email: buyerEmail
-    };
-    let url = `https://iux.com.co/x/venta.php?name=${buyerFullName}&movil=${telephone}&email=${buyerEmail}&ref=cliente&actualiza=${actualizar}`;
-    /*request({
-        url,
-        json: true
-    }, async (error, res, body) => {
-        if (error) {
-            return;
-        }
-
-        if (body.length > 0) {
-            dat = await body.map((re) => {
-                if (re.id === telephone && re.email === buyerEmail) {
-                    respuesta = `Todo bien`;
-                } else if (re.email !== buyerEmail && re.id === telephone) {
-                    respuesta += `Esta cuenta <mark>${buyerEmail}</mark> no coincide con movil <mark>${telephone}</mark>, la cuenta regitrada con este movil es <mark>${re.email}</mark>. `;
-                } else if (re.id !== telephone && re.email === buyerEmail) {
-                    respuesta += `Este movil <mark>${telephone}</mark> no coincide con la cuenta <mark>${re.email}</mark> el movil registrado con esta cuenta es <mark>${re.id}</mark>. `;
-                } else {
-                    respuesta = `Todo bien`;
-                }
-                return re;
-            });
-        } else {
-            respuesta = `Todo bien`;
-        }
-    });*/
-    respuesta = `Todo bien`;
-    var saludo = async function () {
-        if (respuesta !== "") {
-            clearInterval(time);
-            if (respuesta === 'Todo bien') {
-                const rows = await pool.query('SELECT * FROM clientes WHERE movil = ? OR email = ?', [telephone, buyerEmail]);
-                if (rows.length > 0) {
-                    await pool.query('UPDATE clientes SET ? WHERE movil = ? OR email = ?', [newLink, telephone, buyerEmail]);
-                } else {
-                    await pool.query('INSERT INTO clientes SET ? ', newLink);
-                }
-                var pin = referenceCode + ID(8),
-                    //APIKey = '4Vj8eK4rloUd272L48hsrarnUA',
-                    APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg',
-                    key = APIKey + '~' + merchantId + '~' + pin + '~' + amount + '~COP',
-                    hash = crypto.createHash('md5').update(key).digest("hex"),
-                    cdo;
-                cdo = [hash, pin, dat];
-                res.send(cdo);
-            } else {
-                res.send(['smg', respuesta, dat]);
-            }
-        }
-    };
-    let time = setInterval(saludo, 10);
-});
-router.get('/', isLoggedIn, async (req, res) => {
-    const links = await pool.query('SELECT * FROM links WHERE user_id = ? ', [req.user.id]);
-    res.render('links/list', { links });
-});
-router.get('/delete/:id', async (req, res) => {
-    const { id } = req.params;
-    await pool.query('DELETE FROM links WHERE ID = ?', [id]);
-    req.flash('success', 'Link Removed Successfully');
-    res.redirect('/links');
-});
-router.get('/edit/:id', async (req, res) => {
-    const links = await pool.query('SELECT * FROM links WHERE id = ?', [id]);
-    const { id } = req.params;
-    res.render('/links/edit', { link: links[0] });
-});
-router.post('/edit/:id', async (req, res) => {
-    const { id } = req.params;
-    const { title, description, url } = req.body;
-    const newLink = {
-        title,
-        description,
-        url
-    };
-    await pool.query('UPDATE links set ? WHERE id = ?', [newLink, id]);
-    req.flash('success', 'Link Updated Successfully');
-    res.redirect('/links');
 });
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(lon) {
