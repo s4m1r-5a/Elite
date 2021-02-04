@@ -958,7 +958,7 @@ router.post('/rcb', async (req, res) => {
 });
 router.post('/prodlotes', isLoggedIn, async (req, res) => {
     const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
-    WHERE v.tipobsevacion = 'ANULADA' OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`);
+    WHERE l.estado IN('9', '15') AND (v.tipobsevacion = 'ANULADA' OR v.id IS NULL) ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`);
     const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
     const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
     res.send({ productos, asesores, clientes });
@@ -1017,7 +1017,7 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     if (Array.isArray(nrecibo)) {
         await nrecibo.map((t, i) => {
             reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}'),`;
-        }); 
+        });
     } else {
         reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${req.files[0].filename}'),`;
     }
@@ -1334,20 +1334,22 @@ router.get('/editordn/:id', isLoggedIn, async (req, res) => {
     sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
     p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
-    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, COUNT(s.ids) AS t, 
-    SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, s.monto)) AS Montos, p.status 
+    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, pd.uno, pd.dos, 
+    COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, 
+    pt.valmtr2, pt.porcentage, COALESCE(SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, 
+    if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.monto, 0))), 0) AS Montos, p.status 
     FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
     INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc  
     LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
     INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
     LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ?
-    GROUP BY p.id;`;
+    GROUP BY p.id`; //s.concepto NOT IN('COMISION DIRECTA', 'COMISION INDIRECTA', 'BONO') 
+
     sql2 = `SELECT SUM(IF(c.tipo = 'SEPARACION', 1, '')) AS SEPARACION,
     SUM(IF(c.tipo = 'INICIAL', 1, '')) AS INICIAL,
     SUM(IF(c.tipo = 'FINANCIACION', 1, '')) AS FINANCIACION
     FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id 
     WHERE p.tipobsevacion IS NULL AND p.id = ?`;
-
     const orden = await pool.query(sql, id);
     const cuotas = await pool.query(sql2, id);
     /*var abono = 0;
@@ -1374,45 +1376,65 @@ router.post('/ordn/:id', isLoggedIn, async (req, res) => {
     res.send(body);
 })
 router.post('/ordne/', isLoggedIn, async (req, res) => {
-    const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota,
-        xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo,
-        cuota, rcuota, std, preventa } = req.body;
-
+    const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota, porcentage, inicial,
+        xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo, mtr2, total, lote,
+        cuota, rcuota, std, preventa, uno, dos, tres, directa, otro, valmtr2 } = req.body;
+    var vr = parseFloat(vmtr2.replace(/\./g, ''));
+    var ini = parseFloat(inicial.replace(/\./g, ''));
+    var tot = parseFloat(total.replace(/\./g, ''));
     var orden = {
-        lote: lt, vrmt2: vmtr2.replace(/\./g, ''),
-        cliente: Array.isArray(clientes) ? clientes[0] : clientes,
-        asesor, numerocuotaspryecto: parseFloat(inicialcuotas) + parseFloat(financiacion),
-        cupon: idbono ? idbono : 1,
-        inicialdiferida: inicialcuotas,
-        ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
-        separar: rcuota[0].replace(/\./g, ''),
-        iniciar: xcntag, cuot: Math.round(cuot)
+        'p.lote': lt, 'p.vrmt2': vr,
+        'p.cliente': Array.isArray(clientes) ? clientes[0] : clientes,
+        'p.asesor': asesor, 'p.numerocuotaspryecto': parseFloat(inicialcuotas) + parseFloat(financiacion),
+        'p.cupon': idbono ? idbono : 1,
+        'p.inicialdiferida': inicialcuotas,
+        'p.ahorro': ahorro ? ahorro.replace(/\./g, '') : 0,
+        'p.separar': rcuota[0].replace(/\./g, ''),
+        'p.iniciar': xcntag, 'p.cuot': Math.round(cuot)
+    }
+    if (otro) {
+        orden["l.uno"] = null;
+        orden["l.dos"] = null;
+        orden["l.tres"] = null;
+        orden["l.directa"] = null;
+        orden["l.estado"] = 9;
+        orden["l.mtr"] = valmtr2;
+        orden["l.valor"] = Math.round(valmtr2 * mtr2);
+        orden["l.inicial"] = Math.round((valmtr2 * mtr2) * porcentage / 100);
+    } else {
+        const r = await Estados(preventa);
+        var estado = r.pendients ? 8 : r.std
+        orden["l.mtr"] = vr;
+        orden["l.valor"] = tot;
+        orden["l.inicial"] = ini;
+        orden["estado"] = estado;
     }
 
     if (promesa) {
-        orden.promesa = promesa;
-        orden.autoriza = req.user.fullname;
-        orden.status = promesa;
+        orden["p.promesa"] = promesa;
+        orden["p.autoriza"] = req.user.fullname;
+        orden["p.status"] = promesa;
     }
+
     if (Array.isArray(clientes)) {
         switch (clientes.length) {
             case 2:
-                orden.cliente2 = clientes[1];
+                orden["p.cliente2"] = clientes[1];
                 break;
             case 3:
-                orden.cliente2 = clientes[1];
-                orden.cliente3 = clientes[2];
+                orden["p.cliente2"] = clientes[1];
+                orden["p.cliente3"] = clientes[2];
                 break;
             case 4:
-                orden.cliente2 = clientes[1];
-                orden.cliente3 = clientes[2];
-                orden.cliente4 = clientes[3];
+                orden["p.cliente2"] = clientes[1];
+                orden["p.cliente3"] = clientes[2];
+                orden["p.cliente4"] = clientes[3];
                 break;
         }
     }
-    await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [orden, preventa]);
-
-
+    await pool.query(`UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`, [orden, preventa]);
+    await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE lt = ?`, lote);
+    //`UPDATE preventa SET ? WHERE id = ?`
 
     var ID = '', kuotas = 'UPDATE cuotas SET cuota = CASE id ',
         numeros = '', rkuotas = '', fechas = '', stds = '', kuot = false;
@@ -1446,6 +1468,16 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
     await pool.query(kuotas);
     kuot ? await pool.query(cuotas.slice(0, -1)) : '';
     idcuota ? await pool.query(eli) : '';
+    if (otro) {
+        const r = await Estados(preventa);
+        var estado = r.pendients ? 8 : r.std
+        var ip = uno ? 'uno = ' + uno + ', ' : '';
+        ip += dos ? 'dos = ' + dos + ', ' : '';
+        ip += tres ? 'tres = ' + tres + ', ' : '';
+        ip += directa ? 'directa = ' + directa + ', ' : '';
+        ip += 'estado = ' + estado + ', mtr = ' + vr + ', valor = ' + tot + ', inicial = ' + ini;
+        await pool.query(`UPDATE productosd SET ${ip} WHERE id = ?`, lt);
+    }
     res.send(true);
 })
 router.post('/separacion/:id', isLoggedIn, async (req, res) => {
@@ -1458,7 +1490,7 @@ router.post('/separacion/:id', isLoggedIn, async (req, res) => {
 router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
     const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
-    WHERE v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`, id);
+    WHERE l.estado IN('9', '15') AND v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`, id);
     const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
     const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
     const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`, id);
@@ -1920,6 +1952,20 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         respuesta = { "data": solicitudes };
         res.send(respuesta);
+    } else if (id === 'comisionOLD') {
+        if (req.user.admin == 1) {
+            const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+        s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
+        u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
+        cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+        INNER JOIN users u ON s.asesor = u.id  LEFT JOIN preventa pr ON pr.lote = pd.id 
+        INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users us ON pr.asesor = us.id 
+        LEFT JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
+        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA') AND pd.estado IN(9, 15)`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
+
+            respuesta = { "data": solicitudes };
+            res.send(respuesta);
+        }
     } else if (id === 'bank') {
         const { banco, cta, idbank, numero } = req.body;
         await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [{ bank: banco, tipocta: cta, numerocuenta: numero }, idbank]);

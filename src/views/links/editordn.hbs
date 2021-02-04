@@ -4,39 +4,45 @@
             <div class="col-xl-12">
                 <div class="card">
                     <div class="card-header">
-                        {{#each orden}} 
+                        {{#each cuotas}}
+                        <input type="hidden" id="separacion" value="{{SEPARACION}}">
+                        <input type="hidden" id="ncal" value="{{INICIAL}}">
+                        <input type="hidden" id="financia" value="{{FINANCIACION}}">
+                        {{/each}}
+                        {{#each orden}}
                         <input type="hidden" id="ecesr" value="{{asesor}}">
                         <input type="hidden" id="status" value="{{status}}">
                         <input type="hidden" id="clent1" value="{{cliente}}">
                         <input type="hidden" id="clent2" value="{{cliente2}}">
                         <input type="hidden" id="clent3" value="{{cliente3}}">
                         <input type="hidden" id="clent4" value="{{cliente4}}">
-                        <input type="hidden" id="prodct" value="{{lote}}">
                         <input type="hidden" id="Montos" value="{{Montos}}">
                         <input type="hidden" id="Pagos" value="{{t}}">
-                        <input type="hidden" id="mtro2" value="{{mtr2}}">
                         <input type="hidden" id="iniciar" value="{{iniciar}}">
                         <input type="hidden" id="vrmt2" value="{{vrmt2}}">
                         <input type="hidden" id="separar" value="{{separar}}">
-                        <input type="hidden" id="cuotaextraordinaria" value="{{cuotaextraordinaria}}">
-                        <input type="hidden" id="extraordinariameses" value="{{extraordinariameses}}">
                         <input type="hidden" id="kupon" value="{{cupon}}">
                         <input type="hidden" id="cuota" value="{{cuot}}">
                         <input type="hidden" id="pin" value="{{pin}}">
                         <input type="hidden" id="descuento" value="{{descuento}}">
-                        {{/each}}
-                        {{#each cuotas}}
-                        <input type="hidden" id="separacion" value="{{SEPARACION}}">
-                        <input type="hidden" id="ncal" value="{{INICIAL}}">
-                        <input type="hidden" id="financia" value="{{FINANCIACION}}">
-                        {{/each}}                        
+
                     </div>
                     <div class="card-body" id="cuadro2">
                         <table id="crearcartera" class="table table-striped table-sm table-hover responsive">
                             <thead>
+                                <input type="hidden" id="prodct" name="lote" value="{{lote}}">
+                                <input type="hidden" id="mtro2" name="mtr2" value="{{mtr2}}">
                                 <input type="hidden" id="ID-Sep" name="preventa" value="{{id}}">
                                 <input type="hidden" id="cuot" name="cuot">
                                 <input type="hidden" id="idbono" name="idbono">
+                                <input type="hidden" id="otro" name="otro">
+                                <input type="hidden" name="uno" value="{{uno}}">
+                                <input type="hidden" name="dos" value="{{dos}}">
+                                <input type="hidden" name="tres" value="{{tres}}">
+                                <input type="hidden" name="directa" value="{{directa}}">
+                                <input type="hidden" name="valmtr2" value="{{valmtr2}}">
+                                <input type="hidden" name="porcentage" value="{{porcentage}}">
+                                {{/each}}
                                 <tr>
                                     <th colspan="9">
                                         <div class="row">

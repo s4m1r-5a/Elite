@@ -4395,6 +4395,213 @@ if (window.location.pathname == `/links/reportes`) {
             });
         }
     }
+    var comisionesOLD = $('#comisionesOLD').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
+                            <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path>
+                            <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path>
+                            <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path>
+                            <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path>
+                            <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path>
+                            <path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
+                            <path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path>
+                            <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>`,
+                attr: {
+                    title: 'Generar cuenta de cobro',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    CuentaCobro();
+                }
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>`,
+                attr: {
+                    title: 'Inspeccion de linea desendente',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/desendentes',
+                        beforeSend: function (xhr) {
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                comisiones.ajax.reload(null, false)
+                            } else {
+                                $('#ModalEventos').one('shown.bs.modal', function () {
+                                }).modal('hide');
+                                $('#ModalEventos').modal('hide');
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/comisionOLD",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "ids" },
+            { data: "nam" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "ids",
+                //defaultContent: 
+                render: function (data, method, row) {
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                                        </div>
+                                    </div>` : ''
+                }
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+            } else if (data["stado"] == 9) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["stado"] == 15) {
+                $(row).css("background-color", "#FFFFCC");
+            }
+        }
+    });
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 3 : 4;
         var col2 = $(this).attr('id') === 'min' ? 15 : 16;
@@ -4408,6 +4615,7 @@ if (window.location.pathname == `/links/reportes`) {
             .search(buscar, true, false, true)
             .draw();
     });
+
     /*
         var doc = new jsPDF()
         var img2 = new Image();
@@ -5013,8 +5221,6 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             return true;
         }
     );
-    var cuotaextraordinaria = parseFloat($('#cuotaextraordinaria').val());
-    var extraordinariameses = parseFloat($('#extraordinariameses').val());
     var Montos = parseFloat($('#Montos').val());
     var Pagos = parseFloat($('#Pagos').val());
     var vrmt2 = parseFloat($('#vrmt2').val());
@@ -5061,6 +5267,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         $('#proyectos').change(function () {
             var pr = prodct == $(this).val() ? true : false;
             if (pr) {
+                $('#otro').val(null);
                 var ini = iniciar * valor / 100;
                 $('#mtr2').val(mtro2);
                 $('#vmtr2').val(Moneda(Math.round(vrmt2)));
@@ -5106,6 +5313,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                     success: function (data) {
                         if (data) {
                             if (data.valor >= valor) {
+                                $('#otro').val('1');
                                 var porg = data.inicial * 100 / data.valor;
                                 $('#mtr2').val(data.mtr2);
                                 $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
@@ -5468,11 +5676,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         }
     })
     crearcartera.on('click', '.guardar', function () {
-        $('#crearcartera').find('.id, .rcuota, .std, #ahorro, #inicialcuotas, #financiacion').prop('disabled', false);
+        $('#crearcartera').find('.id, .rcuota, .std, #ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial').prop('disabled', false);
         var datos = $('#crearcartera thead').find(`input, select`).serialize();
         datos += '&' + crearcartera.$('input, select').serialize();
         datos += eliminar;
-        crearcartera.$('.id, .rcuota, .std').prop('disabled', true);
+        crearcartera.$('.id, .rcuota, .std, #ini, #fnc, #total, #inicial').prop('disabled', true);
         //console.log(datos) 
         $.ajax({
             type: 'POST',
@@ -5491,6 +5699,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                     SMSj('success', 'Datos actualizados correctamente')
                     $('#ModalEventos').modal('hide')
                     eliminar = '';
+                    window.location.href = '/links/reportes';
                 }
             }
         })
