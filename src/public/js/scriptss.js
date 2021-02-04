@@ -9165,6 +9165,187 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         }
     });
+    var tableOLD = $('#datatableOLD').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],
+        buttons: [{
+            extend: 'pageLength',
+            text: 'Ver',
+            orientation: 'landscape'
+        },
+        {
+            text: `<svg xmlns="http://www.w3.org/2000/svg" 
+                width="36" height="36" viewBox="0 0 24 24" fill="none" 
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
+                stroke-linejoin="round" class="feather feather-calendar">
+                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                    <line x1="16" y1="2" x2="16" y2="6"></line>
+                    <line x1="8" y1="2" x2="8" y2="6"></line>
+                    <line x1="3" y1="10" x2="21" y2="10"></line>
+                </svg>`,
+            attr: {
+                title: 'Fecha',
+                id: 'Date'
+            },
+            className: 'btn btn-secondary fech'
+        },
+        {
+            text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+            placeholder="MZ">`,
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
+            },
+            className: 'btn btn-secondary min'
+        },
+        {
+            text: `<input id="max" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+            placeholder="LT">`,
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary max'
+        }, //<i class="align-middle feather-md" data-feather="calendar"></i> src\public\bank\Movimientos.xlsm
+        admin === '1' ? {
+            text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+            stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>`,
+            attr: {
+                title: 'Descargar movimientos bacarios'
+            },
+            className: 'btn btn-secondary',
+            action: function () {
+                const link = document.createElement('a');
+                link.href = '/bank/Movimientos.xlsm';
+                link.download = "Movimientos.xlsm";
+                link.dispatchEvent(new MouseEvent('click'));
+            }
+        } : ''
+        ],
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/pagoOLD",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#datatableOLD_filter').prepend("<h3 class='float-left mt-2'>PAGOS-ANULADOS</h3>");
+        },
+        columns: [
+            {
+                className: 't',
+                data: "ids"
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "facturasvenc" },
+            {
+                data: "recibo",
+                render: function (data, method, row) {
+                    return data.replace(/~/g, '')
+                }
+            },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            { data: "tipobsevacion" },
+            { data: "descrip" },
+            { data: "cparacion" }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        }
+    });
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 5 : 6;
         table
