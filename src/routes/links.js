@@ -1459,8 +1459,9 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
     var eli = 'DELETE FROM cuotas WHERE ';
     if (Array.isArray(idcuota)) {
         idcuota.map((c, i) => {
-            i === 0 ? eli += 'id = ' + c : eli += ' AND id = ' + c;
+            i === 0 ? eli += 'id IN(' + c + ', ' : eli += c + ', ';
         });
+        eli = eli.slice(0, -2) + ')';
     } else {
         eli += 'id = ' + idcuota;
     }
