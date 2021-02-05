@@ -2033,7 +2033,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
-        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
+        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id,
@@ -2041,25 +2041,20 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);
+        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);*/
         //console.log(so)
-        respuesta = { "data": so };
-        res.send(respuesta);
-
-    } else if (id === 'pagoOLD') {
-        if (req.user.admin == 1) {
-            const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
-        pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip,
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
+        pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote,
-        s.ids, s.descp, pr.id cparacion, pd.estado FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
+        s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
-        WHERE s.concepto IN ('PAGO','ABONO') AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)`);
-            respuesta = { "data": so }; //console.log(so)
-            res.send(respuesta);
-        }
+        LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
+        respuesta = { "data": so };
+        res.send(respuesta);
+
     } else if (id === 'comision') {
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, pg.stads, s.cuentadecobro,
         s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, pg.deuda, pg.cuentacobro,
