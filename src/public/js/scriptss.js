@@ -97,6 +97,51 @@ if (!cli) {
         toggle: true
     });
 }
+
+var $validationForm = $("#smartwizard-arrows-primary");
+$validationForm.smartWizard({
+    theme: "arrows",
+    showStepURLhash: false,
+    lang: {// Variables del lenguaje
+        next: 'Siguiente',
+        previous: 'Atras'
+    },
+    toolbarSettings: {
+        toolbarPosition: 'bottom', // none, top, bottom, both
+        toolbarButtonPosition: 'right', // left, right
+        showNextButton: true, // show/hide a Next button
+        showPreviousButton: false // show/hide a Previous button
+        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+    },
+    autoAdjustHeight: false,
+    backButtonSupport: false,
+    useURLhash: false
+}).on("leaveStep", () => {
+    //$('.h').attr("disabled", false);
+    //return true
+    var fd = $('form').serialize();
+    let skdt;
+    $.ajax({
+        url: '/links/id',
+        data: fd,
+        type: 'POST',
+        async: false,
+        success: function (data) {
+            if (data != 'Pin de registro invalido, comuniquese con su distribuidor!') {
+                $('.h').attr("disabled", false);
+                skdt = true;
+            } else if ($('#ipin').val() != "") {
+                $(".alert").show();
+                $('.alert-message').html('<strong>Error!</strong> ' + data);
+                setTimeout(function () {
+                    $(".alert").fadeOut(3000);
+                }, 2000);
+                skdt = false;
+            }
+        }
+    });
+    return skdt;
+});
 //mensajes
 function SMSj(tipo, mensaje) {
     var message = mensaje;
@@ -322,10 +367,11 @@ $('#btn-mas').on('change', function () {
 })
 
 var chat = document.getElementById('chat');
-chat.scrollTop = chat.scrollHeight - chat.clientHeight;
+admin ? chat.scrollTop = chat.scrollHeight - chat.clientHeight : '';
 
 /////////////////////////////////////////////////////////////////////////////
 $(document).ready(function () {
+    moment.locale('es-mx');
     if (window.location.hostname !== "grupoelitered.com.co") {
         $.ajax({
             url: '/links/desarrollo',
@@ -450,51 +496,7 @@ function titleCase(texto) {
     );
 }
 //////////////////////////////////////////////////////////////////
-var $validationForm = $("#smartwizard-arrows-primary");
-$validationForm.smartWizard({
-    theme: "arrows",
-    showStepURLhash: false,
-    lang: {// Variables del lenguaje
-        next: 'Siguiente',
-        previous: 'Atras'
-    },
-    toolbarSettings: {
-        toolbarPosition: 'bottom', // none, top, bottom, both
-        toolbarButtonPosition: 'right', // left, right
-        showNextButton: true, // show/hide a Next button
-        showPreviousButton: false // show/hide a Previous button
-        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
-    },
-    autoAdjustHeight: false,
-    backButtonSupport: false,
-    useURLhash: false
-}).on("leaveStep", () => {
-    //$('.h').attr("disabled", false);
-    //return true
-    var fd = $('form').serialize();
-    let skdt;
-    $.ajax({
-        url: '/links/id',
-        data: fd,
-        type: 'POST',
-        async: false,
-        success: function (data) {
-            //alert(data)
-            if (data != 'Pin de registro invalido, comuniquese con su distribuidor!') {
-                $('.h').attr("disabled", false);
-                skdt = true;
-            } else if ($('#ipin').val() != "") {
-                $(".alert").show();
-                $('.alert-message').html('<strong>Error!</strong> ' + data);
-                setTimeout(function () {
-                    $(".alert").fadeOut(3000);
-                }, 2000);
-                skdt = false;
-            }
-        }
-    });
-    return skdt;
-});
+
 function init_events(ele) {
     ele.each(function () {
         // crear un objeto de evento (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
@@ -1144,7 +1146,6 @@ if (window.location.pathname == `/links/pagos`) {
 
         if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
             var l = parseFloat($('#Total').val())
-            //var cal = Math.round((l * 3.4 / 100) + 900)
             var cal = Math.round((l * 2.79 / 100) + 800)
             $('#rcb').prop('checked', false)
             $('.transaccion').html(Moneda(cal))
@@ -1172,6 +1173,7 @@ if (window.location.pathname == `/links/pagos`) {
             $('.transaccion').html('0');
             $('.Total3').html(t2 ? t2 : t);
             $('#Total, #Total2').val(T2 ? T2 : T);
+            $('#file2').click();
         }
         $('.sw-btn-next').on('click', function () {
             $('#' + forma).validate();
@@ -1183,9 +1185,10 @@ if (window.location.pathname == `/links/pagos`) {
             $('#trecibo').show('slow');
             $('#trecib').show('slow');
             $('#recibos1').show('slow');
-            $('#trsubida').show('slow');
+            //$('#trsubida').show('slow');
             $('#trarchivos').show('slow');
         } else {
+            $('.montorecibos').text(null);
             $('#trecibo').hide('slow');
             $('#trecib').hide('slow');
             $('#recibos1').hide('slow');
@@ -1208,48 +1211,74 @@ if (window.location.pathname == `/links/pagos`) {
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        //`<img id="img_02" src="${e.target.result}" width="${marg}%" height="100%" alt="As">`
-                        `<div class="image" style="
-                            width: ${marg}%;
-                            padding-top: calc(100% / (16/9));
-                            background-image: url('${e.target.result}');
-                            background-size: 100%;
-                            background-position: center;
-                            background-repeat: no-repeat;float: left;"></div>`
+                        `<div class="card p-1 my-1 rounded" style="background: rgba(255,99,71,0.2); width: ${marg}%; min-width: 50%;float: left;">
+                            <label class="custom-control custom-radio bg-transparent rcbxcdnt" style="display: none;">
+                                <input name="custom-radio" type="radio" class="custom-control-input rcbexcdnt" name="rcbexcd" disabled>
+                                <span class="custom-control-label text-muted">Recibo con excedente</span>
+                            </label>
+                            <div class="image" style="width: 100%; padding-top: calc(100% / (16/9)); background-image: url('${e.target.result}'); 
+                             background-size: 100%; background-position: center; background-repeat: no-repeat;"></div>
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <input type="text" class="recis text-center form-control-sm rounded-pill form-control-no-border" 
+                                                 name="nrecibo" placeholder="Recibo" autocomplete="off" required>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <input class="montos text-center form-control-sm rounded-pill form-control-no-border" type="text" 
+                                                 placeholder="Monto" autocomplete="off" name="montos" required>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="text-center">
+                                                <input class="fech text-center form-control-sm rounded-pill form-control-no-border" type="text" 
+                                                 name="feh" title="Establece la fecha del recibo" autocomplete="off" required>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>`
+                        /*
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <select name="formap" class="form-control-no-border forma form-control-sm rounded-pill" style="text-align:center;" required>
+                                                    <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                                    <option value="CHEQUE">CHEQUE</option><option value="EFECTIVO">EFECTIVO</option>
+                                                    <option value="OTRO">OTRO</option>
+                                                </select>
+                                            </div>
+                                        </th>
+                                    </tr>*/
                     );
-                    $('#trarchivos').after(`
-                    <tr class="op">
-                        <th>                
-                            <div class="input-group">
-                                <div class="input-group-prepend">
-								    <div class="input-group-text">
-                                        <svg xmlns="http://www.w3.org/2000/svg" 
-                                         width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                                         stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                                         stroke-linejoin="round" class="feather feather-file-text">
-                                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                                            <polyline points="14 2 14 8 20 8"></polyline>
-                                            <line x1="16" y1="13" x2="8" y2="13"></line>
-                                            <line x1="16" y1="17" x2="8" y2="17"></line>
-                                            <polyline points="10 9 9 9 8 9"></polyline>
-                                        </svg>
-									</div>
-								</div>
-                                <input class="recis" type="text" name="nrecibo" placeholder="Recibo"
-                                 autocomplete="off" style="padding: 1px; width: 50%;" required>
-								<div class="input-group-prepend">
-									<div class="input-group-text">
-									    <input type="radio" name="rcbexcd" class="rcbexcdnt" disabled>
-									</div>
-								</div>
-							</div>
-                        </th>
-                        <td>
-                            <input class="montos text-center" type="text" name=""
-                             placeholder="Monto" autocomplete="off" style="padding: 1px; width: 70%;" required>                           
-                        </td>
-                    </tr>`
-                    );
+                    $(".fech").daterangepicker({
+                        locale: {
+                            'format': 'YYYY-MM-DD',
+                            'separator': ' - ',
+                            'applyLabel': 'Aplicar',
+                            'cancelLabel': 'Cancelar',
+                            'fromLabel': 'De',
+                            'toLabel': '-',
+                            'customRangeLabel': 'Personalizado',
+                            'weekLabel': 'S',
+                            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                            'firstDay': 1
+                        },
+                        singleDatePicker: true,
+                        showDropdowns: true,
+                        minYear: 2017,
+                        maxYear: parseInt(moment().format('YYYY'), 10),
+                    });
                     $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
                     $('.montos').on('change', function () {
                         var avl = 0, TO = parseFloat($('#Total').val());
@@ -1260,14 +1289,21 @@ if (window.location.pathname == `/links/pagos`) {
                         });
                         $('.montorecibos').html(Moneda(avl))
                         $('#montorecibos').val(avl);
-                        avl > TO ? $('.rcbexcdnt').prop({ disabled: false, required: true })
-                            : $('.rcbexcdnt').prop({ disabled: true, checked: false }), $('#rcbexcdnt').val('');
+                        if (avl > TO) {
+                            $('.rcbexcdnt').prop({ disabled: false, required: true });
+                            $('.rcbxcdnt').show('slow');
+                        } else {
+                            $('.rcbexcdnt').prop({ disabled: true, checked: false });
+                            $('#rcbexcdnt').val('');
+                            $('.rcbxcdnt').hide('slow');
+                        }
                     })
                     $('.rcbexcdnt').on('change', function () {
                         $('#rcbexcdnt').val($(this).val());
                     })
                     $('.recis').on('change', function () {
-                        $(this).next("div").find('.rcbexcdnt').val('~' + $(this).val() + '~');// console.log($(this).next("div").find('.rcbexcdnt').val())
+                        $(this).parents('.card').find('.rcbexcdnt').val($(this).val());
+                        $(this).parents('.card').find('.rcbexcdnt').is(':checked') ? $('#rcbexcdnt').val($(this).val()) : '';
                         var avl = '';
                         $('.recis').map(function () {
                             s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
@@ -1376,29 +1412,50 @@ if (window.location.pathname == `/links/pagos`) {
         };
     });
     $('#recbo').submit(function (e) {
+        e.preventDefault();
         $('input:not(.rcbexcdnt)').prop('disabled', false);
         $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-        /*$(':required').each(function (f) {
-            console.log(this, f)
-        });*/
         if (!$('#montorecibos').val()
             || !$('#file2').val()
-            || !$(".forma").is(':checked')
             || !$('#nrbc').val()
             || (!$(".rcbexcdnt").is(':disabled')
                 && !$(".rcbexcdnt").is(':checked')
             )
         ) {
             SMSj('error', 'Debe rellenar todos los campos solicitados');
-            e.preventDefault();
         } else if (parseFloat($('#montorecibos').val()) < parseFloat($('#Total2').val())) {
             SMSj('error', 'el monto de los recibos ingresados no corresponde al monto total a pagar');
-            e.preventDefault();
         } else {
-            $('#ModalEventos').modal({
-                backdrop: 'static',
-                keyboard: true,
-                toggle: true
+            var formData = new FormData($('#recbo')[0]);
+            var df = $('#recibos1 input').serializeArray();
+            df.map((x, i) => {
+                formData.append(x.name, x.value);
+            })
+            $.ajax({
+                type: 'POST',
+                url: '/links/recibo',
+                data: formData,
+                dataType: 'json',
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data.std) {
+                        SMSj('success', data.msj);
+                        setTimeout(function () {
+                            window.location.href = '/links/pagos';
+                        }, 2000);
+                    } else {
+                        SMSj('error', data.msj);
+                        $('#ModalEventos').hide();
+                    }
+                }
             });
         }
     });
@@ -8030,7 +8087,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         })
     })
     $('#Modaledit').on('change', '.mt2', function () {
-        alert('sdfksdfl')
         var valor = $(this).val() * $('#vmt2').cleanVal();
         var inicial = valor * $('#porcentage').val() / 100;
         $('#Modaledit input[name="valor"]').val(valor);

@@ -456,6 +456,8 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'editar') {
         const { id } = req.body;
+        await pool.query(`UPDATE productosd l INNER JOIN productos p ON l.producto = p.id 
+         SET l.valor = l.mtr2 * l.mtr, l.inicial = (l.mtr2 * l.mtr) * p.porcentage /100 WHERE l.producto = ${id}`)
         const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
         res.send(fila[0]);
     } else if (id === 'nuevo') {
@@ -516,14 +518,9 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
-    SET pd.valor= pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, 
+    SET pd.valor = pd.mtr2 * ${valor}, pd.inicial = (pd.mtr2 * ${valor}) * p.porcentage /100, p.valmtr2 = ${valor}, 
     p.valproyect = p.totalmtr2 * ${valor}, pd.mtr = ${valor} WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`)
     res.send(respuesta);
-});
-router.post('/actualiza', isLoggedIn, async (req, res) => {
-    const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, cantidad, estado, separacion, incentivo, fecha,
-        fechafin, socio, proveedor, documento, nombres, mercantil, fechaM, empresa, nit, banco, cta, numero, mail, direccion, tel, web } = req.body;
-
 });
 router.post('/regispro', isLoggedIn, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, lts, std, mz, n, mtr2, vrlt, vri, vmtr2,
@@ -786,7 +783,8 @@ router.post('/pagos', async (req, res) => {
     res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
-    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt } = req.body;
+    //console.log(req.body, req.files)
+    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt, nrecibo, montos, feh } = req.body;
     var rcb = ''; //console.log(req.body, rcbexcdnt ? 'si' : 'no')
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
@@ -867,7 +865,21 @@ router.post('/recibo', async (req, res) => {
         await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
     await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
     await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
-    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
+
+    if (Array.isArray(nrecibo)) {
+        await nrecibo.map((t, i) => {
+            reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}', ${rcbexcdnt === t ? parseFloat(montorcb) - parseFloat(total) : 0}),`;
+        });
+    } else {
+        reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${req.files[0].filename}', ${parseFloat(montorcb) - parseFloat(total)}),`;
+    }
+    await pool.query(reci.slice(0, -1));
+
+    /*req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
+    res.redirect('/links/cartera');*/
+
     if (g) {
         return res.send({ std: true, msj: 'Solicitud de pago enviada correctamente' });
     } else {
@@ -994,7 +1006,6 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     } else {
         separ.cliente = clientes
     }
-    //console.log(separ)
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
     idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
     var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
@@ -1150,7 +1161,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     //console.log(req.body)
     const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
     if (!fp.length) {
-        req.flash('error', 'Separación no realizada a existe una orden con este lote');
+        req.flash('error', 'Separación no realizada ya existe una orden con este lote');
         res.redirect(`/links/orden?id=${lote}&h=${ahora}`);
     } else {
         const separ = {
@@ -1681,18 +1692,6 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
         }
-        //console.log(`UPDATE solicitudes s LEFT JOIN cuotas c ON s.pago = c.id LEFT JOIN preventa p ON s.lt = p.lote LEFT JOIN cupones cp ON p.cupon = cp.id LEFT JOIN productosd l ON s.lt = l.id LEFT JOIN productos d ON l.producto  = d.id SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = l.mtr * l.mtr2, cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ${lote}`)
-        /*await pool.query(`UPDATE solicitudes s 
-            LEFT JOIN cuotas c ON s.pago = c.id
-            LEFT JOIN preventa p ON s.lt = p.lote  
-            LEFT JOIN cupones cp ON p.cupon = cp.id
-            LEFT JOIN productosd l ON s.lt = l.id 
-            LEFT JOIN productos d ON l.producto  = d.id 
-            SET s.stado = 6, c.estado = 6, l.estado = 9, l.valor = IF (parametro>0) THEN
-            l.mtr * l.mtr2 END IF , 
-            cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL, s.bonoanular = ${bonoanular},
-            p.descrip = '${causa} - ${motivo}', l.inicial = (l.mtr * l.mtr2) * d.porcentage / 100  WHERE s.lt = ? `, lote
-        ); */
         await pool.query(`UPDATE solicitudes s 
         LEFT JOIN cuotas c ON s.pago = c.id
         LEFT JOIN preventa p ON s.lt = p.lote  
@@ -1700,10 +1699,10 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         LEFT JOIN productosd l ON s.lt = l.id 
         LEFT JOIN productos d ON l.producto  = d.id 
         SET s.stado = 6, c.estado = 6, l.estado = 9, 
-        l.valor = if (d.valmtr2 != 0, d.valmtr2 * l.mtr2, l.mtr * l.mtr2),
-        l.inicial = if (d.valmtr2 != 0, (d.valmtr2 * l.mtr2) * d.porcentage / 100, (l.mtr * l.mtr2) * d.porcentage / 100),
+        l.valor = IF(d.valmtr2 != 0, d.valmtr2 * l.mtr2, l.mtr * l.mtr2),
+        l.inicial = IF(d.valmtr2 != 0, (d.valmtr2 * l.mtr2) * d.porcentage / 100, (l.mtr * l.mtr2) * d.porcentage / 100),
         cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-        s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}' WHERE s.lt = ?`, lote);
+        s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', orden = p.id WHERE s.lt = ?`, lote);
         res.send(true);
     }
     //respuesta = { "data": ventas };
