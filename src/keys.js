@@ -1,5 +1,5 @@
 module.exports = {
-    database00: {
+    database0: {
         connectionLimit: 1000,
         host: '96.43.143.58',
         user: 'samir',
