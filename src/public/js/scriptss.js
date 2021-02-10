@@ -5503,15 +5503,15 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         $('#xcntag').change(function () {
             var porcntg = $(this).val();
             var total = $('#total').val().replace(/\./g, '');
-            var totaldesc = $('#destotal').val().replace(/\./g, '');
             var inicl = total * porcntg / 100;
-
             $('#inicial').val(Moneda(Math.round(inicl)));
+            var totaldesc = $('#destotal').val().replace(/\./g, ''); 
             if (totaldesc) {
                 inicl = totaldesc * porcntg / 100;
                 total = totaldesc;
                 $('#desinicial').val(Moneda(Math.round(inicl)));
             }
+
             $('#ini').val(Moneda(Math.round(inicl)));
             $('#fnc').val(Moneda(Math.round(total - inicl)));
             if ($('#Separar').val()) {
@@ -5526,18 +5526,20 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             var porcntg = $('#xcntag').val();
             var total = vmtr * mtr;
             var inicl = total * porcntg / 100;
-            var totaldesc = $('#destotal').val().replace(/\./g, '');
-            $('#total').val(Moneda(Math.round(total)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-            $('#inicial').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-            if (totaldesc) {
-                var ahorro = $('#ahorro').val().replace(/\./g, '');
-                total = total - ahorro;
+
+            $('#total').val(Moneda(Math.round(total)));
+            $('#inicial').val(Moneda(Math.round(inicl)));
+            if (pin) {
+                var ahorr = Math.round(total * descuento / 100);
+                $('#ahorro').val(Moneda(ahorr));
+                total = total - ahorr;
                 inicl = total * porcntg / 100;
-                $('#destotal').val(Moneda(Math.round(total)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                $('#desinicial').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-            }
-            $('#ini').val(Moneda(Math.round(inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-            $('#fnc').val(Moneda(Math.round(total - inicl)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                $('#destotal').val(Moneda(Math.round(total)));
+                $('#desinicial').val(Moneda(Math.round(inicl)));
+                //.mask('#.##$', { reverse: true, selectOnFocus: true });
+            } 
+            $('#ini').val(Moneda(Math.round(inicl)))
+            $('#fnc').val(Moneda(Math.round(total - inicl)))
             if ($('#Separar').val()) {
                 CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
             } else {
