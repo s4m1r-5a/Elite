@@ -604,9 +604,12 @@ router.put('/clientes/:id', async (req, res) => {
     req.files.map((e) => {
         imagenes += `/uploads/${e.filename},`
     })
+    var indic = movil.indexOf(' ');
+    var movl = indic != -1 ? movil.replace(/-/g, "") : '57 ' + movil.replace(/-/g, "");
+
     const clit = {
         nombre: nombres.toUpperCase(), documento: documento.replace(/\./g, ''), fechanacimiento,
-        lugarexpedicion, fechaexpedicion, estadocivil, movil: movil.replace(/-/g, ""), agendado: 1,
+        lugarexpedicion, fechaexpedicion, estadocivil, movil: movl, agendado: 1,
         email: email.toLowerCase(), direccion: direccion.toLowerCase(), tipo,
         acsor: req.user.id, tiempo: ahora, google: '', imags: imagenes
     }
@@ -617,7 +620,7 @@ router.put('/clientes/:id', async (req, res) => {
                 "resource": {
                     "names": [{ "familyName": nombres.toUpperCase() }],
                     "emailAddresses": [{ "value": email.toLowerCase() }],
-                    "phoneNumbers": [{ "value": movil.replace(/-/g, ""), "type": "Personal" }],
+                    "phoneNumbers": [{ "value": '+' + movl, "type": "Personal" }],
                     "organizations": [{ "name": "Red Elite", "title": "Cliente" }]
                 }
             };
@@ -629,7 +632,7 @@ router.put('/clientes/:id', async (req, res) => {
             if (asesors) {
                 const asr = {
                     fullname: nombres.toUpperCase(), document: documento,
-                    cel: movil.replace(/-/g, ""), username: email.toLowerCase(), cli: ir.insertId
+                    cel: movl, username: email.toLowerCase(), cli: ir.insertId
                 }
                 await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             }
@@ -638,7 +641,7 @@ router.put('/clientes/:id', async (req, res) => {
         } else if (cliente.length > 0 && asesors) {
             const asr = {
                 fullname: nombres.toUpperCase(), document: documento,
-                cel: movil.replace(/-/g, ""), username: email.toLowerCase(), cli: cliente[0].idc
+                cel: movl, username: email.toLowerCase(), cli: cliente[0].idc
             }
             await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
             res.send(true);
@@ -694,6 +697,21 @@ router.put('/clientes/:id', async (req, res) => {
         });
     }
 });
+router.put('/editclientes', async (req, res) => {
+    const { idc, name, tipod, docu, lugarex, fehex, fnaci,
+        ecivil, email, pais, Movil, adres } = req.body;
+
+    console.log(req.body);
+    const movl = pais + ' ' + Movil.replace(/-/g, "");
+    const clit = {
+        nombre: name.toUpperCase(), documento: docu, fechanacimiento: fnaci,
+        lugarexpedicion: lugarex, fechaexpedicion: fehex, estadocivil: ecivil,
+        movil: movl, email: email.toLowerCase(), direccion: adres.toLowerCase(),
+        tipo: tipod
+    }
+    await pool.query('UPDATE clientes SET ? WHERE idc = ?', [clit, idc]);
+    res.send(true);
+})
 router.post('/adjuntar', async (req, res) => {
     var imagenes = ''
     req.files.map((e) => {

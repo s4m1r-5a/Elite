@@ -21,6 +21,76 @@ function Moneda(valor) {
     valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
     return valor;
 }
+//Leva a mayúsculas la primera letra de cada palabra
+function titleCase(texto) {
+    const re = /(^|[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?:([a-záéíóúüñ])|([A-ZÁÉÍÓÚÜÑ]))|([A-ZÁÉÍÓÚÜÑ]+)/gu;
+    return texto.replace(re,
+        (m, caracterPrevio, minuscInicial, mayuscInicial, mayuscIntermedias) => {
+            const locale = ['es', 'gl', 'ca', 'pt', 'en'];
+            //Son letras mayúsculas en el medio de la palabra
+            // => llevar a minúsculas.
+            if (mayuscIntermedias)
+                return mayuscIntermedias.toLocaleLowerCase(locale);
+            //Es la letra inicial de la palabra
+            // => dejar el caracter previo como está.
+            // => si la primera letra es minúscula, capitalizar
+            //    sino, dejar como está.
+            return caracterPrevio +
+                (minuscInicial ? minuscInicial.toLocaleUpperCase(locale) : mayuscInicial);
+        }
+    );
+}
+function init_events(ele) {
+    ele.each(function () {
+        // crear un objeto de evento (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
+        // no necesita tener un comienzo o un final
+        var eventObject = {
+            title: $.trim($(this).text()) // Usa el texto del elemento como título del evento.
+        }
+        // almacenar el objeto de evento en el elemento DOM para que podamos acceder a él más tarde
+        $(this).data('eventObject', eventObject)
+        // haz que el evento se pueda arrastrar usando jQuery UI
+        $(this).draggable({
+            zIndex: 1070,
+            revert: true, // hará que el evento vuelva a su
+            revertDuration: 0 //  Posición original después del arrastre
+        })
+    })
+};
+/*CONSULTAR PERSONAS || EMPRESAS*/
+function Consultar(tipo, id) {
+    var settings = {
+        "url": "https://api.misdatos.com.co/api/co/rues/consultarEmpresaPorNit",
+        "method": "POST",
+        "timeout": 0,
+        "headers": {
+            "Authorization": "xxxxxxxxxxxxxxxxxxxx",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "data": {
+            "nit": "901331380"
+        }
+    };
+
+    var settings = {
+        "url": "https://api.misdatos.com.co/api/co/consultarNombres",
+        "method": "POST",
+        "timeout": 0,
+        "headers": {
+            "Authorization": "XXXXXXXXXXXXXXXXXXXXXXXXXXX",
+            "Content-Type": "application/x-www-form-urlencoded"
+        },
+        "data": {
+            "documentType": "CC",
+            "documentNumber": "1032440675"
+        }
+    };
+
+    $.ajax(settings).done(function (response) {
+        console.log(response);
+    });
+}
+////////////////////////////////////////////////////////////////////
 //lenguaje
 let languag = {
     "lengthMenu": "Ver 10 filas",
@@ -476,44 +546,6 @@ $(document).ready(function () {
         });
     });
 });
-//Leva a mayúsculas la primera letra de cada palabra
-function titleCase(texto) {
-    const re = /(^|[^A-Za-zÁÉÍÓÚÜÑáéíóúüñ])(?:([a-záéíóúüñ])|([A-ZÁÉÍÓÚÜÑ]))|([A-ZÁÉÍÓÚÜÑ]+)/gu;
-    return texto.replace(re,
-        (m, caracterPrevio, minuscInicial, mayuscInicial, mayuscIntermedias) => {
-            const locale = ['es', 'gl', 'ca', 'pt', 'en'];
-            //Son letras mayúsculas en el medio de la palabra
-            // => llevar a minúsculas.
-            if (mayuscIntermedias)
-                return mayuscIntermedias.toLocaleLowerCase(locale);
-            //Es la letra inicial de la palabra
-            // => dejar el caracter previo como está.
-            // => si la primera letra es minúscula, capitalizar
-            //    sino, dejar como está.
-            return caracterPrevio +
-                (minuscInicial ? minuscInicial.toLocaleUpperCase(locale) : mayuscInicial);
-        }
-    );
-}
-//////////////////////////////////////////////////////////////////
-
-function init_events(ele) {
-    ele.each(function () {
-        // crear un objeto de evento (http://arshaw.com/fullcalendar/docs/event_data/Event_Object/)
-        // no necesita tener un comienzo o un final
-        var eventObject = {
-            title: $.trim($(this).text()) // Usa el texto del elemento como título del evento.
-        }
-        // almacenar el objeto de evento en el elemento DOM para que podamos acceder a él más tarde
-        $(this).data('eventObject', eventObject)
-        // haz que el evento se pueda arrastrar usando jQuery UI
-        $(this).draggable({
-            zIndex: 1070,
-            revert: true, // hará que el evento vuelva a su
-            revertDuration: 0 //  Posición original después del arrastre
-        })
-    })
-};
 /*if ($('#msg').html() == 'aprobada') {
     history.pushState(null, "", "planes?iux=ir");
 };*/
@@ -5505,7 +5537,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             var total = $('#total').val().replace(/\./g, '');
             var inicl = total * porcntg / 100;
             $('#inicial').val(Moneda(Math.round(inicl)));
-            var totaldesc = $('#destotal').val().replace(/\./g, ''); 
+            var totaldesc = $('#destotal').val().replace(/\./g, '');
             if (totaldesc) {
                 inicl = totaldesc * porcntg / 100;
                 total = totaldesc;
@@ -5537,7 +5569,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 $('#destotal').val(Moneda(Math.round(total)));
                 $('#desinicial').val(Moneda(Math.round(inicl)));
                 //.mask('#.##$', { reverse: true, selectOnFocus: true });
-            } 
+            }
             $('#ini').val(Moneda(Math.round(inicl)))
             $('#fnc').val(Moneda(Math.round(total - inicl)))
             if ($('#Separar').val()) {
@@ -11175,9 +11207,9 @@ if (window.location == `${window.location.origin}/links/red`) {
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     });
 };
+///// https://api.chat-api.com/instance107218/checkPhone?token=5jn3c5dxvcj27fm0&phone=14081472583 verificar si se puede enviar un whatsapp a un numero eliminar los espacios en el numero////////////
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/clientes`) {
-
     $(document).ready(function () {
         $('#creacliente').submit(function (e) {
             e.preventDefault();
@@ -11317,8 +11349,15 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             {
                 data: "imags",
                 render: function (data, method, row) {
-                    return data ? `<span class="badge badge-pill badge-success">Imagen</span>`
-                        : `<span class="badge badge-pill badge-danger">No imagen</span>`
+                    if (data) {
+                        var fr = '', p = data.split(",");
+                        p.map((e) => {
+                            fr += e ? `<a href="${e}" target="_blank" title="Click para ver documento" class="mr-1"><i class="fas fa-address-card"></i></a>` : ``
+                        })
+                        return fr;
+                    } else {
+                        return `<a title="No posee ningun documento"><i class="fas fa-exclamation-circle"></i></a>`;
+                    }
                 }
             },
             {
@@ -11329,6 +11368,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
                                             <a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>
+                                            <a class="dropdown-item editar"><i class="fas fa-edit"></i> Editar</a>
                                             <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                         </div>
                                     </div>` : `<a class="dropdown-item" onclick="AdjuntarCC(${data})"><i class="fas fa-paperclip"></i> Adjuntar</a>`
@@ -11336,13 +11376,51 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             }
         ]
     });
-    /*clientes.on('dblclick', 'td:not(.control, .ul)', function () {
+    clientes.on('click', 'td .editar', function () {
         var fila = $(this).parents('tr');
-        //var data = tabledit.row(fila).data();
-        $(this).find('span').hide();
-        $(this).find('input').show('slow').focus().select();
-    });*/
-    $('#ModalClints').modal('toggle');
+        var data = clientes.row(fila).data();
+        var indic = data.movil.indexOf(' ');
+        var Mvl = indic != -1 ? data.movil.substr(0, indic) : '57';
+        $('.Movil').unmask();
+        $('#ModalClints input, #ModalClints select').val(null);
+        $('#idcc').val(data.idc);
+        $('.name').val(data.nombre);
+        $(`.tipod option[value='${data.tipo}']`).prop("selected", true);
+        $('.docu').val(data.documento);
+        $('.fnaci').val(moment(data.fechanacimiento).format('YYYY-MM-DD'));
+        $('.lugarex').val(data.lugarexpedicion);
+        $('.fehex').val(moment(data.fechaexpedicion).format('YYYY-MM-DD'));
+        $(`.ecivil option[value='${data.estadocivil}']`).prop("selected", true);
+        $(`.pais option[value='${Mvl}']`).prop("selected", true);
+        $('.Movil').val(indic != -1 ? data.movil.slice(indic + 1) : data.movil).mask(`***-***-****`);
+        $('.email').val(data.email);
+        $('.adres').val(data.direccion);
+
+        $('#Movl').html('+' + Mvl);
+        $('#ModalClints').modal('toggle');
+        $(".f").daterangepicker({
+            locale: {
+                'format': 'YYYY-MM-DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10) + 5,
+        });
+        $('.pais').change(function () {
+            $('#Movl').html('+' + $(this).val());
+        })
+    });
     function AdjuntarCC(id) {
         $('#AdjutarDoc').modal({
             toggle: true,
@@ -11396,6 +11474,36 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             });
         }
     }
+    $('#datclient').submit(function (e) {
+        e.preventDefault();
+        var formData = new FormData($('#datclient')[0]);
+        $.ajax({
+            type: 'PUT',
+            url: '/links/editclientes',
+            data: formData,
+            dataType: 'json',
+            processData: false,
+            contentType: false,
+            beforeSend: function (s) {
+                $('#ModalClints').modal('toggle');
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    SMSj('success', 'datos editados correctamente');
+                    $('#ModalEventos').modal('toggle');
+                    clientes.ajax.reload(null, false)
+                } else {
+                    SMSj('error', 'Error al intentar editar los datos');
+                    $('#ModalEventos').modal('toggle');
+                }
+            }
+        });
+    })
 };
 /////////////////////////////* CUPONES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/cupones`) {
