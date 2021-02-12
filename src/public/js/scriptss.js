@@ -58,38 +58,23 @@ function init_events(ele) {
     })
 };
 /*CONSULTAR PERSONAS || EMPRESAS*/
-function Consultar(tipo, id) {
-    var settings = {
-        "url": "https://api.misdatos.com.co/api/co/rues/consultarEmpresaPorNit",
-        "method": "POST",
-        "timeout": 0,
-        "headers": {
-            "Authorization": "xxxxxxxxxxxxxxxxxxxx",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        "data": {
-            "nit": "901331380"
+function Consultar(tipo, code) {
+    var settings, datos = {}, url, dat;
+    if (tipo === 'Nit') {
+        datos.url = 'https://api.misdatos.com.co/api/co/rues/consultarEmpresaPorNit';
+        datos.dat = {
+            "nit": code
         }
-    };
-
-    var settings = {
-        "url": "https://api.misdatos.com.co/api/co/consultarNombres",
-        "method": "POST",
-        "timeout": 0,
-        "headers": {
-            "Authorization": "XXXXXXXXXXXXXXXXXXXXXXXXXXX",
-            "Content-Type": "application/x-www-form-urlencoded"
-        },
-        "data": {
-            "documentType": "CC",
-            "documentNumber": "1032440675"
+    } else {
+        datos.url = 'https://api.misdatos.com.co/api/co/consultarNombres';
+        datos.dat = {
+            "documentType": tipo,
+            "documentNumber": code
         }
-    };
-
-    $.ajax(settings).done(function (response) {
-        console.log(response);
-    });
+    }
+    return datos;
 }
+
 ////////////////////////////////////////////////////////////////////
 //lenguaje
 let languag = {
@@ -11266,7 +11251,27 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             }
         })
     });
-
+    function Consul(tipo, code) {
+        var dw = Consultar(tipo, code);
+        $.ajax({
+            url: dw.url,
+            method: 'POST',
+            timeout: 0,
+            headers: {
+                "Authorization": "nci2upw280kxoy3o1dlc2q0gq28f5pfc9z58b3piryylih19",
+                "Content-Type": "application/x-www-form-urlencoded"
+            },
+            data: dw.dat,
+            //async: false,
+            success: function (dat) {
+                if (jQuery.isEmptyObject(dat.data)) {
+                    $('.name').prop('disabled', false).focus();
+                } else {
+                    $('.name').val(dat.data.fullName);
+                }
+            }
+        });
+    }
     var clientes = $('#clientes').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [
@@ -11384,7 +11389,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
         $('.Movil').unmask();
         $('#ModalClints input, #ModalClints select').val(null);
         $('#idcc').val(data.idc);
-        $('.name').val(data.nombre);
+        $('.name').val(data.nombre).prop('disabled', true);
         $(`.tipod option[value='${data.tipo}']`).prop("selected", true);
         $('.docu').val(data.documento);
         $('.fnaci').val(moment(data.fechanacimiento).format('YYYY-MM-DD'));
@@ -11421,6 +11426,16 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             $('#Movl').html('+' + $(this).val());
         })
     });
+    $('.tipod').on('change', function () {
+        var tpo = $(this).val().split('-')[0];
+        var docu = $('.docu').val() || 0
+        docu ? Consul(tpo, docu) : '';
+    })
+    $('.docu').on('change', function () {
+        var tpo = $('.tipod').val().split('-')[0] || 0;
+        var docu = $(this).val() || 0
+        docu && tpo ? Consul(tpo, docu) : '';
+    })
     function AdjuntarCC(id) {
         $('#AdjutarDoc').modal({
             toggle: true,
@@ -11476,6 +11491,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
     }
     $('#datclient').submit(function (e) {
         e.preventDefault();
+        $('.name').prop('disabled', false);
         var formData = new FormData($('#datclient')[0]);
         $.ajax({
             type: 'PUT',
