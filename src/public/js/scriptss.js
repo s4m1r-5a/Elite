@@ -11426,7 +11426,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             $('#Movl').html('+' + $(this).val());
         })
     });
-    $('.tipod').on('change', function () {
+    /*$('.tipod').on('change', function () {
         var tpo = $(this).val().split('-')[0];
         var docu = $('.docu').val() || 0
         docu ? Consul(tpo, docu) : '';
@@ -11435,7 +11435,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
         var tpo = $('.tipod').val().split('-')[0] || 0;
         var docu = $(this).val() || 0
         docu && tpo ? Consul(tpo, docu) : '';
-    })
+    })*/
     function AdjuntarCC(id) {
         $('#AdjutarDoc').modal({
             toggle: true,
