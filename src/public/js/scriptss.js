@@ -3849,8 +3849,15 @@ if (window.location.pathname == `/links/reportes`) {
         }
 
     }
+    var STAD2 = (col, std) => {
+        comisiones.columns(col).search(std).draw();
+    }
     var comisiones = $('#comisiones').DataTable({
         dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            ['10 filas', '25 filas', '50 filas', '100 filas', 'Ver todo']
+        ],
         buttons: [
             {
                 extend: 'pageLength',
@@ -3919,6 +3926,45 @@ if (window.location.pathname == `/links/reportes`) {
                         }
                     })
                 }
+            },
+            {
+                extend: 'collection',
+                text: 'Stds',
+                orientation: 'landscape',
+                buttons: [
+                    {
+                        text: 'COPIAR',
+                        extend: 'copy'
+                    },
+                    {
+                        text: `PENDIENTES`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Pendiente');
+                        }
+                    },
+                    {
+                        text: `APROBADOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Pagada');
+                        }
+                    },
+                    {
+                        text: `ANULADOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Declinada');
+                        }
+                    },
+                    {
+                        text: `TODOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2('', '');
+                        }
+                    }
+                ]
             }
         ],
         deferRender: true,
@@ -9453,7 +9499,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 this.style.backgroundPosition = "center";
             }
         });
-        if (admin == 1 && (USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'HERLYS CASSERES HENRY')) {
+        if (admin == 1 && (USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'HERLYS CASSERES HENRY' || USERADMIN === 'HABIB SALDARRIAGA')) {
             $('.dropdown-item').show()
             $('#nove').show()
         } else {
@@ -9835,9 +9881,62 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fila.toggleClass('selected');
         })
     })
+    var STAD2 = (col, std) => {
+        comisiones.columns(col).search(std).draw();
+    }
     var comisiones = $('#comisiones').DataTable({
+        dom: 'Bfrtip',
         deferRender: true,
         paging: true,
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            ['10 filas', '25 filas', '50 filas', '100 filas', 'Ver todo']
+        ],
+        buttons: [{
+            extend: 'pageLength',
+            text: 'Ver',
+            orientation: 'landscape'
+        },
+        {
+            extend: 'collection',
+            text: 'Stds',
+            orientation: 'landscape',
+            buttons: [
+                {
+                    text: 'COPIAR',
+                    extend: 'copy'
+                },
+                {
+                    text: `PENDIENTES`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD2(16, 'Pendiente');
+                    }
+                },
+                {
+                    text: `APROBADOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD2(16, 'Pagada');
+                    }
+                },
+                {
+                    text: `ANULADOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD2(16, 'Declinada');
+                    }
+                },
+                {
+                    text: `TODOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD2('', '');
+                    }
+                }
+            ]
+        }
+        ],
         search: {
             regex: true,
             caseInsensitive: true,
