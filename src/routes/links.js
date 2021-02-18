@@ -64,6 +64,7 @@ ADR;TYPE=work_:;;Colombia;Bolivar;Turbaco;la granja;
 TEL;TYPE=WORK,VOICE:3012673944
 URL;type=WORK;CHARSET=UTF-8:admin@retfly.co
 END:VCARD*/
+
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.body.actividad;
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
@@ -75,6 +76,17 @@ router.post('/desarrollo', async (req, res) => {
     })
     await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');*/ //, 'true_573002851046-1593217257@g.us_3EB01486B9FB9A592E32'
     //console.log(body)
+    /*var diacupon = moment().subtract(3, 'days').endOf("days").format('YYYY-MM-DD HH:mm:ss');
+
+    const separaciones = await pool.query(`SELECT p.id, p.fecha, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
+    WHERE p.tipobsevacion IS NULL AND l.estado IN(1,12) AND p.cupon != 1 AND p.fecha < '${diacupon}'`);
+
+    separaciones.forEach(async (val, i) => {
+        if (i < 5) {
+            var u = await QuitarCupon(val.id);
+            console.log(val.id, i, u);
+        }
+    });*/
     res.send(true);
 
 });
@@ -88,7 +100,7 @@ cron.schedule("7 10 * * *", async () => {
     })
     await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
 })
-cron.schedule("59 23 * * *", async () => {
+cron.schedule("0 0 * * *", async () => {
     mysqldump({
         connection: {
             host: '96.43.143.58',
@@ -114,6 +126,16 @@ cron.schedule("59 23 * * *", async () => {
         body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     })
     await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+
+    /////////////////////////////////////////* QUITAR QUPONES *//////////////////////////////////////////
+
+    var diacupon = moment().subtract(3, 'days').endOf("days").format('YYYY-MM-DD HH:mm:ss');
+
+    const separaciones = await pool.query(`SELECT p.id, p.fecha, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
+    WHERE p.tipobsevacion IS NULL AND l.estado IN(1,12) AND p.cupon != 1 AND p.fecha < '${diacupon}'`);
+    separaciones.forEach(async (val, i) => {
+        await QuitarCupon(val.id);
+    });
 });
 cron.schedule("0 0 1 * *", async () => {
     let m = new Date();
@@ -171,10 +193,19 @@ cron.schedule("0 0 1 * *", async () => {
     var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("2 0 * * 5", async () => {
-    await pool.query(`UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION') AND stado = 15`);
-    var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS* del dia *SABADO O DEL 5*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+cron.schedule("0 0 13-15,27-31 * *", async () => {
+    await pool.query(`UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 15`);
+    var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
+});
+cron.schedule("0 12 15,28-31 * *", async () => {
+    const finmes = moment().endOf('month').format('DD');
+    const dia = moment().endOf('month').format('DD');
+    if (dia === finmes || dia === '15') {
+        await pool.query(`UPDATE solicitudes SET stado = 15 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 9`);
+        var bod = `_Hemos *Bloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+        await EnviarWTSAP('57 3007753983', bod);
+    }
 });
 cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var hoy = moment().format('YYYY-MM-DD');
@@ -1657,14 +1688,13 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 })
 //////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, (req, res) => {
-    //Desendentes(15)
     res.render('links/reportes');
 });
 var CODE = null;
 router.post('/anular', isLoggedIn, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
-        fullname, cel, idc, qhacer, causa, motivo } = req.body
-    var bonoanular;
+        fullname, cel, idc, qhacer, causa, motivo, asesor } = req.body
+    var bonoanular = null;
     if (estado == 1) {
         return res.send(false)
     }
@@ -1673,18 +1703,20 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
         res.redirect('/links/reportes');
     } else {
-        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
-        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
-        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
-        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = ${lote}`);
-        var l = r[0].monto1 || 0,
-            k = r[0].monto || 0;
-        var acumulado = l + k;
-        //const o = await pool.query(`SELECT SUM(monto) total FROM solicitudes WHERE stado = '4' AND lt = ?`, lote);
+        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, p.separar, l.valor, p.ahorro,
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto, p.status, COUNT(s.monto) pagos
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.lt = p.lote 
+        INNER JOIN productosd l ON s.lt = l.id WHERE s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL 
+        AND s.stado = 4 AND s.lt = ${lote} GROUP BY p.status, p.separar, l.valor, p.ahorro`);
+        const l = r[0].monto1 || 0,
+            k = r[0].monto || 0,
+            t = r[0];
+        const acumulado = l + k;
+
         if (qhacer === 'BONO' && acumulado > 0) {
             var pin = ID(5);
             const bono = {
-                pin, descuento: 0, estado: 9, clients: idc,
+                pin, descuento: 0, producto: id, estado: 9, clients: idc,
                 tip: qhacer, monto: acumulado, motivo, concept: causa
             }
             const a = await pool.query('INSERT INTO cupones SET ? ', bono);
@@ -1697,30 +1729,33 @@ router.post('/anular', isLoggedIn, async (req, res) => {
             EnviarWTSAP(cel, body2)
 
         } else if (qhacer === 'DEVOLUCION' && acumulado > 0) {
-            const total = acumulado;
-            const porciento = 0.20;
-            const monto = acumulado * porciento;
-            const facturasvenc = r.length;
+            const porciento = t.status == 2 || t == 3 ? 0.20 : 1;
+            const total = porciento < 1 ? (t.valor - t.ahorro) * porciento : t.separar;
+            const monto = acumulado;
+            const facturasvenc = t.pagos;
             const fech = moment(new Date()).format('YYYY-MM-DD');
             bonoanular = null;
             const devolucion = {
-                fech, monto, concepto: qhacer, stado: 3, descp: causa,
+                fech, monto, concepto: qhacer, stado: 3, descp: causa, orden: id, asesor,
                 porciento, total, lt: lote, retefuente: 0, facturasvenc, recibo: 'NO APLICA',
-                reteica: 0, pagar: total - monto, formap: 'INDEFINIDA'
+                reteica: 0, pagar: Math.round(monto - total), formap: porciento < 1 ? 'JARRA-TOTAL' : 'JARRA-SEPARACION'
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
         }
-        await pool.query(`UPDATE solicitudes s 
-        LEFT JOIN cuotas c ON s.pago = c.id
-        LEFT JOIN preventa p ON s.lt = p.lote  
-        LEFT JOIN cupones cp ON p.cupon = cp.id
-        LEFT JOIN productosd l ON s.lt = l.id 
-        LEFT JOIN productos d ON l.producto  = d.id 
+        const sql = `UPDATE cuotas c  
+        INNER JOIN preventa p ON c.separacion = p.id
+        INNER JOIN productosd l ON p.lote = l.id 
+        INNER JOIN productos d ON l.producto  = d.id
+        LEFT JOIN solicitudes s ON s.lt = l.id
+        LEFT JOIN cupones cp ON p.cupon = cp.id 
         SET s.stado = 6, c.estado = 6, l.estado = 9, 
-        l.valor = IF(d.valmtr2 != 0, d.valmtr2 * l.mtr2, l.mtr * l.mtr2),
-        l.inicial = IF(d.valmtr2 != 0, (d.valmtr2 * l.mtr2) * d.porcentage / 100, (l.mtr * l.mtr2) * d.porcentage / 100),
-        cp.estado = 6, p.tipobsevacion = 'ANULADA', l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-        s.bonoanular = ${bonoanular}, p.descrip = '${causa} - ${motivo}', orden = p.id WHERE s.lt = ?`, lote);
+        l.valor = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END,
+        l.inicial = CASE WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
+        ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, cp.estado = 6, p.tipobsevacion = 'ANULADA', 
+        l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
+        ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
+        s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`;
+        await pool.query(sql, lote);
         res.send(true);
     }
     //respuesta = { "data": ventas };
@@ -1731,7 +1766,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status, p.asesor,
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, p.obsevacion
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id ${d} `
@@ -2073,6 +2108,16 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": so };
         res.send(respuesta);
 
+    } else if (id === 'devoluciones') {
+        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, 
+        s.stado, s.formap, s.facturasvenc, s.descp, s.porciento, s.total, u.fullname, s.orden,
+        l.mz, l.n, s.pagar, c.movil, c.email, p.descrip, c.nombre, d.proyect FROM solicitudes s 
+        INNER JOIN productosd l ON s.lt = l.id INNER JOIN users u ON s.asesor = u.id  
+        INNER JOIN preventa p ON s.orden = p.id INNER JOIN productos d ON l.producto = d.id 
+        INNER JOIN clientes c ON p.cliente = c.idc WHERE s.concepto = 'DEVOLUCION' 
+        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        respuesta = { "data": solicitudes }; //console.log(solicitudes)
+        res.send(respuesta);
     } else if (id === 'comision') {
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, pg.stads, s.cuentadecobro,
         s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, pg.deuda, pg.cuentacobro,
@@ -2498,6 +2543,57 @@ async function Estados(S) {
         return { std: 1, estado: 'PENDIENTE', pendients }
     }
 }
+async function QuitarCupon(S) {
+
+    const W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
+    p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
+    p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
+    c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
+    INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
+    ORDER BY TIMESTAMP(c.fechs) ASC`, S);
+
+    const x = W[0];
+    const separa = x.separar;
+    const total = Math.round(x.vrmt2 * x.mtr2);
+    const inicial = Math.round((total * x.iniciar / 100) - separa);
+    const financiacion = Math.round(total - (inicial + separa));
+    const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran);
+    const cuotaordi = x.cuotaextraordinaria;
+    const nini = x.inicialdiferida ? x.inicialdiferida : 0;
+    const nfnc = x.numerocuotaspryecto - nini - x.extran;
+    const cuotaini = inicial ? Math.round(inicial / nini) : 0;
+    const cuotafnc = Math.round((financiacion - extraordinarias) / nfnc);
+    const cf = x.extraordinariameses;
+    mes6 = cuotafnc;
+    mes12 = cuotafnc;
+
+    if (cuotaordi) {
+        cf == 1 ? mes6 = cuotaordi
+            : cf == 2 ? mes12 = cuotaordi
+                : mes6 = cuotaordi, mes12 = cuotaordi;
+    };
+
+    const r = await pool.query(`UPDATE cuotas c INNER JOIN preventa p ON p.id = c.separacion 
+    INNER JOIN cupones u ON u.id = p.cupon SET u.estado = 6, p.cupon = 1, p.ahorro = 0, 
+    p.cuot = ${cuotafnc}, c.proyeccion = CASE WHEN c.tipo = 'SEPARACION' THEN ${separa} 
+        WHEN c.tipo = 'INICIAL' THEN ${cuotaini}
+        WHEN c.tipo = 'FINANCIACION' AND 
+        MONTH(c.fechs) = 6 THEN ${mes6}
+        WHEN c.tipo = 'FINANCIACION' AND 
+        MONTH(c.fechs) = 12 THEN ${mes12}
+        ELSE ${cuotafnc} END, c.cuota = CASE 
+        WHEN c.tipo = 'SEPARACION' THEN ${separa} 
+        WHEN c.tipo = 'INICIAL' THEN ${cuotaini}
+        WHEN c.tipo = 'FINANCIACION' AND 
+        MONTH(c.fechs) = 6 THEN ${mes6}
+        WHEN c.tipo = 'FINANCIACION' AND 
+        MONTH(c.fechs) = 12 THEN ${mes12}
+        ELSE ${cuotafnc} END 
+        WHERE c.separacion = ?`, S);
+
+    r.affectedRows ? ProyeccionPagos(S) : 0;
+    return r.affectedRows
+}
 async function ProyeccionPagos(S) {
 
     const Pagos = await pool.query(`SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, 
@@ -2506,7 +2602,7 @@ async function ProyeccionPagos(S) {
 
     const W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
-    p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c,proyeccion,
+    p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
     c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
     INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
     ORDER BY TIMESTAMP(c.fechs) ASC`, S); // p.proyect DESC
@@ -2515,16 +2611,14 @@ async function ProyeccionPagos(S) {
     const Pg = Pagos[0];
     const pagos = Pg.BONOS + Pg.MONTO
     const Cartera = x.obsevacion;
-    const Proyaccion = x.proyeccion;
+    const Proyeccion = x.proyeccion;
     const separa = x.separar;
     const total = Math.round((x.vrmt2 * x.mtr2) - x.ahorro);
     const inicial = Math.round((total * x.iniciar / 100) - x.separar);
     const financiacion = Math.round(total - (inicial + x.separar));
 
-    if (Proyaccion != 0) {
-
-        await pool.query(`UPDATE cuotas SET estado = 3, cuota = proyeccion WHERE separacion = ?`, S);
-
+    if (Proyeccion > 0) {
+        await pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = proyeccion WHERE separacion = ?`, S);
     } else if (Cartera !== 'CARTERA') {
         const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran);
         const cuotaordi = x.cuotaextraordinaria;
@@ -2544,7 +2638,7 @@ async function ProyeccionPagos(S) {
         };
 
         await pool.query(`UPDATE cuotas SET 
-        estado = 3, cuota = CASE 
+        estado = 3, mora = 0, abono = 0, cuota = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
         WHEN tipo = 'INICIAL' THEN ${cuotaini}
         WHEN tipo = 'FINANCIACION' AND 
@@ -2562,7 +2656,7 @@ async function ProyeccionPagos(S) {
         WHERE separacion = ?`, S);
 
     } else {
-        var pagados = 0, nopagados = 0, cuotaa = 0, ID = '', proy = '', sql = 'UPDATE cuotas SET estado = 3, cuota = CASE id ';
+        var pagados = 0, nopagados = 0, cuotaa = 0, ID = '', proy = '', sql = 'UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = CASE id ';
 
         W.map((c) => {
             if (c.estado != 13) {
@@ -2573,7 +2667,7 @@ async function ProyeccionPagos(S) {
         })
         var tol = pagados + nopagados;
         if (tol === total) {
-            pool.query(`UPDATE cuotas SET estado = 3, proyeccion = cuota WHERE separacion = ?`, S);
+            pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, proyeccion = cuota WHERE separacion = ?`, S);
         } else if (total > tol) {
             tol = total - tol;
             W.map((c) => {
@@ -2587,48 +2681,35 @@ async function ProyeccionPagos(S) {
                     proy += ' WHEN ' + c.id + ' THEN ' + c.cuota;
                 }
             });
-            console.log(sql, tol, total, pagados, nopagados)
+            //console.log(sql, tol, total, pagados, nopagados)
             ID = ID.slice(0, -2);
             sql += ' END, proyeccion = CASE id ' + proy + ' END WHERE id IN(' + ID + ')';
             await pool.query(sql);
         }
     }
 
-    if (Pg.BONOS || Pg.MONTO) {
+    if (pagos > 0) {
+        var sql = 'UPDATE cuotas SET estado = CASE id';
+        var ID = '';
+        var montocuotas = pagos;
+        var cuotaa = '';
 
-        if (pagos === separa) {
-            await pool.query(`UPDATE cuotas SET ? WHERE tipo = 'SEPARACION' AND separacion = ?`, [{ estado: 13, mora: 0 }, S]);
-            console.log('pagos es igual a la separacion');
-        } else if (pagos === (inicial + separa)) {
-            await pool.query(`UPDATE cuotas SET ? WHERE tipo IN('SEPARACION', 'INICIAL') AND separacion = ?`, [{ estado: 13, mora: 0 }, S]);
-            console.log('pagos es igual a la inicial');
-        } else if (pagos >= total) {
-            await pool.query(`UPDATE cuotas SET ? WHERE separacion = ?`, [{ estado: 13, mora: 0 }, S]);
-            console.log('pagos es mayor al total');
-        } else if (pagos > 0 && pagos < total) {
-            const Cuots = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${S} ORDER BY TIMESTAMP(fechs) ASC`);
-            if (Cuots.length > 0) {
-                var sql = 'UPDATE cuotas SET mora = 0, estado = CASE id';
-                var ID = '', montocuotas = pagos, cuotaa = '';
-
-                Cuots.map((c) => {
-                    if (montocuotas >= c.cuota) {
-                        ID += c.id.toString() + ', ';
-                        sql += ' WHEN ' + c.id + ' THEN ' + 13;
-                        montocuotas = montocuotas - c.cuota;
-                    } else if (montocuotas > 0) {
-                        montocuotas = c.cuota - montocuotas;
-                        ID += c.id.toString() + ', ';
-                        sql += ' WHEN ' + c.id + ' THEN ' + 3;
-                        cuataa = ', cuota = CASE id WHEN ' + c.id + ' THEN ' + montocuotas + ' END';
-                        montocuotas = 0;
-                    }
-                })
-                ID = ID.slice(0, -2);
-                sql += ' END' + cuotaa + ' WHERE id IN(' + ID + ')';
-                await pool.query(sql);
+        W.map((c) => {
+            if (montocuotas >= c.cuota) {
+                ID += c.id.toString() + ', ';
+                sql += ' WHEN ' + c.id + ' THEN ' + 13;
+                montocuotas = montocuotas - c.cuota;
+            } else if (montocuotas > 0) {
+                montocuotas = c.cuota - montocuotas;
+                ID += c.id.toString() + ', ';
+                sql += ' WHEN ' + c.id + ' THEN ' + 3;
+                cuotaa = ', cuota = CASE id WHEN ' + c.id + ' THEN ' + montocuotas + ' ELSE cuota END';
+                montocuotas = 0;
             }
-        }
+        })
+        ID = ID.slice(0, -2);
+        sql += ' END' + cuotaa + ' WHERE id IN(' + ID + ')';
+        await pool.query(sql);
     }
 }
 async function Prueva(S) {
@@ -3065,7 +3146,7 @@ async function Desendentes(pin, stados) {
     if (stados != 10) {
         return false
     }
-    let m = new Date(); console.log('paso por aqi')
+    let m = new Date();
     //month = Math.sign(m.getMonth() - 2) > 0 ? m.getMonth() - 2 : 1;
     var mes = m.getMonth() + 1;
     let linea = '', lDesc = '';

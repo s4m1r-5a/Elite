@@ -3944,10 +3944,17 @@ if (window.location.pathname == `/links/reportes`) {
                         }
                     },
                     {
-                        text: `APROBADOS`,
+                        text: `PAGADAS`,
                         className: 'btn btn-secondary',
                         action: function () {
                             STAD2(17, 'Pagada');
+                        }
+                    },
+                    {
+                        text: `DISPONIBLES`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Disponible');
                         }
                     },
                     {
@@ -9884,6 +9891,147 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     var STAD2 = (col, std) => {
         comisiones.columns(col).search(std).draw();
     }
+    var devoluciones = $('#devoluciones').DataTable({
+        dom: 'Bfrtip',
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            ['10 filas', '25 filas', '50 filas', '100 filas', 'Ver todo']
+        ],
+        buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        //{className: "dt-center", targets: "_all"}],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/devoluciones",
+            dataSrc: "data"
+        },
+        /*initComplete: function (settings, json, row) {
+                                        alert(row);
+        },*/
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "ids" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "facturasvenc" },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
+            { data: "formap" },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "fullname" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                    }
+                }
+            },
+            { data: 'descrip' },
+            { data: 'orden' },
+            {
+                className: 't',
+                data: "ids",
+                //defaultContent: 
+                render: function (data, method, row) {
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            
+                                        </div>
+                                    </div>` : ''
+                }
+            }/*<a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>*/
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+            } else if (data["stado"] == 9) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["stado"] == 15) {
+                $(row).css("background-color", "#FFFFCC");
+            }
+        }
+    });
     var comisiones = $('#comisiones').DataTable({
         dom: 'Bfrtip',
         deferRender: true,
