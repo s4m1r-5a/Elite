@@ -487,20 +487,20 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'editar') {
         const { id } = req.body;
+        await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
+        LEFT JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
+        WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END, l.inicial = CASE WHEN p.id IS NOT NULL 
+        THEN (p.vrmt2 * l.mtr2) * p.iniciar / 100 WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
+        ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, l.mtr = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 
+        WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END, l.estado = CASE WHEN p.id IS NOT NULL THEN l.estado
+        WHEN l.estado NOT IN(9, 15) THEN 15 ELSE l.estado END WHERE l.producto = ${id} AND p.tipobsevacion IS NULL`);
 
+        await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
+        INNER JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 
+        ELSE l.mtr * l.mtr2 END, l.inicial = CASE WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
+        ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, l.mtr = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END 
+        WHERE l.producto = ${id} AND p.tipobsevacion IS NOT NULL AND l.estado IN(9, 15)`);
 
-        const sql = `UPDATE productosd l                     
-        INNER JOIN productos d ON l.producto  = d.id 
-        LEFT JOIN preventa p ON p.lote = l.id SET 
-        l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
-        WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END,
-        l.inicial = CASE WHEN p.id IS NOT NULL THEN (p.vrmt2 * l.mtr2) * p.iniciar / 100 
-        WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END,
-        l.mtr = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 
-        WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END 
-        WHERE l.producto = ${id} AND p.tipobsevacion IS NULL`;
-
-        await pool.query(sql);
         const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
         res.send(fila[0]);
     } else if (id === 'nuevo') {
