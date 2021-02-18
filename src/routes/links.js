@@ -487,8 +487,20 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'editar') {
         const { id } = req.body;
-        await pool.query(`UPDATE productosd l INNER JOIN productos p ON l.producto = p.id 
-         SET l.valor = l.mtr2 * l.mtr, l.inicial = (l.mtr2 * l.mtr) * p.porcentage /100 WHERE l.producto = ${id}`)
+
+
+        const sql = `UPDATE productosd l                     
+        INNER JOIN productos d ON l.producto  = d.id 
+        LEFT JOIN preventa p ON p.lote = l.id SET 
+        l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
+        WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END,
+        l.inicial = CASE WHEN p.id IS NOT NULL THEN (p.vrmt2 * l.mtr2) * p.iniciar / 100 
+        WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END,
+        l.mtr = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 
+        WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END 
+        WHERE l.producto = ${id} AND p.tipobsevacion IS NULL`;
+
+        await pool.query(sql);
         const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
         res.send(fila[0]);
     } else if (id === 'nuevo') {
@@ -513,7 +525,14 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
                 estados: 7, fechaini: fecha, fechafin, separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
                 incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0, comision, maxcomis, linea1, linea2, linea3
             };
-            const datos = await pool.query('UPDATE productos SET ? WHERE id = ?', [produc, editar]);
+            await pool.query('UPDATE productos SET ? WHERE id = ?', [produc, editar]);
+            await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
+            LEFT JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
+            WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END, l.inicial = CASE WHEN p.id IS NOT NULL 
+            THEN (p.vrmt2 * l.mtr2) * p.iniciar / 100 WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
+            ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, l.mtr = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 
+            WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END WHERE l.producto = ${editar} AND p.tipobsevacion IS NULL`);
+
             res.send(true);
 
         } else {
@@ -1467,7 +1486,7 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
         orden["l.mtr"] = vr;
         orden["l.valor"] = tot;
         orden["l.inicial"] = ini;
-        orden["estado"] = estado;
+        orden["l.estado"] = estado;
     }
 
     if (promesa) {
@@ -1943,7 +1962,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         var estado = r.pendients ? 8 : r.std
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]
-        );
+        ); console.log('paso aqui')
         res.send(true);
 
     } else if (id === 'estadopromesas') {
@@ -2609,7 +2628,7 @@ async function ProyeccionPagos(S) {
 
     const x = W[0];
     const Pg = Pagos[0];
-    const pagos = Pg.BONOS + Pg.MONTO
+    const pagos = Pg.BONOS + Pg.MONTO; //console.log(pagos)
     const Cartera = x.obsevacion;
     const Proyeccion = x.proyeccion;
     const separa = x.separar;
