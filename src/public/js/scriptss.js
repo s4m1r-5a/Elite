@@ -1731,7 +1731,8 @@ if (window.location.pathname == `/links/reportes`) {
                                                 ${USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO' ?
                             `<a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
                              <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
-                             <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>` : ''}
+                             <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
+                             ${row.kupn ? `<a class="dropdown-item" onclick="RestKupon(${data})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}` : ''}
                                                     <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                                                     <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
@@ -3429,6 +3430,33 @@ if (window.location.pathname == `/links/reportes`) {
                 }
             }
         });
+    }
+    var RestKupon = (id) => {
+        if (admin == 1) {
+            $.ajax({
+                url: '/links/reportes/restkupon',
+                data: { k: id },
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        tableOrden.ajax.reload(null, false)
+                        comisiones.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('success', 'Cupon de descuento restablecido correctamente')
+                    }
+                }
+            });
+        } else {
+            SMSj('error', 'No posees permisos para ejecuutar esta accion')
+        }
     }
     var Proyeccion = (id) => {
         if (admin == 1 && USERADMIN === 'HABIB SALDARRIAGA') {
