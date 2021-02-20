@@ -5020,341 +5020,7 @@ margin + oneLineHeight
 );
 */
 }
-//////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/ordn/${window.location.pathname.split('/')[3]}`) {
-    var table = $('#datatable').DataTable({
-        paging: false,
-        //ordering: false,
-        info: false,
-        searching: false,
-        //deferRender: true,
-        autoWidth: true,
-        responsive: false,
-        ajax: {
-            method: "POST",
-            url: "/links/ordendeseparacion/" + $('#orden').val(),
-            data: {
-                p: $('#numerocuotaspryecto').val(),
-                i: $('#inicialdiferida').val()
-            },
-            dataSrc: "data"
-        },
-        columns: [
-            { data: "tipo" },
-            { data: "ncuota" },
-            {
-                data: "fechs",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD')
-                }
-            },
-            {
-                data: "cuota",
-                render: function (data, method, row) {
-                    var r = moment(row.fechs).format('MMMM'),
-                        u = parseFloat($('.extrao').html().replace(/\D/g, ''));
-                    return (r === 'June' || r === 'December')
-                        && row.tipo === 'FINANCIACION' && u > 0 ?
-                        `<input class="form-control-no-border" 
-                        type="text" name="mz" value="${Moneda(data)}" 
-                        style="padding: 1px;color: #2196F3;">`
-                        : Moneda(data)
-                }
-            },
-            /*{
-                data: "cuota",
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
-            },*/
-            {
-                data: "estado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 13:
-                            return `<span class="badge badge-pill badge-success">Pagada</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
-                            break;
-                        case 8:
-                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
-                            break;
-                        case 1:
-                            return `<span class="badge badge-pill badge-warning">Procesando</span>`
-                            break;
-                    }
-                }
-            },
-            { data: "ncuota2" },
-            {
-                data: "fecha2",
-                render: function (data, method, row) {
-                    return data ? moment(data).format('YYYY-MM-DD') : '';
-                }
-            },
-            /*{
-                data: "cuota2",
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
-            },*/
-            {
-                data: "cuota2",
-                render: function (data, method, row) {
-                    var r = moment(row.fechs).format('MMMM'),
-                        u = parseFloat($('.extrao').html().replace(/\D/g, ''));
-                    return (r === 'June' || r === 'December')
-                        && row.tipo === 'FINANCIACION' && u > 0 ?
-                        `<input class="form-control-no-border" 
-                        type="text" name="mz" value="${Moneda(data)}" 
-                        style="padding: 1px;color: #2196F3;">`
-                        : data ? Moneda(data) : ""
-                }
-            },
-            {
-                data: "estado2",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 13:
-                            return `<span class="badge badge-pill badge-success">Pagada</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
-                            break;
-                        case 8:
-                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
-                            break;
-                        default:
-                            return ``
-                    }
-                }
-            }
-        ],
-        initComplete: function (settings, json) {
-            //tableOrden.column(2).visible(true);
-            //window.addEventListener("load", window.print());
-            /*var s = table
-                .columns([2, 3, 4, 6, 7, 8])
-                .rows()
-                .data()
-                .flatten()
-                .filter(function (value, index) {
-                    return value
-                    //console.log(value);
-                });*/
-        },
-        columnDefs: [
-            { "visible": false, "targets": 0 }
-        ],
-        order: [[0, "desc"], [1, 'asc']],
-        drawCallback: function (settings) {
-            var api = this.api();
-            var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-
-            api.column(0, { page: 'current' }).data().each(function (group, i) {
-                if (last !== group) {
-                    $(rows).eq(i).before(
-                        `<tr class="group">
-                            <td colspan="8" class="text-right text-muted">${group}</td>
-                        </tr>`
-                    );
-                    last = group;
-                }
-            });
-        }
-    });
-    $(document).ready(function () {
-        var mr2 = $('.mr2').html();
-        var mxr = parseFloat($('.mxr').html());
-        var inicial = $('.totali').html();
-        var inip = $('.inip').html();
-        var valor = $('.totalp').html();
-        var vm2 = $('.vm2').html();
-        var ahorro = parseFloat($('.ahorro').html());
-        var descuento = $('.des').html();
-        var extrao = $('.extrao').html();
-        var separar = $('.separar').cleanVal();
-        var cuota = $('#cuota').html();
-        var pin = $('.pin').html();
-        var idpin = '';
-        var mss = $('.mss').html(), j = '';
-        var bono = '', precio = 0;
-        mss == 1 ? j = 'Junio' : mss == 2 ? j = 'Diciembre' : mss == 3 ? j = 'Jun & Dic' : j = 'Ninguno';
-        $('.mss').html(j);
-        $('.totalp').html('Total $' + Moneda(valor));
-        $('.vm2').text('$' + Moneda(vm2));
-        $('.totali').html('Total $' + Moneda(inicial));
-        $('.ahorro').html('Ahorro $' + Moneda(ahorro));
-        $('.extrao').html('$' + Moneda(extrao));
-        //$('.separar').html('$' + Moneda(separar));
-        $('#cuota').html('$' + Moneda(cuota));
-        $('.inip').html(inip + '%');
-        $('.des').html(descuento + '%');
-        $(`#ncl option[value='${inip}']`).attr("selected", true);
-        var Dt = () => {
-            bono = '';
-            pin = $('.pin').html();
-            idpin = '';
-            ahorro = parseFloat($('.ahorro').html().replace(/\D/g, ''));
-            descuento = parseFloat($('.des').html().replace(/\D/g, ''));
-        }
-        var Dts = (s, i, ncl, porcentage, f, p, vrm2) => {
-            var datos = {
-                orden: $('#orden').val(), separacion: s, inicial: ncl, valor: precio, vrm2, porcentage,
-                cuotaInicial: i, cuotaFinanciacion: f, separar: p, ahorro, idpin, mxr, mss
-            }
-            $.ajax({
-                type: 'POST',
-                url: '/links/editarorden',
-                data: datos,
-                success: function (data) {
-                    var d = data[0]
-                    $('.mss').html(d.extraordinariameses);
-                    $('.totalp').html('Total $' + Moneda(d.valor));
-                    $('.vm2').text('$' + Moneda(d.vrmt2));
-                    $('#vrmt2').val(d.vrmt2);
-                    $('.totali').html('Total $' + Moneda(d.inicial));
-                    $('.ahorro').html('Ahorro $' + Moneda(d.ahorro));
-                    $('.extrao').html('$' + Moneda(d.cuotaextraordinaria));
-                    $('.separar').val(d.separar).mask('$$$.$$$.$$$', { reverse: true, selectonfocus: true })
-                    $('#cuota').html('$' + Moneda(d.cuot));
-                    $('.inip').html(d.iniciar + '%');
-                    $('.des').html(d.descuento + '%');
-                    $(`#ncl option[value='${d.iniciar}']`).attr("selected", true);
-                    $('.pin').html(d.pin);
-                    $('#cupon').val(d.pin)
-                    $('.mxr').html(d.extran)
-                    mxr = parseFloat(d.extran), inicial = d.inicial, inip = d.iniciar, valor = d.valor, vm2 = d.vrmt2;
-                    ahorro = parseFloat(d.ahorro), descuento = d.descuento, extrao = d.cuotaextraordinaria, separar = d.separar;
-                    cuota = d.cuot, pin = d.pin, mss = d.extraordinariameses
-                    mss == 1 ? j = 'Junio' : mss == 2 ? j = 'Diciembre' : mss == 3 ? j = 'Jun & Dic' : j = 'Ninguno';
-                    table.ajax.reload(null, false);
-                }
-            })
-        }
-        var Recorre = (v, i, s, e, vrm2) => {
-            var pagos = 0, separa = 0, inicial = 0, financiacion = 0,
-                pagoss = 0, pagosi = 0, pagosf = 0;
-            var u = table.rows().data().filter(function (value, index) {
-                return value
-            });
-            u.map((a) => {
-                if (a.tipo === "SEPARACION" && a.estado !== 3 && separar != a.cuota) {
-                    $('.separar').val(a.cuota).mask('$$$.$$$.$$$', { reverse: true }).prop('disabled', true);
-                    SMSj('error', 'No es posible realizar cambios en la separacion porque el cliente ya realizo el pago de esta');
-                    s = a.cuota;
-                }
-                a.estado === 13 ? pagos += a.cuota : '';
-                a.estado2 === 13 ? pagos += a.cuota2 : '';
-                a.estado === 13 && a.tipo === "SEPARACION" ? pagoss += a.cuota : '';
-                a.estado === 13 && a.tipo === "INICIAL" ? pagosi += a.cuota : '';
-                a.estado2 === 13 && a.tipo === "INICIAL" ? pagosi += a.cuota2 : '';
-                a.estado === 13 && a.tipo === "FINANCIACION" ? pagosf += a.cuota : '';
-                a.estado2 === 13 && a.tipo === "FINANCIACION" ? pagosf += a.cuota2 : '';
-                a.estado === 3 && a.tipo === "SEPARACION" ? separa++ : '';
-                a.estado === 3 && a.tipo === "INICIAL" ? inicial++ : '';
-                a.estado2 === 3 && a.tipo === "INICIAL" ? inicial++ : '';
-                a.estado === 3 && a.tipo === "FINANCIACION" ? financiacion++ : '';
-                a.estado2 === 3 && a.tipo === "FINANCIACION" ? financiacion++ : '';
-            })
-
-            var j = financiacion - mxr
-            if (e == 1) {
-                v = v - pagos;
-                ni = v * i / 100;
-                separa > 0 ? ini = ni - s : ini = ni;
-                f = ini / inicial;
-                cuota = Math.round((v - ni - (extrao * mxr)) / j);
-            } else {
-                ni = v * i / 100;
-                ini = ni - pagosi - s;
-                f = ini / inicial;
-                s = s - pagoss;
-                cuota = Math.round((v - ni - pagosf - (extrao * mxr)) / j);
-            }
-            console.log('pagos ' + pagos, 'separa ' + separa, 'inicial ' + inicial, 'financiacion ' + financiacion,
-                'pagoss ' + pagoss, 'pagosi ' + pagosi, 'pagosf ' + pagosf, 'v ' + v, 'ni ' + ni, 'ini ' + ini, 'f ' + f, 'cuota ' + cuota, 's ' + s)
-            //console.log(s, f, ni, i, cuota, separa, ini, pagos, inicial, j, separa > 0);
-            Dts(s, f, ni, i, cuota, separa, vrm2);
-        }
-        $('span.ei').on('click', function () {
-            var este = $(this), aquel = $(this).next()
-            este.hide()
-            aquel.fadeToggle(2000).focus()
-        })
-        $('.ei:not(span)').on({
-            focus: function () {
-                $(this).css("background-color", "#FFFFCC");
-                $(this).is("input") ? this.select() : '';
-            },
-            blur: function () {
-                var este = $(this), aquel = $(this).prev()
-                if (!este.hasClass('separar') && !este.is("#estructura")) {
-                    este.fadeToggle(2000)
-                    setTimeout(function () {
-                        aquel.fadeToggle(1500)
-                    }, 2000);
-                }
-            },
-            change: function () {
-                var ncl = $('#ncl').val();
-                var vrm2 = $('#vrm2').cleanVal();
-                var cupon = $('#cupon').val();
-                var estructura = $('#estructura').val();
-                separar = $('.separar').cleanVal();
-
-                if (cupon !== bono && cupon !== 'Ninguno' && cupon !== pin) {
-                    $.ajax({
-                        url: '/links/bono/' + $(this).val(),
-                        type: 'GET',
-                        async: false,
-                        success: function (data) {
-                            if (data.length) {
-                                var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
-                                if (data[0].producto != null) {
-                                    SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
-                                    Dt();
-                                } else if (fecha < new Date()) {
-                                    SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
-                                    Dt();
-                                } else if (data[0].estado != 9) {
-                                    SMSj('error', 'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
-                                    Dt();
-                                } else {
-                                    descuento = data[0].descuento;
-                                    idpin = data[0].id;
-                                }
-                                bono = data[0].pin;
-                            } else {
-                                Dt();
-                                SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
-                            }
-                        }
-                    });
-                } else if (!cupon) {
-                    pin = '';
-                    idpin = '';
-                    bono = '';
-                    $('#idpin').val('');
-                    ahorro = 0;
-                    descuento = 0;
-                }
-                valor = vrm2 * mr2;
-                precio = valor;
-                ahorro = Math.round(valor * descuento / 100);
-                valor = valor - ahorro;
-                //console.log(vrm2, mr2, valor, descuento, ahorro);
-                Recorre(valor, ncl, separar, estructura, vrm2);
-            }
-        });
-    })
-
-}
-/////////////////////////////////* EDITAR REPORTES 2 NUEVO*/////////////////////////////////////////////////////////////
+/////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}`) {
     minDateFilter = "";
     maxDateFilter = "";
@@ -8476,7 +8142,10 @@ if (window.location.pathname == `/links/orden`) {
         fechs = new Date(moment(fechs).add(extra, 'month'));
 
         if (months > 102) {
-            $('#ncuotas').html(`
+            $('#ncuotas').html(`           
+            <option value="0">Ninguna</option>
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8493,6 +8162,9 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 90) {
             $('#ncuotas').html(`
+            <option value="0">0 Cuota</option>            
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8508,6 +8180,9 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 72) {
             $('#ncuotas').html(`
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8522,6 +8197,9 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 60) {
             $('#ncuotas').html(`
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8535,6 +8213,9 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 48) {
             $('#ncuotas').html(`
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8547,6 +8228,9 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 42) {
             $('#ncuotas').html(`
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
@@ -8558,60 +8242,80 @@ if (window.location.pathname == `/links/orden`) {
             `)
         } else if (months > 36) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        <option value="24">24 Cuotas</option>
-        <option value="30">30 Cuotas</option>
-        <option value="36">36 Cuotas</option>
-        <option value="42">42 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            <option value="42">42 Cuotas</option>
+            `)
 
         } else if (months > 30) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        <option value="24">24 Cuotas</option>
-        <option value="30">30 Cuotas</option>
-        <option value="36">36 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            <option value="36">36 Cuotas</option>
+            `)
 
         } else if (months > 24) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        <option value="24">24 Cuotas</option>
-        <option value="30">30 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            <option value="30">30 Cuotas</option>
+            `)
 
         } else if (months > 18) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        <option value="24">24 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            <option value="24">24 Cuotas</option>
+            `)
 
         } else if (months > 12) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        <option value="18">18 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            <option value="18">18 Cuotas</option>
+            `)
 
         } else if (months > 6) {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
-        <option value="12">12 Cuotas</option>
-        `)
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
+            <option value="12">12 Cuotas</option>
+            `)
 
         } else {
             $('#ncuotas').html(`
-        <option value="6">6 Cuotas</option>
+            <option value="0">0 Cuota</option>             
+            <option value="1">1 Cuota</option>
+            <option value="2">2 Cuotas</option>
+            <option value="6">6 Cuotas</option>
         `)
-
         };
     };
     $('.val').mask('#.##$', { reverse: true });
@@ -8640,17 +8344,18 @@ if (window.location.pathname == `/links/orden`) {
     var meses = 0;
     var cuota30 = Moneda(Math.round((inicial - separacion) / u));
     Meses(0)
+    $(`#ncuotas option[value='6']`).prop('selected', true);
     var N = parseFloat($('#ncuotas').val());
-    var cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
+    var cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
     $('#cuota').val(cuota70.replace(/\./g, ''))
-
+    console.log(cuota, cuota70, meses, u, N, (N - (meses + u) || 1))
     $.ajax({
         url: '/links/tabla/1',
         type: 'POST',
         data: {
             separacion: Moneda(separacion),
-            cuota70,
-            cuota30,
+            cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
+            cuota30: N === 1 ? 0 : cuota30,
             oficial30,
             oficial70,
             N,
@@ -8660,24 +8365,7 @@ if (window.location.pathname == `/links/orden`) {
             mesesextra: '',
             extra: ''
         },
-        async: false,
-        success: function (data) {
-            /*if (data) {
-                console.log({
-                    separacion: Moneda(separacion),
-                    cuota70: Moneda(Math.round(cuota / (N - (meses + u)))),
-                    cuota30: Moneda(Math.round((inicial - separacion) / u)),
-                    oficial30: '$' + Moneda(inicial),
-                    oficial70: '$' + Moneda((100 - inicial) * precio / 100),
-                    N: parseFloat($('#ncuotas').val()),
-                    u: parseFloat($('#diferinicial').val()),
-                    fcha,
-                    fcha2: moment(fch).format('YYYY-MM-DD'),
-                    mesesextra: '',
-                    extra: $('#cuotaestrao').val()
-                })
-            }*/
-        }
+        async: false
     });
     $(document).ready(function () {
         if ($('#mesje').text()) {
@@ -8875,13 +8563,42 @@ if (window.location.pathname == `/links/orden`) {
             D = parseFloat($('#dia').val());
             N = parseFloat($('#ncuotas').val());
 
+
+            if ($(this).attr('id') === 'ncuotas' && $(this).val() === '0') {
+                $('#abono').val(Moneda(precio));
+            }
+
             if ($(this).attr('id') === 'abono') {
                 if (parseFloat($(this).cleanVal()) < cpara || !$('#abono').val()) {
                     $('#abono').val(Moneda(cpara))
                     SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
+                } else if (parseFloat($(this).cleanVal()) > precio || !$('#abono').val()) {
+                    $('#abono').val(Moneda(cpara))
+                    SMSj('info', 'La separacion no ser mayor al valor del producto')
                 }
             }
-            var abono = parseFloat($('#abono').cleanVal());
+            var abono = parseFloat($('#abono').val().replace(/\./g, ''));
+
+            if ($(`#ncuotas`).is(':disabled') && abono < precio) {
+                $(`#ncuotas option[value='1']`).prop('selected', true);
+                N = 1;
+            }
+
+            if (N > 1 && abono < inicial && $('#diferinicial').val() === '0') {
+                $(`#diferinicial option[value='1']`).prop('selected', true);
+                u = 1;
+            }
+
+            if (N < 6) {
+                $(`#Emeses option[value='0']`).attr('selected', true);
+                $('#cuotaestrao').val(null);
+            }
+
+            if (N === 2 && parseFloat($('#diferinicial').val()) > 1) {
+                $(`#diferinicial option[value='1']`).prop('selected', true);
+                u = 1;
+            }
+
             Años(u + 1, D, N)
             if ($(this).attr('id') === 'bono') {
                 if ($(this).val() !== bono && $(this).val()) {
@@ -8912,6 +8629,7 @@ if (window.location.pathname == `/links/orden`) {
                                     $('#cuotainicial').val(Moneda(Math.round(inicial)))
                                     $('#p70').val(Moneda(Math.round(precio - inicial)));
                                     $('.totalote').val(Moneda(Math.round(precio)))
+                                    parseFloat($('#abono').val().replace(/\./g, '')) > precio ? $('#abono').val(Moneda(precio)) : '';
                                 }
                                 bono = data[0].pin;
                             } else {
@@ -8967,28 +8685,46 @@ if (window.location.pathname == `/links/orden`) {
                 cuota = cuota - cut;
                 $('#extran').val(meses)
             }
+            if (separacion === precio) {
+                Años(0, D, N)
+                cuota = 0;
+                Estra()
+                cuota30 = 0;
+                cuota70 = 0;
+                $(`#diferinicial option[value='0']`).attr('selected', true);
+                $(`#Emeses option[value='0']`).attr('selected', true);
+                $('#cuotaestrao').val(null);
+                $('#cuotaestrao').attr('disabled', true);
+                $("#diferinicial").attr('disabled', true);
+                $(`#Emeses`).attr('disabled', true);
+                $(`#ncuotas`).attr('disabled', true);
+                $(`#dia`).attr('disabled', true);
 
-            if (separacion >= inicial) {
+            } else if (separacion >= inicial) {
                 Años(0, D, N)
                 resl = separacion - inicial;
                 cuota = Math.round(precio - resl - inicial);
                 Estra()
                 cuota30 = 0;
                 cuota70 = Moneda(Math.round(cuota / (N - meses)));
-                $(`#diferinicial option[value='0']`).attr("selected", true);
-                $("#diferinicial").prop('disabled', true)
+                $(`#diferinicial option[value='0']`).attr('selected', true);
+                $("#diferinicial").attr('disabled', true);
             } else {
                 cuota = Math.round(precio - inicial);
                 Estra()
                 cuota30 = Moneda(Math.round((inicial - separacion) / u))
-                cuota70 = Moneda(Math.round(cuota / (N - (meses + u))));
-                $("#diferinicial").prop('disabled', false)
+                cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
+                $("#diferinicial").prop('disabled', false);
+                $(`#Emeses`).prop('disabled', false);
+                $('#cuotaestrao').prop('disabled', false);
+                $(`#dia`).attr('disabled', false);
+                $(`#ncuotas`).attr('disabled', false);
             }
 
             recolecta = {
                 separacion: Moneda(separacion),
-                cuota70,
-                cuota30,
+                cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
+                cuota30: N === 1 ? 0 : cuota30,
                 oficial30,
                 oficial70,
                 N,
@@ -8998,7 +8734,7 @@ if (window.location.pathname == `/links/orden`) {
                 mesesextra,
                 extra: $('#cuotaestrao').val()
             }
-            $('#cuota').val(cuota70.replace(/\./g, ''))
+            cuota70 ? $('#cuota').val(cuota70.replace(/\./g, '')) : $('#cuota').val(0);
             $.ajax({
                 url: '/links/tabla/1',
                 type: 'POST',
@@ -9007,7 +8743,7 @@ if (window.location.pathname == `/links/orden`) {
                 success: function (data) {
                     tabla.ajax.reload(function (json) {
                         //SMSj('success', 'Se realizaron cambios exitosamente')
-                    })
+                    }); console.log('aqi')
                 }
             });
         })

@@ -86,6 +86,18 @@ router.post('/desarrollo', async (req, res) => {
         var u = await QuitarCupon(val.id);
         console.log(val.id, i, u);
     });*/
+    /*const cuotas = await pool.query(`SELECT p.id, COUNT(c.id) cont FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id WHERE c.tipo = 'INICIAL' GROUP BY p.id`);
+    var sql = `UPDATE preventa SET inicialdiferida = CASE id`;
+    var ID = '';
+
+    cuotas.map((c) => {
+        ID += c.id.toString() + ', ';
+        sql += ' WHEN ' + c.id + ' THEN ' + c.cont;
+    })
+
+    ID = ID.slice(0, -2);
+    sql += ' END WHERE id IN(' + ID + ')';
+    await pool.query(sql);*/
     res.send(true);
 
 });
@@ -1225,7 +1237,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
-    //console.log(req.body)
+    console.log(req.body)
     const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
     if (!fp.length) {
         req.flash('error', 'Separación no realizada ya existe una orden con este lote');
@@ -1238,26 +1250,30 @@ router.post('/orden', isLoggedIn, async (req, res) => {
             cliente3: client[2] ? client[2] : null,
             cliente4: client[3] ? client[3] : null,
             asesor: req.user.id,
-            numerocuotaspryecto,
+            numerocuotaspryecto: numerocuotaspryecto ? numerocuotaspryecto : 0,
             extraordinariameses: extraordinariameses ? extraordinariameses : 0,
             cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
             cupon: cupon ? cupon : 1,
-            inicialdiferida: inicialdiferida || null,
+            inicialdiferida: inicialdiferida || 0,
             ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
             separar: separacion.replace(/\./g, ''),
             extran: extran ? extran : 0, vrmt2: vrmt2.replace(/\./g, ''),
             iniciar, cuot
         };
-        //console.log(separ)
+        console.log(separ)
         const h = await pool.query('INSERT INTO preventa SET ? ', separ);
         await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
         cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
 
         var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
-        await ncuota.map((t, i) => {
-            cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}, ${cuota[i]}),`;
-        });
+        if (Array.isArray(ncuota)) {
+            await ncuota.map((t, i) => {
+                cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}, ${cuota[i]}),`;
+            });
+        } else {
+            cuotas += `(${h.insertId}, '${tipo}', ${ncuota}, '${fecha}', ${cuota}, ${estado}, ${cuota}),`;
+        }
         await pool.query(cuotas.slice(0, -1));
 
         req.flash('success', 'Separación realizada exitosamente');
@@ -1283,11 +1299,11 @@ router.post('/tabla/:id', async (req, res) => {
         var data = new Array();
         dataSet.data = data
         const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra, separacion } = req.body;
-        var v = Math.round((parseFloat(N) - parseFloat(u)) / 2);
+        var v = N == 1 ? 1 : Math.round((parseFloat(N) - parseFloat(u)) / 2);
         var p = (parseFloat(N) - parseFloat(u)) / 2
         var j = Math.round(parseFloat(u) / 2);
         var o = parseFloat(u) / 2;
-        var y = 0;
+        var y = 0; console.log(fcha, fcha2, 'c70' + cuota70, 'c30' + cuota30, oficial70, oficial30, N, u, mesesextra, extra, separacion, v, p, j, o, y)
         l = {
             n: `1 <input value="1" type="hidden" name="ncuota">`,
             fecha: fcha2,
@@ -1621,7 +1637,9 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
 });
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    const { p, i } = req.body;
+    let { p, i } = req.body;
+    p = parseFloat(p);
+    i = parseFloat(i);
     sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
     const orden = await pool.query(sql, id);
     var y = [orden[0]], o = [orden[0]];
@@ -1632,7 +1650,16 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(orden)
     w = await orden
         .map((t, c) => {
-            //console.log(t, u, e, v)
+            if ((t.tipo === 'INICIAL' && i === 0) || (t.tipo === 'FINANCIACION' && p === 0)) {
+                s = {
+                    id2: '',
+                    ncuota2: '',
+                    fecha2: '',
+                    cuota2: '',
+                    estado2: ''
+                };
+                return Object.assign(t, s);
+            }
             if (t.tipo === 'SEPARACION') {
                 s = {
                     id2: '',
@@ -1643,7 +1670,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                 }
                 return Object.assign(orden[0], s);
             }
-            if (t.tipo === 'INICIAL' && i === '1') {
+            if (t.tipo === 'INICIAL' && i === 1) {
                 s = {
                     id2: '',
                     ncuota2: '',
@@ -1660,7 +1687,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: t.fechs,
                     cuota2: t.cuota,
                     estado2: t.estado
-                }
+                };
                 return Object.assign(y[t.ncuota - e], s);
 
             } else if (t.tipo === 'INICIAL') {
@@ -1676,7 +1703,17 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     return Object.assign(y[e], h)
                 }
             }
-            if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
+            if (t.tipo === 'FINANCIACION' && p < 3) {
+                s = {
+                    id2: '',
+                    ncuota2: '',
+                    fecha2: '',
+                    cuota2: '',
+                    estado2: ''
+                }
+                return Object.assign(t, s);
+
+            } else if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
                 s = {
                     id2: t.id,
                     ncuota2: t.ncuota,
