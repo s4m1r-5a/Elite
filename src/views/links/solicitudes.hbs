@@ -13,6 +13,42 @@
             </div>
             <div class="card-body">
                 <input type="hidden" id="tu" value="{{user.id}}">
+                <div class="card" style="display: none;">
+                    <div class="card-header"></div>
+                    <div class="card-body">
+                        <table id="Recibos" class="table table-sm table-striped table-hover display nowrap"
+                            style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Asesor</th>
+                                    <th data-priority="6">Cliente</th>
+                                    <th>Fecha</th>
+                                    <th>Proyecto</th>
+                                    <th data-priority="4">Mz</th>
+                                    <th data-priority="4">Lt</th>
+                                    <th data-priority="5">Descp</th>
+                                    <th data-priority="3">Monto</th>
+                                    <th data-priority="7">Facturas V</th>
+                                    <th data-priority="2">Recibo</th>
+                                    <th data-priority="1">Estado</th>
+                                    <th data-priority="1">Rcb</th>
+                                    <th>Aprueba</th>
+                                    <th>Estado LT</th>
+                                    <th>Obv</th>
+                                    <th>Motivo</th>
+                                    <th>Orden</th>
+                                    <th>Bono Anul</th>
+                                    <th>Monto Anul</th>
+                                    <th>Orden Anul</th>
+                                    <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+                                </tr>
+                            </thead>
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
                 <table id="datatable" class="table table-sm table-striped table-hover display nowrap"
                     style="width:100%">
                     <thead>
@@ -253,11 +289,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="col-12">
+                    <!--<div class="col-12">
                         <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
                             <tbody></tbody>
                         </table>
-                    </div>
+                    </div>-->
                 </div>
             </div>
         </div>
@@ -304,6 +340,114 @@
                         </tbody>
                     </form>
                 </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="Modalimg2" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div id="descargaimg">
+                </div>
+                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                    <a class="reditar" data-dismiss="modal" aria-label="Close">
+                        <i class="feather mr-0" data-feather="x"></i></a>
+                </div>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="extr">
+                <div class="row no-gutters">
+                    <div class="col-md-8 fotos" width="100%" height="200">
+                        <!--<img src="" class="card-img foto" alt="...">-->
+                    </div>
+                    <div class="col-md-4">
+                        <table class="table table-sm my-2">
+                            <tbody>
+                                <tr>
+                                    <th colspan="2">
+                                        <small class="text-muted fecha float-right"></small>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="cliente"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="proyecto"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span class="mz"></span>
+                                    </th>
+                                    <td>
+                                        <span class="lote"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th colspan="2">
+                                        <span class="recibo"></span>
+                                    </th>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>FAT.VEC:</span>
+                                    </th>
+                                    <td>
+                                        <span class="badge badge-dark fatvc"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>MONTO:</span>
+                                    </th>
+                                    <td>
+                                        <input type="hidden" id="montopago">
+                                        <span class="monto"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>BONO:</span>
+                                    </th>
+                                    <td>
+                                        <span class="bonoo"></span>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <th>
+                                        <span>BONO VR.:</span>
+                                    </th>
+                                    <td>
+                                        <span class="bonom"></span>estado
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <input type="hidden" id="stadopago">
+                                    <th colspan="1" class="estado"></th>
+                                    <td>
+                                        <div class="btn-group btn-group-sm float-right" style="display: none;"
+                                            id="nove">
+                                            <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
+                                                aria-haspopup="true" aria-expanded="false">Acción</button>
+                                            <div class="dropdown-menu"></div>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="col-12">
+                        <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
+                            <tbody></tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>

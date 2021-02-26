@@ -2168,8 +2168,25 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
-        LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
+        LEFT JOIN cupones cpb ON s.bonoanular = cpb.id LEFT JOIN recibos r ON s.ids = r.registro 
+        WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
         respuesta = { "data": so };
+        res.send(respuesta);
+
+    } else if (id == 'recibos') {
+        var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, 
+        cpb.monto montoa, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, 
+        s.aprueba, pr.descrip, cpb.producto ordenanu, cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, 
+        c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, r.baucher, pd.n, s.stado, cp.pin bono, 
+        cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, r.monto mont, r.rcb, 
+        r.formapg, r.registro, r.date, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular 
+        FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id INNER JOIN preventa pr ON s.lt = pr.lote 
+        INNER JOIN productosd pd ON pr.lote = pd.id INNER JOIN productos p ON pd.producto = p.id 
+        INNER JOIN users u ON pr.asesor = u.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
+        LEFT JOIN cupones cp ON s.bono = cp.id LEFT JOIN cupones cpb ON s.bonoanular = cpb.id 
+        LEFT JOIN recibos r ON s.ids = r.registro WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND s.ids = 2247
+        respuesta = { "data": so }; //console.log(respuesta);
         res.send(respuesta);
 
     } else if (id === 'devoluciones') {
@@ -2202,9 +2219,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'saldo') {
         const { lote, solicitud, fecha } = req.body;
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
-        AND lt = ${lote} AND stado = 3 AND DATE(fech) < '${fecha}' AND TIME(fech) < TIME('${fecha}') 
-        AND ids != ${solicitud}`);
-        //SELECT * FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.lt = 650 AND DATE(s.fech) < '2020-11-20 10:50' AND TIME(s.fech) < TIME('2020-11-20 10:50') AND s.ids != 978
+        AND lt = ${lote} AND stado = 3 AND TIMESTAMP(fech) < '${fecha}' AND ids != ${solicitud}`);
+        //console.log(u)
         if (u.length > 0) {
             return res.send(false);
         }
@@ -2350,7 +2366,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
         const R = await PagosAbonos(ids, pdf, req.user.fullname);
         if (R) {
-            await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
+            //await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
             await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
         }
         res.send(R);
@@ -3677,7 +3693,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
         }
     };
     q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944' // //
+    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944' //cel; //
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
