@@ -8908,6 +8908,130 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             elemen.addClass('i');
         }
     }
+    var Recibos = $('#Recibos').DataTable({
+        //lengthMenu: -1,
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/pago",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            //$('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+        },
+        columns: [
+            {
+                className: 't',
+                data: "ids"
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "facturasvenc" },
+            {
+                data: "recibo",
+                render: function (data, method, row) {
+                    return data.replace(/~/g, '')
+                }
+            },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            { data: "tipobsevacion" },
+            { data: "descrip" },
+            { data: "cparacion" },
+            { data: "bonoanular" },
+            {
+                data: "montoa",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "ordenanu" }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        }
+    });
     var table = $('#datatable').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [
@@ -9205,7 +9329,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             link.download = "recibo" + data.ids + ".jpg";
             link.dispatchEvent(new MouseEvent('click'));
         });
-        BancoExt.$('tr.selected').removeClass('selected');
+        //BancoExt.$('tr.selected').removeClass('selected');
         $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
         $('#Modalimg .cliente').html(data.nombre);
         $('#Modalimg .proyecto').html(data.proyect);
@@ -9223,7 +9347,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
-                Buscar(data.ids);
+                //Buscar(data.ids);
                 break;
             case 6:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
@@ -9285,7 +9409,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('.dropdown-item').on('click', function () {
             var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = false;
             //console.log(accion)
-            var w = Seleccion();
+            //var w = Seleccion();
             fd.append('pdef', data.pdf);
             fd.append('ids', data.ids);
             fd.append('movil', data.movil);
@@ -9293,13 +9417,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fd.append('extr', extr);
             //console.log(w.length, imge, accion, totalasociados);
 
-            if (totalasociados < data.monto && (accion === 'Asociar' || accion === 'Aprobar')) {
+            /*if (totalasociados < data.monto && (accion === 'Asociar' || accion === 'Aprobar')) {
                 alert('Los valores de los extractos ha asociar son menores al monto ha aprobar')
                 return false;
             } else if (w.length < imge && (accion === 'Asociar' || accion === 'Aprobar')) {
                 alert('El numero de extractos no puede ser diferente al numero de recibos que halla en la solicitud');
                 return false;
-            }
+            }*/
 
             if (accion === 'Declinar' && admin == 1) {
                 porque = prompt("Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago", "Solicitud rechazada por que");
