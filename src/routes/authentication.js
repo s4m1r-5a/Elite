@@ -86,6 +86,7 @@ router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 router.get('/tablero', isLoggedIn, async (req, res) => {
+
   /*const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
   ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
@@ -116,6 +117,90 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
 });
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
+  let linea = '', lDesc = '';
+  var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id;
+  let indircet1;
+  let indircet2;
+  let indircet3;
+  const dircet = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
+  COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
+  (
+    SELECT SUM(if(s.concepto IN('COMISION DIRECTA','BONO EXTRA'), s.total, 0)) 
+      comision FROM preventa p INNER JOIN solicitudes s ON p.lote = s.lt 
+      WHERE mes = MONTH(p.fecha) AND YEAR(p.fecha) = YEAR(CURDATE()) ${d}
+  ) as comisiones  
+  FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE MONTH(p.fecha)
+  BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY MONTH(p.fecha)
+  ${d} ORDER BY 1;`);
+
+  const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND  acreedor IS NOT NULL AND usuario IS NOT NULL`, req.user.id);
+  if (lineaUno.length > 0) {
+    await lineaUno.map((p, x) => {
+      lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+    });
+    indircet1 = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
+    COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
+    (
+      SELECT SUM(if(s.descp = 'PRIMERA LINEA', s.total, 0)) 
+        comision FROM preventa p INNER JOIN solicitudes s ON p.lote = s.lt 
+        WHERE (${lDesc}) AND mes = MONTH(p.fecha) AND YEAR(p.fecha) = YEAR(CURDATE())
+    ) as comisiones  
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE (${lDesc}) AND
+    MONTH(p.fecha) BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY MONTH(p.fecha)
+    ORDER BY 1;`);
+  }
+
+  const lineaDos = linea ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`) : '';
+  lDesc = '', linea = '';
+  if (lineaDos.length > 0) {
+    await lineaDos.map((p, x) => {
+      lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+    });
+    indircet2 = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
+    COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
+    (
+      SELECT SUM(if(s.descp = 'SEGUNDA LINEA', s.total, 0)) 
+        comision FROM preventa p INNER JOIN solicitudes s ON p.lote = s.lt 
+        WHERE (${lDesc}) AND mes = MONTH(p.fecha) AND YEAR(p.fecha) = YEAR(CURDATE())
+    ) as comisiones  
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE (${lDesc}) AND
+    MONTH(p.fecha) BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY MONTH(p.fecha)
+    ORDER BY 1;`);
+  }
+
+  const lineaTres = linea ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`) : '';
+  lDesc = '', linea = '';
+  if (lineaTres.length > 0) {
+    await lineaTres.map((p, x) => {
+      lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
+    });
+    indircet3 = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
+    COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
+    (
+      SELECT SUM(if(s.descp = 'TERCERA LINEA', s.total, 0)) 
+        comision FROM preventa p INNER JOIN solicitudes s ON p.lote = s.lt 
+        WHERE (${lDesc}) AND mes = MONTH(p.fecha) AND YEAR(p.fecha) = YEAR(CURDATE())
+    ) as comisiones  
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE (${lDesc}) AND
+    MONTH(p.fecha) BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY MONTH(p.fecha)
+    ORDER BY 1;`);
+  }
+
+  res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3 });
+  ////// 5 MEJORES ASESORES DEL AÑO Y DEL MES //////////////
+  `SELECT COUNT(p.asesor) asesores, u.fullname
+  FROM preventa p INNER JOIN users u ON p.asesor = u.id
+  WHERE MONTH(p.fecha) BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) 
+  GROUP BY u.fullname ORDER BY asesores DESC LIMIT 5;
+  
+  SELECT COUNT(p.asesor) asesores, u.fullname
+  FROM preventa p INNER JOIN users u ON p.asesor = u.id
+  WHERE MONTH(p.fecha) = MONTH(CURDATE()) 
+  GROUP BY u.fullname ORDER BY asesores DESC LIMIT 5;`
+
+
 
   /*if (a == 'table5') {
 

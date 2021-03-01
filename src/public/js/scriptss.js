@@ -1,4 +1,3 @@
-
 /////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
     maskElements: 'input,td,span,div',
@@ -555,6 +554,13 @@ if (window.location.pathname == `/tablero`) {
     var fe = f.getMonth();
     var d = 90//parseFloat($('.p' + m).val())
     var datosTabla6
+    var tod = {
+        d: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        one: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        two: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        thre: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    };
+
 
     $('#promedio').html($('.d' + m).val());
     $('#ventaprecio').html($('.v' + m).val());
@@ -596,28 +602,32 @@ if (window.location.pathname == `/tablero`) {
         data: {
             labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
             datasets: [{
-                label: "Ventas ($)",
+                label: "Ventas Directas",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.dark,
+                data: tod.d
+            },
+            {
+                label: "Ventas Nivel 1",
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.success,
-                data: [$('.v1').val(), $('.v2').val(), $('.v3').val(), $('.v4').val(), $('.v5').val(), $('.v6').val(),
-                $('.v7').val(), $('.v8').val(), $('.v9').val(), $('.v10').val(), $('.v11').val(), $('.v12').val()]
+                data: tod.one
             },
             {
-                label: "Ventas ($)",
+                label: "Ventas Nivel 2",
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.primary,
-                data: [$('.u1').val(), $('.u2').val(), $('.u3').val(), $('.u4').val(), $('.u5').val(), $('.u6').val(),
-                $('.u7').val(), $('.u8').val(), $('.u9').val(), $('.u10').val(), $('.u11').val(), $('.u12').val()]
+                data: tod.two
             },
             {
-                label: "Ventas ($)",
+                label: "Ventas Nivel 3",
                 fill: true,
                 backgroundColor: "transparent",
-                borderColor: window.theme.secondary,
-                data: [$('.c1').val(), $('.c2').val(), $('.c3').val(), $('.c4').val(), $('.c5').val(), $('.c6').val(),
-                $('.c7').val(), $('.c8').val(), $('.c9').val(), $('.c10').val(), $('.c11').val(), $('.c12').val()]
+                borderColor: window.theme.danger,
+                data: tod.thre
             }]
         },
         options: {
@@ -635,7 +645,28 @@ if (window.location.pathname == `/tablero`) {
     };
 
     window.pie = new Chart(canvas, datos);
-    window.pie2 = new Chart(canvas2, datos2);
+
+    $.ajax({
+        url: '/tablero/1',
+        type: 'POST',
+        //async: false,
+        success: function (data) {
+            data.d.map((x, i) => {
+                tod.d[i] = Math.round(x.total / 1000000);
+            });
+            data.one.map((x, i) => {
+                tod.one[i] = Math.round(x.total / 1000000);
+            });
+            data.two.map((x, i) => {
+                tod.two[i] = Math.round(x.total / 1000000);
+            });
+            data.thre.map((x, i) => {
+                tod.thre[i] = Math.round(x.total / 1000000);
+            });
+            console.log(tod)
+            window.pie2 = new Chart(canvas2, datos2);
+        }
+    });
 
     function Calcula() {
         reportes.map((repor) => {
@@ -703,115 +734,115 @@ if (window.location.pathname == `/tablero`) {
         window.pie2.update();
     };
 
-    $.ajax({
-        url: '/tablero/1',
-        type: 'POST',
-        //async: false,
-        success: function (data) {
-            data.map((repor) => {
-                reportes[repor.Mes - 1].cuentas += repor.CantMes
-                reportes[repor.Mes - 1].comision += repor.Comision
-                reportes[repor.Mes - 1].venta += repor.venta
-                reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].l1 = repor.Porcentag
-                reportes[repor.Mes - 1].u1 = repor.utilidad
-                reportes[repor.Mes - 1].año = repor.Año
-                reportes[repor.Mes - 1].mes = repor.Mes
-            });
-        }
-    });
-    $.ajax({
-        url: '/tablero/2',
-        type: 'POST',
-        //async: false,
-        success: function (data) {
-            data.map((repor) => {
-                reportes[repor.Mes - 1].cuentas += repor.CantMes
-                reportes[repor.Mes - 1].comision += repor.Comision
-                reportes[repor.Mes - 1].venta += repor.venta
-                reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].l2 = repor.Porcentag
-                reportes[repor.Mes - 1].u2 = repor.utilidad
-                reportes[repor.Mes - 1].año = repor.Año
-                reportes[repor.Mes - 1].mes = repor.Mes
-            });
-        }
-    });
-    $.ajax({
-        url: '/tablero/3',
-        type: 'POST',
-        //async: false,
-        success: function (data) {
-            data.map((repor) => {
-                reportes[repor.Mes - 1].cuentas += repor.CantMes
-                reportes[repor.Mes - 1].comision += repor.Comision
-                reportes[repor.Mes - 1].venta += repor.venta
-                reportes[repor.Mes - 1].utilidad += repor.utilidad
-                reportes[repor.Mes - 1].l3 = repor.Porcentag
-                reportes[repor.Mes - 1].u3 = repor.utilidad
-                reportes[repor.Mes - 1].año = repor.Año
-                reportes[repor.Mes - 1].mes = repor.Mes
-            });
-            Calcula()
-            Desendente()
-            $('#cuerpo').append(`
-            <tr>
-                <td><i class="fas fa-square-full text-primary"></i> Tu</td>
-                <td class="text-right">$ ${Moneda($('.c' + m).val())}</td>
-                <td class="text-right text-success">${$('.p' + m).val()}%</td>
-            </tr>
-            <tr>
-                <td><i class="fas fa-square-full text-warning"></i> Nivel 1</td>
-                <td class="text-right">$ ${Moneda(reportes[fe].t1)}</td>
-                <td class="text-right text-success">${reportes[fe].l1}%</td>
-            </tr>
-            <tr>
-                <td><i class="fas fa-square-full text-danger"></i> Nivel 2</td>
-                <td class="text-right">$ ${Moneda(reportes[fe].t2)}</td>
-                <td class="text-right text-success">${reportes[fe].l2}%</td>
-            </tr>
-            <tr>
-                <td><i class="fas fa-square-full text-dark"></i> Nivel 3</td>
-                <td class="text-right">$ ${Moneda(reportes[fe].t3)}</td>
-                <td class="text-right text-success">${reportes[fe].l3}%</td>
-            </tr>`);
-            Grafica()
-            var datosTabla6 = reportes.map((p) => {
-                return Object.values(p)
-            })
-            //table6.draw();
-            var table6 = $('#datatables6').DataTable({
-                pageLength: 6,
-                lengthChange: false,
-                bFilter: false,
-                deferRender: true,
-                paging: true,
-                responsive: { details: { type: 'column' } },
-                //columnDefs: [{ className: 'control', orderable: true, targets: 0 }],
-                order: [[0, "desc"], [1, "asc"]],
-                language: languag,
-                data: datosTabla6,
-                columns: [
-                    { title: "Año" },
-                    { title: "Mes" },
-                    { title: "Cuentas" },
-                    { title: "Total Ventas", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-1 %", render: function (data, method, row) { return data + '%' } },
-                    { title: "Nivel-2 %", render: function (data, method, row) { return data + '%' } },
-                    { title: "Nivel-3 %", render: function (data, method, row) { return data + '%' } },
-                    { title: "Nivel-1 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-2 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } }, ,
-                    { title: "Nivel-3 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-1 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-2 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Nivel-3 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Comision Niveles", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                    { title: "Total Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
-                ]
-            });
-        }
-    });
+    /* $.ajax({
+         url: '/tablero/1',
+         type: 'POST',
+         //async: false,
+         success: function (data) {
+             data.map((repor) => {
+                 reportes[repor.Mes - 1].cuentas += repor.CantMes
+                 reportes[repor.Mes - 1].comision += repor.Comision
+                 reportes[repor.Mes - 1].venta += repor.venta
+                 reportes[repor.Mes - 1].utilidad += repor.utilidad
+                 reportes[repor.Mes - 1].l1 = repor.Porcentag
+                 reportes[repor.Mes - 1].u1 = repor.utilidad
+                 reportes[repor.Mes - 1].año = repor.Año
+                 reportes[repor.Mes - 1].mes = repor.Mes
+             });
+         }
+     });
+     $.ajax({
+         url: '/tablero/2',
+         type: 'POST',
+         //async: false,
+         success: function (data) {
+             data.map((repor) => {
+                 reportes[repor.Mes - 1].cuentas += repor.CantMes
+                 reportes[repor.Mes - 1].comision += repor.Comision
+                 reportes[repor.Mes - 1].venta += repor.venta
+                 reportes[repor.Mes - 1].utilidad += repor.utilidad
+                 reportes[repor.Mes - 1].l2 = repor.Porcentag
+                 reportes[repor.Mes - 1].u2 = repor.utilidad
+                 reportes[repor.Mes - 1].año = repor.Año
+                 reportes[repor.Mes - 1].mes = repor.Mes
+             });
+         }
+     });
+     $.ajax({
+         url: '/tablero/3',
+         type: 'POST',
+         //async: false,
+         success: function (data) {
+             data.map((repor) => {
+                 reportes[repor.Mes - 1].cuentas += repor.CantMes
+                 reportes[repor.Mes - 1].comision += repor.Comision
+                 reportes[repor.Mes - 1].venta += repor.venta
+                 reportes[repor.Mes - 1].utilidad += repor.utilidad
+                 reportes[repor.Mes - 1].l3 = repor.Porcentag
+                 reportes[repor.Mes - 1].u3 = repor.utilidad
+                 reportes[repor.Mes - 1].año = repor.Año
+                 reportes[repor.Mes - 1].mes = repor.Mes
+             });
+             Calcula()
+             Desendente()
+             $('#cuerpo').append(`
+             <tr>
+                 <td><i class="fas fa-square-full text-primary"></i> Tu</td>
+                 <td class="text-right">$ ${Moneda($('.c' + m).val())}</td>
+                 <td class="text-right text-success">${$('.p' + m).val()}%</td>
+             </tr>
+             <tr>
+                 <td><i class="fas fa-square-full text-warning"></i> Nivel 1</td>
+                 <td class="text-right">$ ${Moneda(reportes[fe].t1)}</td>
+                 <td class="text-right text-success">${reportes[fe].l1}%</td>
+             </tr>
+             <tr>
+                 <td><i class="fas fa-square-full text-danger"></i> Nivel 2</td>
+                 <td class="text-right">$ ${Moneda(reportes[fe].t2)}</td>
+                 <td class="text-right text-success">${reportes[fe].l2}%</td>
+             </tr>
+             <tr>
+                 <td><i class="fas fa-square-full text-dark"></i> Nivel 3</td>
+                 <td class="text-right">$ ${Moneda(reportes[fe].t3)}</td>
+                 <td class="text-right text-success">${reportes[fe].l3}%</td>
+             </tr>`);
+             Grafica()
+             var datosTabla6 = reportes.map((p) => {
+                 return Object.values(p)
+             })
+             //table6.draw();
+             var table6 = $('#datatables6').DataTable({
+                 pageLength: 6,
+                 lengthChange: false,
+                 bFilter: false,
+                 deferRender: true,
+                 paging: true,
+                 responsive: { details: { type: 'column' } },
+                 //columnDefs: [{ className: 'control', orderable: true, targets: 0 }],
+                 order: [[0, "desc"], [1, "asc"]],
+                 language: languag,
+                 data: datosTabla6,
+                 columns: [
+                     { title: "Año" },
+                     { title: "Mes" },
+                     { title: "Cuentas" },
+                     { title: "Total Ventas", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Nivel-1 %", render: function (data, method, row) { return data + '%' } },
+                     { title: "Nivel-2 %", render: function (data, method, row) { return data + '%' } },
+                     { title: "Nivel-3 %", render: function (data, method, row) { return data + '%' } },
+                     { title: "Nivel-1 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Nivel-2 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } }, ,
+                     { title: "Nivel-3 Utilida", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Nivel-1 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Nivel-2 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Nivel-3 Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Comision Niveles", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                     { title: "Total Ganado", render: function (data, method, row) { return '$' + Moneda(parseFloat(data)) } },
+                 ]
+             });
+         }
+     });*/
 
     var date = new Date()
     // Bar chart
@@ -2503,6 +2534,22 @@ if (window.location.pathname == `/links/reportes`) {
                         body.push(
                             {
                                 id: {
+                                    content: 'TOTAL ABONADO',
+                                    colSpan: 4, styles: {
+                                        halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                        fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
+                                    }
+                                },
+                                id5: {
+                                    content: '$' + Moneda(vlr),
+                                    colSpan: 4, styles: {
+                                        halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                        fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
+                                    }
+                                }
+                            },
+                            {
+                                id: {
                                     content: 'SALDO A LA FECHA',
                                     colSpan: 4, styles: {
                                         halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
@@ -2609,34 +2656,26 @@ if (window.location.pathname == `/links/reportes`) {
                         },
                         {
                             id: {
-                                content: 'Sp. ' + gt, styles: {
-                                    halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                content: gt2, styles: {
+                                    halign: 'left', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
                                 }
                             },
                             id2: {
-                                content: 'Dto. ' + datos[i].descuento + '%', styles: {
-                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                content: 'RC-' + datos[i].ids, styles: {
+                                    halign: 'center', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
                                 }
                             },
                             id3: {
-                                content: 'Cupon: ' + datos[i].cupon, styles: {
-                                    halign: 'center', cellWidth: 'auto', textColor: '#7f8c8d',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
+                                content: datos[i].descp, styles: {
+                                    halign: 'center', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
                                 }
                             },
                             id4: {
-                                content: 'Ahorro: $' + Moneda(datos[i].ahorro), colSpan: 2, styles: {
-                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
-                                }
-                            },
-                            id6: {
-                                content: 'Total: $' + Moneda(datos[i].total), colSpan: 3, styles: {
-                                    halign: 'right', cellWidth: 'auto', textColor: '#7f8c8d',
-                                    fontStyle: 'bolditalic', fontSize: 8, fillColor: "#FFFFCC"
-                                }
+                                content: datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                                    : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                        : Moneda(datos[i].monto), colSpan: 5, styles: {
+                                            halign: 'right', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
+                                        }
                             }
                         }
                     )
@@ -2650,20 +2689,43 @@ if (window.location.pathname == `/links/reportes`) {
                     <td colspan="12" class="text-right">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
                             : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
                                 : Moneda(datos[i].monto)}</td>
-                    </tr>`)
+                    </tr>`);
+                    body.push(
+                        {
+                            id: {
+                                content: gt2, styles: {
+                                    halign: 'left', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
+                                }
+                            },
+                            id2: {
+                                content: 'RC-' + datos[i].ids, styles: {
+                                    halign: 'center', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
+                                }
+                            },
+                            id3: {
+                                content: datos[i].descp, styles: {
+                                    halign: 'center', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
+                                }
+                            },
+                            id4: {
+                                content: datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                                    : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                        : Moneda(datos[i].monto), colSpan: 5, styles: {
+                                            halign: 'right', cellWidth: 'auto', fontStyle: 'bolditalic', fontSize: 8, fillColor: "#40E0D0"
+                                        }
+                            }
+                        }
+                    )
                     pago = datos[i].ids;
                     vlr += valr
                 }
                 body.push(
                     {
-                        id: { content: datos[i].fech, styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id2: { content: datos[i].ids, styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id3: { content: datos[i].formap ? datos[i].formap : 'Indefinido', styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id4: { content: datos[i].descp, styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id5: { content: datos[i].formap === 'BONO' ? '$0' : '$' + Moneda(datos[i].monto), styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id6: { content: datos[i].bono ? datos[i].bono : 'No aplica', styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id7: { content: datos[i].mtb ? '$' + Moneda(datos[i].mtb) : '$0', styles: { fontSize: 8, fontStyle: 'bold' } },
-                        id8: { content: '$' + Moneda(valr), styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id: { content: datos[i].date ? datos[i].date : 'Indefinido', styles: { fontSize: 7, fontStyle: 'bold' } },
+                        id2: { content: datos[i].rcb ? datos[i].rcb : 'Indefinido', styles: { fontSize: 7, fontStyle: 'bold' } },
+                        id3: { content: datos[i].formapg ? datos[i].formapg : 'Indefinido', styles: { fontSize: 7, fontStyle: 'bold' } },
+                        id4: { content: datos[i].id ? datos[i].id : 'Indefinido', styles: { fontSize: 7, fontStyle: 'bold' } },
+                        id5: { content: datos[i].mounto ? '$' + Moneda(datos[i].mounto) : '$0', styles: { fontSize: 7, fontStyle: 'bold' } }
                     }
                 )
                 //console.log(pago, datos[i].ids)
@@ -2679,6 +2741,22 @@ if (window.location.pathname == `/links/reportes`) {
                         </tr>`
                     );
                     body.push(
+                        {
+                            id: {
+                                content: 'TOTAL ABONADO',
+                                colSpan: 4, styles: {
+                                    halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
+                                }
+                            },
+                            id5: {
+                                content: '$' + Moneda(vlr),
+                                colSpan: 4, styles: {
+                                    halign: 'right', cellWidth: 'wrap', textColor: '#FFFFCC',
+                                    fontStyle: 'bolditalic', fontSize: 7, fillColor: "#7f8c8d"
+                                }
+                            }
+                        },
                         {
                             id: {
                                 content: 'SALDO A LA FECHA',
@@ -4770,198 +4848,198 @@ if (window.location.pathname == `/links/reportes`) {
             .search(buscar, true, false, true)
             .draw();
     });
-
-    /*
-        var doc = new jsPDF()
-        var img2 = new Image();
-        var img = new Image();
-        img.src = '/img/avatars/avatar.png'
-        img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
-        var totalPagesExp = '{total_pages_count_string}'
-    
-        //doc.setFontSize(18)
-        //doc.text('With content', 14, 22)
-        doc.setTextColor(0)
-        doc.setFontStyle('normal')
-        if (img) {
-            doc.addImage(img, 'png', 13, 10, 15, 20)
-            doc.addImage(img2, 'png', 183, 15, 15, 15)
-        }
-        doc.setFontSize(15)
-        doc.setTextColor(110)
-        doc.text('CONSTRUCCIONES CAMPESTRES', 105, 25, null, null, "center");
-       
-    
-        doc.setFontSize(11)
-        doc.setTextColor(0)
-    
-        // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-        var pageSize = doc.internal.pageSize
-        var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
-        var titulo = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, pageWidth - 10, {})
-        var parrafo = doc.splitTextToSize(`Entre los suscritos a saber, por una parte, `, pageWidth - 10, {})
-        var text1 = doc.splitTextToSize(`PONTEVEDRA PROMOTORA S.A.S., `, pageWidth - 10, {})
-        var text2 = doc.splitTextToSize(`sociedad comercial legalmente constituida, con domicilio principal en la ciudad de Turbaco-Bolivar, con matrícula mercantil número `, pageWidth - 10, {})
-        var text3 = doc.splitTextToSize(`09-394948-12 `, pageWidth - 10, {})
-        var text4 = doc.splitTextToSize(`de fecha 03-05-2018, con `, pageWidth - 10, {})
-        var text5 = doc.splitTextToSize(`Nit. 901177360-5`, pageWidth - 10, {})
-        var text6 = doc.splitTextToSize(`, representada legalmente  por  `, pageWidth - 10, {})
-        var text6 = doc.splitTextToSize(`JUANA TERESA BRAY BOHORQUEZ`, pageWidth - 10, {})
-        var text7 = doc.splitTextToSize(`, mujer, mayor de edad, identificada con la `, pageWidth - 10, {})
-        var text8 = doc.splitTextToSize(`C.C 45.582.407`, pageWidth - 10, {})
-        var text9 = doc.splitTextToSize(`del Carmen de Bolívar, quien para los efectos del presente contrato será  LA  PROMITENTE VENDEDORA; y por la otra parte, `, pageWidth - 10, {})
-        var text10 = doc.splitTextToSize(`LAURA ANDREA RICAURTE VALDERRAMA`, pageWidth - 10, {})
-        var text11 = doc.splitTextToSize(`C.C 1.050.952.779`, pageWidth - 10, {})
-        var text12 = doc.splitTextToSize(` y `, pageWidth - 10, {})
-        var text13 = doc.splitTextToSize(`MARIA JOSE RICAURTE VALDERRAMA`, pageWidth - 10, {})
-        var text14 = doc.splitTextToSize(`C.C 1.047.496.162`, pageWidth - 10, {})
-        var text15 = doc.splitTextToSize(` de CARTAGENA-BOLIVAR, con Dirección Cartagena, Bolívar Urbanización la Española Mz o Casa 6 quien para los efectos de este contrato será `, pageWidth - 10, {})
-        var text16 = doc.splitTextToSize(` EL PROMITENTE COMPRADOR`, pageWidth - 10, {})
-        var text17 = doc.splitTextToSize(`, acordamos celebrar el presente `, pageWidth - 10, {})
-        var text18 = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA`, pageWidth - 10, {})
-        var text19 = doc.splitTextToSize(`, previas las siguientes consideraciones:`, pageWidth - 10, {})
-        doc.text(titulo, 105, 40, null, null, "center");
-    
-        doc.setTextColor(100)
-        doc.text(parrafo, 13, 50)
-        doc.setTextColor(0)
-        doc.text(text1, 13, 50)
-        doc.text("This is centred text.", 105, 80, null, null, "center");
-        doc.text("And a little bit more underneath it.", 105, 90, null, null, "center");
-        doc.text("This is right aligned text", 200, 100, null, null, "right");
-        doc.text("And some more", 200, 110, null, null, "right");
-        doc.text("Back to left", 20, 120);*/
-    /*doc.setTextColor(100)
-    doc.text(text2, 13, 50)
-    doc.setTextColor(0)
-    doc.text(text3, 13, 50)
-    doc.setTextColor(100)
-    doc.text(text4, 13, 50)
-    doc.setTextColor(0)
-    doc.text(text5, 13, 50)
-    doc.setTextColor(100)
-    doc.text(text6, 13, 50)
-    doc.setTextColor(0)
-    doc.text(text7, 13, 50)
-    doc.setTextColor(100)
-    doc.text(text8, 13, 50)
-    doc.setTextColor(0)
-    doc.text(text9, 13, 50)*/
-    //doc.addPage("a3"); 
-    /*doc.autoTable({
-        head: [
-            { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
-        ],
-        body: [{
-            id: '',
-            name: '',
-            email: '',
-            city: 'RECIBO DE CAJA',
-            expenses: 'data.ids'
-        },
-        {
-            id: 'CLIENTE',
-            name: 'data.nombre + ',
-            email: 'CC:  + data.document',
-            city: 'data.movil',
-            expenses: ''
-        },
-        {
-            id: 'PRODUCTO',
-            name: 'data.proyect',
-            email: 'MZ.  data.mz',
-            city: 'LT. ',
-            expenses: ''
-        },
-        {
-            id: 'CONCEPTO',
-            name: 'ABONO',
-            email: 'data.descp',
-            city: 'CUOTA #',
-            expenses: 'NO APLICA'
-        },
-        {
-            id: 'F PAGO',
-            name: 'data.formap',
-            email: 'R  data.recibo',
-            city: 'MONTO',
-            expenses: '$ + Moneda(data.monto)'
-        },
-        {
-            id: 'BONO',
-            name: 'NO APLICA',
-            email: 'R5 0',
-            city: 'MONTO',
-            expenses: '$'
-        },
-        {
-            id: 'TOTAL',
-            name: `MCT********`,
-            email: '',
-            city: '',
-            expenses: '$'
-        },
-        {
-            id: 'SLD FECHA',
-            name: ` MCT********`,
-            email: '',
-            city: '',
-            expenses: '$'
-        },
-        {
-            id: 'TOTAL SLD',
-            name: `MCT********`,
-            email: '',
-            city: '',
-            expenses: '$'
-        }],
-        //html: '#tablarecibo',
-        //showHead: false,
-        columnStyles: {
-            //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-            id: { textColor: 0, fontStyle: 'bold' },
-            0: { cellWidth: '50' },
-            1: { cellWidth: 'auto' },
-            2: { cellWidth: 'wrap' },
-            3: { cellWidth: 'wrap' },
-        },
-        /*didDrawPage: function (data) {
-            // Header
+    var th = () => {
+        /*
+            var doc = new jsPDF()
+            var img2 = new Image();
+            var img = new Image();
+            img.src = '/img/avatars/avatar.png'
+            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+            var totalPagesExp = '{total_pages_count_string}'
+        
+            //doc.setFontSize(18)
+            //doc.text('With content', 14, 22)
             doc.setTextColor(0)
             doc.setFontStyle('normal')
             if (img) {
-                doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                doc.addImage(img, 'png', 13, 10, 15, 20)
+                doc.addImage(img2, 'png', 183, 15, 15, 15)
             }
             doc.setFontSize(15)
-            doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
-            doc.setFontSize(7)
-            doc.text('2020-08-28', data.settings.margin.left + 170, 8)
-            doc.setFontSize(10)
-            doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
-            doc.setFontSize(10)
-            doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
-            doc.setFontSize(8)
-            doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
- 
-            doc.setDrawColor(0, 255, 0)
-                .setLineWidth(1 / 72)
-            doc.setFontSize(8)
-            doc.text(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, data.settings.margin.left, 40)
- 
-            // Footer
-            var str = 'Page ' + doc.internal.getNumberOfPages()
-            // Total page number plugin only available in jspdf v1.0+
-            if (typeof doc.putTotalPages === 'function') {
-                str = str + ' of ' + totalPagesExp
-            }
-            doc.setFontSize(8)
- 
+            doc.setTextColor(110)
+            doc.text('CONSTRUCCIONES CAMPESTRES', 105, 25, null, null, "center");
+           
+        
+            doc.setFontSize(11)
+            doc.setTextColor(0)
+        
             // jsPDF 1.4+ uses getWidth, <1.4 uses .width
             var pageSize = doc.internal.pageSize
-            var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-            doc.text(`https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
-        },*//*
+            var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
+            var titulo = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, pageWidth - 10, {})
+            var parrafo = doc.splitTextToSize(`Entre los suscritos a saber, por una parte, `, pageWidth - 10, {})
+            var text1 = doc.splitTextToSize(`PONTEVEDRA PROMOTORA S.A.S., `, pageWidth - 10, {})
+            var text2 = doc.splitTextToSize(`sociedad comercial legalmente constituida, con domicilio principal en la ciudad de Turbaco-Bolivar, con matrícula mercantil número `, pageWidth - 10, {})
+            var text3 = doc.splitTextToSize(`09-394948-12 `, pageWidth - 10, {})
+            var text4 = doc.splitTextToSize(`de fecha 03-05-2018, con `, pageWidth - 10, {})
+            var text5 = doc.splitTextToSize(`Nit. 901177360-5`, pageWidth - 10, {})
+            var text6 = doc.splitTextToSize(`, representada legalmente  por  `, pageWidth - 10, {})
+            var text6 = doc.splitTextToSize(`JUANA TERESA BRAY BOHORQUEZ`, pageWidth - 10, {})
+            var text7 = doc.splitTextToSize(`, mujer, mayor de edad, identificada con la `, pageWidth - 10, {})
+            var text8 = doc.splitTextToSize(`C.C 45.582.407`, pageWidth - 10, {})
+            var text9 = doc.splitTextToSize(`del Carmen de Bolívar, quien para los efectos del presente contrato será  LA  PROMITENTE VENDEDORA; y por la otra parte, `, pageWidth - 10, {})
+            var text10 = doc.splitTextToSize(`LAURA ANDREA RICAURTE VALDERRAMA`, pageWidth - 10, {})
+            var text11 = doc.splitTextToSize(`C.C 1.050.952.779`, pageWidth - 10, {})
+            var text12 = doc.splitTextToSize(` y `, pageWidth - 10, {})
+            var text13 = doc.splitTextToSize(`MARIA JOSE RICAURTE VALDERRAMA`, pageWidth - 10, {})
+            var text14 = doc.splitTextToSize(`C.C 1.047.496.162`, pageWidth - 10, {})
+            var text15 = doc.splitTextToSize(` de CARTAGENA-BOLIVAR, con Dirección Cartagena, Bolívar Urbanización la Española Mz o Casa 6 quien para los efectos de este contrato será `, pageWidth - 10, {})
+            var text16 = doc.splitTextToSize(` EL PROMITENTE COMPRADOR`, pageWidth - 10, {})
+            var text17 = doc.splitTextToSize(`, acordamos celebrar el presente `, pageWidth - 10, {})
+            var text18 = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA`, pageWidth - 10, {})
+            var text19 = doc.splitTextToSize(`, previas las siguientes consideraciones:`, pageWidth - 10, {})
+            doc.text(titulo, 105, 40, null, null, "center");
+        
+            doc.setTextColor(100)
+            doc.text(parrafo, 13, 50)
+            doc.setTextColor(0)
+            doc.text(text1, 13, 50)
+            doc.text("This is centred text.", 105, 80, null, null, "center");
+            doc.text("And a little bit more underneath it.", 105, 90, null, null, "center");
+            doc.text("This is right aligned text", 200, 100, null, null, "right");
+            doc.text("And some more", 200, 110, null, null, "right");
+            doc.text("Back to left", 20, 120);*/
+        /*doc.setTextColor(100)
+        doc.text(text2, 13, 50)
+        doc.setTextColor(0)
+        doc.text(text3, 13, 50)
+        doc.setTextColor(100)
+        doc.text(text4, 13, 50)
+        doc.setTextColor(0)
+        doc.text(text5, 13, 50)
+        doc.setTextColor(100)
+        doc.text(text6, 13, 50)
+        doc.setTextColor(0)
+        doc.text(text7, 13, 50)
+        doc.setTextColor(100)
+        doc.text(text8, 13, 50)
+        doc.setTextColor(0)
+        doc.text(text9, 13, 50)*/
+        //doc.addPage("a3"); 
+        /*doc.autoTable({
+            head: [
+                { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+            ],
+            body: [{
+                id: '',
+                name: '',
+                email: '',
+                city: 'RECIBO DE CAJA',
+                expenses: 'data.ids'
+            },
+            {
+                id: 'CLIENTE',
+                name: 'data.nombre + ',
+                email: 'CC:  + data.document',
+                city: 'data.movil',
+                expenses: ''
+            },
+            {
+                id: 'PRODUCTO',
+                name: 'data.proyect',
+                email: 'MZ.  data.mz',
+                city: 'LT. ',
+                expenses: ''
+            },
+            {
+                id: 'CONCEPTO',
+                name: 'ABONO',
+                email: 'data.descp',
+                city: 'CUOTA #',
+                expenses: 'NO APLICA'
+            },
+            {
+                id: 'F PAGO',
+                name: 'data.formap',
+                email: 'R  data.recibo',
+                city: 'MONTO',
+                expenses: '$ + Moneda(data.monto)'
+            },
+            {
+                id: 'BONO',
+                name: 'NO APLICA',
+                email: 'R5 0',
+                city: 'MONTO',
+                expenses: '$'
+            },
+            {
+                id: 'TOTAL',
+                name: `MCT********`,
+                email: '',
+                city: '',
+                expenses: '$'
+            },
+            {
+                id: 'SLD FECHA',
+                name: ` MCT********`,
+                email: '',
+                city: '',
+                expenses: '$'
+            },
+            {
+                id: 'TOTAL SLD',
+                name: `MCT********`,
+                email: '',
+                city: '',
+                expenses: '$'
+            }],
+            //html: '#tablarecibo',
+            //showHead: false,
+            columnStyles: {
+                //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                id: { textColor: 0, fontStyle: 'bold' },
+                0: { cellWidth: '50' },
+                1: { cellWidth: 'auto' },
+                2: { cellWidth: 'wrap' },
+                3: { cellWidth: 'wrap' },
+            },
+            /*didDrawPage: function (data) {
+                // Header
+                doc.setTextColor(0)
+                doc.setFontStyle('normal')
+                if (img) {
+                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                    doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                }
+                doc.setFontSize(15)
+                doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                doc.setFontSize(7)
+                doc.text('2020-08-28', data.settings.margin.left + 170, 8)
+                doc.setFontSize(10)
+                doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                doc.setFontSize(10)
+                doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                doc.setFontSize(8)
+                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+     
+                doc.setDrawColor(0, 255, 0)
+                    .setLineWidth(1 / 72)
+                doc.setFontSize(8)
+                doc.text(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, data.settings.margin.left, 40)
+     
+                // Footer
+                var str = 'Page ' + doc.internal.getNumberOfPages()
+                // Total page number plugin only available in jspdf v1.0+
+                if (typeof doc.putTotalPages === 'function') {
+                    str = str + ' of ' + totalPagesExp
+                }
+                doc.setFontSize(8)
+     
+                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                var pageSize = doc.internal.pageSize
+                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                doc.text(`https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+            },*//*
 margin: { top: 200 },
 startY: 200,
 showHead: 'firstPage',
@@ -5019,6 +5097,7 @@ margin,
 margin + oneLineHeight
 );
 */
+    }
 }
 /////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}`) {
@@ -9920,6 +9999,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         }
     });
+    var body = [];
     var comisiones = $('#comisiones').DataTable({
         dom: 'Bfrtip',
         deferRender: true,
@@ -9971,6 +10051,49 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     }
                 }
             ]
+        },
+        {
+            text: `<i class="align-middle" data-feather="file-text"></i>`,
+            attr: {
+                title: 'Fecha',
+                id: 'facturar'
+            },
+            className: 'btn btn-secondary',
+            action: function () {
+                var doc = new jsPDF('p', 'mm', [612, 792]);
+                var img = new Image();
+                var fech = moment().format('llll');
+                img.src = '/img/avatars/avatar.png'
+                var totalPagesExp = '{total_pages_count_string}'
+                doc.autoTable({
+                    head: [
+                        { id: 'id', id2: 'std', id3: 'producto', id4: 'benefactor', id5: 'cliente', id6: '%', id7: 'monto', id8: 'concepto' },
+                    ],
+                    body,
+                    includeHiddenHtml: false,
+                    theme: 'plain',
+                    didDrawPage: function (data) {
+                        // Header
+                        doc.setTextColor(0)
+                        doc.setFontStyle('normal')
+                        if (img) {
+                            doc.addImage(img, 'png', data.settings.margin.left, 2, 7, 10)
+                        }
+                        doc.setFontSize(13)
+                        doc.text('CUENTAS DE COBRO', data.settings.margin.left + 9, 9)
+                        doc.setFontSize(7)
+                        doc.text(fech, data.settings.margin.left + 153, 8)
+                        // Footer
+                        var str = 'Page ' + doc.internal.getNumberOfPages()
+                        // Total page number plugin only available in jspdf v1.0+
+                        if (typeof doc.putTotalPages === 'function') {
+                            str = str + ' of ' + totalPagesExp
+                        }
+                    },
+                    margin: { top: 13 },
+                })
+                doc.output('dataurlnewwindow')
+            }
         }
         ],
         search: {
@@ -9993,18 +10116,25 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             dataSrc: "data"
         },
         drawCallback: function (settings) {
-            var api = this.api();
+            var api = this.api(); body = [];
             var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-            api.rows({ page: 'current' }).data().each(function (group, i) {
+            var last = null, totales = 0;
+            var filas = api.rows({ page: 'current' }).data();
+            filas.each(function (group, i) {
                 if (last !== group.cuentadecobro) {
-                    //var dato = api.rows(i, { page: 'current' }).data()
+                    var fechg = moment(group.fechas).format('YYYY-MM-DD hh:mm A');
+                    var std = 0; totales += group.deuda;
                     //console.log(group)
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
                             <td colspan="1">
                                 <div class="text-center">
                                     ${group.cuentadecobro}
+                                </div>
+                            </td>
+                            <td colspan="2">
+                                <div class="text-center">
+                                    ${fechg} 
                                 </div>
                             </td>
                             <td colspan="2">
@@ -10017,7 +10147,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     $${Moneda(group.deuda)}
                                 </div>
                             </td>
-                            <td colspan="12">
+                            <td colspan="5">
                                 <div class="text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
@@ -10032,7 +10162,87 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             </td>
                         </tr>`
                     );
+                    body.push(
+                        {
+                            id: {
+                                content: group.cuentadecobro, colSpan: 1, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 10, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id2: {
+                                content: fechg, colSpan: 2, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 10, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id4: {
+                                content: group.nam, colSpan: 3, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 10, fillColor: "#FFFFCC"
+                                }
+                            },
+                            id7: {
+                                content: '$' + Moneda(group.deuda), colSpan: 2, styles: {
+                                    halign: 'right', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 10, fillColor: "#FFFFCC"
+                                }
+                            }
+                        }
+                    )
                     last = group.cuentadecobro;
+                }
+                switch (group.stado) {
+                    case 4:
+                        std = `Pagada`
+                        break;
+                    case 6:
+                        std = `Declinada`
+                        break;
+                    case 3:
+                        std = `Pendiente`
+                        break;
+                    case 15:
+                        std = `Inactiva`
+                        break;
+                    case 9:
+                        std = `Disponible`
+                        break;
+                    default:
+                        std = `Sin info`
+                }
+
+                body.push(
+                    {
+                        id: { content: group.ids, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id2: { content: std, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id3: { content: `${group.proyect} ${group.mz}-${group.n}`, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id4: { content: group.fullname, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id5: { content: group.nombre, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id6: { content: (group.porciento * 100).toFixed(2) + `%`, styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id7: { content: '$' + Moneda(group.pagar), styles: { fontSize: 8, fontStyle: 'bold' } },
+                        id8: { content: group.descp, styles: { fontSize: 8, fontStyle: 'bold' } }
+                    }
+                );
+
+                if (i == filas.length - 1) {
+                    body.push(
+                        {
+                            id: {
+                                content: 'TOTAL A PAGAR', colSpan: 4, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 9, textColor: '#FFFFCC', fillColor: "#000000"
+                                }
+                            },
+                            id5: {
+                                content: '$' + Moneda(totales), colSpan: 4, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 9, textColor: '#FFFFCC', fillColor: "#000000"
+                                }
+                            }
+                        },
+                        {
+                            id: {
+                                content: `${NumeroALetras(totales)} MCT********`, colSpan: 8, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 7, textColor: '#FFFFCC', fillColor: "#000000"
+                                }
+                            }
+                        }
+                    )
                 }
             });
         },
