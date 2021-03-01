@@ -2150,7 +2150,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
-        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id,
@@ -2158,9 +2158,9 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);*/
+        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);
         //console.log(so)
-        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
+        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote,
@@ -2169,7 +2169,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
         LEFT JOIN cupones cpb ON s.bonoanular = cpb.id LEFT JOIN recibos r ON s.ids = r.registro 
-        WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
+        WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)*/
         respuesta = { "data": so };
         res.send(respuesta);
 
@@ -2604,17 +2604,17 @@ async function Estados(S) {
 
         if (pagos >= cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
-            //console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
+            console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
             return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
-            //console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
+            console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
-            //console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
+            console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
-            //console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
+            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
@@ -3303,17 +3303,16 @@ var normalize = (function () {
     }
 
 })();
+Desendentes('97890290003800000154', 10)
 async function Desendentes(pin, stados) {
     if (stados != 10) {
         return false
     }
     let m = new Date();
-    //month = Math.sign(m.getMonth() - 2) > 0 ? m.getMonth() - 2 : 1;
     var mes = m.getMonth() + 1;
     let linea = '', lDesc = '';
     var corte, cort = 0, cortp = 0, rangofchs = '';
     var hoy = moment().format('YYYY-MM-DD')
-    /*var month = moment().subtract(3, 'month').format('YYYY-MM-DD')*/
     var venta = 0, bono = 0, bonop = 0, personal = 0
     var sqlINSERT = 'INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, porciento, total, lt, retefuente, reteica, pagar) VALUES ';
     var sqlUPDATE = 'UPDATE productosd SET';
@@ -3380,7 +3379,7 @@ async function Desendentes(pin, stados) {
 
     var j = asesor[0]
     if (j.sucursal) {
-
+        sqlDIRECTA = ' directa = CASE id';
         const directas = await pool.query(`SELECT * FROM preventa p 
             INNER JOIN productosd l ON p.lote = l.id
             INNER JOIN productos o ON l.producto = o.id
@@ -3402,18 +3401,10 @@ async function Desendentes(pin, stados) {
                 sqlDIRECTA += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                 IDS += a.lote.toString() + ', ';
                 direct = true;
-                /*var f = {
-                    fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: std, descp: 'VENTA DIRECTA',
-                    asesor: j.acreedor, porciento: j.sucursal, total: val, lt: a.lote, retefuente,
-                    reteica, pagar: monto - (retefuente + reteica)
-                }
- 
-                await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
-                await pool.query(`INSERT INTO solicitudes SET ?`, f);*/
-            })
+            })                
             if (direct) {
                 IDS = IDS.slice(0, -2);
-                sqlUPDATE += sqlDIRECTA + ' END WHERE id IN(' + IDS + ')';
+                sqlUPDATE += sqlDIRECTA + ' END WHERE id IN(' + IDS + ')'; //console.log(sqlINSERT.slice(0, -1), sqlUPDATE)
                 await pool.query(sqlUPDATE);
                 await pool.query(sqlINSERT.slice(0, -1));
             }
