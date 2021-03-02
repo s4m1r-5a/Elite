@@ -119,6 +119,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
   let linea = '', lDesc = '';
   var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id;
+  //var d = 'AND p.asesor =  ' + req.user.id;
   let indircet1;
   let indircet2;
   let indircet3;
@@ -130,8 +131,8 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
       WHERE mes = MONTH(p.fecha) AND YEAR(p.fecha) = YEAR(CURDATE()) ${d}
   ) as comisiones  
   FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE MONTH(p.fecha)
-  BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY MONTH(p.fecha)
-  ${d} ORDER BY 1;`);
+  BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) ${d} GROUP BY MONTH(p.fecha)
+  ORDER BY 1;`);
 
   const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND  acreedor IS NOT NULL AND usuario IS NOT NULL`, req.user.id);
   if (lineaUno.length > 0) {
@@ -188,17 +189,18 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1;`);
   }
 
-  res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3 });
   ////// 5 MEJORES ASESORES DEL AÑO Y DEL MES //////////////
-  `SELECT COUNT(p.asesor) asesores, u.fullname
-  FROM preventa p INNER JOIN users u ON p.asesor = u.id
-  WHERE MONTH(p.fecha) BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) 
-  GROUP BY u.fullname ORDER BY asesores DESC LIMIT 5;
-  
-  SELECT COUNT(p.asesor) asesores, u.fullname
-  FROM preventa p INNER JOIN users u ON p.asesor = u.id
-  WHERE MONTH(p.fecha) = MONTH(CURDATE()) 
-  GROUP BY u.fullname ORDER BY asesores DESC LIMIT 5;`
+  asesoresA = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
+  COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
+  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE MONTH(p.fecha) BETWEEN 1 and 12 
+  AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
+
+  asesoresM = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
+  COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
+  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE MONTH(p.fecha) = MONTH(CURDATE()) 
+  GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
+
+  res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM });
 
 
 
