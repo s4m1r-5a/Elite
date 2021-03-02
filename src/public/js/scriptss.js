@@ -543,51 +543,26 @@ if (window.location.pathname == `/`) {
 }
 //////////////////////////* TABLERO *///////////////////////////////////////
 if (window.location.pathname == `/tablero`) {
-    new Chart(document.getElementById("chartjs-dashboard-pie"), {})
-    //new Chart(document.getElementById("chartjs-line"), {})
 
+    var totalaño = 0;
+    var totalmes = 0;
+    var ventaño = 0;
+    var ventames = 0;
+    var promedio = 0;
+    var totales = 0;
     var canvas2 = document.getElementById("chartjs-line").getContext('2d');
-    var canvas = document.getElementById("chartjs-dashboard-pie").getContext('2d');
-    var reportes = new Array()
-    var f = new Date();
-    var m = f.getMonth() + 1;
-    var fe = f.getMonth();
-    var d = 90//parseFloat($('.p' + m).val())
-    var datosTabla6
     var tod = {
         d: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        d1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         one: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        one1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
         two: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
-        thre: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        two1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        thre: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        thre1: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+        indirectas: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
     };
 
-
-    $('#promedio').html($('.d' + m).val());
-    $('#ventaprecio').html($('.v' + m).val());
-    $('#utilidad').html($('.u' + m).val());
-    $('#utilidadneta').html($('.c' + m).val());
-    $('#ventames').html($('.m' + m).val());
-
-    $('#utilidadneta').mask('000,000,000', { reverse: true });
-    $('#utilidad').mask('000,000,000', { reverse: true });
-    $('#ventaprecio').mask('000,000,000', { reverse: true });
-
-    var reportes = [
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-        { año: 0, mes: 0, cuentas: 0, venta: 0, utilidad: 0, l1: 0, l2: 0, l3: 0, u1: 0, u2: 0, u3: 0, t1: 0, t2: 0, t3: 0, comision: 0, total: 0 },
-
-    ]
     var datos = {
         type: "pie",
         data: { labels: ["Utilidad Directa", "Utilidad Indirecta", "Comision Directa", "Comision Indirecta"] },
@@ -604,9 +579,18 @@ if (window.location.pathname == `/tablero`) {
             datasets: [{
                 label: "Ventas Directas",
                 fill: true,
-                backgroundColor: "transparent",
-                borderColor: window.theme.dark,
-                data: tod.d
+                //backgroundColor: "transparent",
+                borderColor: '#000000',
+                data: tod.d,
+                //borderDash: [10, 5]
+            },
+            {
+                label: "Comision Directa",
+                fill: true,
+                //backgroundColor: "transparent",
+                borderColor: '#000000',
+                data: tod.d1,
+                borderDash: [10, 5]
             },
             {
                 label: "Ventas Nivel 1",
@@ -616,6 +600,14 @@ if (window.location.pathname == `/tablero`) {
                 data: tod.one
             },
             {
+                label: "Comision Indirecta 1",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.success,
+                data: tod.one1,
+                borderDash: [10, 5]
+            },
+            {
                 label: "Ventas Nivel 2",
                 fill: true,
                 backgroundColor: "transparent",
@@ -623,11 +615,27 @@ if (window.location.pathname == `/tablero`) {
                 data: tod.two
             },
             {
+                label: "Comision Indirecta 2",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.primary,
+                data: tod.two1,
+                borderDash: [10, 5]
+            },
+            {
                 label: "Ventas Nivel 3",
                 fill: true,
                 backgroundColor: "transparent",
                 borderColor: window.theme.danger,
                 data: tod.thre
+            },
+            {
+                label: "Comision Indirecta 3",
+                fill: true,
+                backgroundColor: "transparent",
+                borderColor: window.theme.danger,
+                data: tod.thre3,
+                borderDash: [10, 5]
             }]
         },
         options: {
@@ -644,8 +652,7 @@ if (window.location.pathname == `/tablero`) {
         }
     };
 
-    window.pie = new Chart(canvas, datos);
-
+    //window.pie = new Chart(canvas, datos);
     $.ajax({
         url: '/tablero/1',
         type: 'POST',
@@ -653,18 +660,100 @@ if (window.location.pathname == `/tablero`) {
         success: function (data) {
             data.d.map((x, i) => {
                 tod.d[i] = Math.round(x.total / 1000000);
+                tod.d1[i] = Math.round(x.comisiones / 1000000);
+                ventaño += x.ventas;
+                ventames = x.mesactual ? x.ventas : 0;
+                totalaño += x.total;
+                totalmes = x.mesactual;
+                totales += x.total;
             });
             data.one.map((x, i) => {
                 tod.one[i] = Math.round(x.total / 1000000);
+                tod.one1[i] = Math.round(x.comisiones / 1000000);
+                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                totales += x.total;
             });
             data.two.map((x, i) => {
                 tod.two[i] = Math.round(x.total / 1000000);
+                tod.two1[i] = Math.round(x.comisiones / 1000000);
+                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                totales += x.total;
             });
             data.thre.map((x, i) => {
                 tod.thre[i] = Math.round(x.total / 1000000);
+                tod.thre1[i] = Math.round(x.comisiones / 1000000);
+                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                totales += x.total;
             });
-            console.log(tod)
+            data.asesoresA.map((x, i) => {
+                var y = i + 1;
+                $('#asesor-name' + y).html(x.fullname);
+                $('#asesor-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
+                $('#asesor-imagen' + y).prop('src', x.imagen);
+                $('#asesor-rango' + y).html(x.rango);
+            });
+            data.asesoresM.map((x, i) => {
+                var y = i + 1;
+                $('#asesr-name' + y).html(x.fullname);
+                $('#asesr-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
+                $('#asesr-imagen' + y).prop('src', x.imagen);
+                $('#asesr-rango' + y).html(x.rango);
+            });
+            promedio = ventaño / 30;
+            $('#ventames').html(ventames);
+            $('#promedio').html(Math.round(promedio));
+            $('#ventaprecio').html(Moneda(totalmes));
+            $('#utilidadneta').html(Moneda(totalaño));
+            $('#utilidad').html(Moneda(totales));
+            console.log(data)
             window.pie2 = new Chart(canvas2, datos2);
+            new Chart(document.getElementById("chartjs-dashboard-bar"), {
+                type: "bar",
+                data: {
+                    labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
+                    datasets: [{
+                        label: "Directas",
+                        backgroundColor: window.theme.primary,
+                        borderColor: window.theme.primary,
+                        hoverBackgroundColor: '#E8EAED',
+                        hoverBorderColor: window.theme.primary,
+                        data: tod.d1
+                    }, {
+                        label: "Indirectas",
+                        backgroundColor: window.theme.success,
+                        borderColor: "#E8EAED",
+                        hoverBackgroundColor: "#E8EAED",
+                        hoverBorderColor: "#E8EAED",
+                        data: tod.indirectas
+                    }]
+                },
+                options: {
+                    maintainAspectRatio: false,
+                    legend: {
+                        display: false
+                    },
+                    scales: {
+                        yAxes: [{
+                            gridLines: {
+                                display: false
+                            },
+                            stacked: false,
+                            ticks: {
+                                stepSize: 100
+                            }
+                        }],
+                        xAxes: [{
+                            barPercentage: .75,
+                            categoryPercentage: .5,
+                            stacked: false,
+                            gridLines: {
+                                color: "transparent"
+                            }
+                        }]
+                    }
+                }
+            });
+
         }
     });
 
@@ -846,52 +935,6 @@ if (window.location.pathname == `/tablero`) {
 
     var date = new Date()
     // Bar chart
-    new Chart(document.getElementById("chartjs-dashboard-bar"), {
-        type: "bar",
-        data: {
-            labels: ["Ene", "Feb", "Mar", "Abr", "May", "Jun", "Jul", "Ago", "Sep", "Oct", "Nov", "Dic"],
-            datasets: [{
-                label: "Last year",
-                backgroundColor: window.theme.primary,
-                borderColor: window.theme.primary,
-                hoverBackgroundColor: window.theme.primary,
-                hoverBorderColor: window.theme.primary,
-                data: [54, 67, 41, 55, 62, 45, 55, 73, 60, 76, 48, 79]
-            }, {
-                label: "This year",
-                backgroundColor: "#E8EAED",
-                borderColor: "#E8EAED",
-                hoverBackgroundColor: "#E8EAED",
-                hoverBorderColor: "#E8EAED",
-                data: [69, 66, 24, 48, 52, 51, 44, 53, 62, 79, 51, 68]
-            }]
-        },
-        options: {
-            maintainAspectRatio: false,
-            legend: {
-                display: false
-            },
-            scales: {
-                yAxes: [{
-                    gridLines: {
-                        display: false
-                    },
-                    stacked: false,
-                    ticks: {
-                        stepSize: 20
-                    }
-                }],
-                xAxes: [{
-                    barPercentage: .75,
-                    categoryPercentage: .5,
-                    stacked: false,
-                    gridLines: {
-                        color: "transparent"
-                    }
-                }]
-            }
-        }
-    });
 
     $("#datetimepicker-dashboard").datetimepicker({
         inline: true,
