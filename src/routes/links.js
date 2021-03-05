@@ -1809,7 +1809,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, cp.estado = 6, p.tipobsevacion = 'ANULADA', 
         l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
         ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
-        s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`;
+        s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; console.log(sql)
         await pool.query(sql, lote);
         res.send(true);
     }
@@ -2150,7 +2150,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
-        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
+        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id,
@@ -2158,9 +2158,9 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.concepto IN ('PAGO','ABONO') AND pr.tipobsevacion IS NULL ${n}`);
+        WHERE s.concepto IN ('PAGO','ABONO') ${n}`); // AND pr.tipobsevacion IS NULL*/
         //console.log(so)
-        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote,
@@ -2168,8 +2168,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
-        LEFT JOIN cupones cpb ON s.bonoanular = cpb.id LEFT JOIN recibos r ON s.ids = r.registro 
-        WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)*/
+        LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
         respuesta = { "data": so };
         res.send(respuesta);
 
@@ -2566,18 +2565,6 @@ async function Rango(id) {
 };
 async function Estados(S) {
     // S = id de separacion
-    // L = id de lote
-    // P = id de la solicitud de pago
-    /*var F
-    if (P) {
-        const g = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote 
-        WHERE pr.tipobsevacion IS NULL AND s.ids = ${P} LIMIT 1`);
-        F = { r: g[0].id, m: `AND pr.id = ${g[0].id}` }
-    } else if (L) {
-        F = { r: L, m: `AND pd.id = ${L}` }
-    } else {
-        F = { r: S, m: `AND pr.id = ${S}` }
-    }*/
 
     var F = { r: S, m: `AND pr.id = ${S}` };
 
@@ -2604,17 +2591,17 @@ async function Estados(S) {
 
         if (pagos >= cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
-            console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
+            //console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
             return { std: 13, estado: 'VENDIDO', pendients }
         } else if (pagos >= cuotas.INICIAL && pagos < cuotas.TOTAL) {
             Desendentes(Pagos[0].asesor, 10)
-            console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
+            //console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
-            console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
+            //console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
-            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
+            //console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 
@@ -2925,7 +2912,7 @@ async function PagosAbonos(Tid, pdf, user) {
         const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
 
         if (Cuotas.length > 0 && monto > 0) {
-            await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: 4 }, Tid]);
+            await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: 4, aprueba: user }, Tid]);
             var sql = `UPDATE cuotas SET estado = 13, mora = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
             var sql2 = '', idS = '';
 
@@ -2972,197 +2959,6 @@ async function PagosAbonos(Tid, pdf, user) {
             return false
         }
 
-        /*const Ai = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
-            WHERE c.separacion = ${T} AND c.tipo = 'INICIAL' AND c.estado = 3`);
-        if (Ai.length > 0) {
-            var totalinicial = 0,
-                cuotainicial = Ai[0].cuota;
- 
-            Ai.map((c, x) => {
-                totalinicial += c.cuota;
-            })
-            if (monto >= totalinicial) {
-                //estados = 10
-                await pool.query(
-                    `UPDATE cuotas c 
-                            INNER JOIN preventa p ON c.separacion = p.id 
-                            INNER JOIN productosd l ON p.lote = l.id 
-                            INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                            WHERE s.ids = ? AND c.tipo = 'INICIAL' AND c.estado = 3`,
-                    [
-                        {
-                            's.aprueba': user,
-                            's.stado': 4,
-                            'c.estado': 13,
-                            'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                            'l.fechar': moment(fech2).format('YYYY-MM-DD'),
-                            'l.estado': 10
-                        }, Tid
-                    ]
-                );
-                if (monto > totalinicial) {
-                    const Af = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
-                    WHERE c.separacion = ${T} AND c.tipo = 'FINANCIACION' AND c.estado = 3`)
- 
-                    var extraordinaria = Af[0].cuotaextraordinaria,
-                        cuotafinanciada = 0,
-                        excedenteinicial = Math.round(monto - totalinicial),
-                        totalfinanceo = 0,
-                        cuota = 0,
-                        numerocuotas = 0;
- 
-                    Af.filter((c) => {
-                        return c.cuota !== c.cuotaextraordinaria;
-                    }).map((c, x) => {
-                        totalfinanceo += c.cuota;
-                        cuotafinanciada = c.cuota
-                        numerocuotas = x + 1;
-                    })
-                    if (excedenteinicial >= totalfinanceo) {
-                        await pool.query(
-                            `UPDATE cuotas c 
-                                    INNER JOIN preventa p ON c.separacion = p.id 
-                                    INNER JOIN productosd l ON p.lote = l.id 
-                                    INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                                    WHERE s.ids = ? AND c.tipo = 'FINANCIACION' 
-                                    AND c.cuota != ${extraordinaria} AND c.estado = 3`,
-                            [
-                                {
-                                    's.aprueba': user,
-                                    's.stado': 4,
-                                    'c.estado': 13,
-                                    'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                    'l.estado': 13
-                                }, Tid
-                            ]
-                        );
-                        if (excedenteinicial > totalfinanceo) {
-                            resp = 'El monto consignado es mayor al del valor total del producto, se genero un BONO'
-                            var pin = ID(5),
-                                motivo = `${fech} Excedente del pago total del producto`;
-                            const bono = {
-                                pin, descuento: 0, estado: 9, clients: S.idc, concept: 'EXCEDENTE',
-                                tip: 'BONO', monto: excedenteinicial - totalfinanceo, motivo,
-                            }
-                            await pool.query('INSERT INTO cupones SET ? ', bono);
- 
-                            var nombr = S.nombre.split(" ")[0],
-                                bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
- 
-                            EnviarWTSAP(S.movil, bodi);
-                        };
-                    } else {
-                        cuota = cuotafinanciada - Math.round(excedenteinicial / numerocuotas);
-                        await pool.query(
-                            `UPDATE cuotas c 
-                                INNER JOIN preventa p ON c.separacion = p.id 
-                                INNER JOIN productosd l ON p.lote = l.id 
-                                INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                                WHERE s.ids = ? AND c.tipo = 'FINANCIACION' 
-                                AND c.cuota != ${extraordinaria} AND c.estado = 3`,
-                            [
-                                {
-                                    's.aprueba': user,
-                                    's.stado': 4,
-                                    'c.cuota': cuota//,
-                                    //'l.estado': estados
-                                }, Tid
-                            ]
-                        );
-                    }
-                }
-                //Estados(null, null, Tid)
-            } else {
-                var cuota = cuotainicial - Math.round(monto / Ai.length)
-                await pool.query(
-                    `UPDATE cuotas c 
-                            INNER JOIN preventa p ON c.separacion = p.id 
-                            INNER JOIN productosd l ON p.lote = l.id 
-                            INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                            WHERE s.ids = ?  AND c.tipo = 'INICIAL' AND c.estado = 3`,
-                    [
-                        {
-                            's.aprueba': user,
-                            's.stado': 4,
-                            'c.cuota': cuota,
-                            'l.estado': 12
-                        }, Tid
-                    ]
-                );
-            }
- 
-        } else {
-            const Af = await pool.query(`SELECT * FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id 
-            WHERE c.separacion = ${T} AND c.estado = 3`)
-            if (Af.length > 0) {
-                var extraordinaria = Af[0].cuotaextraordinaria,
-                    cuotafinanciada = 0,
-                    totalfinanceo = 0,
-                    cuota = 0,
-                    numerocuotas = 0;
- 
-                Af.filter((c) => {
-                    return c.cuota !== c.cuotaextraordinaria;
-                }).map((c, x) => {
-                    totalfinanceo += c.cuota;
-                    cuotafinanciada = c.cuota
-                    numerocuotas = x + 1;
-                })
-                if (monto >= totalfinanceo) {
-                    await pool.query(
-                        `UPDATE cuotas c 
-                                INNER JOIN preventa p ON c.separacion = p.id 
-                                INNER JOIN productosd l ON p.lote = l.id 
-                                INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                                WHERE s.ids = ? AND c.estado = 3`,
-                        [
-                            {
-                                's.aprueba': user,
-                                's.stado': 4,
-                                'c.estado': 13,
-                                'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                                'l.estado': 13
-                            }, Tid
-                        ]
-                    );
-                    if (monto > totalfinanceo) {
- 
-                        resp = 'El monto consignado es mayor al del valor total del producto, se genero un BONO'
-                        var pin = ID(5),
-                            motivo = `${fech} Excedente del pago total del producto`;
-                        const bono = {
-                            pin, descuento: 0, estado: 9, clients: S.idc, concept: 'EXCEDENTE',
-                            tip: 'BONO', monto: monto - totalfinanceo, motivo,
-                        }
-                        await pool.query('INSERT INTO cupones SET ? ', bono);
- 
-                        var nombr = S.nombre.split(" ")[0],
-                            bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
- 
-                        EnviarWTSAP(S.movil, bodi);
- 
-                    }
-                } else {
-                    var cuota = cuotafinanciada - Math.round(monto / numerocuotas);
-                    await pool.query(
-                        `UPDATE cuotas c 
-                                INNER JOIN preventa p ON c.separacion = p.id 
-                                INNER JOIN productosd l ON p.lote = l.id 
-                                INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                                WHERE s.ids = ? AND c.tipo = 'FINANCIACION' 
-                                AND c.cuota != ${extraordinaria} AND c.estado = 3`,
-                        [
-                            {
-                                's.aprueba': user,
-                                's.stado': 4,
-                                'c.cuota': cuota,
-                                'l.estado': 10
-                            }, Tid
-                        ]
-                    );
-                }
-            }
-        }*/
     } else if (S.concepto === 'PAGO') {
         var cuota = S.cuota + S.mora;
         if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo && monto >= cuota) {
@@ -3177,12 +2973,11 @@ async function PagosAbonos(Tid, pdf, user) {
         }
         if (monto >= cuota || S.std === 13) {
             var montocuotas = monto - cuota;
-            //console.log(S.pago, Tid, T, montocuotas);
-            await pool.query(`UPDATE cuotas c 
-                INNER JOIN preventa p ON c.separacion = p.id 
-                INNER JOIN productosd l ON p.lote = l.id 
-                INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                WHERE c.id = ?`,
+            await pool.query(`UPDATE solicitudes s  
+                INNER JOIN preventa p ON s.lt = p.lote
+                INNER JOIN productosd l ON s.lt = l.id 
+                INNER JOIN cuotas c ON s.pago = c.id SET ? 
+                WHERE s.ids = ?`,
                 [
                     {
                         's.aprueba': user,
@@ -3191,7 +2986,7 @@ async function PagosAbonos(Tid, pdf, user) {
                         'c.mora': 0,
                         'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
                         'l.fechar': moment(fech2).format('YYYY-MM-DD')
-                    }, S.pago
+                    }, Tid
                 ]
             );
             const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
@@ -3228,11 +3023,11 @@ async function PagosAbonos(Tid, pdf, user) {
             var mor = monto >= S.mora ? 0 : S.mora - monto
             var cuo = monto > S.mora ? S.cuota - (monto + S.mora) : S.cuota;
             await pool.query(
-                `UPDATE cuotas c 
-                    INNER JOIN preventa p ON c.separacion = p.id 
-                    INNER JOIN productosd l ON p.lote = l.id 
-                    INNER JOIN solicitudes s ON s.lt = l.id SET ? 
-                    WHERE c.id = ?`,
+                `UPDATE solicitudes s  
+                INNER JOIN preventa p ON s.lt = p.lote
+                INNER JOIN productosd l ON s.lt = l.id 
+                INNER JOIN cuotas c ON s.pago = c.id SET ? 
+                WHERE s.ids = ?`,
                 [
                     {
                         's.aprueba': user,
@@ -3242,7 +3037,7 @@ async function PagosAbonos(Tid, pdf, user) {
                         'c.mora': mor,
                         'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
                         'c.abono': S.abono + monto
-                    }, S.pago
+                    }, Tid
                 ]
             );
         }
@@ -3303,7 +3098,7 @@ var normalize = (function () {
     }
 
 })();
-Desendentes('97890290003800000154', 10)
+//Desendentes('97890290003800000154', 10)
 async function Desendentes(pin, stados) {
     if (stados != 10) {
         return false
@@ -3401,7 +3196,7 @@ async function Desendentes(pin, stados) {
                 sqlDIRECTA += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                 IDS += a.lote.toString() + ', ';
                 direct = true;
-            })                
+            })
             if (direct) {
                 IDS = IDS.slice(0, -2);
                 sqlUPDATE += sqlDIRECTA + ' END WHERE id IN(' + IDS + ')'; //console.log(sqlINSERT.slice(0, -1), sqlUPDATE)

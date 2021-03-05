@@ -242,7 +242,9 @@
                                 servicio al cliente</p>
                         </div>
                         <div id="arrows-primary-step-3" class="">
-                            <form id="payu" method="post" action="https://checkout.payulatam.com/ppp-web-gateway-payu/">
+                            <!--https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu-->
+                            <form id="payu" method="post"
+                                action="https://checkout.payulatam.com/ppp-web-gateway-payu">
                                 <table class="table table-sm my-2">
                                     <tbody>
                                         <tr>
@@ -306,12 +308,12 @@
                                         </tr>
                                     </tbody>
                                 </table>
-                                <!--<input name="merchantId" type="hidden" value="508029">
-                                <input name="accountId" type="hidden" value="512321">-->
+                                <!--<input name="merchantId" type="hidden" value="508029"> PARA PRUEBAS
+                                <input name="accountId" type="hidden" value="512321"> PARA PRUEBAS-->
                                 <input name="merchantId" type="hidden" value="845014">
                                 <input name="accountId" type="hidden" value="852515">
-                                <!--<input name="merchantId" type="hidden" value="825255">
-                                    <input name="accountId" type="hidden" value="832520">-->
+                                <!--<input name="merchantId" type="hidden" value="825255"> SAMIR
+                                    <input name="accountId" type="hidden" value="832520"> SAMIR-->
                                 <input name="referenceCode" type="hidden" id="Code">
                                 <input name="tax" type="hidden" value="0">
                                 <input name="taxReturnBase" type="hidden" value="0">
@@ -319,8 +321,12 @@
                                 <input name="signature" type="hidden" id="signature" value="">
                                 <input name="test" type="hidden" value="0">
                                 <input type="hidden" name="extra2" id="extra" value="">
-                                <input name="responseUrl" type="hidden" value="https://grupoelitered.com.co/planes">
-                                <input name="confirmationUrl" type="hidden" value="https://grupoelitered.com.co/confir">
+                                <input name="responseUrl" type="hidden" value="https://grupoelitefincaraiz.com/planes">
+                                <input name="confirmationUrl" type="hidden"
+                                    value="https://grupoelitefincaraiz.com/confir">
+                                <!--<input name="responseUrl" type="hidden" value="http://localhost:5000/planes">
+                                <input name="confirmationUrl" type="hidden"
+                                    value="https://endarh7fdp1a476.m.pipedream.net">-->
                                 <div class="mt-auto pgpayu" style="display: none;">
                                     <input name="Submit" type="submit" class="btn btn-lg btn-outline-danger"
                                         value="Pagar">

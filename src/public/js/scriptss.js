@@ -1088,8 +1088,8 @@ if (window.location.pathname == `/links/pagos`) {
                         });
                         var Calculo = (m) => {
                             var mora = 0, cuot = 0, Description = '', cont = 0, c = ID(3);
-                            $('#Code').val(data.client.idc + '-' + m + '-' + c);
-                            vx = data.client.idc + '-' + m;
+                            $('#Code').val(data.client.idc + '-' + m + '-' + c); console.log(data.client.idc + '-' + m + '-' + c)
+                            vx = data.client.idc + '-' + m + '-' + c;
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
@@ -1236,12 +1236,12 @@ if (window.location.pathname == `/links/pagos`) {
             T = $('.Total').html().replace(/\./g, '');
 
         if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
-            var l = parseFloat($('#Total').val())
-            var cal = Math.round((l * 2.79 / 100) + 800)
+            //var l = parseFloat($('#Total').val())
+            //var cal = Math.round((l * 2.79 / 100) + 800)
             $('#rcb').prop('checked', false)
-            $('.transaccion').html(Moneda(cal))
+            /*$('.transaccion').html(Moneda(cal))
             $('.Total3').html(Moneda(l + cal));
-            $('#Total, #Total2').val(l + cal);
+            $('#Total, #Total2').val(l + cal);*/
             $('#recibo').val('');
             $('#file').val('');
             var fd = $('form').serialize();
