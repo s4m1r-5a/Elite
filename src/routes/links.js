@@ -112,7 +112,7 @@ cron.schedule("7 10 * * *", async () => {
     await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
 })
 cron.schedule("0 0 * * *", async () => {
-    mysqldump({
+    /*mysqldump({
         connection: {
             host: '96.43.143.58',
             user: 'samir',
@@ -122,7 +122,7 @@ cron.schedule("0 0 * * *", async () => {
         },
         dumpToFile: './elite.sql',
         //compressFile: true,
-    });
+    });*/
     var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
     SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
