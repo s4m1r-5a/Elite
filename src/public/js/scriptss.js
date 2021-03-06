@@ -5904,15 +5904,13 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/ links / ordendeseparacion / ${window.location.pathname.split('/')[3]} `) {
+if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
     $('footer').hide()
     $('nav').hide()
     var table = $('#datatable').DataTable({
         paging: false,
-        //ordering: false,
         info: false,
         searching: false,
-        //deferRender: true,
         autoWidth: true,
         responsive: false,
         ajax: {
@@ -5942,19 +5940,19 @@ if (window.location.pathname == `/ links / ordendeseparacion / ${window.location
                 render: function (data, method, row) {
                     switch (data) {
                         case 13:
-                            return `< span class="badge badge-pill badge-success" > Pagada</span > `
+                            return `<span class="badge badge-pill badge-success"> Pagada</span>`
                             break;
                         case 3:
-                            return `< span class="badge badge-pill badge-primary" > Pendiente</span > `
+                            return `<span class="badge badge-pill badge-primary"> Pendiente</span>`
                             break;
                         case 6:
-                            return `< span class="badge badge-pill badge-danger" > Anulada</span > `
+                            return `<span class="badge badge-pill badge-danger"> Anulada</span> `
                             break;
                         case 8:
-                            return `< span class="badge badge-pill badge-secondary" > Abono</span > `
+                            return `<span class="badge badge-pill badge-secondary"> Abono</span>`
                             break;
                         case 1:
-                            return `< span class="badge badge-pill badge-warning" > Procesando</span > `
+                            return `<span class="badge badge-pill badge-warning"> Procesando</span>`
                             break;
                     }
                 }
@@ -5975,16 +5973,16 @@ if (window.location.pathname == `/ links / ordendeseparacion / ${window.location
                 render: function (data, method, row) {
                     switch (data) {
                         case 13:
-                            return `< span class="badge badge-pill badge-success" > Pagada</span > `
+                            return `<span class="badge badge-pill badge-success"> Pagada</span>`
                             break;
                         case 3:
-                            return `< span class="badge badge-pill badge-primary" > Pendiente</span > `
+                            return `<span class="badge badge-pill badge-primary"> Pendiente</span> `
                             break;
                         case 5:
-                            return `< span class="badge badge-pill badge-danger" > Vencida</span > `
+                            return `<span class="badge badge-pill badge-danger"> Vencida</span> `
                             break;
                         case 8:
-                            return `< span class="badge badge-pill badge-secondary" > Abono</span > `
+                            return `<span class="badge badge-pill badge-secondary"> Abono</span> `
                             break;
                         default:
                             return ``
@@ -6009,13 +6007,13 @@ if (window.location.pathname == `/ links / ordendeseparacion / ${window.location
             api.column(0, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
                     $(rows).eq(i).before(
-                        `< tr class="group" >
+                        `<tr class="group">
             <td colspan="8">
                 <div class="text-right text-muted">
                     ${group}
                 </div>
             </td>
-                        </tr > `
+                        </tr>`
                     );
                     last = group;
                 }

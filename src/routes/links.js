@@ -1641,7 +1641,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     p = parseFloat(p);
     i = parseFloat(i);
     sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
-    const orden = await pool.query(sql, id);
+    const orden = await pool.query(sql, id); console.log(orden)
     var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
     var u = Math.round((p - i) / 2);
