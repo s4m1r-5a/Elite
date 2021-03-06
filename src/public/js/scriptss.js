@@ -5478,13 +5478,13 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 <option value="3" selected="selected">Pendiente</option>
                 <option value="13">Pagada</option>
                 </select>`,
-                `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
-                    <polyline points="3 6 5 6 21 6"></polyline>
-                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
-                    <line x1="10" y1="11" x2="10" y2="17"></line>
-                    <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg></a>`
+                `${x.tipo !== 'SEPARACION' ? '<a>' : ''}<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+            <polyline points="3 6 5 6 21 6"></polyline>
+            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+            <line x1="10" y1="11" x2="10" y2="17"></line>
+            <line x1="14" y1="11" x2="14" y2="17"></line>
+            </svg>${x.tipo !== 'SEPARACION' ? '</a >' : ''}`
             ]
         });
         $('#inicialcuotas').val(ncal);
@@ -5569,7 +5569,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         crearcartera.row(fila).remove().draw(false);
         var cuotai = $('#inicialcuotas').val() - 1;
         var cuotaf = $('#financiacion').val() - 1;
-        eliminar += `&acion=eliminar&idcuota=${id}`;
+        eliminar += `& acion=eliminar & idcuota=${id}`;
         tipo === 'INICIAL' ? $('#inicialcuotas').val(cuotai) : $('#financiacion').val(cuotaf);
         if ($('#Separar').val()) {
             CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
@@ -5714,17 +5714,17 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             if (montorecibos > 0 && tpo !== undefined) {
                 if (montorecibos >= cuota) {
                     $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    $(i).find(`.std option[value = '13']`).attr("selected", true);
                     montorecibos = montorecibos - cuota;
 
                 } else if (montorecibos < cuota) {
                     $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    $(i).find(`.std option[value = '3']`).attr("selected", true);
                     montorecibos = 0;
                 }
             } else {
                 $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value='3']`).attr("selected", true);
+                $(i).find(`.std option[value = '3']`).attr("selected", true);
             }
         })
         //$(this).val(Moneda(estacuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
@@ -5756,13 +5756,28 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     var CONT = (sepa, typo) => {
         var p = sepa > 0 ? parseFloat(sepa) : 0
         var ini = parseFloat($('#ini').val().replace(/\./g, '')) - p;
-        var fnc = $('#fnc').val().replace(/\./g, '');
-        var cuotai = parseFloat(ini) / $('#inicialcuotas').val();
-        var cuotaf = parseFloat(fnc) / $('#financiacion').val();
+        var fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+        var ic = parseFloat($('#inicialcuotas').val());
+        var fc = parseFloat($('#financiacion').val());
+        var cuotai = parseFloat(ini) / ic;
+        var cuotaf = parseFloat(fnc) / fc;
         var montorecibos = Montos || 0;
         var fecha = $('#crearcartera .tabl tr').find(`.fecha`)[0].value;
         var n = 0, s;
         $('#cuot').val(cuotaf);
+        if (ic === 0 && fc === 0) {
+            $('#Separar').val(Moneda(Math.round(ini + p + fnc)));
+            $('#cuot').val(0);
+            cuotai = 0;
+            cuotaf = 0;
+        } else if (ic === 0 && fc !== 0) {
+            $('#Separar').val(Moneda(Math.round(ini + p)));
+            cuotai = 0;
+        } else if (ic !== 0 && fc === 0) {
+            $('#Separar').val(Moneda(Math.round(p + fnc)));
+            $('#cuot').val(0);
+            cuotaf = 0;
+        }
         $('#crearcartera .tabl tr').each((e, i) => {
             var fe = $(i).find(`.fecha`).val();
             var tpo = $(i).find(`.tipo`).val();
@@ -5779,17 +5794,17 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             if (montorecibos > 0 && tpo !== undefined) {
                 if (montorecibos >= cuota) {
                     $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    $(i).find(`.std option[value = '13']`).attr("selected", true);
                     montorecibos = montorecibos - cuota;
 
                 } else if (montorecibos < cuota) {
                     $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    $(i).find(`.std option[value = '3']`).attr("selected", true);
                     montorecibos = 0;
                 }
             } else {
                 $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value='3']`).attr("selected", true);
+                $(i).find(`.std option[value = '3']`).attr("selected", true);
             } //console.log(fe !== undefined && typo && fe !== fecha, fe , typo, fecha, n)
             if (fe !== undefined && typo && fe !== fecha) {
                 n++;
@@ -5825,44 +5840,44 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         if (!datos.length) {
             datos.push([
                 '',
-                `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
-                `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-                `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
-                `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
-                `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
-                `<select size="1" class="text-center std" name="std" disabled>
+                `< input class= "text-center id" type = "text" name = "id" style = "width: 100%;" value = "0" disabled > `,
+                `< input class= "text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
+                `< input class= "text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
+                `< input class= "text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "SEPARACION" > `,
+                `< input class= "text-center cuota" type = "text" name = "cuota" id = "Separar" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
+                `< input class= "text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
+                `< select size = "1" class= "text-center std" name = "std" disabled >
                 <option value="3" selected="selected">Pendiente</option>
                 <option value="13">Pagada</option>
-                </select>`,
-                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                </select > `,
+                `< svg xmlns = "http://www.w3.org/2000/svg" width = "24" height = "24" viewBox = "0 0 24 24" fill = "none"
+        stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" class="feather feather-trash-2" >
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
                     <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>`
+                </svg > `
             ])
         }
         tipo != 1 ? datos.push([
             '',
-            `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
-            `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
-            `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
-            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
-            `<select size="1" class="text-center std" name="std" disabled>
+            `< input class="text-center id" type = "text" name = "id" style = "width: 100%;" value = "0" disabled > `,
+            `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
+            `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
+            `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "${tipo}" > `,
+            `< input class="text-center cuota" type = "text" name = "cuota" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
+            `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
+            `< select size = "1" class="text-center std" name = "std" disabled >
             <option value="3" selected="selected">Pendiente</option>
             <option value="13">Pagada</option>
-            </select>`,
-            `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+            </select > `,
+            `< a > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg></a>`
+            </svg></a > `
         ]) : '';
         crearcartera.clear().draw(false);
         var dat = [];
@@ -5889,7 +5904,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
+if (window.location.pathname == `/ links / ordendeseparacion / ${window.location.pathname.split('/')[3]} `) {
     $('footer').hide()
     $('nav').hide()
     var table = $('#datatable').DataTable({
@@ -5927,19 +5942,19 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 render: function (data, method, row) {
                     switch (data) {
                         case 13:
-                            return `<span class="badge badge-pill badge-success">Pagada</span>`
+                            return `< span class="badge badge-pill badge-success" > Pagada</span > `
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
+                            return `< span class="badge badge-pill badge-primary" > Pendiente</span > `
                             break;
                         case 6:
-                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            return `< span class="badge badge-pill badge-danger" > Anulada</span > `
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
+                            return `< span class="badge badge-pill badge-secondary" > Abono</span > `
                             break;
                         case 1:
-                            return `<span class="badge badge-pill badge-warning">Procesando</span>`
+                            return `< span class="badge badge-pill badge-warning" > Procesando</span > `
                             break;
                     }
                 }
@@ -5960,16 +5975,16 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 render: function (data, method, row) {
                     switch (data) {
                         case 13:
-                            return `<span class="badge badge-pill badge-success">Pagada</span>`
+                            return `< span class="badge badge-pill badge-success" > Pagada</span > `
                             break;
                         case 3:
-                            return `<span class="badge badge-pill badge-primary">Pendiente</span>`
+                            return `< span class="badge badge-pill badge-primary" > Pendiente</span > `
                             break;
                         case 5:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            return `< span class="badge badge-pill badge-danger" > Vencida</span > `
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-secondary">Abono</span>`
+                            return `< span class="badge badge-pill badge-secondary" > Abono</span > `
                             break;
                         default:
                             return ``
@@ -5994,13 +6009,13 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
             api.column(0, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
                     $(rows).eq(i).before(
-                        `<tr class="group">
-                            <td colspan="8">
-                                <div class="text-right text-muted">
-                                    ${group}
-                                </div>
-                            </td>
-                        </tr>`
+                        `< tr class="group" >
+            <td colspan="8">
+                <div class="text-right text-muted">
+                    ${group}
+                </div>
+            </td>
+                        </tr > `
                     );
                     last = group;
                 }
@@ -6043,7 +6058,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('nav').show()
 }
 //////////////////////////////////* CARTERA */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/cartera`) {
+if (window.location.pathname == `/ links / cartera`) {
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
@@ -6094,7 +6109,7 @@ if (window.location.pathname == `/links/cartera`) {
                         $('#vmtr2').val(Moneda(Math.round(data.mtr)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         $('#inicial').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         $('#total').val(Moneda(Math.round(data.valor)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        $(`#xcntag option[value='${porg}']`).attr("selected", true);
+                        $(`#xcntag option[value = '${porg}']`).attr("selected", true);
                         $('#ini').val(Moneda(Math.round(data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         $('#fnc').val(Moneda(Math.round(data.valor - data.inicial)))//.mask('#.##$', { reverse: true, selectOnFocus: true });
                         if ($('#Separar').val()) {
@@ -6271,16 +6286,16 @@ if (window.location.pathname == `/links/cartera`) {
                 proyectos.append(parent)
                 proyecto = x.proyect;
             }
-            option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, false, false);
+            option = new Option(`${x.proyect} MZ ${x.mz} LT ${x.n} `, x.id, false, false);
             parent.append(option)
         });
         asesores.append(new Option(`Selecciona un Asesor`, 0, true, true))
         data.asesores.map((x, v) => {
-            asesores.append(new Option(`${x.fullname}  CC ${x.document}`, x.id, false, false))
+            asesores.append(new Option(`${x.fullname} CC ${x.document} `, x.id, false, false))
         });
         //clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
         data.clientes.map((x, v) => {
-            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
+            clientes.append(new Option(`${x.nombre} CC ${x.documento} `, x.idc, false, false))
         });
     });
     var cartera = $('#cartera').DataTable({
@@ -6292,8 +6307,8 @@ if (window.location.pathname == `/links/cartera`) {
                 orientation: 'landscape'
             },
             {
-                text: `<input id="min" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-            placeholder="MZ">`,
+                text: `< input id = "min" type = "text" class="edi text-center" style = "width: 30px; padding: 1px;"
+        placeholder = "MZ" > `,
                 attr: {
                     title: 'Busqueda por MZ',
                     id: ''
@@ -6301,8 +6316,8 @@ if (window.location.pathname == `/links/cartera`) {
                 className: 'btn btn-secondary'
             },
             {
-                text: `<input id="max" type="text" class="edi text-center" style="width: 30px; padding: 1px;"
-            placeholder="LT">`,
+                text: `< input id = "max" type = "text" class="edi text-center" style = "width: 30px; padding: 1px;"
+        placeholder = "LT" > `,
                 attr: {
                     title: 'Busqueda por LT',
                     id: ''
@@ -6310,9 +6325,9 @@ if (window.location.pathname == `/links/cartera`) {
                 className: 'btn btn-secondary'
             },
             {
-                text: `<div class="mb-0">
+                text: `< div class="mb-0" >
                             <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
-                        </div>`,
+                        </div > `,
                 attr: {
                     title: 'Fecha',
                     id: 'facturar'
@@ -6390,25 +6405,25 @@ if (window.location.pathname == `/links/cartera`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
+                            return `< span class="badge badge-pill badge-warning" > Pendiente</span > `
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
+                            return `< span class="badge badge-pill badge-info" > Tramitando</span > `
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            return `< span class="badge badge-pill badge-danger" > Anulada</span > `
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-success">Separado</span>`
+                            return `< span class="badge badge-pill badge-success" > Separado</span > `
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
+                            return `< span class="badge badge-pill badge-dark" > Apartado</span > `
                             break;
                         case 13:
-                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
+                            return `< span class="badge badge-pill badge-primary" > Vendido</span > `
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
+                            return `< span class="badge badge-pill badge-tertiary" > Inactivo</span > ` //secondary
                             break;
                     }
                 }
@@ -6436,7 +6451,7 @@ if (window.location.pathname == `/links/cartera`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return admin == 1 ? `< div class="btn-group btn-group-sm" >
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
@@ -6447,8 +6462,8 @@ if (window.location.pathname == `/links/cartera`) {
                                                     <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
                                                     <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
                                                 </div>
-                                        </div>`
-                        : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
+                                        </div > `
+                        : `< a href = "/links/ordendeseparacion/${data}" target = "_blank" > <i class="fas fa-print"></i></a > `
                 }
             }, //std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
             {
@@ -6457,10 +6472,10 @@ if (window.location.pathname == `/links/cartera`) {
                 render: function (data, method, row) {
                     switch (data) {
                         case 3:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
+                            return `< span class="badge badge-pill badge-danger" > Vencida</span > `
                             break;
                         case 5:
-                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
+                            return `< span class="badge badge-pill badge-danger" > VencidaR</span > `
                             break;
                     }
                 }
@@ -6643,17 +6658,17 @@ if (window.location.pathname == `/links/cartera`) {
             if (montorecibos > 0 && tpo !== undefined) {
                 if (montorecibos >= cuota) {
                     $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    $(i).find(`.std option[value = '13']`).attr("selected", true);
                     montorecibos = montorecibos - cuota;
 
                 } else if (montorecibos < cuota) {
                     $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    $(i).find(`.std option[value = '3']`).attr("selected", true);
                     montorecibos = 0;
                 }
             } else {
                 $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value='3']`).attr("selected", true);
+                $(i).find(`.std option[value = '3']`).attr("selected", true);
             }
         })
         //$(this).val(Moneda(estacuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
@@ -6705,17 +6720,17 @@ if (window.location.pathname == `/links/cartera`) {
             if (montorecibos > 0 && tpo !== undefined) {
                 if (montorecibos >= cuota) {
                     $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value='13']`).attr("selected", true);
+                    $(i).find(`.std option[value = '13']`).attr("selected", true);
                     montorecibos = montorecibos - cuota;
 
                 } else if (montorecibos < cuota) {
                     $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value='3']`).attr("selected", true);
+                    $(i).find(`.std option[value = '3']`).attr("selected", true);
                     montorecibos = 0;
                 }
             } else {
                 $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value='3']`).attr("selected", true);
+                $(i).find(`.std option[value = '3']`).attr("selected", true);
             }
         })
         realcuotai = Math.round(cuotai);
@@ -6746,42 +6761,42 @@ if (window.location.pathname == `/links/cartera`) {
         if (!datos.length) {
             datos.push([
                 '',
-                `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-                `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
-                `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
-                `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
-                `<select size="1" class="text-center std" name="std" disabled>
+                `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
+                `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
+                `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "SEPARACION" > `,
+                `< input class="text-center cuota" type = "text" name = "cuota" id = "Separar" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
+                `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
+                `< select size = "1" class="text-center std" name = "std" disabled >
                 <option value="3" selected="selected">Pendiente</option>
                 <option value="13">Pagada</option>
-                </select>`,
-                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+                </select > `,
+                `< svg xmlns = "http://www.w3.org/2000/svg" width = "24" height = "24" viewBox = "0 0 24 24" fill = "none"
+        stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" class="feather feather-trash-2" >
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
                     <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg>`
+                </svg > `
             ])
         }
         datos.push([
             '',
-            `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
-            `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
-            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
-            `<select size="1" class="text-center std" name="std" disabled>
+            `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
+            `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
+            `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "${tipo}" > `,
+            `< input class="text-center cuota" type = "text" name = "cuota" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
+            `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
+            `< select size = "1" class="text-center std" name = "std" disabled >
             <option value="3" selected="selected">Pendiente</option>
             <option value="13">Pagada</option>
-            </select>`,
-            `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
+            </select > `,
+            `< a > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg></a>`
+            </svg></a > `
         ])
         crearcartera.clear().draw(false);
         var dat = []
@@ -6815,9 +6830,9 @@ if (window.location.pathname == `/links/cartera`) {
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        `<div class="image container" style="width: ${marg}%; min-width: 25%; padding-top: 
-                        calc(100% / (16/9)); background-image: url('${e.target.result}'); background-size: 100%; 
-                        background-position: center; background-repeat: no-repeat;float: left;"></div>`
+                        `< div class="image container" style = "width: ${marg}%; min-width: 25%; padding-top: 
+        calc(100 % / (16/9)); background - image: url('${e.target.result}'); background - size: 100 %;
+    background - position: center; background - repeat: no - repeat; float: left; "></div>`
                     );
                     /*<div class="card">
                         <table class="table table-sm"><tbody><tr><th><div class="text-center"><input type="text" 
