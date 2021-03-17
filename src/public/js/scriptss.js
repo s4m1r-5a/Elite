@@ -426,13 +426,11 @@ admin ? chat.scrollTop = chat.scrollHeight - chat.clientHeight : '';
 /////////////////////////////////////////////////////////////////////////////
 $(document).ready(function () {
     moment.locale('es-mx');
-    if (window.location.hostname !== "grupoelitered.com.co") {
-        $.ajax({
-            url: '/links/desarrollo',
-            data: { actividad: true, sitio: window.location.hostname },
-            type: 'POST'
-        })
-    }
+    $.ajax({
+        url: '/links/desarrollo',
+        data: { actividad: true },
+        type: 'POST'
+    })
     if ($('#nivel').html() == 'Inversionista') {
         $('#nivel').addClass('badge-warning')
     } else if ($('#nivel').html() == 'Director') {
@@ -4042,14 +4040,16 @@ if (window.location.pathname == `/links/reportes`) {
                 </svg>`,
                 attr: {
                     title: 'Inspeccion de linea desendente',
-                    id: ''
+                    id: 'Desendente'
                 },
                 className: 'btn btn-secondary',
                 action: function () {
                     $.ajax({
                         type: 'POST',
                         url: '/links/desendentes',
+                        async: false,
                         beforeSend: function (xhr) {
+                            $('#Desendente').prop('disabled', true);
                             $('#ModalEventos').modal({
                                 backdrop: 'static',
                                 keyboard: true,

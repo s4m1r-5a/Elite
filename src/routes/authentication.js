@@ -118,7 +118,7 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
   let linea = '', lDesc = '';
-  var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id;
+  var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id; console.log(req.user.id)
   //var d = 'AND p.asesor =  ' + req.user.id;
   let indircet1;
   let indircet2;

@@ -18,19 +18,31 @@ const nodemailer = require('nodemailer');
 const { isNull } = require('util');
 const { Console } = require('console');
 const { send } = require('process');
+const path = require('path');
 const mysqldump = require('mysqldump')
 const transpoter = nodemailer.createTransport({
-    host: 'smtp.hostinger.co',
-    port: 587,
-    secure: false,
+    host: 'smtpout.secureserver.net',
+    port: 465,
+    secure: true,
     auth: {
-        user: 'suport@tqtravel.co',
-        pass: '123456789'
+        user: 'info@grupoelitefincaraiz.com',
+        pass: 'C0l0mb1@@'
     },
     tls: {
         rejectUnauthorized: false
     }
 })
+const SCOPES = [
+    'https://www.googleapis.com/auth/contacts',
+    'https://www.googleapis.com/auth/drive',
+    'https://www.googleapis.com/auth/drive.file',
+    'https://www.googleapis.com/auth/drive.readonly',
+    'https://www.googleapis.com/auth/drive.metadata.readonly',
+    'https://www.googleapis.com/auth/drive.appdata',
+    'https://www.googleapis.com/auth/drive.metadata',
+    'https://www.googleapis.com/auth/drive.photos.readonly'
+];
+const TOKEN_PATH = ['token-drive.json', 'token-people.json'];
 moment.locale('es');
 var desarrollo = false;
 var url = 'https://bin.chat-api.com/1bd03zz1'
@@ -40,6 +52,18 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
     if(!error) {
         console.log(body);
     }
+
+    horizontal bar
+
+GRUPO ELITE FINCA RAÍZ
+GRUPO ELITE FINCA RAÍZ S.A.S, GERENCIA
+GRUPO ELITE FINCA RAÍZ S.A.S
+300-775-3983
+Mz L lote 17
+Turbaco, Bolivar / Colombia
+https://grupoelitefincaraiz.com
+
+
 });*/
 /*request(url, function (error, response, body) {
     if (error) return console.error('Failed: %s', error.message);
@@ -66,7 +90,7 @@ URL;type=WORK;CHARSET=UTF-8:admin@retfly.co
 END:VCARD*/
 
 router.post('/desarrollo', async (req, res) => {
-    desarrollo = req.body.actividad;
+    desarrollo = req.headers.origin;
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
@@ -98,6 +122,176 @@ router.post('/desarrollo', async (req, res) => {
     ID = ID.slice(0, -2);
     sql += ' END WHERE id IN(' + ID + ')';
     await pool.query(sql);*/
+
+
+
+    /*
+        await transpoter.sendMail({
+            from: "'GrupoElite' <info@grupoelitefincaraiz.com>",
+            to: 'redflix.red@hotmail.com',
+            subject: 'confirmacion de registro',
+            html: `<h1>GRUPO ELITE FINCA RAÍZ</h1>
+                   <img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" width="90" height="110" class="mr-1" alt="A"><br>
+                   <ul>
+                        <li>GERENCIA</li>
+                        <li>300-775-3983</li>
+                        <li>Mz L lote 17 Urb. la granja</li>
+                        <li>Turbaco, Bolivar / Colombia</li>
+                        <li><a href="https://grupoelitefincaraiz.com">https://grupoelitefincaraiz.com</a></li>
+                   </ul>`,
+            attachments: [
+                {   // file on disk as an attachment
+                    filename: 'PRUEBA2.pdf',
+                    path: path.join(__dirname, '../public/uploads/01jzpv2u26-0pta9541ljz0-mc-984gb82.pdf') // stream this file
+                },
+                {   // use URL as an attachment
+                    filename: 'PRUEBA.pdf',
+                    path: 'https://grupoelitefincaraiz.com/uploads/h0i0vq907gp9-s1e7-a9p13394tv11wl10.pdf'
+                }
+            ]
+        });*/
+
+
+    // If modifying these scopes, delete token.json.
+    fs.readFile('credentials.json', (err, content) => {
+        if (err) return console.log('Error loading client secret file:', err);
+        // Authorize a client with credentials, then call the Google Drive API.
+        authorize(JSON.parse(content), listFiles);
+    });
+    function authorize(credentials, callback) {
+        const { client_secret, client_id, redirect_uris } = credentials.installed;
+        const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirect_uris[0]);
+
+        // Check if we have previously stored a token.
+        fs.readFile(TOKEN_PATH[0], (err, token) => {
+            if (err) return getAccessToken(oAuth2Client, callback);
+            oAuth2Client.setCredentials(JSON.parse(token));
+            callback(oAuth2Client);
+        });
+    }
+    function getAccessToken(oAuth2Client, callback) {
+        const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+        });
+        console.log('Authorize this app by visiting this url:', authUrl);
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Enter the code from that page here: ', (code) => {
+            rl.close();
+            oAuth2Client.getToken(code, (err, token) => {
+                if (err) return console.error('Error retrieving access token', err);
+                oAuth2Client.setCredentials(token);
+                // Store the token to disk for later program executions
+                fs.writeFile(TOKEN_PATH[0], JSON.stringify(token), (err) => {
+                    if (err) return console.error(err);
+                    console.log('Token stored to', TOKEN_PATH[0]);
+                });
+                callback(oAuth2Client);
+            });
+        });
+    }
+    function listFiles(auth) {
+        const drive = google.drive({ version: 'v3', auth });
+        drive.files.list({
+            pageSize: 10,
+            fields: 'nextPageToken, files(id, name)',
+        }, (err, res) => {
+            if (err) return console.log('The API returned an error: ' + err);
+            const files = res.data.files;
+            if (files.length) {
+                console.log('Files:');
+                files.map((file) => {
+                    console.log(`${file.name} (${file.id})`);
+                });
+            } else {
+                console.log('No files found.');
+            }
+        });
+    }
+    /*function listFiles(auth) {
+        var fileMetadata = {
+            'name': 'photo.jpg'
+        };
+        var media = {
+            mimeType: 'image/jpg',
+            body: fs.createReadStream('src/public/img/avatars/avatar6.jpg')
+        };
+        const drive = google.drive({ version: 'v3', auth });
+        drive.files.create({
+            resource: fileMetadata,
+            media: media,
+            fields: 'id'
+        }, (err, res) => {
+            if (err) return console.log('The API returned an error: ' + err);
+            console.log('Files: ' + file.id);
+        });
+    }*/
+
+
+
+
+
+    console.log(req.headers.origin)
+    const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
+    MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
+    FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id WHERE s.stado != 6 AND s.concepto 
+    IN('COMISION DIRECTA', 'COMISION INDIRECTA') GROUP BY l.id, s.descp, l.mz, l.n HAVING dc > 1 ORDER BY dc DESC`);
+    console.log(busq.length)
+    await busq.map(async (x) => {
+        let id = x.ul ? x.ul : x.menor;
+        console.log(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`, x.ul, x.menor)
+        //await pool.query(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`)
+    })
+
+    //////////VENTAS DE ASESORES LOS ULLTIMOS 6 MESES /////////////////
+
+    /* `SELECT u.fullname, pn.fechactivacion, COUNT(p.id) total, COUNT(IF(TIMESTAMP(p.fecha) >= date_sub(curdate(), INTERVAL 3 month), 1, NULL)) Ult_3meses, 
+ COUNT(IF(TIMESTAMP(p.fecha) >= date_sub(curdate(), INTERVAL 6 month), 1, NULL)) Ult_6meses
+ FROM users u INNER JOIN pines pn ON pn.id = u.pin LEFT JOIN preventa p ON u.id = p.asesor
+ WHERE p.tipobsevacion IS NULL 
+ GROUP BY u.fullname, pn.fechactivacion HAVING Ult_6meses < 1 ORDER BY total DESC`*/
+
+    ///////////////////// PAGOS ANULADOS CONCEPTO: PAGO ///////////////////////////////////////////
+
+    /*SELECT s.ids, s.fech, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, c.tipo, c.estado, c.cuota, l.mz, l.n FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN cuotas c ON s.pago = c.id INNER JOIN preventa p ON c.separacion = p.id    
+     WHERE s.concepto IN('PAGO') AND p.tipobsevacion = 'ANULADA';
+       
+     UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN cuotas c ON s.pago = c.id INNER JOIN preventa p ON c.separacion = p.id  
+     SET s.orden = p.id, s.stado = 6, c.estado = 6
+     WHERE s.concepto IN('PAGO') AND p.tipobsevacion = 'ANULADA';
+     
+     SELECT s.ids, s.fech, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, c.tipo, c.estado, c.cuota, l.mz, l.n FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN cuotas c ON s.pago = c.id INNER JOIN preventa p ON c.separacion = p.id    
+     WHERE s.concepto IN('PAGO') AND p.tipobsevacion = 'ANULADA';*/
+
+    ///////////////////// PAGOS ANULADOS CONCEPTO: ABONO ///////////////////////////////////////////
+
+    /* SELECT s.ids, s.fech, s.concepto, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, l.mz, l.n,
+     s.observaciones FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote   
+     WHERE s.concepto IN('ABONO') AND p.tipobsevacion IS NULL AND TIMESTAMP(s.fech) < p.fecha ;     
+         
+     
+     UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote SET s.stado = 6, 
+     s.observaciones = IF(s.orden IS NULL, 1, NULL) WHERE s.concepto IN('ABONO') AND p.tipobsevacion IS NULL AND TIMESTAMP(s.fech) < p.fecha;     
+         
+     
+     UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote SET s.observaciones = NULL,
+     s.orden = p.id WHERE s.concepto IN('ABONO') AND p.tipobsevacion = 'ANULADA' AND s.observaciones = 1 AND s.orden IS NULL;
+     
+     SELECT s.ids, s.fech, s.concepto, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, l.mz, l.n,
+     s.observaciones FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote   
+     WHERE s.concepto IN('ABONO') AND p.tipobsevacion IS NULL AND TIMESTAMP(s.fech) < p.fecha ;
+
+     UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote SET s.orden = p.id 
+     WHERE s.concepto IN('ABONO', 'PAGO') AND p.tipobsevacion IS NULL AND s.orden IS NULL AND s.stado != 6;
+     
+     SELECT s.ids, s.fech, s.concepto, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, l.mz, l.n,
+     s.observaciones FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote   
+     WHERE s.concepto IN('ABONO', 'PAGO') ;*/
+
     res.send(true);
 
 });
@@ -331,10 +525,6 @@ router.get('/prueba', async (req, res) => {
     });*/
 
     res.send(true);
-})
-router.post('/desendentes', async (req, res) => {
-    var y = await Desendentes(req.user.id, 10)
-    res.send(y);
 })
 router.get('/proyecciones', async (req, res) => {
 
@@ -655,8 +845,6 @@ router.post('/clientes', async (req, res) => {
     res.send(respuesta);
 });
 router.put('/clientes/:id', async (req, res) => {
-    const SCOPES = ['https://www.googleapis.com/auth/contacts'];
-    const TOKEN_PATH = 'token.json';
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors, id
@@ -714,12 +902,12 @@ router.put('/clientes/:id', async (req, res) => {
     }
 
     function authorize(credentials, callback) {
-        const { client_secret, client_id, redirect_uris } = Contactos;
+        const { client_secret, client_id, redirect_uris } = credentials.installed;
         const oAuth2Client = new google.auth.OAuth2(
-            client_id, client_secret, redirect_uris);
+            client_id, client_secret, redirect_uris[0]);
 
-        // Comprueba si previamente hemos almacenado un token.
-        fs.readFile(TOKEN_PATH, (err, token) => {
+        // Check if we have previously stored a token.
+        fs.readFile(TOKEN_PATH[1], (err, token) => {
             if (err) return getNewToken(oAuth2Client, callback);
             oAuth2Client.setCredentials(JSON.parse(token));
             callback(oAuth2Client);
@@ -728,22 +916,22 @@ router.put('/clientes/:id', async (req, res) => {
     function getNewToken(oAuth2Client, callback) {
         const authUrl = oAuth2Client.generateAuthUrl({
             access_type: 'offline',
-            scope: SCOPES,
+            scope: SCOPES[0],
         });
-        console.log('Autorice esta aplicación visitando esta url: ', authUrl);
+        console.log('Authorize this app by visiting this url:', authUrl);
         const rl = readline.createInterface({
             input: process.stdin,
             output: process.stdout,
         });
-        rl.question('Ingrese el código de esa página aquí: ', (code) => {
+        rl.question('Enter the code from that page here: ', (code) => {
             rl.close();
             oAuth2Client.getToken(code, (err, token) => {
                 if (err) return console.error('Error retrieving access token', err);
                 oAuth2Client.setCredentials(token);
-                // Almacenar el token en el disco para posteriores ejecuciones del programa
-                fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
+                // Store the token to disk for later program executions
+                fs.writeFile(TOKEN_PATH[1], JSON.stringify(token), (err) => {
                     if (err) return console.error(err);
-                    console.log('Token almacenado en', TOKEN_PATH);
+                    console.log('Token stored to', TOKEN_PATH[1]);
                 });
                 callback(oAuth2Client);
             });
@@ -1641,7 +1829,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     p = parseFloat(p);
     i = parseFloat(i);
     sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
-    const orden = await pool.query(sql, id); console.log(orden)
+    const orden = await pool.query(sql, id); //console.log(orden)
     var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
     var u = Math.round((p - i) / 2);
@@ -2131,6 +2319,10 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     }
 })
+router.post('/desendentes', async (req, res) => {
+    var y = await Desendentes(req.user.id, 10)
+    res.send(y);
+})
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
@@ -2165,9 +2357,9 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote,
         s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
-        INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
-        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
+        LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
+        INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users u ON pr.asesor = u.id 
+        LEFT JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
         LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
         respuesta = { "data": so };
         res.send(respuesta);
@@ -2331,7 +2523,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         if (!req.files[0]) {
             pdf = pdef;
         } else {
-            pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+            pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
             await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
         }
         //console.log(pdf)
@@ -2357,12 +2549,12 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
 
     } else {
-        const { ids, acumulado, extr } = req.body
+        const { ids, acumulado, extr } = req.body;
         let valu = [];
         extr.split(',').map((x) => {
             valu.push([x, ids])
         })
-        const pdf = 'https://grupoelitered.com.co/uploads/' + req.files[0].filename;
+        const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
         const R = await PagosAbonos(ids, pdf, req.user.fullname);
         if (R) {
             //await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
@@ -2584,7 +2776,7 @@ async function Estados(S) {
          INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN cupones cp ON s.bono = cp.id 
          WHERE s.stado = 3 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
-    var pendients = Pendientes.length;
+    var pendients = Pendientes.length || 0;
     if (Pagos[0].BONOS || Pagos[0].MONTO) {
         var pagos = Pagos[0].BONOS + Pagos[0].MONTO,
             cuotas = Cuotas[0];
@@ -2748,25 +2940,27 @@ async function ProyeccionPagos(S) {
     SUM(s.monto) AS MONTO, pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
     LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') AND pr.id = ?`, S);
 
-    const W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
+    let W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
     c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
     INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
     ORDER BY TIMESTAMP(c.fechs) ASC`, S); // p.proyect DESC
-
+    let op = false;
     const x = W[0];
     const Pg = Pagos[0];
-    const pagos = Pg.BONOS + Pg.MONTO; //console.log(pagos)
+    const pagos = Pg.BONOS + Pg.MONTO;
     const Cartera = x.obsevacion;
     const Proyeccion = x.proyeccion;
     const separa = x.separar;
     const total = Math.round((x.vrmt2 * x.mtr2) - x.ahorro);
     const inicial = Math.round((total * x.iniciar / 100) - x.separar);
     const financiacion = Math.round(total - (inicial + x.separar));
-
+    console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion)
     if (Proyeccion > 0) {
+        op = true;
         await pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = proyeccion WHERE separacion = ?`, S);
+
     } else if (Cartera !== 'CARTERA') {
         const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran);
         const cuotaordi = x.cuotaextraordinaria;
@@ -2836,6 +3030,15 @@ async function ProyeccionPagos(S) {
         }
     }
 
+    if (!op) {
+        W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
+        p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
+        p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
+        c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
+        INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
+        ORDER BY TIMESTAMP(c.fechs) ASC`, S);
+    }
+
     if (pagos > 0) {
         var sql = 'UPDATE cuotas SET estado = CASE id';
         var ID = '';
@@ -2843,12 +3046,12 @@ async function ProyeccionPagos(S) {
         var cuotaa = '';
 
         W.map((c) => {
-            if (montocuotas >= c.cuota) {
+            if (montocuotas >= c.proyeccion) {
                 ID += c.id.toString() + ', ';
                 sql += ' WHEN ' + c.id + ' THEN ' + 13;
-                montocuotas = montocuotas - c.cuota;
+                montocuotas = montocuotas - c.proyeccion;
             } else if (montocuotas > 0) {
-                montocuotas = c.cuota - montocuotas;
+                montocuotas = c.proyeccion - montocuotas;
                 ID += c.id.toString() + ', ';
                 sql += ' WHEN ' + c.id + ' THEN ' + 3;
                 cuotaa = ', cuota = CASE id WHEN ' + c.id + ' THEN ' + montocuotas + ' ELSE cuota END';
@@ -2898,7 +3101,6 @@ async function PagosAbonos(Tid, pdf, user) {
 
     const S = SS[0];
     const T = S.cparacion;
-    var estados = 0, resp = true;
     const fech = moment(S.fechs).format('YYYY-MM-DD');
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? S.monto + S.mount : S.monto;
@@ -2967,10 +3169,10 @@ async function PagosAbonos(Tid, pdf, user) {
                 asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
             }
             await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
-        } else if (S.tipo === 'SEPARACION' && monto < cuota) {
+        } /*else if (S.tipo === 'SEPARACION' && monto < cuota) {
             Eli(pdf);
             return false;
-        }
+        }*/
         if (monto >= cuota || S.std === 13) {
             var montocuotas = monto - cuota;
             await pool.query(`UPDATE solicitudes s  
@@ -3229,23 +3431,10 @@ async function Desendentes(pin, stados) {
                     sqlDIRECTA += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                     IDS += a.lote.toString() + ', ';
                     direct = true;
-                    /*var f = {
-                        fech: hoy, monto, concepto: 'COMISION DIRECTA', stado: std, descp: 'VENTA DIRECTA',
-                        asesor: j.acreedor, porciento: a.comision, total: val, lt: a.lote, retefuente,
-                        reteica, pagar: monto - (retefuente + reteica)
-                    }
-                    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ directa: j.acreedor }, a.lote]);
-                    await pool.query(`INSERT INTO solicitudes SET ?`, f);*/
                     if (a.bonoextra > 0.0000) {
                         monto = val * a.bonoextra;
                         retefuente = monto * 0.10;
                         reteica = monto * 8 / 1000;
-                        /*var g = {
-                            fech: hoy, monto, concepto: 'BONO EXTRA', stado: std, descp: 'VENTA DIRECTA',
-                            asesor: j.acreedor, porciento: a.bonoextra, total: val, lt: a.lote, retefuente,
-                            reteica, pagar: monto - (retefuente + reteica)
-                        }*/
-                        //await pool.query(`INSERT INTO solicitudes SET ?`, g);
                         sqlINSERT += `('${hoy}', ${monto}, 'BONO EXTRA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${a.bonoextra}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
                     }
                 }
@@ -3290,13 +3479,6 @@ async function Desendentes(pin, stados) {
                         IDS += a.lote.toString() + ', ';
                         sqlUNO += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                         one = true;
-                        /*var f = {
-                            fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'PRIMERA LINEA',
-                            asesor: j.acreedor, porciento: a.linea1, total: val, lt: a.lote, retefuente,
-                            reteica, pagar: monto - (retefuente + reteica)
-                        }
-                        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
-                        await pool.query(`INSERT INTO solicitudes SET ?`, f);*/
                     }
                     if (a.mes === mes) {
                         cort += val;
@@ -3404,8 +3586,9 @@ async function Desendentes(pin, stados) {
         if (direct || one || two || three) {
             IDS = IDS.slice(0, -2);
             sqlUPDATE += `${direct ? sqlDIRECTA : ''}${one ? sqlUNO : ''}${two ? sqlDOS : ''}${three ? sqlTRES : ''} WHERE id IN(${IDS})`;
-            await pool.query(sqlUPDATE.replace(/,/, ''));
+            //console.log(sqlUPDATE.replace(/,/, ''))
             await pool.query(sqlINSERT.slice(0, -1));
+            await pool.query(sqlUPDATE.replace(/,/, ''));
 
             var rangoniveles = await [Math.max(...repor1), Math.max(...repor2), Math.max(...repor3)];
             var v = {
@@ -3469,17 +3652,23 @@ function Moneda(valor) {
 }
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     var cel = 0;
-    movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
+    if (desarrollo === 'http://localhost:5000') {
+        cel = '57 3007753983';
+    } else {
+        movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
+    }
+
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
         form: {
-            //phone: desarrollo ? '57 3012673944' : cel,
             body
         }
     };
+
     q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = cel; //'573012673944' //cel; //
+    chatid ? options.form.chatId = chatid : options.form.phone = cel;
+
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
@@ -3487,8 +3676,12 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
-    //console.log(movil, body, filename, caption)
-    var cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil;
+    var cel = 0;
+    if (desarrollo === 'http://localhost:5000') {
+        cel = '57 3007753983';
+    } else {
+        movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
+    }
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
@@ -3502,71 +3695,6 @@ function EnvWTSAP_FILE(movil, body, filename, caption) {
     request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
-    });
-}
-/*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
-const TOKEN_PATH = 'token.json';
-fs.readFile('credentials.json', (err, content) => {
-    if (err) return console.log('Error loading client secret file:', err);
-    authorize(JSON.parse(content), listConnectionNames);
-});*/
-function authorize(credentials, callback) {
-    const { client_secret, client_id, redirect_uris } = Contactos;
-    const oAuth2Client = new google.auth.OAuth2(
-        client_id, client_secret, redirect_uris);
-
-    // Comprueba si previamente hemos almacenado un token.
-    fs.readFile(TOKEN_PATH, (err, token) => {
-        if (err) return getNewToken(oAuth2Client, callback);
-        oAuth2Client.setCredentials(JSON.parse(token));
-        callback(oAuth2Client);
-    });
-}
-function getNewToken(oAuth2Client, callback) {
-    const authUrl = oAuth2Client.generateAuthUrl({
-        access_type: 'offline',
-        scope: SCOPES,
-    });
-    console.log('Autorice esta aplicación visitando esta url: ', authUrl);
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout,
-    });
-    rl.question('Ingrese el código de esa página aquí: ', (code) => {
-        rl.close();
-        oAuth2Client.getToken(code, (err, token) => {
-            if (err) return console.error('Error retrieving access token', err);
-            oAuth2Client.setCredentials(token);
-            // Almacenar el token en el disco para posteriores ejecuciones del programa
-            fs.writeFile(TOKEN_PATH, JSON.stringify(token), (err) => {
-                if (err) return console.error(err);
-                console.log('Token almacenado en', TOKEN_PATH);
-            });
-            callback(oAuth2Client);
-        });
-    });
-}
-function listConnectionNames(auth) {
-    const service = google.people({ version: 'v1', auth });
-    service.people.connections.list({
-        resourceName: 'people/me',
-        pageSize: 100,
-        personFields: 'biographies,birthdays,coverPhotos,emailAddresses,events,genders,imClients,interests,locales,memberships,metadata,names,nicknames,occupations,organizations,phoneNumbers,photos,relations,residences,sipAddresses,skills,urls,userDefined'
-    }, (err, res) => {
-        if (err) return console.error('The API returned an error: ' + err);
-        const connections = res.data.connections;
-        if (connections) {
-            console.log('Connections:');
-            connections.forEach((person) => {
-                if (person.names && person.names.length > 0) {
-                    console.log(person.names);
-                } else {
-                    console.log('No display name found for connection.');
-                }
-            });
-        } else {
-            console.log('No connections found.');
-        }
     });
 }
 module.exports = router;
