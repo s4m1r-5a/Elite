@@ -194,7 +194,7 @@ router.post('/desarrollo', async (req, res) => {
             });
         });
     }
-    function listFiles(auth) {
+    /*function listFiles(auth) {
         const drive = google.drive({ version: 'v3', auth });
         drive.files.list({
             pageSize: 10,
@@ -211,7 +211,7 @@ router.post('/desarrollo', async (req, res) => {
                 console.log('No files found.');
             }
         });
-    }
+    }*/
     /*function listFiles(auth) {
         var fileMetadata = {
             'name': 'photo.jpg'
@@ -234,8 +234,53 @@ router.post('/desarrollo', async (req, res) => {
 
 
 
+    async function listFiles(auth) {
+        const drive = google.drive({ version: 'v3', auth });
+        /*var fileMetadata = {
+            'name': `MZ-20 LT-19 544-8452`,
+            "folderColorRgb": 'red',
+            "description": 'ORDEN ANULADA - ERROR - por que el cliente quiere que se le realice una modificación en el numero de cuotas a pagar (refinanciación) - CARPETA: eefew87sWESFSsdfDfggdd - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
+            'mimeType': 'application/vnd.google-apps.folder',
+            parents: ['16zVtMcWY63AdiO63ZTsMW4w1r95UnOP4']
+        };
+        await drive.files.create({
+            resource: fileMetadata,
+            fields: 'id'
+        }, function (err, file) {
+            if (err) {
+                // Handle error
+                console.error(err);
+            } else {
+                console.log('Folder Id: ', file.data.id);
+            }
+        })*/
+        await drive.files.list({
+            pageSize: 10,
+            fields: 'nextPageToken, files(id, name)',
+        }, (err, res) => {
+            if (err) return console.log('The API returned an error: ' + err);
+            const files = res.data.files;
+            if (files.length) {
+                console.log('Files:');
+                files.map((file) => {
+                    console.log(`${file.name} (${file.id})`);
+                });
+            } else {
+                console.log('No files found.');
+            }
+        });
+    }
 
-    console.log(req.headers.origin)
+
+
+
+
+
+
+
+    var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
+    console.log(req.headers.origin, path.join(__dirname, '../' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)))
+
     const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
     MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
     FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id WHERE s.stado != 6 AND s.concepto 
@@ -292,9 +337,169 @@ router.post('/desarrollo', async (req, res) => {
      s.observaciones FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote   
      WHERE s.concepto IN('ABONO', 'PAGO') ;*/
 
+
+
     res.send(true);
 
 });
+var co = 0
+cron.schedule("*/10 * * * * *", async () => {
+    function authorize(credentials, callback) {
+        const { client_secret, client_id, redirect_uris } = credentials.installed;
+        const oAuth2Client = new google.auth.OAuth2(
+            client_id, client_secret, redirect_uris[0]);
+
+        // Check if we have previously stored a token.
+        fs.readFile(TOKEN_PATH[0], (err, token) => {
+            if (err) return getAccessToken(oAuth2Client, callback);
+            oAuth2Client.setCredentials(JSON.parse(token));
+            callback(oAuth2Client);
+        });
+    }
+    function getAccessToken(oAuth2Client, callback) {
+        const authUrl = oAuth2Client.generateAuthUrl({
+            access_type: 'offline',
+            scope: SCOPES,
+        });
+        console.log('Authorize this app by visiting this url:', authUrl);
+        const rl = readline.createInterface({
+            input: process.stdin,
+            output: process.stdout,
+        });
+        rl.question('Enter the code from that page here: ', (code) => {
+            rl.close();
+            oAuth2Client.getToken(code, (err, token) => {
+                if (err) return console.error('Error retrieving access token', err);
+                oAuth2Client.setCredentials(token);
+                // Store the token to disk for later program executions
+                fs.writeFile(TOKEN_PATH[0], JSON.stringify(token), (err) => {
+                    if (err) return console.error(err);
+                    console.log('Token stored to', TOKEN_PATH[0]);
+                });
+                callback(oAuth2Client);
+            });
+        });
+    }
+    if (desarrollo && desarrollo !== 'http://localhost:5000') {
+        var mensajeP = 'Proyectos ', mensajeO = 'Ordenes ', mensajeR = 'Recibocaja ';
+        const proyectos = await pool.query(`SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`);
+        mensajeP += proyectos.length;
+        if (proyectos.length) {
+            proyectos.map(async (x) => {
+                function Proyectos(auth) {
+                    const drive = google.drive({ version: 'v3', auth });
+                    var fileMetadata = {
+                        'name': x.proyect,
+                        "folderColorRgb": 'green',
+                        "description": x.categoria,
+                        'mimeType': 'application/vnd.google-apps.folder'
+                    };
+                    drive.files.create({
+                        resource: fileMetadata,
+                        fields: 'id'
+                    }, (err, file) => {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            console.log('Folder Id: ', file.data.id);
+                            mensajeP += ' Folder Id: ' + file.data.id;
+                            pool.query(`UPDATE productos SET ? WHERE id = ?`, [{ drive: file.data.id }, x.id]);
+                        }
+                    })
+                }
+
+                fs.readFile('credentials.json', (err, content) => {
+                    if (err) return console.log('Error loading client secret file:', err);
+                    // Authorize a client with credentials, then call the Google Drive API.
+                    authorize(JSON.parse(content), Proyectos);
+                });
+            });
+        }
+
+        const ordenes = await pool.query(`SELECT p.id, p.lote, d.proyect, d.drive, l.mz, l.n, p.tipobsevacion, p.fecha, p.descrip, 
+    p.drive drivO, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    WHERE d.drive IS NOT NULL AND p.drive IS NULL AND l.estado NOT IN(9, 1, 15) LIMIT 20`);
+        mensajeO += ordenes.length;
+        if (ordenes.length) {
+            ordenes.map(async (x) => {
+                function Ordenes(auth) {
+                    const drive = google.drive({ version: 'v3', auth });
+                    var fileMetadata = {
+                        'name': `MZ-${x.mz} LT-${x.n} ${x.id}-${x.lote}`,
+                        "folderColorRgb": x.tipobsevacion === 'ANULADA' ? 'red' : x.estado === 13 ? 'green' : 'blue',
+                        "description": x.tipobsevacion === 'ANULADA' ? 'ORDEN ANULADA - ' + x.descrip + ' - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
+                            : x.estado === 13 ? 'ORDEN CULMINADA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
+                                : 'ORDEN ACTIVA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
+                        'mimeType': 'application/vnd.google-apps.folder',
+                        parents: [x.drive]
+                    };
+                    drive.files.create({
+                        resource: fileMetadata,
+                        fields: 'id'
+                    }, (err, file) => {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            console.log('Folder Id: ', file.data.id);
+                            mensajeO += ' Folder Id: ' + file.data.id;
+                            pool.query(`UPDATE preventa SET ? WHERE id = ?`, [{ drive: file.data.id }, x.id]);
+                        }
+                    })
+                }
+
+                fs.readFile('credentials.json', (err, content) => {
+                    if (err) return console.log('Error loading client secret file:', err);
+                    // Authorize a client with credentials, then call the Google Drive API.
+                    authorize(JSON.parse(content), Ordenes);
+                });
+            });
+        }
+        const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, p.tipobsevacion, s.stado, s.ids, s.drive driveS, s.pdf 
+    FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3 LIMIT 1`);
+        mensajeR += recibocaja.length;
+        if (recibocaja.length) {
+            recibocaja.map(async (x) => {
+                function RecivoCaja(auth) {
+                    const drive = google.drive({ version: 'v3', auth });
+                    var fileMetadata = {
+                        'name': `${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`,
+                        "description": x.stado === 4 ? 'APROBADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf
+                            : 'DECLINADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf,
+                        'mimeType': 'application/vnd.google-apps.folder',
+                        parents: [x.drive]
+                    };
+                    var f = x.pdf.indexOf('/uploads/');
+                    var media = {
+                        mimeType: 'application/pdf',
+                        body: fs.createReadStream(path.join(__dirname, '../' + x.pdf.substr(f)))
+                    };
+                    drive.files.create({
+                        resource: fileMetadata,
+                        media: media,
+                        fields: 'id'
+                    }, (err, file) => {
+                        if (err) {
+                            console.error(err);
+                        } else {
+                            console.log('File Id: ', file.data.id);
+                            mensajeR += ' File Id: ' + file.data.id;
+                            pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
+                        }
+                    })
+                }
+
+                fs.readFile('credentials.json', (err, content) => {
+                    if (err) return console.log('Error loading client secret file:', err);
+                    // Authorize a client with credentials, then call the Google Drive API.
+                    authorize(JSON.parse(content), RecivoCaja);
+                });
+            });
+        }
+        await EnviarWTSAP('57 3012673944', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
+        console.log(co++, ordenes.length, proyectos.length, recibocaja.length)
+    }
+})
 cron.schedule("7 10 * * *", async () => {
     var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
@@ -3164,11 +3369,14 @@ async function PagosAbonos(Tid, pdf, user) {
     } else if (S.concepto === 'PAGO') {
         var cuota = S.cuota + S.mora;
         if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo && monto >= cuota) {
-            var solicitar = {
-                fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION',
-                asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
+            const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
+            if (!sep.length) {
+                var solicitar = {
+                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION',
+                    asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
+                }
+                await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
             }
-            await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
         } /*else if (S.tipo === 'SEPARACION' && monto < cuota) {
             Eli(pdf);
             return false;
@@ -3371,6 +3579,27 @@ async function Desendentes(pin, stados) {
         default:
             return false
     }
+    /////////// CONSULTAR COMISIONES /////////////////////////
+    /*SELECT s.ids, s.descp, s.stado, s.cuentadecobro, s.orden, 
+    l.id, l.mz, l.n, l.uno, l.dos, l.tres, l.directa, s.asesor
+    FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id 
+    WHERE (l.directa IS NULL AND s.descp = 'VENTA DIRECTA') 
+    OR (l.uno IS NULL AND s.descp = 'PRIMERA LINEA') 
+    OR (l.dos IS NULL AND s.descp = 'SEGUNDA LINEA') 
+    OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
+    AND s.descp != 'SEPARACION';*/
+
+    await pool.query(`UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id 
+        SET l.uno = IF(s.descp = 'PRIMERA LINEA', s.asesor, l.uno), 
+        l.dos = IF(s.descp = 'SEGUNDA LINEA', s.asesor, l.dos), 
+        l.tres = IF(s.descp = 'TERCERA LINEA', s.asesor, l.tres), 
+        l.directa = IF(s.descp = 'VENTA DIRECTA', s.asesor, l.directa)
+        WHERE (l.directa IS NULL AND s.descp = 'VENTA DIRECTA') 
+        OR (l.uno IS NULL AND s.descp = 'PRIMERA LINEA') 
+        OR (l.dos IS NULL AND s.descp = 'SEGUNDA LINEA') 
+        OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
+        AND s.descp != 'SEPARACION'`);
+
     const asesor = await pool.query(`SELECT * FROM pines p INNER JOIN users u ON p.acreedor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ? LIMIT 1`, pin);
 

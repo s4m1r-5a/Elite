@@ -10174,16 +10174,47 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         drawCallback: function (settings) {
             var api = this.api(); body = [];
             var rows = api.rows({ page: 'current' }).nodes();
-            var last = null, totales = 0;
+            var last = null, totales = 0, pagar = 0, cont = 0, total = 0;
             var filas = api.rows({ page: 'current' }).data();
             filas.each(function (group, i) {
                 if (last !== group.cuentadecobro) {
+                    if (last != null) {
+                        $(rows).eq(i - 1).after(
+                            `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">                            
+                                <td>
+                                    <div class="text-center">
+                                        ${cont}
+                                    </div>
+                                </td>
+                                <td colspan="16">
+                                    <div class="text-center">
+                                        $${Moneda(pagar)}
+                                    </div>
+                                </td>                            
+                            </tr>`
+                        );
+                        body.push(
+                            {
+                                id: {
+                                    content: cont, colSpan: 1, styles: {
+                                        halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 8, fillColor: total !== pagar ? '#F08080' : '#7f8c8d'
+                                    }
+                                },
+                                id2: {
+                                    content: Moneda(pagar), colSpan: 7, styles: {
+                                        halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 8, fillColor: total !== pagar ? '#F08080' : '#7f8c8d'
+                                    }
+                                }
+                            }
+                        );
+                        pagar = 0; cont = 0;
+                    }
                     var fechg = moment(group.fechas).format('YYYY-MM-DD hh:mm A');
                     var std = 0; totales += group.deuda;
                     //console.log(group)
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="1">
+                            <td>
                                 <div class="text-center">
                                     ${group.cuentadecobro}
                                 </div>
@@ -10193,7 +10224,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     ${fechg} 
                                 </div>
                             </td>
-                            <td colspan="2">
+                            <td>
                                 <div class="text-center">
                                     ${group.nam} 
                                 </div>
@@ -10203,7 +10234,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     $${Moneda(group.deuda)}
                                 </div>
                             </td>
-                            <td colspan="5">
+                            <td colspan="12">
                                 <div class="text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
@@ -10263,7 +10294,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     default:
                         std = `Sin info`
                 }
-
                 body.push(
                     {
                         id: { content: group.ids, styles: { fontSize: 8, fontStyle: 'bold' } },
@@ -10276,9 +10306,36 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         id8: { content: group.descp, styles: { fontSize: 8, fontStyle: 'bold' } }
                     }
                 );
-
+                total = group.deuda;
+                pagar += group.pagar; cont++;
                 if (i == filas.length - 1) {
+                    $(rows).eq(i).after(
+                        `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">                          
+                            <td>
+                                <div class="text-center">
+                                    ${cont}
+                                </div>
+                            </td>
+                            <td colspan="16">
+                                <div class="text-center">
+                                    $${Moneda(pagar)}
+                                </div>
+                            </td>                            
+                        </tr>`
+                    );
                     body.push(
+                        {
+                            id: {
+                                content: cont, colSpan: 1, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 8, fillColor: total !== pagar ? '#F08080' : '#7f8c8d'
+                                }
+                            },
+                            id2: {
+                                content: Moneda(pagar), colSpan: 7, styles: {
+                                    halign: 'center', cellWidth: 'wrap', fontStyle: 'bolditalic', fontSize: 8, fillColor: total !== pagar ? '#F08080' : '#7f8c8d'
+                                }
+                            }
+                        },
                         {
                             id: {
                                 content: 'TOTAL A PAGAR', colSpan: 4, styles: {
