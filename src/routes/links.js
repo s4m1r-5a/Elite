@@ -496,7 +496,7 @@ cron.schedule("*/10 * * * * *", async () => {
                 });
             });
         }
-        await EnviarWTSAP('57 3012673944', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
+        await EnviarWTSAP('57 3007753983', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
         console.log(co++, ordenes.length, proyectos.length, recibocaja.length)
     }
 })
