@@ -454,7 +454,7 @@ cron.schedule("*/10 * * * * *", async () => {
                 });
             });
         }
-        const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, p.tipobsevacion, s.stado, s.ids, s.drive driveS, s.pdf 
+        /*const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, p.tipobsevacion, s.stado, s.ids, s.drive driveS, s.pdf 
     FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
     WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3 LIMIT 1`);
         mensajeR += recibocaja.length;
@@ -495,7 +495,7 @@ cron.schedule("*/10 * * * * *", async () => {
                     authorize(JSON.parse(content), RecivoCaja);
                 });
             });
-        }
+        }*/
         await EnviarWTSAP('57 3007753983', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
         console.log(co++, ordenes.length, proyectos.length, recibocaja.length)
     }
