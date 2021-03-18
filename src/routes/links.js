@@ -499,6 +499,7 @@ cron.schedule("*/10 * * * * *", async () => {
         await EnviarWTSAP('57 3007753983', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
         console.log(co++, ordenes.length, proyectos.length, recibocaja.length)
     }
+    await EnviarWTSAP('57 3007753983', desarrollo);
 })
 cron.schedule("7 10 * * *", async () => {
     var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
