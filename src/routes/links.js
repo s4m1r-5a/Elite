@@ -380,7 +380,7 @@ cron.schedule("*/10 * * * * *", async () => {
             });
         });
     }
-    if (desarrollo && desarrollo !== 'http://localhost:5000') {
+    if (desarrollo !== 'http://localhost:5000') {
         var mensajeP = 'Proyectos ', mensajeO = 'Ordenes ', mensajeR = 'Recibocaja ';
         const proyectos = await pool.query(`SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`);
         mensajeP += proyectos.length;
