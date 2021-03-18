@@ -343,7 +343,7 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-cron.schedule("*/10 * 5 * * *", async () => {
+cron.schedule("*/10 * * * * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
         const oAuth2Client = new google.auth.OAuth2(
