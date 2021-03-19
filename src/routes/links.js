@@ -91,6 +91,7 @@ END:VCARD*/
 
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.headers.origin;
+    await EnviarWTSAP('57 3007753983', desarrollo);
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
@@ -279,7 +280,7 @@ router.post('/desarrollo', async (req, res) => {
 
 
     var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
-    console.log(req.headers.origin, path.join(__dirname, '../' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)))
+    console.log(req.headers.origin, path.join(__dirname, '../public' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)), 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f))
 
     const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
     MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
@@ -418,7 +419,7 @@ cron.schedule("*/10 * 5 * * *", async () => {
 
         const ordenes = await pool.query(`SELECT p.id, p.lote, d.proyect, d.drive, l.mz, l.n, p.tipobsevacion, p.fecha, p.descrip, 
     p.drive drivO, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    WHERE d.drive IS NOT NULL AND p.drive IS NULL AND l.estado NOT IN(9, 1, 15) LIMIT 20`);
+         WHERE d.drive IS NOT NULL AND p.drive IS NULL AND l.estado NOT IN(9, 1, 15) LIMIT 20`);
         mensajeO += ordenes.length;
         if (ordenes.length) {
             ordenes.map(async (x) => {
@@ -454,25 +455,25 @@ cron.schedule("*/10 * 5 * * *", async () => {
                 });
             });
         }
-        /*const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, p.tipobsevacion, s.stado, s.ids, s.drive driveS, s.pdf 
-    FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3 LIMIT 1`);
+        const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, s.descp, s.stado, s.ids, s.drive driveS, s.pdf 
+        FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+        WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3 LIMIT 1`);
         mensajeR += recibocaja.length;
         if (recibocaja.length) {
             recibocaja.map(async (x) => {
                 function RecivoCaja(auth) {
                     const drive = google.drive({ version: 'v3', auth });
                     var fileMetadata = {
-                        'name': `${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`,
+                        'name': `${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`,
                         "description": x.stado === 4 ? 'APROBADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf
                             : 'DECLINADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf,
-                        'mimeType': 'application/vnd.google-apps.folder',
                         parents: [x.drive]
                     };
                     var f = x.pdf.indexOf('/uploads/');
                     var media = {
                         mimeType: 'application/pdf',
-                        body: fs.createReadStream(path.join(__dirname, '../' + x.pdf.substr(f)))
+                        body: fs.createReadStream(path.join(__dirname, '../public' + x.pdf.substr(f)))
+                        //body: fs.createReadStream(path.join(__dirname, '../public/uploads/--l54j4f2000-xh-wjo3d85n3o08017he9.pdf'))
                     };
                     drive.files.create({
                         resource: fileMetadata,
@@ -482,9 +483,9 @@ cron.schedule("*/10 * 5 * * *", async () => {
                         if (err) {
                             console.error(err);
                         } else {
-                            console.log('File Id: ', file.data.id);
+                            console.log('File Id: ', file.data.id, ' NAME: ', file.data.name, file.data, ` ${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`);
                             mensajeR += ' File Id: ' + file.data.id;
-                            pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
+                            //pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
                         }
                     })
                 }
@@ -495,7 +496,7 @@ cron.schedule("*/10 * 5 * * *", async () => {
                     authorize(JSON.parse(content), RecivoCaja);
                 });
             });
-        }*/
+        }
         await EnviarWTSAP('57 3007753983', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
         console.log(co++, ordenes.length, proyectos.length, recibocaja.length)
     }
