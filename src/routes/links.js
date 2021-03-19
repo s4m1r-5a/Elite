@@ -91,7 +91,6 @@ END:VCARD*/
 
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.headers.origin;
-    await EnviarWTSAP('57 3007753983', desarrollo);
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
@@ -344,7 +343,7 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-cron.schedule("*/10 * 5 * * *", async () => {
+cron.schedule("*/10 * * * * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
         const oAuth2Client = new google.auth.OAuth2(
@@ -381,7 +380,7 @@ cron.schedule("*/10 * 5 * * *", async () => {
             });
         });
     }
-    if (desarrollo !== 'http://localhost:5000') {
+    if (desarrollo && desarrollo !== 'http://localhost:5000') {
         var mensajeP = 'Proyectos ', mensajeO = 'Ordenes ', mensajeR = 'Recibocaja ';
         const proyectos = await pool.query(`SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`);
         mensajeP += proyectos.length;
@@ -457,7 +456,7 @@ cron.schedule("*/10 * 5 * * *", async () => {
         }
         const recibocaja = await pool.query(`SELECT s.orden, s.lt, d.proyect, p.drive, l.mz, l.n, s.descp, s.stado, s.ids, s.drive driveS, s.pdf 
         FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-        WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3 LIMIT 1`);
+        WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3`);
         mensajeR += recibocaja.length;
         if (recibocaja.length) {
             recibocaja.map(async (x) => {
@@ -484,8 +483,8 @@ cron.schedule("*/10 * 5 * * *", async () => {
                             console.error(err);
                         } else {
                             console.log('File Id: ', file.data.id, ' NAME: ', file.data.name, file.data, ` ${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`);
-                            mensajeR += ' File Id: ' + file.data.id;
-                            //pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
+                            //mensajeR += ' File Id: ' + file.data.id;
+                            pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
                         }
                     })
                 }
