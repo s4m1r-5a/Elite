@@ -1084,6 +1084,7 @@ if (window.location.pathname == `/links/pagos`) {
                         data.d.map((r) => {
                             $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
                         });
+
                         var Calculo = (m) => {
                             var mora = 0, cuot = 0, Description = '', cont = 0, c = ID(3);
                             $('#Code').val(data.client.idc + '-' + m + '-' + c); console.log(data.client.idc + '-' + m + '-' + c)
@@ -1091,6 +1092,7 @@ if (window.location.pathname == `/links/pagos`) {
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
+                                $('#orden').val(m); console.log(m, 'sdflks')
                                 $('#Cupon').html(r.pin);
                                 $('#Dto').html(r.descuento);
                                 $('#Ahorro').html(Moneda(r.ahorro));
@@ -1107,7 +1109,6 @@ if (window.location.pathname == `/links/pagos`) {
                                 cuot += r.cuota;
                                 c = mora + cuot;
                                 tsinbono = c;
-                                //!x ? idC = r.id : '';
                                 if (!x) {
                                     idC = r.id;
                                     $('#concpto').val(r.tipo);
@@ -1124,7 +1125,7 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Total, #Total2').val(c);
                                 $('#Description').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
-                                $('#idC').val(idC)
+                                $('#idC').val(idC);
                                 //$('#idC').val(r.id);
                                 cont++
                             })
@@ -1534,6 +1535,7 @@ if (window.location.pathname == `/links/pagos`) {
                         toggle: true
                     });
                 },
+                async: false,
                 success: function (data) {
                     if (data.std) {
                         SMSj('success', data.msj);

@@ -343,7 +343,7 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-cron.schedule("*/10 * 5 * * *", async () => {
+cron.schedule("*/10 * 5 5 * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
         const oAuth2Client = new google.auth.OAuth2(
@@ -1256,9 +1256,8 @@ router.post('/pagos', async (req, res) => {
     res.send({ sig: hash, ext });
 });
 router.post('/recibo', async (req, res) => {
-    //console.log(req.body, req.files)
-    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt, nrecibo, montos, feh } = req.body;
-    var rcb = ''; //console.log(req.body, rcbexcdnt ? 'si' : 'no')
+    const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt, nrecibo, montos, feh, orden } = req.body;
+    var rcb = ''; //console.log(req.body)
     if (recibos.indexOf(',')) {
         var rcbs = recibos.split(',')
         rcbs.map((s) => {
@@ -1268,11 +1267,9 @@ router.post('/recibo', async (req, res) => {
     } else {
         rcb = `recibo LIKE '%${recibos}%'`;
     }
-    var excd = false;
+    var excd = false, excedente = 0;
     var sum = 0, saldo = montorcb;
-    //var excedent = Math.sign(excd) >= 0 ? excd : 0;
-    //console.log(rcb, id)
-    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE (${rcb})`); //stado != 6 AND 
+    const recibe = await pool.query(`SELECT * FROM solicitudes WHERE stado != 6 AND (${rcb})`);
     if (recibe.length > 0) {
         recibe.filter((a) => {
             return a.rcbexcdnt && a.excdnt;
@@ -1280,7 +1277,6 @@ router.post('/recibo', async (req, res) => {
             sum += a.monto;
         });
         saldo = montorcb - sum;
-        //console.log(recibe, sum, saldo, montorcb, total)
         if (saldo < parseFloat(total) && sum > 1) {
             if (g) {
                 return res.send({ std: false, msj: 'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum) });
@@ -1299,25 +1295,15 @@ router.post('/recibo', async (req, res) => {
     }
     if (saldo > parseFloat(total)) {
         excd = true;
+        excedente = saldo - parseFloat(total);
     }
-    //console.log(sum, saldo, montorcb, total)
-    var imagenes = ''
-    req.files.map((e) => {
-        imagenes += `/uploads/${e.filename},`
-    })
-    const a = await Bonos(bono, lt);
-    if (a) {
+
+    if (bono) {
         await pool.query('UPDATE cupones SET ? WHERE id = ?',
-            [{ producto: a, estado: 14 }, pin]
+            [{ producto: orden, estado: 14 }, pin]
         );
-    } else if (!a && bono != 0) {
-        if (g) {
-            return res.send({ std: false, msj: 'Solicitud de pago rechazada, Bono erroneo' });
-        } else {
-            req.flash('error', 'Solicitud de pago rechazada, Bono erroneo');
-            return res.redirect('/links/pagos');
-        }
     }
+
     const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
@@ -1326,32 +1312,57 @@ router.post('/recibo', async (req, res) => {
         k = r[0].monto || 0;
     var acumulado = l + k;
 
-    const pago = {
-        fech: ahora, monto: total, recibo: recibos, facturasvenc: factrs, lt, acumulado,
-        concepto: 'PAGO', stado: 3, img: imagenes, descp: concpto, formap, motorecibos: montorcb
-    }
-    !rcbexcdnt || !excd ? '' : pago.excdnt = 1;
-    !rcbexcdnt ? '' : pago.rcbexcdnt = rcbexcdnt;
-    mora != 0 ? pago.moras = mora : '';
-    bono != 0 ? pago.bono = pin : ''; //console.log(pago);
-    concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
-        await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
+    concpto !== 'ABONO' ? await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id) : '';
     await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
     await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
-    const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
-    var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
 
-    if (Array.isArray(nrecibo)) {
-        await nrecibo.map((t, i) => {
-            reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}', ${rcbexcdnt === t ? parseFloat(montorcb) - parseFloat(total) : 0}),`;
-        });
-    } else {
-        reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${req.files[0].filename}', ${parseFloat(montorcb) - parseFloat(total)}),`;
+    let pago = {
+        fech: ahora, facturasvenc: factrs, lt, acumulado, orden,
+        concepto: 'PAGO', stado: 3, descp: concpto, formap
     }
-    await pool.query(reci.slice(0, -1));
+    var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
+    if (Array.isArray(nrecibo)) {
+        for (i = 0; i <= nrecibo.length - 1; i++) {
+            //console.log(i, montos[i], nrecibo.length, parseFloat(montos[i].replace(/\./g, '')))
+            var recib = parseFloat(montos[i].replace(/\./g, ''));
+            pago.img = `/uploads/${req.files[i].filename}`;
+            pago.motorecibos = recib;
+            pago.recibo = `~${nrecibo[i]}~`;
+            pago.monto = recib;
 
-    /*req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
-    res.redirect('/links/cartera');*/
+            if (nrecibo[i] === rcbexcdnt) {
+                pago.monto = recib - excedente;
+                pago.rcbexcdnt = rcbexcdnt;
+                pago.excdnt = 1;
+            }
+
+            mora != 0 ? pago.moras = mora : '';
+            concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id;
+
+            let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+            reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '/uploads/${req.files[i].filename}', ${nrecibo[i] === rcbexcdnt ? excedente : 0}),`;
+        };
+    } else {
+        var recib = parseFloat(montos.replace(/\./g, ''));
+        pago.img = `/uploads/${req.files[0].filename}`;
+        pago.motorecibos = recib;
+        pago.recibo = `~${nrecibo}~`;
+        pago.monto = recib;
+
+        if (nrecibo === rcbexcdnt) {
+            pago.monto = recib - excedente;
+            pago.rcbexcdnt = rcbexcdnt;
+            pago.excdnt = 1;
+        }
+
+        mora ? pago.moras = mora : '';
+        concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id;
+
+        let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+        reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${req.files[0].filename}', ${excedente}),`;
+    }
+    //console.log(reci.slice(0, -1))
+    await pool.query(reci.slice(0, -1));
 
     if (g) {
         return res.send({ std: true, msj: 'Solicitud de pago enviada correctamente' });
@@ -1359,7 +1370,6 @@ router.post('/recibo', async (req, res) => {
         req.flash('success', 'Solicitud de pago enviada correctamente');
         return res.redirect('/links/pagos');
     }
-    //uploads/
 });
 router.post('/bonus', async (req, res) => {
     const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin } = req.body;
