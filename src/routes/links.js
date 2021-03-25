@@ -1354,7 +1354,6 @@ router.post('/recibo', async (req, res) => {
             pago.rcbexcdnt = rcbexcdnt;
             pago.excdnt = 1;
         }
-
         mora ? pago.moras = mora : '';
         concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id;
 
