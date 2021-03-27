@@ -153,7 +153,7 @@ router.post('/desarrollo', async (req, res) => {
 
 
     // If modifying these scopes, delete token.json.
-    fs.readFile('credentials.json', (err, content) => {
+    /*fs.readFile('credentials.json', (err, content) => {
         if (err) return console.log('Error loading client secret file:', err);
         // Authorize a client with credentials, then call the Google Drive API.
         authorize(JSON.parse(content), listFiles);
@@ -193,7 +193,7 @@ router.post('/desarrollo', async (req, res) => {
                 callback(oAuth2Client);
             });
         });
-    }
+    }*/
     /*function listFiles(auth) {
         const drive = google.drive({ version: 'v3', auth });
         drive.files.list({
@@ -234,9 +234,9 @@ router.post('/desarrollo', async (req, res) => {
 
 
 
-    async function listFiles(auth) {
+    /*async function listFiles(auth) {
         const drive = google.drive({ version: 'v3', auth });
-        /*var fileMetadata = {
+        var fileMetadata = {
             'name': `MZ-20 LT-19 544-8452`,
             "folderColorRgb": 'red',
             "description": 'ORDEN ANULADA - ERROR - por que el cliente quiere que se le realice una modificación en el numero de cuotas a pagar (refinanciación) - CARPETA: eefew87sWESFSsdfDfggdd - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
@@ -254,22 +254,22 @@ router.post('/desarrollo', async (req, res) => {
                 console.log('Folder Id: ', file.data.id);
             }
         })*/
-        await drive.files.list({
-            pageSize: 10,
-            fields: 'nextPageToken, files(id, name)',
-        }, (err, res) => {
-            if (err) return console.log('The API returned an error: ' + err);
-            const files = res.data.files;
-            if (files.length) {
-                console.log('Files:');
-                files.map((file) => {
-                    console.log(`${file.name} (${file.id})`);
-                });
-            } else {
-                console.log('No files found.');
-            }
-        });
-    }
+    /*await drive.files.list({
+        pageSize: 10,
+        fields: 'nextPageToken, files(id, name)',
+    }, (err, res) => {
+        if (err) return console.log('The API returned an error: ' + err);
+        const files = res.data.files;
+        if (files.length) {
+            console.log('Files:');
+            files.map((file) => {
+                console.log(`${file.name} (${file.id})`);
+            });
+        } else {
+            console.log('No files found.');
+        }
+    });
+}*/
 
 
 
@@ -278,10 +278,10 @@ router.post('/desarrollo', async (req, res) => {
 
 
 
-    var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
-    console.log(req.headers.origin, path.join(__dirname, '../public' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)), 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f))
+    //var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
+    //console.log(req.headers.origin, path.join(__dirname, '../public' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)), 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f))
 
-    const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
+    /*const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
     MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
     FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id WHERE s.stado != 6 AND s.concepto 
     IN('COMISION DIRECTA', 'COMISION INDIRECTA') GROUP BY l.id, s.descp, l.mz, l.n HAVING dc > 1 ORDER BY dc DESC`);
@@ -290,7 +290,7 @@ router.post('/desarrollo', async (req, res) => {
         let id = x.ul ? x.ul : x.menor;
         console.log(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`, x.ul, x.menor)
         //await pool.query(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`)
-    })
+    })*/
 
     //////////VENTAS DE ASESORES LOS ULLTIMOS 6 MESES /////////////////
 
@@ -502,14 +502,16 @@ cron.schedule("*/10 * 5 5 * *", async () => {
     await EnviarWTSAP('57 3007753983', desarrollo);
 })
 cron.schedule("7 10 * * *", async () => {
-    var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
-    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
-    INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-    var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
-    f.map((x) => {
-        body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
-    })
-    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+    if (desarrollo && desarrollo !== 'http://localhost:5000') {
+        var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
+        const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+        INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+        var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
+        f.map((x) => {
+            body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
+        })
+        await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+    }
 })
 cron.schedule("0 0 * * *", async () => {
     /*mysqldump({
@@ -530,23 +532,25 @@ cron.schedule("0 0 * * *", async () => {
 
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
-    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
-    INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
-    var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
-    f.map((x) => {
-        body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
-    })
-    await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+    if (desarrollo && desarrollo !== 'http://localhost:5000') {
+        const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+        INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
+        var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
+        f.map((x) => {
+            body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
+        })
+        await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
 
-    /////////////////////////////////////////* QUITAR QUPONES *//////////////////////////////////////////
+        /////////////////////////////////////////* QUITAR QUPONES *//////////////////////////////////////////
 
-    var diacupon = moment().subtract(3, 'days').endOf("days").format('YYYY-MM-DD HH:mm:ss');
+        var diacupon = moment().subtract(3, 'days').endOf("days").format('YYYY-MM-DD HH:mm:ss');
 
-    const separaciones = await pool.query(`SELECT p.id, p.fecha, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
-    WHERE p.tipobsevacion IS NULL AND l.estado IN(1,12) AND p.cupon != 1 AND p.fecha < '${diacupon}'`);
-    separaciones.forEach(async (val, i) => {
-        await QuitarCupon(val.id);
-    });
+        const separaciones = await pool.query(`SELECT p.id, p.fecha, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
+        WHERE p.tipobsevacion IS NULL AND l.estado IN(1,12) AND p.cupon != 1 AND p.fecha < '${diacupon}'`);
+        separaciones.forEach(async (val, i) => {
+            await QuitarCupon(val.id);
+        });
+    }
 });
 cron.schedule("0 0 1 * *", async () => {
     let m = new Date();
@@ -656,6 +660,7 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
+
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
@@ -2212,7 +2217,7 @@ router.post('/anular', isLoggedIn, async (req, res) => {
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, cp.estado = 6, p.tipobsevacion = 'ANULADA', 
         l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
         ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
-        s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; console.log(sql)
+        s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; //console.log(sql)
         await pool.query(sql, lote);
         res.send(true);
     }
@@ -2222,9 +2227,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
 
-        d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
+        //d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
+        d = req.user.admin > 0 ? `` : `WHERE p.asesor = ?`;
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status, p.asesor,
+        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status, p.asesor, p.tipobsevacion,
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, p.obsevacion,
             CASE WHEN e.estado = 6 AND e.tip = 'CUPON' THEN 1 ELSE 0 END kupn FROM preventa p INNER JOIN productosd pd 
             ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN clientes c ON p.cliente = c.idc 
@@ -2339,7 +2345,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 };
             };
             const u = await pool.query(`SELECT * FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
-            INNER JOIN productos pl ON l.producto = pl.id LEFT JOIN solicitudes s ON l.id = s.lt WHERE s.stado != 6 AND p.id = ?`, k);
+            INNER JOIN productos pl ON l.producto = pl.id LEFT JOIN solicitudes s ON p.id = s.orden WHERE s.stado != 6 AND p.id = ?`, k);
             if (!CODE) {
                 CODE = ID(7);
                 var mensaje = `_*${req.user.fullname}* intenta eliminar la orden de separacion *${k}* la cual corresponde al LT: *${u[0].n}* ${u[0].mz === 'no' ? 'DE' : 'MZ: *' + u[0].mz + '* DE'} *${u[0].proyect}*_\n\n`;
@@ -2362,7 +2368,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
                 l.inicial = if (p.valmtr2 != 0, (p.valmtr2 * l.mtr2) * p.porcentage / 100, (l.mtr * l.mtr2) * p.porcentage / 100),
                 l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, u[0].lote);
 
-                await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.lt = p.lote WHERE p.id = ?`, k);
+                await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
                 await EnviarWTSAP('57 3002851046', `Orden de separacion *${k}* eliminada correctamente`);
                 res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
             } else {
@@ -2375,7 +2381,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             l.inicial = if (p.valmtr2 != 0, (p.valmtr2 * l.mtr2) * p.porcentage / 100, (l.mtr * l.mtr2) * p.porcentage / 100),
             l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL WHERE l.id = ?`, i[0].lote);
 
-            await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.lt = p.lote WHERE p.id = ?`, k);
+            await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
             await EnviarWTSAP('57 3002851046', `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${i[0].proyect}_`);
             res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
         }
@@ -2524,6 +2530,24 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         const date = { fecha };
         await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [date, id]);
         res.send(true);
+    } else if (id === 'restorden') {
+        const { k } = req.body;
+        const sql = `UPDATE cuotas c  
+        INNER JOIN preventa p ON c.separacion = p.id
+        INNER JOIN productosd l ON p.lote = l.id 
+        INNER JOIN productos d ON l.producto  = d.id
+        LEFT JOIN solicitudes s ON s.orden = p.id
+        LEFT JOIN cupones cp ON p.cupon = cp.id 
+        SET s.stado = 4, c.estado = 3, l.estado = 1, 
+        cp.estado = 14, p.tipobsevacion = NULL WHERE p.id = ?`;
+        await pool.query(sql, k);
+
+        await ProyeccionPagos(k)
+        const r = await Estados(k);
+        var estado = r.pendients ? 8 : r.std
+        await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+        SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
+        res.send(true);
     }
 });
 router.post('/std/:id', isLoggedIn, async (req, res) => {
@@ -2557,16 +2581,6 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
         var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
-        /*const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor,
-        pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba,
-        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, 
-        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id,
-        s.ids, s.descp, pr.id cparacion FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
-        INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON pr.lote = pd.id
-        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
-        INNER JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.concepto IN ('PAGO','ABONO') ${n}`); // AND pr.tipobsevacion IS NULL*/
-        //console.log(so)
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
@@ -2977,7 +2991,7 @@ async function Estados(S) {
 
     const Pagos = await pool.query(
         `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, SUM(s.monto) AS MONTO,
-         pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+         pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
     const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
@@ -2987,7 +3001,7 @@ async function Estados(S) {
     ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
 
     const Pendientes = await pool.query(
-        `SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote 
+        `SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id 
          INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN cupones cp ON s.bono = cp.id 
          WHERE s.stado = 3 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
     );
@@ -3152,7 +3166,7 @@ async function QuitarCupon(S) {
 async function ProyeccionPagos(S) {
 
     const Pagos = await pool.query(`SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, 
-    SUM(s.monto) AS MONTO, pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+    SUM(s.monto) AS MONTO, pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
     LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') AND pr.id = ?`, S);
 
     let W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
@@ -3171,7 +3185,7 @@ async function ProyeccionPagos(S) {
     const total = Math.round((x.vrmt2 * x.mtr2) - x.ahorro);
     const inicial = Math.round((total * x.iniciar / 100) - x.separar);
     const financiacion = Math.round(total - (inicial + x.separar));
-    console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion)
+    //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion)
     if (Proyeccion > 0) {
         op = true;
         await pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = proyeccion WHERE separacion = ?`, S);
@@ -3382,7 +3396,7 @@ async function PagosAbonos(Tid, pdf, user) {
             const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
             if (!sep.length) {
                 var solicitar = {
-                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION',
+                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION', orden: T,
                     asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
                 }
                 await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
@@ -3529,7 +3543,7 @@ async function Desendentes(pin, stados) {
     var corte, cort = 0, cortp = 0, rangofchs = '';
     var hoy = moment().format('YYYY-MM-DD')
     var venta = 0, bono = 0, bonop = 0, personal = 0
-    var sqlINSERT = 'INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, porciento, total, lt, retefuente, reteica, pagar) VALUES ';
+    var sqlINSERT = 'INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ';
     var sqlUPDATE = 'UPDATE productosd SET';
     var sqlDIRECTA = ', directa = CASE id', direct = false;
     var sqlUNO = ', uno = CASE id', one = false;
@@ -3616,8 +3630,8 @@ async function Desendentes(pin, stados) {
     var j = asesor[0]
     if (j.sucursal) {
         sqlDIRECTA = ' directa = CASE id';
-        const directas = await pool.query(`SELECT * FROM preventa p 
-            INNER JOIN productosd l ON p.lote = l.id
+        const directas = await pool.query(`SELECT p.id ordn, p.*, l.*, o.*, u.*, c.* 
+            FROM preventa p INNER JOIN productosd l ON p.lote = l.id
             INNER JOIN productos o ON l.producto = o.id
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
@@ -3633,7 +3647,7 @@ async function Desendentes(pin, stados) {
                 var reteica = monto * 8 / 1000;
                 var std = a.obsevacion === 'CARTERA' ? 4 : 15;
 
-                sqlINSERT += `('${hoy}', ${monto}, 'COMISION DIRECTA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${j.sucursal}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                sqlINSERT += `('${hoy}', ${monto}, 'COMISION DIRECTA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${j.sucursal}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                 sqlDIRECTA += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                 IDS += a.lote.toString() + ', ';
                 direct = true;
@@ -3648,7 +3662,7 @@ async function Desendentes(pin, stados) {
         return true
     } else {
         const directas = await pool.query(`SELECT MONTH(fechar) AS mes, 
-            p.*, l.*, o.*, u.*, c.* FROM preventa p 
+            p.id ordn, p.*, l.*, o.*, u.*, c.* FROM preventa p 
             INNER JOIN productosd l ON p.lote = l.id
             INNER JOIN productos o ON l.producto = o.id
             INNER JOIN users u ON p.asesor = u.id
@@ -3666,7 +3680,7 @@ async function Desendentes(pin, stados) {
                 if (a.directa === null) {
                     var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                     bonop += val
-                    sqlINSERT += `('${hoy}', ${monto}, 'COMISION DIRECTA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${a.comision}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                    sqlINSERT += `('${hoy}', ${monto}, 'COMISION DIRECTA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${a.comision}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                     sqlDIRECTA += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                     IDS += a.lote.toString() + ', ';
                     direct = true;
@@ -3674,7 +3688,7 @@ async function Desendentes(pin, stados) {
                         monto = val * a.bonoextra;
                         retefuente = monto * 0.10;
                         reteica = monto * 8 / 1000;
-                        sqlINSERT += `('${hoy}', ${monto}, 'BONO EXTRA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${a.bonoextra}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                        sqlINSERT += `('${hoy}', ${monto}, 'BONO EXTRA', ${std}, 'VENTA DIRECTA', '${j.acreedor}', ${a.bonoextra}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                     }
                 }
                 if (a.mes === mes || a.pagobono) {
@@ -3695,7 +3709,7 @@ async function Desendentes(pin, stados) {
                 linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
             });
             const reporte = await pool.query(`SELECT MONTH(fechar) AS mes, 
-                p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
+                p.id ordn, p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
                 INNER JOIN productosd l ON p.lote = l.id
                 INNER JOIN productos o ON l.producto = o.id
                 INNER JOIN users u ON p.asesor = u.id
@@ -3714,7 +3728,7 @@ async function Desendentes(pin, stados) {
                     if (a.uno === null) {
                         var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                         bono += val;
-                        sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'PRIMERA LINEA', '${j.acreedor}', ${a.linea1}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                        sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'PRIMERA LINEA', '${j.acreedor}', ${a.linea1}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                         IDS += a.lote.toString() + ', ';
                         sqlUNO += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                         one = true;
@@ -3735,7 +3749,7 @@ async function Desendentes(pin, stados) {
                     linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
                 });
                 const reporte2 = await pool.query(`SELECT MONTH(fechar) AS mes, 
-                p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
+                p.id ordn, p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
                 INNER JOIN productosd l ON p.lote = l.id
                 INNER JOIN productos o ON l.producto = o.id
                 INNER JOIN users u ON p.asesor = u.id
@@ -3754,7 +3768,7 @@ async function Desendentes(pin, stados) {
                         if (a.dos === null) {
                             var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                             bono += val
-                            sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'SEGUNDA LINEA', '${j.acreedor}', ${a.linea2}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                            sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'SEGUNDA LINEA', '${j.acreedor}', ${a.linea2}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                             IDS += a.lote.toString() + ', ';
                             sqlDOS += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                             two = true;
@@ -3782,7 +3796,7 @@ async function Desendentes(pin, stados) {
                     lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
                 });
                 const reporte3 = await pool.query(`SELECT MONTH(fechar) AS mes, 
-                p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
+                p.id ordn, p.*, l.*, o.*, u.*, r.*, c.* FROM preventa p 
                 INNER JOIN productosd l ON p.lote = l.id
                 INNER JOIN productos o ON l.producto = o.id
                 INNER JOIN users u ON p.asesor = u.id
@@ -3790,6 +3804,7 @@ async function Desendentes(pin, stados) {
                 INNER JOIN clientes c ON p.cliente = c.idc
                 WHERE (${lDesc}) AND l.estado IN(10, 13) 
                 AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${rangofchs}`);
+
                 if (reporte3.length > 0) {
                     await reporte3.map(async (a, x) => {
                         var val = a.valor - a.ahorro
@@ -3800,7 +3815,7 @@ async function Desendentes(pin, stados) {
                         if (a.tres === null) {
                             var std = a.obsevacion === 'CARTERA' ? 4 : 15;
                             bono += val
-                            sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'TERCERA LINEA', '${j.acreedor}', ${a.linea3}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}),`;
+                            sqlINSERT += `('${hoy}', ${monto}, 'COMISION INDIRECTA', ${std}, 'TERCERA LINEA', '${j.acreedor}', ${a.linea3}, ${val}, ${a.lote}, ${retefuente}, ${reteica}, ${monto - (retefuente + reteica)}, ${a.ordn}),`;
                             IDS += a.lote.toString() + ', ';
                             sqlTRES += ` WHEN ${a.lote} THEN '${j.acreedor}'`;
                             three = true;

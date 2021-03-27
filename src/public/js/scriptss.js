@@ -1675,6 +1675,13 @@ if (window.location.pathname == `/links/reportes`) {
                         }
                     },
                     {
+                        text: `ANULADAS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD(-1, 'ANULADA');
+                        }
+                    },
+                    {
                         text: `TODOS`,
                         className: 'btn btn-secondary',
                         action: function () {
@@ -1700,9 +1707,9 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -2 },
         { responsivePriority: 1, targets: -3 },
-        { targets: [-1], visible: false, searchable: true }],
+        { responsivePriority: 1, targets: -4 },
+        { targets: [-1, -2], visible: false, searchable: true }],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, "desc"]],
         language: languag,
@@ -1798,23 +1805,56 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
-                                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                             aria-haspopup="true" aria-expanded="false">Acción</button>
-                                                <div class="dropdown-menu">
-                                                ${USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO' ?
-                            `<a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
-                             <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
-                             <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
-                             ${row.kupn ? `<a class="dropdown-item" onclick="RestKupon(${data})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}` : ''}
-                                                    <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                                    <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
-                                                    <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
-                                                </div>
-                                        </div>`
-                        : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
-                    //<a class="dropdown-item" onclick="Cartera(${data})"><i class="fas fa-business-time"></i> Cartera</a>
+                    if (USERADMIN === 'HABIB SALDARRIAGA' && row.tipobsevacion === 'ANULADA' && (row.estado == 9 || row.estado == 15)) {
+                        return `
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                <a class="dropdown-item" onclick="RestOrden(${data})"><i class="fas fa-undo"></i> Restablecer Orden</a>
+                            </div>
+                        </div>`;
+                    } else if (row.tipobsevacion === 'ANULADA' && admin == 1) {
+                        return `
+                        <div class="btn-group btn-group-sm">
+                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                            <div class="dropdown-menu">
+                                <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                <small class="text-muted">No es posible restablecer esta oreden</small>
+                            </div>
+                        </div>`;
+                    } else if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO') {
+                        return `<div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">Acción</button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
+                                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
+                                        <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
+                                        ${row.kupn ? `<a class="dropdown-item" onclick="RestKupon(${data})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}
+                                        <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                        <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
+                                        <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
+                                    </div>
+                                </div>`;
+                    } else if (admin == 1) {
+                        return `<div class="btn-group btn-group-sm">
+                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                    aria-haspopup="true" aria-expanded="false">Acción</button>
+                                    <div class="dropdown-menu">
+                                        <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                                        <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
+                                        <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
+                                    </div>
+                                </div>`;
+                    } else {
+                        return `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
+                    }
                 }
             },
             {
@@ -1832,10 +1872,11 @@ if (window.location.pathname == `/links/reportes`) {
                     }
                 }
             },
-            { data: "obsevacion" }
+            { data: "obsevacion" },
+            { data: "tipobsevacion" }
         ],
         rowCallback: function (row, data, index) {
-            if (data["estado"] == 9) {
+            if (data["tipobsevacion"] === 'ANULADA') {
                 $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
             } else if (data["estado"] == 12) {
                 $(row).css("background-color", "#00FFFF");
@@ -2245,14 +2286,14 @@ if (window.location.pathname == `/links/reportes`) {
                                 { text: line[3].text, style: 'lastLine' },
                                 { text: line[4].text, style: 'lastLine' }]);
                         }
-    
+     
                     });
                     //Sobrescriba el cuerpo de la tabla anterior con el nuevo.
                     doc.content[1].table.headerRows = 12;
                     doc.content[1].table.widths = [50, 50, 150, 100, 100];
                     doc.content[1].table.body = bod;
                     doc.content[1].layout = 'lightHorizontalLines';
-    
+     
                     doc.styles = {
                         subheader: {
                             fontSize: 7,
@@ -2355,7 +2396,7 @@ if (window.location.pathname == `/links/reportes`) {
             // Actualizar pie de página
             /*$(api.column(13).footer()).html(
                 $('#saldos').val('$' + pageTotal + ' ( $' + total + ' total)')
-    
+     
             );*/
         },
         rowCallback: function (row, data, index) {
@@ -3572,6 +3613,33 @@ if (window.location.pathname == `/links/reportes`) {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                         }).modal('hide');
                         SMSj('success', 'Cupon de descuento restablecido correctamente')
+                    }
+                }
+            });
+        } else {
+            SMSj('error', 'No posees permisos para ejecuutar esta accion')
+        }
+    }
+    var RestOrden = (id) => {
+        if (admin == 1) {
+            $.ajax({
+                url: '/links/reportes/restorden',
+                data: { k: id },
+                type: 'POST',
+                beforeSend: function (xhr) {
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        tableOrden.ajax.reload(null, false)
+                        comisiones.ajax.reload(null, false)
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                        }).modal('hide');
+                        SMSj('success', 'Orden ' + id + ' restablecida correctamente')
                     }
                 }
             });
@@ -9006,7 +9074,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             });
         return x
     };
-
     $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
@@ -10481,7 +10548,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             toggle: true
         });
     }
-    var bonos = $('#bonos').DataTable({
+    /*var bonos = $('#bonos').DataTable({
         deferRender: true,
         paging: true,
         search: {
@@ -10500,9 +10567,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             url: "/links/solicitudes/bono",
             dataSrc: "data"
         },
-        /*initComplete: function (settings, json, row) {
-                                        alert(row);
-        },*/
         columns: [
             { data: "ids" },
             { data: "fullname" },
@@ -10648,8 +10712,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         </div>
                                     </div>` : ''
             }
-        ]*/
-    });
+        ]
+    });*/
     $('#recbo').submit(function (e) {
         e.preventDefault();
         var dat = new FormData(this); //$('#recbo').serialize();
@@ -10824,7 +10888,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
 
     }
-    var BancoExt = $('#BancoExt').DataTable({
+    /*var BancoExt = $('#BancoExt').DataTable({
         scrollY: "200px",
         //scrollCollapse: true,
         paging: false,
@@ -10839,7 +10903,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         autoWidth: true,
         //responsive: false,
         columnDefs: [
-            /*{
+            {
                 render: function (data, type, row) {
                     return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
                 },
@@ -10851,7 +10915,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 },
                 targets: 10
             },
-            { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }*/
+            { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }
         ],
         order: [[1, "desc"]],
         language: languag,
@@ -10869,15 +10933,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 //console.log(api.row(i).data())
                 if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
-                    /*$(rows).eq(i).before(
-                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="7">
-                                <div class="text-center">
-                                    ${'Este Pago tiene un excedente de $' + Moneda(group.excdnt)}
-                                </div>
-                            </td>
-                        </tr>`
-                    );*/
                     pagos = group.pagos;
                     xtrato = group.xtrabank;
                 } else if ((xtrato === group.xtrabank || pagos === group.pagos) && group.xtrabank) {
@@ -10906,8 +10961,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
             }
         ]
-    });
-    BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
+    });*/
+    /*BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
         var data = BancoExt.row(this).data();
         var monto = parseFloat($('#montopago').val());
         var stad = parseFloat($('#stadopago').val());
@@ -10940,7 +10995,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         } else {
             alert('El monto ha aprobar excede el excedente acumulado de los pagos');
         }
-    });
+    });*/
     /*$('button').click(function () {
         var data = table.$('input, select').serialize();
         alert(
