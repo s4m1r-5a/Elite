@@ -10309,7 +10309,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                          aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
-                                            <a class="dropdown-item" href="${group.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>
+                                        ${group.cuentacobro ? `<a class="dropdown-item" href="${group.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>` : ''}                                            
                                             <a class="dropdown-item" onclick="Eliminar(${group.cuentadecobro}, '${group.cuentacobro}', '${group.nam}', '${group.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
                                             <a class="dropdown-item" onclick="PagarCB(${group.cuentadecobro}, '${group.nam}')"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
@@ -10318,6 +10318,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                             </td>
                         </tr>`
                     );
+
+                    console.log(window.location.origin + group.cuentacobro)
                     body.push(
                         {
                             id: {
@@ -11446,10 +11448,7 @@ if (window.location == `${window.location.origin}/links/red`) {
     }
     var red = $('#red').DataTable({
         dom: 'Bfrtip',
-        lengthMenu: [
-            [10, 25, 50, -1],
-            ['10 filas', '25 filas', '50 filas', 'Ver todo']
-        ],
+        lengthMenu: -1,
         buttons: [
             {
                 text: `<div class="mb-0">
@@ -11604,8 +11603,8 @@ if (window.location == `${window.location.origin}/links/red`) {
             { responsivePriority: 10004, targets: 7 },
             { responsivePriority: 10005, targets: 8 }*/
         ],
-        order: [[0, 'desc'], [6, 'desc'], [4, 'desc'], [2, 'desc']],
-        displayLength: 20,
+        order: [[0, 'asc'], [6, 'desc'], [4, 'desc'], [2, 'desc']],
+        displayLength: -1,
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();

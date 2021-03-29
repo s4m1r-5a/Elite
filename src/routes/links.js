@@ -281,7 +281,7 @@ router.post('/desarrollo', async (req, res) => {
     //var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
     //console.log(req.headers.origin, path.join(__dirname, '../public' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)), 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f))
 
-    /*const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
+    const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
     MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
     FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id WHERE s.stado != 6 AND s.concepto 
     IN('COMISION DIRECTA', 'COMISION INDIRECTA') GROUP BY l.id, s.descp, l.mz, l.n HAVING dc > 1 ORDER BY dc DESC`);
@@ -290,8 +290,51 @@ router.post('/desarrollo', async (req, res) => {
         let id = x.ul ? x.ul : x.menor;
         console.log(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`, x.ul, x.menor)
         //await pool.query(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`)
-    })*/
+    })
+    /*const l = await pool.query(`SELECT i.acreedor u, u.fullname nom, i.usuario u1, u1.fullname nom1, (
+        SELECT i.usuario FROM pines i WHERE u1 = i.acreedor
+      ) as u2, (
+        SELECT u.fullname FROM users u WHERE u2 = u.id
+      ) as nom2, (
+        SELECT i.usuario FROM pines i WHERE u2 = i.acreedor
+      ) as u3, (
+        SELECT u.fullname FROM users u WHERE u3 = u.id
+      ) as nom3, (
+        SELECT i.usuario FROM pines i WHERE u3 = i.acreedor
+      ) as u4, (
+        SELECT u.fullname FROM users u WHERE u4 = u.id
+      ) as nom4, (
+        SELECT i.usuario FROM pines i WHERE u4 = i.acreedor
+      ) as u5, (
+        SELECT u.fullname FROM users u WHERE u5 = u.id
+      ) as nom5, (
+        SELECT i.usuario FROM pines i WHERE u5= i.acreedor
+      ) as u6, (
+        SELECT u.fullname FROM users u WHERE u6 = u.id
+      ) as nom6, (
+        SELECT i.usuario FROM pines i WHERE u6 = i.acreedor
+      ) as u7, (
+        SELECT u.fullname FROM users u WHERE u7 = u.id
+      ) as nom7    
+     FROM pines i INNER JOIN users u ON i.acreedor = u.id INNER JOIN users u1 ON i.usuario = u1.id  
+     ORDER BY nom4, nom1, nom2, nom3`);
+    console.log(l)*/
 
+    /*SELECT i.acreedor u, u.fullname nom, i.usuario u1, u1.fullname nom1, (
+        SELECT i.usuario FROM pines i WHERE u1 = i.acreedor
+      ) as u2, (
+        SELECT u.fullname FROM users u WHERE u2 = u.id
+      ) as nom2, (
+        SELECT i.usuario FROM pines i WHERE u2 = i.acreedor
+      ) as u3, (
+        SELECT u.fullname FROM users u WHERE u3 = u.id
+      ) as nom3, (
+        SELECT i.usuario FROM pines i WHERE u3 = i.acreedor
+      ) as u4, (
+        SELECT u.fullname FROM users u WHERE u4 = u.id
+      ) as nom4  
+     FROM pines i INNER JOIN users u ON i.acreedor = u.id INNER JOIN users u1 ON i.usuario = u1.id  
+     ORDER BY nom4, nom1, nom2, nom3;*/
     //////////VENTAS DE ASESORES LOS ULLTIMOS 6 MESES /////////////////
 
     /* `SELECT u.fullname, pn.fechactivacion, COUNT(p.id) total, COUNT(IF(TIMESTAMP(p.fecha) >= date_sub(curdate(), INTERVAL 3 month), 1, NULL)) Ult_3meses, 
@@ -1020,7 +1063,8 @@ router.post('/red', async (req, res) => {
     LEFT JOIN users u2 ON u2.pin = p2.id 
     LEFT JOIN pines p3 ON p3.usuario = u2.id
     LEFT JOIN users u3 ON u3.pin = p3.id 
-    ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : ''}`);
+    ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : 'WHERE u.id is NOT NULL'}
+    ORDER BY u.fullname, nombre1, nombre2, nombre3`);
     respuesta = { "data": red };
     res.send(respuesta);
 });
