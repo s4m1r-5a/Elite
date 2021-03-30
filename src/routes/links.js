@@ -335,6 +335,8 @@ router.post('/desarrollo', async (req, res) => {
       ) as nom4  
      FROM pines i INNER JOIN users u ON i.acreedor = u.id INNER JOIN users u1 ON i.usuario = u1.id  
      ORDER BY nom4, nom1, nom2, nom3;*/
+
+
     //////////VENTAS DE ASESORES LOS ULLTIMOS 6 MESES /////////////////
 
     /* `SELECT u.fullname, pn.fechactivacion, COUNT(p.id) total, COUNT(IF(TIMESTAMP(p.fecha) >= date_sub(curdate(), INTERVAL 3 month), 1, NULL)) Ult_3meses, 
@@ -1051,6 +1053,9 @@ router.get('/red', isLoggedIn, async (req, res) => {
     res.render('links/red');
 });
 router.post('/red', async (req, res) => {
+/*SELECT p.acreedor , p.usuario, p1.acreedor, p1.usuario, p2.acreedor, p2.usuario 
+FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor;*/
+
     const red = await pool.query(`SELECT u.fullname,
     u.nrango, u.admin, u1.fullname nombre1, u1.nrango rango1, 
     u1.admin admin1, u2.fullname nombre2, u2.nrango rango2, 
