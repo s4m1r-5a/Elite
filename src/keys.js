@@ -2,16 +2,16 @@ module.exports = {
     database0: {
         connectionLimit: 1000,
         host: '96.43.143.58',
-        user: 'samir',
-        password: 'Abcd1234@',
-        database: 'pruebasElite',
+        user: 'admin',
+        password: 'C0l0mb1@',
+        database: 'pElite',
         port: 3306
     },
     database: {
         connectionLimit: 1000,
         host: '96.43.143.58',
-        user: 'samir',
-        password: 'Abcd1234@',
+        user: 'admin',
+        password: 'C0l0mb1@',
         database: 'elite',
         port: 3306
     },
