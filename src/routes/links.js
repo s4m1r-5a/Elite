@@ -291,52 +291,17 @@ router.post('/desarrollo', async (req, res) => {
         console.log(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`, x.ul, x.menor)
         //await pool.query(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`)
     })
-    /*const l = await pool.query(`SELECT i.acreedor u, u.fullname nom, i.usuario u1, u1.fullname nom1, (
-        SELECT i.usuario FROM pines i WHERE u1 = i.acreedor
-      ) as u2, (
-        SELECT u.fullname FROM users u WHERE u2 = u.id
-      ) as nom2, (
-        SELECT i.usuario FROM pines i WHERE u2 = i.acreedor
-      ) as u3, (
-        SELECT u.fullname FROM users u WHERE u3 = u.id
-      ) as nom3, (
-        SELECT i.usuario FROM pines i WHERE u3 = i.acreedor
-      ) as u4, (
-        SELECT u.fullname FROM users u WHERE u4 = u.id
-      ) as nom4, (
-        SELECT i.usuario FROM pines i WHERE u4 = i.acreedor
-      ) as u5, (
-        SELECT u.fullname FROM users u WHERE u5 = u.id
-      ) as nom5, (
-        SELECT i.usuario FROM pines i WHERE u5= i.acreedor
-      ) as u6, (
-        SELECT u.fullname FROM users u WHERE u6 = u.id
-      ) as nom6, (
-        SELECT i.usuario FROM pines i WHERE u6 = i.acreedor
-      ) as u7, (
-        SELECT u.fullname FROM users u WHERE u7 = u.id
-      ) as nom7    
-     FROM pines i INNER JOIN users u ON i.acreedor = u.id INNER JOIN users u1 ON i.usuario = u1.id  
-     ORDER BY nom4, nom1, nom2, nom3`);
-    console.log(l)*/
-
-    /*SELECT i.acreedor u, u.fullname nom, i.usuario u1, u1.fullname nom1, (
-        SELECT i.usuario FROM pines i WHERE u1 = i.acreedor
-      ) as u2, (
-        SELECT u.fullname FROM users u WHERE u2 = u.id
-      ) as nom2, (
-        SELECT i.usuario FROM pines i WHERE u2 = i.acreedor
-      ) as u3, (
-        SELECT u.fullname FROM users u WHERE u3 = u.id
-      ) as nom3, (
-        SELECT i.usuario FROM pines i WHERE u3 = i.acreedor
-      ) as u4, (
-        SELECT u.fullname FROM users u WHERE u4 = u.id
-      ) as nom4  
-     FROM pines i INNER JOIN users u ON i.acreedor = u.id INNER JOIN users u1 ON i.usuario = u1.id  
-     ORDER BY nom4, nom1, nom2, nom3;*/
 
 
+/*
+    `UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote 
+    SET s.orden = p.id 
+    WHERE s.concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA', 'BONO EXTRA') AND p.tipobsevacion IS NOT NULL AND s.stado = 6;`
+
+`SELECT s.ids, s.fech, s.concepto, s.stado, s.orden, p.tipobsevacion, p.id, p.fecha, p.lote, l.mz, l.n,
+     s.observaciones FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id INNER JOIN preventa p ON l.id = p.lote   
+     WHERE s.concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA', 'BONO EXTRA') AND p.tipobsevacion IS NOT NULL AND s.stado = 6;`
+*/
     //////////VENTAS DE ASESORES LOS ULLTIMOS 6 MESES /////////////////
 
     /* `SELECT u.fullname, pn.fechactivacion, COUNT(p.id) total, COUNT(IF(TIMESTAMP(p.fecha) >= date_sub(curdate(), INTERVAL 3 month), 1, NULL)) Ult_3meses, 
@@ -653,19 +618,22 @@ cron.schedule("0 0 1 * *", async () => {
     var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 0 13-15,27-31 * *", async () => {
+cron.schedule("0 0 2,17 * *", async () => {
     await pool.query(`UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 15`);
     var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 12 15,28-31 * *", async () => {
-    const finmes = moment().endOf('month').format('DD');
+cron.schedule("0 0 3,18 * *", async () => {
+    /*const finmes = moment().endOf('month').format('DD');
     const dia = moment().endOf('month').format('DD');
     if (dia === finmes || dia === '15') {
         await pool.query(`UPDATE solicitudes SET stado = 15 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 9`);
         var bod = `_Hemos *Bloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
         await EnviarWTSAP('57 3007753983', bod);
-    }
+    }*/
+    await pool.query(`UPDATE solicitudes SET stado = 15 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 9`);
+        var bod = `_Hemos *Bloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
+        await EnviarWTSAP('57 3007753983', bod);
 });
 cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var hoy = moment().format('YYYY-MM-DD');
@@ -873,18 +841,18 @@ router.get('/chats', async (req, res) => {
 
         const apiRes = await fetch(url, options);
         const jsonResponse = await apiRes.json();
-        console.log(jsonResponse)
+        //console.log(jsonResponse)
         return jsonResponse;
     }
 
     var b = await chats()
-    /*var a = await b.dialogs.map((x) => {
+    var a = await b.dialogs.map((x) => {
         if (moviles.indexOf(x.id) != -1) {
             return x
         }
-    })*/
-    //res.send({ dialogs: a.filter(Boolean) });
-    res.send({ dialogs: 0 });
+    })
+    res.send({ dialogs: a.filter(Boolean) });
+    //res.send({ dialogs: 0 });
 
 })
 router.get('/chats/:id', isLoggedIn, async (req, res) => {
@@ -1845,10 +1813,10 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
     const orden = await pool.query(sql, id);
-    const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
-            SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
-            FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.lt = p.lote
-            WHERE s.concepto IN('PAGO', 'ABONO') AND p.id = ? `, id);
+    const r = await pool.query(`SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS monto, SUM(s.monto) AS monto1
+                 FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
+                 LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO')  AND pr.id = ? `, id
+    );
     var l = r[0].monto1 || 0,
         k = r[0].monto || 0;
     var total = l + k;
@@ -1885,41 +1853,40 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
 })
 router.get('/editordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params
-    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
-    p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
-    p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
-    c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, pd.uno, pd.dos, 
-    COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, 
-    pt.valmtr2, pt.porcentage, COALESCE(SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, 
-    if((s.concepto = 'PAGO' OR s.concepto = 'ABONO') AND s.stado = 4, s.monto, 0))), 0) AS Montos, p.status 
-    FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc  
-    LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
-    INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
-    LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ?
-    GROUP BY p.id`; //s.concepto NOT IN('COMISION DIRECTA', 'COMISION INDIRECTA', 'BONO') 
 
-    sql2 = `SELECT SUM(IF(c.tipo = 'SEPARACION', 1, '')) AS SEPARACION,
-    SUM(IF(c.tipo = 'INICIAL', 1, '')) AS INICIAL,
-    SUM(IF(c.tipo = 'FINANCIACION', 1, '')) AS FINANCIACION
-    FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id 
-    WHERE p.tipobsevacion IS NULL AND p.id = ?`;
-    const orden = await pool.query(sql, id);
-    const cuotas = await pool.query(sql2, id);
-    /*var abono = 0;
-    orden.map((x) => {
-        if (x.concepto === 'ABONO' && x.stado == 4) {
-            abono = 1;
-        }
-    })
-    if (abono === 1) {
-        req.flash('error', 'Esta separacion no es posible editarla ya que tiene un ABONO aprobado');
-        res.redirect('/links/reportes');
+    const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND orden = ? AND stado IN(3, 4)`, id);
+
+    if (comi.length > 0) {
+
+        req.flash('error', 'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) pendiente(s) o paga(s)');
+            res.redirect('/links/reportes');
+
     } else {
-        //console.log(orden)
-        res.render('links/editordn', { orden, id });
-    }*/
-    res.render('links/editordn', { id, orden, cuotas });
+
+        sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
+            p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
+            p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
+            c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, pd.uno, pd.dos, 
+            COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, 
+            pt.valmtr2, pt.porcentage, COALESCE(SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, 
+            if((s.concepto = 'PAGO' OR s.concepto = 'ABONO') AND s.stado = 4, s.monto, 0))), 0) AS Montos, p.status 
+            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc  
+            LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+            INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
+            LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ?
+            GROUP BY p.id`; 
+
+        sql2 = `SELECT SUM(IF(c.tipo = 'SEPARACION', 1, '')) AS SEPARACION,
+            SUM(IF(c.tipo = 'INICIAL', 1, '')) AS INICIAL,
+            SUM(IF(c.tipo = 'FINANCIACION', 1, '')) AS FINANCIACION
+            FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id 
+            WHERE p.tipobsevacion IS NULL AND p.id = ?`;
+
+        const orden = await pool.query(sql, id);
+        const cuotas = await pool.query(sql2, id);
+        res.render('links/editordn', { id, orden, cuotas });
+    }
 })
 router.post('/ordn/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -2611,8 +2578,11 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
     }
 })
 router.post('/desendentes', async (req, res) => {
-    var y = await Desendentes(req.user.id, 10)
-    res.send(y);
+    const { id, asesor } = req.body; console.log(id, asesor)
+    const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND orden = ? AND stado IN(3, 4)`, id);
+
+    //var y = await Desendentes(req.user.id, 10)
+    res.send(true);
 })
 //////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
@@ -3647,15 +3617,6 @@ async function Desendentes(pin, stados) {
         default:
             return false
     }
-    /////////// CONSULTAR COMISIONES /////////////////////////
-    /*SELECT s.ids, s.descp, s.stado, s.cuentadecobro, s.orden, 
-    l.id, l.mz, l.n, l.uno, l.dos, l.tres, l.directa, s.asesor
-    FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id 
-    WHERE (l.directa IS NULL AND s.descp = 'VENTA DIRECTA') 
-    OR (l.uno IS NULL AND s.descp = 'PRIMERA LINEA') 
-    OR (l.dos IS NULL AND s.descp = 'SEGUNDA LINEA') 
-    OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
-    AND s.descp != 'SEPARACION';*/
 
     await pool.query(`UPDATE solicitudes s INNER JOIN productosd l ON s.lt = l.id 
         SET l.uno = IF(s.descp = 'PRIMERA LINEA', s.asesor, l.uno), 

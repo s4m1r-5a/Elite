@@ -1838,7 +1838,8 @@ if (window.location.pathname == `/links/reportes`) {
                                         <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                                         <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
                                         <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
+                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
+                                        ${USERADMIN === 'HABIB SALDARRIAGA' ? `<a class="dropdown-item" onclick="GestComi(${data},'${row.asesor}')"><i class="fas fa-sitemap"></i> Gestionar Comisiones</a>` : ''}                                                  
                                     </div>
                                 </div>`;
                     } else if (admin == 1) {
@@ -3699,6 +3700,25 @@ if (window.location.pathname == `/links/reportes`) {
             }
         });
     }
+    var GestComi = (id, asesor) => {
+        $.ajax({
+            url: '/links/desendentes',
+            data: { id, asesor },
+            type: 'POST',
+            async: false,
+            success: function (data) {
+                if (data) {
+                    $('#ModalEventos').one('shown.bs.modal', function () {
+                        $('#ModalEventos').modal('hide');
+                        tableOrden.ajax.reload(null, false);
+                        comisiones.ajax.reload(null, false);
+                        SMSj('success', 'Gestion de comisiones generada');
+                    }).modal('hide');
+                    data = null
+                }
+            }
+        });
+    }
     var D = ''
     var cartra = $('#cartra').DataTable({
         dom: '',
@@ -4100,50 +4120,6 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 'btn btn-secondary',
                 action: function () {
                     CuentaCobro();
-                }
-            },
-            {
-                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>`,
-                attr: {
-                    title: 'Inspeccion de linea desendente',
-                    id: 'Desendente'
-                },
-                className: 'btn btn-secondary',
-                action: function () {
-                    $.ajax({
-                        type: 'POST',
-                        url: '/links/desendentes',
-                        async: false,
-                        beforeSend: function (xhr) {
-                            $('#Desendente').prop('disabled', true);
-                            $('#ModalEventos').modal({
-                                backdrop: 'static',
-                                keyboard: true,
-                                toggle: true
-                            });
-                        },
-                        success: function (data) {
-                            if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                $('#ModalEventos').modal('hide');
-                                SMSj('success', `Solicitud procesada correctamente`);
-                                comisiones.ajax.reload(null, false)
-                            } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                $('#ModalEventos').modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
-                            }
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    })
                 }
             },
             {
@@ -4767,7 +4743,7 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    CuentaCobro();
+                    //CuentaCobro();
                 }
             },
             {
@@ -4782,7 +4758,7 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    $.ajax({
+                    /*$.ajax({
                         type: 'POST',
                         url: '/links/desendentes',
                         beforeSend: function (xhr) {
@@ -4809,7 +4785,7 @@ if (window.location.pathname == `/links/reportes`) {
                         error: function (data) {
                             console.log(data);
                         }
-                    })
+                    })*/
                 }
             }
         ],
