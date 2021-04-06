@@ -1891,7 +1891,7 @@ if (window.location.pathname == `/links/reportes`) {
                 $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
             }
             if (data["obsevacion"] === 'CARTERA') {
-                row, $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+                $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
             }
         },
         initComplete: function (settings, json) {
@@ -11115,9 +11115,14 @@ if (window.location == `${window.location.origin}/links/red`) {
         processing: true,
         autowidth: true,
         columnDefs: [
-            { responsivePriority: 1, targets: -1 },
-            { responsivePriority: 1, targets: -2 }],
-        order: [1, 'asc'],
+            { responsivePriority: 2, targets: 1 },
+            { responsivePriority: 1, targets: 2 },
+            { responsivePriority: 2, targets: 3 },
+            { responsivePriority: 2, targets: 5 },
+            { responsivePriority: 1, targets: 6 },
+            { responsivePriority: 1, targets: 7 },
+            { responsivePriority: 1, targets: 8 }],
+        order: [2, 'asc'],
         ajax: {
             method: "POST",
             url: "/links/reds",
@@ -11130,7 +11135,7 @@ if (window.location == `${window.location.origin}/links/red`) {
                 data: null,
                 defaultContent: ''
             },
-            { data: "pin" },
+            { data: "acreedor" },
             { data: "fullname" },
             { data: "cel" },
             { data: "username" },
@@ -11138,7 +11143,7 @@ if (window.location == `${window.location.origin}/links/red`) {
             {
                 data: "sucursal",
                 render: function (data, method, row) {
-                    return `<input type="text" class="text-center edir" id="${row.pin}"
+                    return `<input type="text" class="text-center edir" id="${row.pin}" style="width:40px"
                     data-toggle="tooltip" data-placement="top" data-container="body" onClick="this.select();"
                     title="Digite porcentage" autocomplete="off" value="${data ? (data * 100).toFixed(1) : 'Red'}"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onchange="Porcentag(this);">`
@@ -11228,6 +11233,24 @@ if (window.location == `${window.location.origin}/links/red`) {
                     }
                 }
             },
+            {
+                data: "bonoextra",
+                render: function (data, method, row) {
+                    return `<input type="text" class="text-center edir" id="${row.pin}" style="width:40px"
+                    data-toggle="tooltip" data-placement="top" data-container="body" onClick="this.select();"
+                    title="Digite porcentage" autocomplete="off" value="${(data * 100).toFixed(1)}"
+                    data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onchange="PorcentagBEx(this);">`
+                }
+            },
+            { data: "idpapa" },
+            { data: "namepapa" },
+            { data: "rangopapa" },
+            { data: "idabuelo" },
+            { data: "nameabuelo" },
+            { data: "rangoabuelo" },
+            { data: "idbisabuelo" },
+            { data: "namebisabuelo" },
+            { data: "rangobisabuelo" },
         ],
         dom: 'Bfrtip',
         buttons: [{
@@ -11349,10 +11372,11 @@ if (window.location == `${window.location.origin}/links/red`) {
         language: languag,
         deferRender: true,
         paging: true,
-        search: {
+        /*search: {
             regex: true,
             caseInsensitive: true,
-        },
+        },*/
+        searching: false,
         responsive: {
             details: {
                 type: 'column'
@@ -11362,6 +11386,7 @@ if (window.location == `${window.location.origin}/links/red`) {
             //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
         },
         rowCallback: function (row, data, index) {
+            //$(row).find(`.papa`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
             /*if (data["estado"] == 9) {
                 $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
             }*/
@@ -11401,7 +11426,6 @@ if (window.location == `${window.location.origin}/links/red`) {
         }
     })
     function Porcentag(F) {
-        //console.log(F, F.id, F.value / 100)
         if (!isNaN(F.value)) {
             $.ajax({
                 type: 'PUT',
@@ -11421,6 +11445,27 @@ if (window.location == `${window.location.origin}/links/red`) {
         } else {
             alert('digite un numero para el porcentage valido')
         }
+    }
+    function PorcentagBEx(F) {
+        /*if (!isNaN(F.value)) {
+            $.ajax({
+                type: 'PUT',
+                url: '/links/reds',
+                data: { S: null, F: F.id, U: F.value / 100 },
+                beforeSend: function (xhr) {
+                },
+                success: function (dat) {
+                    if (dat) {
+                        red2.ajax.reload(null, false)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        } else {
+            alert('digite un numero para el porcentage valido')
+        }*/
     }
     var red = $('#red').DataTable({
         dom: 'Bfrtip',
