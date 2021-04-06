@@ -540,6 +540,12 @@ cron.schedule("0 0 * * *", async () => {
     SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
     AND p.tipobsevacion IS NULL AND l.estado = 1`);
 
+
+    SELECT p.id, p.separar, COUNT(s.ids), IF(SUM(s.monto) < p.separar, SUM(s.monto), NULL) suma FROM preventa p INNER JOIN solicitudes s ON p.id = s.orden INNER JOIN productosd l ON p.lote = l.id WHERE s.concepto IN('PAGO', 'ABONO') 
+GROUP BY p.id 
+ORDER BY suma DESC LIMIT 10
+
+
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
     if (desarrollo && desarrollo !== 'http://localhost:5000') {
@@ -1472,17 +1478,29 @@ router.post('/cartera/:id', isLoggedIn, async (req, res) => {
 });
 router.post('/cartera', isLoggedIn, async (req, res) => {
     const { h } = req.body;
-    sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,
-            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
-            t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
-            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-            INNER JOIN cuotas t ON t.separacion = p.id WHERE p.tipobsevacion IS NULL 
-            AND t.estado IN(3,5) AND t.fechs < '${h}'`
+    sql = `SELECT p.id, l.mz, l.n, p.fecha, (
+        SELECT MAX(TIMESTAMP(fech))
+        FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
+      ) as ultimoabono, (
+        SELECT TIMESTAMPDIFF(MONTH, p.fecha, MAX(TIMESTAMP(fech)))
+        FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
+      ) as meses, l.estado, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, (
+        SELECT SUM(monto)
+        FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
+      ) as abonos, d.proyect, c.nombre, c.documento, u.fullname, c.movil
+  FROM preventa p 
+  INNER JOIN solicitudes s ON p.id = s.orden 
+  INNER JOIN productosd l ON p.lote = l.id 
+  INNER JOIN productos d ON l.producto = d.id 
+  INNER JOIN clientes c ON p.cliente = c.idc 
+  INNER JOIN users u ON p.asesor = u.id 
+  WHERE p.tipobsevacion IS NULL
+  GROUP BY p.id
+  HAVING meses > 2 AND abonos < Total
+  ORDER BY ultimoabono;`
 
     const cuotas = await pool.query(sql);
     respuesta = { "data": cuotas };
-    //console.log(cuotas.length, h)
     res.send(respuesta);
 
 });

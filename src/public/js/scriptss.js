@@ -6102,7 +6102,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     $('nav').show()
 }
 //////////////////////////////////* CARTERA */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/ links / cartera`) {
+if (window.location.pathname == `/links/cartera`) {
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
@@ -6351,48 +6351,17 @@ if (window.location.pathname == `/ links / cartera`) {
                 orientation: 'landscape'
             },
             {
-                text: `< input id = "min" type = "text" class="edi text-center" style = "width: 30px; padding: 1px;"
-        placeholder = "MZ" > `,
-                attr: {
-                    title: 'Busqueda por MZ',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
-                text: `< input id = "max" type = "text" class="edi text-center" style = "width: 30px; padding: 1px;"
-        placeholder = "LT" > `,
-                attr: {
-                    title: 'Busqueda por LT',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            },
-            {
-                text: `< div class="mb-0" >
+                text: `<div class="mb-0" >
                             <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
-                        </div > `,
+                        </div>`,
                 attr: {
                     title: 'Fecha',
                     id: 'facturar'
                 },
                 className: 'btn btn-secondary',
                 action: function () {
-                    /*tabledit.ajax.url("/links/productos/0").load(function () {
-                        tabledit.columns.adjust().draw();
-                    });*/
-                    //$('#ideditar').val('');
-                    //$('.datatabledit').hide();
-                    //$('#cuadro3 input').val('');
-                    //$('#vmt2').val('0');
-                    //$('input[name="incentivo"]').val('0');
-                    //$('#mzs').val(0);
-                    //$('#lts').val(0);
                     $("#cuadro1").hide("slow");
                     $("#cuadro2").show("slow");
-                    //$("#reportrange span").html(start.format("ll") + " - " + end.format("ll"));
-                    //$('#inicio').val(start.format("YYYY-MM-DD"))
-                    //$('#fin').val(end.format("YYYY-MM-DD"))
                 }
             }
         ],
@@ -6412,8 +6381,8 @@ if (window.location.pathname == `/ links / cartera`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
+        /*{ responsivePriority: 1, targets: -1 },
+    { responsivePriority: 1, targets: -2 }*/],
         //{className: "dt-center", targets: "_all"}],
         order: [[1, "desc"]],
         language: languag,
@@ -6432,10 +6401,6 @@ if (window.location.pathname == `/ links / cartera`) {
                 data: "id"
             },
             {
-                data: "proyecto",
-                className: 'te'
-            },
-            {
                 data: "mz",
                 className: 'te'
             },
@@ -6444,33 +6409,79 @@ if (window.location.pathname == `/ links / cartera`) {
                 className: 'te'
             },
             {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "ultimoabono",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            {
+                data: "meses",
+                className: 'te'
+            },
+            {
                 data: "estado",
                 className: 'te',
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `< span class="badge badge-pill badge-warning" > Pendiente</span > `
+                            return `<span class="badge badge-pill badge-warning"> Pendiente</span>`
                             break;
                         case 8:
-                            return `< span class="badge badge-pill badge-info" > Tramitando</span > `
+                            return `<span class="badge badge-pill badge-info"> Tramitando</span>`
                             break;
                         case 9:
-                            return `< span class="badge badge-pill badge-danger" > Anulada</span > `
+                            return `<span class="badge badge-pill badge-danger"> Anulada</span>`
                             break;
                         case 10:
-                            return `< span class="badge badge-pill badge-success" > Separado</span > `
+                            return `<span class="badge badge-pill badge-success"> Separado</span>`
                             break;
                         case 12:
-                            return `< span class="badge badge-pill badge-dark" > Apartado</span > `
+                            return `<span class="badge badge-pill badge-dark"> Apartado</span>`
                             break;
                         case 13:
-                            return `< span class="badge badge-pill badge-primary" > Vendido</span > `
+                            return `<span class="badge badge-pill badge-primary"> Vendido</span>`
                             break;
                         case 15:
-                            return `< span class="badge badge-pill badge-tertiary" > Inactivo</span > ` //secondary
+                            return `<span class="badge badge-pill badge-tertiary"> Inactivo</span>` //secondary
                             break;
                     }
                 }
+            },
+            {
+                data: "valor",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "separar",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "ahorro",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "Total",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "abonos",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "proyect",
+                className: 'te'
             },
             {
                 data: "nombre",
@@ -6481,78 +6492,27 @@ if (window.location.pathname == `/ links / cartera`) {
                 className: 'te'
             },
             {
-                data: "fecha",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
+                data: "fullname",
+                className: 'te'
             },
             {
-                data: "fullname",
+                data: "movil",
                 className: 'te'
             },
             {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 ? `< div class="btn-group btn-group-sm" >
+                    return admin == 1 ? `<div class="btn-group btn-group-sm">
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
                                                     <a class="dropdown-item" href="/links/ordn/${data}"><i class="fas fa-edit"></i> Ediar</a>
-                                                    <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
                                                     <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                                    <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
-                                                    <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                                    <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
                                                 </div>
-                                        </div > `
-                        : `< a href = "/links/ordendeseparacion/${data}" target = "_blank" > <i class="fas fa-print"></i></a > `
+                                        </div>`
+                        : `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`
                 }
-            }, //std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora
-            {
-                data: "std",
-                className: 'te',
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 3:
-                            return `< span class="badge badge-pill badge-danger" > Vencida</span > `
-                            break;
-                        case 5:
-                            return `< span class="badge badge-pill badge-danger" > VencidaR</span > `
-                            break;
-                    }
-                }
-            },
-            {
-                data: "tipo",
-                className: 'te'
-            },
-            {
-                data: "ncuota",
-                className: 'te'
-            },
-            {
-                data: "fechs",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "cuota",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "abono",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "mora",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             }
         ],
         rowCallback: function (row, data, index) {
@@ -6805,42 +6765,42 @@ if (window.location.pathname == `/ links / cartera`) {
         if (!datos.length) {
             datos.push([
                 '',
-                `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
-                `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
-                `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "SEPARACION" > `,
-                `< input class="text-center cuota" type = "text" name = "cuota" id = "Separar" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
-                `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
-                `< select size = "1" class="text-center std" name = "std" disabled >
-                <option value="3" selected="selected">Pendiente</option>
-                <option value="13">Pagada</option>
-                </select > `,
-                `< svg xmlns = "http://www.w3.org/2000/svg" width = "24" height = "24" viewBox = "0 0 24 24" fill = "none"
-        stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" class="feather feather-trash-2" >
+                `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+                `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+                `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
+                `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
+                `<select size="1" class="text-center std" name="std" disabled>
+                     <option value="3" selected="selected">Pendiente</option>
+                    <option value="13">Pagada</option>
+                 </select>`,
+                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
                     <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg > `
+                </svg>`
             ])
         }
         datos.push([
             '',
-            `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
-            `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
-            `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "${tipo}" > `,
-            `< input class="text-center cuota" type = "text" name = "cuota" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
-            `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
-            `< select size = "1" class="text-center std" name = "std" disabled >
+            `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+            `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
+            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
+            `<select size="1" class="text-center std" name="std" disabled>
             <option value="3" selected="selected">Pendiente</option>
             <option value="13">Pagada</option>
-            </select > `,
-            `< a > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            </select>`,
+            `<a> <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg></a > `
+            </svg></a>`
         ])
         crearcartera.clear().draw(false);
         var dat = []
@@ -6874,9 +6834,9 @@ if (window.location.pathname == `/ links / cartera`) {
                 reader.readAsDataURL(this);
                 reader.onload = function (e) {
                     $('#recibos1').append(
-                        `< div class="image container" style = "width: ${marg}%; min-width: 25%; padding-top: 
-        calc(100 % / (16/9)); background - image: url('${e.target.result}'); background - size: 100 %;
-    background - position: center; background - repeat: no - repeat; float: left; "></div>`
+                        `<div class="image container" style="width: ${marg}%; min-width: 25%; padding-top: 
+                         calc(100% / (16/9)); background-image: url('${e.target.result}'); background-size: 100%;
+                         background-position: center; background-repeat: no-repeat; float: left;"></div>`
                     );
                     /*<div class="card">
                         <table class="table table-sm"><tbody><tr><th><div class="text-center"><input type="text" 
