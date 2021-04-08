@@ -1939,16 +1939,18 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
     const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota, porcentage, inicial,
         xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo, mtr2, total, lote,
         cuota, rcuota, std, preventa, uno, dos, tres, directa, otro, valmtr2 } = req.body;
+
     var vr = parseFloat(vmtr2.replace(/\./g, ''));
     var ini = parseFloat(inicial.replace(/\./g, ''));
     var tot = parseFloat(total.replace(/\./g, ''));
+    var ahorr = ahorro ? parseFloat(ahorro.replace(/\./g, '')) : 0;
     var orden = {
         'p.lote': lt, 'p.vrmt2': vr,
         'p.cliente': Array.isArray(clientes) ? clientes[0] : clientes,
         'p.asesor': asesor, 'p.numerocuotaspryecto': parseFloat(inicialcuotas) + parseFloat(financiacion),
         'p.cupon': idbono ? idbono : 1,
         'p.inicialdiferida': inicialcuotas,
-        'p.ahorro': ahorro ? ahorro.replace(/\./g, '') : 0,
+        'p.ahorro': ahorr,
         'p.separar': rcuota[0].replace(/\./g, ''),
         'p.iniciar': xcntag, 'p.cuot': Math.round(cuot)
     }
@@ -1993,7 +1995,9 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
         }
     }
     await pool.query(`UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`, [orden, preventa]);
-    await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE lt = ?`, lote);
+    await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE orden = ?`, preventa);
+    const comisiones = await pool.query(`SELECT * FROM solicitudes WHERE descp != 'SEPARACION' 
+    AND concepto IN('COMISION DIRECTA', 'COMISION INDIRECTA') AND orden = ?`, preventa);
     //`UPDATE preventa SET ? WHERE id = ?`
 
     var ID = '', kuotas = 'UPDATE cuotas SET cuota = CASE id ',
@@ -2039,6 +2043,20 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
         ip += 'estado = ' + estado + ', mtr = ' + vr + ', valor = ' + tot + ', inicial = ' + ini;
         await pool.query(`UPDATE productosd SET ${ip} WHERE id = ?`, lt);
     }
+    var ttt = tot - ahorr;
+    if (comisiones.length > 0) {
+        comisiones.filter((x) => {
+            return x.total !== ttt;
+        }).map((x) => {
+            var monto = ttt * x.porciento;
+            var retefuente = monto * 0.10;
+            var reteica = monto * 8 / 1000;
+            var pagar = monto - (retefuente + reteica);
+            var h = { monto, total: ttt, retefuente, reteica, pagar };
+            pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [h, x.ids]);
+        })
+    }
+
     res.send(true);
 })
 router.post('/separacion/:id', isLoggedIn, async (req, res) => {
@@ -2107,13 +2125,13 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     p = parseFloat(p);
     i = parseFloat(i);
     sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
-    const orden = await pool.query(sql, id); //console.log(orden)
+    const orden = await pool.query(sql, id);
     var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
     var u = Math.round((p - i) / 2);
     var m = (p - i) / 2;
     var v = i / 2;
-    //console.log(orden)
+    //console.log(p, i)
     w = await orden
         .map((t, c) => {
             if ((t.tipo === 'INICIAL' && i === 0) || (t.tipo === 'FINANCIACION' && p === 0)) {
@@ -2936,7 +2954,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
             valu.push([x, ids])
         })
         const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf, req.user.fullname);
+        const R = await PagosAbonos(ids, pdf, req.user.fullname); //console.log(R)
         if (R) {
             //await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
             await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
@@ -3475,7 +3493,7 @@ async function PagosAbonos(Tid, pdf, user) {
     pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
     pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono,
     s.ids, s.descp, pr.id cparacion, s.pago, c.estado std FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
-    INNER JOIN preventa pr ON s.lt = pr.lote INNER JOIN productosd pd ON s.lt = pd.id
+    INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
     LEFT JOIN cupones cp ON s.bono = cp.id WHERE  pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
