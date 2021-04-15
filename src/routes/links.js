@@ -683,78 +683,150 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
-router.get('/prueba', async (req, res) => {
-    /*await pool.query(`UPDATE productosd p INNER JOIN preventa pr ON p.id = pr.lote 
-    SET p.estado = 9, p.tramitando = NULL, pr.cupon = NULL 
-    WHERE p.estado = 1`);
-    await pool.query(`DELETE c, p FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id     
-    WHERE p.cupon IS NULL`)
-    await pool.query(
-        `UPDATE solicitudes s INNER JOIN cuotas c ON s.pago = c.id SET ? WHERE s.stado = ?`,
-        [
-            {
-                's.stado': 3,
-                'c.estado': 3
-            }, 6
-        ]
-    );*/
-    //var request = require("request");
+router.get('/authorize', async (req, res) => {
 
-    /*var options1 = {
-        method: 'POST',
-        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
-        headers:
-        {
-            accept: 'application/json',
-            'content-type': 'application/x-www-form-urlencoded',
-            authorization: `Basic ${Buffer.from("37eb1267-6c33-46b1-a76f-33a553fd812f:yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP").toString('base64')}`
-            //'Basic base64(37eb1267-6c33-46b1-a76f-33a553fd812f:sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM)'
+    /*
+        var data = JSON.stringify({
+            "data": [
+                {
+                    "commerceTransferButtonId": "h4ShG3NER1C",
+                    "transferReference": "10009824679",
+                    "transferAmount": 3458.33,
+                    "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
+                    "transferDescription": "Compra en Telovendo",
+                    "confirmationURL": "https://pagos-api-dev.tigocloud.net/bancolombia/callback"
+                }
+            ]
+        });
+    
+        var config = {
+            method: 'post',
+            url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': 'Bearer AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJm1oK9pPzuhMx8Izra6EPMwRgpnTMNXlkmuRhqe1iLTaP17WuwNHhh160vS_AYkkqtDrO7th67tRJD1WZ592Vx-TYPnY-Cy--JyTlpZfW22bBvEaYPOcCqmlIjxuwZsErj52uVNltVd6SFedjAPzvIJRrIDVblpSz_SVslJoneD8Y'
+            },
+            data: data
+        };
+    
+        axios(config)
+            .then(function (response) {
+                console.log(JSON.stringify(response.data));
+            })
+            .catch(function (error) {
+                console.log(error);
+            });*/
+
+    var config = {
+        method: 'GET',
+        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize',
+        headers: { accept: 'text/html' },
+        qs: {
+            client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+            response_type: 'code',
+            scope: 'Transfer-Intention:write:app',
+            redirect_uri: 'http://localhost:5000/links/authorize',
+            state: 'samirsa'
         },
-        form:
-        {
-            grant_type: 'client_credentials',
-            scope: `Transfer-Intention:write:app Transfer-Intention:read:app`
+    };
+    var datos;
+    request(config, function (error, response, body) {
+        if (error) throw new Error(error);
+        res.send(body);
+        //console.log(body);
+    });
+
+    //res.send(datos);
+})
+router.get('/prueba2', async (req, res) => {
+    var data = JSON.stringify({
+        "data": [
+            {
+                "commerceTransferButtonId": "h4ShG3NER1C",
+                "transferReference": "10009824679",
+                "transferAmount": 3458.33,
+                "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
+                "transferDescription": "Compra en Telovendo",
+                "confirmationURL": "https://pagos-api-dev.tigocloud.net/bancolombia/callback"
+            }
+        ]
+    });
+
+    var config = {
+        method: 'post',
+        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry?access_token=AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmuxZgRYnX5hscdkLBx4N3CWvTC6-T2nqywJ_NgBjW7PxADMSUvuuAxyGTeFLNA9IEYQMBfroZ3Yt0h9ikvOzJYMOqPmk-1hHCnADOqhUzvGKWx30QAksyFchSUv7eUbFOsZzWxmz_-WgDuOkNkfQ_GH6hNZC9Cye10TmjB3CWqPY',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: data
+    };
+
+    axios(config)
+        .then(function (response) {
+            console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+            console.log(error);
+        });
+
+})
+router.post('/callback', async (req, res) => {
+    console.log(req.body);
+})
+router.post('/prueba2', async (req, res) => {
+    console.log(req.body);
+})
+router.post('/authorize', async (req, res) => {
+    console.log(req.body)
+    const options = {
+        method: 'POST',
+        url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize',
+        headers: { 'content-type': 'application/x-www-form-urlencoded', accept: 'text/html' },
+        form: {
+            client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+            scope: 'Transfer-Intention:write:app',
+            'resource-owner': 'Samir Saldarriaga',
+            redirect_uri: 'http://localhost:5000/links/prueba2',
+            'original-url': '/bancolombiabluemix-dev/sandbox/v1/security/oauth-otp-pymes/oauth2/authorize?client_id=37eb1267-6c33-46b1-a76f-33a553fd812f&response_type=code&scope=Transfer-Intention%3Awrite%3Aapp&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Flinks%2Fauthorize&state=samirsa',
+            'dp-state': 'VA',
+            'dp-data': 'jabuna'
         }
     };
-    request(options1, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    });*/
-
-    /*var options = {
-        method: 'POST',
-        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
-        headers:
-        {
-            accept: 'application/vnd.bancolombia.v1+json',
-            'content-type': 'application/vnd.bancolombia.v1+json'
-        },
-        form:
-        {
-            "token_type": "Bearer",
-            "access_token": "AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmtdFG9j6TgzXbLObt3L0ZB0OzPEY_5FQOdKb8h52V2Q0TLb9FbjW6peNsFMmkc9Fp-ayy3lPtqYJGYl6TX7CW-WAXvPNH-gI_RK6L7UJXbGBmBNueWz3lpEQ61ETta9c5RUF7Dvn9svAZcRe1mHvdjk-itXDqB7tgWmm5L4PEFZr6Lf-hgeTL9POn134BckGa",
-            "expires_in": 1200,
-            "consented_on": 1599933480,
-            "scope": "Transfer-Intention:write:app Transfer-Intention:read:app"
-        },
-        body: `{"data":[
-                    {
-                        "commerceTransferButtonId": "h4ShG3NER1C",
-                        "transferReference": "1002345678",
-                        "transferDescription": "Compra en Telovendo",
-                        "transferAmount": 3458.33,
-                        "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
-                        "confirmationURL": "https://pagos-api-dev.cloud.net/callback"
-                    }
-                ]
-        }`
-    };
     request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    });*/
+        if (error) throw new Error(error);
+        res.send(body);
+        //console.log(body);
+    });
 
-    res.send(true);
+    /*
+        var qs = require('qs');
+        var data = qs.stringify({
+            'client_id': '37eb1267-6c33-46b1-a76f-33a553fd812f',
+            'scope': 'Transfer-Intention:write:app',
+            'resource-owner': 'RedFLix',
+            'redirect_uri': 'http://localhost:5000/links/prueba2',
+            'original-url': '/bancolombiabluemix-dev/sandbox/v1/security/oauth-otp-pymes/oauth2/authorize?response_type=code&scope=Transfer-Intention:write:app&redirect_uri=http://localhost:5000/links/authorize&state=sami&client_id=37eb1267-6c33-46b1-a76f-33a553fd812f',
+            'dp-state': 'samirdgh',
+            'dp-data': 'sami'
+        });
+        var config = {
+            method: 'post',
+            url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded'
+            },
+            data: data
+        };
+    
+        axios(config)
+            .then(function (response) {
+                //console.log(JSON.stringify(response.data));
+                res.send(response.data);
+            })
+            .catch(function (error) {
+                console.log(error);
+            });*/
+
 })
 router.get('/proyecciones', async (req, res) => {
 
@@ -1277,7 +1349,7 @@ router.get('/pagos/:id', async (req, res) => {
     const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id)
     if (cliente.length > 0) {
         const client = cliente[0]
-        const d = await pool.query(`SELECT p.id, p.ahorro, pd.id lt, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, 
+        const d = await pool.query(`SELECT p.id, p.ahorro, pd.id lt, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, c.pin, pr.id pyt, 
         c.descuento, pr.proyect FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN cupones c ON p.cupon = c.id 
         INNER JOIN productos pr ON pd.producto = pr.id WHERE p.tipobsevacion IS NULL AND (p.cliente = ? OR p.cliente2 = ?)`, [client.idc, client.idc]);
         var c = ''
@@ -1287,8 +1359,9 @@ router.get('/pagos/:id', async (req, res) => {
                 c += `${x > 0 ? ' OR ' : ''}separacion = ${b.id}`
             }) : c = `separacion = ${d[0].id}`;
 
+            const cuentas = await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r ON p.recaudador = r.id WHERE p.producto = ${d[0].pyt} ORDER BY r.id`);
             const cuotas = await pool.query(`SELECT * FROM cuotas WHERE estado = 3 AND fechs <= CURDATE() AND (${c}) ORDER BY TIMESTAMP(fechs) ASC`);
-            res.send({ d, client, cuotas, status: true });
+            res.send({ d, client, cuotas, cuentas, status: true });
         } else {
             res.send({ paquete: 'Aun no realiza una separacion, comuniiquece con un asesor', status: false });
         }
@@ -1297,15 +1370,53 @@ router.get('/pagos/:id', async (req, res) => {
     }
 });
 router.post('/pagos', async (req, res) => {
-    const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin } = req.body;
-    //var nombre = normalize(buyerFullName).toUpperCase();
-    var APIKey = 'lPAfp1kXJPETIVvqr60o6cyEIy' //Grupo Elite 
-    //var APIKey = '4Vj8eK4rloUd272L48hsrarnUA' //para pruebas
-    //var APIKey = 'pGO1M3MA7YziDyS3jps6NtQJAg' // Para SAMIR
-    var key = APIKey + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP'
-    var hash = crypto.createHash('md5').update(key).digest("hex");
-    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
-    res.send({ sig: hash, ext });
+    const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin, pyt } = req.body;
+    const codes = await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
+    ON p.recaudador = r.id WHERE p.producto = '${pyt}' AND r.entidad = 'PAYU'`);
+    if (codes.length > 0) {
+        var key = codes[0].code3 + '~' + codes[0].code1 + '~' + referenceCode + '~' + amount + '~COP'
+        var hash = crypto.createHash('md5').update(key).digest("hex");
+        var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
+        var smg = { sig: hash, ext, merchantId: codes[0].code1, accountId: codes[0].code2 };
+    }
+    res.send(smg);
+});
+router.post('/boton', async (req, res) => {
+    const { pyt, mora, transferAmount, transferReference, transferDescription } = req.body;
+    console.log(req.body);
+    var data = JSON.stringify({
+        "data": [
+            {
+                "commerceTransferButtonId": "h4ShG3NER1C",
+                "transferReference": transferReference,
+                "transferAmount": transferAmount,
+                "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
+                "transferDescription": transferDescription,
+                "confirmationURL": "https://pagos-api-dev.tigocloud.net/bancolombia/callback"
+            }
+        ]
+    });
+
+    var config = {
+        method: 'post',
+        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmDtiIF4TAuv9kgn089V6e83QR05QKFMYC3i8QAr2fHyFCkaKFvzS8rhq75wwWVrXJhSpDQgc8e6wxrvoXY2Ts8FOMHb_8wkpk0rz0XYpuKDEAPniWedJvNmb8KP97Qht4PeL2EK3im3uEbkE1P91INYcMVVVzpbGoC_1SyCDcf4E'
+        },
+        data: data
+    };
+    axios(config)
+        .then(function (response) {
+            console.log(response.data);
+            //var dat = JSON.parse(response.data)
+            res.send({ std: true, msj: 'vamos muy bien', href: response.data.data[0].redirectURL });
+        })
+        .catch(function (error) {
+            //console.log(error);
+            res.send({ std: false, msj: error, href: '/' });
+        });
+
 });
 router.post('/recibo', async (req, res) => {
     const { total, factrs, id, recibos, ahora, concpto, lt, formap, bono, pin, montorcb, g, mora, rcbexcdnt, nrecibo, montos, feh, orden } = req.body;
@@ -1482,7 +1593,7 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
         SELECT MAX(TIMESTAMP(fech))
         FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
       ) as ultimoabono, (
-        SELECT TIMESTAMPDIFF(MONTH, p.fecha, MAX(TIMESTAMP(fech)))
+        SELECT TIMESTAMPDIFF(MONTH, MAX(TIMESTAMP(fech)), CURDATE())
         FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
       ) as meses, l.estado, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, (
         SELECT SUM(monto)

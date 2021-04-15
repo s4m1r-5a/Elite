@@ -1010,6 +1010,10 @@ if (window.location.pathname == `/tablero`) {
 };
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pagos`) {
+    $(document).ready(function () {
+        $('#cedula').focus();
+    });
+    $('nav').hide();
     var bono = 0, tsinbono = 0, vx = 0, cliente;
     var DT = () => {
         bono = 0;
@@ -1020,27 +1024,34 @@ if (window.location.pathname == `/links/pagos`) {
         $('.bonus').val('');
         $('.bonu').val('');
     }
-    var validationForm = $("#smartwizard");
-    validationForm.smartWizard({
+    $('.card-header').on('click', function () {
+        if ($(this).find('i').hasClass('fa-angle-down')) {
+            $(this).find('i').removeClass("fa-angle-down");
+            $(this).find('i').addClass("fa-angle-up");
+        } else {
+            $(this).find('i').removeClass("fa-angle-up");
+            $(this).find('i').addClass("fa-angle-down");
+        }
+    })
+    $("#smartwizard").smartWizard({
         /*showStepURLhash: false,
-        backButtonSupport: false,*/
-        useURLhash: false,
+        useURLhash: false,*/
         selected: 0, // Paso inicial seleccionado, 0 - primer paso
-        theme: 'arrows', //'default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+        theme: 'dots', //'arrows''default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
         justified: true, // Justificación del menú Nav.
-        darkMode: true, // Activar/desactivar el Modo Oscuro si el tema es compatible.
-        autoAdjustHeight: true, // Ajustar automáticamente la altura del contenido
+        darkMode: false, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+        autoAdjustHeight: false, // Ajustar automáticamente la altura del contenido
         cycleSteps: false, // Permite recorrer los pasos
         backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
-        //enableURLhash: true, // Habilitar la selección del paso basado en el hash url
+        enableURLhash: false, // Habilitar la selección del paso basado en el hash url
         transition: {
-            animation: 'none', // Efecto en la navegación, none/fade/slide-horizontal/slide-vertical/slide-swing
+            animation: 'slide-swing', // Efecto en la navegación, /none/fade/slide-horizontal/slide-vertical/slide-swing
             speed: '400',  // Velocidad de animación Transion
             easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
         },
         toolbarSettings: {
-            toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos
-            toolbarButtonPosition: 'right', // izquierda, derecha, centro
+            toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos - none, top, bottom, both
+            toolbarButtonPosition: 'center', // izquierda, derecha, centro - left, right, center
             showNextButton: true, // show/hide a Next button
             showPreviousButton: false, // show/hide a Previous button
             //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
@@ -1084,21 +1095,44 @@ if (window.location.pathname == `/links/pagos`) {
                         data.d.map((r) => {
                             $('#proyectos').append(`<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`);
                         });
-
                         var Calculo = (m) => {
                             var mora = 0, cuot = 0, Description = '', cont = 0, c = ID(3);
-                            $('#Code').val(data.client.idc + '-' + m + '-' + c); console.log(data.client.idc + '-' + m + '-' + c)
+                            $('#Code').val(data.client.idc + '-' + m + '-' + c);
+                            $('#transferReference').val(data.client.idc + '-' + m + '-' + c);
                             vx = data.client.idc + '-' + m + '-' + c;
+                            var RCB = false, BOTON = false, PAYU = false, WOMPI = false;
+                            data.cuentas.map((r) => {
+                                if (r.tipo === 'CTA-CTE' && r.stado === 7) {
+                                    $('#RCB').show();
+                                    $('#formapRCB').val(`${r.tipo}-${r.code1}`); 
+                                    RCB = true;
+                                } else if (r.tipo === 'BOTON' && r.stado === 7) {
+                                    $('#BOTON').show();
+                                    BOTON = true;
+                                } else if (r.entidad === 'PAYU' && r.stado === 7) {
+                                    $('#PAYU').show();
+                                    PAYU = true;
+                                } else if (r.entidad === 'WOMPI' && r.stado === 7) {
+                                    $('#WOMPI').show();
+                                    WOMPI = true
+                                } //else { $('#WOMPI').hide() }
+                            })
+                            !RCB ? $('#RCB').hide() : '';
+                            !BOTON ? $('#BOTON').hide() : '';
+                            !PAYU ? $('#PAYU').hide() : '';
+                            !WOMPI ? $('#WOMPI').hide() : '';
+                            RCB = false, BOTON = false, PAYU = false, WOMPI = false;
                             data.d.filter((r) => {
                                 return r.id == m
                             }).map((r) => {
-                                $('#orden').val(m); console.log(m, 'sdflks')
+                                $('#orden').val(m);
                                 $('#Cupon').html(r.pin);
                                 $('#Dto').html(r.descuento);
                                 $('#Ahorro').html(Moneda(r.ahorro));
                                 $('#Proyecto').html(Moneda(r.valor));
                                 $('#Proyecto-Dto').html(Moneda(r.valor - r.ahorro));
                                 $('#lt').val(r.lt);
+                                $('.pyt').val(r.pyt);
                                 Description = r.proyect + ' Mz ' + r.mz + ' Lote: ' + r.n;
                             })
                             data.cuotas.filter((r) => {
@@ -1117,13 +1151,13 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Cuotan').html(Moneda(r.ncuota));
                                 $('#Cuota').html(Moneda(r.cuota));
                                 $('#Mora').html(Moneda(mor));
-                                $('#mora').val(mor);
+                                $('#mora, .mora').val(mor);
                                 $('#Facturas').html(x + 1);
                                 $('.Totalf').html(Moneda(r.cuota + mor));
                                 $('.Total, .Total3').html(Moneda(c));
                                 //$('.Total3').html(Moneda(mora + cuot));
                                 $('#Total, #Total2').val(c);
-                                $('#Description').val(r.tipo + ' ' + Description);
+                                $('#Description, #transferDescription').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
                                 $('#idC').val(idC);
                                 //$('#idC').val(r.id);
@@ -1134,12 +1168,13 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Cuotan').html(0);
                                 $('#Cuota').html(0);
                                 $('#Mora').html(0);
+                                $('#mora, .mora').val(0);
                                 $('#Facturas').html(0);
                                 $('.Totalf').html(0);
                                 $('.Total').html(0);
                                 $('.Total3').html(0);
                                 $('#Total, #Total2').val(0);
-                                $('#Description').val('ABONO ' + Description);
+                                $('#Description, #transferDescription').val('ABONO ' + Description);
                                 $('#factrs').val(0);
                                 $('#idC').val('');
                                 $('#concpto').val('ABONO')
@@ -1150,13 +1185,14 @@ if (window.location.pathname == `/links/pagos`) {
                         $('#proyectos').change(function () {
                             Calculo($(this).val())
                         })
+                        $('.Total2 input').focus();
                         $('.Total2').change(function () {
                             var totl2 = parseFloat($(this).cleanVal())
                             var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''))
                             var totl = parseFloat($('.Total').html().replace(/\./g, ''))
                             //if (totl2 === totalf || totl2 > totl) {
                             $('.Total3').html(Moneda(totl2));
-                            $('#Total, #Total2').val(totl2);
+                            $('#Total, #Total2, #transferAmount').val(totl2);
                             if (totl2 < totl) {
                                 $('#idC').val(idC);
                             }
@@ -1186,7 +1222,8 @@ if (window.location.pathname == `/links/pagos`) {
             var T2 = $('.Total2').val();
             if (T != 0 || T2 || bono) {
                 skdt = true
-                $('.sw-btn-next').html('Pagar')
+                //$('.sw-btn-next').html('Pagar');
+                $('.sw-btn-next').hide();
             } else {
                 skdt = false
                 SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
@@ -1237,7 +1274,7 @@ if (window.location.pathname == `/links/pagos`) {
         if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
             //var l = parseFloat($('#Total').val())
             //var cal = Math.round((l * 2.79 / 100) + 800)
-            $('#rcb').prop('checked', false)
+            //$('#rcb').prop('checked', false)
             /*$('.transaccion').html(Moneda(cal))
             $('.Total3').html(Moneda(l + cal));
             $('#Total, #Total2').val(l + cal);*/
@@ -1251,23 +1288,41 @@ if (window.location.pathname == `/links/pagos`) {
                 async: true,
                 success: function (data) {
                     $('#signature').val(data.sig);
-                    $('#extra').val(data.ext)
+                    $('#extra').val(data.ext);
+                    $('#merchantId').val(data.merchantId);
+                    $('#accountId').val(data.accountId);
                 }
             });
             RCB(false);
 
         } else if (forma === 'recbo') {
             RCB(true);
-            $('#pys').prop('checked', false);
+            //$('#pys').prop('checked', false);
             $('#signature').val('');
             $('.transaccion').html('0');
             $('.Total3').html(t2 ? t2 : t);
             $('#Total, #Total2').val(T2 ? T2 : T);
-            $('#file2').click();
+        } else if (forma === 'boton') {
+            RCB(true);
+            $('#recibo').val('');
+            $('#file').val('');
+            $('#signature').val('');
+            $('.transaccion').html('0');
+            $('.Total3').html(t2 ? t2 : t);
+            $('#Total, #Total2, #c').val(T2 ? T2 : T);
         }
-        $('.sw-btn-next').on('click', function () {
-            $('#' + forma).validate();
-            $('#' + forma).submit();
+        $('#subirR').click(function () {
+            $('#file2').click();
+        })
+        $('#BTN-BOTON').on('click', function () {
+            $('#boton').submit();
+        })
+        $('#BTN-PAYU').on('click', function () {
+            $('#payu').submit();
+        })
+        $('#BTN-RCB').on('click', function () {
+            $('#recbo').validate();
+            $('#recbo').submit();
         })
     }
     var RCB = (n) => {
@@ -1549,6 +1604,39 @@ if (window.location.pathname == `/links/pagos`) {
                 }
             });
         }
+    });
+    $('#boton').submit(function (e) {
+        e.preventDefault();
+        var formData = $(this).serialize();
+        $.ajax({
+            type: 'POST',
+            url: '/links/boton',
+            data: $(this).serialize(),            
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            //async: false,
+            success: function (data) {
+                if (data.std) {
+                    SMSj('success', data.msj);
+                    setTimeout(function () {
+                        window.location.href = data.href;
+                    }, 2000);
+                } else {
+                    SMSj('error', 'Existe un error. No es posible con tinuar, intenta con un metodo de pago diferente');
+                    $('#ModalEventos').hide();
+                    setTimeout(function () {
+                        $('#ModalEventos').one('shown.bs.modal', function () {
+                            $('#ModalEventos').hide();
+                        }).modal('hide');                        
+                    }, 2000);
+                }
+            }
+        });
     });
 
 }
@@ -6097,10 +6185,10 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         //window.addEventListener("load", window.print());
     })
 
-} else {
-    $('footer').show()
-    $('nav').show()
-}
+} //else {
+//$('footer').show()
+//$('nav').show()
+//}
 //////////////////////////////////* CARTERA */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/cartera`) {
     minDateFilter = "";
@@ -7040,7 +7128,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         $('.v').change(function () {
             if ($(this).attr('id') === 'vmt2') {
                 $('#crearlotes .vmt2').val($(this).val());
-                console.log('si cruso')
+                //console.log('si cruso')
             }
             $('#crearlotes .mt2').each(function (index, element) {
                 var fila = $(this).parents('tr');
@@ -12165,6 +12253,10 @@ if (window.location == `${window.location.origin}/links/cupones`) {
             }
         })
     })
+};
+////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/prueba`) {
+
 };
 function Unidades(num) {
 
