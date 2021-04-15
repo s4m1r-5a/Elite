@@ -1,601 +1,489 @@
-<main class="main d-flex w-100">
+<main class="main d-flex w-100" style="background-image: url('/img/payu/fondoA.png');
+  -webkit-background-size: 100% 100%;           
+     -moz-background-size: 100% 100%;         
+       -o-background-size: 100% 100%;          
+          background-size: 100% 100%;           
+
+  -moz-border-image: url(bg-image.png) 0;">
+    <!--<h3 class="float-left ml-2 mt-2">Pagos</h3>-->
     <div class="container d-flex flex-column">
         <div class="row h-100">
             <div class="col-sm-12 col-md-10 col-lg-8 mx-auto d-table h-100">
-                <div class="text-center mt-4">
-                    <h1 class="h2">Pagos</h1>
+                <!--<div class="t-1">
+                    
                     <p class="lead">
                         Conoce aqui el monto de tus cuotas.
                     </p>
-                </div>
-                <div id="smartwizard" class="wizard wizard-primary mb-1">
-                    <ul>
+                </div>-->
+                <div id="smartwizard">
+                    <ul class="nav">
                         <li>
-                            <a class="sidebar-link" href="#arrows-primary-step-1">
-                                <i class="align-middle" data-feather="credit-card"></i> <span
-                                    class="align-middle">Documento</span>
+                            <a class="nav-link" href="#step-1">
+                                Documento
                             </a>
                         </li>
                         <li>
-                            <a class="sidebar-link" href="#arrows-primary-step-2">
-                                <i class="align-middle" data-feather="droplet"></i> <span
-                                    class="align-middle">Cuota</span>
+                            <a class="nav-link" href="#step-2">
+                                Cuota
                             </a>
                         </li>
                         <li>
-                            <a class="sidebar-link" href="#arrows-primary-step-3">
-                                <i class="align-middle" data-feather="help-circle"></i> <span
-                                    class="align-middle">Metodo</span>
+                            <a class="nav-link" href="#step-3">
+                                Metodo
                             </a>
                         </li>
                     </ul>
-                    <div>
-                        <div id="arrows-primary-step-1" class="">
-                            <div class="m-sm-4">
+                    <div class="tab-content">
+                        <div id="step-1" class="tab-pane" role="tabpanel">
+                            <div class="m-sm-4" style="max-width: 500px;">
                                 <div class="alert alert-danger alert-dismissible form-group" role="alert"
                                     style="display: none;">
                                     <div class="alert-message">s</div>
                                 </div>
                                 <div class="form-group">
-                                    <label>Documento</label>
+                                    <h3 class="float-left">Documento de identidad</h3>
+                                    <label>ingrese un documento que se encuentre en la orden de
+                                        compra.</label>
                                     <input class="form-control form-control-lg" id="cedula" type="text" name="pin"
                                         placeholder="Ingrese numero de documento" required autocomplete="off" />
                                 </div>
                             </div>
                         </div>
-                        <div id="arrows-primary-step-2" class="">
-                            <table class="table table-sm my-2">
-                                <tbody>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-lg" data-feather="user"></i>
-                                        </th>
-                                        <td>
-                                            <span class="Cliente"></span>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-lg" data-feather="sun"></i>
-                                        </th>
-                                        <td>
-                                            Proyecto:
-                                            <select class="form-control-no-border" id="proyectos">
-                                            </select>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <div class="row">
-                                <div class="col-12 col-lg-6">
+                        <div id="step-2" class="tab-pane" role="tabpanel">
+                            <div class="row justify-content-center">
+                                <div class="col-12 card border-secondary" style="max-width: 500px;">
                                     <table class="table table-sm my-2">
                                         <tbody>
                                             <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="heart"></i>
-                                                    Cupon
-                                                </th>
-                                                <td>
-                                                    <span id="Cupon"></span>
-                                                </td>
+                                                <th><i class="feather-lg" data-feather="user"></i></th>
+                                                <td><span class="Cliente"></span></td>
                                             </tr>
                                             <tr>
                                                 <th>
-                                                    <i class="feather-md" data-feather="mail"></i>
-                                                    Dto
+                                                    <i class="feather-lg" data-feather="sun"></i>
                                                 </th>
                                                 <td>
-                                                    <span id="Dto"></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="phone-call"></i>
-                                                    Ahorro
-                                                </th>
-                                                <td>
-                                                    <span id="Ahorro"></span>
-                                                </td>
-                                            </tr>
-                                            <tr class="mb-4">
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Proyecto Dto
-                                                </th>
-                                                <td>
-                                                    <span id="Proyecto-Dto"></span>
-                                                </td>
-                                            </tr>
-                                            <tr class="mb-4">
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Facturas V.
-                                                </th>
-                                                <td>
-                                                    <span id="Facturas"></span>
+                                                    Proyecto:
+                                                    <select class="form-control-no-border" id="proyectos"
+                                                        style="width: 90%;">
+                                                    </select>
                                                 </td>
                                             </tr>
                                         </tbody>
                                     </table>
-                                </div>
-                                <div class="col-12 col-lg-6">
-                                    <table class="table table-sm my-2">
-                                        <tbody>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Proyecto
-                                                </th>
-                                                <td>
-                                                    <span id="Proyecto"></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Concepto
-                                                </th>
-                                                <td>
-                                                    <span id="Concepto"></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    N° Cuota
-                                                </th>
-                                                <td>
-                                                    <span id="Cuotan"></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Cuota
-                                                </th>
-                                                <td>
-                                                    <span id="Cuota"></span>
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="map"></i>
-                                                    Mora
-                                                </th>
-                                                <td>
-                                                    <span id="Mora"></span>
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
+                                    <div class="card bg-light">
+                                        <div class="card-header">
+                                            <strong class="text-muted">DETALLADO</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="row">
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Cupon:</span>
+                                                    <span id="Cupon" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Proyecto:</span>
+                                                    <span id="Proyecto" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Dto:</span>
+                                                    <span class="float-right">%</span>
+                                                    <span id="Dto" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Concepto:</span>
+                                                    <span id="Concepto" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Ahorro:</span>
+                                                    <span id="Ahorro" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>N°-Cuota:</span>
+                                                    <span id="Cuotan" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Proyecto-Dto:</span>
+                                                    <span id="Proyecto-Dto" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Cuota:</span>
+                                                    <span id="Cuota" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Facturas-Vnc:</span>
+                                                    <span id="Facturas" class="float-right"></span>
+                                                </div>
+                                                <div class="col-12 col-md-6 col-lg-6">
+                                                    <span>Mora:</span>
+                                                    <span id="Mora" class="float-right"></span>
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <hr />
+                                                </div>
+
+                                                <div class="col-12">
+                                                    <span>BONO:</span>
+                                                    <div class="d-inline-block float-right" style="max-width: 80px;">
+                                                        <input class="edi d text-center text-uppercase" id="bono"
+                                                            type="text" placeholder="Bono" autocomplete="off"
+                                                            style="padding: 1px; width: 100%;" name="bono">
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <span>FACTURA:</span>
+                                                    <div class="d-inline-block float-right">
+                                                        <span class="Totalf"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <span>BONO:</span>
+                                                    <div class="d-inline-block float-right">
+                                                        <span id="TotalBono"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <span>PAGAR:</span>
+                                                    <div class="d-inline-block float-right">
+                                                        <span class="Total"></span>
+                                                    </div>
+                                                </div>
+                                                <div class="col-12">
+                                                    <span>OTRO VALOR:</span>
+                                                    <div class="d-inline-block float-right" style="max-width: 80px;">
+                                                        <input class="edi d text-right Total2" type="text"
+                                                            placeholder="Valor" autocomplete="off"
+                                                            style="padding: 1px; width: 100%;" name="otrovalor"
+                                                            data-mask="000.000.000" data-mask-reverse="true"
+                                                            data-mask-selectonfocus="true">
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                 </div>
                             </div>
-                            <table class="table table-sm my-2">
-                                <tbody>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="bookmark"></i>
-                                            ¿ Tienes un BONO ?
-                                        </th>
-                                        <td>
-                                            <div class="d-inline-block float-right">
-                                                <input class="form-control-no-border edi d text-center text-uppercase"
-                                                    id="bono" type="text" placeholder="Ingrese aqui el bono"
-                                                    autocomplete="off" style="padding: 1px; width: 100%;" name="bono">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="dollar-sign"></i>
-                                            Total Factura
-                                        </th>
-                                        <td>
-                                            <div class="d-inline-block float-right">
-                                                <span class="Totalf"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="dollar-sign"></i>
-                                            Bono
-                                        </th>
-                                        <td>
-                                            <div class="d-inline-block float-right">
-                                                <span id="TotalBono"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="dollar-sign"></i>
-                                            Total a Pagar
-                                        </th>
-                                        <td>
-                                            <div class="d-inline-block float-right">
-                                                <span class="Total"></span>
-                                            </div>
-                                        </td>
-                                    </tr>
-                                    <tr>
-                                        <th>
-                                            <i class="feather-md" data-feather="dollar-sign"></i>
-                                            Otro Valor
-                                        </th>
-                                        <td>
-                                            <div class="d-inline-block float-right">
-                                                <input class="form-control-no-border edi d text-right Total2"
-                                                    type="text" placeholder="Ingrese aqui otro valor" autocomplete="off"
-                                                    style="padding: 1px; width: 100%;" name="otrovalor"
-                                                    data-mask="000.000.000" data-mask-reverse="true"
-                                                    data-mask-selectonfocus="true">
-                                            </div>
-                                        </td>
-                                    </tr>
-                                </tbody>
-                            </table>
-                            <p>El monto a digitar en otro valor debe ser mayor
-                                al total
-                                a pagar. Para mas informacion comuniquese con
-                                nuestro
-                                servicio al cliente</p>
                         </div>
-                        <div id="arrows-primary-step-3" class="">
-                            <!--https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu-->
-                            <form id="payu" method="post"
-                                action="https://checkout.payulatam.com/ppp-web-gateway-payu">
-                                <table class="table table-sm my-2">
-                                    <tbody>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>Nombre
-                                            </th>
-                                            <td>
-                                                <input type="text" name="buyerFullName" class="form-control Cliente"
-                                                    disabled>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>Movil
-                                            </th>
-                                            <td>
-                                                <input type="text" name="telephone" class="form-control" id="Movil"
-                                                    disabled>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="user"></i>Email
-                                            </th>
-                                            <td>
-                                                <input type="email" name="buyerEmail" class="form-control" id="Email"
-                                                    disabled>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="sun"></i>Concepto
-                                            </th>
-                                            <td>
-                                                <input type="text" name="description" class="form-control"
-                                                    id="Description" value="" disabled>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="dollar-sign"></i>
-                                                transaccion
-                                            </th>
-                                            <td>
-                                                <div class="d-inline-block float-right">
-                                                    <span class="transaccion"></span>
+                        <div id="step-3" class="tab-pane" role="tabpanel">
+                            <div class="row justify-content-center">
+                                <div class="col-12 card border-secondary" style="max-width: 500px;">
+
+                                    <div class="accordion" id="accordion">
+                                        <div class="card bg-light mt-2">
+                                            <div class="card-header" type="button" data-toggle="collapse"
+                                                data-target="#collapse" aria-expanded="true" aria-controls="collapse">
+                                                <strong class="text-muted">RESUMEN DE TRANSACCION</strong>
+                                                <i class="fas fa-angle-up float-right"></i>
+                                            </div>
+                                            <div id="collapse" class="collapse show" aria-labelledby="headingOne"
+                                                data-parent="#accordion">
+                                                <div class="card-body text-center">
+                                                    <strong class="">VALOR A PAGAR</strong>
+                                                    <h1 class="text-success Total3"></h1>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                        <tr>
-                                            <th>
-                                                <i class="feather-md" data-feather="dollar-sign"></i>
-                                                Total
-                                            </th>
-                                            <td>
-                                                <div class="d-inline-block float-right">
-                                                    <span class="Total3"></span>
-                                                    <input type="hidden" name="amount" id="Total">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="accordion" id="accordionExample">
+                                        <div class="card">
+                                            <div class="card-header" id="headingOne" type="button"
+                                                data-toggle="collapse" data-target="#collapseOne" aria-expanded="true"
+                                                aria-controls="collapseOne">
+                                                <strong class="text-muted">DETALLES DEL PAGO</strong>
+                                                <i class="fas fa-angle-down float-right"></i>
+                                            </div>
+                                            <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
+                                                data-parent="#accordionExample">
+                                                <div class="card-body">
+                                                    <!--https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu-->
+                                                    <form id="payu" method="post"
+                                                        action="https://checkout.payulatam.com/ppp-web-gateway-payu">
+                                                        <input name="pyt" class="pyt" type="hidden">
+                                                        <input name="mora" class="mora" type="hidden">
+                                                        <table class="table table-sm">
+                                                            <tbody>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="user"></i>Nombre
+                                                                    </th>
+                                                                    <td>
+                                                                        <input type="text" name="buyerFullName"
+                                                                            class="form-control Cliente" disabled>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="user"></i>Movil
+                                                                    </th>
+                                                                    <td>
+                                                                        <input type="text" name="telephone"
+                                                                            class="form-control" id="Movil" disabled>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="user"></i>Email
+                                                                    </th>
+                                                                    <td>
+                                                                        <input type="email" name="buyerEmail"
+                                                                            class="form-control" id="Email" disabled>
+                                                                    </td>
+                                                                </tr>
+                                                                <tr>
+                                                                    <th>
+                                                                        <i class="feather-md"
+                                                                            data-feather="sun"></i>Concepto
+                                                                    </th>
+                                                                    <td>
+                                                                        <input type="text" name="description"
+                                                                            class="form-control" id="Description"
+                                                                            value="" disabled>
+                                                                    </td>
+                                                                </tr>
+                                                            </tbody>
+                                                        </table>
+                                                        <input type="hidden" name="amount" id="Total">
+                                                        <input name="merchantId" id="merchantId" type="hidden">
+                                                        <input name="accountId" id="accountId" type="hidden">
+                                                        <input name="referenceCode" type="hidden" id="Code">
+                                                        <input name="tax" type="hidden" value="0">
+                                                        <input name="taxReturnBase" type="hidden" value="0">
+                                                        <input name="currency" type="hidden" value="COP">
+                                                        <input name="signature" type="hidden" id="signature">
+                                                        <input name="test" type="hidden" value="0">
+                                                        <input type="hidden" name="extra2" id="extra">
+                                                        <input name="responseUrl" type="hidden"
+                                                            value="https://grupoelitefincaraiz.com/planes">
+                                                        <input name="confirmationUrl" type="hidden"
+                                                            value="https://grupoelitefincaraiz.com/confir">
+                                                        <!--<input name="responseUrl" type="hidden" value="http://localhost:5000/planes">
+                                                        <input name="confirmationUrl" type="hidden" value="https://endarh7fdp1a476.m.pipedream.net">-->
+                                                        <div class="mt-auto pgpayu" style="display: none;">
+                                                            <input name="Submit" type="submit"
+                                                                class="btn btn-lg btn-outline-danger" value="Pagar">
+                                                        </div>
+                                                    </form>
                                                 </div>
-                                            </td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                                <!--<input name="merchantId" type="hidden" value="508029"> PARA PRUEBAS
-                                <input name="accountId" type="hidden" value="512321"> PARA PRUEBAS-->
-                                <input name="merchantId" type="hidden" value="845014">
-                                <input name="accountId" type="hidden" value="852515">
-                                <!--<input name="merchantId" type="hidden" value="825255"> SAMIR
-                                    <input name="accountId" type="hidden" value="832520"> SAMIR-->
-                                <input name="referenceCode" type="hidden" id="Code">
-                                <input name="tax" type="hidden" value="0">
-                                <input name="taxReturnBase" type="hidden" value="0">
-                                <input name="currency" type="hidden" value="COP">
-                                <input name="signature" type="hidden" id="signature" value="">
-                                <input name="test" type="hidden" value="0">
-                                <input type="hidden" name="extra2" id="extra" value="">
-                                <input name="responseUrl" type="hidden" value="https://grupoelitefincaraiz.com/planes">
-                                <input name="confirmationUrl" type="hidden"
-                                    value="https://grupoelitefincaraiz.com/confir">
-                                <!--<input name="responseUrl" type="hidden" value="http://localhost:5000/planes">
-                                <input name="confirmationUrl" type="hidden"
-                                    value="https://endarh7fdp1a476.m.pipedream.net">-->
-                                <div class="mt-auto pgpayu" style="display: none;">
-                                    <input name="Submit" type="submit" class="btn btn-lg btn-outline-danger"
-                                        value="Pagar">
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <div class="card">
+                                        <div class="card-header">
+                                            <strong class="text-muted">METODOS DE PAGO</strong>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="accordion" id="accordion2">
+
+                                                <div class="card" id="BOTON">
+                                                    <div class="card-header" type="button" data-toggle="collapse"
+                                                        data-target="#collapse2" aria-expanded="true"
+                                                        aria-controls="collapse2" onclick="Pay('boton')">
+                                                        <div class="row">
+                                                            <div class="col-12 col-md-9 col-lg-9">
+                                                                <strong class="text-muted">Botón
+                                                                    Bancolombia</strong><br>
+                                                                <small class="text-muted">Transfiere con tu cuenta
+                                                                    Bancolombia</small>
+                                                            </div>
+                                                            <div class="col-12 col-md-3 col-lg-3 text-center">
+                                                                <a class="float-center"><img src="/img/btn-bank.png"
+                                                                        width="80" height="40" alt="x" /></a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="collapse2" class="collapse" aria-labelledby="headingOne"
+                                                        data-parent="#accordion2">
+                                                        <div class="card-body">
+                                                            <small>Realiza transferencias por internet desde tu cuenta
+                                                                de ahorros o corriente Bancolombia</small><br />
+                                                            <a class="float-right mb-2" id="BTN-BOTON"><img
+                                                                    src="/img/btn-bancolombia.png" width="120"
+                                                                    height="40" alt="x" /></a>
+                                                            <form enctype="multipart/form-data" id="boton"
+                                                                action="/links/recibo" method="POST">
+                                                                <input name="pyt" class="pyt" type="hidden">
+                                                                <input name="mora" class="mora" type="hidden">
+                                                                <input type="hidden" id="transferAmount"
+                                                                    name="transferAmount">
+                                                                <input type="hidden" id="transferReference"
+                                                                    name="transferReference">
+                                                                <input type="hidden" id="transferDescription"
+                                                                    name="transferDescription">
+                                                            </form>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card" id="PAYU">
+                                                    <div class="card-header" type="button" data-toggle="collapse"
+                                                        data-target="#collapse3" aria-expanded="true"
+                                                        aria-controls="collapse2" onclick="Pay('payu')">
+                                                        <div class="row">
+                                                            <div class="col-12 col-md-9 col-lg-9">
+                                                                <strong class="text-muted">Paga con PayU</strong><br>
+                                                                <small class="text-muted">Todos los medios de pago en un
+                                                                    solo luga</small>
+                                                            </div>
+                                                            <div class="col-12 col-md-3 col-lg-3 text-center">
+                                                                <a class="float-center"><img src="/img/btn-payu2.png"
+                                                                        width="80" height="40" alt="x" /></a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="collapse3" class="collapse" aria-labelledby="headingOne"
+                                                        data-parent="#accordion2">
+                                                        <div class="card-body">
+                                                            <!--<img src="/img/payu/Recurso 10.png" width="200" height="95"
+                                                                alt="x" />-->
+                                                            <small>Pagos en linea lideres en el mercado</small><br />
+                                                            <a class="float-right mb-2" id="BTN-PAYU"><img
+                                                                    src="/img/btn-payu.png" width="120" height="45"
+                                                                    alt="x" /></a>
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <div class="card" id="RCB">
+                                                    <div class="card-header" type="button" data-toggle="collapse"
+                                                        data-target="#collapse4" aria-expanded="true"
+                                                        aria-controls="collapse2" onclick="Pay('recbo')">
+                                                        <div class="row">
+                                                            <div class="col-12 col-md-9 col-lg-9">
+                                                                <strong class="text-muted">Recibos</strong><br>
+                                                                <small class="text-muted">Tengo un recibo emitido por el
+                                                                    banco</small>
+                                                            </div>
+                                                            <div class="col-12 col-md-3 col-lg-3 text-center">
+                                                                <a class="float-center"><img src="/img/logos/recibo.jpg"
+                                                                        width="40" height="40" alt="x" /></a>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                    <div id="collapse4" class="collapse" aria-labelledby="headingOne"
+                                                        data-parent="#accordion2">
+                                                        <div class="card-body">
+                                                            <small>Sube aqui los recibos de consignacion emitido por los
+                                                                bancos o sucursales</small><br />
+                                                            <small class="montorecibos badge badge-dark"></small>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-danger float-right mb-2"
+                                                                data-toggle="tooltip" data-placement="top" id="subirR"
+                                                                data-container="body" title="Click para seleccionar recibo(s). Mantener tecla 
+                                                                'Ctrl' precionada para seleccionar varios recibos"
+                                                                data-toggle="dropdown" aria-haspopup="true"
+                                                                aria-expanded="false">Subir
+                                                                RCB</button>
+                                                            <table class="table table-sm" id="recibosss">
+                                                                <form enctype="multipart/form-data" id="recbo"
+                                                                    action="/links/recibo" method="POST">
+                                                                    <input type="hidden" id="Total2" name="total">
+                                                                    <input type="hidden" id="factrs" name="factrs">
+                                                                    <input type="hidden" id="idC" name="id">
+                                                                    <input type="hidden" id="concpto" name="concpto">
+                                                                    <input type="hidden" id="orden" name="orden">
+                                                                    <input type="hidden" id="lt" name="lt">
+                                                                    <input type="hidden" class="bonus" name="bono">
+                                                                    <input type="hidden" class="bonu" name="pin">
+                                                                    <input id="ahora" type="hidden" name="ahora">
+                                                                    <input id="mora" type="hidden" name="mora">
+                                                                    <input id="rcbexcdnt" type="hidden"
+                                                                        name="rcbexcdnt">
+                                                                    <input type="hidden" class="TotalBono"
+                                                                        name="bonomonto">
+                                                                    <input type="hidden" name="montorcb"
+                                                                        id="montorecibos">
+                                                                    <input type="hidden" name="recibos" id="nrbc">
+                                                                    <input type="hidden" name="formap" id="formapRCB">
+                                                                    <input type="hidden" name="g" value="1">
+                                                                    <tbody>
+                                                                        <tr style="display: none;" id="trsubida">
+                                                                            <th colspan="2">
+                                                                                <i class="feather-md"
+                                                                                    data-feather="file-plus"></i>
+                                                                                <input
+                                                                                    class="form-control-no-border edi"
+                                                                                    type="file" name="image" id="file2"
+                                                                                    multiple style="width: 50%;"
+                                                                                    onchange="preview(this);" required>
+                                                                            </th>
+                                                                        </tr>
+                                                                        <tr style="display: none;" id="trarchivos">
+                                                                            <th colspan="2" class="image-wrap"
+                                                                                id="recibos1" width="100%" height="200">
+                                                                                <input class="custom-control-input"
+                                                                                    type="radio" name="nrecibo"
+                                                                                    disabled>
+                                                                                <input class="custom-control-input"
+                                                                                    type="radio" name="montos" disabled>
+                                                                                <input class="custom-control-input"
+                                                                                    type="radio" name="fech" disabled>
+                                                                            </th>
+                                                                        </tr>
+                                                                    </tbody>
+                                                                </form>
+                                                            </table>
+                                                            <button
+                                                                class="btn btn-sm btn-outline-danger float-right mb-2"
+                                                                id="BTN-RCB">Eviar</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </form>
-                            <table class="table table-sm my-2" id="recibosss">
-                                <thead>
-                                    <tr>
-                                        <th colspan="2">
-                                            <label class="form-check">
-                                                <input type="radio" class="form-check-input" id="pys"
-                                                    onclick="Pay('payu')">
-                                                <span class="form-check-label">
-                                                    <img src="/img/logos/payu4.png" width="40" height="40" class="mr-1"
-                                                        alt="A">payu la mejor forma
-                                                    de hacer
-                                                    pagos</span>
-                                            </label>
-                                        </th>
-                                    </tr>
-                                    <tr>
-                                        <th colspan="2">
-                                            <label class="form-check" data-toggle="tooltip" data-placement="top"
-                                                data-container="body" title="Click para seleccionar recibo(s). Mantener tecla 
-                                                'Ctrl' precionada para seleccionar varios recibos" autocomplete="off"
-                                                data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
-                                                <input type="radio" class="form-check-input" id="rcb"
-                                                    onclick="Pay('recbo')">
-                                                <span class="form-check-label">
-                                                    <img src="/img/logos/recibo.jpg" width="40" height="40"
-                                                        class="rounded-circle mr-1" alt="A">Ingresa aqui tus recibos
-                                                    de pago
-                                                    <small class="montorecibos badge badge-dark ml-2"></small>
-                                                </span>
-                                            </label>
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
-                                    <input type="hidden" id="Total2" name="total">
-                                    <input type="hidden" id="factrs" name="factrs">
-                                    <input type="hidden" id="idC" name="id">
-                                    <input type="hidden" id="concpto" name="concpto">
-                                    <input type="hidden" id="orden" name="orden">
-                                    <input type="hidden" id="lt" name="lt">
-                                    <input type="hidden" class="bonus" name="bono">
-                                    <input type="hidden" class="bonu" name="pin">
-                                    <input id="ahora" type="hidden" name="ahora">
-                                    <input id="mora" type="hidden" name="mora">
-                                    <input id="rcbexcdnt" type="hidden" name="rcbexcdnt">
-                                    <input type="hidden" class="TotalBono" name="bonomonto">
-                                    <input type="hidden" name="montorcb" id="montorecibos">
-                                    <input type="hidden" name="recibos" id="nrbc">
-                                    <input type="hidden" name="formap" value="CTA-CTE-50900011438">
-                                    <input type="hidden" name="g" value="1">
-                                    <tbody>
-                                        <!--<tr style="display: none;" id="trecibo">
-                                            <th>
-                                                <label class="custom-control custom-radio">
-                                                    <input name="formap" type="radio" class="custom-control-input forma"
-                                                        value="CTA-CTE-50900011438" required>
-                                                    <span class="custom-control-label badge badge-primary">
-                                                        CTA CTE 50900011438</span>
-                                                </label>
-                                            </th>
-                                            <td>
-                                                <label class="custom-control custom-radio">
-                                                    <input name="formap" type="radio" class="custom-control-input forma"
-                                                        value="CHEQUE" required>
-                                                    <span class="custom-control-label badge badge-primary">
-                                                        CHEQUE</span>
-                                                </label>
-                                            </td>
-                                        </tr>
-                                        <tr style="display: none;" id="trecib">
-                                            <th>
-                                                <label class="custom-control custom-radio">
-                                                    <input name="formap" type="radio" class="custom-control-input forma"
-                                                        value="EFECTIVO" required>
-                                                    <span class="custom-control-label badge badge-primary">
-                                                        EFECTIVO</span>
-                                                </label>
-                                            </th>
-                                            <td>
-                                                <label class="custom-control custom-radio">
-                                                    <input name="formap" type="radio" class="custom-control-input forma"
-                                                        value="OTRO" required>
-                                                    <span class="custom-control-label badge badge-primary">
-                                                        OTRO</span>
-                                                </label>
-                                            </td>
-                                        </tr>-->
-                                        <tr style="display: none;" id="trsubida">
-                                            <th colspan="2">
-                                                <i class="feather-md" data-feather="file-plus"></i>
-                                                <input class="form-control-no-border edi" type="file" name="image"
-                                                    id="file2" multiple style="width: 50%;" onchange="preview(this);"
-                                                    required>
-                                            </th>
-                                        </tr>
-                                        <tr style="display: none;" id="trarchivos">
-                                            <th colspan="2" class="image-wrap" id="recibos1" width="100%" height="200">
-                                                <input class="custom-control-input" type="radio" name="nrecibo"
-                                                    disabled>
-                                                <input class="custom-control-input" type="radio" name="montos" disabled>
-                                                <input class="custom-control-input" type="radio" name="fech" disabled>
-                                            </th>
-                                        </tr>
-                                    </tbody>
-                                </form>
-                            </table>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+
+                <!--<div id="smartwizard2">
+                    <ul class="nav">
+                        <li>
+                            <a class="nav-link" href="#step-1">
+                                Step 1
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="#step-2">
+                                Step 2
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="#step-3">
+                                Step 3
+                            </a>
+                        </li>
+                        <li>
+                            <a class="nav-link" href="#step-4">
+                                Step 4
+                            </a>
+                        </li>
+                    </ul>
+                    <div class="tab-content">
+                        <div id="step-1" class="tab-pane" role="tabpanel">
+                            Step content
+                        </div>
+                        <div id="step-2" class="tab-pane" role="tabpanel">
+                            Step content
+                        </div>
+                        <div id="step-3" class="tab-pane" role="tabpanel">
+                            Step content
+                        </div>
+                        <div id="step-4" class="tab-pane" role="tabpanel">
+                            Step content
+                        </div>
+                    </div>
+                </div>-->
             </div>
         </div>
     </div>
 </main>
-
-<!--<main class="main d-flex w-100">
-    <div class="container d-flex flex-column">
-        <div class="row h-100">
-            <div class="col-sm-10 col-md-8 col-lg-6 mx-auto d-table h-100">
-                <div class="d-table-cell align-middle">
-
-                    <div class="text-center">
-                        <h1 class="display-1 font-weight-bold">404</h1>
-                        <p class="h1">En construcción.</p>
-                        <p class="h2 font-weight-normal mt-3 mb-4">Estamos realizando actualizaciones para brindarte una
-                            mejor experiencia.
-                        </p>
-                        <a href="/tablero" class="btn btn-primary btn-lg">Volver al sitio</a>
-                    </div>
-
-                </div>
-            </div>
-        </div>
-    </div>
-</main>-->
-
-<!--<table class="table table-sm my-2" id="tablarecibo" style="display: none;">
-    <tbody>
-        <tr>
-            <th colspan="4">
-                <i class="feather-lg" data-feather="user"></i>
-                <span class="ml-2 Cliente">SAMIR SALDARRIAGA</span>
-            </th>
-        </tr>
-        <tr>
-            <th colspan="4">
-                <i class="feather-lg" data-feather="sun"></i>
-                <span class="ml-2 Cliente">PRADOS DE PONTEVEDRA Mz 1 Lt 5</span>
-            </th>
-        </tr>
-        <tr>
-            <th>
-                <i class="feather-md" data-feather="heart"></i>
-                Cupon
-            </th>
-            <td>
-                <span id="Cupon">U5HG1</span>
-            </td>
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Proyecto
-            </th>
-            <td>
-                <span id="Proyecto">64.480.000</span>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <i class="feather-md" data-feather="mail"></i>
-                Dto
-            </th>
-            <td>
-                <span id="Dto">5%</span>
-            </td>
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Concepto
-            </th>
-            <td>
-                <span id="Concepto">SEPARACION</span>
-            </td>
-        </tr>
-        <tr>
-            <th>
-                <i class="feather-md" data-feather="phone-call"></i>
-                Ahorro
-            </th>
-            <td>
-                <span id="Ahorro">3.224.000</span>
-            </td>
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                N° Cuota
-            </th>
-            <td>
-                <span id="Cuotan">1</span>
-            </td>
-        </tr>
-        <tr class="mb-4">
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Proyecto Dto
-            </th>
-            <td>
-                <span id="Proyecto-Dto">61.256.000</span>
-            </td>
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Cuota
-            </th>
-            <td>
-                <span id="Cuota">1.256.000</span>
-            </td>
-        </tr>
-        <tr class="mb-4">
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Facturas V.
-            </th>
-            <td>
-                <span id="Facturas">1</span>
-            </td>
-            <th>
-                <i class="feather-md" data-feather="map"></i>
-                Mora
-            </th>
-            <td>
-                <span id="Mora">0</span>
-            </td>
-        </tr>
-        <tr>
-            <th colspan="3">
-                <i class="feather-md" data-feather="dollar-sign"></i>
-                Total Factura
-            </th>
-            <td>
-                <div class="d-inline-block float-right">
-                    <span class="Totalf">1.256.000</span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <th colspan="3">
-                <i class="feather-md" data-feather="dollar-sign"></i>
-                Total a Pagar
-            </th>
-            <td>
-                <div class="d-inline-block float-right">
-                    <span class="Total">1.256.000</span>
-                </div>
-            </td>
-        </tr>
-        <tr>
-            <th colspan="3">
-                <i class="feather-md" data-feather="dollar-sign"></i>
-                Otro Valor
-            </th>
-            <td>
-                <div class="d-inline-block float-right">
-                    <input class="form-control-no-border edi direccion d text-right Total2" type="text"
-                        placeholder="Ingrese aqui otro valor" autocomplete="off" style="padding: 1px; width: 100%;"
-                        name="direccion" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true"
-                        value="$0">
-                </div>
-            </td>
-        </tr>
-    </tbody>
-</table>-->
