@@ -2574,6 +2574,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         }
 
     } else if (id === 'proyectos') {
+        /////////////* Selecciona el nombre de cada proyecto *///////////////////
         sql = `SELECT DISTINCT pt.proyect FROM preventa p 
         INNER JOIN productosd pd ON p.lote = pd.id 
         INNER JOIN productos pt ON pd.producto = pt.id`
@@ -2749,8 +2750,7 @@ router.post('/desendentes', async (req, res) => {
     const { id, asesor } = req.body;
     let sep = true, bon = true, separa = 0;
     const comi = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id 
-    WHERE (s.concepto = 'BONO EXTRA' OR s.descp = 'SEPARACION') AND s.concepto NOT IN('PAGO', 'ABONO') 
-    AND s.orden = ? AND s.stado != 6`, id);
+    WHERE (s.concepto = 'BONO EXTRA' OR s.descp = 'SEPARACION') AND s.orden = ? AND s.stado != 6`, id);
     if (comi.length > 0) {
         comi.map((a) => {
             a.concepto === 'BONO EXTRA' ? bon = false : "";
@@ -2768,7 +2768,7 @@ router.post('/desendentes', async (req, res) => {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.id = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3)`, id);
+            AND p.tipobsevacion IS NULL AND p.status IN(2, 3)`, id); console.log(id, asesor, directas, sep, bon, separa)
 
     if (directas.length > 0) {
         var hoy = moment().format('YYYY-MM-DD');

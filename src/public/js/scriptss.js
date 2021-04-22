@@ -73,6 +73,14 @@ function Consultar(tipo, code) {
     }
     return datos;
 }
+/*CONSULTAS EN DATATABLES*/
+var VER = (tabla, filas) => {
+    $(tabla).DataTable().page.len(filas).draw();
+}
+var STAD = (tabla, col, std) => {
+    $(tabla).DataTable().columns().search('');
+    $(tabla).DataTable().columns(col).search(std).draw();
+}
 
 ////////////////////////////////////////////////////////////////////
 //lenguaje
@@ -1104,7 +1112,7 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuentas.map((r) => {
                                 if (r.tipo === 'CTA-CTE' && r.stado === 7) {
                                     $('#RCB').show();
-                                    $('#formapRCB').val(`${r.tipo}-${r.code1}`); 
+                                    $('#formapRCB').val(`${r.tipo}-${r.code1}`);
                                     RCB = true;
                                 } else if (r.tipo === 'BOTON' && r.stado === 7) {
                                     $('#BOTON').show();
@@ -1611,7 +1619,7 @@ if (window.location.pathname == `/links/pagos`) {
         $.ajax({
             type: 'POST',
             url: '/links/boton',
-            data: $(this).serialize(),            
+            data: $(this).serialize(),
             beforeSend: function (xhr) {
                 $('#ModalEventos').modal({
                     backdrop: 'static',
@@ -1632,7 +1640,7 @@ if (window.location.pathname == `/links/pagos`) {
                     setTimeout(function () {
                         $('#ModalEventos').one('shown.bs.modal', function () {
                             $('#ModalEventos').hide();
-                        }).modal('hide');                        
+                        }).modal('hide');
                     }, 2000);
                 }
             }
@@ -1676,6 +1684,20 @@ if (window.location.pathname == `/links/reportes`) {
             return true;
         }
     );
+    $('.card-header').on('click', function () {
+        var papa = $(this).parents('.accordion');
+        if ($(this).find('i').hasClass('fa-angle-down')) {
+            $(papa).find('.card-header i').removeClass("fa-angle-up");
+            $(papa).find('.card-header i').addClass("fa-angle-down");
+
+            $(this).find('i').removeClass("fa-angle-down");
+            $(this).find('i').addClass("fa-angle-up");
+
+        } else {
+            $(this).find('i').removeClass("fa-angle-up");
+            $(this).find('i').addClass("fa-angle-down");
+        }
+    })
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     if (admin == 1) {
         $('#resumen').show();
@@ -1687,13 +1709,16 @@ if (window.location.pathname == `/links/reportes`) {
         $('#reports').hide('slow');
         tableOrden.columns.adjust().draw();
     })
+    var column = 4;
     var tableOrden = $('#datatable2').DataTable({
-        dom: 'Bfrtip',
+        //dom: 'Bfrtip',
+        //searching: false,
+        lengthChange: false,
         lengthMenu: [
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: [
+        /*buttons: [
             {
                 extend: 'pageLength',
                 text: 'Ver',
@@ -1778,7 +1803,7 @@ if (window.location.pathname == `/links/reportes`) {
                     }
                 ]
             }
-        ],
+        ],*/
         deferRender: true,
         paging: true,
         search: {
@@ -1795,10 +1820,12 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: -3 },
-        { responsivePriority: 1, targets: -4 },
+        { responsivePriority: 1, targets: [1, 3, 4, 6] },
+        { responsivePriority: 2, targets: 5 },
+        { responsivePriority: 3, targets: 11 },
+        { responsivePriority: 4, targets: [7, 8, -3] },
+        { targets: [6, -1, 13], searchable: true },
         { targets: [-1, -2], visible: false, searchable: true }],
-        //{className: "dt-center", targets: "_all"}],
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -1887,62 +1914,19 @@ if (window.location.pathname == `/links/reportes`) {
             },
             {
                 data: "fullname",
-                className: 'te'
+                className: 'warp'
             },
             {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    if (USERADMIN === 'HABIB SALDARRIAGA' && row.tipobsevacion === 'ANULADA' && (row.estado == 9 || row.estado == 15)) {
-                        return `
-                        <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                <a class="dropdown-item" onclick="RestOrden(${data})"><i class="fas fa-undo"></i> Restablecer Orden</a>
-                            </div>
-                        </div>`;
-                    } else if (row.tipobsevacion === 'ANULADA' && admin == 1) {
-                        return `
-                        <div class="btn-group btn-group-sm">
-                            <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                            <div class="dropdown-menu">
-                                <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                <small class="text-muted">No es posible restablecer esta oreden</small>
-                            </div>
-                        </div>`;
-                    } else if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO') {
-                        return `<div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">Acción</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="/links/editordn/${data}"><i class="fas fa-edit"></i> Editar</a>
-                                        <a class="dropdown-item" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
-                                        <a class="dropdown-item" onclick="Proyeccion(${data})"><i class="fas fa-glasses"></i> Verificar Proyeccion</a>
-                                        ${row.kupn ? `<a class="dropdown-item" onclick="RestKupon(${data})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}
-                                        <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                        <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
-                                        <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>
-                                        ${USERADMIN === 'HABIB SALDARRIAGA' ? `<a class="dropdown-item" onclick="GestComi(${data},'${row.asesor}')"><i class="fas fa-sitemap"></i> Gestionar Comisiones</a>` : ''}                                                  
-                                    </div>
-                                </div>`;
+                    if (row.tipobsevacion === 'ANULADA' && admin == 1 && row.estado != 9 && row.estado != 15) {
+                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
                     } else if (admin == 1) {
-                        return `<div class="btn-group btn-group-sm">
-                                    <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                    aria-haspopup="true" aria-expanded="false">Acción</button>
-                                    <div class="dropdown-menu">
-                                        <a class="dropdown-item" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                                        <a class="dropdown-item"><i class="fas fa-paperclip"></i> Adjunar</a>
-                                        <a class="dropdown-item" onclick="Eliminar(${data})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                                        <a class="dropdown-item" onclick="Verificar(${data})"><i class="fas fa-glasses"></i> Verificar Estado</a>                                                  
-                                    </div>
-                                </div>`;
+                        return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
+                        aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
                     } else {
-                        return `<a href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
+                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
                     }
                 }
             },
@@ -1964,6 +1948,38 @@ if (window.location.pathname == `/links/reportes`) {
             { data: "obsevacion" },
             { data: "tipobsevacion" }
         ],
+        drawCallback: function (settings) {
+            var AdminSuper = false, resOrden = false;
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var filas = api.column(0, { page: 'current' }).data();
+            filas.each(function (g, i) {
+
+                AdminSuper = (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO') && admin == 1;
+                resOrden = USERADMIN === 'HABIB SALDARRIAGA' && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
+
+                $(rows).eq(i).after(
+                    `<tr class="total">
+                        <th colspan=${column} class="menu">
+                        <nav class="nav flex-sm-row collapse" id="Ord${g.id}" aria-labelledby="headingOne" data-parent="#datatable2">
+
+                        ${AdminSuper && !resOrden ? `
+                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>                                
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="GestComi(${g.id},'${g.asesor}')"><i class="fas fa-sitemap"></i> Comisiones</a>`
+                        : ''}                              
+                        ${!resOrden ? `
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/ordendeseparacion/${g.id}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Verificar(${g.id})"><i class="fas fa-glasses"></i> Estado</a>`
+                        : ''}
+                        ${g.kupn && AdminSuper && !resOrden ? `<a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="RestKupon(${g.id})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}
+                        ${resOrden ? `<a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="RestOrden(${g.id})"><i class="fas fa-undo"></i> Restablecer Orden</a>` : ''}
+                        </nav></td></tr>`
+                );
+            });
+        },
         rowCallback: function (row, data, index) {
             if (data["tipobsevacion"] === 'ANULADA') {
                 $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
@@ -1974,7 +1990,7 @@ if (window.location.pathname == `/links/reportes`) {
             } else if (data["estado"] == 10) {
                 $(row).css("background-color", "#40E0D0");
             } else if (data["estado"] == 1) {
-                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
+                $(row).css({ "background-color": "#FEC782", "color": "#FFFFFF" });
             } else if (data["estado"] == 13) {
                 $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
             }
@@ -1983,6 +1999,19 @@ if (window.location.pathname == `/links/reportes`) {
             }
         },
         initComplete: function (settings, json) {
+            $('#collapse').collapse('toggle');
+            var n = $('#datatable2 tbody tr:first').find('td:hidden').length;
+            column = 13 - n;
+            $('.menu').prop('colspan', column);
+            if (!$('main').hasClass('p-1') && column < 7) {
+                $('main').addClass('p-1')
+                $('card-body').addClass('p-1')
+                $('.texto').text('');
+            } else if ($('main').hasClass('p-1') && column > 6) {
+                $('main').removeClass('p-1')
+                $('card-body').removeClass('p-1')
+                $('.texto').text('Accion');
+            };
             if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'GISELLE VERONICA SANTAMARIA') {
                 $(".fi").daterangepicker({
                     locale: {
@@ -2018,11 +2047,117 @@ if (window.location.pathname == `/links/reportes`) {
                     })
                 });
             }
+            this.api().columns(2).every(function () {
+                var column = this;
+                var productos = $('.productos');
+                productos.select2({
+                    placeholder: 'Seleccione proyecto',
+                    allowClear: true
+                });
+                column.data().unique().sort().each(function (d, j) {
+                    productos.append(new Option(d, d, false, false));
+
+                    $('#menu2').append(
+                        `<a class="flex-sm-fill text-sm-center nav-link 2" href="javascript:void 0"
+                        onclick="STAD('#datatable2', 2, ${d})"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
+                    );
+                });
+                $('#menu2').append(`<a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0">
+                    <i class="fas fa-undo"></i> Todos</a>`)
+
+                productos.val(null).trigger('change');
+            });
+
+
+            $('#menu2 a').on('click', function () {
+                var texto = $(this).text().trim();
+                if (texto === 'Todos') {
+                    $('#menu2 a').removeClass("text-success");
+                    tableOrden
+                        .columns('')
+                        .search('')
+                        .draw();
+
+                } else if ($(this).hasClass('13')) {
+                    $(this).toggleClass("text-success");
+                    !$(this).hasClass('text-success') ? texto = '' : '';
+                    tableOrden
+                        .columns(13)
+                        .search(texto)
+                        .draw();
+
+                } else if ($(this).hasClass('-1')) {
+                    $(this).toggleClass("text-success");
+                    !$(this).hasClass('text-success') ? texto = '' : '';
+                    tableOrden
+                        .columns(-1)
+                        .search(texto)
+                        .draw();
+
+                } else if ($(this).hasClass('2')) {
+                    $(this).siblings(".2").removeClass("text-success");
+                    $(this).toggleClass("text-success");
+                    !$(this).hasClass('text-success') ? texto = '' : '';
+                    tableOrden
+                        .columns(2)
+                        .search(texto)
+                        .draw();
+
+                } else if ($(this).hasClass('6')) {
+                    $(this).siblings(".6").removeClass("text-success");
+                    $(this).toggleClass("text-success");
+                    !$(this).hasClass('text-success') ? texto = '' : '';
+                    tableOrden
+                        .columns(6)
+                        .search(texto)
+                        .draw();
+
+                }; //console.log(texto)
+            });
         }
     });
-    var STAD = (col, std) => {
-        tableOrden.columns(col).search(std).draw();
-    }
+    $('#datatable2_filter').hide();
+    $(window).resize(function () {
+        console.log('cambio');
+        tableOrden
+            .columns.adjust()
+            .responsive.recalc();
+    });
+    /*tableOrden.on('column-sizing.dt', function (e, settings) {
+        console.log('Column width recalculated in table');
+    });
+    tableOrden.on('column-visibility.dt', function (e, settings, column, state) {
+        console.log('Column ' + column + ' has changed to ' + (state ? 'visible' : 'hidden'));
+    });*/
+    tableOrden.on('responsive-display', function (e, datatable, row, showHide, update) {
+        console.log(row.id(), 'Details for row ' + row.index() + ' ' + (showHide ? 'shown' : 'hidden'));
+    });
+    tableOrden.on('responsive-resize', function (e, datatable, columns) {
+        tableOrden
+            .columns.adjust()
+            .responsive.recalc();
+        var count = columns.reduce(function (a, b) {
+            return b === false ? a + 1 : a;
+        }, 0);
+        column = 15 - count;
+        if (!$('main').hasClass('p-1') && column < 7) {
+            $('main').addClass('p-1')
+            $('card-body').addClass('p-1')
+            $('.texto').text('');
+        } else if ($('main').hasClass('p-1') && column > 6) {
+            $('main').removeClass('p-1')
+            $('card-body').removeClass('p-1')
+            $('.texto').text('Accion');
+        };
+        $('.menu').prop('colspan', column);
+        //console.log(column, count + ' column(s) are hidden');
+    });
+    $('#busq').on('keyup', function () {
+        tableOrden.search(this.value).draw();
+    });
+    $('#busq2').on('keyup', function () {
+        comisiones.search(this.value).draw();
+    });
     //////////////////////* Table3 *///////////////////////
     var area, productos, descuentos, total, abonos, salds,
         Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
@@ -2061,27 +2196,20 @@ if (window.location.pathname == `/links/reportes`) {
     var estadoscuentas = $('#estadoscuentas').DataTable({
         processing: true,
         autowidth: true,
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-            /*{ responsivePriority: 1, targets: -1 },
-              { responsivePriority: 1, targets: -2 }*/],
-        //{className: "dt-center", targets: "_all"}],
-        order: [[1, 'asc'], [2, 'asc']],
+        //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
+        order: [[0, 'asc'], [1, 'asc']],
         ajax: {
             method: "POST",
             url: "/links/reportes/estadosc",
             dataSrc: "data"
         },
         columns: [
-            {
+            /*{
                 className: 'control',
                 orderable: true,
                 data: null,
                 defaultContent: ''
-            },
+            },*/
             {
                 data: "mz",
                 render: function (data, method, row) {
@@ -2093,7 +2221,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "vrmt2",
                 className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             {
                 data: "nombre",
@@ -2109,7 +2237,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "valor",
                 className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             {
                 data: "descuento",
@@ -2121,23 +2249,23 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "ahorro",
                 className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             {
                 data: "total",
                 className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             {
                 data: "montos",
                 className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
             {
                 className: 't',
                 data: "montos",
                 render: function (data, method, row) {
-                    return '$' + Moneda(row.total - data) + '.00';
+                    return '$' + Moneda(row.total - data);
                 }
             },
             {
@@ -2150,14 +2278,21 @@ if (window.location.pathname == `/links/reportes`) {
             var rows = api.rows({ page: 'current' }).nodes();
             var last = null;
             var total = 0;
-            var filas = api.column(1, { page: 'current' }).data();
+            var filas = api.column(0, { page: 'current' }).data();
+            var intVal = function (i) {
+                var t = i.replace(/[\$,]/g, '')
+                return typeof i === 'string' ?
+                    t.replace(/\./g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
             filas.each(function (group, i) {
                 if (last !== group) {
                     if (last != null) {
                         $(rows).eq(i - 1).after(
                             `<tr class="total">
                                     <td colspan=2>Total:</td>
-                                    <td colspan="10">${total}</td>
+                                    <td colspan="10">${Moneda(total)}</td>
                                  </tr>`
                         );
                         total = 0;
@@ -2169,12 +2304,12 @@ if (window.location.pathname == `/links/reportes`) {
                     );
                     last = group;
                 }
-                total += +$(rows).eq(i).children()[2].textContent;
+                total += intVal($(rows).eq(i).children()[10].textContent);
                 if (i == filas.length - 1) {
                     $(rows).eq(i).after(
                         `<tr class="total">
                                 <td colspan=2>Total:</td>
-                                <td colspan="10">${total}</td>
+                                <td colspan="10">${Moneda(total)}</td>
                             </tr>`
                     );
                 }
@@ -2408,21 +2543,21 @@ if (window.location.pathname == `/links/reportes`) {
             }*/
         ],
         fixedHeader: {
-            headerOffset: -10
+            headerOffset: -9
         },
-        ordering: true,
+        //ordering: true,
         language: languag,
-        deferRender: true,
+        //deferRender: true,
         paging: true,
         search: {
             regex: true,
             caseInsensitive: true,
         },
-        responsive: {
+        responsive: true/*{
             details: {
                 type: 'column'
             }
-        },
+        }*/,
         initComplete: function (settings, json) {
             //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
         },
@@ -2458,25 +2593,25 @@ if (window.location.pathname == `/links/reportes`) {
                     return intVal(a) + intVal(b);
                 }, 0);*/
             productos = api
-                .column(4, { order: 'applied', search: 'applied' })
+                .column(3, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b, x) {
                     return x;
                 }, 0);
             descuentos = api
-                .column(9, { order: 'applied', search: 'applied' })
+                .column(8, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
             total = api
-                .column(10, { order: 'applied', search: 'applied' })
+                .column(9, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
             abonos = api
-                .column(11, { order: 'applied', search: 'applied' })
+                .column(10, { order: 'applied', search: 'applied' })
                 .data()
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
@@ -4174,16 +4309,14 @@ if (window.location.pathname == `/links/reportes`) {
         }
 
     }
-    var STAD2 = (col, std) => {
-        comisiones.columns(col).search(std).draw();
-    }
     var comisiones = $('#comisiones').DataTable({
-        dom: 'Bfrtip',
+        //dom: 'Bfrtip',        
+        lengthChange: false,
         lengthMenu: [
             [10, 25, 50, 100, -1],
             ['10 filas', '25 filas', '50 filas', '100 filas', 'Ver todo']
         ],
-        buttons: [
+        /*buttons: [
             {
                 extend: 'pageLength',
                 text: 'Ver',
@@ -4256,7 +4389,7 @@ if (window.location.pathname == `/links/reportes`) {
                     }
                 ]
             }
-        ],
+        ],*/
         deferRender: true,
         paging: true,
         search: {
@@ -4283,9 +4416,9 @@ if (window.location.pathname == `/links/reportes`) {
             url: "/links/reportes/comision",
             dataSrc: "data"
         },
-        /*initComplete: function (settings, json, row) {
-                                        alert(row);
-        },*/
+        initComplete: function (settings, json, row) {
+            $('#collapse4').collapse('toggle');
+        },
         columns: [
             {
                 data: null,
@@ -4368,15 +4501,13 @@ if (window.location.pathname == `/links/reportes`) {
                 data: "ids",
                 //defaultContent: 
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
-                                        </div>
-                                    </div>` : ''
+                    return admin == 1 ? `
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                    </div>` : ''
                 }
             }
         ],
@@ -4392,6 +4523,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         }
     });
+    $('#comisiones_filter').hide();
     var aasesor = null, iid = null;
     comisiones.on('click', 'td:not(.control, .t)', function () {
         var fila = $(this).parents('tr');
@@ -11163,13 +11295,8 @@ if (window.location == `${window.location.origin}/links/red`) {
         processing: true,
         autowidth: true,
         columnDefs: [
-            { responsivePriority: 2, targets: 1 },
-            { responsivePriority: 1, targets: 2 },
-            { responsivePriority: 2, targets: 3 },
-            { responsivePriority: 2, targets: 5 },
-            { responsivePriority: 1, targets: 6 },
-            { responsivePriority: 1, targets: 7 },
-            { responsivePriority: 1, targets: 8 }],
+            { responsivePriority: 2, targets: [1, 3, 5] },
+            { responsivePriority: 1, targets: [2, 6, 7, 8] }],
         order: [2, 'asc'],
         ajax: {
             method: "POST",
