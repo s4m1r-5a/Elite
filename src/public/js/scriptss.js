@@ -1650,9 +1650,9 @@ if (window.location.pathname == `/links/pagos`) {
 }
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/reportes`) {
-    let p = '', fecha = new Date(), fechs = new Date();
-    fecha.setDate(fecha.getDate() + 30)
-    function RecogerDatos() {
+    //let p = '', fecha = new Date(), fechs = new Date();
+    //fecha.setDate(fecha.getDate() + 30)
+    /*function RecogerDatos() {
         dts = {
             id_venta: $('#idsms').val(),
             correo: $('#correo').val(),
@@ -1662,8 +1662,8 @@ if (window.location.pathname == `/links/reportes`) {
             movil: $("#cels").val(),
             fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),
             fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
-        };
-    };
+        }
+    }*/
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
@@ -1699,7 +1699,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     })
     //////////////////////* TABLA DE REPORTES */////////////////////// 
-    if (admin == 1) {
+    /*if (admin == 1) {
         $('#resumen').show();
     }
     $('#reports').click(function () {
@@ -1708,7 +1708,7 @@ if (window.location.pathname == `/links/reportes`) {
         $('#stadocuentasr').hide('slow');
         $('#reports').hide('slow');
         tableOrden.columns.adjust().draw();
-    })
+    })*/
     var column = 4;
     var tableOrden = $('#datatable2').DataTable({
         //dom: 'Bfrtip',
@@ -1820,7 +1820,7 @@ if (window.location.pathname == `/links/reportes`) {
             orderable: true,
             targets: 0
         },
-        { responsivePriority: 1, targets: [1, 3, 4, 6] },
+        { responsivePriority: 1, targets: [3, 4, 6] },
         { responsivePriority: 2, targets: 5 },
         { responsivePriority: 3, targets: 11 },
         { responsivePriority: 4, targets: [7, 8, -3] },
@@ -2003,15 +2003,13 @@ if (window.location.pathname == `/links/reportes`) {
             var n = $('#datatable2 tbody tr:first').find('td:hidden').length;
             column = 13 - n;
             $('.menu').prop('colspan', column);
-            if (!$('main').hasClass('p-1') && column < 7) {
+            /*if (!$('main').hasClass('p-1') && column < 7) {
                 $('main').addClass('p-1')
                 $('card-body').addClass('p-1')
-                $('.texto').text('');
             } else if ($('main').hasClass('p-1') && column > 6) {
                 $('main').removeClass('p-1')
                 $('card-body').removeClass('p-1')
-                $('.texto').text('Accion');
-            };
+            };*/
             if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'GISELLE VERONICA SANTAMARIA') {
                 $(".fi").daterangepicker({
                     locale: {
@@ -2067,8 +2065,6 @@ if (window.location.pathname == `/links/reportes`) {
 
                 productos.val(null).trigger('change');
             });
-
-
             $('#menu2 a').on('click', function () {
                 var texto = $(this).text().trim();
                 if (texto === 'Todos') {
@@ -2116,14 +2112,19 @@ if (window.location.pathname == `/links/reportes`) {
             });
         }
     });
+    $('#ModalEventos').on('hide.bs.modal', function (e) {
+        console.log('lo mandaron a cerrar')
+    })
+    $('#ModalEventos').on('hidden.bs.modal', function (e) {
+        console.log('ya se cerro')
+    })
     $('#datatable2_filter').hide();
-    $(window).resize(function () {
-        console.log('cambio');
+    /*$(window).resize(function () {
         tableOrden
             .columns.adjust()
             .responsive.recalc();
     });
-    /*tableOrden.on('column-sizing.dt', function (e, settings) {
+    tableOrden.on('column-sizing.dt', function (e, settings) {
         console.log('Column width recalculated in table');
     });
     tableOrden.on('column-visibility.dt', function (e, settings, column, state) {
@@ -2140,15 +2141,13 @@ if (window.location.pathname == `/links/reportes`) {
             return b === false ? a + 1 : a;
         }, 0);
         column = 15 - count;
-        if (!$('main').hasClass('p-1') && column < 7) {
+        /*if (!$('main').hasClass('p-1') && column < 7) {
             $('main').addClass('p-1')
             $('card-body').addClass('p-1')
-            $('.texto').text('');
         } else if ($('main').hasClass('p-1') && column > 6) {
             $('main').removeClass('p-1')
             $('card-body').removeClass('p-1')
-            $('.texto').text('Accion');
-        };
+        };*/
         $('.menu').prop('colspan', column);
         //console.log(column, count + ' column(s) are hidden');
     });
@@ -2638,13 +2637,13 @@ if (window.location.pathname == `/links/reportes`) {
             .draw();
     });
 
-    $('#resumen').click(function () {
+    /*$('#resumen').click(function () {
         $('#stadoreportes').hide('slow');
         $('#stadocuentasd').hide('slow');
         $('#stadocuentasr').show('slow');
         $('#reports').show('slow');
         estadoscuentas.columns.adjust().draw();
-    })
+    })*/
     //////////////////////* ESTADOS DE CUENTA DETALLADOS */////////////////////// 
     var body = [];
     var estadoscuentas2 = $('#estadoscuentas2').DataTable({
@@ -3409,13 +3408,13 @@ if (window.location.pathname == `/links/reportes`) {
             SMSj('error', 'No existe RECIBO alguno para eliminar')
         }
     });
-    $('#detalles').click(function () {
+    /*$('#detalles').click(function () {
         $('#stadocuentasr').hide('slow');
         $('#stadoreportes').hide('slow');
         $('#stadocuentasd').show('slow');
         $('#reports').show('slow');
         estadoscuentas2.columns.adjust().draw();
-    })
+    })*/
     ///////////////////// Daterangepicker /////////////////// 
     var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");
@@ -3724,8 +3723,7 @@ if (window.location.pathname == `/links/reportes`) {
                 success: function (data) {
                     if (data.r) {
                         tableOrden.ajax.reload(null, false)
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         SMSj('success', data.m);
                     } else if (data.m === 'Codigo enviado') {
                         var Code = prompt("Digite el codigo de autorizacion para realizar la eliminacion de la orden");
@@ -3738,24 +3736,20 @@ if (window.location.pathname == `/links/reportes`) {
                                 success: function (data) {
                                     if (data.r) {
                                         tableOrden.ajax.reload(null, false)
-                                        $('#ModalEventos').one('shown.bs.modal', function () {
-                                        }).modal('hide');
+                                        $('#ModalEventos').modal('hide')
                                         SMSj('success', data.m);
                                     } else {
-                                        $('#ModalEventos').one('shown.bs.modal', function () {
-                                        }).modal('hide');
+                                        $('#ModalEventos').modal('hide')
                                         SMSj('error', data.m);
                                     }
                                 }
                             });
                         } else {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
+                            $('#ModalEventos').modal('hide')
                             SMSj('error', 'ERROR DE AUTORIZACION');
                         }
                     } else {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         SMSj('error', data.m);
                     }
                 }
@@ -3778,15 +3772,11 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 success: function (data) {
                     if (data) {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                            $('#ModalEventos').modal('hide');
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         tableOrden.ajax.reload(null, false);
                         comisiones.ajax.reload(null, false);
                     } else {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                            $('#ModalEventos').modal('hide');
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         tableOrden.ajax.reload(null, false);
                         SMSj('error', 'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor');
                     }
@@ -3811,8 +3801,7 @@ if (window.location.pathname == `/links/reportes`) {
                 if (data) {
                     tableOrden.ajax.reload(null, false)
                     comisiones.ajax.reload(null, false)
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
+                    $('#ModalEventos').modal('hide')
                 }
             }
         });
@@ -3834,8 +3823,7 @@ if (window.location.pathname == `/links/reportes`) {
                     if (data) {
                         tableOrden.ajax.reload(null, false)
                         comisiones.ajax.reload(null, false)
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         SMSj('success', 'Cupon de descuento restablecido correctamente')
                     }
                 }
@@ -3861,8 +3849,7 @@ if (window.location.pathname == `/links/reportes`) {
                     if (data) {
                         tableOrden.ajax.reload(null, false)
                         comisiones.ajax.reload(null, false)
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                         SMSj('success', 'Orden ' + id + ' restablecida correctamente')
                     }
                 }
@@ -3889,8 +3876,7 @@ if (window.location.pathname == `/links/reportes`) {
                     if (data) {
                         tableOrden.ajax.reload(null, false)
                         comisiones.ajax.reload(null, false)
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide')
                     }
                 }
             });
@@ -3906,18 +3892,14 @@ if (window.location.pathname == `/links/reportes`) {
             async: false,
             success: function (data) {
                 if (data) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                        $('#ModalEventos').modal('hide')
-                        tableOrden.ajax.reload(null, false)
-                        SMSj('success', 'Orden anulada correctamente')
-                    }).modal('hide');
+                    $('#ModalEventos').modal('hide')
+                    tableOrden.ajax.reload(null, false)
+                    SMSj('success', 'Orden anulada correctamente')
                     data = null
                 } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                        $('#ModalEventos').modal('hide')
-                        tableOrden.ajax.reload(null, false)
-                        SMSj('error', 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar')
-                    }).modal('hide');
+                    $('#ModalEventos').modal('hide')
+                    tableOrden.ajax.reload(null, false)
+                    SMSj('error', 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar')
                     data = null
                 }
             }
@@ -3931,189 +3913,15 @@ if (window.location.pathname == `/links/reportes`) {
             async: false,
             success: function (data) {
                 if (data) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                        $('#ModalEventos').modal('hide');
-                        tableOrden.ajax.reload(null, false);
-                        comisiones.ajax.reload(null, false);
-                        SMSj('success', 'Gestion de comisiones generada');
-                    }).modal('hide');
+                    $('#ModalEventos').modal('hide');
+                    tableOrden.ajax.reload(null, false);
+                    comisiones.ajax.reload(null, false);
+                    SMSj('success', 'Gestion de comisiones generada');
                     data = null
                 }
             }
         });
     }
-    var D = ''
-    var cartra = $('#cartra').DataTable({
-        dom: '',
-        deferRender: true,
-        paging: true,
-        select: true,
-        search: {
-            regex: true,
-            caseInsensitive: true,
-        },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },],
-        //{ responsivePriority: 1, targets: -1 },
-        //{ responsivePriority: 1, targets: -2 }],
-        //{className: "dt-center", targets: "_all"}],
-        order: [[1, "asc"]],
-        language: false,
-        ajax: {
-            method: "POST",
-            data: function (d) {
-                d.h = moment().format('YYYY-MM-DD');
-                d.k = D
-            },
-            url: "/links/reportes/cartera",
-            dataSrc: "data"
-        },
-        columns: [
-            {
-                data: null,
-                defaultContent: ''
-            },
-            {
-                data: "tipo",
-                className: 'te'
-            },
-            {
-                data: "ncuota",
-                className: 'te'
-            },
-            {
-                data: "fechs",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "cuota",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },/*
-            {
-                data: "abono",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },*/
-            {
-                data: "mora",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            }/*,
-            {
-                data: "estado",
-                className: 'te',
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 1:
-                            return `<span class="badge badge-pill badge-warning">Pendiente</span>`
-                            break;
-                        case 8:
-                            return `<span class="badge badge-pill badge-info">Tramitando</span>`
-                            break;
-                        case 9:
-                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
-                            break;
-                        case 10:
-                            return `<span class="badge badge-pill badge-success">Separado</span>`
-                            break;
-                        case 12:
-                            return `<span class="badge badge-pill badge-dark">Apartado</span>`
-                            break;
-                        case 13:
-                            return `<span class="badge badge-pill badge-primary">Vendido</span>`
-                            break;
-                        case 15:
-                            return `<span class="badge badge-pill badge-tertiary">Inactivo</span>` //secondary
-                            break;
-                    }
-                }
-            },
-            {
-                data: "fecha",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            {
-                data: "std",
-                className: 'te',
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 3:
-                            return `<span class="badge badge-pill badge-danger">Vencida</span>`
-                            break;
-                        case 5:
-                            return `<span class="badge badge-pill badge-danger">VencidaR</span>`
-                            break;
-                    }
-                }
-            }  */
-        ],
-        initComplete: function (settings, json) {
-        },
-        rowCallback: function (row, data, index) {
-            if (data["estado"] == 9) {
-                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-            } else if (data["estado"] == 12) {
-                $(row).css("background-color", "#00FFFF");
-            } else if (data["estado"] == 8) {
-                $(row).css("background-color", "#FFFFCC");
-            } else if (data["estado"] == 10) {
-                $(row).css("background-color", "#40E0D0");
-            } else if (data["estado"] == 1) {
-                $(row).css({ "background-color": "#162723", "color": "#FFFFFF" });
-            } else if (data["estado"] == 13) {
-                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
-            }
-        }
-    });
-    var Cartera = (id, proyc) => {
-        D = id
-        cartra.ajax.url("/links/reportes/cartera").load(function () {
-            cartra.columns.adjust().draw();
-            var dato = cartra.rows().data() //{ page: 'current' }
-            $('#pryec').html(dato[0].proyecto)
-            $('#mzlt').html(`Mz ${dato[0].mz} - LT ${dato[0].n}`)
-            $('#clnt').html(dato[0].nombre)
-            $('#docu').html(dato[0].documento)
-            $('#asesor').html(dato[0].fullname)
-        });
-
-        $('#PagO').modal({
-            backdrop: 'static',
-            keyboard: true,
-            toggle: true
-        });
-    }
-    cartra.on('click', 'tr', function () {
-        if ($(this).hasClass('selected')) {
-            $(this).removeClass('selected');
-        }
-        else {
-            cartra.$('tr.selected').removeClass('selected');
-            $(this).addClass('selected');
-        }
-        dato = cartra.row(this).data();
-        $('#idC').val(dato.idcuota);
-        $('#factrs').val(cartra.rows().data().length);
-        $('#Total').val(dato.cuota);
-        $('#totl').html('$' + Moneda(dato.cuota));
-        $('#concpto').val(dato.tipo);
-        $('#lt').val(dato.lote);
-    })
     $('#recbo').submit(function (e) {
         e.preventDefault();
         $('#g').val(1);
@@ -4136,58 +3944,12 @@ if (window.location.pathname == `/links/reportes`) {
             },
             success: function (data) {
                 if (data.std) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
                     $('#ModalEventos').modal('hide');
                     SMSj('success', data.msj);
                     //table.ajax.reload(null, false)
                 } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
                     $('#ModalEventos').modal('hide');
                     SMSj('error', data.msj)
-                }
-            },
-            error: function (data) {
-                console.log(data);
-            }
-        });
-    });
-    $('#bank').submit(function (e) {
-        e.preventDefault();
-        var dat = $(this).serialize(); //new FormData(this);
-        //dat.append('id', data.pdf);
-        $.ajax({
-            type: 'POST',
-            url: '/links/reportes/bank',
-            data: dat,
-            //async: true,
-            beforeSend: function (xhr) {
-                $('#BANK').modal('hide');
-                $('#ModalEventos').modal({
-                    backdrop: 'static',
-                    keyboard: true,
-                    toggle: true
-                });
-            },
-            success: function (data) {
-                if (data) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    $('#ModalEventos').modal('hide');
-                    SMSj('success', 'Cuenta Bancaria registrada correctamente');
-                    comisiones.ajax.reload(null, false)
-                    /*comisiones.ajax.reload(function (json) {
-                        comisiones.columns.adjust().draw();
-                        SMSj('success', 'Actualizacion exitosa')
-                        CuentaCobro()
-                    })*/
-
-                } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    $('#ModalEventos').modal('hide');
-                    SMSj('error', 'Error al tratar de registrar la cuenta bancaria')
                 }
             },
             error: function (data) {
@@ -4401,14 +4163,11 @@ if (window.location.pathname == `/links/reportes`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
-        //{className: "dt-center", targets: "_all"}],
+        columnDefs: [
+            { className: 'control', orderable: true, targets: 0 },
+            { responsivePriority: 1, targets: [8, 11, 15, 16, 17] },
+            { responsivePriority: 2, targets: [13, -1] }
+        ],
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -4449,7 +4208,7 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 data: "porciento",
                 render: function (data, method, row) {
-                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                    return `${(data * 100).toFixed(2)}%` //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
             }, {
                 data: "retefuente",
@@ -4499,7 +4258,6 @@ if (window.location.pathname == `/links/reportes`) {
             {
                 className: 't',
                 data: "ids",
-                //defaultContent: 
                 render: function (data, method, row) {
                     return admin == 1 ? `
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
@@ -4529,7 +4287,7 @@ if (window.location.pathname == `/links/reportes`) {
         var fila = $(this).parents('tr');
         var data = comisiones.row(fila).data(); //console.log(data)
         if (!aasesor && data.stado === 9) {
-            aasesor = data.nam;
+            aasesor = data.nam; console.log(data.bank)
             iid = data.ids;
             fila.toggleClass('selected');
         } else if (iid === data.ids) {
@@ -4558,14 +4316,10 @@ if (window.location.pathname == `/links/reportes`) {
                 },
                 success: function (data) {
                     if (data) {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
                         $('#ModalEventos').modal('hide');
                         SMSj('success', `Solicitud procesada correctamente`);
                         comisiones.ajax.reload(null, false)
                     } else {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
                         $('#ModalEventos').modal('hide');
                         SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                     }
@@ -4584,98 +4338,7 @@ if (window.location.pathname == `/links/reportes`) {
             MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0,
             cuerpo = [], Ids = [];
 
-        comisiones
-            .rows('.selected')
-            .data()
-            .filter(function (value, index) {
-                //console.log(value.proyect, value, index)
-                if (index < 1) {
-                    ID = value.i;
-                    RG = value.idu;
-                    CC = value.docu;
-                    NOMBRE = value.nam;
-                    EMAIL = value.mail;
-                    MOVIL = value.clu;
-                    BANCO = value.bank;
-                    TCTA = value.tipocta;
-                    NCTA = value.numerocuenta;
-                }
-                TOTAL += value.total;
-                MONTO += parseFloat(value.monto);
-                PAGAR += value.pagar;
-                RETEFUENTE += value.retefuente;
-                RETEICA += value.reteica;
-                Ids.push(value.ids);
-                cuerpo.push({
-                    id: {
-                        content: value.ids, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    fecha: {
-                        content: value.fech, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    concepto: {
-                        content: value.concepto, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    descp: {
-                        content: value.descp, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    porciento: {
-                        content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    benefactor: {
-                        content: value.fullname, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    proyecto: {
-                        content: value.proyect, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    mz: {
-                        content: value.mz, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    lt: {
-                        content: value.n, colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    total: {
-                        content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    },
-                    monto: {
-                        content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
-                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
-                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
-                        }
-                    }
-                })
-            });
-        if (BANCO) {
+        var enviarCuentaCobro = () => {
             var fd = new FormData();
             var doc = new jsPDF('p', 'mm', 'a4');
             var img2 = new Image();
@@ -4826,8 +4489,8 @@ if (window.location.pathname == `/links/reportes`) {
                     $('#Modalimg').modal('hide');
                     $('#ModalEventos').modal({
                         backdrop: 'static',
-                        keyboard: true,
-                        toggle: true
+                        keyboard: false,
+                        show: true
                     });
                 },
                 success: function (dat) {
@@ -4906,8 +4569,6 @@ if (window.location.pathname == `/links/reportes`) {
                             processData: false,
                             contentType: false,
                             success: function (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
                                 $('#ModalEventos').modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
                                 comisiones.ajax.reload(null, false)
@@ -4918,8 +4579,6 @@ if (window.location.pathname == `/links/reportes`) {
                         });
 
                     } else {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
                         $('#ModalEventos').modal('hide');
                         SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
                     }
@@ -4928,14 +4587,142 @@ if (window.location.pathname == `/links/reportes`) {
                     console.log(data);
                 }
             })
+        };
+        comisiones
+            .rows('.selected')
+            .data()
+            .filter(function (value, index) {
+                if (index < 1) {
+                    ID = value.i;
+                    RG = value.idu;
+                    CC = value.docu;
+                    NOMBRE = value.nam;
+                    EMAIL = value.mail;
+                    MOVIL = value.clu;
+                    BANCO = value.bank;
+                    TCTA = value.tipocta;
+                    NCTA = value.numerocuenta;
+                }
+                TOTAL += value.total;
+                MONTO += parseFloat(value.monto);
+                PAGAR += value.pagar;
+                RETEFUENTE += value.retefuente;
+                RETEICA += value.reteica;
+                Ids.push(value.ids);
+                cuerpo.push({
+                    id: {
+                        content: value.ids, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    fecha: {
+                        content: value.fech, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    concepto: {
+                        content: value.concepto, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    descp: {
+                        content: value.descp, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    porciento: {
+                        content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    benefactor: {
+                        content: value.fullname, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    proyecto: {
+                        content: value.proyect, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    mz: {
+                        content: value.mz, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    lt: {
+                        content: value.n, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    total: {
+                        content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    monto: {
+                        content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    }
+                })
+            });
+        if (BANCO) {
+            enviarCuentaCobro();
+        } else if (!TOTAL) {
+            SMSj('error', 'Debe seleccionar al menos una comicion, para generar una cuenta de cobro');
+            return false;
         } else {
             $('#idbank').val(ID)
             $('#BANK').modal({
                 backdrop: 'static',
-                keyboard: true,
+                keyboard: false,
                 toggle: true
             });
         }
+        $('#bank').submit((e) => {
+            e.preventDefault();
+            var datos = $('#bank').serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/links/reportes/bank',
+                data: datos,
+                beforeSend: (x) => {
+                    $('#BANK').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                },
+                success: (data) => {
+                    if (data) {
+                        BANCO = data.banco;
+                        TCTA = data.cta;
+                        NCTA = data.numero;
+                        SMSj('success', 'Cuenta Bancaria registrada correctamente');
+                        enviarCuentaCobro();
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        })
+        //$('#ModalEventos').on('show.bs.modal', function (e) {
+        // do something...
+        //})
     }
     var comisionesOLD = $('#comisionesOLD').DataTable({
         dom: 'Bfrtip',

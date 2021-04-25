@@ -248,6 +248,67 @@ var t = {
     "pse_reference2": 0
 }
 
+router.post('/api/bank/callback', async (req, res) => {
+    const { transferVoucher, transferAmount, transferStateDescription, sign, requestDate, transferState,
+        transferDate, transferCode, transferReference, commerceTransferButtonId } = req.body;
+
+
+    let AppiKey = '1Fj8eK4rlyUd252L48herdrnEZ';
+    let key = `${AppiKey}~${commerceTransferButtonId}~${transferCode}~${transferAmount}~${transferState}`;
+    let hash = crypto.createHash('sha512').update(key).digest("hex");
+    console.log(req.body, hash, hash.length);
+
+    res.status(200).end();
+
+
+
+
+
+    /*const ids = reference_sale.split("-");
+    const r = {
+        transaction_date, reference_sale, state_pol, payment_method_type, value, cc_number, cc_holder, response_message_pol,
+        payment_method_name, description, pse_bank, reference_pol, ip, cliente: ids[0], transaction_id, transaction_bank_id,
+        currency, error_message_bank
+    }
+    const pin = await pool.query('SELECT * FROM payu WHERE reference_sale = ?', reference_sale);
+    var d = '';
+    if (pin.length > 0) {
+        console.log('si existe')
+        await pool.query('UPDATE payu set ? WHERE reference_sale = ?', [r, reference_sale]);
+    } else {
+        console.log('no existe')
+        const l = await pool.query('INSERT INTO payu SET ? ', r);
+        d = l.insertId
+    }
+    if (state_pol == 4 && d) {
+        var i = extra2.split("~");
+        const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
+        SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
+        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, i[3]]);
+        var l = r[0].monto1 || 0,
+            k = r[0].monto || 0;
+        var acumulado = l + k;
+
+        const pago = {
+            fech: transaction_date, monto: i[0], recibo: reference_sale, facturasvenc: i[1], lt: i[3], motorecibos: i[0], transfer: d,
+            acumulado, concepto: 'PAGO', stado: 3, descp: i[2], formap: payment_method_name, orden: ids[1], img: '/img/payu.png'
+        }
+
+        i[4] != 0 ? pago.bono = i[5] : '';
+        i[2] === 'ABONO' ? pago.concepto = i[2] : pago.pago = i[6],
+            await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', i[6]);
+        await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', i[3]);
+        const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+        const R = await PagosAbonos(P.insertId, 'GRUPO ELITE SISTEMA')
+        var body = reference_sale + ' ' + d + ' ' + description;
+        EnviarWTSAP(phone, `Solicitud de pago ${reference_sale} aprobada, ${response_message_pol}, cuanto antes enviaremos tu recibo de caja`)
+        EnviarWTSAP('57 3012673944', body)
+    } else {
+        EnviarWTSAP(phone, `Solicitud de pago ${reference_sale} rechazada, ${response_message_pol}`)
+    }*/
+});
+
 router.post('/confir', async (req, res) => {
     const { transaction_date, reference_sale, state_pol, payment_method_type, value, email_buyer, phone, cc_number,
         cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip, transaction_id,
