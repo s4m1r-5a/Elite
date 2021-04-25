@@ -2681,10 +2681,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             res.send(respuesta);
         }
     } else if (id === 'bank') {
-        const { banco, cta, idbank, numero } = req.body;
+        const { banco, cta, idbank, numero } = req.body; console.log(req.body)
         await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [{ bank: banco, tipocta: cta, numerocuenta: numero }, idbank]);
-        //console.log(req.body)
-        res.send(true);
+        res.send({ banco, cta, idbank, numero });
     } else if (id === 'std') {
         const { ids, std } = req.body;
         console.log(ids, std)

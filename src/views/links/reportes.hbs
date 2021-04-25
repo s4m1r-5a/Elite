@@ -2,7 +2,7 @@
 <tr class="table-success"></tr>-->
 <table id="my-table"></table>
 
-<main class="content" style="background-image: url('/img/fondo2.png');
+<main class="content p-1" style="background-image: url('/img/fondo2.png');
   -webkit-background-size: 100% 100%;           
      -moz-background-size: 100% 100%;         
        -o-background-size: 100% 100%;          
@@ -35,7 +35,7 @@
                                 <input id="max" type="text" class="edi text-center"
                                     style="width: 30px; padding: 1px; border: 0;" placeholder="LT">
                             </a>
-                            <a class="nav-item nav-link">
+                            <a class="nav-item nav-link d-none d-sm-block">
                                 <input id="busq" type="text" class="edi text-center"
                                     style="width: 200px; padding: 1px; border: 0;" placeholder="Buscar...">
                             </a>
@@ -191,7 +191,7 @@
             <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
                 aria-controls="collapse">
                 <strong class="text-muted">COMISIONES</strong><br>
-                <small class="text-muted">Conoce al detalle el estdo de cada una de tus comisiones</small>
+                <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
                 <i class="fas fa-angle-down float-right"></i>
             </div>
             <div id="collapse4" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion2">
@@ -200,13 +200,21 @@
                         <div class="nav nav-tabs" id="nav-tab" role="tablist">
                             <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#men1"
                                 role="button" aria-expanded="false" aria-controls="men">Ver</a>
+
                             <a class="nav-item nav-link" data-toggle="collapse" href="#men2" role="button"
                                 aria-expanded="false" aria-controls="men2">
                                 <i class="align-middle" data-feather="sliders"></i>
                             </a>
-                            <a class="nav-item nav-link">
+
+                            <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0"
+                                onclick="CuentaCobro()">
+                                <i class="align-middle" data-feather="slack"></i>
+                            </a>
+
+                            <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0" role="button"
+                                aria-expanded="false" aria-controls="men2">
                                 <input id="busq2" type="text" class="edi text-center"
-                                    style="width: 200px; padding: 1px; border: 0;" placeholder="Buscar...">
+                                    style="width: 150px; padding: 1px; border: 0;" placeholder="Buscar...">
                             </a>
 
                             <a class="nav-item nav-link d-none" data-toggle="collapse" href="#men3" role="button"
@@ -276,8 +284,8 @@
                                 <th>Proyct</th>
                                 <th>Mz</th>
                                 <th>Lt</th>
-                                <th data-priority="2">Estado</th>
-                                <th data-priority="1">Accion</th>
+                                <th>Estado</th>
+                                <th>Accion</th>
                             </tr>
                         </thead>
                         <tbody></tbody>
@@ -287,7 +295,7 @@
         </div>
     </div>
 
-    <div class="accordion" id="accordion3" style="display: none;">
+    <div class="accordion" id="accordion3">
         <div class="card bg-light mt-2">
             <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse5" aria-expanded="true"
                 aria-controls="collapse">
