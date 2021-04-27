@@ -1663,7 +1663,12 @@ if (window.location.pathname == `/links/reportes`) {
             fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),
             fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
         }
-    }*/
+    }   
+    $('#ModalEventos').modal({
+        backdrop: 'static',
+        keyboard: false,
+        show: true
+    });*/
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
@@ -1697,7 +1702,13 @@ if (window.location.pathname == `/links/reportes`) {
             $(this).find('i').removeClass("fa-angle-up");
             $(this).find('i').addClass("fa-angle-down");
         }
-    })
+    });
+    $('#ModalEventos').on('hide.bs.modal', function (e) {
+        console.log('lo mandaron a cerrar')
+    });
+    $('#ModalEventos').on('hidden.bs.modal', function (e) {
+        console.log('ya se cerro')
+    });
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     /*if (admin == 1) {
         $('#resumen').show();
@@ -1822,8 +1833,9 @@ if (window.location.pathname == `/links/reportes`) {
         },
         { responsivePriority: 1, targets: [3, 4, 6] },
         { responsivePriority: 2, targets: 5 },
-        { responsivePriority: 3, targets: 11 },
-        { responsivePriority: 4, targets: [7, 8, -3] },
+        { responsivePriority: 3, targets: 1 },
+        { responsivePriority: 4, targets: 11 },
+        { responsivePriority: 5, targets: [7, 8, -3] },
         { targets: [6, -1, 13], searchable: true },
         { targets: [-1, -2], visible: false, searchable: true }],
         order: [[1, "desc"]],
@@ -1999,7 +2011,7 @@ if (window.location.pathname == `/links/reportes`) {
             }
         },
         initComplete: function (settings, json) {
-            $('#collapse').collapse('toggle');
+            //$('#collapse').collapse('toggle');
             var n = $('#datatable2 tbody tr:first').find('td:hidden').length;
             column = 13 - n;
             $('.menu').prop('colspan', column);
@@ -2112,12 +2124,6 @@ if (window.location.pathname == `/links/reportes`) {
             });
         }
     });
-    $('#ModalEventos').on('hide.bs.modal', function (e) {
-        console.log('lo mandaron a cerrar')
-    })
-    $('#ModalEventos').on('hidden.bs.modal', function (e) {
-        console.log('ya se cerro')
-    })
     $('#datatable2_filter').hide();
     /*$(window).resize(function () {
         tableOrden
@@ -2830,13 +2836,23 @@ if (window.location.pathname == `/links/reportes`) {
                 if (last !== group || lote !== datos[i].n) {
                     if (last != null) {
                         $(rows).eq(i - 1).after(
-                            `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
-                            <td colspan="4">TOTAL ABONADO</td>
-                            <td colspan="11">$${Moneda(vlr)}</td>
-                            </tr><tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
-                            <td colspan="4">SALDO A LA FECHA</td>
-                            <td colspan="11">$${Moneda(totaloteanterior - vlr)}</td>
-                        </tr>`
+                            `<tr class="total" style="background: #F08080; color: #FFFFCC;">                           
+                                <td colspan="15">
+                                    <nav class="nav nav-justified">
+                                        <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
+                                        <a class="nav-item nav-link py-0">$${Moneda(vlr)}</a>
+                                    </nav>
+                                </td>
+                            </tr>
+                            <tr class="total" style="background: #F08080; color: #FFFFCC;">                          
+                                <td colspan="15">
+                                    <nav class="nav nav-justified">
+                                        <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
+                                        <a class="nav-item nav-link py-0">$${Moneda(totaloteanterior - vlr)}</a>
+                                    </nav>
+                                </td>
+                            </tr>
+                            <tr></tr>`
                         );
                         body.push(
                             {
@@ -2876,25 +2892,37 @@ if (window.location.pathname == `/links/reportes`) {
                     }
                     $(rows).eq(i).before(
                         `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="2" class="text-left">${group}</td>
-                            <td class="text-center">${datos[i].proyect}</td>
-                            <td class="text-center">MZ: ${datos[i].mz} - LT: ${datos[i].n}</td>
-                            <td colspan="11" class="text-right">PRECIO: $${Moneda(datos[i].valor)}</td>
+                            <td colspan="15">
+                                <nav class="nav flex-column flex-sm-row">
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${group}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].proyect}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${datos[i].mz} - LT: ${datos[i].n}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${Moneda(datos[i].valor)}</a>
+                                </nav>
+                            </td>
                         </tr>
                         <tr class="group" style="background: #FFFFCC; color: #7f8c8d;">
-                            <td class="text-left">SEPARADO: ${gt}</td>
-                            <td class="text-center">DSTO: ${datos[i].descuento}%</td>
-                            <td class="text-center">CUPON: ${datos[i].cupon}</td>
-                            <td class="text-center">AHORRO: $${Moneda(datos[i].ahorro)}</td>
-                            <td colspan="12" class="text-right">TOTAL: $${Moneda(datos[i].total)}</td>
+                            <td colspan="15">
+                                <nav class="nav flex-column flex-sm-row">
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">SEPARADO: ${gt}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">DSTO: ${datos[i].descuento}%</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">CUPON: ${datos[i].cupon}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">AHORRO: $${Moneda(datos[i].ahorro)}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">TOTAL: $${Moneda(datos[i].total)}</a>
+                                </nav>
+                            </td>
                         </tr>
                         <tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${datos[i].img}', '${datos[i].id}')">
-                            <td class="text-left">${gt2}</td>
-                            <td colspan="2" class="text-center">RC-${datos[i].ids}</td>
-                            <td class="text-center">${datos[i].descp}</td>
-                            <td colspan="12" class="text-right">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                            <td colspan="15">
+                                <nav class="nav nav-justified">
+                                    <a class="nav-item nav-link py-0">${gt2}</a>
+                                    <a class="nav-item nav-link py-0">RC-${datos[i].ids}</a>
+                                    <a class="nav-item nav-link py-0">${datos[i].descp}</a>
+                                    <a class="nav-item nav-link py-0">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
                             : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
-                                : Moneda(datos[i].monto)}</td>
+                                : Moneda(datos[i].monto)}</a>
+                                </nav>
+                            </td>
                         </tr>`
                     );
 
@@ -2990,13 +3018,18 @@ if (window.location.pathname == `/links/reportes`) {
                     //("background-color", "#40E0D0");
                     $(rows).eq(i - 1).after(
                         `<tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${datos[i].img}', '${datos[i].id}')">
-                    <td class="text-left">${gt2}</td>
-                    <td colspan="2" class="text-center">RC-${datos[i].ids}</td>
-                    <td class="text-center">${datos[i].descp}</td>
-                    <td colspan="12" class="text-right">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
+                            <td colspan="15">
+                                <nav class="nav nav-justified">
+                                    <a class="nav-item nav-link py-0">${gt2}</a>
+                                    <a class="nav-item nav-link py-0">RC-${datos[i].ids}</a>
+                                    <a class="nav-item nav-link py-0">${datos[i].descp}</a>
+                                    <a class="nav-item nav-link py-0">$${datos[i].formap === 'BONO' ? Moneda(datos[i].mtb)
                             : datos[i].mtb ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
-                                : Moneda(datos[i].monto)}</td>
-                    </tr>`);
+                                : Moneda(datos[i].monto)}</a>
+                                </nav>
+                            </td>
+                        </tr>`
+                    );
                     body.push(
                         {
                             id: {
@@ -3039,13 +3072,23 @@ if (window.location.pathname == `/links/reportes`) {
 
                 if (i == filas.length - 1) {
                     $(rows).eq(i).after(
-                        `<tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
-                        <td colspan="4">TOTAL ABONADO</td>
-                        <td colspan="11">$${Moneda(vlr)}</td>
-                        </tr><tr class="total text-right" style="background: #F08080; color: #FFFFCC;">
-                            <td colspan="4">SALDO A LA FECHA</td>
-                            <td colspan="11">$${Moneda(parseFloat(datos[i].total) - vlr)}</td>
-                        </tr>`
+                        `<tr class="total" style="background: #F08080; color: #FFFFCC;">                          
+                            <td colspan="15">
+                                <nav class="nav nav-justified">
+                                    <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
+                                    <a class="nav-item nav-link py-0">$${Moneda(vlr)}</a>
+                                </nav>
+                            </td>
+                        </tr>
+                        <tr class="total" style="background: #F08080; color: #FFFFCC;">                           
+                            <td colspan="15">
+                                <nav class="nav nav-justified">
+                                    <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
+                                    <a class="nav-item nav-link py-0">$${Moneda(parseFloat(datos[i].total) - vlr)}</a>
+                                </nav>
+                            </td>
+                        </tr>
+                        <tr></tr>`
                     );
                     body.push(
                         {
@@ -4176,7 +4219,8 @@ if (window.location.pathname == `/links/reportes`) {
             dataSrc: "data"
         },
         initComplete: function (settings, json, row) {
-            $('#collapse4').collapse('toggle');
+            //$('#collapse4').collapse('toggle');
+            //$('#ModalEventos').modal('hide');
         },
         columns: [
             {
@@ -4943,6 +4987,18 @@ if (window.location.pathname == `/links/reportes`) {
             .columns(col2)
             .search(buscar, true, false, true)
             .draw();
+    });
+    $('#collapse').on('shown.bs.collapse', function () {
+        tableOrden.columns.adjust().responsive.recalc();
+    });
+    $('#collapse2').on('shown.bs.collapse', function () {
+        estadoscuentas2.columns.adjust().responsive.recalc();
+    });
+    $('#collapse3').on('shown.bs.collapse', function () {
+        estadoscuentas.columns.adjust().responsive.recalc();
+    });
+    $('#collapse4').on('shown.bs.collapse', function () {
+        comisiones.columns.adjust().responsive.recalc();
     });
     var th = () => {
         /*
@@ -9036,6 +9092,20 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             return true;
         }
     );
+    $('.card-header').on('click', function () {
+        var papa = $(this).parents('.accordion');
+        if ($(this).find('i').hasClass('fa-angle-down')) {
+            $(papa).find('.card-header i').removeClass("fa-angle-up");
+            $(papa).find('.card-header i').addClass("fa-angle-down");
+
+            $(this).find('i').removeClass("fa-angle-down");
+            $(this).find('i').addClass("fa-angle-up");
+
+        } else {
+            $(this).find('i').removeClass("fa-angle-up");
+            $(this).find('i').addClass("fa-angle-down");
+        }
+    });
     $(document).ready(function () {
         $("#Date_search").html("");
         $('a.toggle-vis').on('click', function (e) {
@@ -9043,7 +9113,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             var column = table.column($(this).attr('data-column'));
             column.visible(!column.visible());
         });
-
     });
     var Color = (val) => {
         var elemen = $(`#t-${val}`);
@@ -9180,31 +9249,24 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
     });
     var table = $('#datatable').DataTable({
-        dom: 'Bfrtip',
-        lengthMenu: [
+        //dom: 'Bfrtip',
+        /*lengthMenu: [
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
-        ],
-        buttons: [{
+        ],*/
+        lengthChange: false,
+        /*buttons: [{
             extend: 'pageLength',
             text: 'Ver',
             orientation: 'landscape'
         },
         {
-            text: `<svg xmlns="http://www.w3.org/2000/svg" 
-                width="36" height="36" viewBox="0 0 24 24" fill="none" 
-                stroke="currentColor" stroke-width="2" stroke-linecap="round" 
-                stroke-linejoin="round" class="feather feather-calendar">
-                    <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                    <line x1="16" y1="2" x2="16" y2="6"></line>
-                    <line x1="8" y1="2" x2="8" y2="6"></line>
-                    <line x1="3" y1="10" x2="21" y2="10"></line>
-                </svg>`,
+            text: `ed`,
             attr: {
                 title: 'Fecha',
-                id: 'Date'
+                id: 'gg'
             },
-            className: 'btn btn-secondary fech'
+            className: 'btn btn-secondary'
         },
         {
             text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
@@ -9282,7 +9344,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 }
             ]
         }
-        ],
+        ],*/
         deferRender: true,
         paging: true,
         autoWidth: true,
@@ -9299,7 +9361,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             dataSrc: "data"
         },
         initComplete: function (settings, json, row) {
-            $('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+            //$('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
         },
         columns: [
             {
@@ -9405,6 +9467,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         }
     });
+    $('#busq').on('keyup', function () {
+        table.search(this.value).draw();
+    });
+    $('#datatable_filter').hide();
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 5 : 6;
         table
@@ -9412,9 +9478,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             .search(this.value)
             .draw();
     });
-    var STAD = (col, std) => {
-        table.columns(col).search(std).draw();
-    }
     table.on('click', 'td:not(.t)', function () {
         var fila = $(this).parents('tr');
         var data = table.row(fila).data(); //console.log(data)
@@ -9459,6 +9522,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             })
         } else if (imagenes) {
             imge = 1
+            $("#Modalimg .foto").remove();
+            $("#descargaimg .imag").remove();
             $("#descargaimg").html(`<a class="imag" href="${data.img}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
             $("#Modalimg .fotos").append(
                 `<div class="foto" style="
@@ -9923,9 +9988,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fila.toggleClass('selected');
         })
     })
-    var STAD2 = (col, std) => {
-        comisiones.columns(col).search(std).draw();
-    }
     var devoluciones = $('#devoluciones').DataTable({
         dom: 'Bfrtip',
         lengthMenu: [
@@ -10192,7 +10254,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 if (last !== group.cuentadecobro) {
                     if (last != null) {
                         $(rows).eq(i - 1).after(
-                            `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">                            
+                            `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">
                                 <td>
                                     <div class="text-center">
                                         ${cont}
@@ -10262,7 +10324,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         </tr>`
                     );
 
-                    console.log(window.location.origin + group.cuentacobro)
+                    //console.log(window.location.origin + group.cuentacobro)
                     body.push(
                         {
                             id: {
@@ -10451,6 +10513,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         ]
     });
+    var bajarPdf = () => {
+        const link = document.createElement('a');
+        link.href = '/bank/Movimientos.xlsm';
+        link.download = "Movimientos.xlsm";
+        link.dispatchEvent(new MouseEvent('click'));
+    }
     var Eliminar = (id, pdf, nombre, movil) => {
         var porque = '';
         porque = prompt("Deje en claro por que quiere eliminar la solicitud, le enviaremos este mensaje al asesor para que pueda corregir y generar nuevamene la solicitud", "Solicitud rechazada por que");
@@ -10952,6 +11020,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     // Daterangepicker
     /*var start = moment().subtract(29, "days").startOf("hour");
     var end = moment().startOf("hour").add(32, "hour");*/
+
+    $('#collapse').on('shown.bs.collapse', function () {
+        table.columns.adjust().responsive.recalc();
+    });
+    $('#collapse2').on('shown.bs.collapse', function () {
+        devoluciones.columns.adjust().responsive.recalc();
+    });
+    $('#collapse3').on('shown.bs.collapse', function () {
+        comisiones.columns.adjust().responsive.recalc();
+    });
     $(".fech").daterangepicker({
         locale: {
             'format': 'YYYY-MM-DD HH:mm',
