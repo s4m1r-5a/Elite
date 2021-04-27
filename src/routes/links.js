@@ -520,7 +520,7 @@ cron.schedule("7 10 * * *", async () => {
         f.map((x) => {
             body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
         })
-        await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
+        //await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
     }
 })
 cron.schedule("0 0 * * *", async () => {
