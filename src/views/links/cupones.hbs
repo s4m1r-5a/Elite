@@ -1,136 +1,57 @@
-<main class="content">
-    <div class="container-fluid p-0">
-        <div class="row" id="cuadro1">
-            <div class="col-xl-12">
-                <div class="card">
-                    <div class="card-header">
-                        <form id="creacliente">
-                            <div class="row" id="addcliente" style="display: none;">
-                                <div class="col-12 col-lg-12">
-                                    <div class="d-inline-block float-right">
-                                        <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
-                                    </div>
-                                    <hr style="width: 90%;" />
-                                </div>
-                                <div class="col-12 col-lg-6">
-                                    <table class="table table-sm">
-                                        <tbody>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <div class="text-center row">
-                                                        <div class="col-6">
-                                                            TIPO
-                                                            <select class="form-control-no-border"
-                                                                style="padding: 1px;text-align:center;" id="promesa"
-                                                                name="promesa" required>
-                                                                <option value="BONO">BONO</option>
-                                                                <option value="CUPON">CUPON</option>
-                                                            </select>
-                                                        </div>
-                                                        <div class="col-6">
-                                                            PIN
-                                                            <input
-                                                                class="form-control-no-border text-center text-uppercase"
-                                                                type="text" autocomplete="off" name="pin" id="pin"
-                                                                placeholder="Cupon"
-                                                                style="padding: 1px; width: 125px; background-color: #FFFFCC;">
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <div class="text-center row">
-                                                        <div class="col-4">
-                                                            $ O %
-                                                            <input
-                                                                class="form-control-no-border text-center text-uppercase"
-                                                                type="text" autocomplete="off" name="desmonto"
-                                                                id="desmonto" placeholder="$ - %"
-                                                                style="padding: 1px; width: 125px; background-color: #FFFFCC;">
-                                                        </div>
-                                                        <div class="col-8">
-                                                            <select id="client" class="form-control-no-border select2"
-                                                                name="client">
-                                                            </select>
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <div class="text-center row">
-                                                        <div class="col-sm-6">
-                                                            SELECIONA LAS PARTES A QUIEN DESEAS NOTIFICAR
-                                                        </div>
-                                                        <div class="col-sm-3">
-                                                            <div class="custom-control custom-switch">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                    id="cliente">
-                                                                <label class="custom-control-label"
-                                                                    for="cliente">CLIENTE</label>
-                                                            </div>
-                                                        </div>
-                                                        <div class="col-sm-3">
-                                                            <div class="custom-control custom-switch">
-                                                                <input type="checkbox" class="custom-control-input"
-                                                                    id="asesor">
-                                                                <label class="custom-control-label"
-                                                                    for="asesor">ASESOR</label>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                </th>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                                <div class="col-12 col-lg-6">
-                                    <table class="table table-sm">
-                                        <tbody>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <textarea id="motivo" name="motivo"
-                                                        placeholder="DEJA EN CLARO EL MOTIVO DE POR QUE CREAS ESTE BONO O CUPON"
-                                                        style="width: 100%;"></textarea>
-                                                </th>
-                                            </tr>
-                                            <tr>
-                                                <th colspan="2">
-                                                    <button class="btn-outline-dark float-right btn-sm"
-                                                        type="submit">CREAR</button>
-                                                </th>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </div>
-                            </div>
-                        </form>
+<div class="card">
+    <div class="card-header">
+        <form id="generarBonos">
+            <div class="row" id="addBonos" style="display: none;">
+                <div class="col-12 col-lg-12 mb-2">
+                    <div class="d-inline-block float-right">
+                        <a class="r atras"><i class="feather-lg" data-feather="x-circle"></i></a>
                     </div>
-                    <div class="card-body">
-                        <table id="tablacupones" class="table table-sm table-striped table-hover display nowrap"
-                            style="width:100%">
-                            <thead>
-                                <tr>
-                                    <th></th>
-                                    <th>Id</th>
-                                    <th>Cupon</th>
-                                    <th>Dto</th>
-                                    <th>Fecha</th>
-                                    <th>Estado</th>
-                                    <th>Ahorro</th>
-                                    <th>Proyecto</th>
-                                    <th>Mz</th>
-                                    <th>Lt</th>
-                                    <th>Solicitante</th>
-                                    <th>Accion</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
+                    <hr style="width: 90%;" />
+                </div>
+                <div class="col-12 mb-2">
+                    <input class="ahora" type="hidden" name="ahora">
+                    <input class="pinBono" type="hidden" name="pin">
+                    <input class="text-center float-left" type="text" autocomplete="off" name="monto" id="bonoMonto"
+                        placeholder="MONTO" style="padding: 1px; width: 125px; background-color: #FFFFCC;"
+                        data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>
+                    <input class="text-center float-right pinBono" type="text" autocomplete="off" name="pin2" disabled
+                        placeholder="BONO" style="padding: 1px; width: 125px; background-color: #FFFFCC;" required>
+                </div>
+                <div class="col-12 mb-2">
+                    <select id="client" class="form-control-no-border select2" name="client" required>
+                    </select>
+                </div>
+                <div class="col-12 mb-2">
+                    <textarea id="motivo" name="motivo"
+                        placeholder="DEJA EN CLARO EL MOTIVO DE POR QUE CREAS ESTE BONO O CUPON"
+                        style="width: 100%;" required></textarea>
+                </div>
+                <div class="col-12">
+                    <input class="edi float-left" type="file" name="image" id="file" style="width: 50%;" required>
+                    <button class="btn-outline-primary float-right btn-sm" type="submit" id="gb">Generar</button>
                 </div>
             </div>
-        </div>
+        </form>
     </div>
-</main>
+    <div class="card-body">
+        <table id="tablacupones" class="table table-sm table-striped table-hover display nowrap" style="width:100%">
+            <thead>
+                <tr>
+                    <th></th>
+                    <th>Id</th>
+                    <th>Cupon</th>
+                    <th>Dto</th>
+                    <th>Fecha</th>
+                    <th>Estado</th>
+                    <th>Ahorro</th>
+                    <th>Proyecto</th>
+                    <th>Mz</th>
+                    <th>Lt</th>
+                    <th>Solicitante</th>
+                    <th>Accion</th>
+                </tr>
+            </thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</div>

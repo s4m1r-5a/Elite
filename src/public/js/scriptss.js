@@ -5418,7 +5418,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                     }).map((x, j) => {
                         c = j + 2;
                     })
-                $('#financiacion').val(c)
+                $('#financiacion').val(c);
                 if ($('#Separar').val()) {
                     FINANCIAR('FINANCIACION', c, parseFloat($('#Separar').val().replace(/\./g, '')))
                 } else {
@@ -5945,7 +5945,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     }
     var FINANCIAR = (tipo, cnt, separ) => {
         var table = new $.fn.dataTable.Api('#crearcartera');
-        var datos = table.rows({ page: 'current' }).data()
+        var datos = table.rows({ page: 'current' }).data();
         if (!datos.length) {
             datos.push([
                 '',
@@ -5970,23 +5970,23 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         }
         tipo != 1 ? datos.push([
             '',
-            `< input class="text-center id" type = "text" name = "id" style = "width: 100%;" value = "0" disabled > `,
-            `< input class="text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
-            `< input class="text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
-            `< input class="text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "${tipo}" > `,
-            `< input class="text-center cuota" type = "text" name = "cuota" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
-            `< input class="text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
-            `< select size = "1" class="text-center std" name = "std" disabled >
+            `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
+            `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+            `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
+            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
+            `<select size="1" class="text-center std" name="std" disabled>
             <option value="3" selected="selected">Pendiente</option>
             <option value="13">Pagada</option>
-            </select > `,
-            `< a > <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            </select>`,
+            `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                 <polyline points="3 6 5 6 21 6"></polyline>
                 <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                 <line x1="10" y1="11" x2="10" y2="17"></line>
                 <line x1="14" y1="11" x2="14" y2="17"></line>
-            </svg></a > `
+            </svg></a>`
         ]) : '';
         crearcartera.clear().draw(false);
         var dat = [];
@@ -6005,7 +6005,6 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         }).map((x, c) => {
             dat.push(x);
         })
-
         crearcartera.rows.add(dat).draw(false);
         separ ? $('#Separar').val(Moneda(separ)) : '';
         CONT(separ, tipo);
@@ -11768,6 +11767,7 @@ if (window.location == `${window.location.origin}/links/red`) {
     });
 };
 ///// https://api.chat-api.com/instance107218/checkPhone?token=5jn3c5dxvcj27fm0&phone=14081472583 verificar si se puede enviar un whatsapp a un numero eliminar los espacios en el numero////////////
+
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/clientes`) {
     $(document).ready(function () {
@@ -12103,21 +12103,61 @@ if (window.location == `${window.location.origin}/links/cupones`) {
     $.ajax({
         type: 'POST',
         url: '/links/cupones/clientes'
-    })
-        .then(function (data) {
-            clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
-            data.clientes.map((x, v) => {
-                clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
-            });
+    }).then(function (data) {
+        //clientes.append(new Option(`Selecciona un Cliente`, 0, true, true))
+        data.clientes.map((x, v) => {
+            clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, false, false))
         });
+        clientes.val(null).trigger('change');
+    });
     $(document).ready(function () {
         $(".select2").each(function () {
             $(this)
                 .wrap("<div class=\"position-relative\"></div>")
                 .select2({
                     placeholder: 'Selecciona un Cliente',
-                    dropdownParent: $(this).parent()
+                    dropdownParent: $(this).parent(),
+                    allowClear: true
                 });
+        });
+        $('.atras').click(function () {
+            $('#gBono').show("slow")
+            $("#addBonos").hide("slow");
+            $("#addBonos input, textarea").val('');
+            $('#gb').prop('disabled', false);
+            clientes.val(null).trigger('change');
+        })
+        $('#generarBonos').submit(function (e) {
+            e.preventDefault();
+            $('.ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+            var formData = new FormData(document.getElementById("generarBonos"));
+            $.ajax({
+                url: '/links/bonos/crear',
+                data: formData,
+                type: 'POST',
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#gb').prop('disabled', true);
+                    $('#ModalEventos').modal({
+                        toggle: true,
+                        backdrop: 'static',
+                        keyboard: true,
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        cupones.ajax.reload(null, false)
+                        $('#ModalEventos').modal('hide')
+                        $('#gBono').show("slow")
+                        $("#addBonos").hide("slow");
+                        $("#addBonos input, textarea").val('');
+                        $('#gb').prop('disabled', false);
+                        clientes.val(null).trigger('change');
+                        SMSj('success', 'Bono generado exitosamente')
+                    }
+                }
+            });
         });
     })
     var cupones = $('#tablacupones').DataTable({
@@ -12129,16 +12169,18 @@ if (window.location == `${window.location.origin}/links/cupones`) {
         buttons: [
             {
                 text: `<div class="mb-0">
-                            <i class="align-middle mr-2" data-feather="user-plus"></i> <span class="align-middle">Ingresar Cliente</span>
+                            <i class="align-middle mr-2" data-feather="tag"></i> <span class="align-middle">Generar Bono</span>
                         </div>`,
                 attr: {
-                    title: 'Agregar-Clientes',
-                    id: 'agrecli'
+                    title: 'Generar Bono',
+                    id: 'gBono'
                 },
                 className: 'btn btn-outline-dark',
                 action: function () {
-                    $('#agrecli').hide("slow")
-                    $("#addcliente").show("slow");
+                    $('#gBono').hide("slow")
+                    $("#addBonos").show("slow");
+                    let bono = ID(5);
+                    $('.pinBono').val(bono);
                 }
             }
         ],
