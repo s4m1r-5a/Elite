@@ -281,7 +281,7 @@ router.post('/desarrollo', async (req, res) => {
     //var f = 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.indexOf('/uploads/')
     //console.log(req.headers.origin, path.join(__dirname, '../public' + 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f)), 'https://grupoelitefincaraiz.com/uploads/l31j-w513sxj0s941uz-f0og4y9f-4nl4b.pdf'.substr(f))
 
-    const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
+    /*const busq = await pool.query(`SELECT s.descp, COUNT(l.id) dc, l.id, l.mz, l.n, 
     MIN(s.ids) menor, MAX(s.ids) mayor, MIN(IF(s.cuentadecobro IS NOT NULL, s.ids, NULL)) ul
     FROM solicitudes s INNER JOIN productosd l ON s.lt = l.id WHERE s.stado != 6 AND s.concepto 
     IN('COMISION DIRECTA', 'COMISION INDIRECTA') GROUP BY l.id, s.descp, l.mz, l.n HAVING dc > 1 ORDER BY dc DESC`);
@@ -290,7 +290,7 @@ router.post('/desarrollo', async (req, res) => {
         let id = x.ul ? x.ul : x.menor;
         console.log(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`, x.ul, x.menor)
         //await pool.query(`DELETE FROM solicitudes WHERE ids != ${id} AND descp = '${x.descp}' AND lt = ${x.id}`)
-    })
+    })*/
 
 
     /*
