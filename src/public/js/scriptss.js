@@ -12166,7 +12166,7 @@ if (window.location == `${window.location.origin}/links/cupones`) {
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: [
+        buttons: admin == 1 ? [
             {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="tag"></i> <span class="align-middle">Generar Bono</span>
@@ -12183,7 +12183,7 @@ if (window.location == `${window.location.origin}/links/cupones`) {
                     $('.pinBono').val(bono);
                 }
             }
-        ],
+        ] : '',
         deferRender: true,
         paging: true,
         autoWidth: true,
