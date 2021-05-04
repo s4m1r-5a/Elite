@@ -1146,12 +1146,12 @@ router.post('/reds', async (req, res) => {
     if (req.user.admin == 1) {
         const red = await pool.query(`SELECT u.*, r.*, p.acreedor , p.usuario idpapa, 
         up.fullname namepapa, rp.rango rangopapa, p1.usuario idabuelo, ua.fullname nameabuelo, 
-        ra.rango rangoabuelo, p2.usuario idbisabuelo, ub.fullname namebisabuelo, rb.rango rangobisabuelo  
-        FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
-        INNER JOIN users u ON p.acreedor = u.id INNER JOIN rangos r ON u.nrango = r.id
-        INNER JOIN users up ON p.usuario = up.id INNER JOIN rangos rp ON up.nrango = rp.id
-        INNER JOIN users ua ON p1.usuario = ua.id INNER JOIN rangos ra ON ua.nrango = ra.id
-        INNER JOIN users ub ON p2.usuario = ub.id INNER JOIN rangos rb ON ub.nrango = rb.id
+        ra.rango rangoabuelo, p2.usuario idbisabuelo, ub.fullname namebisabuelo, rb.rango rangobisabuelo          
+        FROM pines p LEFT JOIN pines p1 ON p1.acreedor = p.usuario LEFT JOIN pines p2 ON p2.acreedor = p1.usuario        
+        INNER JOIN users u ON u.id = p.acreedor INNER JOIN rangos r ON r.id = u.nrango        
+        LEFT JOIN users up ON up.id = p.usuario LEFT JOIN rangos rp ON rp.id = up.nrango        
+        LEFT JOIN users ua ON ua.id = p1.usuario LEFT JOIN rangos ra ON ra.id = ua.nrango        
+        LEFT JOIN users ub ON ub.id = p2.usuario LEFT JOIN rangos rb ON rb.id = ub.nrango
         ORDER BY u.fullname`);
         /*const red = await pool.query(`SELECT * FROM users u 
             INNER JOIN rangos r ON u.nrango = r.id`);*/
@@ -3330,10 +3330,10 @@ async function Estados(S) {
             //console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
             return { std: 10, estado: 'SEPARADO', pendients }
         } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
-            console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
+            //console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
             return { std: 12, estado: 'APARTADO', pendients }
         } else {
-            console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
+            //console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
             return { std: 1, estado: 'PENDIENTE', pendients }
         }
 

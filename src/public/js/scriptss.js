@@ -11411,11 +11411,11 @@ if (window.location == `${window.location.origin}/links/red`) {
         language: languag,
         deferRender: true,
         paging: true,
-        /*search: {
+        search: {
             regex: true,
             caseInsensitive: true,
-        },*/
-        searching: false,
+        },
+        //searching: false,
         responsive: {
             details: {
                 type: 'column'
