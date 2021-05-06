@@ -707,11 +707,11 @@ if (window.location.pathname == `/tablero`) {
             });
             promedio = ventaño / 30;
             $('#ventames').html(ventames);
-            $('#promedio').html(Math.round(promedio));
+            $('#promedio').html(Math.round(ventaño));
             $('#ventaprecio').html(Moneda(totalmes));
             $('#utilidadneta').html(Moneda(totalaño));
             $('#utilidad').html(Moneda(totales));
-            console.log(data)
+            //console.log(data)
             window.pie2 = new Chart(canvas2, datos2);
             new Chart(document.getElementById("chartjs-dashboard-bar"), {
                 type: "bar",
