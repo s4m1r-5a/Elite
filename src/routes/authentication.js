@@ -192,12 +192,12 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   ////// 5 MEJORES ASESORES DEL AÑO Y DEL MES //////////////
   asesoresA = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
   COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
-  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE MONTH(p.fecha) BETWEEN 1 and 12 
+  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE u.nrango < 7 AND MONTH(p.fecha) BETWEEN 1 and 12 
   AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
 
   asesoresM = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
   COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
-  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE MONTH(p.fecha) = MONTH(CURDATE()) 
+  INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE u.nrango < 7 AND MONTH(p.fecha) = MONTH(CURDATE()) 
   GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
 
   res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM });
