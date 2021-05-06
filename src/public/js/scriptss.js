@@ -4279,6 +4279,9 @@ if (window.location.pathname == `/links/reportes`) {
                 data: "stado",
                 render: function (data, method, row) {
                     switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Esta comision esta siendo auditadda">Auditando</span>`
+                            break;
                         case 4:
                             return `<span class="badge badge-pill badge-dark">Pagada</span>`
                             break;
@@ -4322,6 +4325,8 @@ if (window.location.pathname == `/links/reportes`) {
                 $(row).css("background-color", "#40E0D0");
             } else if (data["stado"] == 15) {
                 $(row).css("background-color", "#FFFFCC");
+            } else if (data["stado"] == 1) {
+                $(row).css({ "background-color": "#FEC782", "color": "#FFFFFF" });
             }
         }
     });

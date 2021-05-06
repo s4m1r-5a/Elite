@@ -3628,11 +3628,11 @@ async function Pa(S, fn) {
 //Desendentes('15', 10)
 
 async function PagosAbonos(Tid, pdf, user) {
-    //u.
+    //u. obsevacion pr
     const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, u.nrango, c.mora, 
     pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, 
     pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
-    pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono,
+    pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono, pr.obsevacion,
     s.ids, s.descp, pr.id cparacion, s.pago, c.estado std FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
     INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
@@ -3644,6 +3644,7 @@ async function PagosAbonos(Tid, pdf, user) {
     const fech = moment(S.fechs).format('YYYY-MM-DD');
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? S.monto + S.mount : S.monto;
+    const std = S.obsevacion === 'CARTERA' ? 1 : 15;
     //console.log(S, monto)
     if (S.stado === 4 || S.stado === 6) {
         Eli(pdf)
@@ -3707,7 +3708,7 @@ async function PagosAbonos(Tid, pdf, user) {
             const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
             if (!sep.length) {
                 var solicitar = {
-                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: 15, descp: 'SEPARACION', orden: T,
+                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: std, descp: 'SEPARACION', orden: T,
                     asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
                 }
                 await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
@@ -3918,8 +3919,15 @@ async function Desendentes(pin, stados, pasado) {
         OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
         AND s.descp != 'SEPARACION'`);
 
-    const asesor = await pool.query(`SELECT * FROM pines p INNER JOIN users u ON p.acreedor = u.id 
-    INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ? LIMIT 1`, pin);
+    const asesor = await pool.query(`SELECT p.*, u.*, r.*, u1.nrango papa, u2.nrango abue, u3.nrango bisab     
+        FROM pines p INNER JOIN users u ON p.acreedor = u.id             
+        INNER JOIN rangos r ON u.nrango = r.id    
+        LEFT JOIN users u1 ON p.usuario = u1.id  
+        LEFT JOIN pines p1 ON p.usuario = p1.acreedor 
+        LEFT JOIN users u2 ON p1.usuario = u2.id  
+        LEFT JOIN pines p2 ON p1.usuario = p2.acreedor 
+        LEFT JOIN users u3 ON p2.usuario = u3.id
+        WHERE u.id =  ? LIMIT 1`, pin);
 
     var j = asesor[0]
     if (j.sucursal) {
@@ -4070,29 +4078,28 @@ async function Desendentes(pin, stados, pasado) {
                     var montoB = val * a.linea3
                     var retefuenteB = montoB * 0.10
                     var reteicaB = montoB * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bonop += val
                     var f = [[
                         hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
                         j.acreedor, a.comision, val, a.lote, retefuente,
                         reteica, monto - (retefuente + reteica), a.ordn
                     ]]
-                    a.papa ? f.push([
+                    a.papa && j.papa < 6 ? f.push([
                         hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                         a.papa, a.linea1, val, a.lote, retefuenteP,
                         reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
                     ]) : '';
-                    a.abuelo ? f.push([
+                    a.abuelo && j.abue < 6 ? f.push([
                         hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
                         a.abuelo, a.linea2, val, a.lote, retefuenteA,
                         reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
                     ]) : '';
-                    a.bisabuelo ? f.push([
+                    a.bisabuelo && j.bisab < 6 ? f.push([
                         hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
-                    //console.log(a.papa, a.abuelo, a.bisabuelo, f)
                     if (a.bonoextra > 0.0000) {
                         montoC = val * a.bonoextra;
                         retefuenteC = montoC * 0.10;
@@ -4122,7 +4129,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea1
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val;
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'PRIMERA LINEA',
@@ -4146,7 +4153,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea2
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'SEGUNDA LINEA',
@@ -4170,7 +4177,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea3
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'TERCERA LINEA',

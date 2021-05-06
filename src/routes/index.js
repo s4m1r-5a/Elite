@@ -1099,7 +1099,7 @@ async function Desendentes(pin, stados, pasado) {
                     var montoB = val * a.linea3
                     var retefuenteB = montoB * 0.10
                     var reteicaB = montoB * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bonop += val
                     var f = [[
                         hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
@@ -1151,7 +1151,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea1
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val;
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'PRIMERA LINEA',
@@ -1175,7 +1175,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea2
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'SEGUNDA LINEA',
@@ -1199,7 +1199,7 @@ async function Desendentes(pin, stados, pasado) {
                     var monto = val * a.linea3
                     var retefuente = monto * 0.10
                     var reteica = monto * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
                     bono += val
                     var f = {
                         fech: hoy, monto, concepto: 'COMISION INDIRECTA', stado: std, descp: 'TERCERA LINEA',
