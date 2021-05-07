@@ -89,6 +89,8 @@ TEL;TYPE=WORK,VOICE:3012673944
 URL;type=WORK;CHARSET=UTF-8:admin@retfly.co
 END:VCARD*/
 
+// ELIMINAR ASESORES QUE NO TIENEN VENTAS EN EL SISTEMA
+// DELETE u FROM users u LEFT JOIN preventa p ON u.id = p.asesor WHERE p.asesor IS NULL
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.headers.origin;
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
@@ -679,7 +681,10 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
-
+router.get('/roles', isLoggedIn, (req, res) => {
+    console.log(req.user)
+    res.send(req.user)
+});
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
@@ -1185,9 +1190,11 @@ router.put('/reds', async (req, res) => {
 });
 ///////////////////* CLIENTES *///////////////////////////
 router.get('/clientes', isLoggedIn, (req, res) => {
+    console.log(req.user)
     res.render('links/clientes');
 });
 router.post('/clientes', async (req, res) => {
+    console.log(req.user)
     const cliente = await pool.query(`SELECT * FROM clientes c 
     LEFT JOIN users u ON c.acsor = u.id     
     ${req.user.admin != 1 ? 'WHERE c.acsor = ' + req.user.id : ''}`);

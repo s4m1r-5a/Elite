@@ -81,7 +81,19 @@ var STAD = (tabla, col, std) => {
     $(tabla).DataTable().columns().search('');
     $(tabla).DataTable().columns(col).search(std).draw();
 }
-
+////////////////////*ROLES*//////////////////////////////////////
+let rol;
+$.ajax({
+    url: '/links/roles',
+    async: false,
+    beforeSend: function (xhr) {
+    },
+    success: function (data) {
+        rol = data;
+    }
+});
+/* var admin = $('#usuarioadmin').val()
+var USERADMIN = $('#usuariofullname').val(); */
 ////////////////////////////////////////////////////////////////////
 //lenguaje
 let languag = {
@@ -149,16 +161,6 @@ $(".fechas").daterangepicker({
     showDropdowns: true,
     opens: "right",
 });
-var admin = $('#usuarioadmin').val()
-var USERADMIN = $('#usuariofullname').val();
-var cli = $('#cli').val()
-if (!cli) {
-    $('#AddClientes').modal({
-        backdrop: 'static',
-        keyboard: true,
-        toggle: true
-    });
-}
 
 var $validationForm = $("#smartwizard-arrows-primary");
 $validationForm.smartWizard({
@@ -429,25 +431,42 @@ $('#btn-mas').on('change', function () {
 })
 
 var chat = document.getElementById('chat');
-admin ? chat.scrollTop = chat.scrollHeight - chat.clientHeight : '';
+rol.subadmin ? chat.scrollTop = chat.scrollHeight - chat.clientHeight : '';
 
 /////////////////////////////////////////////////////////////////////////////
 $(document).ready(function () {
     moment.locale('es-mx');
-    $.ajax({
+    var cli = $('#cli').val()
+    if (!cli) {
+        $('#AddClientes').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+    }
+    /* $.ajax({
         url: '/links/desarrollo',
         data: { actividad: true },
         type: 'POST'
-    })
-    if ($('#nivel').html() == 'Inversionista') {
+    }) */
+    if ($('#nivel').html() === 'Independiente') {
+        $('#nivel').addClass('badge-danger')
+    } else if ($('#nivel').html() === 'Inversionista') {
         $('#nivel').addClass('badge-warning')
-    } else if ($('#nivel').html() == 'Director') {
-        $('#nivel').addClass('badge-info')
-    } else if ($('#nivel').html() == 'Gerente') {
+    } else if ($('#nivel').html() === 'Director') {
+        $('#afiliacion').removeClass('d-none');
         $('#nivel').addClass('badge-dark')
-    } else if ($('#nivel').html() == 'Vicepresidente') {
+    } else if ($('#nivel').html() === 'Gerente') {
+        $('#afiliacion').removeClass('d-none');
+        $('#nivel').addClass('badge-info')
+    } else if ($('#nivel').html() === 'Gerente Elite') {
+        $('#afiliacion').removeClass('d-none');
+        $('#nivel').addClass('badge-primary')
+    } else if ($('#nivel').html() === 'Vicepresidente') {
+        $('#afiliacion').removeClass('d-none');
         $('#nivel').addClass('badge-tertiary')
     } else {
+        $('#afiliacion').removeClass('d-none');
         $('#nivel').addClass('badge-success')
     }
     $('a.r').css("color", "#bfbfbf");
@@ -1932,9 +1951,9 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    if (row.tipobsevacion === 'ANULADA' && admin == 1 && row.estado != 9 && row.estado != 15) {
+                    if (row.tipobsevacion === 'ANULADA' && rol.admin && row.estado != 9 && row.estado != 15) {
                         return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
-                    } else if (admin == 1) {
+                    } else if (rol.subadmin) {
                         return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
                         aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
                     } else {
@@ -1967,8 +1986,8 @@ if (window.location.pathname == `/links/reportes`) {
             var filas = api.column(0, { page: 'current' }).data();
             filas.each(function (g, i) {
 
-                AdminSuper = (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'AURA VILLEGAS DEL TORO') && admin == 1;
-                resOrden = USERADMIN === 'HABIB SALDARRIAGA' && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
+                AdminSuper = rol.subadmin;
+                resOrden = rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
 
                 $(rows).eq(i).after(
                     `<tr class="total">
@@ -2022,7 +2041,7 @@ if (window.location.pathname == `/links/reportes`) {
                 $('main').removeClass('p-1')
                 $('card-body').removeClass('p-1')
             };*/
-            if (USERADMIN === 'HABIB SALDARRIAGA' || USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'GISELLE VERONICA SANTAMARIA') {
+            if (rol.subadmin) {
                 $(".fi").daterangepicker({
                     locale: {
                         'format': 'YYYY-MM-DD',
@@ -3262,7 +3281,7 @@ if (window.location.pathname == `/links/reportes`) {
         var data = estadoscuentas2.row(this).data();
         $("#Modalimg .foto").remove();
         $("#descargaimg .imag").remove();
-        if (data.rcb && admin == 1) {
+        if (data.rcb && rol.subadmin) {
             imge = 1;
             $("#descargaimg").html(`<a class="imag" href="${data.baucher}" target="_blank"><span class="badge badge-dark">Img</span></a>`);
             $("#Modalimg .fotos").html(
@@ -3418,7 +3437,7 @@ if (window.location.pathname == `/links/reportes`) {
     estadoscuentas2.on('click', '.no', function () {
         var fila = $(this).parents('tr');
         var data = estadoscuentas2.row(fila).data();
-        if (data.id && admin == 1) {
+        if (data.id && rol.admin) {
             var mensaje = confirm("¿Seguro deseas eliminar este RECIBO DEL PAGO?");
             if (mensaje) {
                 $('#ModalEventos').modal({
@@ -3503,7 +3522,7 @@ if (window.location.pathname == `/links/reportes`) {
         datos = tableOrden.row(this).data();
     })
     var Pago = (id, img, rcb) => {
-        if (rcb === 'null' && admin == 1) {
+        if (rcb === 'null' && rol.subadmin) {
             var imagenes = img === null ? '' : img.indexOf(",") > 0 ? img.split(",") : img
             if (Array.isArray(imagenes)) {
                 var marg = 100 / (imagenes.length - 1);
@@ -3800,7 +3819,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     }
     var Promesa = (id, aut) => {
-        if (admin == 1) {
+        if (rol.subadmin) {
             var D = { k: id, h: aut, f: moment().format('YYYY-MM-DD') };
             $.ajax({
                 url: '/links/reportes/estadopromesas',
@@ -3850,7 +3869,7 @@ if (window.location.pathname == `/links/reportes`) {
         });
     }
     var RestKupon = (id) => {
-        if (admin == 1) {
+        if (rol.subadmin) {
             $.ajax({
                 url: '/links/reportes/restkupon',
                 data: { k: id },
@@ -3876,7 +3895,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     }
     var RestOrden = (id) => {
-        if (admin == 1) {
+        if (rol.admin) {
             $.ajax({
                 url: '/links/reportes/restorden',
                 data: { k: id },
@@ -3902,7 +3921,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     }
     var Proyeccion = (id) => {
-        if (admin == 1 && USERADMIN === 'HABIB SALDARRIAGA') {
+        if (rol.admin) {
             var D = { k: id, h: moment().format('YYYY-MM') };
             $.ajax({
                 url: '/links/reportes/proyeccion',
@@ -4306,7 +4325,7 @@ if (window.location.pathname == `/links/reportes`) {
                 className: 't',
                 data: "ids",
                 render: function (data, method, row) {
-                    return admin == 1 ? `
+                    return rol.admin ? `
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
                     <div class="dropdown-menu">
                         <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
@@ -4350,7 +4369,7 @@ if (window.location.pathname == `/links/reportes`) {
         }
     });
     var EstadoCC = (id, std, actualstd) => {
-        if ((actualstd === 4 && USERADMIN === 'HABIB SALDARRIAGA') || actualstd !== 4) {
+        if ((actualstd === 4 && rol.admin) || actualstd !== 4) {
             $.ajax({
                 type: 'POST',
                 url: '/links/reportes/std',
@@ -4370,7 +4389,7 @@ if (window.location.pathname == `/links/reportes`) {
                         comisiones.ajax.reload(null, false)
                     } else {
                         $('#ModalEventos').modal('hide');
-                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente`)
                     }
                 },
                 error: function (data) {
@@ -4956,7 +4975,7 @@ if (window.location.pathname == `/links/reportes`) {
                 data: "ids",
                 //defaultContent: 
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return rol.admin ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
@@ -6570,7 +6589,7 @@ if (window.location.pathname == `/links/cartera`) {
                 className: 't',
                 data: "id",
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return rol.subadmin ? `<div class="btn-group btn-group-sm">
                                             <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                              aria-haspopup="true" aria-expanded="false">Acción</button>
                                                 <div class="dropdown-menu">
@@ -7654,7 +7673,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     var table2 = $('#datatable2').DataTable({
         dom: 'Bfrtip',
         buttons: ['pageLength',
-            admin === '1' ? {
+            rol.subadmin ? {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
                         </div>`,
@@ -7693,7 +7712,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         responsive: true,
         order: [[1, "desc"]],
         columnDefs: [
-            { "visible": admin === '1' && USERADMIN === 'HABIB SALDARRIAGA' ? true : false, "targets": [7, 5, -1] },
+            { "visible": rol.subadmin ? true : false, "targets": [7, 5, -1] },
             { responsivePriority: 1, targets: -1 },
             { responsivePriority: 2, targets: 3 },
             { responsivePriority: 3, targets: 7 },
@@ -7725,7 +7744,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             {
                 data: "valmtr2", className: 'to',
                 render: function (data, method, row) {
-                    return admin === '1' && USERADMIN === 'HABIB SALDARRIAGA' ? `<div class="input-group">
+                    return rol.admin ? `<div class="input-group">
                                 <input type="text" class="form-control-no-border text-center edi"
                                     autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
                                 <span class="input-group-append">
@@ -9610,7 +9629,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 this.style.backgroundPosition = "center";
             }
         });
-        if (admin == 1 && (USERADMIN === 'ARELYS SAAVEDRA ALVAREZ' || USERADMIN === 'HERLYS CASSERES HENRY' || USERADMIN === 'HABIB SALDARRIAGA')) {
+        if (rol.contador === 1) {
             $('.dropdown-item').show()
             $('#nove').show()
         } else {
@@ -9641,7 +9660,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 return false;
             }*/
 
-            if (accion === 'Declinar' && admin == 1) {
+            if (accion === 'Declinar' && rol.contador) {
                 porque = prompt("Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago", "Solicitud rechazada por que");
                 if (porque) {
                     fd.append('img', data.img);
@@ -9682,7 +9701,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         }
                     })
                 }
-            } else if (accion === 'Asociar' && admin == 1) {
+            } else if (accion === 'Asociar' && rol.contador) {
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
@@ -9714,8 +9733,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         console.log(data);
                     }
                 })
-            } else if (accion === 'Desasociar' && admin == 1) {
-                console.log(extr)
+            } else if (accion === 'Desasociar' && rol.contador) {
+                //console.log(extr)
                 if (!extr) {
                     alert('Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción');
                 } else if (confirm("Seguro deseas desasociar este extrato del pago?")) {
@@ -9753,7 +9772,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         }
                     })
                 }
-            } else if ((accion === 'Enviar' || accion === 'Aprobar') && admin == 1) {
+            } else if ((accion === 'Enviar' || accion === 'Aprobar') && rol.contador) {
                 data.pdf ? mensaje = confirm("Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente")
                     : mensaje = true;
 
@@ -10109,7 +10128,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 data: "ids",
                 //defaultContent: 
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return rol.contador ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
@@ -11948,7 +11967,7 @@ if (window.location == `${window.location.origin}/links/clientes`) {
             {
                 data: "idc",
                 render: function (data, method, row) {
-                    return admin == 1 ? `<div class="btn-group btn-group-sm">
+                    return rol.subadmin ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu">
@@ -12171,7 +12190,7 @@ if (window.location == `${window.location.origin}/links/cupones`) {
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: admin == 1 ? [
+        buttons: rol.subadmin ? [
             {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="tag"></i> <span class="align-middle">Generar Bono</span>
@@ -12257,7 +12276,7 @@ if (window.location == `${window.location.origin}/links/cupones`) {
             { data: "nombre" },
             {
                 className: 't',
-                defaultContent: admin == 1 ? `<div class="btn-group btn-group-sm">
+                defaultContent: rol.subadmin ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu"></div>

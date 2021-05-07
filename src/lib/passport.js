@@ -14,7 +14,7 @@ passport.use('local.signin', new LocalStrategy({
   const rows = await pool.query(`SELECT * FROM users u WHERE u.username = ?`, [username]);
   if (rows.length > 0) {
     const user = rows[0];
-    const validPassword = await helpers.matchPassword(password, user.password)
+    const validPassword = await helpers.matchPassword(password, user.password);
     if (validPassword) {
       done(null, user, req.flash('success', 'Bienvenido ' + user.fullname));
     } else {
@@ -127,8 +127,8 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 passport.deserializeUser(async (id, done) => {
-  const rows = await pool.query(`SELECT u.id, u.pin, u.fullname, u.document, u.username, u.imagen, u.admin, u.cel, u.cli, r.rango 
-  FROM users u INNER JOIN rangos r ON u.nrango = r.id WHERE u.id = ?`, id);
+  const rows = await pool.query(`SELECT u.*, r.rango, p.admin, p.subadmin, p.contador, p.financiero, p.asistente
+  FROM users u INNER JOIN rangos r ON u.nrango = r.id INNER JOIN pines p ON p.id = u.pin WHERE u.id = ?`, id); 
   done(null, rows[0]);
 });
 function regiId(chars = "01234567890", lon = 20) {
