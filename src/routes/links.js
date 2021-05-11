@@ -1197,7 +1197,7 @@ router.post('/clientes', noExterno, async (req, res) => {
     //console.log(req.user)
     const cliente = await pool.query(`SELECT * FROM clientes c 
     LEFT JOIN users u ON c.acsor = u.id     
-    ${req.user.admin != 1 ? 'WHERE c.acsor = ' + req.user.id : ''}`);
+    ${req.user.asistente ? 'WHERE c.acsor = ' + req.user.id : ''}`);
     respuesta = { "data": cliente };
     res.send(respuesta);
 });
