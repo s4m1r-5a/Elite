@@ -1789,7 +1789,7 @@ router.post('/cupon', noExterno, async (req, res) => {
 });
 router.post('/cupones', noExterno, async (req, res) => {
 
-    var d = req.user.admin > 0 ? '' : 'WHERE c.clients = ?';
+    var d = req.user.auxicontbl > 0 ? '' : 'WHERE c.clients = ?';
     var sql = `SELECT c.id, c.pin, c.descuento, c.fecha, c.estado, v.ahorro, p.mz, p.n, t.proyect, cl.nombre, cl.movil, 
     cl.email FROM cupones c LEFT JOIN preventa v ON c.producto = v.id LEFT JOIN productosd p ON v.lote = p.id 
     LEFT JOIN productos t ON p.producto = t.id LEFT JOIN clientes cl ON c.clients = cl.idc ${d} `
