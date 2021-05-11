@@ -5,6 +5,18 @@ module.exports = {
         }
         return res.redirect('/signin');
     },
+    noExterno(req, res, next) {
+        if (req.isAuthenticated()) {
+            if (req.user.externo) {
+                console.log(req)
+                req.flash('error', `Requiere tener permisos especiales para entrar a esta ubicacion, comunicate con la persona encargada`);
+                return res.redirect('/links/reportes');
+            } else {
+                return next();
+            }
+        }
+        return res.redirect('/signin');
+    },
     isLogged(req, res, next) {
         if (req.isAuthenticated()) {
             if (req.user.rango !== "5") {
