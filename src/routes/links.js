@@ -1612,21 +1612,23 @@ router.post('/bonus', async (req, res) => {
     }
 });
 /////////////* CARTERAS */////////////////////////////////////
-router.get('/cartera', noExterno, async (req, res) => {
-    if (req.user.admin == 1) {
-        res.render('links/cartera');
-    } else {
-        req.flash('error', 'No tienes permisos para acceder al modulo CARTERA');
-        res.redirect('/links/reportes');
-    }
+router.get('/cartera', isLoggedIn, async (req, res) => {
+    res.render('links/cartera');
 });
 router.post('/cartera/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const fila = await pool.query('SELECT * FROM productosd WHERE id = ?', id);
     res.send(fila[0]);
 });
-router.post('/cartera', noExterno, async (req, res) => {
+router.post('/cartera', isLoggedIn, async (req, res) => {
     const { h } = req.body;
+    let prd;
+    if (req.user.externo) {
+        const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+        prd = prcd.map(e => e.producto);
+    }
+    let d = prd ? `AND d.id IN (${prd})` : '';
+
     sql = `SELECT p.id, l.mz, l.n, p.fecha, (
         SELECT MAX(TIMESTAMP(fech))
         FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
@@ -1643,7 +1645,7 @@ router.post('/cartera', noExterno, async (req, res) => {
   INNER JOIN productos d ON l.producto = d.id 
   INNER JOIN clientes c ON p.cliente = c.idc 
   INNER JOIN users u ON p.asesor = u.id 
-  WHERE p.tipobsevacion IS NULL
+  WHERE p.tipobsevacion IS NULL ${d}
   GROUP BY p.id
   HAVING meses > 2 AND abonos < Total
   ORDER BY ultimoabono;`
@@ -2505,7 +2507,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
 
     } else if (id == 'estadosc2') {
-        
+
         let prd;
         if (req.user.externo) {
             const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);

@@ -6430,7 +6430,7 @@ if (window.location.pathname == `/links/cartera`) {
     })
     var cartera = $('#cartera').DataTable({
         dom: 'Bfrtip',
-        buttons: rol.auxicontbl || !rol.externo ?
+        buttons: rol.auxicontbl && !rol.externo ?
             [
                 { extend: 'pageLength', text: 'Ver', orientation: 'landscape' },
                 {
