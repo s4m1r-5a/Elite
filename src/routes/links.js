@@ -3,7 +3,7 @@ const express = require('express');
 const router = express.Router();
 const crypto = require('crypto');
 const pool = require('../database');
-const { isLoggedIn, isLogged, Admins } = require('../lib/auth');
+const { isLoggedIn, noExterno, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
 const { registro, dataSet, Contactos } = require('../keys');
 const request = require('request');
@@ -12,7 +12,7 @@ const axios = require('axios');
 const fetch = require('node-fetch');
 const fs = require('fs');
 const readline = require('readline');
-const { google } = require('googleapis');
+const { google, containeranalysis_v1alpha1 } = require('googleapis');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
 const { isNull } = require('util');
@@ -682,13 +682,13 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
     await EnviarWTSAP('57 3007753983', bod);
 });
 router.get('/roles', isLoggedIn, (req, res) => {
-    console.log(req.user)
+    //console.log(req.user)
     res.send(req.user)
 });
 router.get('/add', isLoggedIn, (req, res) => {
     res.render('links/add');
 });
-router.get('/authorize', async (req, res) => {
+router.get('/authorize', isLoggedIn, async (req, res) => {
 
     /*
         var data = JSON.stringify({
@@ -781,7 +781,7 @@ router.post('/callback', async (req, res) => {
 router.post('/prueba2', async (req, res) => {
     console.log(req.body);
 })
-router.post('/authorize', async (req, res) => {
+router.post('/authorize', isLoggedIn, async (req, res) => {
     console.log(req.body)
     const options = {
         method: 'POST',
@@ -913,7 +913,7 @@ router.get('/proyecciones', async (req, res) => {
     res.send(true);
 })
 //////////////////* CHATS */////////////////////
-router.get('/chats', async (req, res) => {
+router.get('/chats', isLoggedIn, async (req, res) => {
     const cliente = await pool.query(`SELECT movil FROM clientes`);
     var moviles = cliente.map((x) => {
         return x.movil.replace(/ /g, '').length === 10 ? '57' + x.movil.replace(/ /g, '') + '@c.us' : x.movil.replace(/ /g, '') + '@c.us';
@@ -929,13 +929,13 @@ router.get('/chats', async (req, res) => {
     }
 
     var b = await chats()
-    var a = await b.dialogs.map((x) => {
-        if (moviles.indexOf(x.id) != -1) {
-            return x
-        }
-    })
-    res.send({ dialogs: a.filter(Boolean) });
-    //res.send({ dialogs: 0 });
+    /*  var a = await b.dialogs.map((x) => {
+         if (moviles.indexOf(x.id) != -1) {
+             return x
+         }
+     }) */
+    //res.send({ dialogs: a.filter(Boolean) });
+    res.send({ dialogs: 0 });
 
 })
 router.get('/chats/:id', isLoggedIn, async (req, res) => {
@@ -984,16 +984,16 @@ router.post('/extractos', async (req, res) => {
     res.send(e);
 });
 //////////////////* PRODUCTOS */////////////////////
-router.get('/productos', isLoggedIn, async (req, res) => {
+router.get('/productos', noExterno, async (req, res) => {
     const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
     res.render('links/productos', { proveedores });
 });
-router.post('/productos', isLoggedIn, async (req, res) => {
+router.post('/productos', noExterno, async (req, res) => {
     const fila = await pool.query('SELECT * FROM productos');
     respuesta = { "data": fila };
     res.send(respuesta);
 });
-router.post('/productos/:id', isLoggedIn, async (req, res) => {
+router.post('/productos/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     if (id === 'eliminar') {
         const { id } = req.body;
@@ -1071,7 +1071,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
     }
 });
-router.put('/produc/:id', isLoggedIn, async (req, res) => {
+router.put('/produc/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
@@ -1079,7 +1079,7 @@ router.put('/produc/:id', isLoggedIn, async (req, res) => {
     WHERE pd.producto = ${id} AND pd.estado = 9`)
     res.send(true);
 });
-router.put('/productos/:id', isLoggedIn, async (req, res) => {
+router.put('/productos/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const { valor } = req.body;
     await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
@@ -1087,7 +1087,7 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
     p.valproyect = p.totalmtr2 * ${valor}, pd.mtr = ${valor} WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`)
     res.send(respuesta);
 });
-router.post('/regispro', isLoggedIn, async (req, res) => {
+router.post('/regispro', noExterno, async (req, res) => {
     const { categoria, title, porcentage, totalmtr2, valmtr2, valproyect, mzs, lts, std, mz, n, mtr2, vrlt, vri, vmtr2,
         separacion, incentivo, fecha, fechafin, descripcion, comision, maxcomis, linea1, linea2, linea3 } = req.body;
     const produc = {                                                           //mzs cantidad
@@ -1123,10 +1123,10 @@ router.post('/excelprod', async (req, res) => {
     res.send(e);
 });
 //////////////* RED *//////////////////////////////////
-router.get('/red', isLoggedIn, async (req, res) => {
+router.get('/red', noExterno, async (req, res) => {
     res.render('links/red');
 });
-router.post('/red', async (req, res) => {
+router.post('/red', noExterno, async (req, res) => {
     /*SELECT p.acreedor , p.usuario, p1.acreedor, p1.usuario, p2.acreedor, p2.usuario 
     FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor;*/
 
@@ -1147,7 +1147,7 @@ router.post('/red', async (req, res) => {
     respuesta = { "data": red };
     res.send(respuesta);
 });
-router.post('/reds', async (req, res) => {
+router.post('/reds', noExterno, async (req, res) => {
     if (req.user.admin == 1) {
         const red = await pool.query(`SELECT u.*, r.*, p.acreedor , p.usuario idpapa, 
         up.fullname namepapa, rp.rango rangopapa, p1.usuario idabuelo, ua.fullname nameabuelo, 
@@ -1164,7 +1164,7 @@ router.post('/reds', async (req, res) => {
         res.send(respuesta);
     }
 });
-router.put('/red', async (req, res) => {
+router.put('/red', noExterno, async (req, res) => {
     if (req.user.admin == 1) {
         const { S, U, F } = req.body
         console.log(S, U, F)
@@ -1176,7 +1176,7 @@ router.put('/red', async (req, res) => {
         res.send(true);
     }
 });
-router.put('/reds', async (req, res) => {
+router.put('/reds', noExterno, async (req, res) => {
     if (req.user.admin == 1) {
         const { S, U, F } = req.body
         console.log(S, U, F)
@@ -1189,19 +1189,19 @@ router.put('/reds', async (req, res) => {
     }
 });
 ///////////////////* CLIENTES *///////////////////////////
-router.get('/clientes', isLoggedIn, (req, res) => {
+router.get('/clientes', noExterno, (req, res) => {
     console.log(req.user)
     res.render('links/clientes');
 });
-router.post('/clientes', async (req, res) => {
-    console.log(req.user)
+router.post('/clientes', noExterno, async (req, res) => {
+    //console.log(req.user)
     const cliente = await pool.query(`SELECT * FROM clientes c 
     LEFT JOIN users u ON c.acsor = u.id     
     ${req.user.admin != 1 ? 'WHERE c.acsor = ' + req.user.id : ''}`);
     respuesta = { "data": cliente };
     res.send(respuesta);
 });
-router.put('/clientes/:id', async (req, res) => {
+router.put('/clientes/:id', noExterno, async (req, res) => {
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors, id
@@ -1303,7 +1303,7 @@ router.put('/clientes/:id', async (req, res) => {
         });
     }
 });
-router.put('/editclientes', async (req, res) => {
+router.put('/editclientes', noExterno, async (req, res) => {
     const { idc, name, tipod, docu, lugarex, fehex, fnaci,
         ecivil, email, pais, Movil, adres } = req.body;
 
@@ -1318,7 +1318,7 @@ router.put('/editclientes', async (req, res) => {
     await pool.query('UPDATE clientes SET ? WHERE idc = ?', [clit, idc]);
     res.send(true);
 })
-router.post('/adjuntar', async (req, res) => {
+router.post('/adjuntar', noExterno, async (req, res) => {
     var imagenes = ''
     req.files.map((e) => {
         imagenes += `/uploads/${e.filename},`
@@ -1326,7 +1326,7 @@ router.post('/adjuntar', async (req, res) => {
     await pool.query('UPDATE clientes SET ? WHERE idc = ?', [{ imags: imagenes }, req.body.idc]);
     res.send(true);
 })
-router.post('/elicliente', async (req, res) => {
+router.post('/elicliente', noExterno, async (req, res) => {
     const { id } = req.body;
     try {
         await pool.query(`DELETE FROM clientes WHERE idc = ?`, id);
@@ -1336,13 +1336,13 @@ router.post('/elicliente', async (req, res) => {
         res.send(false);
     }
 })
-router.post('/movil', async (req, res) => {
+router.post('/movil', noExterno, async (req, res) => {
     const { movil } = req.body;
     const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
     res.send(cliente);
 });
 /////////////////////////////////////////////////////
-router.get('/social', isLoggedIn, (req, res) => {
+router.get('/social', noExterno, (req, res) => {
     var options = {
         method: 'POST',
         url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
@@ -1372,7 +1372,7 @@ router.get('/social', isLoggedIn, (req, res) => {
 router.post('/bonos/:id', isLoggedIn, (req, res) => {
     const { monto, ahora, pin, client, motivo } = req.body;
     const datos = {
-        pin, descuento: 0, fecha: ahora, estado: 9, clients: client, monto: monto.replace(/\./g, ''), 
+        pin, descuento: 0, fecha: ahora, estado: 9, clients: client, monto: monto.replace(/\./g, ''),
         tip: 'BONO', motivo, concept: 'CRUCE CUENTAS', soporte: '/uploads/' + req.files[0].filename
     }
     //console.log(datos);
@@ -1612,7 +1612,7 @@ router.post('/bonus', async (req, res) => {
     }
 });
 /////////////* CARTERAS */////////////////////////////////////
-router.get('/cartera', isLoggedIn, async (req, res) => {
+router.get('/cartera', noExterno, async (req, res) => {
     if (req.user.admin == 1) {
         res.render('links/cartera');
     } else {
@@ -1620,12 +1620,12 @@ router.get('/cartera', isLoggedIn, async (req, res) => {
         res.redirect('/links/reportes');
     }
 });
-router.post('/cartera/:id', isLoggedIn, async (req, res) => {
+router.post('/cartera/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const fila = await pool.query('SELECT * FROM productosd WHERE id = ?', id);
     res.send(fila[0]);
 });
-router.post('/cartera', isLoggedIn, async (req, res) => {
+router.post('/cartera', noExterno, async (req, res) => {
     const { h } = req.body;
     sql = `SELECT p.id, l.mz, l.n, p.fecha, (
         SELECT MAX(TIMESTAMP(fech))
@@ -1653,7 +1653,7 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 
 });
-router.post('/rcb', async (req, res) => {
+router.post('/rcb', noExterno, async (req, res) => {
     const { rcb } = req.body; console.log(req.body)
     const recibo = await pool.query(`SELECT * FROM solicitudes WHERE recibo LIKE '%${rcb}%'`);
     //console.log(recibo)
@@ -1663,7 +1663,7 @@ router.post('/rcb', async (req, res) => {
         res.send(true);
     }
 });
-router.post('/prodlotes', isLoggedIn, async (req, res) => {
+router.post('/prodlotes', noExterno, async (req, res) => {
     const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
     WHERE l.estado IN('9', '15') AND (v.tipobsevacion = 'ANULADA' OR v.id IS NULL) ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`);
     const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
@@ -1671,7 +1671,7 @@ router.post('/prodlotes', isLoggedIn, async (req, res) => {
     res.send({ productos, asesores, clientes });
 
 });
-router.post('/crearcartera', isLoggedIn, async (req, res) => {
+router.post('/crearcartera', noExterno, async (req, res) => {
     const { idbono, asesor, clientes, mtr2, vmtr2, inicial, total, cupon, xcntag, cuponx100, cuot,
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
         std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa, feh, montos } = req.body;
@@ -1743,7 +1743,7 @@ router.post('/crearcartera', isLoggedIn, async (req, res) => {
     res.redirect('/links/cartera');
 })
 //////////////* CUPONES *//////////////////////////////////
-router.get('/saluda', isLoggedIn, async (req, res) => {
+router.get('/saluda', noExterno, async (req, res) => {
     const r = await pool.query(`SELECT SUM(s.monto) + 
     SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS montos, 
     p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha, 
@@ -1756,10 +1756,10 @@ router.get('/saluda', isLoggedIn, async (req, res) => {
     console.log(r)
     res.send('samir todo biaen');
 });
-router.get('/cupones', isLoggedIn, async (req, res) => {
+router.get('/cupones', noExterno, async (req, res) => {
     res.render('links/cupones');
 });
-router.post('/cupon', isLoggedIn, async (req, res) => {
+router.post('/cupon', noExterno, async (req, res) => {
     const { dto, std, cliente, ctn } = req.body;
     if (ctn < 1) {
         var hora = moment().format('YYYY-MM-DD HH:mm');
@@ -1785,7 +1785,7 @@ router.post('/cupon', isLoggedIn, async (req, res) => {
         res.send({ tipo: 'error', msj: 'Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud' });
     }
 });
-router.post('/cupones', isLoggedIn, async (req, res) => {
+router.post('/cupones', noExterno, async (req, res) => {
 
     var d = req.user.admin > 0 ? '' : 'WHERE c.clients = ?';
     var sql = `SELECT c.id, c.pin, c.descuento, c.fecha, c.estado, v.ahorro, p.mz, p.n, t.proyect, cl.nombre, cl.movil, 
@@ -1797,7 +1797,7 @@ router.post('/cupones', isLoggedIn, async (req, res) => {
     res.send(respuesta);
 
 });
-router.post('/cupones/:d', isLoggedIn, async (req, res) => {
+router.post('/cupones/:d', noExterno, async (req, res) => {
     const { d } = req.params;
     if (d === 'BONO') {
         const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
@@ -1824,12 +1824,12 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
         }
     }
 });
-router.get('/bono/:id', async (req, res) => {
+router.get('/bono/:id', noExterno, async (req, res) => {
     const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id)
     res.send(bono);
 });
 //////////////* ORDEN *//////////////////////////////////
-router.get('/orden', isLoggedIn, async (req, res) => {
+router.get('/orden', noExterno, async (req, res) => {
     moment.locale('es');
     const { id, h } = req.query;
     var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
@@ -1849,7 +1849,7 @@ router.get('/orden', isLoggedIn, async (req, res) => {
         res.render('links/orden', { proyecto, id, mensaje: '' });
     }
 });
-router.post('/orden', isLoggedIn, async (req, res) => {
+router.post('/orden', noExterno, async (req, res) => {
     const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
@@ -1901,7 +1901,7 @@ router.get('/cel/:id', async (req, res) => {
     const datos = await pool.query(`SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`)
     res.send(datos);
 });
-router.post('/codigo', isLoggedIn, async (req, res) => {
+router.post('/codigo', noExterno, async (req, res) => {
     const { movil } = req.body;
     const codigo = ID2(5);
     EnviarWTSAP(movil,
@@ -1910,7 +1910,7 @@ router.post('/codigo', isLoggedIn, async (req, res) => {
     );
     res.send(codigo);
 });
-router.post('/tabla/:id', async (req, res) => {
+router.post('/tabla/:id', noExterno, async (req, res) => {
     if (req.params.id == 1) {
         var data = new Array();
         dataSet.data = data
@@ -1995,7 +1995,7 @@ router.post('/tabla/:id', async (req, res) => {
         res.send(dataSet);
     }
 });
-router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
+router.get('/ordendeseparacion/:id', noExterno, async (req, res) => {
     //console.log(req.params)
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
@@ -2011,7 +2011,7 @@ router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(orden)
     res.render('links/ordendeseparacion', { orden, id, total });
 })
-router.get('/ordn/:id', isLoggedIn, async (req, res) => {
+router.get('/ordn/:id', noExterno, async (req, res) => {
     const { id } = req.params
     sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto,
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
@@ -2039,7 +2039,7 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     }
 
 })
-router.get('/editordn/:id', isLoggedIn, async (req, res) => {
+router.get('/editordn/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
     const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND descp != 'SEPARACION' AND orden = ? AND stado IN(3, 4)`, id);
@@ -2076,7 +2076,7 @@ router.get('/editordn/:id', isLoggedIn, async (req, res) => {
         res.render('links/editordn', { iD, orden, cuotas });
     }
 })
-router.post('/ordn/:id', isLoggedIn, async (req, res) => {
+router.post('/ordn/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
     const orden = await pool.query(sql, id);
@@ -2084,7 +2084,7 @@ router.post('/ordn/:id', isLoggedIn, async (req, res) => {
     body = { "data": orden };
     res.send(body);
 })
-router.post('/ordne/', isLoggedIn, async (req, res) => {
+router.post('/ordne/', noExterno, async (req, res) => {
     const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota, porcentage, inicial,
         xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo, mtr2, total, lote,
         cuota, rcuota, std, preventa, uno, dos, tres, directa, otro, valmtr2 } = req.body;
@@ -2208,14 +2208,14 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
 
     res.send(true);
 })
-router.post('/separacion/:id', isLoggedIn, async (req, res) => {
+router.post('/separacion/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const fila = await pool.query(`SELECT p.extraordinariameses, p.cuotaextraordinaria, p.extran, 
     p.separar, p.vrmt2, p.iniciar, p.cupon, p.ahorro, p.obsevacion, c.descuento, c.pin FROM preventa p  
     LEFT JOIN cupones c ON p.cupon = c.id WHERE p.id = ?`, id);
     res.send(fila[0]);
 });
-router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
+router.post('/prodlotes/:id', noExterno, async (req, res) => {
     const { id } = req.params
     const productos = await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
     WHERE l.estado IN('9', '15') AND v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`, id);
@@ -2225,7 +2225,7 @@ router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
     res.send({ productos, asesores, clientes, orden });
 
 });
-router.post('/editarorden', isLoggedIn, async (req, res) => {
+router.post('/editarorden', noExterno, async (req, res) => {
     //console.log(req.body);
     const { orden, separacion, cuotaInicial, vrm2, cuotaFinanciacion, separar,
         ahorro, idpin, mxr, mss, porcentage, inicial, valor } = req.body;
@@ -2268,7 +2268,7 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
     //console.log(ordn)
     res.send(ordn);
 });
-router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
+router.post('/ordendeseparacion/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     let { p, i } = req.body;
     p = parseFloat(p);
@@ -2379,7 +2379,7 @@ router.get('/reportes', isLoggedIn, (req, res) => {
     res.render('links/reportes');
 });
 var CODE = null;
-router.post('/anular', isLoggedIn, async (req, res) => {
+router.post('/anular', noExterno, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
         fullname, cel, idc, qhacer, causa, motivo, asesor } = req.body
     var bonoanular = null;
@@ -2452,8 +2452,12 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id == 'table2') {
 
-        //d = req.user.admin > 0 ? `WHERE p.tipobsevacion IS NULL` : `WHERE p.tipobsevacion IS NULL AND p.asesor = ?`;
-        d = req.user.admin > 0 ? `` : `WHERE p.asesor = ?`;
+        let prd;
+        if (req.user.externo) {
+            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+            prd = prcd.map(e => e.producto);
+        }
+        let d = prd ? `WHERE pt.id IN (${prd})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
 
         sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status, p.asesor, p.tipobsevacion,
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, p.obsevacion,
@@ -2479,6 +2483,13 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
     } else if (id == 'estadosc') {
 
+        let prd;
+        if (req.user.externo) {
+            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+            prd = prcd.map(e => e.producto);
+        }
+        let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
+
         sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect,
         SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
         AS montos, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha,
@@ -2486,7 +2497,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos pt ON pd.producto = pt.id LEFT JOIN cupones cu ON cu.id = p.cupon 
         INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
         INNER JOIN solicitudes s ON pd.id = s.lt LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL
+        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}
         GROUP BY p.id`
 
         const solicitudes = await pool.query(sql);
@@ -2494,15 +2505,13 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
 
     } else if (id == 'estadosc2') {
-        d = req.user.admin > 0 ? `` : `AND p.asesor = ?`;
-
-        /*sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
-        p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, s.monto,
-        cu.descuento, c.nombre, cp.monto mtb FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
-        INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
-        LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
-        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`*/
+        
+        let prd;
+        if (req.user.externo) {
+            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+            prd = prcd.map(e => e.producto);
+        }
+        let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
 
         sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
         p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
@@ -2547,7 +2556,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
         //res.send(true);
 
-    } else if (id == 'eliminar') {
+    } else if (id == 'eliminar' && !req.user.externo) {
         const { k, code } = req.body; //console.log(req.body)
         const R = await Estados(k);
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
@@ -2627,7 +2636,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         );
         res.send(true);
 
-    } else if (id === 'restkupon') {
+    } else if (id === 'restkupon' && !req.user.externo) {
         const { k } = req.body;
         await RestablecerCupon(k)
         const r = await Estados(k);
@@ -2636,7 +2645,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
         res.send(true);
 
-    } else if (id === 'proyeccion') {
+    } else if (id === 'proyeccion' && !req.user.externo) {
         const { k, h } = req.body;
         await ProyeccionPagos(k)
         const r = await Estados(k);
@@ -2691,7 +2700,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         const cuotas = await pool.query(sql);
         respuesta = { "data": cuotas };
         res.send(respuesta);
-    } else if (id === 'comision') {
+    } else if (id === 'comision' && !req.user.externo) {
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
@@ -2704,7 +2713,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
 
         respuesta = { "data": solicitudes };
         res.send(respuesta);
-    } else if (id === 'comisionOLD') {
+    } else if (id === 'comisionOLD' && !req.user.externo) {
         if (req.user.admin == 1) {
             const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
@@ -2718,7 +2727,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             respuesta = { "data": solicitudes };
             res.send(respuesta);
         }
-    } else if (id === 'bank') {
+    } else if (id === 'bank' && !req.user.externo) {
         const { banco, cta, idbank, numero } = req.body; console.log(req.body)
         await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [{ bank: banco, tipocta: cta, numerocuenta: numero }, idbank]);
         res.send({ banco, cta, idbank, numero });
@@ -2727,7 +2736,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         console.log(ids, std)
         await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
         res.send(true);
-    } else if (id === 'registrarcb') {
+    } else if (id === 'registrarcb' && !req.user.externo) {
         const { img, id, nrecibo, montos, feh, formap, observacion, j } = req.body; console.log(req.body, j)
         if (j) {
             const rcb = { date: feh, formapg: formap, rcb: nrecibo, monto: montos.replace(/\./g, ''), observacion, baucher: img }
@@ -2755,7 +2764,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         const date = { fecha };
         await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [date, id]);
         res.send(true);
-    } else if (id === 'restorden') {
+    } else if (id === 'restorden' && !req.user.externo) {
         const { k } = req.body;
         const sql = `UPDATE cuotas c  
         INNER JOIN preventa p ON c.separacion = p.id
@@ -2783,7 +2792,7 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     }
 })
-router.post('/desendentes', async (req, res) => {
+router.post('/desendentes', noExterno, async (req, res) => {
     const { id, asesor } = req.body;
     let sep = true, bon = true, separa = 0;
     const comi = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id 
@@ -2898,7 +2907,12 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             var total = l + k;
             await pool.query('UPDATE solicitudes SET ? WHERE lt = ? AND fech = ?', [{ acumulado: total }, u[x].lt, u[x].fech]);
         }*/
-        var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
+        let prd;
+        if (req.user.externo) {
+            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+            prd = prcd.map(e => e.producto);
+        }
+        let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
         const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
@@ -3112,7 +3126,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     }
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
-router.post('/afiliado', async (req, res) => {
+router.post('/afiliado', noExterno, async (req, res) => {
     const { movil, cajero } = req.body;
     var pin = ID(13);
     var cel = movil.replace(/-/g, "");

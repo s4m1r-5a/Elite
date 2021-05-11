@@ -18,7 +18,7 @@
         </div>
         <div id="collapse" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
             <!-- collapse show -->
-            <div class="card-body responsive">
+            <div class="card-body">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
                         <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#menu1"
@@ -82,7 +82,7 @@
                     </div>
                 </div>
                 <!-- TABLAS -->
-                <table id="datatable2" class="table table-sm table-striped display nowrap w-100 table-responsive">
+                <table id="datatable2" class="table table-sm table-striped display nowrap w-100">
                     <thead>
                         <tr>
                             <th></th>
@@ -189,6 +189,9 @@
         </div>
     </div>
 </div>
+{{#if user.externo}}
+
+{{else if user.auxicontbl}}
 
 <div class="accordion" id="accordion2">
     <div class="card">
@@ -664,3 +667,4 @@
         </div>
     </div>
 </div>
+{{/if}}
