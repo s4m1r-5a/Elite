@@ -12230,7 +12230,8 @@ if (window.location == `${window.location.origin}/links/cupones` && !rol.externo
             [10, 25, 50, -1],
             ['10 filas', '25 filas', '50 filas', 'Ver todo']
         ],
-        buttons: rol.subadmin ? [
+        buttons: rol.auxicontbl ? [
+            { extend: 'pageLength', text: 'Ver', orientation: 'landscape' },
             {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="tag"></i> <span class="align-middle">Generar Bono</span>
@@ -12247,7 +12248,7 @@ if (window.location == `${window.location.origin}/links/cupones` && !rol.externo
                     $('.pinBono').val(bono);
                 }
             }
-        ] : '',
+        ] : [{ extend: 'pageLength', text: 'Ver', orientation: 'landscape' }],
         deferRender: true,
         paging: true,
         autoWidth: true,
@@ -12256,7 +12257,8 @@ if (window.location == `${window.location.origin}/links/cupones` && !rol.externo
             caseInsensitive: true,
         },
         responsive: true,
-        columnDefs: [{ responsivePriority: 1, targets: -1 }],
+        columnDefs: [{ responsivePriority: 1, targets: -1 },
+        { visible: rol.auxicontbl ? true : false, targets: -1 }],
         order: [[1, "desc"]], //[0, "asc"]
         language: languag2,
         ajax: {
@@ -12316,7 +12318,7 @@ if (window.location == `${window.location.origin}/links/cupones` && !rol.externo
             { data: "nombre" },
             {
                 className: 't',
-                defaultContent: rol.subadmin ? `<div class="btn-group btn-group-sm">
+                defaultContent: rol.auxicontbl ? `<div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                             aria-haspopup="true" aria-expanded="false">Acción</button>
                                         <div class="dropdown-menu"></div>
