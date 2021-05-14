@@ -2384,24 +2384,23 @@ var CODE = null;
 router.post('/anular', noExterno, async (req, res) => {
     const { id, lote, proyecto, mz, n, estado, nombre, movil, documento,
         fullname, cel, idc, qhacer, causa, motivo, asesor } = req.body
-    var bonoanular = null;
+    var bonoanular = null; console.log(req.body)
     if (estado == 1) {
-        return res.send(false)
+        return res.send({ std: false, msg: 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar' })
     }
-    const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND concepto IN('PAGO', 'ABONO') AND lt = ${lote}`);
+    const u = await pool.query(`SELECT * FROM solicitudes WHERE stado = 3 AND concepto IN('PAGO', 'ABONO') AND orden = ${id}`);
     if (u.length > 0) {
-        req.flash('error', 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion');
-        res.redirect('/links/reportes');
+        return res.send({ std: false, msg: 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion' });
     } else {
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, p.separar, l.valor, p.ahorro,
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto, p.status, COUNT(s.monto) pagos
-        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.lt = p.lote 
+        FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.orden = p.id 
         INNER JOIN productosd l ON s.lt = l.id WHERE s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL 
-        AND s.stado = 4 AND s.lt = ${lote} GROUP BY p.status, p.separar, l.valor, p.ahorro`);
+        AND s.stado = 4 AND s.orden = ${id} GROUP BY p.status, p.separar, l.valor, p.ahorro`);
         const l = r[0].monto1 || 0,
             k = r[0].monto || 0,
             t = r[0];
-        const acumulado = l + k;
+        const acumulado = l + k; console.log(acumulado)
 
         if (qhacer === 'BONO' && acumulado > 0) {
             var pin = ID(5);
@@ -2420,7 +2419,7 @@ router.post('/anular', noExterno, async (req, res) => {
 
         } else if (qhacer === 'DEVOLUCION' && acumulado > 0) {
             const porciento = t.status == 2 || t == 3 ? 0.20 : 1;
-            const total = porciento < 1 ? (t.valor - t.ahorro) * porciento : t.separar;
+            const total = porciento < 1 ? (t.valor - t.ahorro) * porciento : 1000000; //t.separar deberia traer de productos el valor estipulado  para la separacion hablar con habib;
             const monto = acumulado;
             const facturasvenc = t.pagos;
             const fech = moment(new Date()).format('YYYY-MM-DD');
@@ -2436,7 +2435,7 @@ router.post('/anular', noExterno, async (req, res) => {
         INNER JOIN preventa p ON c.separacion = p.id
         INNER JOIN productosd l ON p.lote = l.id 
         INNER JOIN productos d ON l.producto  = d.id
-        LEFT JOIN solicitudes s ON s.lt = l.id
+        LEFT JOIN solicitudes s ON s.orden = p.id
         LEFT JOIN cupones cp ON p.cupon = cp.id 
         SET s.stado = 6, c.estado = 6, l.estado = 9, 
         l.valor = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END,
@@ -2446,7 +2445,7 @@ router.post('/anular', noExterno, async (req, res) => {
         ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
         s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; //console.log(sql)
         await pool.query(sql, lote);
-        res.send(true);
+        res.send({ std: true, msg: 'Orden anulada correctamente' });
     }
     //respuesta = { "data": ventas };
 });
@@ -3045,8 +3044,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
-    if (req.user.admin != 1) {
-        return res.send(false);
+    if (!req.user.contador) {
+        return res.send({ std: false, msg: `No tienes permiso para realizar esta accion` })
     };
     //console.log(req.body, req.files)
     //return res.send(true);
@@ -3113,12 +3112,12 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
     } else {
         const { ids, acumulado, extr } = req.body;
-        let valu = [];
+        let valu = []; console.log(req.body)
         extr.split(',').map((x) => {
             valu.push([x, ids])
         })
         const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf, req.user.fullname); //console.log(R)
+        const R = await PagosAbonos(ids, pdf, req.user.fullname); console.log(R)
         if (R) {
             //await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
             await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
@@ -3671,7 +3670,7 @@ async function PagosAbonos(Tid, pdf, user) {
     //console.log(S, monto)
     if (S.stado === 4 || S.stado === 6) {
         Eli(pdf)
-        return false
+        return { std: false, msg: S.stado === 4 ? `Este pago ya ha sido aprobado.` : 'Este pago se encuentra declinado.' }
     };
     if (S.concepto === 'ABONO') {
         var montocuotas = monto;
@@ -3722,7 +3721,7 @@ async function PagosAbonos(Tid, pdf, user) {
                 EnviarWTSAP(S.movil, bodi);
             };
         } else {
-            return false
+            return { std: false, msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente' }
         }
 
     } else if (S.concepto === 'PAGO') {
@@ -3827,7 +3826,7 @@ async function PagosAbonos(Tid, pdf, user) {
 
     await EnviarWTSAP(S.movil, bod);
     await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
-    return true
+    return { std: true, msg: `Solicitud procesada correctamente` }
 }
 async function Bonos(pin, lote) {
     const recibe = await pool.query(
@@ -4279,11 +4278,11 @@ function Moneda(valor) {
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     var cel = 0;
     if (desarrollo === 'http://localhost:5000') {
-        cel = '57 3007753983';
+        cel = '57 3012673944';
     } else {
         movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
     }
-
+    cel = '57 3012673944';
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
