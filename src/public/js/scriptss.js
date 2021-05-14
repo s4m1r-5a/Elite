@@ -81,6 +81,13 @@ var STAD = (tabla, col, std) => {
     $(tabla).DataTable().columns().search('');
     $(tabla).DataTable().columns(col).search(std).draw();
 }
+////////////////////* ESTADO DE EL MODAL DE EVENTOS /////////////////////
+$('#ModalEventos').on('hide.bs.modal', function (e) {
+    console.log('lo mandaron a cerrar')
+});
+$('#ModalEventos').on('hidden.bs.modal', function (e) {
+    console.log('ya se cerro')
+});
 ////////////////////*ROLES*//////////////////////////////////////
 let ro;
 $.ajax({
@@ -564,10 +571,8 @@ $(document).ready(function () {
             },
             success: function (data) {
                 if (data) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                        $('#ModalEventos').modal('hide')
-                        SMSj('success', 'Datos atualizados correctamente')
-                    }).modal('hide');
+                    SMSj('success', 'Datos atualizados correctamente');
+                    $('#ModalEventos').modal('hide')
                 }
             }
         });
@@ -1293,13 +1298,11 @@ if (window.location.pathname == `/links/pagos`) {
                     },
                     success: function (data) {
                         if (data) {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
+                            $('#ModalEventos').modal('hide');
                             SMSj('success', `El bono fue redimido exitosamente`);
                             validationForm.smartWizard("reset");
                         } else {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
+                            $('#ModalEventos').modal('hide');
                             SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
                         }
                     }
@@ -1674,12 +1677,10 @@ if (window.location.pathname == `/links/pagos`) {
                         window.location.href = data.href;
                     }, 2000);
                 } else {
-                    SMSj('error', 'Existe un error. No es posible con tinuar, intenta con un metodo de pago diferente');
+                    SMSj('error', 'Existe un error. No es posible continuar, intenta con un metodo de pago diferente');
                     $('#ModalEventos').hide();
                     setTimeout(function () {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                            $('#ModalEventos').hide();
-                        }).modal('hide');
+                        $('#ModalEventos').modal('hide');
                     }, 2000);
                 }
             }
@@ -1743,12 +1744,6 @@ if (window.location.pathname === `/links/reportes`) {
             $(this).find('i').removeClass("fa-angle-up");
             $(this).find('i').addClass("fa-angle-down");
         }
-    });
-    $('#ModalEventos').on('hide.bs.modal', function (e) {
-        console.log('lo mandaron a cerrar')
-    });
-    $('#ModalEventos').on('hidden.bs.modal', function (e) {
-        console.log('ya se cerro')
     });
     //////////////////////* TABLA DE REPORTES */////////////////////// 
     /*if (admin == 1) {
@@ -2010,6 +2005,7 @@ if (window.location.pathname === `/links/reportes`) {
 
                 AdminSuper = rol.subadmin;
                 resOrden = rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
+                //<a class="flex-sm-fill text-sm-center nav-link" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a> 
 
                 $(rows).eq(i).after(
                     `<tr class="total">
@@ -2018,7 +2014,7 @@ if (window.location.pathname === `/links/reportes`) {
 
                         ${AdminSuper && !resOrden ? `
                         <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>                                
+                        <a class="flex-sm-fill text-sm-center nav-link anular" href="#"><i class="fas fa-ban"></i> Anular</a>                                
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="GestComi(${g.id},'${g.asesor}')"><i class="fas fa-sitemap"></i> Comisiones</a>`
                         : ''}                              
@@ -3539,9 +3535,63 @@ if (window.location.pathname === `/links/reportes`) {
         Fehsf = moment(end).format('ll');
         estadoscuentas.draw();
     });
+    /* 
+    tableOrden.on('click', 'tr:not(.total)', function () {
+        datos = tableOrden.row(this).data(); console.log(datos, datos.status > 1)
+    }) */
     var datos
-    tableOrden.on('click', 'tr', function () {
-        datos = tableOrden.row(this).data();
+    tableOrden.on('click', '.anular', function () {
+        var fila = $(this).parents('tr').prev();
+        datos = tableOrden.row(fila).data();
+        console.log(datos, fila, 'vamos muy bien samir')
+
+        if (datos.status > 1 && (datos.estado === 10 || datos.estado === 13)) {
+            if (confirm("Esta orden posee un pago de comisiones si la anula se le generará un cobro a ese asesor por el monto de la comision ha anular, Seguro deseas continuar con la anulación?")) {
+                $('#Anulacion').modal('show');
+            } else {
+                return false;
+            }
+        } else {
+            $('#Anulacion').modal('show');
+            return true;
+        }
+    })
+    $('#enanul').submit(function (e) {
+        e.preventDefault();
+        datos.causa = $('#causa').val();
+        datos.motivo = $('#motivo').val();
+        datos.qhacer = $('#qhacer').val();
+        $.ajax({
+            url: '/links/anular',
+            data: datos,
+            type: 'POST',
+            //async: false,
+            beforeSend: function (xhr) {
+                $('#Anulacion').modal('hide')
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data.std) {
+                    tableOrden.ajax.reload(null, false)
+                    SMSj('success', data.msg)
+                    data = null
+                    $('#ModalEventos').modal('hide')
+                } else {
+                    tableOrden.ajax.reload(null, false)
+                    SMSj('error', data.msg)
+                    data = null
+                    $('#ModalEventos').modal('hide')
+                }
+                datos = null;
+            }
+        });
+    });
+    $('#Anulacion').on('hidden.bs.modal', function (e) {
+        $(this).find('input, textarea, select').val(null);
     })
     var Pago = (id, img, rcb) => {
         if (rcb === 'null' && rol.subadmin) {
@@ -3972,27 +4022,6 @@ if (window.location.pathname === `/links/reportes`) {
             SMSj('error', 'No posees permisos para ejecuutar esta accion')
         }
     }
-    var Enviar = (datos) => {
-        $.ajax({
-            url: '/links/anular',
-            data: datos,
-            type: 'POST',
-            async: false,
-            success: function (data) {
-                if (data) {
-                    $('#ModalEventos').modal('hide')
-                    tableOrden.ajax.reload(null, false)
-                    SMSj('success', 'Orden anulada correctamente')
-                    data = null
-                } else {
-                    $('#ModalEventos').modal('hide')
-                    tableOrden.ajax.reload(null, false)
-                    SMSj('error', 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar')
-                    data = null
-                }
-            }
-        });
-    }
     var GestComi = (id, asesor) => {
         !rol.externo ?
             $.ajax({
@@ -4046,21 +4075,6 @@ if (window.location.pathname === `/links/reportes`) {
             }
         });
     });
-    $('#enanul').submit(function (e) {
-        e.preventDefault();
-        datos.causa = $('#causa').val();
-        datos.motivo = $('#motivo').val();
-        datos.qhacer = $('#qhacer').val();
-        $('#Anulacion').modal('hide')
-        $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true,
-        });
-    });
-    $('#Anulacion').on('hidden.bs.modal', function (e) {
-        Enviar(datos);
-    })
     window.preview = function (input) {
         if (input.files && input.files[0]) {
             var marg = 100 / $('#file2')[0].files.length;
@@ -4816,9 +4830,6 @@ if (window.location.pathname === `/links/reportes`) {
                     }
                 })
             })
-            //$('#ModalEventos').on('show.bs.modal', function (e) {
-            // do something...
-            //})
         }
     }
     var comisionesOLD;
@@ -4875,16 +4886,12 @@ if (window.location.pathname === `/links/reportes`) {
                         },
                         success: function (data) {
                             if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                $('#ModalEventos').modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
-                                comisiones.ajax.reload(null, false)
-                            } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
+                                comisiones.ajax.reload(null, false);
                                 $('#ModalEventos').modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            } else {
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide');
                             }
                         },
                         error: function (data) {
@@ -5399,9 +5406,6 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                     $('#fnc').val(Moneda(Math.round(precio - inicial)));
                 }
                 $('#ModalEventos').modal('hide')
-                /*$('#ModalEventos').one('shown.bs.modal', function () {
-                    $('#ModalEventos').modal('hide')
-                }).modal('hide');*/
                 if (T) {
                     CONT(separar);
                     T = false;
@@ -7553,11 +7557,8 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
             responsive: true,
             initComplete: function (settings, json) {
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
-                $('#ModalEventos').modal('hide')
-                $('#ModalEventos').one('shown.bs.modal', function () {
-                    $('#ModalEventos').modal('hide')
-                }).modal('hide');
                 $('#datatable_filter').hide()
+                $('#ModalEventos').modal('hide');
             },
             columnDefs: [
                 //{ "visible": false, "targets": 1 }
@@ -7688,14 +7689,12 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
         } else if (data.id !== dataid) {
             dataid = data.id;
             $('#datatable').DataTable().ajax.url("/links/productos/" + data.id).load(function () {
-                $('#ModalEventos').modal('hide')
                 $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+                $('#ModalEventos').modal('hide')
             });
         } else {
-            $('#ModalEventos').one('shown.bs.modal', function () {
-                $('#ModalEventos').modal('hide')
-            }).modal('show');
             $('#datatable2').DataTable().$('tr.selected').removeClass('selected');
+            $('#ModalEventos').modal('hide');
         }
     });
     $('#datatable2').on('click', '.to', function () {
@@ -8698,15 +8697,13 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
                                     },
                                     success: function (data) {
                                         if (data) {
-                                            $('#ModalEventos').one('shown.bs.modal', function () {
-                                                $('#ModalEventos').modal('hide')
-                                                SMSj('success', 'Cliente registrado correctamente')
-                                                $(`#${card} .client`).val(data.code);
-                                                $(`#${card} .nombres`).val($('#AddCliente .nombr').val().toLocaleUpperCase());
-                                                $(`#${card} .movil`).val($('#AddCliente .movi').val()).mask('**** $$$-$$$-$$$$', { reverse: true });
-                                                $(`#${card} .email`).val($('#AddCliente .mail').val());
-                                                $(`#${card} .documento`).val($('#AddCliente .document').val()).mask('AAAAAAAAAA');
-                                            }).modal('hide');
+                                            SMSj('success', 'Cliente registrado correctamente')
+                                            $(`#${card} .client`).val(data.code);
+                                            $(`#${card} .nombres`).val($('#AddCliente .nombr').val().toLocaleUpperCase());
+                                            $(`#${card} .movil`).val($('#AddCliente .movi').val()).mask('**** $$$-$$$-$$$$', { reverse: true });
+                                            $(`#${card} .email`).val($('#AddCliente .mail').val());
+                                            $(`#${card} .documento`).val($('#AddCliente .document').val()).mask('AAAAAAAAAA');
+                                            $('#ModalEventos').modal('hide')
                                         }
                                     }
                                 });
@@ -9663,7 +9660,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 this.style.backgroundPosition = "center";
             }
         });
-        if (rol.contador === 1) {
+        if (rol.contador) {
             $('.dropdown-item').show()
             $('#nove').show()
         } else {
@@ -9720,14 +9717,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         },
                         success: function (data) {
                             if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
                                 table.ajax.reload(null, false)
+                                $('#ModalEventos').modal('hide')
                             } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
                                 SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                $('#ModalEventos').modal('hide')
                             }
                         },
                         error: function (data) {
@@ -9752,15 +9747,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     },
                     success: function (data) {
                         if (data) {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
                             SMSj('success', `Solicitud procesada correctamente`);
+                            $('#ModalEventos').modal('hide')
                             table.ajax.reload(null, false)
                             BancoExt.ajax.reload(null, false)
                         } else {
-                            $('#ModalEventos').one('shown.bs.modal', function () {
-                            }).modal('hide');
-                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                            $('#ModalEventos').modal('hide')
                         }
                     },
                     error: function (data) {
@@ -9789,16 +9782,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         },
                         success: function (data) {
                             if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
                                 table.ajax.reload(null, false)
                                 BancoExt.ajax.reload(null, false)
+                                $('#ModalEventos').modal('hide')
                                 Buscar(ed);
                             } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide')
                             }
                         },
                         error: function (data) {
@@ -9969,26 +9960,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     data: fd,
                                     processData: false,
                                     contentType: false,
-                                    beforeSend: function (xhr) {
-                                        /*$('#Modalimg').modal('hide');
-                                        $('#ModalEventos').modal({
-                                            backdrop: 'static',
-                                            keyboard: true,
-                                            toggle: true
-                                        });*/
-                                    },
                                     success: function (data) {
-                                        if (data) {
-                                            $('#ModalEventos').one('shown.bs.modal', function () {
-                                            }).modal('hide');
-                                            $('#ModalEventos').modal('hide');
-                                            SMSj('success', `Solicitud procesada correctamente`);
+                                        if (data.std) {
+                                            SMSj('success', data.msg);
                                             table.ajax.reload(null, false)
+                                            $('#ModalEventos').modal('hide')
                                         } else {
-                                            $('#ModalEventos').one('shown.bs.modal', function () {
-                                            }).modal('hide');
-                                            $('#ModalEventos').modal('hide');
-                                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                            SMSj('error', data.msg)
+                                            $('#ModalEventos').modal('hide')
                                         }
                                     },
                                     error: function (data) {
@@ -9996,9 +9975,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                     }
                                 })
                             } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar')
+                                SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar');
+                                $('#ModalEventos').modal('hide');
                             }
                         },
                         error: function (data) {
@@ -10023,14 +10001,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         },
                         success: function (data) {
                             if (data) {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
                                 SMSj('success', `Solicitud procesada correctamente`);
-                                table.ajax.reload(null, false)
+                                table.ajax.reload(null, false);
+                                $('#ModalEventos').modal('hide');
                             } else {
-                                $('#ModalEventos').one('shown.bs.modal', function () {
-                                }).modal('hide');
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide');
                             }
                         },
                         error: function (data) {
@@ -10213,28 +10189,28 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     text: `PENDIENTES`,
                     className: 'btn btn-secondary',
                     action: function () {
-                        STAD2(16, 'Pendiente');
+                        STAD('#comisiones', 16, 'Pendiente');
                     }
                 },
                 {
                     text: `APROBADOS`,
                     className: 'btn btn-secondary',
                     action: function () {
-                        STAD2(16, 'Pagada');
+                        STAD('#comisiones', 16, 'Pagada');
                     }
                 },
                 {
                     text: `ANULADOS`,
                     className: 'btn btn-secondary',
                     action: function () {
-                        STAD2(16, 'Declinada');
+                        STAD('#comisiones', 16, 'Declinada');
                     }
                 },
                 {
                     text: `TODOS`,
                     className: 'btn btn-secondary',
                     action: function () {
-                        STAD2('', '');
+                        STAD('#comisiones', '', '');
                     }
                 }
             ]
@@ -10595,14 +10571,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 success: function (data) {
                     if (data.r) {
                         comisiones.ajax.reload(null, false)
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                            $('#ModalEventos').modal('hide');
-                        }).modal('hide');
                         SMSj('success', data.m);
+                        $('#ModalEventos').modal('hide');
                     } else {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
                         SMSj('error', data.m);
+                        $('#ModalEventos').modal('hide');
                     }
                 }
             });
@@ -10806,16 +10779,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             success: function (data) {
                 if (data.std) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    $('#ModalEventos').modal('hide');
                     SMSj('success', data.msj);
+                    $('#ModalEventos').modal('hide');
                     //table.ajax.reload(null, false)
                 } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
+                    SMSj('error', data.msj);
                     $('#ModalEventos').modal('hide');
-                    SMSj('error', data.msj)
                 }
             },
             error: function (data) {
@@ -10843,14 +10812,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             success: function (data) {
                 if (data.std) {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
-                    $('#ModalEventos').modal('hide');
                     SMSj('success', `Solicitud procesada correctamente`);
-                    comisiones.ajax.reload(null, false)
+                    comisiones.ajax.reload(null, false);
+                    $('#ModalEventos').modal('hide');
                 } else {
-                    $('#ModalEventos').one('shown.bs.modal', function () {
-                    }).modal('hide');
                     $('#ModalEventos').modal('hide');
                 }
             },
@@ -11853,17 +11818,12 @@ if (window.location == `${window.location.origin}/links/clientes` && !rol.extern
                 },
                 success: function (data) {
                     if (data) {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                            clientes.ajax.reload(null, false)
-                            $('#ModalEventos').modal('hide')
-                            $('#agrecli').show("slow")
-                            $("#addcliente").hide("slow");
-                            $("#addcliente input").val('')
-                        }).modal('hide');
-                        /*tabledit.ajax.reload(function (json) {
-                            tabledit.columns.adjust().draw();
-                            SMSj('success', 'Actualizacion exitosa')
-                        })*/
+                        clientes.ajax.reload(null, false)
+                        $('#ModalEventos').modal('hide')
+                        $('#agrecli').show("slow")
+                        $("#addcliente").hide("slow");
+                        $("#addcliente input").val('')
+                        $('#ModalEventos').modal('hide');
                     }
                 }
             });
@@ -12100,10 +12060,9 @@ if (window.location == `${window.location.origin}/links/clientes` && !rol.extern
                 },
                 success: function (data) {
                     if (data) {
-                        $('#ModalEventos').one('shown.bs.modal', function () {
-                        }).modal('hide');
                         clientes.ajax.reload(null, false)
-                        SMSj('success', 'Documento agregado exitosamente')
+                        SMSj('success', 'Documento agregado exitosamente');
+                        $('#ModalEventos').modal('hide');
                     }
                 }
             });
@@ -12616,10 +12575,8 @@ function LISTAS(n, fi, ff, p) {
             doc.putTotalPages(totalPagesExp)
         }
         doc.output('save', `LISTADO ${p}.pdf`)
-        $('#ModalEventos').one('shown.bs.modal', function () {
-        }).modal('hide');
-        $('#ModalEventos').modal('hide');
         SMSj('success', `Lista de ${p} descargada exitosamente`);
+        $('#ModalEventos').modal('hide');
     }
     $.ajax({
         type: 'POST',
