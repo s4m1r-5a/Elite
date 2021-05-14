@@ -4282,7 +4282,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     } else {
         movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
     }
-    cel = '57 3012673944';
+    //cel = '57 3012673944';
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
