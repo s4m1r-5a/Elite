@@ -2949,7 +2949,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productosd l ON s.lt = l.id INNER JOIN users u ON s.asesor = u.id  
         INNER JOIN preventa p ON s.orden = p.id INNER JOIN productos d ON l.producto = d.id 
         INNER JOIN clientes c ON p.cliente = c.idc WHERE s.concepto = 'DEVOLUCION' 
-        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes }; //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'comision') {
@@ -2959,13 +2959,13 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productosd pd ON s.lt = pd.id INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONO EXTRA')  
-        AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
+        AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`);//AND stado = 3
         respuesta = { "data": solicitudes }; //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'bono') {
         const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
         INNER JOIN users u ON s.asesor = u.id WHERE s.concepto = 'BONO'
-        ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`);
+        ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`);
         respuesta = { "data": solicitudes };
         //console.log(solicitudes)
         res.send(respuesta);
