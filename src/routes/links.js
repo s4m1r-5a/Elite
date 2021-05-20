@@ -3024,7 +3024,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": solicitudes };
         res.send(respuesta);
     } else if (id == 'rcbcc') {
-        if (req.user.admin != 1) {
+        if (!req.user.contador) {
             return res.send(false);
         };
         const { ids, montorcb, recibos } = req.body;
