@@ -461,6 +461,7 @@ $(document).ready(function () {
     if ($('#nivel').html() === 'Independiente') {
         $('#nivel').addClass('badge-danger')
     } else if ($('#nivel').html() === 'Inversionista') {
+        $('#afiliacion').removeClass('d-none');
         $('#nivel').addClass('badge-warning')
     } else if ($('#nivel').html() === 'Director') {
         $('#afiliacion').removeClass('d-none');
