@@ -718,24 +718,29 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
                 totalmes = x.mesactual;
                 totales += x.total;
             });
+            data.one &&
             data.one.map((x, i) => {
                 tod.one[i] = Math.round(x.total / 1000000);
                 tod.one1[i] = Math.round(x.comisiones / 1000000);
                 tod.indirectas[i] += Math.round(x.comisiones / 1000000);
                 totales += x.total;
             });
+            data.two &&
             data.two.map((x, i) => {
                 tod.two[i] = Math.round(x.total / 1000000);
                 tod.two1[i] = Math.round(x.comisiones / 1000000);
                 tod.indirectas[i] += Math.round(x.comisiones / 1000000);
                 totales += x.total;
             });
+            
+            data.thre &&
             data.thre.map((x, i) => {
                 tod.thre[i] = Math.round(x.total / 1000000);
                 tod.thre1[i] = Math.round(x.comisiones / 1000000);
                 tod.indirectas[i] += Math.round(x.comisiones / 1000000);
                 totales += x.total;
             });
+            data.asesoresA &&
             data.asesoresA.map((x, i) => {
                 var y = i + 1;
                 $('#asesor-name' + y).html(x.fullname);
@@ -743,6 +748,7 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
                 $('#asesor-imagen' + y).prop('src', x.imagen);
                 $('#asesor-rango' + y).html(x.rango);
             });
+            data.asesoresM &&
             data.asesoresM.map((x, i) => {
                 var y = i + 1;
                 $('#asesr-name' + y).html(x.fullname);

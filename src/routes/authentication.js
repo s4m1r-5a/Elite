@@ -118,7 +118,7 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
   let linea = '', lDesc = '';
-  var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id; console.log(req.user.id)
+  var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id; //console.log(req.user.id)
   //var d = 'AND p.asesor =  ' + req.user.id;
   let indircet1;
   let indircet2;
@@ -133,7 +133,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE MONTH(p.fecha)
   BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) ${d} GROUP BY MONTH(p.fecha)
   ORDER BY 1;`);
-
+  
   const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND  acreedor IS NOT NULL AND usuario IS NOT NULL`, req.user.id);
   if (lineaUno.length > 0) {
     await lineaUno.map((p, x) => {
@@ -199,6 +199,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
   INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE u.nrango < 7 AND MONTH(p.fecha) = MONTH(CURDATE()) 
   GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
+  //console.log({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM }, d)
 
   res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM });
 
