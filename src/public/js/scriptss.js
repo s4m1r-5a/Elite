@@ -96,7 +96,7 @@ $.ajax({
     beforeSend: function (xhr) {
     },
     success: function (data) {
-        ro = data;
+        ro = data; //console.log(data)
     }
 });
 const rol = ro;
@@ -3485,6 +3485,8 @@ if (window.location.pathname === `/links/reportes`) {
                     }
                 })
             }
+        } else if (data.id) {
+            SMSj('error', 'No tienes permiso para ejecutar esta accion')
         } else {
             SMSj('error', 'No existe RECIBO alguno para eliminar')
         }
@@ -3896,7 +3898,7 @@ if (window.location.pathname === `/links/reportes`) {
         }
     }
     var Promesa = (id, aut) => {
-        if (rol.subadmin) {
+        if (rol.subadmin || rol.externo) {
             var D = { k: id, h: aut, f: moment().format('YYYY-MM-DD') };
             $.ajax({
                 url: '/links/reportes/estadopromesas',

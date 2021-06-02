@@ -8,7 +8,7 @@ module.exports = {
     noExterno(req, res, next) {
         if (req.isAuthenticated()) {
             if (req.user.externo) {
-                console.log(req)
+                //console.log(req)
                 req.flash('error', `Requiere tener permisos especiales para entrar a esta ubicacion, comunicate con la persona encargada`);
                 return res.redirect('/links/reportes');
             } else {
@@ -22,7 +22,7 @@ module.exports = {
             if (req.user.rango !== "5") {
                 return next();
             } else {
-                console.log(req.originalUrl)
+                //console.log(req.originalUrl)
                 req.flash('error', `Requiere tener permisos especiales para entrar a esta ubicacion, comunicate con la persona encargada`);
                 return res.redirect('/tablero');
             }
@@ -34,7 +34,7 @@ module.exports = {
             if (req.user.admin == "1") {
                 return next();
             } else {
-                console.log(req.originalUrl)
+                //console.log(req.originalUrl)
                 req.flash('error', `Requiere tener permisos especiales para entrar a esta ubicacion, comunicate con la persona encargada`);
                 return res.redirect('/tablero');
             }

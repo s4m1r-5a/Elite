@@ -20,6 +20,7 @@ const { Console } = require('console');
 const { send } = require('process');
 const path = require('path');
 const mysqldump = require('mysqldump')
+const XLSX = require('xlsx')
 const transpoter = nodemailer.createTransport({
     host: 'smtpout.secureserver.net',
     port: 465,
@@ -744,7 +745,44 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
     //res.send(datos);
 })
 router.get('/prueba2', async (req, res) => {
-    var data = JSON.stringify({
+    const ruta = path.join(__dirname, '../public/uploads/libroej.json');
+    const ruta2 = path.join(__dirname, '../public/uploads/Libro de ejemplo.xlsx');
+
+    fs.exists(ruta2, function (exists) {
+        console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
+        if (exists) {
+            fs.unlink(ruta2, function (err) {
+                if (err) console.log(err);
+                console.log('Archivo eliminado');
+                return 'Archivo eliminado';
+            });
+        } else {
+            console.log('El archivo no exise');
+            return 'El archivo no exise';
+        }
+    })
+    const content = await pool.query(`SELECT d.proyect, l.mz, l.n lt, c.nombre, c.documento, 
+    c.movil, s.fech fecha, s.concepto, s.descp, s.stado, s.monto, s.recibo, 
+    REPLACE(s.img, "/uploads", "https://grupoelitefincaraiz.com/uploads") img 
+    FROM solicitudes s INNER JOIN preventa p ON p.id = s.orden 
+    INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
+    INNER JOIN clientes c ON c.idc = p.cliente WHERE s.concepto IN('PAGO', 'ABONO') 
+    AND d.proyect IN('PRADOS DE PONTEVEDRA', 'COLINAS DE PONTEVEDRA') 
+    ORDER BY d.proyect, l.mz, l.n, s.fech`);
+    //console.log(datos)
+
+    //let content = JSON.parse(fs.readFileSync(ruta, 'utf8'));
+    //console.log(content)
+
+    let newWB = XLSX.utils.book_new()
+    let newWS = XLSX.utils.json_to_sheet(content)
+    XLSX.utils.book_append_sheet(newWB, newWS, 'samir');
+    XLSX.writeFile(newWB, ruta2)
+
+    res.redirect('/uploads/Libro de ejemplo.xlsx')
+
+
+    /* var data = JSON.stringify({
         "data": [
             {
                 "commerceTransferButtonId": "h4ShG3NER1C",
@@ -772,7 +810,7 @@ router.get('/prueba2', async (req, res) => {
         })
         .catch(function (error) {
             console.log(error);
-        });
+        }); */
 
 })
 router.post('/callback', async (req, res) => {
@@ -1201,11 +1239,11 @@ router.post('/clientes', noExterno, async (req, res) => {
     respuesta = { "data": cliente };
     res.send(respuesta);
 });
-router.put('/clientes/:id', noExterno, async (req, res) => {
+router.put('/clientes/:id', isLoggedIn, async (req, res) => {
     const {
         ahora, nombres, documento, lugarexpedicion, fechaexpedicion, tipo,
         fechanacimiento, estadocivil, email, movil, direccion, asesors, id
-    } = req.body;
+    } = req.body; console.log(req.body)
     var imagenes = ''
     req.files.map((e) => {
         imagenes += `/uploads/${e.filename},`
@@ -1221,6 +1259,7 @@ router.put('/clientes/:id', noExterno, async (req, res) => {
     }
     if (req.params.id === 'agregar') {
         const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
+        
         if (!cliente.length) {
             var person = {
                 "resource": {
@@ -1678,7 +1717,7 @@ router.post('/crearcartera', noExterno, async (req, res) => {
         ahorro, desinicial, destotal, inicialcuotas, financiacion, tini, tfnc, fecha, n, tipo, cuota, rcuota,
         std, concpto, lt, ahora, montorcb, recibos, formap, nrecibo, promesa, feh, montos } = req.body;
 
-    //console.log(req.body, req.files, req.body.promesa ? 'si' : 'no')
+    //console.log(req.body, req.files, req.body.promesa ? 'si' : 'no') 
 
     var separ = {
         lote: lt, asesor: asesor, iniciar: xcntag, obsevacion: 'CARTERA', cuot,
@@ -1718,7 +1757,7 @@ router.post('/crearcartera', noExterno, async (req, res) => {
     })
     var fpago = Array.isArray(formap) ? formap[0] : formap;
     const pago = {
-        fech: ahora, monto: montorcb, recibo: recibos, facturasvenc: 0, lt, acumulado: 0,
+        fech: ahora, monto: montorcb, recibo: recibos, facturasvenc: 0, lt, acumulado: 0, orden: h.insertId,
         concepto: 'ABONO', stado: 4, img: imagenes, descp: 'ABONO', formap: fpago, excdnt: 0
     }
     const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
@@ -1997,7 +2036,7 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
         res.send(dataSet);
     }
 });
-router.get('/ordendeseparacion/:id', noExterno, async (req, res) => {
+router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(req.params)
     const { id } = req.params
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
@@ -2270,7 +2309,7 @@ router.post('/editarorden', noExterno, async (req, res) => {
     //console.log(ordn)
     res.send(ordn);
 });
-router.post('/ordendeseparacion/:id', noExterno, async (req, res) => {
+router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     let { p, i } = req.body;
     p = parseFloat(p);
@@ -4257,6 +4296,7 @@ async function Desendentes(pin, stados, pasado) {
 
 };
 async function Eli(img) {
+    //path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf')
     fs.exists(img, function (exists) {
         if (exists) {
             fs.unlink(img, function (err) {
