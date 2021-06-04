@@ -1259,7 +1259,7 @@ router.put('/clientes/:id', isLoggedIn, async (req, res) => {
     }
     if (req.params.id === 'agregar') {
         const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
-        
+
         if (!cliente.length) {
             var person = {
                 "resource": {
@@ -2834,31 +2834,35 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
 })
 router.post('/desendentes', noExterno, async (req, res) => {
     const { id, asesor } = req.body;
-    let sep = true, bon = true, separa = 0;
-    const comi = await pool.query(`SELECT * FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id 
-    WHERE (s.concepto = 'BONO EXTRA' OR s.descp = 'SEPARACION') AND s.orden = ? AND s.stado != 6`, id);
+    let sep = true, bon = true;
+
+    const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto NOT IN('PAGO', 'ABONO') 
+    AND (concepto = 'BONO EXTRA' OR descp = 'SEPARACION') AND orden = ? AND stado != 6`, id);
     if (comi.length > 0) {
         comi.map((a) => {
             a.concepto === 'BONO EXTRA' ? bon = false : "";
             a.descp === 'SEPARACION' ? sep = false : '';
         })
-        separa = comi[0].separar;
     }
+
     const directas = await pool.query(`SELECT p0.usuario papa, p1.usuario abuelo, p2.usuario bisabuelo, 
-            MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.* 
+            MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.*, r.incntivo
             FROM pines p0 LEFT JOIN pines p1 ON p0.usuario = p1.acreedor 
             LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
             INNER JOIN preventa p ON p0.acreedor = p.asesor
             INNER JOIN productosd l ON p.lote = l.id
             INNER JOIN productos o ON l.producto = o.id
             INNER JOIN users u ON p.asesor = u.id
+            INNER JOIN rangos r ON u.nrango = r.id
             INNER JOIN clientes c ON p.cliente = c.idc
-            WHERE p.id = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3)`, id); console.log(id, asesor, directas, sep, bon, separa)
+            WHERE p.id = ? AND p.tipobsevacion IS NULL`, id); //  AND p.status IN(2, 3)
+
+    //console.log(comi, id, asesor, directas, sep, bon) // incntivo
 
     if (directas.length > 0) {
         var hoy = moment().format('YYYY-MM-DD');
         await directas.map(async (a, x) => {
+            var estdStatus = (a.estado === 10 || a.estado === 13) && a.status > 1;
             var val = a.valor - a.ahorro
             var monto = val * a.comision
             var retefuente = monto * 0.10
@@ -2877,37 +2881,37 @@ router.post('/desendentes', noExterno, async (req, res) => {
             var reteicaB = montoB * 8 / 1000
             var std = a.obsevacion === 'CARTERA' ? 4 : 15;
             var f = [];
+            
+            sep && a.incntivo && f.push([
+                hoy, a.incentivo, 'COMISION DIRECTA', std, 'SEPARACION',
+                asesor, 0, a.separar, a.lote, 0, 0, a.incentivo, a.ordn
+            ]);
 
-            sep ? f.push([
-                hoy, 100000, 'COMISION DIRECTA', std, 'SEPARACION',
-                asesor, 0, separa, a.lote, 0, 0, 100000, a.ordn
-            ]) : '';
-
-            a.directa === null ? f.push([
+            a.directa === null && estdStatus ? f.push([
                 hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
                 asesor, a.comision, val, a.lote, retefuente,
                 reteica, monto - (retefuente + reteica), a.ordn
             ]) : '';
 
-            a.papa && !a.uno ? f.push([
+            a.papa && !a.uno && estdStatus ? f.push([
                 hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                 a.papa, a.linea1, val, a.lote, retefuenteP,
                 reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
             ]) : '';
 
-            a.abuelo && !a.dos ? f.push([
+            a.abuelo && !a.dos && estdStatus ? f.push([
                 hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
                 a.abuelo, a.linea2, val, a.lote, retefuenteA,
                 reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
             ]) : '';
 
-            a.bisabuelo && !a.tres ? f.push([
+            a.bisabuelo && !a.tres && estdStatus ? f.push([
                 hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
                 a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                 reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
             ]) : '';
 
-            if (bon && a.bonoextra > 0.0000) {
+            if (bon && a.bonoextra > 0.0000 && estdStatus) {
                 montoC = val * a.bonoextra;
                 retefuenteC = montoC * 0.10;
                 reteicaC = montoC * 8 / 1000;
