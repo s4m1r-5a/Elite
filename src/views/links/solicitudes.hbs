@@ -66,13 +66,13 @@
                     </nav>
                     <nav class="nav nav-fill collapse" id="menu2" aria-labelledby="headingOne" data-parent="#menu">
                         <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 11, 'Pendiente')"><i class="fas fa-cart-arrow-down"></i>
+                            onclick="STAD('#datatable', 12, 'Pendiente')"><i class="fas fa-cart-arrow-down"></i>
                             Pendientes</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 11, 'Aprobada')"><i class="fas fa-handshake"></i>
+                            onclick="STAD('#datatable', 12, 'Aprobada')"><i class="fas fa-handshake"></i>
                             Aprobados</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 11, 'Anulada')"><i class="far fa-thumbs-down"></i>
+                            onclick="STAD('#datatable', 12, 'Anulada')"><i class="far fa-thumbs-down"></i>
                             Anulados</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
                             onclick="STAD('#datatable', '', '')"><i class="far fa-thumbs-down"></i>
@@ -115,14 +115,15 @@
                         </table>
                     </div>
                 </div>-->
-                <table id="datatable" class="table table-sm table-striped table-hover display nowrap table-responsive"
+                <table id="datatable" class="table table-sm table-striped table-hover display nowrap"
                     style="width:100%">
                     <thead>
                         <tr>
-                            <th>Id</th>
+                            <th data-priority="1">Id</th>
                             <th>Asesor</th>
-                            <th data-priority="4">Cliente</th>
+                            <th>Cliente</th>
                             <th>Fecha</th>
+                            <th>FechaRcb</th>
                             <th>Proyecto</th>
                             <th data-priority="1">Mz</th>
                             <th data-priority="1">Lt</th>
@@ -134,9 +135,14 @@
                             <th data-priority="1">Rcb</th>
                             <th>Aprueba</th>
                             <th>Estado LT</th>
+                            <th>Orden</th>
+                            <th>Extrato</th>
+                            <th>Consignacion</th>
+                            <th>FechaConsignacion</th>
+                            <th>Descp</th>
+                            <th>Lugar</th>
                             <th>Obv</th>
                             <th>Motivo</th>
-                            <th>Orden</th>
                             <th>Bono Anul</th>
                             <th>Monto Anul</th>
                             <th>Orden Anul</th>
@@ -144,13 +150,29 @@
                     </thead>
                     <tbody></tbody>
                 </table>
+                {{!-- <table id="BancoExt" class="table table-sm table-striped table-hover display nowrap"
+                    style="width:100%;font-size:9px;">
+                    <thead>
+                        <tr>
+                            <th>Id</th>
+                            <th>Fecha</th>
+                            <th>Concepto</th>
+                            <th>Lugar</th>
+                            <th>Descrp</th>
+                            <th>Monto</th>
+                            <th>Pago</th>
+                            <th>RcbMonto</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table> --}}
             </div>
         </div>
     </div>
 
-{{#if user.externo}}
+    {{#if user.externo}}
 
-{{else if user.auxicontbl}}
+    {{else if user.auxicontbl}}
 
     <div class="card">
         <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="true"
@@ -263,8 +285,8 @@
             </div>
         </div>
     </div>
-    
-{{/if}}
+
+    {{/if}}
 
 </div>
 
@@ -348,6 +370,7 @@
             </div>
             <div class="modal-body">
                 <input type="hidden" id="extr">
+                <input type="hidden" id="idSolicitud">
                 <div class="row no-gutters">
                     <div class="col-md-8 fotos" width="100%" height="200">
                         <!--<img src="" class="card-img foto" alt="...">-->
@@ -379,8 +402,11 @@
                                     </td>
                                 </tr>
                                 <tr>
-                                    <th colspan="2">
+                                    <th>
                                         <span class="recibo"></span>
+                                    </th>
+                                    <th>
+                                        <a class="fechaRcb float-right"></a>
                                     </th>
                                 </tr>
                                 <tr>
@@ -431,11 +457,23 @@
                             </tbody>
                         </table>
                     </div>
-                    <!--<div class="col-12">
+                    <div class="col-12">
                         <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Fecha</th>
+                                    <th>Concepto</th>
+                                    <th>Lugar</th>
+                                    <th>Descrp</th>
+                                    <th>Monto</th>
+                                    <th>Pago</th>
+                                    <th>RcbMonto</th>
+                                </tr>
+                            </thead>
                             <tbody></tbody>
                         </table>
-                    </div>-->
+                    </div>
                 </div>
             </div>
         </div>

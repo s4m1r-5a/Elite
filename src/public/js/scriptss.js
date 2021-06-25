@@ -719,43 +719,43 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
                 totales += x.total;
             });
             data.one &&
-            data.one.map((x, i) => {
-                tod.one[i] = Math.round(x.total / 1000000);
-                tod.one1[i] = Math.round(x.comisiones / 1000000);
-                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
-                totales += x.total;
-            });
+                data.one.map((x, i) => {
+                    tod.one[i] = Math.round(x.total / 1000000);
+                    tod.one1[i] = Math.round(x.comisiones / 1000000);
+                    tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                    totales += x.total;
+                });
             data.two &&
-            data.two.map((x, i) => {
-                tod.two[i] = Math.round(x.total / 1000000);
-                tod.two1[i] = Math.round(x.comisiones / 1000000);
-                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
-                totales += x.total;
-            });
-            
+                data.two.map((x, i) => {
+                    tod.two[i] = Math.round(x.total / 1000000);
+                    tod.two1[i] = Math.round(x.comisiones / 1000000);
+                    tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                    totales += x.total;
+                });
+
             data.thre &&
-            data.thre.map((x, i) => {
-                tod.thre[i] = Math.round(x.total / 1000000);
-                tod.thre1[i] = Math.round(x.comisiones / 1000000);
-                tod.indirectas[i] += Math.round(x.comisiones / 1000000);
-                totales += x.total;
-            });
+                data.thre.map((x, i) => {
+                    tod.thre[i] = Math.round(x.total / 1000000);
+                    tod.thre1[i] = Math.round(x.comisiones / 1000000);
+                    tod.indirectas[i] += Math.round(x.comisiones / 1000000);
+                    totales += x.total;
+                });
             data.asesoresA &&
-            data.asesoresA.map((x, i) => {
-                var y = i + 1;
-                $('#asesor-name' + y).html(x.fullname);
-                $('#asesor-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
-                $('#asesor-imagen' + y).prop('src', x.imagen);
-                $('#asesor-rango' + y).html(x.rango);
-            });
+                data.asesoresA.map((x, i) => {
+                    var y = i + 1;
+                    $('#asesor-name' + y).html(x.fullname);
+                    $('#asesor-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
+                    $('#asesor-imagen' + y).prop('src', x.imagen);
+                    $('#asesor-rango' + y).html(x.rango);
+                });
             data.asesoresM &&
-            data.asesoresM.map((x, i) => {
-                var y = i + 1;
-                $('#asesr-name' + y).html(x.fullname);
-                $('#asesr-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
-                $('#asesr-imagen' + y).prop('src', x.imagen);
-                $('#asesr-rango' + y).html(x.rango);
-            });
+                data.asesoresM.map((x, i) => {
+                    var y = i + 1;
+                    $('#asesr-name' + y).html(x.fullname);
+                    $('#asesr-ventas' + y).html(`Separaciones ${x.ventas} - ${x.iniciales} Iniciales`);
+                    $('#asesr-imagen' + y).prop('src', x.imagen);
+                    $('#asesr-rango' + y).html(x.rango);
+                });
             promedio = ventaño / 30;
             $('#ventames').html(ventames);
             $('#promedio').html(Math.round(ventaño));
@@ -9121,7 +9121,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     $(`a[href='${window.location.pathname}']`).parent().addClass('active');
     minDateFilter = "";
     maxDateFilter = "";
-    var extr = [], imge = 0;
+    var idExtracto = false;
+    var dateExtracto = false;
+    var columnaBusque = 3;
+    /* var extr = [], imge = 0;
     var totalasociados = 0;
     var Seleccion = () => {
         extr = [];
@@ -9135,12 +9138,13 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 return true;
             });
         return x
-    };
-    $.fn.dataTableExt.afnFiltering.push(
+    }; */
+
+    /* $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[3]).getTime() //tiem === 1 ? new Date(aData[3]).getTime() : tiem === 2 ? new Date(aData[1]).getTime() : '';
-                //console.log(tiem)
+                aData._date = new Date(aData[columnaBusque]).getTime()
+                //console.log(aData._date, columnaBusque, aData.length)
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -9154,7 +9158,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
             return true;
         }
-    );
+    ); */
     $('.card-header').on('click', function () {
         var papa = $(this).parents('.accordion');
         if ($(this).find('i').hasClass('fa-angle-down')) {
@@ -9434,9 +9438,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             { data: "fullname" },
             { data: "nombre" },
             {
-                data: "fech",
+                data: "fech"
+            },
+            {
+                data: "fecharcb",
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD')
                 }
             },
             { data: "proyect" },
@@ -9510,9 +9517,22 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     }
                 }
             },
+            { data: "cparacion" },
+            { data: "extr" },
+            {
+                data: "consignado",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "date",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            { data: "description" },
+            { data: "lugar" },
             { data: "tipobsevacion" },
             { data: "descrip" },
-            { data: "cparacion" },
             { data: "bonoanular" },
             {
                 data: "montoa",
@@ -9546,23 +9566,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         var data = table.row(fila).data(); //console.log(data)
         var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
         IDS = data.ids
-        var Buscar = (id) => {
-            var h = BancoExt.rows().data().filter(function (value, index) {
-                if (value.ids === id) {
-                    return true
-                }
-            });
-            if (h.length > 0) {
-                BancoExt.columns(6).search(id).draw();
-                $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
-                                        <a class="dropdown-item">Enviar</a>`);
-            } else {
-                BancoExt.columns(6).search('').draw();
-                $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
-                                        <a class="dropdown-item">Enviar</a>`);
-            }
-        }
         fila.toggleClass('selected');
+        BancoExt.$('tr.selected').removeClass('selected');
+
         if (Array.isArray(imagenes)) {
             var marg = 100 / (imagenes.length - 1);
             imge = imagenes.length - 1
@@ -9598,19 +9604,22 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     background-repeat: no-repeat;float: left;">
                 </div>`);
         }
+
         $('.imag').on('click', function () {
             const link = document.createElement('a');
             link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
             link.download = "recibo" + data.ids + ".jpg";
             link.dispatchEvent(new MouseEvent('click'));
         });
-        //BancoExt.$('tr.selected').removeClass('selected');
-        $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD'));
+        var fechaRecibo = moment.utc(data.fecharcb).format('YYYY-MM-DD');
+        var fechaExtrato = moment.utc(data.date).format('YYYY-MM-DD');
+        $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD HH:mm'));
         $('#Modalimg .cliente').html(data.nombre);
         $('#Modalimg .proyecto').html(data.proyect);
         $('#Modalimg .mz').html('MZ: ' + data.mz);
         $('#Modalimg .lote').html('LT: ' + data.n);
         $('#Modalimg .recibo').html('RCB ' + data.recibo.replace(/~/g, ' ')).parents('tr').css({ "background-color": "#162723", "color": "#FFFFFF" });
+        $('#Modalimg .fechaRcb').html(fechaRecibo);
         $('#Modalimg .fatvc').html(data.facturasvenc); //'FAT.VEC: ' + 
         $('#Modalimg .monto').html('$' + Moneda(data.monto)).parents('td').css({ "background-color": "#162723", "color": "#FFFFFF" });;
         $('#montopago').val(data.monto);
@@ -9619,17 +9628,43 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#apde').attr('data-toggle', "dropdown");
         $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
         $('#stadopago').val(data.stado);
+        $('#idSolicitud').val(data.ids);
+
+        let esFecha = moment(data.fecharcb, true).isValid();
+        !esFecha && alert('Debe establecer una fecha al recibo a continuacion donde se muestra "Fecha inválida"');
+
+        var nuevaFechaRecibo = moment($('#Modalimg .fechaRcb').html(), true).isValid()
+            ? $('#Modalimg .fechaRcb').html() : false;
+
+        var diferenciaDeFechas = Math.abs(moment(data.fecharcb).diff(moment(data.date), 'days'));
+
+        fechaExtrato < fechaRecibo && alert('La fecha del recibo no coincide con la del extrato, y esto no es posible ya que causara una contabilidad erronea');
+
+        if (!isNaN(diferenciaDeFechas) && diferenciaDeFechas > 5) {
+            alert('La diferencia de dias entre la fecha del extato y la fecha del recibo es de ' + diferenciaDeFechas + ' dias, para fines contables esto no debe ser posible por favor revice el caso, de lo contrario seguira generandose este aviso');
+        }
         switch (data.stado) {
             case 4:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
-                //Buscar(data.ids);
+                if (data.extr && !rol.externo) {
+                    BuscarFechaRcb(data.fecharcb, data.extr)
+                    //BancoExt.columns(0,).search(data.extr).draw();
+                    $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
+                                            <a class="dropdown-item">Enviar</a>`);
+                } else if (!rol.externo) {
+                    //BancoExt.columns(0).search('').draw();
+                    BuscarFechaRcb(data.fecharcb)
+                    $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
+                                            <a class="dropdown-item">Enviar</a>`);
+                }
                 break;
             case 6:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
                 break;
             case 3:
                 $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
-                //$('#apde').attr('data-toggle', "dropdown");
+                //BancoExt.columns(0).search('').draw();
+                !rol.externo && BuscarFechaRcb(data.fecharcb);
                 $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
                                         <a class="dropdown-item">Declinar</a>`);
                 break;
@@ -9690,6 +9725,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
             fd.append('extr', extr);
+            idExtracto && fd.append('idExtracto', idExtracto);
             //console.log(w.length, imge, accion, totalasociados);
 
             /*if (totalasociados < data.monto && (accion === 'Asociar' || accion === 'Aprobar')) {
@@ -9739,7 +9775,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         }
                     })
                 }
-            } else if (accion === 'Asociar' && rol.contador) {
+            } else if (accion === 'Asociar' && rol.contador && !rol.externo) {
+                if (!idExtracto) {
+                    alert('Debe seleccionar un extrato antes de intentar asociar al pago');
+                    return false;
+                }
+
+                if (!nuevaFechaRecibo) {
+                    alert('Debe establecer una fecha al recibo antes de asociar');
+                    return false;
+                }
                 $.ajax({
                     type: 'PUT',
                     url: '/links/solicitudes/' + accion,
@@ -9769,9 +9814,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         console.log(data);
                     }
                 })
-            } else if (accion === 'Desasociar' && rol.contador) {
+            } else if (accion === 'Desasociar' && rol.contador && !rol.externo) {
                 //console.log(extr)
-                if (!extr) {
+                if (!idExtracto) {
                     alert('Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción');
                 } else if (confirm("Seguro deseas desasociar este extrato del pago?")) {
                     var ed = data.ids;
@@ -9807,6 +9852,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     })
                 }
             } else if ((accion === 'Enviar' || accion === 'Aprobar') && rol.contador) {
+                if (!rol.externo && !idExtracto) {
+                    alert('Debe asociar un extrato al pago que desea aprobar');
+                    return false;
+                }
+                if (!rol.externo && !nuevaFechaRecibo) {
+                    alert('Debe establecer una fecha al recibo antes de aprobar');
+                    return false;
+                }
+
                 data.pdf ? mensaje = confirm("Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente")
                     : mensaje = true;
 
@@ -9816,7 +9870,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         url: '/links/solicitudes/saldo',
                         data: {
                             solicitud: data.ids,
-                            lote: data.id,
+                            lote: data.lote,
                             fecha: data.fech
                         },
                         async: true,
@@ -10029,6 +10083,46 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#Modalimg').one('hidden.bs.modal', function () {
             fila.toggleClass('selected');
         })
+        $(".fechaRcb").daterangepicker({
+            locale: {
+                'format': 'YYYY-MM-DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10),
+        }, function (start, end, label) {
+            if (data.extr) {
+                alert('Si deseaa cambiar la fecha del recibo debera antes desasociar el extrato, de lo contrario no sera posible realizar esta accion.')
+                return false
+            }
+            $('.dropdown-item').hide()
+            var did = data.ids;
+            var fechaRCB = moment(start).format('YYYY-MM-DD');
+            $.ajax({
+                type: 'POST',
+                url: '/links/solicitudes/fechas',
+                data: { id: did, fecha: fechaRCB },
+                success: function (data) {
+                    if (data) {
+                        $('#Modalimg .fechaRcb').html(fechaRCB)
+                        table.ajax.reload(null, false);
+                        SMSj('success', 'Fecha actualizada correctamente')
+                        BuscarFechaRcb(start);
+                    }
+                }
+            })
+        });
     })
     var devoluciones = $('#devoluciones').DataTable({
         dom: 'Bfrtip',
@@ -10600,8 +10694,26 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             toggle: true
         });
     }
-    /*var bonos = $('#bonos').DataTable({
-        deferRender: true,
+    var BuscarFechaRcb = (start, extra) => {
+        BancoExt.$('tr.selected').removeClass('selected');
+        BancoExt.column(0).search("").draw();
+        BancoExt.column(1).search("").draw();
+        idExtracto = false;
+        dateExtracto = false;
+        var fechaRCB = moment(start).format('YYYY-MM-DD');
+        var fechaPos1 = moment(start).add(1, 'days').format('YYYY-MM-DD')
+        var fechaPos2 = moment(start).add(2, 'days').format('YYYY-MM-DD')
+        var fechaPos3 = moment(start).add(3, 'days').format('YYYY-MM-DD')
+        var fechaPos4 = moment(start).add(4, 'days').format('YYYY-MM-DD')
+        let buscar = new RegExp(`${fechaRCB}|${fechaPos1}|${fechaPos2}|${fechaPos3}|${fechaPos4}`);
+        //console.log(buscar, extra, start)
+        extra ? BancoExt.column(0).search(extra).draw() :
+            BancoExt.column(1).search(buscar, true, false).draw();
+        $('.dropdown-item').show();
+    }
+    /* INABILITADOS */
+    var bonos = $('#bonos').DataTable({
+        /*deferRender: true,
         paging: true,
         search: {
             regex: true,
@@ -10692,7 +10804,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         </div>
                                     </div>` : ''
             }
-        ]
+        ]*/
     });
     var premios = $('#premios').DataTable({
         /*deferRender: true,
@@ -10764,8 +10876,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         </div>
                                     </div>` : ''
             }
-        ]
-    });*/
+        ]*/
+    });
+    /* INABILITADOS */
+
+
     $('#recbo').submit(function (e) {
         e.preventDefault();
         var dat = new FormData(this); //$('#recbo').serialize();
@@ -10932,21 +11047,22 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
 
     }
-    /*var BancoExt = $('#BancoExt').DataTable({
-        scrollY: "200px",
+    var BancoExt = $('#BancoExt').DataTable({
+        //scrollY: "200px",
         //scrollCollapse: true,
-        paging: false,
+        paging: true,
         search: {
             regex: true,
             caseInsensitive: true,
         },
         //ordering: false,
-        //info: false,
+        lengthChange: false,
+        info: false,
         //searching: false,
         //deferRender: true,
         autoWidth: true,
-        //responsive: false,
-        columnDefs: [
+        responsive: true,
+        /* columnDefs: [
             {
                 render: function (data, type, row) {
                     return `El día ${moment(row[3]).format('ll')}, ${row[2]} pasajeros fueron trasladados de ${row[4]} con destino a ${row[5]}. ${row[8] ? row[8] + '.' : ''} Grupo o pasajero que hace referencia a la reserva ${row[10] ? row[10] : row[9]}`;
@@ -10955,12 +11071,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             {
                 render: function (data, type, row) {
-                    return '$' + Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
+                    return '$' + data//Moneda(parseFloat(data.replace(/(?!\w|\s).| /g, "")));
                 },
                 targets: 10
             },
             { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }
-        ],
+        ], */
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -10974,14 +11090,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             var xtrato = null;
             var pagos = null;
             api.rows({ page: 'current' }).data().each(function (group, i) {
-                //console.log(api.row(i).data())
-                if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
+
+                /* if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
                     pagos = group.pagos;
                     xtrato = group.xtrabank;
                 } else if ((xtrato === group.xtrabank || pagos === group.pagos) && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
-                }
+                } */
             });
         },
         columns: [
@@ -11005,13 +11121,56 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
             }
         ]
-    });*/
-    /*BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
+    });
+    $('#BancoExt_filter').hide();
+    BancoExt.on('click', 'tr', function () { //'td:not(.control, .t)'
         var data = BancoExt.row(this).data();
         var monto = parseFloat($('#montopago').val());
         var stad = parseFloat($('#stadopago').val());
-        var acum = 0, acu = 0, U = false;
-        BancoExt
+        var montos = data.monto || 0;
+        var excedentes = monto + montos;
+        var acum = 0, acu = 0, U = false; console.log(data, monto, stad)
+
+        if ($(this).hasClass('selected')) {
+            BancoExt.$('tr.selected').removeClass('selected');
+            idExtracto = false;
+            dateExtracto = false;
+            return false;
+        } else {
+            BancoExt.$('tr.selected').removeClass('selected');
+            $(this).toggleClass('selected');
+        }
+
+
+        if (monto > data.consignado) {
+            alert('No es posible asociar el pago a este extrato ya que su monto supera el monto del extrato');
+            $(this).toggleClass('selected');
+            idExtracto = false;
+            dateExtracto = false;
+            return false;
+        } else if (data.monto >= data.consignado) {
+            alert('No sera posible asociar el pago a este extrato ya que este posee un pago que cubre todo su monto');
+            $(this).toggleClass('selected');
+            idExtracto = false;
+            dateExtracto = false;
+            return false;
+        } else if (excedentes > data.consignado) {
+            alert('No es posible asociar el pago a este extrato ya que con su monto supera el monto del extrato');
+            $(this).toggleClass('selected');
+            idExtracto = false;
+            dateExtracto = false;
+            return false;
+        }
+        if (data.consignado < monto) {
+            alert('No es posible asociar el pago a este extrato ya que el valor es menor al pago aprovar');
+            $(this).toggleClass('selected');
+            idExtracto = false;
+            dateExtracto = false;
+            return false;
+        }
+        idExtracto = data.id;
+        dateExtracto = moment.utc(data.date).format('YYYY-MM-DD');
+        /* BancoExt
             //.column(6)
             .rows()
             .data()
@@ -11038,8 +11197,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             //console.log(extr)
         } else {
             alert('El monto ha aprobar excede el excedente acumulado de los pagos');
-        }
-    });*/
+        } */
+    });
     /*$('button').click(function () {
         var data = table.$('input, select').serialize();
         alert(
@@ -11085,21 +11244,56 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         startDate: moment().subtract(29, "days"),
         endDate: moment(),
         ranges: {
-            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
-            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
-            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
             'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
             'Este Mes': [moment().startOf('month'), moment().endOf('month')],
-            'Hoy': [moment().startOf('days'), moment().endOf("days")],
-            'Mañana': [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
-            'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf("days")],
-            'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")]
         }
     }, function (start, end, label) {
-        tiem = 1
-        maxDateFilter = end;
-        minDateFilter = start;
+        maxDateFilter = new Date(end).getTime();
+        minDateFilter = new Date(start).getTime();
         table.draw();
+        console.log(maxDateFilter, minDateFilter)
+        $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    });
+    $(".fechaRcbs").daterangepicker({
+        locale: {
+            'format': 'YYYY-MM-DD HH:mm',
+            'separator': ' a ',
+            'applyLabel': 'Aplicar',
+            'cancelLabel': 'Cancelar',
+            'fromLabel': 'De',
+            'toLabel': 'A',
+            'customRangeLabel': 'Personalizado',
+            'weekLabel': 'S',
+            'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+            'firstDay': 1
+        },
+        opens: "center",
+        timePicker: true,
+        timePicker24Hour: true,
+        timePickerIncrement: 15,
+        opens: "right",
+        alwaysShowCalendars: false,
+        //autoApply: false,
+        startDate: moment().subtract(29, "days"),
+        endDate: moment(),
+        ranges: {
+            'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+            'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+            'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf("days")],
+            'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf("days")],
+            'Ayer': [moment().subtract(1, 'days').startOf("days"), moment().subtract(1, 'days').endOf("days")],
+            'Hoy': [moment().startOf('days'), moment().endOf("days")]
+        }
+    }, function (start, end, label) {
+        maxDateFilter = new Date(end).getTime();
+        minDateFilter = new Date(start).getTime();
+        table.draw();
+        console.log(maxDateFilter, minDateFilter)
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     });
     $(".fechs").daterangepicker({
@@ -11143,6 +11337,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         minDateFilter = start;
         BancoExt.draw();
         $("#Date_search").val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    });
+    $('.fech').on('cancel.daterangepicker', function (ev, picker) {
+        //do something, like clearing an input
+        maxDateFilter = "";
+        minDateFilter = "";
+        table.draw();
     });
 };
 /////////////////////////////* RED */////////////////////////////////////////////////////////////////////

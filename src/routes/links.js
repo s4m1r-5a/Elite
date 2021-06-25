@@ -683,7 +683,7 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
     await EnviarWTSAP('57 3007753983', bod);
 });
 router.get('/roles', isLoggedIn, (req, res) => {
-    //console.log(req.user)
+    desarrollo = req.headers.host;
     res.send(req.user)
 });
 router.get('/add', isLoggedIn, (req, res) => {
@@ -1569,6 +1569,7 @@ router.post('/recibo', async (req, res) => {
             pago.motorecibos = recib;
             pago.recibo = `~${nrecibo[i]}~`;
             pago.monto = recib;
+            pago.fecharcb = feh[i];
 
             if (nrecibo[i] === rcbexcdnt) {
                 pago.monto = recib - excedente;
@@ -1588,6 +1589,7 @@ router.post('/recibo', async (req, res) => {
         pago.motorecibos = recib;
         pago.recibo = `~${nrecibo}~`;
         pago.monto = recib;
+        pago.fecharcb = feh;
 
         if (nrecibo === rcbexcdnt) {
             pago.monto = recib - excedente;
@@ -2800,7 +2802,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         }
         res.send(true);
     } else if (id === 'fechas') {
-        const { id, fecha } = req.body; console.log(req.body)
+        const { id, fecha } = req.body; //console.log(req.body)
         const date = { fecha };
         await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [date, id]);
         res.send(true);
@@ -2881,7 +2883,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
             var reteicaB = montoB * 8 / 1000
             var std = a.obsevacion === 'CARTERA' ? 4 : 15;
             var f = [];
-            
+
             sep && a.incntivo && f.push([
                 hoy, a.incentivo, 'COMISION DIRECTA', std, 'SEPARACION',
                 asesor, 0, a.separar, a.lote, 0, 0, a.incentivo, a.ordn
@@ -2957,12 +2959,12 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             prd = prcd.map(e => e.producto);
         }
         let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
-        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa,
+        const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
-        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion,
-        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote,
-        s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
-        LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
+        cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb,
+        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
+        e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
+        LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN extrabanco e ON s.extrato = e.id
         INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users u ON pr.asesor = u.id 
         LEFT JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
         LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
@@ -3013,7 +3015,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'saldo') {
-        const { lote, solicitud, fecha } = req.body;
+        const { lote, solicitud, fecha } = req.body; console.log(lote, solicitud, fecha)
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
         AND lt = ${lote} AND stado = 3 AND TIMESTAMP(fech) < '${fecha}' AND ids != ${solicitud}`);
         //console.log(u)
@@ -3057,12 +3059,11 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send({ r: true, m: 'Cuenta de cobro eliminada correctamente' });
 
     } else if (id == 'extractos') {
-        if (req.user.admin != 1) {
+        /* if (req.user.admin != 1) {
             return res.send(false);
-        };
-        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt, x.xtrabank, x.pagos
-        FROM extrabanco e LEFT JOIN extratos x ON x.xtrabank = e.id LEFT JOIN solicitudes s ON x.pagos = s.ids LEFT JOIN productosd pd ON s.lt = pd.id 
-        LEFT JOIN preventa pr ON pr.lote = pd.id LEFT JOIN productos p ON pd.producto = p.id LEFT JOIN clientes cl ON pr.cliente = cl.idc`);
+        }; */
+        const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto 
+        FROM extrabanco e LEFT JOIN solicitudes s ON s.extrato = e.id WHERE e.consignado > 0`);
         //console.log(solicitudes)
         respuesta = { "data": solicitudes };
         res.send(respuesta);
@@ -3082,6 +3083,10 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
                 }, ids
             ]
         );
+        res.send(true);
+    } else if (id === 'fechas') {
+        const { id, fecha } = req.body; console.log(req.body)
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ fecharcb: fecha }, id]);
         res.send(true);
     }
 });
@@ -3139,34 +3144,26 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 
     } else if (id === 'Asociar') {
 
-        const { ids, acumulado, extr } = req.body
-        let valu = [];
-        extr.split(',').map((x) => {
-            valu.push([x, ids])
-        })
-        await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
+        const { ids, idExtracto } = req.body;
+        await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ extrato: idExtracto }, ids]);
         res.send(true);
 
     } else if (id === 'Desasociar') {
-        const { ids, extr } = req.body
-        //console.log(extr)
-        await pool.query(`DELETE FROM extratos WHERE xtrabank IN(${extr}) AND pagos = ${ids}`);
+        const { ids } = req.body
+        await pool.query('UPDATE solicitudes SET extrato = NULL WHERE ids = ?', ids);
         res.send(true);
 
     } else {
-        const { ids, acumulado, extr } = req.body;
-        let valu = []; console.log(req.body)
-        extr.split(',').map((x) => {
-            valu.push([x, ids])
-        })
+        const { ids, acumulado, extr, idExtracto } = req.body;
+
         const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf, req.user.fullname); console.log(R)
+        const R = await PagosAbonos(ids, pdf, req.user.fullname); //console.log(R)
+        var w = { acumulado };
+        idExtracto && (w.extrato = idExtracto);
         if (R) {
-            //await pool.query("INSERT INTO extratos (xtrabank, pagos) VALUES ?", [valu])
-            await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ acumulado }, ids]);
+            await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [w, ids]);
         }
         res.send(R);
-        //res.send(true);
     }
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
@@ -4321,12 +4318,12 @@ function Moneda(valor) {
 }
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     var cel = 0;
-    if (desarrollo === 'http://localhost:5000') {
+    if (desarrollo === 'localhost:5000') {
         cel = '57 3012673944';
     } else {
         movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
     }
-    //cel = '57 3012673944';
+    //console.log(cel, desarrollo)
     var options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
@@ -4346,7 +4343,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
 }
 function EnvWTSAP_FILE(movil, body, filename, caption) {
     var cel = 0;
-    if (desarrollo === 'http://localhost:5000') {
+    if (desarrollo === 'localhost:5000') {
         cel = '57 3007753983';
     } else {
         movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
