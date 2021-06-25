@@ -9555,7 +9555,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     });
     $('#datatable_filter').hide();
     $('#min, #max').on('keyup', function () {
-        var col = $(this).attr('id') === 'min' ? 5 : 6;
+        var col = $(this).attr('id') === 'min' ? 6 : 7;
         table
             .columns(col)
             .search(this.value)
@@ -10699,13 +10699,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         BancoExt.column(0).search("").draw();
         BancoExt.column(1).search("").draw();
         idExtracto = false;
-        dateExtracto = false;
+        dateExtracto = false; 
+        var fechaAnt = moment(start).subtract(1, 'days').format('YYYY-MM-DD');
         var fechaRCB = moment(start).format('YYYY-MM-DD');
         var fechaPos1 = moment(start).add(1, 'days').format('YYYY-MM-DD')
         var fechaPos2 = moment(start).add(2, 'days').format('YYYY-MM-DD')
         var fechaPos3 = moment(start).add(3, 'days').format('YYYY-MM-DD')
         var fechaPos4 = moment(start).add(4, 'days').format('YYYY-MM-DD')
-        let buscar = new RegExp(`${fechaRCB}|${fechaPos1}|${fechaPos2}|${fechaPos3}|${fechaPos4}`);
+        let buscar = new RegExp(`${fechaAnt}|${fechaRCB}|${fechaPos1}|${fechaPos2}|${fechaPos3}|${fechaPos4}`);
         //console.log(buscar, extra, start)
         extra ? BancoExt.column(0).search(extra).draw() :
             BancoExt.column(1).search(buscar, true, false).draw();
