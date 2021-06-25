@@ -9123,28 +9123,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     maxDateFilter = "";
     var idExtracto = false;
     var dateExtracto = false;
-    var columnaBusque = 3;
-    /* var extr = [], imge = 0;
-    var totalasociados = 0;
-    var Seleccion = () => {
-        extr = [];
-        totalasociados = 0;
-        var x = BancoExt
-            .rows('.selected')
-            .data()
-            .filter(function (value, index) {
-                extr.push(value.id);
-                totalasociados += value.consignado;
-                return true;
-            });
-        return x
-    }; */
 
-    /* $.fn.dataTableExt.afnFiltering.push(
+    $.fn.dataTableExt.afnFiltering.push(
         function (oSettings, aData, iDataIndex) {
             if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[columnaBusque]).getTime()
-                //console.log(aData._date, columnaBusque, aData.length)
+                aData._date = new Date(aData[3]).getTime()
+                //console.log(aData._date, aData[3], aData.length)
             }
             if (minDateFilter && !isNaN(minDateFilter)) {
                 if (aData._date < minDateFilter) {
@@ -9158,7 +9142,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
             return true;
         }
-    ); */
+    );
     $('.card-header').on('click', function () {
         var papa = $(this).parents('.accordion');
         if ($(this).find('i').hasClass('fa-angle-down')) {

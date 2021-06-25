@@ -457,6 +457,9 @@
                             </tbody>
                         </table>
                     </div>
+                    {{#if user.externo}}
+
+                    {{else if user.auxicontbl}}
                     <div class="col-12">
                         <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
                             <thead>
@@ -474,6 +477,7 @@
                             <tbody></tbody>
                         </table>
                     </div>
+                    {{/if}}
                 </div>
             </div>
         </div>
