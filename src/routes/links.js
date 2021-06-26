@@ -1676,10 +1676,18 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
       ) as ultimoabono, (
         SELECT TIMESTAMPDIFF(MONTH, MAX(TIMESTAMP(fech)), CURDATE())
         FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
-      ) as meses, l.estado, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, (
+      ) as meses2, l.estado, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, (
         SELECT SUM(monto)
         FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id
-      ) as abonos, d.proyect, c.nombre, c.documento, u.fullname, c.movil
+      ) as abonos, d.proyect, c.nombre, c.documento, u.fullname, c.movil, (
+        SELECT SUM(cuota)
+        FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3
+        ORDER BY fechs ASC
+      ) as deuda, (
+        SELECT COUNT(*)
+        FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3
+        ORDER BY fechs ASC
+      ) as meses
   FROM preventa p 
   INNER JOIN solicitudes s ON p.id = s.orden 
   INNER JOIN productosd l ON p.lote = l.id 
@@ -2121,7 +2129,7 @@ router.get('/editordn/:id', noExterno, async (req, res) => {
 })
 router.post('/ordn/:id', noExterno, async (req, res) => {
     const { id } = req.params;
-    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
+    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`
     const orden = await pool.query(sql, id);
     console.log(orden)
     body = { "data": orden };
@@ -2264,7 +2272,7 @@ router.post('/prodlotes/:id', noExterno, async (req, res) => {
     WHERE l.estado IN('9', '15') AND v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`, id);
     const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
     const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
-    const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`, id);
+    const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`, id);
     res.send({ productos, asesores, clientes, orden });
 
 });
@@ -2316,7 +2324,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     let { p, i } = req.body;
     p = parseFloat(p);
     i = parseFloat(i);
-    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY tipo DESC, ncuota ASC`
+    sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`
     const orden = await pool.query(sql, id);
     var y = [orden[0]], o = [orden[0]];
     var e = Math.round(i / 2);
