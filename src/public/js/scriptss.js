@@ -6472,15 +6472,12 @@ if (window.location.pathname == `/links/cartera`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-        /*{ responsivePriority: 1, targets: -1 },
-    { responsivePriority: 1, targets: -2 }*/],
-        //{className: "dt-center", targets: "_all"}],
-        order: [[1, "desc"]],
+        columnDefs: [
+            { className: 'control', orderable: true, targets: 0 },
+            { responsivePriority: 1, targets: [1, 2, 3, 5, 6, 7, 8, 10, 11, 12, 13] },
+            //{ responsivePriority: 2, targets: 4 }
+        ],
+        order: [[6, "desc"], [1, "desc"]],
         language: languag,
         ajax: {
             method: "POST",
@@ -6508,14 +6505,14 @@ if (window.location.pathname == `/links/cartera`) {
                 data: "fecha",
                 className: 'te',
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             {
                 data: "ultimoabono",
                 className: 'te',
                 render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD hh:mm A') //pone la fecha en un formato entendible
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
                 }
             },
             {
@@ -6572,6 +6569,11 @@ if (window.location.pathname == `/links/cartera`) {
             },
             {
                 data: "abonos",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "deuda",
                 className: 'te',
                 render: $.fn.dataTable.render.number('.', '.', 0, '$')
             },
@@ -9836,12 +9838,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                     })
                 }
             } else if ((accion === 'Enviar' || accion === 'Aprobar') && rol.contador) {
-                if (!rol.externo && !idExtracto) {
+                if (!rol.externo && !idExtracto && accion === 'Aprobar') {
                     alert('Debe asociar un extrato al pago que desea aprobar');
                     return false;
                 }
                 if (!rol.externo && !nuevaFechaRecibo) {
-                    alert('Debe establecer una fecha al recibo antes de aprobar');
+                    alert('Debe establecer una fecha al recibo antes de realizar esta accion');
                     return false;
                 }
 
@@ -10683,7 +10685,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         BancoExt.column(0).search("").draw();
         BancoExt.column(1).search("").draw();
         idExtracto = false;
-        dateExtracto = false; 
+        dateExtracto = false;
         var fechaAnt = moment(start).subtract(1, 'days').format('YYYY-MM-DD');
         var fechaRCB = moment(start).format('YYYY-MM-DD');
         var fechaPos1 = moment(start).add(1, 'days').format('YYYY-MM-DD')
