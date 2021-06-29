@@ -1,7 +1,6 @@
 <!--<tr class="table-primary"></tr>
 <tr class="table-success"></tr>-->
 <table id="my-table"></table>
-
 <!--<main class="content p-1" style="background-image: url('/img/fondo2.png');
   -webkit-background-size: 100% 100%;           
      -moz-background-size: 100% 100%;         
@@ -19,6 +18,12 @@
         <div id="collapse" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
             <!-- collapse show -->
             <div class="card-body">
+                <a><span class="badge badge-pill" style="background-color: green;">Al dia</span></a>
+                <a><span class="badge badge-pill" style="background-color: blue;">>= 1 mes de retraso</span></a>
+                <a><span class="badge badge-pill" style="background-color: purple;">>= 3 meses de retraso</span></a>
+                <a><span class="badge badge-pill" style="background-color: navy;">>= 5 meses de retraso</span></a>
+                <a><span class="badge badge-pill" style="background-color: red;">>= 10 meses de retraso</span></a>
+                <hr>
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
                         <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#menu1"
@@ -98,6 +103,16 @@
                             <th>Asesor</th>
                             <th class="texto">+</th>
                             <th>Doc</th>
+                            <th></th>
+                            <th></th>
+                            <th>Ult.Abono</th>
+                            <th>Retraso</th>
+                            <th>Valor</th>
+                            <th>Separacion</th>
+                            <th>Ahorro</th>
+                            <th>Total</th>
+                            <th>Abonado</th>
+                            <th>Deuda</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
@@ -865,3 +880,125 @@
     </div>
 </div>
 {{/if}}
+
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="ModalEstadoDetalles" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <div class="">
+                    <h4 class="card-title m-0" id="datosProducto"></h4>
+                    <h6 class="card-subtitle m-0 text-muted" id="datos2Producto"></h6>
+                </div>
+                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
+                    <a class="reditar" data-dismiss="modal" aria-label="Close">
+                        <i class="feather mr-0" data-feather="x"></i></a>
+                </div>
+            </div>
+            <div class="modal-body p-2">
+                <div class="accordion" id="estadoDetalles">
+                    <div class="card mb-1">
+                        <div class="card-header" type="button" data-toggle="collapse" data-target="#detallado"
+                            aria-expanded="true" aria-controls="collapse">
+                            <strong class="text-muted" id="nombreCliente"></strong><br>
+                            <small class="text-muted" id="emailCliente"></small>
+                            <i class="fas fa-angle-up float-right"></i>
+                        </div>
+                        <div id="detallado" class="collapse show" aria-labelledby="headingOne"
+                            data-parent="#estadoDetalles">
+                            <div class="card-body p-0">
+                                <div class="card-group">
+                                    <div class="card">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item py-1" id="Area">Cras justo odio</li>
+                                            <li class="list-group-item py-1" id="Separacion">Dapibus ac facilisis in
+                                            </li>
+                                            <li class="list-group-item py-1" id="PinKupon">Vestibulum at eros</li>
+                                            <li class="list-group-item py-1" id="Descuento">Cras justo odio</li>
+                                            <li class="list-group-item py-1" id="Mora">Dapibus ac facilisis in</li>
+                                            <li class="list-group-item py-1" id="Abono">Vestibulum at eros</li>
+                                        </ul>
+                                    </div>
+                                    <div class="card">
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item py-1" id="ValorArea">Cras justo odio</li>
+                                            <li class="list-group-item py-1" id="Valor">Dapibus ac facilisis in</li>
+                                            <li class="list-group-item py-1" id="Porcentage">Vestibulum at eros</li>
+                                            <li class="list-group-item py-1" id="TotalPrecio">Cras justo odio</li>
+                                            <li class="list-group-item py-1" id="Deuda">Dapibus ac facilisis in</li>
+                                            <li class="list-group-item py-1" id="Saldo">Vestibulum at eros</li>
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{#if user.externo}}
+
+                {{else if user.auxicontbl}}
+                <div class="accordion" id="tablaComi">
+                    <div class="card mb-1">
+                        <div class="card-header" type="button" data-toggle="collapse" data-target="#tebleComi"
+                            aria-expanded="true" aria-controls="collapse">
+                            <strong class="text-muted">COMISIONES</strong><br>
+                            <small class="text-muted" id="totalComi"></small>
+                            <i class="fas fa-angle-down float-right"></i>
+                        </div>
+                        <div id="tebleComi" class="collapse" aria-labelledby="headingOne" data-parent="#tablaComi">
+                            <div class="card-body text-center p-0">
+                                <table id="comi" class="table table-sm" style="width:100%;font-size:9px;">
+                                    <thead>
+                                        <tr>
+                                            <th>Id</th>
+                                            <th>Asesor</th>
+                                            <th>FechaCreo</th>
+                                            <th>Monto</th>
+                                            <th>%</th>
+                                            <th>Total</th>
+                                            <th>Concepto</th>
+                                            <th>Descp</th>
+                                            <th>Estado</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {{/if}}
+                <div class="accordion" id="tablaRcb">
+                    <div class="card mb-1">
+                        <div class="card-header" type="button" data-toggle="collapse" data-target="#tableRcb"
+                            aria-expanded="true" aria-controls="collapse">
+                            <strong class="text-muted">RECIBOS</strong><br>
+                            <small class="text-muted" id="totalRcb">Se muestran los recibos de este lote</small>
+                            <i class="fas fa-angle-down float-right"></i>
+                        </div>
+                        <div id="tableRcb" class="collapse" aria-labelledby="headingOne" data-parent="#tablaRcb">
+                            <div class="card-body text-center p-0">
+                                <table id="Rcbs" class="table table-sm" style="width:100%;font-size:9px;">
+                                    <thead>
+                                        <tr>
+                                            <th data-priority="1">Id</th>
+                                            <th>FechaP</th>
+                                            <th>FechaRcb</th>
+                                            <th data-priority="3">Descp</th>
+                                            <th data-priority="2">Monto</th>
+                                            <th data-priority="5">Recibo</th>
+                                            <th data-priority="1">Estado</th>
+                                            <th data-priority="1">Rcb</th>
+                                            <th>QuienAprueba</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

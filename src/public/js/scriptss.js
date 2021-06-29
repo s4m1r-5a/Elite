@@ -1699,25 +1699,6 @@ if (window.location.pathname == `/links/pagos`) {
 if (window.location.pathname === `/links/reportes`) {
     $('.sidebar-item').removeClass('active');
     $(`a[href='${window.location.pathname}']`).parent().addClass('active');
-    //let p = '', fecha = new Date(), fechs = new Date();
-    //fecha.setDate(fecha.getDate() + 30)
-    /*function RecogerDatos() {
-        dts = {
-            id_venta: $('#idsms').val(),
-            correo: $('#correo').val(),
-            clave: $('#contraseña').val(),
-            client: $('#cliente').val(),
-            smss: $('#smsdescripcion').text(),
-            movil: $("#cels").val(),
-            fechadeactivacion: moment.utc(fechs).format('YYYY-MM-DD'),
-            fechadevencimiento: moment.utc(fecha).format('YYYY-MM-DD')
-        }
-    }   
-    $('#ModalEventos').modal({
-        backdrop: 'static',
-        keyboard: false,
-        show: true
-    });*/
     minDateFilter = "";
     maxDateFilter = "";
     $.fn.dataTableExt.afnFiltering.push(
@@ -1869,18 +1850,16 @@ if (window.location.pathname === `/links/reportes`) {
                 type: 'column'
             }
         },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-        { responsivePriority: 1, targets: [3, 4, 6] },
-        { responsivePriority: 2, targets: 5 },
-        { responsivePriority: 3, targets: 1 },
-        { responsivePriority: 4, targets: 11 },
-        { responsivePriority: 5, targets: [7, 8, -3] },
-        { targets: [6, -1, 13], searchable: true },
-        { targets: [-1, -2], visible: false, searchable: true }],
+        columnDefs: [
+            { className: 'control', orderable: true, targets: 0 },
+            { responsivePriority: 1, targets: [3, 4, 6] },
+            { responsivePriority: 2, targets: 5 },
+            { responsivePriority: 3, targets: 1 },
+            { responsivePriority: 4, targets: 11 },
+            { responsivePriority: 5, targets: [7, 8, 12] },
+            { targets: [6, 14, 13], searchable: true },
+            { targets: [13, 14], visible: false, searchable: true }
+        ],
         order: [[1, "desc"]],
         language: languag,
         ajax: {
@@ -1907,7 +1886,7 @@ if (window.location.pathname === `/links/reportes`) {
             },
             {
                 data: "n",
-                className: 'te'
+                className: 'deuda'
             },
             {
                 data: "promesa",
@@ -1925,29 +1904,29 @@ if (window.location.pathname === `/links/reportes`) {
             },
             {
                 data: "estado",
-                className: 'te',
+                className: 'Std',
                 render: function (data, method, row) {
                     switch (data) {
                         case 1:
-                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
+                            return `<a><span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span></a>`
                             break;
                         case 8:
-                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
+                            return `<a><span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span></a>`
                             break;
                         case 9:
-                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
+                            return `<a><span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span></a>`
                             break;
                         case 10:
-                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
+                            return `<a><span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span></a>`
                             break;
                         case 12:
-                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
+                            return `<a><span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span></a>`
                             break;
                         case 13:
-                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
+                            return `<a><span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span></a>`
                             break;
                         case 15:
-                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
+                            return `<a><span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span></a>` //secondary
                             break;
                     }
                 }
@@ -2001,7 +1980,47 @@ if (window.location.pathname === `/links/reportes`) {
                 }
             },
             { data: "obsevacion" },
-            { data: "tipobsevacion" }
+            { data: "tipobsevacion" },
+            {
+                data: "ultimoabono",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data ? moment(data).format('YYYY-MM-DD') : 'No registra'
+                }
+            },
+            {
+                data: "meses",
+                className: 'te'
+            },
+            {
+                data: "valor",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "separar",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "ahorro",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "Total",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "abonos",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "deuda",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            }
         ],
         drawCallback: function (settings) {
             var AdminSuper = false, resOrden = false;
@@ -2048,17 +2067,36 @@ if (window.location.pathname === `/links/reportes`) {
             } else if (data["estado"] == 1) {
                 $(row).css({ "background-color": "#FEC782", "color": "#FFFFFF" });
             } else if (data["estado"] == 13) {
-                $(row).css({ "background-color": "#008080", "color": "#FFFFFF" });
+                $(row).css({ "background-color": "#008080", "color": "white" });
             }
             if (data["obsevacion"] === 'CARTERA') {
-                $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+                $(row).find(`.ids`).css({ "background-color": "#EB0C1A", "color": "white", "border-radius": "10%", "text-align": "center" });
             }
+            var caso = data["meses"];
+            var msg = caso ? `Se encuentra retrasado ${caso} mes(es) en sus pagos` : "Se encuentra al dia con sus pagos";
+            switch (true) {
+                case (caso >= 10):
+                    return $(row).find(`.deuda`).prop('title', msg).css({ "background-color": "red", "color": "white", "border-radius": "10%", "text-align": "center", "cursor": "pointer" });
+                    break;
+                case (caso >= 5):
+                    return $(row).find(`.deuda`).prop('title', msg).css({ "background-color": "navy", "color": "white", "border-radius": "10%", "text-align": "center", "cursor": "pointer" });
+                    break;
+                case (caso >= 3):
+                    return $(row).find(`.deuda`).prop('title', msg).css({ "background-color": "purple", "color": "white", "border-radius": "10%", "text-align": "center", "cursor": "pointer" });
+                    break;
+                case (caso >= 1):
+                    return $(row).find(`.deuda`).prop('title', msg).css({ "background-color": "blue", "color": "white", "border-radius": "10%", "text-align": "center", "cursor": "pointer" });
+                    break;
+                default:
+                    return $(row).find(`.deuda`).prop('title', msg).css({ "background-color": "green", "color": "white", "border-radius": "10%", "text-align": "center", "cursor": "pointer" });
+            }
+
         },
         initComplete: function (settings, json) {
             //$('#collapse').collapse('toggle');
             $('#datatable2_filter').hide();
             var n = $('#datatable2 tbody tr:first').find('td:hidden').length;
-            column = 13 - n;
+            column = 21 - n;
             $('.menu').prop('colspan', column);
             /*if (!$('main').hasClass('p-1') && column < 7) {
                 $('main').addClass('p-1')
@@ -2169,6 +2207,41 @@ if (window.location.pathname === `/links/reportes`) {
             });
         }
     });
+    tableOrden.on('click', '.Std', function () {
+        var fila = $(this).parents('tr');
+        var data = tableOrden.row(fila).data(); //console.log(data)
+        $('#datosProducto').html(`${data.proyecto}`);
+        $('#datos2Producto').html(`Manzana: ${data.mz}  -  Lote: ${data.n}`);
+        $('#nombreCliente').html(data.nombre);
+        $('#emailCliente').html(data.email);
+        $('#Area').html('Area: ' + data.mtr2);
+        $('#ValorArea').html('Valor: $' + Moneda(data.mtr));
+        $('#Separacion').html('Separado: ' + moment(data.fecha).format('YYYY-MM-DD'));
+        $('#Valor').html('Precio: $' + Moneda(data.valor));
+        $('#PinKupon').html(data.pin ? `Cupon: ${data.pin}` : "Cupon: No aplica");
+        $('#Porcentage').html(data.descuento ? `Descuento: ${data.descuento}%` : 'Descuento: 0%');
+        $('#Descuento').html(data.ahorro ? `Ahorro: $${Moneda(data.ahorro)}` : 'Ahorro: No aplica');
+        $('#TotalPrecio').html('Total: $' + Moneda(data.Total));
+        $('#Mora').html(data.meses ? `Mes(es) mora: ${data.meses}` : 'Mes(es) mora: Al dia');
+        $('#Deuda').html(data.deuda ? `Deuda: $${Moneda(data.deuda)}` : 'Deuda: $0.000');
+        $('#Abono').html(data.abonos ? `Abonado: $${Moneda(data.abonos)}` : 'Abonado: $0.000');
+        $('#Saldo').html('Saldo: $' + Moneda(data.Total - (data.abonos || 0)));
+        /* Comi.ajax.url("/links/productos/0").load(function () {
+            tabledit.columns.adjust().draw();
+        }); */
+        Comi.column(9).search(data.lote).draw();
+        Recibos.column(9).search(data.id).draw();
+        $('#ModalEstadoDetalles').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+        $('#ModalEstadoDetalles').on('shown.bs.modal', function (e) {
+            Recibos.columns.adjust().responsive.recalc();
+            Comi.columns.adjust().responsive.recalc();
+        });
+
+    })
     /*$(window).resize(function () {
         tableOrden
             .columns.adjust()
@@ -2190,7 +2263,7 @@ if (window.location.pathname === `/links/reportes`) {
         var count = columns.reduce(function (a, b) {
             return b === false ? a + 1 : a;
         }, 0);
-        column = 15 - count;
+        column = 23 - count;
         /*if (!$('main').hasClass('p-1') && column < 7) {
             $('main').addClass('p-1')
             $('card-body').addClass('p-1')
@@ -2208,6 +2281,14 @@ if (window.location.pathname === `/links/reportes`) {
         comisiones.search(this.value).draw();
     });
     //////////////////////* Table3 *///////////////////////
+    $.ajax({
+        url: '/links/reportes/msg',
+        type: 'POST',
+        async: false,
+        success: function (data) {
+            
+        }
+    });
     var area, productos, descuentos, total, abonos, salds,
         Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
     var f = [{
@@ -2240,6 +2321,123 @@ if (window.location.pathname === `/links/reportes`) {
                 })
             }
         }
+    });
+    //////////////////////* TABLA DE RECIBOS DE MODAL *///////////////////////////
+    var Recibos = $('#Rcbs').DataTable({
+        //dom: 'Bfrtip',
+        lengthChange: false,
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: {
+            /* details: {
+                type: 'column'
+            } */
+            details: {
+                display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                type: 'none',
+                target: ''
+            }
+        },
+        order: [[0, "desc"]],
+        language: languag2,
+        columnDefs: [
+            { targets: -1, visible: false, searchable: true }
+        ],
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/recibos",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            $('#Rcbs_filter').hide();
+            //$('[data-toggle="popover"]').popover()
+        },
+        columns: [
+            {
+                className: 't',
+                data: "ids"
+            },
+            {
+                data: "fech"
+            },
+            {
+                data: "fecharcb",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "recibo",
+                className: "Reci",
+                render: function (data, method, row) {
+                    return `<a tabindex="0" class="recivos" data-toggle="popover" title="${data.replace(/~/g, '')}" data-content="<img src='https://grupoelitefincaraiz.com${row.img}' alt='...' class='img-thumbnail'>">${data.replace(/~/g, '')}</a>` //`<a class="recivos" id="${row.img}">${data.replace(/~/g, '')}</a>`//
+                }
+            },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" },
+            { data: "orden" }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        },
+        infoCallback: function (settings, start, end, max, total, pre) {
+            $('#totalRcb').html('Total de recibos ingresados ' + total);
+            return pre;
+        }
+    });
+    Recibos.on("mouseenter", ".Reci", function () {
+        /* var fila = $(this).parents('tr');
+        var data = Recibos.row(fila).data(); */
+
+        $('.recivos').popover({
+            trigger: "hover",
+            delay: { "show": 500, "hide": 100 },
+            placement: "auto",
+            html: true,
+            //title: 'Recibo',
+            //content: `<img src='https://grupoelitefincaraiz.com/${$(this).prop('id')}' alt='...' class='img-thumbnail'>`,
+        });
     });
     //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////  
     var estadoscuentas = $('#estadoscuentas').DataTable({
@@ -4184,6 +4382,116 @@ if (window.location.pathname === `/links/reportes`) {
 
     }
     if (!rol.externo) {
+        var Comi = $('#comi').DataTable({
+            lengthChange: false,
+            deferRender: true,
+            info: true,
+            paging: false,
+            search: {
+                regex: true,
+                caseInsensitive: true,
+            },
+            responsive: {
+                details: {
+                    display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                    type: 'none',
+                    target: ''
+                }
+            },
+            columnDefs: [
+                { targets: -1, visible: false, searchable: true }
+                //{ className: 'control', orderable: true, targets: 0 },
+                //{ responsivePriority: 1, targets: [8, 11, 15, 16, 17] },
+                //{ responsivePriority: 2, targets: [13, -1] }
+            ],
+            order: [[0, "desc"]],
+            language: languag,
+            ajax: {
+                method: "POST",
+                url: "/links/reportes/comision",
+                dataSrc: "data"
+            },
+            initComplete: function (settings, json, row) {
+                $('#comi_filter').hide();
+                //$("#comi").find(".row").last().hide();
+            },
+            columns: [
+                { data: "ids" },
+                { data: "nam" },
+                {
+                    data: "fech",
+                    className: "nowrap",
+                    render: function (data, method, row) {
+                        return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                    }
+                },
+                {
+                    data: "monto",
+                    render: function (data, method, row) {
+                        return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    }
+                },
+                {
+                    data: "porciento",
+                    render: function (data, method, row) {
+                        return `${(data * 100).toFixed(2)}%` //replaza cualquier caracter y espacio solo deja letras y numeros
+                    }
+                },
+                {
+                    data: "pagar",
+                    render: function (data, method, row) {
+                        return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                    }
+                },
+                { data: "concepto" },
+                { data: "descp" },
+                {
+                    data: "stado",
+                    render: function (data, method, row) {
+                        switch (data) {
+                            case 1:
+                                return `<span class="badge badge-pill badge-warning" title="Esta comision esta siendo auditadda">Auditando</span>`
+                                break;
+                            case 4:
+                                return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                                break;
+                            case 6:
+                                return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                                break;
+                            case 3:
+                                return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                                break;
+                            case 9:
+                                return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                break;
+                            default:
+                                return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                        }
+                    }
+                },
+                { data: "lt" }
+            ],
+            rowCallback: function (row, data, index) {
+                if (data["stado"] == 3) {
+                    $(row).css("background-color", "#00FFFF");
+                } else if (data["stado"] == 4) {
+                    $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+                } else if (data["stado"] == 9) {
+                    $(row).css("background-color", "#40E0D0");
+                } else if (data["stado"] == 15) {
+                    $(row).css("background-color", "#FFFFCC");
+                } else if (data["stado"] == 1) {
+                    $(row).css({ "background-color": "#FEC782", "color": "#FFFFFF" });
+                }
+            },
+            infoCallback: function (settings, start, end, max, total, pre) {
+                $('#totalComi').html('Total comisiones generadas ' + total);
+                //return false;
+            }
+        });
         var comisiones = $('#comisiones').DataTable({
             //dom: 'Bfrtip',        
             lengthChange: false,

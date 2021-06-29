@@ -27,7 +27,7 @@ const transpoter = nodemailer.createTransport({
     secure: true,
     auth: {
         user: 'info@grupoelitefincaraiz.com',
-        pass: 'C0l0mb1@@'
+        pass: 'C0l0mb1@*c4rt4g3n4'
     },
     tls: {
         rejectUnauthorized: false
@@ -131,7 +131,7 @@ router.post('/desarrollo', async (req, res) => {
     /*
         await transpoter.sendMail({
             from: "'GrupoElite' <info@grupoelitefincaraiz.com>",
-            to: 'redflix.red@hotmail.com',
+            to: 'samirsaldarriaga@hotmail.com',
             subject: 'confirmacion de registro',
             html: `<h1>GRUPO ELITE FINCA RAÍZ</h1>
                    <img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" width="90" height="110" class="mr-1" alt="A"><br>
@@ -1696,7 +1696,7 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
   INNER JOIN users u ON p.asesor = u.id 
   WHERE p.tipobsevacion IS NULL ${d}
   GROUP BY p.id
-  HAVING meses > 2 AND abonos < Total
+  HAVING meses > 2 AND abonos < Total AND deuda > 0
   ORDER BY ultimoabono;`
 
     const cuotas = await pool.query(sql);
@@ -2507,15 +2507,29 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
             const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
             prd = prcd.map(e => e.producto);
         }
-        let d = prd ? `WHERE pt.id IN (${prd})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
+        let d = prd ? `WHERE d.id IN (${prd})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
+        //let d = prd ? `AND d.id IN (${prd})` : ''; 
 
-        sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status, p.asesor, p.tipobsevacion,
-            pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, p.obsevacion,
-            CASE WHEN e.estado = 6 AND e.tip = 'CUPON' THEN 1 ELSE 0 END kupn FROM preventa p INNER JOIN productosd pd 
-            ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN clientes c ON p.cliente = c.idc 
-            INNER JOIN users u ON p.asesor = u.id LEFT JOIN cupones e ON p.id = e.producto ${d}`
+        sql = `SELECT p.id, l.id lote, d.proyect proyecto, l.mz, l.n, c.imags, p.promesa, p.status, p.asesor, c.email,
+        p.tipobsevacion, l.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
+        p.obsevacion, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, e.pin, e.descuento, l.mtr, l.mtr2,
 
-        const ventas = await pool.query(sql, req.user.id);
+        (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as deuda, 
+        (SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as meses,
+        (SELECT MAX(TIMESTAMP(fech)) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id) as ultimoabono, 
+        (SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id AND stado = 4) as abonos, 
+        CASE WHEN e.estado = 6 AND e.tip = 'CUPON' THEN 1 ELSE 0 END kupn
+
+        FROM preventa p 
+        INNER JOIN productosd l ON p.lote = l.id 
+        INNER JOIN productos d ON l.producto = d.id 
+        INNER JOIN clientes c ON p.cliente = c.idc 
+        INNER JOIN users u ON p.asesor = u.id 
+        LEFT JOIN cupones e ON p.id = e.producto ${d}
+        GROUP BY p.id, e.id
+        ORDER BY ultimoabono;` // HAVING meses > 2 AND abonos < Total AND deuda > 0 --- WHERE p.tipobsevacion IS NULL        
+
+        const ventas = await pool.query(sql, req.user.id); //console.log(ventas)
         respuesta = { "data": ventas };
         res.send(respuesta);
 
@@ -2530,6 +2544,17 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         sqlr += ' END WHERE id IN(' + idss + ')';
         //console.log(sqlr)
         await pool.query(sqlr);*/
+
+    } else if (id === 'recibos') {
+        let prd;
+        if (req.user.externo) {
+            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+            prd = prcd.map(e => e.producto);
+        }
+        let n = prd ? `AND orden IN (${prd})` : '';
+        const so = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN ('PAGO','ABONO') ${n} ORDER BY ids`);
+        respuesta = { "data": so };
+        res.send(respuesta);
 
     } else if (id == 'estadosc') {
 
@@ -2753,7 +2778,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     } else if (id === 'comision' && !req.user.externo) {
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
-        u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
+        u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
         INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
@@ -2831,6 +2856,35 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         var estado = r.pendients ? 8 : r.std
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
+        res.send(true);
+    } else if (id === 'msg') {
+        //console.log(path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf'))
+        var hdh = await transpoter.sendMail({
+            from: "'GrupoElite' <info@grupoelitefincaraiz.com>",
+            to: 's4m1r.5a@gmail.com',
+            subject: 'confirmacion de registro',
+            html: `<h1>GRUPO ELITE FINCA RAÍZ</h1>
+                   <img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" width="90" height="110" class="mr-1" alt="A"><br>
+                   <ul>
+                        <li>GERENCIA</li>
+                        <li>300-285-1046</li>
+                        <li>Mz L lote 17 Urb. la granja</li>
+                        <li>Turbaco, Bolivar / Colombia</li>
+                        <li><a href="https://grupoelitefincaraiz.com">https://grupoelitefincaraiz.com</a></li>
+                        <li><p>texto</p></li>
+                   </ul>`/* ,
+            attachments: [
+                {   // file on disk as an attachment
+                    filename: 'PRUEBA2.pdf',
+                    path: path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf') // stream this file
+                },
+                {   // use URL as an attachment
+                    filename: 'PRUEBA.pdf',
+                    path: 'https://grupoelitefincaraiz.com/uploads/h0i0vq907gp9-s1e7-a9p13394tv11wl10.pdf'
+                }
+            ] */
+        });
+        console.log(hdh)
         res.send(true);
     }
 });
