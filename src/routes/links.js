@@ -1506,7 +1506,7 @@ router.get('/msg', async (req, res) => {
     res.send(true);
 })
 router.get('/roles', isLoggedIn, (req, res) => {
-    desarrollo = req.headers.host;
+    //desarrollo = req.headers.host;
     res.send(req.user)
 });
 router.get('/add', isLoggedIn, (req, res) => {
