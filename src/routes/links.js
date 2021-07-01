@@ -360,7 +360,7 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-cron.schedule("5 9,16 * * *", async () => {
+/* cron.schedule("5 9,16 * * *", async () => {
     const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
     ORDER BY fechs ASC) as deuda, 
@@ -384,7 +384,7 @@ cron.schedule("5 9,16 * * *", async () => {
     }
     const ty = await EnviarWTSAP('57 3012673944', `_Hoy *${moment().format('llll')}*, el sistema detecto *${yt.length} Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(deuda)}*_`);
     console.log(yt.length, cont, ty);
-})
+}) */
 cron.schedule("*/10 * 5 5 * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -3682,6 +3682,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     } else if (id === 'msg') {
 
+        console.log(req.headers.origin)
 
     }
 });
@@ -3957,8 +3958,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     //console.log(req.body, req.files)
     //return res.send(true);
     if (id === 'Declinar') {
-        const { ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
-        const r = await Estados(null, null, ids);
+        const { Orden, ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body
+        const r = await Estados(Orden);
 
         await pool.query(`UPDATE solicitudes s 
             LEFT JOIN cuotas c ON s.pago = c.id 
@@ -4013,11 +4014,11 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         res.send(true);
 
     } else {
-        const { ids, acumulado, extr, idExtracto } = req.body;
+        const { ids, acumulado, ahora, idExtracto } = req.body;
 
         const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf, req.user.fullname); //console.log(R)
-        var w = { acumulado };
+        const R = await PagosAbonos(ids, pdf, req.user.fullname); 
+        var w = { acumulado, aprobado: ahora };
         idExtracto && (w.extrato = idExtracto);
         if (R) {
             await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [w, ids]);

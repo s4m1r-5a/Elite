@@ -2286,7 +2286,7 @@ if (window.location.pathname === `/links/reportes`) {
         type: 'POST',
         async: false,
         success: function (data) {
-            
+
         }
     });
     var area, productos, descuentos, total, abonos, salds,
@@ -10019,16 +10019,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             fd.append('movil', data.movil);
             fd.append('nombre', data.nombre);
             fd.append('extr', extr);
+            fd.append('Orden', data.cparacion)
+            fd.append('ahora', moment().format('YYYY-MM-DD HH:mm'));
+
             idExtracto && fd.append('idExtracto', idExtracto);
             //console.log(w.length, imge, accion, totalasociados);
-
-            /*if (totalasociados < data.monto && (accion === 'Asociar' || accion === 'Aprobar')) {
-                alert('Los valores de los extractos ha asociar son menores al monto ha aprobar')
-                return false;
-            } else if (w.length < imge && (accion === 'Asociar' || accion === 'Aprobar')) {
-                alert('El numero de extractos no puede ser diferente al numero de recibos que halla en la solicitud');
-                return false;
-            }*/
 
             if (accion === 'Declinar' && rol.contador) {
                 porque = prompt("Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago", "Solicitud rechazada por que");
@@ -10348,7 +10343,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                         processData: false,
                         contentType: false,
                         beforeSend: function (xhr) {
-                            alert('aqui')
                             $('#Modalimg').modal('hide');
                             $('#ModalEventos').modal({
                                 backdrop: 'static',
