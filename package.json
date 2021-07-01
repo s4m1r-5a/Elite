@@ -37,6 +37,7 @@
     "passport-facebook": "^3.0.0",
     "passport-google-oauth": "^2.0.0",
     "passport-local": "^1.0.0",
+    "pdfmake": "^0.1.71",
     "phantomjs": "^2.1.7",
     "request": "^2.88.0",
     "socket.io": "^3.1.0",

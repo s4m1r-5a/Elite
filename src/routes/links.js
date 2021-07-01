@@ -21,13 +21,17 @@ const { send } = require('process');
 const path = require('path');
 const mysqldump = require('mysqldump')
 const XLSX = require('xlsx')
+const PdfPrinter = require('pdfmake')
+const Roboto = require('../public/fonts/Roboto');
+
+
 const transpoter = nodemailer.createTransport({
     host: 'smtpout.secureserver.net',
-    port: 465,
-    secure: true,
+    port: 80,
+    secure: false,
     auth: {
-        user: 'info@grupoelitefincaraiz.com',
-        pass: 'C0l0mb1@*c4rt4g3n4'
+        user: 'info@grupoelitefincaraiz.co',
+        pass: 'KYs4_$1gij'
     },
     tls: {
         rejectUnauthorized: false
@@ -356,6 +360,31 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
+cron.schedule("5 9,16 * * *", async () => {
+    const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
+    (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
+    ORDER BY fechs ASC) as deuda, 
+    (SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
+    ORDER BY fechs ASC) as meses
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    INNER JOIN clientes c ON p.cliente = c.idc WHERE p.tipobsevacion IS NULL GROUP BY p.id 
+    HAVING meses > 1 AND deuda > 0 ORDER BY meses DESC`; // LIMIT 5
+    const yt = await pool.query(sql);
+
+    let cont = 0, deuda = 0;
+    for (i = 0; i < yt.length; i++) {
+        let data = yt[i];
+        //if (i === 3) { continue; } \n
+        cont = i + 1;
+        let body = `_Hola *${data.nombre}*, le recordamos ponerse al día con el lote *${data.n}* manzana *${data.mz}* del proyecto *${data.proyect}*, hasta la fecha tiene un saldo vencido de *${data.meses} mes(es)*, por un monto de *$${Moneda(data.deuda)}*, te invitamos a realizar los pagos y así evitar incurrir en el cobro de intereses por mora, para mayor información escribanos al WhatsApp 3002851046, si está al día con sus pagos haga caso omiso a este mensaje._\n
+        \n_Ahora puedes realizar tus pagos en linea o subir tus constancias de pago por transferencia o consignación bancaria al siguiente link *https://grupoelitefincaraiz.com/links/pagos*, solo debes ingresar tu numero de documento y listo_\n
+        \n_*GRUPO ELITE FINCA RAÍZ S.A.S*_`;
+        const tt = await EnviarWTSAP(data.movil, body);
+        //console.log(tt, cont)
+    }
+    const ty = await EnviarWTSAP('57 3012673944', `_Hoy *${moment().format('llll')}*, el sistema detecto *${yt.length} Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(deuda)}*_`);
+    console.log(yt.length, cont, ty);
+})
 cron.schedule("*/10 * 5 5 * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -682,6 +711,800 @@ cron.schedule("0 1 1 1,4,7,10 *", async () => {
     var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
     await EnviarWTSAP('57 3007753983', bod);
 });
+let rt = [], t = 1;
+cron.schedule("*/20 * * * *", async () => {
+    /* var hdh;
+    console.log(rt[t]);
+    rt.length && ( 
+        hdh = await transpoter.sendMail({
+            from: "'GRUPO ELITE' <info@grupoelitefincaraiz.co>",
+            to: rt[t],
+            subject: 'NUEVA CUENTA DE DEPÓSITOS',
+            html: `<!DOCTYPE html>
+    <html lang="es">
+    <head>
+            <title>An Accessible Account Update Email</title>    
+        <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />    
+        <meta name="viewport" content="width=device-width, initial-scale=1">    
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+            <style type="text/css">
+            body,
+            table,
+            td,
+            a {
+                -webkit-text-size-adjust: 100%;
+                -ms-text-size-adjust: 100%;
+            }
+    
+            table,
+            td {
+                mso-table-lspace: 0pt;
+                mso-table-rspace: 0pt;
+            }
+    
+            img {
+                -ms-interpolation-mode: bicubic;
+            }
+    
+            img {
+                border: 0;
+                height: auto;
+                line-height: 100%;
+                outline: none;
+                text-decoration: none;
+            }
+    
+            table {
+                border-collapse: collapse !important;
+            }
+    
+            body {
+                height: 100% !important;
+                margin: 0 !important;
+                padding: 0 !important;
+                width: 100% !important;
+            }
+    
+            a[x-apple-data-detectors] {
+                color: inherit !important;
+                text-decoration: none !important;
+                font-size: inherit !important;
+                font-family: inherit !important;
+                font-weight: inherit !important;
+                line-height: inherit !important;
+            }
+    
+            u+#body a {
+                color: inherit;
+                text-decoration: none;
+                font-size: inherit;
+                font-family: inherit;
+                font-weight: inherit;
+                line-height: inherit;
+            }
+    
+            #MessageViewBody a {
+                color: inherit;
+                text-decoration: none;
+                font-size: inherit;
+                font-family: inherit;
+                font-weight: inherit;
+                line-height: inherit;
+            }
+    
+            a {
+                color: #B200FD;
+                font-weight: 600;
+                text-decoration: underline;
+            }
+    
+            a:hover {
+                color: #000000 !important;
+                text-decoration: none !important;
+            }
+    
+            @media screen and (min-width:600px) {
+                h1 {
+                    font-size: 48px !important;
+                    line-height: 48px !important;
+                }
+    
+                .intro {
+                    font-size: 24px !important;
+                    line-height: 36px !important;
+                }
+            }
+        </style>     
+    </head>
+    <body style="margin: 0 !important; padding: 0 !important;">
+        <div style="display: none; max-height: 0; overflow: hidden;">
+        </div>
+        <div style="display: none; max-height: 0px; overflow: hidden;">
+            &nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;‌&nbsp;
+        </div>
+        <div role="article" aria-label="Un correo electrónico de GrupoElite" lang="es"
+            style="background-color: white; color: #2b2b2b; font-family: 'Avenir Next', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol'; font-size: 18px; font-weight: 400; line-height: 28px; margin: 0 auto; max-width: 600px; padding: 40px 20px 40px 20px;">
+            <header>
+                <a href="https://grupoelitefincaraiz.com">
+                    <center><img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" alt="" height="80" width="80">
+                    </center>
+                </a>
+                <h1
+                    style="color: #000000; font-size: 32px; font-weight: 800; line-height: 32px; margin: 48px 0; text-align: center;">
+                    CIRCULAR No.2021/06/16.
+                </h1>
+            </header>
+            <main>
+                <div style="background-color: ghostwhite; border-radius: 4px; padding: 24px 48px;">
+                    <h4>DIRIGIDO A COMPRADORES DE:</h4>
+                    <ul>
+                        <li>PRADOS DE PONTEVEDRA</li>
+                        <li>COLINAS DE PONTEVEDRA</li>
+                        <li>PRADOS ELITE DE PONTEVEDRA</li>
+                    </ul>
+                    <h4>ASUNTO:</h4>
+                    <ul>
+                        <li>NUEVA CUENTA DE DEPÓSITOS</li>
+                    </ul>
+                    <h4>Respetados señores:</h4>
+                    <p>
+                        Por temas de reorganización empresarial y buscando optimizar los procesos, nos permitimos
+                        comunicarles, que la cuenta bancaria en la cual se deberán realizar los depósitos para el pago de
+                        cuotas del lote o lotes negociados, será modificada, y en consecuencia, modificará el parágrafo 2 de
+                        la Cláusula cuarta de la promesa de compraventa firmada entre las partes, el cual quedará de la
+                        siguiente manera:
+                    </p>
+                    <p>
+                        “Los dineros correspondientes al pago del precio anotado en esta cláusula, deberán ser consignados
+                        en la siguiente cuenta bancaria:
+                    </p>
+                    <ul>
+                        <li>No. Cuenta: 0571 6998 8581</li>
+                        <li>Tipo: CUENTA CORRIENTE</li>
+                        <li>Banco: DAVIVIENDA</li>
+                        <li>Titular: PONTEVEDRA PROMOTORA S.A.S.</li>
+                        <li>Nit: 901.177.360-9</li>
+                    </ul>
+                    <p>
+                        La constancia de pago por transferencia o consignación bancaria deberá ser enviada al correo
+                        electrónico: <a
+                            href="mailto:pontevedrapromotora@gmail.com?Subject=Cambio%20de%20cuenta%20de%20recaudo"
+                            style="color: #B200FD; text-decoration: underline;">pontevedrapromotora@gmail.com</a> o al
+                        WhatsApp
+                        <a href="https://wa.me/573007861987?text=Me%20interesa%20conocer%20mas%20sobre%20el%20cambio%20de%20cuenta%20de%20recaudo"
+                            style="color: #B200FD; text-decoration: underline;">300-786-1987</a>
+                    </p>
+                    <p>
+                        Adicionalmente, en los próximos días se les compartirá un link, con la cual accederán a la
+                        plataforma de Promotora Pontevedra, a la cual podrán acceder y consultar todo lo concerniente a su
+                        cuenta, y entre otros, podrán realizar los pagos directamente y conocer el estado de cuenta en
+                        tiempo real.
+                    </p>
+                    <p>
+                        Cualquier duda al respecto o alguna información adicional que requieran, será atendida al WhatsApp
+                        <a href="https://wa.me/573007861987?text=Me%20interesa%20conocer%20mas%20sobre%20el%20cambio%20de%20cuenta%20de%20recaudo"
+                            style="color: #B200FD; text-decoration: underline;">300-786-1987</a> o al correo
+                        <a href="mailto:pontevedrapromotora@gmail.com?Subject=Cambio%20de%20cuenta%20de%20recaudo"
+                            style="color: #B200FD; text-decoration: underline;">pontevedrapromotora@gmail.com</a>
+                    </p>
+                </div>
+            </main>
+            <footer>
+                <p style="font-size: 16px; font-weight: 400; line-height: 24px; margin-top: 48px;">
+                    Recibiste este correo electrónico porque te importa crear experiencias más accesibles para las personas.
+                </p>
+    
+                <address style="font-size: 16px; font-style: normal; font-weight: 400; line-height: 24px;">
+                    <strong>Cordialmente</strong> Gerencia Grupo Elite
+                </address>
+            </footer>
+        </div>  
+    </body>
+    </html>`
+        })
+    )
+    rt.length && t++;
+    console.log("Resultados: " + rt.length, hdh, t); */
+
+    /* ,
+        attachments: [
+            {   // file on disk as an attachment
+                filename: 'PRUEBA2.pdf',
+                path: path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf') // stream this file
+            },
+            {   // use URL as an attachment
+                filename: 'PRUEBA.pdf',
+                path: 'https://grupoelitefincaraiz.com/uploads/h0i0vq907gp9-s1e7-a9p13394tv11wl10.pdf'
+            }
+        ] */
+}); //console.log(path.join(__dirname))
+router.get('/msg', async (req, res) => {
+
+
+    ////////////////////////* CREAR PDF *//////////////////////////////
+    const printer = new PdfPrinter(Roboto);
+    let docDefinition = {
+        content: [
+            { text: 'Tables', style: 'header' },
+            'Official documentation is in progress, this document is just a glimpse of what is possible with pdfmake and its layout engine.',
+            { text: 'A simple table (no headers, no width specified, no spans, no styling)', style: 'subheader' },
+            'The following table has nothing more than a body array',
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        ['Column 1', 'Column 2', 'Column 3'],
+                        ['One value goes here', 'Another one here', 'OK?']
+                    ]
+                }
+            },
+            { text: 'A simple table with nested elements', style: 'subheader' },
+            'It is of course possible to nest any other type of nodes available in pdfmake inside table cells',
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        ['Column 1', 'Column 2', 'Column 3'],
+                        [
+                            {
+                                stack: [
+                                    'Let\'s try an unordered list',
+                                    {
+                                        ul: [
+                                            'item 1',
+                                            'item 2'
+                                        ]
+                                    }
+                                ]
+                            },
+                            [
+                                'or a nested table',
+                                {
+                                    table: {
+                                        body: [
+                                            ['Col1', 'Col2', 'Col3'],
+                                            ['1', '2', '3'],
+                                            ['1', '2', '3']
+                                        ]
+                                    },
+                                }
+                            ],
+                            {
+                                text: [
+                                    'Inlines can be ',
+                                    { text: 'styled\n', italics: true },
+                                    { text: 'easily as everywhere else', fontSize: 10 }]
+                            }
+                        ]
+                    ]
+                }
+            },
+            { text: 'Defining column widths', style: 'subheader' },
+            'Tables support the same width definitions as standard columns:',
+            {
+                bold: true,
+                ul: [
+                    'auto',
+                    'star',
+                    'fixed value'
+                ]
+            },
+            {
+                style: 'tableExample',
+                table: {
+                    widths: [100, '*', 200, '*'],
+                    body: [
+                        ['width=100', 'star-sized', 'width=200', 'star-sized'],
+                        ['fixed-width cells have exactly the specified width', { text: 'nothing interesting here', italics: true, color: 'gray' }, { text: 'nothing interesting here', italics: true, color: 'gray' }, { text: 'nothing interesting here', italics: true, color: 'gray' }]
+                    ]
+                }
+            },
+            {
+                style: 'tableExample',
+                table: {
+                    widths: ['*', 'auto'],
+                    body: [
+                        ['This is a star-sized column. The next column over, an auto-sized column, will wrap to accomodate all the text in this cell.', 'I am auto sized.'],
+                    ]
+                }
+            },
+            {
+                style: 'tableExample',
+                table: {
+                    widths: ['*', 'auto'],
+                    body: [
+                        ['This is a star-sized column. The next column over, an auto-sized column, will not wrap to accomodate all the text in this cell, because it has been given the noWrap style.', { text: 'I am auto sized.', noWrap: true }],
+                    ]
+                }
+            },
+            { text: 'Defining row heights', style: 'subheader' },
+            {
+                style: 'tableExample',
+                table: {
+                    heights: [20, 50, 70],
+                    body: [
+                        ['row 1 with height 20', 'column B'],
+                        ['row 2 with height 50', 'column B'],
+                        ['row 3 with height 70', 'column B']
+                    ]
+                }
+            },
+            'With same height:',
+            {
+                style: 'tableExample',
+                table: {
+                    heights: 40,
+                    body: [
+                        ['row 1', 'column B'],
+                        ['row 2', 'column B'],
+                        ['row 3', 'column B']
+                    ]
+                }
+            },
+            'With height from function:',
+            {
+                style: 'tableExample',
+                table: {
+                    heights: function (row) {
+                        return (row + 1) * 25;
+                    },
+                    body: [
+                        ['row 1', 'column B'],
+                        ['row 2', 'column B'],
+                        ['row 3', 'column B']
+                    ]
+                }
+            },
+            { text: 'Column/row spans', pageBreak: 'before', style: 'subheader' },
+            'Each cell-element can set a rowSpan or colSpan',
+            {
+                style: 'tableExample',
+                color: '#444',
+                table: {
+                    widths: [200, 'auto', 'auto'],
+                    headerRows: 2,
+                    // keepWithHeaderRows: 1,
+                    body: [
+                        [{ text: 'Header with Colspan = 2', style: 'tableHeader', colSpan: 2, alignment: 'center' }, {}, { text: 'Header 3', style: 'tableHeader', alignment: 'center' }],
+                        [{ text: 'Header 1', style: 'tableHeader', alignment: 'center' }, { text: 'Header 2', style: 'tableHeader', alignment: 'center' }, { text: 'Header 3', style: 'tableHeader', alignment: 'center' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        [{ rowSpan: 3, text: 'rowSpan set to 3\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor' }, 'Sample value 2', 'Sample value 3'],
+                        ['', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', { colSpan: 2, rowSpan: 2, text: 'Both:\nrowSpan and colSpan\ncan be defined at the same time' }, ''],
+                        ['Sample value 1', '', ''],
+                    ]
+                }
+            },
+            { text: 'Headers', pageBreak: 'before', style: 'subheader' },
+            'You can declare how many rows should be treated as a header. Headers are automatically repeated on the following pages',
+            { text: ['It is also possible to set keepWithHeaderRows to make sure there will be no page-break between the header and these rows. Take a look at the document-definition and play with it. If you set it to one, the following table will automatically start on the next page, since there\'s not enough space for the first row to be rendered here'], color: 'gray', italics: true },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    // dontBreakRows: true,
+                    // keepWithHeaderRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        [
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+                            'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+                        ]
+                    ]
+                }
+            },
+            { text: 'Styling tables', style: 'subheader' },
+            'You can provide a custom styler for the table. Currently it supports:',
+            {
+                ul: [
+                    'line widths',
+                    'line colors',
+                    'cell paddings',
+                ]
+            },
+            'with more options coming soon...\n\npdfmake currently has a few predefined styles (see them on the next page)',
+            { text: 'noBorders:', fontSize: 14, bold: true, pageBreak: 'before', margin: [0, 0, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: 'noBorders'
+            },
+            { text: 'headerLineOnly:', fontSize: 14, bold: true, margin: [0, 20, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: 'headerLineOnly'
+            },
+            { text: 'lightHorizontalLines:', fontSize: 14, bold: true, margin: [0, 20, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: 'lightHorizontalLines'
+            },
+            { text: 'but you can provide a custom styler as well', margin: [0, 20, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: {
+                    hLineWidth: function (i, node) {
+                        return (i === 0 || i === node.table.body.length) ? 2 : 1;
+                    },
+                    vLineWidth: function (i, node) {
+                        return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+                    },
+                    hLineColor: function (i, node) {
+                        return (i === 0 || i === node.table.body.length) ? 'black' : 'gray';
+                    },
+                    vLineColor: function (i, node) {
+                        return (i === 0 || i === node.table.widths.length) ? 'black' : 'gray';
+                    },
+                    // hLineStyle: function (i, node) { return {dash: { length: 10, space: 4 }}; },
+                    // vLineStyle: function (i, node) { return {dash: { length: 10, space: 4 }}; },
+                    // paddingLeft: function(i, node) { return 4; },
+                    // paddingRight: function(i, node) { return 4; },
+                    // paddingTop: function(i, node) { return 2; },
+                    // paddingBottom: function(i, node) { return 2; },
+                    // fillColor: function (rowIndex, node, columnIndex) { return null; }
+                }
+            },
+            { text: 'zebra style', margin: [0, 20, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: {
+                    fillColor: function (rowIndex, node, columnIndex) {
+                        return (rowIndex % 2 === 0) ? '#CCCCCC' : null;
+                    }
+                }
+            },
+            { text: 'and can be used dash border', margin: [0, 20, 0, 8] },
+            {
+                style: 'tableExample',
+                table: {
+                    headerRows: 1,
+                    body: [
+                        [{ text: 'Header 1', style: 'tableHeader' }, { text: 'Header 2', style: 'tableHeader' }, { text: 'Header 3', style: 'tableHeader' }],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                        ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+                    ]
+                },
+                layout: {
+                    hLineWidth: function (i, node) {
+                        return (i === 0 || i === node.table.body.length) ? 2 : 1;
+                    },
+                    vLineWidth: function (i, node) {
+                        return (i === 0 || i === node.table.widths.length) ? 2 : 1;
+                    },
+                    hLineColor: function (i, node) {
+                        return 'black';
+                    },
+                    vLineColor: function (i, node) {
+                        return 'black';
+                    },
+                    hLineStyle: function (i, node) {
+                        if (i === 0 || i === node.table.body.length) {
+                            return null;
+                        }
+                        return { dash: { length: 10, space: 4 } };
+                    },
+                    vLineStyle: function (i, node) {
+                        if (i === 0 || i === node.table.widths.length) {
+                            return null;
+                        }
+                        return { dash: { length: 4 } };
+                    },
+                    // paddingLeft: function(i, node) { return 4; },
+                    // paddingRight: function(i, node) { return 4; },
+                    // paddingTop: function(i, node) { return 2; },
+                    // paddingBottom: function(i, node) { return 2; },
+                    // fillColor: function (i, node) { return null; }
+                }
+            },
+            { text: 'Optional border', fontSize: 14, bold: true, pageBreak: 'before', margin: [0, 0, 0, 8] },
+            'Each cell contains an optional border property: an array of 4 booleans for left border, top border, right border, bottom border.',
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        [
+                            {
+                                border: [false, true, false, false],
+                                fillColor: '#eeeeee',
+                                text: 'border:\n[false, true, false, false]'
+                            },
+                            {
+                                border: [false, false, false, false],
+                                fillColor: '#dddddd',
+                                text: 'border:\n[false, false, false, false]'
+                            },
+                            {
+                                border: [true, true, true, true],
+                                fillColor: '#eeeeee',
+                                text: 'border:\n[true, true, true, true]'
+                            }
+                        ],
+                        [
+                            {
+                                rowSpan: 3,
+                                border: [true, true, true, true],
+                                fillColor: '#eeeeff',
+                                text: 'rowSpan: 3\n\nborder:\n[true, true, true, true]'
+                            },
+                            {
+                                border: undefined,
+                                fillColor: '#eeeeee',
+                                text: 'border:\nundefined'
+                            },
+                            {
+                                border: [true, false, false, false],
+                                fillColor: '#dddddd',
+                                text: 'border:\n[true, false, false, false]'
+                            }
+                        ],
+                        [
+                            '',
+                            {
+                                colSpan: 2,
+                                border: [true, true, true, true],
+                                fillColor: '#eeffee',
+                                text: 'colSpan: 2\n\nborder:\n[true, true, true, true]'
+                            },
+                            ''
+                        ],
+                        [
+                            '',
+                            {
+                                border: undefined,
+                                fillColor: '#eeeeee',
+                                text: 'border:\nundefined'
+                            },
+                            {
+                                border: [false, false, true, true],
+                                fillColor: '#dddddd',
+                                text: 'border:\n[false, false, true, true]'
+                            }
+                        ]
+                    ]
+                },
+                layout: {
+                    defaultBorder: false,
+                }
+            },
+            'For every cell without a border property, whether it has all borders or not is determined by layout.defaultBorder, which is false in the table above and true (by default) in the table below.',
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        [
+                            {
+                                border: [false, false, false, false],
+                                fillColor: '#eeeeee',
+                                text: 'border:\n[false, false, false, false]'
+                            },
+                            {
+                                fillColor: '#dddddd',
+                                text: 'border:\nundefined'
+                            },
+                            {
+                                fillColor: '#eeeeee',
+                                text: 'border:\nundefined'
+                            },
+                        ],
+                        [
+                            {
+                                fillColor: '#dddddd',
+                                text: 'border:\nundefined'
+                            },
+                            {
+                                fillColor: '#eeeeee',
+                                text: 'border:\nundefined'
+                            },
+                            {
+                                border: [true, true, false, false],
+                                fillColor: '#dddddd',
+                                text: 'border:\n[true, true, false, false]'
+                            },
+                        ]
+                    ]
+                }
+            },
+            'And some other examples with rowSpan/colSpan...',
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        [
+                            '',
+                            'column 1',
+                            'column 2',
+                            'column 3'
+                        ],
+                        [
+                            'row 1',
+                            {
+                                rowSpan: 3,
+                                colSpan: 3,
+                                border: [true, true, true, true],
+                                fillColor: '#cccccc',
+                                text: 'rowSpan: 3\ncolSpan: 3\n\nborder:\n[true, true, true, true]'
+                            },
+                            '',
+                            ''
+                        ],
+                        [
+                            'row 2',
+                            '',
+                            '',
+                            ''
+                        ],
+                        [
+                            'row 3',
+                            '',
+                            '',
+                            ''
+                        ]
+                    ]
+                },
+                layout: {
+                    defaultBorder: false,
+                }
+            },
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        [
+                            {
+                                colSpan: 3,
+                                text: 'colSpan: 3\n\nborder:\n[false, false, false, false]',
+                                fillColor: '#eeeeee',
+                                border: [false, false, false, false]
+                            },
+                            '',
+                            ''
+                        ],
+                        [
+                            'border:\nundefined',
+                            'border:\nundefined',
+                            'border:\nundefined'
+                        ]
+                    ]
+                }
+            },
+            {
+                style: 'tableExample',
+                table: {
+                    body: [
+                        [
+                            { rowSpan: 3, text: 'rowSpan: 3\n\nborder:\n[false, false, false, false]', fillColor: '#eeeeee', border: [false, false, false, false] },
+                            'border:\nundefined',
+                            'border:\nundefined'
+                        ],
+                        [
+                            '',
+                            'border:\nundefined',
+                            'border:\nundefined'
+                        ],
+                        [
+                            '',
+                            'border:\nundefined',
+                            'border:\nundefined'
+                        ]
+                    ]
+                }
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                margin: [0, 0, 0, 10]
+            },
+            subheader: {
+                fontSize: 16,
+                bold: true,
+                margin: [0, 10, 0, 5]
+            },
+            tableExample: {
+                margin: [0, 5, 0, 15]
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 13,
+                color: 'black'
+            }
+        },
+        defaultStyle: {
+            // alignment: 'justify'
+        }
+    }
+    let ruta = path.join(__dirname);
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(ruta + '/tables.pdf'));
+    pdfDoc.end();
+    ///////////////////////* PDF END *////////////////////////////////
+
+
+
+
+    /* const sql = `SELECT c.email FROM preventa p INNER JOIN productosd l ON p.lote = l.id
+    INNER JOIN productos d ON l.producto = d.id INNER JOIN clientes c ON p.cliente = c.idc 
+    WHERE d.id IN(38,35,14) AND p.tipobsevacion IS NULL`;
+    const yt = await pool.query(sql);
+    let correos = '', cont = 1;
+    let tr = await yt.map((x) => {
+        correos += x.email + ',';
+        if (cont === 100) {
+            cont = 1;
+            gt = correos.slice(0, -1);
+            correos = '';
+            return gt;
+        } else {
+            cont++;
+            return 0;
+        }
+    })
+    tr.push('samirsaldarriaga@hotmail.com,9rupoelite@gmail.com');
+    rt = await tr.filter((e) => {
+        return e !== 0;
+    })
+    console.log(rt.length); */
+
+    res.send(true);
+})
 router.get('/roles', isLoggedIn, (req, res) => {
     desarrollo = req.headers.host;
     res.send(req.user)
@@ -2858,34 +3681,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
         res.send(true);
     } else if (id === 'msg') {
-        //console.log(path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf'))
-        var hdh = await transpoter.sendMail({
-            from: "'GrupoElite' <info@grupoelitefincaraiz.com>",
-            to: 's4m1r.5a@gmail.com',
-            subject: 'confirmacion de registro',
-            html: `<h1>GRUPO ELITE FINCA RAÍZ</h1>
-                   <img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" width="90" height="110" class="mr-1" alt="A"><br>
-                   <ul>
-                        <li>GERENCIA</li>
-                        <li>300-285-1046</li>
-                        <li>Mz L lote 17 Urb. la granja</li>
-                        <li>Turbaco, Bolivar / Colombia</li>
-                        <li><a href="https://grupoelitefincaraiz.com">https://grupoelitefincaraiz.com</a></li>
-                        <li><p>texto</p></li>
-                   </ul>`/* ,
-            attachments: [
-                {   // file on disk as an attachment
-                    filename: 'PRUEBA2.pdf',
-                    path: path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf') // stream this file
-                },
-                {   // use URL as an attachment
-                    filename: 'PRUEBA.pdf',
-                    path: 'https://grupoelitefincaraiz.com/uploads/h0i0vq907gp9-s1e7-a9p13394tv11wl10.pdf'
-                }
-            ] */
-        });
-        console.log(hdh)
-        res.send(true);
+
+
     }
 });
 router.post('/std/:id', isLoggedIn, async (req, res) => {
@@ -4379,50 +5176,49 @@ function Moneda(valor) {
     return valor;
 }
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
-    var cel = 0;
-    if (desarrollo === 'localhost:5000') {
-        cel = '57 3012673944';
-    } else {
-        movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
-    }
-    //console.log(cel, desarrollo)
-    var options = {
+    let cel = 0;
+    movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
+
+    let options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
-        form: {
+        data: {
             body
         }
     };
 
-    q ? options.form.quotedMsgId = q : '';
-    chatid ? options.form.chatId = chatid : options.form.phone = cel;
+    q ? options.data.quotedMsgId = q : '';
+    chatid ? options.data.chatId = chatid : options.data.phone = cel;
 
-    request(options, function (error, response, body) {
+    const tt = await axios(options);
+    //console.log(tt.data)
+
+    /* request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
-    });
+    }); */
     smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
+    return tt.data
 }
-function EnvWTSAP_FILE(movil, body, filename, caption) {
-    var cel = 0;
-    if (desarrollo === 'localhost:5000') {
-        cel = '57 3007753983';
-    } else {
-        movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
-    }
-    var options = {
+async function EnvWTSAP_FILE(movil, body, filename, caption) {
+    let cel = 0;
+    movil ? cel = movil.indexOf("-") > 0 ? '57' + movil.replace(/-/g, "") : movil.indexOf(" ") > 0 ? movil : '57' + movil : '';
+
+    let options = {
         method: 'POST',
         url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
-        form: {
+        data: {
             phone: cel,
             body,           //`https://grupoelitered.com.co/uploads/0erdlw-york61mn26n46v141lap-gvk-ro.pdf`,
             filename,
             caption
         }
     };
-    request(options, function (error, response, body) {
+    const tt = await axios(options);
+    return tt.data
+    /* request(options, function (error, response, body) {
         if (error) return console.error('Failed: %s', error.message);
         console.log('Success: ', body);
-    });
+    }); */
 }
 module.exports = router;
