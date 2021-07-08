@@ -3823,7 +3823,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
-        e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
+        e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular, s.aprobado FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN extrabanco e ON s.extrato = e.id
         INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users u ON pr.asesor = u.id 
         LEFT JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 

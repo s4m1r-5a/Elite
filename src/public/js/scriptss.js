@@ -9923,6 +9923,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
         $('#stadopago').val(data.stado);
         $('#idSolicitud').val(data.ids);
+        $('#aprobadoEl').html(data.aprobado && 'Aprobado el ' + moment(data.aprobado).format('llll'));
 
         let esFecha = moment(data.fecharcb, true).isValid();
         !esFecha && alert('Debe establecer una fecha al recibo a continuacion donde se muestra "Fecha inválida"');

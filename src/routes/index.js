@@ -4,10 +4,41 @@ const request = require('request')
 const nodemailer = require('nodemailer')
 const pool = require('../database');
 const crypto = require('crypto');
+const axios = require('axios');
 const sms = require('../sms.js');
 const MSGS = require('../index.js');
+const fs = require('fs');
+const path = require('path');
+const PdfPrinter = require('pdfmake')
+const Roboto = require('../public/fonts/Roboto');
 const moment = require('moment');
 moment.locale('es');
+const NumeroALetras = require('../functions.js')
+
+
+
+///////////* PARA COBRAR DIARIO *////////////////////////
+var E = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, (
+    SELECT SUM(cuota)
+    FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3
+    ORDER BY fechs ASC
+  ) as deuda, (
+    SELECT COUNT(*)
+    FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3
+    ORDER BY fechs ASC
+  ) as meses
+FROM preventa p  
+INNER JOIN productosd l ON p.lote = l.id 
+INNER JOIN productos d ON l.producto = d.id 
+INNER JOIN clientes c ON p.cliente = c.idc 
+WHERE p.tipobsevacion IS NULL
+GROUP BY p.id
+HAVING meses > 1 AND deuda > 0
+ORDER BY meses DESC;`;
+
+
+
+
 
 router.get('/', async (req, res) => {
     res.render('index');
@@ -20,10 +51,10 @@ router.get('/condiciones', async (req, res) => {
 });
 router.post('/webhook', async function (req, res) {
     const { messages, ack, chatUpdate, previous_substatus } = req.body;
-    console.log(ack ? 'bien' : 'nada');
+    console.log(ack ? 'bien' : 'nada', req.body);
     [
         {
-            "messages": [
+            /* "messages": [
                 {
                     "id": "false_17472822486@c.us_DF38E6A25B42CC8CCE57EC40F",
                     "body": "Ok!",
@@ -86,48 +117,39 @@ router.post('/webhook', async function (req, res) {
             "previous_status": "authenticated",
             "substatus": "normal",
             "previous_substatus": "battery_low_2",
-            "instanceId": "107218"
-        }]
-    if (messages) {
-        messages
-            /*.filter((x) => {
-                return !x.fromMe;
-            })*/
-            .map((x) => {
-                /*const author = x.author;
-                const body = x.body.replace(/[^a-zA-Z 0-9.,?!¡¿]+/g, '');
-                const chatId = x.chatId;
-                const senderName = x.senderName;*/
-                require('../index.js')('messages', x);
-            });
-    } else if (chatUpdate) {
-        chatUpdate.map((x) => {
-            require('../index.js')('chatUpdate', x);
-        });
-    } else if (ack) {
-        ack.map((x) => {
-            require('../index.js')('typing', x);
-        });
-    } else if (previous_substatus) {
-        previous_substatus
-    }
-    res.send(true);
-    res.end();
-    /*for (var i in data.messages) {
-        const author = data.messages[i].author;
-        const body = data.messages[i].body;
-        const chatId = data.messages[i].chatId;
-        const senderName = data.messages[i].senderName;
-        if (data.messages[i].fromMe) return;
+            "instanceId": "107218" */
+        }
+    ]
 
-        if (/help/.test(body)) {
+
+
+    for (var i in messages) {
+
+
+        const author = messages[i].author;
+        const body = messages[i].body;
+        const chatId = messages[i].chatId;
+        const senderName = messages[i].senderName;
+
+        if (messages[i].fromMe || /@g.us/.test(chatId)) return;
+
+        if (body == 1) {
+            const res = await EstadoCuenta(chatId.replace('@c.us', ''), senderName, author);
+            await apiChatApi('message', { chatId: chatId, body: res });
+        } else if (body == 2) {
+            await apiChatApi('message', { chatId: chatId, body: chatId });
+        } else if (body == 3) {
+            await apiChatApi('message', { chatId: chatId, body: chatId });
+        } else if (body == 4) {
+            await apiChatApi('message', { chatId: chatId, body: chatId });
+        } else if (/help/.test(body)) {
             const text = `${senderName}, this is a demo bot for https://chat-api.com/.
-            Commands:
-            1. chatId - view the current chat ID
-            2. file [pdf/jpg/doc/mp3] - get a file
-            3. ptt - get a voice message
-            4. geo - get a location
-            5. group - create a group with you and the bot`;
+                Commands:
+                1. chatId - view the current chat ID
+                2. file [pdf/jpg/doc/mp3] - get a file
+                3. ptt - get a voice message
+                4. geo - get a location
+                5. group - create a group with you and the bot`;
             await apiChatApi('message', { chatId: chatId, body: text });
         } else if (/chatId/.test(body)) {
             await apiChatApi('message', { chatId: chatId, body: chatId });
@@ -154,26 +176,69 @@ router.post('/webhook', async function (req, res) {
             let arrayPhones = [author.replace("@c.us", "")];
             await apiChatApi('group', { groupName: 'Bot group', phones: arrayPhones, messageText: 'Welcome to the new group!' });
         } else {
-            const text = `🤖 ¡Hola! Soy el Asistente de RedElite creado para ofrecerte mayor facilidad de procesos
+            const max_time = moment().unix();
+            const min_time = moment().subtract(2, "hours").unix();
+            const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=1&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
+            const chat = await axios(Url);
+            //console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
+            if (chat.data.messages.length) {
+                await apiChatApi('message', { chatId: chatId, body: 'No comprendo lo que dice' });
+            } else {
 
-            ➖➖➖➖➖➖➖
-            ¡Déjame mostrarte lo que puedo hacer!
-            ➖➖➖➖➖➖➖    
-
-            😮 (Para seleccionar el elemento deseado, simplemente envíeme el número en el mensaje de respuesta)
-            1 - Estado de cuenta
-            2 - Enviar el ultimo recibo
-            3 - Enviar todos los recibos
-            4 - Conocer mi saldo a la fecha
-            5 - Chatear con un asesor
-            
-            Empieza a probar, estoy esperando 👀
-            
-            Siempre puedes volver al menú principal: 
-            🔙 Para volver al menú, envíame "#"`
-            await apiChatApi('message', { chatId: chatId, body: text });
+                const text = `🤖 ¡Hola! Soy el Asistente de GrupoElite creado para ofrecerte mayor facilidad de procesos
+    
+                ➖➖➖➖➖➖➖
+                ¡Déjame mostrarte lo que puedo hacer!
+                ➖➖➖➖➖➖➖    
+    
+                😮 (Para seleccionar el elemento deseado, simplemente envíeme el número en el mensaje de respuesta)
+                1 - Estado de cuenta
+                2 - Enviar el ultimo recibo
+                3 - Enviar todos los recibos
+                4 - Conocer mi saldo a la fecha
+                5 - Auditoria
+                6 - Chatear con un asesor
+                
+                Empieza a probar, estoy esperando 👀
+                
+                Siempre puedes volver al menú principal: 
+                🔙 Para volver al menú, envíame "#"`
+                var r = await apiChatApi('message', { chatId: chatId, body: text });
+                console.log(r, 'lo que respondio del envio')
+            }
         }
-    }*/
+    }
+    //https://grupoelitefincaraiz.com/webhook
+
+
+
+
+
+
+
+
+
+    if (messages) {
+        /* messages
+            
+            .map((x) => {
+                
+                require('../index.js')('messages', x);
+            });
+    } else if (chatUpdate) {
+        chatUpdate.map((x) => {
+            require('../index.js')('chatUpdate', x);
+        });
+    } else if (ack) {
+        ack.map((x) => {
+            require('../index.js')('typing', x);
+        });
+    } else if (previous_substatus) {
+        previous_substatus */
+    }
+    res.send(true);
+    res.end();
+
 });
 
 const transpoter = nodemailer.createTransport({
@@ -247,7 +312,6 @@ var t = {
     "pse_reference3": 0,
     "pse_reference2": 0
 }
-
 router.post('/api/bank/callback', async (req, res) => {
     const { transferVoucher, transferAmount, transferStateDescription, sign, requestDate, transferState,
         transferDate, transferCode, transferReference, commerceTransferButtonId } = req.body;
@@ -308,7 +372,6 @@ router.post('/api/bank/callback', async (req, res) => {
         EnviarWTSAP(phone, `Solicitud de pago ${reference_sale} rechazada, ${response_message_pol}`)
     }*/
 });
-
 router.post('/confir', async (req, res) => {
     const { transaction_date, reference_sale, state_pol, payment_method_type, value, email_buyer, phone, cc_number,
         cc_holder, description, response_message_pol, payment_method_name, pse_bank, reference_pol, ip, transaction_id,
@@ -367,7 +430,6 @@ router.post('/confir', async (req, res) => {
         EnviarWTSAP(phone, `Solicitud de pago ${reference_sale} rechazada, ${response_message_pol}`)
     }
 });
-
 router.get(`/planes`, async (req, res) => {
     console.log(req.query)
     const r = {
@@ -466,19 +528,159 @@ router.post(`/venta`, async (req, res) => {
 
     }
 });
+async function EstadoCuenta(movil, nombre, author) {
+    const cel = movil.slice(-10);
+    const estado = await pool.query(`SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
+    p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp,s.monto, s.img, cu.descuento, 
+    c.nombre, c.documento, c.email, c.movil, cp.monto mtb, pd.mtr2 FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+    INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
+    LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
+    INNER JOIN clientes c ON p.cliente = c.idc WHERE s.stado != 6 AND s.concepto IN('PAGO', 'ABONO') 
+    AND p.tipobsevacion IS NULL AND c.movil LIKE '%${cel}%' OR nombre = ?`, nombre);
+    const cuerpo = []
+    let totalAbonado = 0;
+    estado.map((e, i) => {
+        totalAbonado += e.monto;
+        if (!i) {
+            cuerpo.push(
+                [
+                    { text: `Area: ${e.mtr2} mt2`, style: 'tableHeader', colSpan: 2, alignment: 'center' },
+                    {}, { text: `Vr Mt2: $${Moneda(e.vrmt2)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {},
+                    { text: '$' + Moneda(e.valor), style: 'tableHeader', alignment: 'center' }
+                ],
+                [
+                    'Cupon', 'Dsto', 'Ahorro',
+                    { text: `Total lote`, colSpan: 2 }, {}
+                ],
+                [
+                    { text: e.cupon, style: 'tableHeader', alignment: 'center' },
+                    { text: `${e.descuento}%`, style: 'tableHeader', alignment: 'center' },
+                    { text: `-$${Moneda(e.ahorro)}`, style: 'tableHeader', alignment: 'center' },
+                    { text: `$${Moneda(e.total)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {}
+                ],
+                ['Fecha', 'Recibo', 'Forma', 'Tipo', 'Monto'],
+                [moment(e.fech).format('YYYY-MM-DD'), `RC${e.ids}`, e.formap, e.descp, '$' + Moneda(e.monto)]);
+        } else {
+            cuerpo.push([moment(e.fech).format('YYYY-MM-DD'), `RC${e.ids}`, e.formap, e.descp, '$' + Moneda(e.monto)]);
+        }
+    }) 
+    cuerpo.push(
+        [
+            { text: 'TOTAL ABONADO', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
+            { text: '$' + Moneda(totalAbonado), style: 'tableHeader', alignment: 'center' }
+        ],
+        [
+            { text: NumeroALetras(totalAbonado), style: 'small', colSpan: 5 },
+            {}, {}, {}, {}
+        ],
+        [
+            { text: 'SALDO A LA FECHA', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
+            { text: '$' + Moneda(estado[0].total - totalAbonado), style: 'tableHeader', alignment: 'center' }
+        ],
+        [
+            { text: NumeroALetras(estado[0].total - totalAbonado), style: 'small', colSpan: 5 },
+            {}, {}, {}, {}
+        ]
+    )
+    ////////////////////////* CREAR PDF *//////////////////////////////
+    const printer = new PdfPrinter(Roboto);
+    let docDefinition = {
+        content: [ // pageBreak: 'before',
+            {
+                columns: [
+                    [
+                        { text: 'ESTADO DE CUENTA', style: 'header' },
+                        'Conoce aqui el estado el estado de tus pagos y montos',
+                        { text: estado[0].nombre, style: 'subheader' },
+                        {
+                            alignment: 'justify', italics: true, color: 'gray', fontSize: 9,
+                            columns: [
+                                { text: `Doc. ${estado[0].documento}` },
+                                { text: `Movil ${estado[0].movil}` },
+                                { text: estado[0].email },
+                            ]
+                        },
+                        {
+                            alignment: 'justify', italics: true,
+                            columns: [
+                                { width: 250, text: estado[0].proyect },
+                                { text: `MZ: ${estado[0].mz ? estado[0].mz : 'No aplica'}` },
+                                { text: `LT: ${estado[0].n}` }
+                            ]
+                        }
+                    ],
+                    {
+                        width: 100,
+                        image: path.join(__dirname, '/../public/img/avatars/avatar.png'),
+                        fit: [100, 100]
+                    }
+                ]
+            },
+            {
+                style: 'tableBody',
+                color: '#444',
+                table: {
+                    widths: ['auto', 'auto', 'auto', 'auto', 'auto'],
+                    headerRows: 4,
+                    // keepWithHeaderRows: 1,
+                    body: cuerpo
+                }
+            }
+        ],
+        styles: {
+            header: {
+                fontSize: 18,
+                bold: true,
+                margin: [0, 0, 0, 10]
+            },
+            subheader: {
+                fontSize: 16,
+                bold: true,
+                margin: [0, 5, 0, 2]
+            },
+            tableBody: {
+                margin: [0, 5, 0, 5]
+            },
+            tableHeader: {
+                bold: true,
+                fontSize: 13,
+                color: 'black'
+            },
+            small: {
+                fontSize: 9,
+                italics: true, 
+                color: 'gray',
+                alignment: 'right'
+            }
+        }
+    }
+    let ruta = path.join(__dirname);
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(ruta + '/tables.pdf'));
+    pdfDoc.end();
 
-
+    var dataFile = {
+        phone: author,
+        body: 'https://grupoelitefincaraiz.co/uploads/0pj3q97q5c4q8h-av1vzxmsma8o49u4574.pdf',
+        filename: `E.C. ${estado[0].nombre}.pdf`
+    };
+    await apiChatApi('sendFile', dataFile);
+    return JSON.stringify(estado);
+}
 async function apiChatApi(method, params) {
-    const options = {};
-    options['method'] = "POST";
-    options['body'] = JSON.stringify(params);
-    options['headers'] = { 'Content-Type': 'application/json' };
 
-    const url = `${apiUrl}/${method}?token=${token}`;
+    const apiUrl = 'https://eu89.chat-api.com/instance107218';
+    const token = '5jn3c5dxvcj27fm0';
+    const options = {
+        method: "POST",
+        url: `${apiUrl}/${method}?token=${token}`,
+        data: JSON.stringify(params),
+        headers: { 'Content-Type': 'application/json' }
+    };
 
-    const apiResponse = await fetch(url, options);
-    const jsonResponse = await apiResponse.json();
-    return jsonResponse;
+    const apiResponse = await axios(options); 
+    console.log(apiResponse.data)
+    return apiResponse.data;
 }
 async function PagosAbonos(Tid, user) {
     //u.
@@ -736,7 +938,7 @@ async function PagosAbonos(Tid, user) {
                 }
                 await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
             }
-        } 
+        }
         if (monto >= cuota || S.std === 13) {
             var montocuotas = monto - cuota;
             await pool.query(`UPDATE solicitudes s  
