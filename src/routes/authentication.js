@@ -198,7 +198,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   asesoresM = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
   COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 
   INNER JOIN rangos r ON u.nrango = r.id LEFT JOIN solicitudes s ON p.lote = s.lt WHERE u.nrango < 7 AND MONTH(p.fecha) = MONTH(CURDATE()) 
-  GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
+  AND YEAR(p.fecha) = YEAR(CURDATE()) GROUP BY u.fullname, u.imagen, r.rango ORDER BY ventas DESC LIMIT 5`);
   //console.log({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM }, d)
 
   res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM });

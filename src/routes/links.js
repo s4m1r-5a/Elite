@@ -3719,7 +3719,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.id = ? AND p.tipobsevacion IS NULL`, id); //  AND p.status IN(2, 3)
 
-    //console.log(comi, id, asesor, directas, sep, bon) // incntivo
+    console.log(comi, id, asesor, directas, sep, bon) // incntivo
 
     if (directas.length > 0) {
         var hoy = moment().format('YYYY-MM-DD');
@@ -3823,7 +3823,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
-        e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
+        e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular, s.aprobado FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN extrabanco e ON s.extrato = e.id
         INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users u ON pr.asesor = u.id 
         LEFT JOIN clientes cl ON pr.cliente = cl.idc LEFT JOIN cupones cp ON s.bono = cp.id 
@@ -3875,13 +3875,12 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'saldo') {
-        const { lote, solicitud, fecha } = req.body; console.log(lote, solicitud, fecha)
+        const { lote, solicitud, fecha } = req.body; //console.log(lote, solicitud, fecha)
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
         AND lt = ${lote} AND stado = 3 AND TIMESTAMP(fech) < '${fecha}' AND ids != ${solicitud}`);
         //console.log(u)
-        if (u.length > 0) {
-            return res.send(false);
-        }
+        if (u.length > 0) return res.send(false);
+
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
