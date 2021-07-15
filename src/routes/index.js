@@ -9,11 +9,11 @@ const sms = require('../sms.js');
 const MSGS = require('../index.js');
 const fs = require('fs');
 const path = require('path');
-const PdfPrinter = require('pdfmake')
-const Roboto = require('../public/fonts/Roboto');
 const moment = require('moment');
 moment.locale('es');
-const NumeroALetras = require('../functions.js')
+const {
+    EstadoCuenta, apiChatApi, QuienEs, RecibosCaja, NumeroALetras
+} = require('../functions.js')
 
 
 
@@ -51,80 +51,8 @@ router.get('/condiciones', async (req, res) => {
 });
 router.post('/webhook', async function (req, res) {
     const { messages, ack, chatUpdate, previous_substatus } = req.body;
-    console.log(ack ? 'bien' : 'nada', req.body);
-    [
-        {
-            /* "messages": [
-                {
-                    "id": "false_17472822486@c.us_DF38E6A25B42CC8CCE57EC40F",
-                    "body": "Ok!",
-                    "type": "chat",
-                    "senderName": "Ilya",
-                    "fromMe": true,
-                    "author": "17472822486@c.us",
-                    "time": 1504208593,
-                    "chatId": "17472822486@c.us",
-                    "messageNumber": 100
-                }
-            ]
-        },
-        {
-            "chatUpdate": [
-                {
-                    "old": {
-                        "id": "1493046918-13216468942@g.us",
-                        "name": "Ok!",
-                        "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
-                        "metadata": {
-                            "groupInviteLink": null,
-                            "isGroup": true,
-                            "participants": [
-                                "17162266665@c.us",
-                                "17162277775@c.us"
-                            ]
-                        },
-                        "last_time": 0
-                    },
-                    "new": {
-                        "id": "1493046918-13216468942@g.us",
-                        "name": "Ok!",
-                        "image": "https://pps.whatsapp.net/v/t61.11540-24/42886681_356710581739497_4892819781461213184_n.jpg?oe=5BD90F82&oh=c256f7e5c7aeccd19cf2e626f3ef4236",
-                        "metadata": {
-                            "groupInviteLink": null,
-                            "isGroup": true,
-                            "participants": [
-                                "17162266665@c.us",
-                                "17162277775@c.us"
-                            ]
-                        },
-                        "last_time": 0
-                    }
-                }
-            ]
-        },
-        {
-            "ack": [
-                {
-                    "id": "true573175386881@c.us_3EB0DA8B4C1A96DA52C3",
-                    "queueNumber": 100,
-                    "chatId": "573175386881@c.us",
-                    "status": "viewed"
-                }
-            ]
-        },
-        {
-            "status": "authenticated",
-            "previous_status": "authenticated",
-            "substatus": "normal",
-            "previous_substatus": "battery_low_2",
-            "instanceId": "107218" */
-        }
-    ]
-
-
-
+    //console.log(req.body)
     for (var i in messages) {
-
 
         const author = messages[i].author;
         const body = messages[i].body;
@@ -135,13 +63,104 @@ router.post('/webhook', async function (req, res) {
 
         if (body == 1) {
             const res = await EstadoCuenta(chatId.replace('@c.us', ''), senderName, author);
-            await apiChatApi('message', { chatId: chatId, body: res });
+            if (res.sent) {
+                await apiChatApi('message', { chatId: chatId, body: `😃 _Tú solicitud fue procesada exitosamente._\n\n_Te la enviamos también al correo que diste al momento de tu registro_ 👊🤝 🕜\n\nEnvíanos la opción de tu preferencia 🤔🤔 👇🏼\n \n# - *_Volver al menú principal_*\n5 - *_Auditar los pagos_*\n0 - *_Salir_*` });
+            } else {
+                await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
+            }
         } else if (body == 2) {
-            await apiChatApi('message', { chatId: chatId, body: chatId });
+            const cel = chatId.replace('@c.us', '').slice(-10);
+            const recibos = await pool.query(`SELECT s.*, c.nombre FROM solicitudes s 
+            INNER JOIN preventa p ON s.orden = p.id INNER JOIN clientes c ON p.cliente = c.idc 
+            LEFT JOIN clientes c2 ON p.cliente2 = c2.idc LEFT JOIN clientes c3 ON p.cliente3 = c3.idc 
+            LEFT JOIN clientes c4 ON p.cliente4 = c4.idc WHERE s.stado != 6 AND s.concepto IN('PAGO', 'ABONO') 
+            AND p.tipobsevacion IS NULL AND (c.movil LIKE '%${cel}%' OR c.code LIKE '%${cel}%' OR c.nombre = '${senderName}'
+            OR c2.movil LIKE '%${cel}%' OR c2.code LIKE '%${cel}%' OR c2.nombre = '${senderName}'
+            OR c3.movil LIKE '%${cel}%' OR c3.code LIKE '%${cel}%' OR c3.nombre = '${senderName}'
+            OR c4.movil LIKE '%${cel}%' OR c4.code LIKE '%${cel}%' OR c4.nombre = '${senderName}')`);
+            if (recibos.length) {
+                //let l = "```+numero de recibo```";
+                let body = `_😁Hola *${recibos[0].nombre.split(" ")[0]}*, en el sistema nos registran *${recibos.length}* recibos🧾 de caja los cuales se resumen a continuación_ \n\n`
+                recibos.map((e, i) => {
+                    body += `_${e.stado !== 4 ? '~' : ''}*RC${e.ids}* por un valor de💵 *$${Moneda(e.monto)}*${e.stado !== 4 ? '~' : ''}_\n`;
+                })
+                body += `\n_Los recibos con *tachaduras* no se enviaran ya estan a espera de que el area de contabilidad los apruebe, una ves *aprobados* se le enviaran por este medio_\n\n_Si desea recibir uno de estos recibos por favor envienos el recibo, ej: *"rc990"* sin las comillas. Si lo que desea es que le enviemos todos los recibos envienos *"rc##"*._
+                \n\n_*rc+numero de recibo* - Enviar recibo_\n_*rc##* - Enviar todos los recibos_\n_*#* - Volver al menú principal_\n_*5* - Auditar los pagos_\n_*0* - Salir_`;
+                await apiChatApi('message', { chatId: chatId, body });
+            } else {
+                await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
+            }
         } else if (body == 3) {
-            await apiChatApi('message', { chatId: chatId, body: chatId });
+            var dataLink = {
+                body: "https://grupoelitefincaraiz.com/links/pagos",
+                previewBase64: "data:image/x-icon;base64,AAABAAEAAAAAAAEAIAB5GQAAFgAAAIlQTkcNChoKAAAADUlIRFIAAAEAAAABAAgGAAAAXHKoZgAAGUBJREFUeNrt3XmcXGWd7/HPqb2r9yUhnX0hnZAACYEQkggBAioOEFZfc1EZRLgojLwUnfEig9fBYXPuwNULgpoRHB1kkMUNBhQMewgkkJXs+55OutNr7XXuH091Ld3V3VXdSbqr+b5fr34lVXWq6pxT5/k9z3lWEBERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERGRE8habk9aM9A7IQVry1nW1isHeiek71zAqQO9EyIyMBwDvQMiMnBcvW0QCtiseS/Izo1h9m6LYqe95vZYTJjq5uTTvUw+3dOnHQi02axZGsC2c9t+5AQ3lcOclJT3PXZ9vDxES2PMnAC3xaRTPVTUOPP6jKYjMbasDhONmh0/aYyL8VN7PgeH98fYsT5MLJbbwVbUOKmpdVE5zIkjv93rcb8/Xh5i8+owjfWxjNdKyhyMn+pm2mwfI8a4sI5N9lABXAeM78dnfAg83c1r04G/y/L8OuA/gWg/vncs8AWgstPzO4CfZNnemdj+WJWqw8BTwMdZXrsUOK8fn70PeKrbANDeEuetF9t57vFmtq0LE2iLEwpkXriWA4qKHZSUO5hzcRF/e3s5dad787pwDu2J8r3rDxEJ57a9t8jC7bGYfraXi64pYeanfFSdlF/qWHxPI6veDQJQXuXgfz02jLMXFuX1GZtXh/mXm+tpORoHYNFXSrn9weoe37PqnSD/99uHaW/NLQC4PSbI1o5zcfmNZcy+sIjho11YVl67im1D/b4of3yihZd+3cLR+jjtrXEi4cz9cLrM71lR4+ScTxfxpW9XMGKcG2f/gk8pJgDM78dn/IruA8Bk4B+yPP9C4j39CQC1wM3AhE7Pv033AWARcFW/zlhKG7CM7AHgfOBb/fjslcDLWQNAw6EYT9zfyG8fbSYa6f5i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78OBUzEVi9nMBY5gKgN9wFmJ97UkPmMmphSSzXpERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERE5IT4/3XR8/QYP54iAAAAAElFTkSuQmCC",
+                title: "PAGOS EN LINEA",
+                description: "Gestiona tus pagos en línea con solo unos clics",
+                chatId
+            };
+            await apiChatApi('sendLink', dataLink);
+            await apiChatApi('message', { chatId: chatId, body: `_Solo debes ingresar el numero de *documento* del comprador y seguir los pasos_` });
         } else if (body == 4) {
-            await apiChatApi('message', { chatId: chatId, body: chatId });
+            const cel = chatId.replace('@c.us', '').slice(-10);
+            const recibos = await pool.query(`SELECT s.monto, c.nombre, l.valor, p.ahorro
+            FROM solicitudes s INNER JOIN productosd l ON l.id = s.lt 
+            INNER JOIN preventa p ON s.orden = p.id INNER JOIN clientes c ON p.cliente = c.idc 
+            LEFT JOIN clientes c2 ON p.cliente2 = c2.idc LEFT JOIN clientes c3 ON p.cliente3 = c3.idc 
+            LEFT JOIN clientes c4 ON p.cliente4 = c4.idc WHERE s.stado != 6 AND s.concepto IN('PAGO', 'ABONO') 
+            AND p.tipobsevacion IS NULL AND (c.movil LIKE '%${cel}%' OR c.code LIKE '%${cel}%' OR c.nombre = '${senderName}'
+            OR c2.movil LIKE '%${cel}%' OR c2.code LIKE '%${cel}%' OR c2.nombre = '${senderName}'
+            OR c3.movil LIKE '%${cel}%' OR c3.code LIKE '%${cel}%' OR c3.nombre = '${senderName}'
+            OR c4.movil LIKE '%${cel}%' OR c4.code LIKE '%${cel}%' OR c4.nombre = '${senderName}')`);
+            if (recibos.length) {
+                let saldo = 0;
+                recibos.map((e, i) => {
+                    saldo += e.monto;
+                });
+                let body = `_😁Hola *${recibos[0].nombre.split(" ")[0]}*, Su salso a la fecha es de *$${Moneda(recibos[0].valor - recibos[0].ahorro - saldo)}*_
+                \n_*${NumeroALetras(recibos[0].valor - recibos[0].ahorro - saldo)}.*_`;
+                await apiChatApi('message', { chatId: chatId, body });
+            } else {
+                await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
+            }
+        } else if (body == 5 || body == 6 || body == 8) {
+            await apiChatApi('message', { chatId: chatId, body: `😃 _Esta opcion aun no se encuentra disponible, nos encontramos trabajando en ello_` });
+        } else if (body == 7) {
+            await apiChatApi('labelChat', { labelId: "7", chatId });
+            await apiChatApi('message', { chatId: chatId, body: `😃 _Pronto te antenderemos recuerda que hay personas antes que tu. Una ves llegue tu turno una persona te contactara_\n\n_De antemano agradecemos por tu paciencia_` });
+        } else if (/^\s?[0-9]+#\s?$/.test(body)) {
+            QuienEs(body.replace('#', '').trim(), chatId);
+        } else if (/^\s?[a-zA-Z0-9]{5}@7\s?$/.test(body)) {
+            const Code = await pool.query(`SELECT * FROM clientes WHERE code = ?`, body.trim());
+            if (Code.length) {
+                await pool.query(`UPDATE clientes SET code = ? WHERE  code = ?`, [chatId.replace('@c.us', ''), body.trim()]);
+                await apiChatApi('message', { chatId: chatId, body: `CODIGO APROBADO` });
+                await apiChatApi('message', {
+                    chatId: chatId, body: `_🤖 😃¡Bienvenido! *${Code[0].nombre.split(" ")[0]}*_
+    
+                    ➖➖➖➖➖➖➖
+    _*¡* Déjame mostrarte lo que puedo hacer *!*_
+                    ➖➖➖➖➖➖➖    
+        
+    _😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
+    
+                    _*1* - Estado de cuenta_
+                    _*2* - Enviar recibo(s) de caja_
+                    _*3* - Realizar pago o abono_
+                    _*4* - Conocer mi saldo a la fecha_
+                    _*5* - Auditar producto_
+                    _*6* - Actualizar datos de contacto_
+                    _*7* - Chatear con un asesor_
+                    _*8* - Agendar llamada o cita_
+                    
+    _Empieza a probar, estoy esperando 👀_
+                    
+    _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_` });
+            } else {
+                await apiChatApi('message', { chatId: chatId, body: `CODIGO INVALIDO` });
+            }
+        } else if (/^\s?rc[0-9]+\s?$|^\s?rc##\s?$/i.test(body)) {
+            const res = await RecibosCaja(chatId.replace('@c.us', ''), senderName, author, body.trim().replace(/rc/i, ''));
+            !res && await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
         } else if (/help/.test(body)) {
             const text = `${senderName}, this is a demo bot for https://chat-api.com/.
                 Commands:
@@ -175,48 +194,42 @@ router.post('/webhook', async function (req, res) {
         } else if (/group/.test(body)) {
             let arrayPhones = [author.replace("@c.us", "")];
             await apiChatApi('group', { groupName: 'Bot group', phones: arrayPhones, messageText: 'Welcome to the new group!' });
-        } else {
+        } else if (/^\s?#\s?$|[a-zA-Z]+/.test(body)) {
             const max_time = moment().unix();
             const min_time = moment().subtract(2, "hours").unix();
             const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=1&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
             const chat = await axios(Url);
-            //console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
-            if (chat.data.messages.length) {
+            chat.length && console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
+            if ((chat.data.messages.length - 1) > 0) {
                 await apiChatApi('message', { chatId: chatId, body: 'No comprendo lo que dice' });
             } else {
-
-                const text = `🤖 ¡Hola! Soy el Asistente de GrupoElite creado para ofrecerte mayor facilidad de procesos
+                const text = `_🤖 *¡Hola!* Soy el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
     
                 ➖➖➖➖➖➖➖
-                ¡Déjame mostrarte lo que puedo hacer!
+_*¡* Déjame mostrarte lo que puedo hacer *!*_
                 ➖➖➖➖➖➖➖    
     
-                😮 (Para seleccionar el elemento deseado, simplemente envíeme el número en el mensaje de respuesta)
-                1 - Estado de cuenta
-                2 - Enviar el ultimo recibo
-                3 - Enviar todos los recibos
-                4 - Conocer mi saldo a la fecha
-                5 - Auditoria
-                6 - Chatear con un asesor
+_😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
+
+                _*1* - Estado de cuenta_
+                _*2* - Enviar recibo(s) de caja_
+                _*3* - Realizar pago o abono_
+                _*4* - Conocer mi saldo a la fecha_
+                _~*5* - Auditar producto~_
+                _~*6* - Actualizar datos de contacto~_    
+                _*7* - Chatear con una persona_
+                _~*8* - Agendar llamada o cita~_
                 
-                Empieza a probar, estoy esperando 👀
+_Empieza a probar, estoy esperando 👀_
                 
-                Siempre puedes volver al menú principal: 
-                🔙 Para volver al menú, envíame "#"`
+_Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_`;
+
                 var r = await apiChatApi('message', { chatId: chatId, body: text });
                 console.log(r, 'lo que respondio del envio')
             }
         }
     }
     //https://grupoelitefincaraiz.com/webhook
-
-
-
-
-
-
-
-
 
     if (messages) {
         /* messages
@@ -240,7 +253,7 @@ router.post('/webhook', async function (req, res) {
     res.end();
 
 });
-
+console.log(path.join(__dirname, '/public/uploads/estadodecuenta-${estado[0].cparacion}.pdf'))
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
@@ -528,160 +541,6 @@ router.post(`/venta`, async (req, res) => {
 
     }
 });
-async function EstadoCuenta(movil, nombre, author) {
-    const cel = movil.slice(-10);
-    const estado = await pool.query(`SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
-    p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp,s.monto, s.img, cu.descuento, 
-    c.nombre, c.documento, c.email, c.movil, cp.monto mtb, pd.mtr2 FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
-    INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
-    LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
-    INNER JOIN clientes c ON p.cliente = c.idc WHERE s.stado != 6 AND s.concepto IN('PAGO', 'ABONO') 
-    AND p.tipobsevacion IS NULL AND c.movil LIKE '%${cel}%' OR nombre = ?`, nombre);
-    const cuerpo = []
-    let totalAbonado = 0;
-    estado.map((e, i) => {
-        totalAbonado += e.monto;
-        if (!i) {
-            cuerpo.push(
-                [
-                    { text: `Area: ${e.mtr2} mt2`, style: 'tableHeader', colSpan: 2, alignment: 'center' },
-                    {}, { text: `Vr Mt2: $${Moneda(e.vrmt2)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {},
-                    { text: '$' + Moneda(e.valor), style: 'tableHeader', alignment: 'center' }
-                ],
-                [
-                    'Cupon', 'Dsto', 'Ahorro',
-                    { text: `Total lote`, colSpan: 2 }, {}
-                ],
-                [
-                    { text: e.cupon, style: 'tableHeader', alignment: 'center' },
-                    { text: `${e.descuento}%`, style: 'tableHeader', alignment: 'center' },
-                    { text: `-$${Moneda(e.ahorro)}`, style: 'tableHeader', alignment: 'center' },
-                    { text: `$${Moneda(e.total)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {}
-                ],
-                ['Fecha', 'Recibo', 'Forma', 'Tipo', 'Monto'],
-                [moment(e.fech).format('YYYY-MM-DD'), `RC${e.ids}`, e.formap, e.descp, '$' + Moneda(e.monto)]);
-        } else {
-            cuerpo.push([moment(e.fech).format('YYYY-MM-DD'), `RC${e.ids}`, e.formap, e.descp, '$' + Moneda(e.monto)]);
-        }
-    }) 
-    cuerpo.push(
-        [
-            { text: 'TOTAL ABONADO', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
-            { text: '$' + Moneda(totalAbonado), style: 'tableHeader', alignment: 'center' }
-        ],
-        [
-            { text: NumeroALetras(totalAbonado), style: 'small', colSpan: 5 },
-            {}, {}, {}, {}
-        ],
-        [
-            { text: 'SALDO A LA FECHA', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
-            { text: '$' + Moneda(estado[0].total - totalAbonado), style: 'tableHeader', alignment: 'center' }
-        ],
-        [
-            { text: NumeroALetras(estado[0].total - totalAbonado), style: 'small', colSpan: 5 },
-            {}, {}, {}, {}
-        ]
-    )
-    ////////////////////////* CREAR PDF *//////////////////////////////
-    const printer = new PdfPrinter(Roboto);
-    let docDefinition = {
-        content: [ // pageBreak: 'before',
-            {
-                columns: [
-                    [
-                        { text: 'ESTADO DE CUENTA', style: 'header' },
-                        'Conoce aqui el estado el estado de tus pagos y montos',
-                        { text: estado[0].nombre, style: 'subheader' },
-                        {
-                            alignment: 'justify', italics: true, color: 'gray', fontSize: 9,
-                            columns: [
-                                { text: `Doc. ${estado[0].documento}` },
-                                { text: `Movil ${estado[0].movil}` },
-                                { text: estado[0].email },
-                            ]
-                        },
-                        {
-                            alignment: 'justify', italics: true,
-                            columns: [
-                                { width: 250, text: estado[0].proyect },
-                                { text: `MZ: ${estado[0].mz ? estado[0].mz : 'No aplica'}` },
-                                { text: `LT: ${estado[0].n}` }
-                            ]
-                        }
-                    ],
-                    {
-                        width: 100,
-                        image: path.join(__dirname, '/../public/img/avatars/avatar.png'),
-                        fit: [100, 100]
-                    }
-                ]
-            },
-            {
-                style: 'tableBody',
-                color: '#444',
-                table: {
-                    widths: ['auto', 'auto', 'auto', 'auto', 'auto'],
-                    headerRows: 4,
-                    // keepWithHeaderRows: 1,
-                    body: cuerpo
-                }
-            }
-        ],
-        styles: {
-            header: {
-                fontSize: 18,
-                bold: true,
-                margin: [0, 0, 0, 10]
-            },
-            subheader: {
-                fontSize: 16,
-                bold: true,
-                margin: [0, 5, 0, 2]
-            },
-            tableBody: {
-                margin: [0, 5, 0, 5]
-            },
-            tableHeader: {
-                bold: true,
-                fontSize: 13,
-                color: 'black'
-            },
-            small: {
-                fontSize: 9,
-                italics: true, 
-                color: 'gray',
-                alignment: 'right'
-            }
-        }
-    }
-    let ruta = path.join(__dirname);
-    let pdfDoc = printer.createPdfKitDocument(docDefinition);
-    pdfDoc.pipe(fs.createWriteStream(ruta + '/tables.pdf'));
-    pdfDoc.end();
-
-    var dataFile = {
-        phone: author,
-        body: 'https://grupoelitefincaraiz.co/uploads/0pj3q97q5c4q8h-av1vzxmsma8o49u4574.pdf',
-        filename: `E.C. ${estado[0].nombre}.pdf`
-    };
-    await apiChatApi('sendFile', dataFile);
-    return JSON.stringify(estado);
-}
-async function apiChatApi(method, params) {
-
-    const apiUrl = 'https://eu89.chat-api.com/instance107218';
-    const token = '5jn3c5dxvcj27fm0';
-    const options = {
-        method: "POST",
-        url: `${apiUrl}/${method}?token=${token}`,
-        data: JSON.stringify(params),
-        headers: { 'Content-Type': 'application/json' }
-    };
-
-    const apiResponse = await axios(options); 
-    console.log(apiResponse.data)
-    return apiResponse.data;
-}
 async function PagosAbonos(Tid, user) {
     //u.
     const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, u.nrango, c.mora, 

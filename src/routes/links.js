@@ -3719,7 +3719,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.id = ? AND p.tipobsevacion IS NULL`, id); //  AND p.status IN(2, 3)
 
-    //console.log(comi, id, asesor, directas, sep, bon) // incntivo
+    console.log(comi, id, asesor, directas, sep, bon) // incntivo
 
     if (directas.length > 0) {
         var hoy = moment().format('YYYY-MM-DD');
@@ -3875,13 +3875,12 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         //console.log(solicitudes)
         res.send(respuesta);
     } else if (id === 'saldo') {
-        const { lote, solicitud, fecha } = req.body; console.log(lote, solicitud, fecha)
+        const { lote, solicitud, fecha } = req.body; //console.log(lote, solicitud, fecha)
         const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
         AND lt = ${lote} AND stado = 3 AND TIMESTAMP(fech) < '${fecha}' AND ids != ${solicitud}`);
         //console.log(u)
-        if (u.length > 0) {
-            return res.send(false);
-        }
+        if (u.length > 0) return res.send(false);
+
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
