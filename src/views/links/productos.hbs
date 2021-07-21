@@ -1,5 +1,14 @@
 <input type="hidden" id="proyecto" value="">
 <input type="hidden" id="idproyecto" value="">
+
+<form enctype="multipart/form-data" id="productoExcel" action="/links/recibo" method="POST">
+    <input class="form-control-no-border edi" type="file" name="image" id="fileExcel"
+        onchange="subirExcel();" required>
+</form>
+
+
+
+
 <div class="container-fluid p-0">
     <div class="row" id="cuadro2" style="display: none;">
         <div class="col-xl-12">

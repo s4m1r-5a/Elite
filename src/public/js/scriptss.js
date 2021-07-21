@@ -271,7 +271,7 @@ $(document).ready(function () {
             }
         });
     }
-    Chats();
+    //Chats();
 })
 var Chatid = (id, id2, img, name, tiempo) => {
     $.ajax({
@@ -320,7 +320,7 @@ var Chatid = (id, id2, img, name, tiempo) => {
         }
     });
 }
-const socket = io();
+/* const socket = io();
 socket.on('messages', function (data) {
     var chatId = "#" + data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
     var t = data.chatId.replace(/[^a-zA-Z 0-9]+/g, '');
@@ -398,7 +398,7 @@ socket.on('typing', function (data) {
     if (data.chatId.replace(/[^a-zA-Z 0-9]+/g, '') === $('#ChatActivo').val()) {
         $("#" + data.id.replace(/[^a-zA-Z 0-9]+/g, '')).find('.fa-copyright').removeClass("fas").addClass('far');
     }
-});
+}); */
 
 $("#send").keypress(function (e) {
     var code = (e.keyCode ? e.keyCode : e.which);
@@ -453,11 +453,6 @@ $(document).ready(function () {
             toggle: true
         });
     }
-    /* $.ajax({
-        url: '/links/desarrollo',
-        data: { actividad: true },
-        type: 'POST'
-    }) */
     if ($('#nivel').html() === 'Independiente') {
         $('#nivel').addClass('badge-danger')
     } else if ($('#nivel').html() === 'Inversionista') {
@@ -1695,30 +1690,873 @@ if (window.location.pathname == `/links/pagos`) {
     });
 
 }
+//////////////////////////////////* COMISIONES */////////////////////////////////////////////////////////////
+if (window.location.pathname === `/links/comisiones` && !rol.externo) {
+    $('.sidebar-item').removeClass('active');
+    $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+
+    var comisiones = $('#comisiones').DataTable({
+        //dom: 'Bfrtip',        
+        lengthChange: false,
+        lengthMenu: [
+            [10, 25, 50, 100, -1],
+            ['10 filas', '25 filas', '50 filas', '100 filas', 'Ver todo']
+        ],
+        /*buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
+                            <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path>
+                            <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path>
+                            <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path>
+                            <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path>
+                            <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path>
+                            <path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
+                            <path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path>
+                            <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>`,
+                attr: {
+                    title: 'Generar cuenta de cobro',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    CuentaCobro();
+                }
+            },
+            {
+                extend: 'collection',
+                text: 'Stds',
+                orientation: 'landscape',
+                buttons: [
+                    {
+                        text: 'COPIAR',
+                        extend: 'copy'
+                    },
+                    {
+                        text: `PENDIENTES`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Pendiente');
+                        }
+                    },
+                    {
+                        text: `PAGADAS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Pagada');
+                        }
+                    },
+                    {
+                        text: `DISPONIBLES`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Disponible');
+                        }
+                    },
+                    {
+                        text: `ANULADOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2(17, 'Declinada');
+                        }
+                    },
+                    {
+                        text: `TODOS`,
+                        className: 'btn btn-secondary',
+                        action: function () {
+                            STAD2('', '');
+                        }
+                    }
+                ]
+            }
+        ],*/
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [
+            { className: 'control', orderable: true, targets: 0 },
+            { responsivePriority: 1, targets: [8, 11, 15, 16, 17] },
+            { responsivePriority: 2, targets: [13, -1] }
+        ],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/comision",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            //$('#collapse4').collapse('toggle');
+            //$('#ModalEventos').modal('hide');
+            $('#comisiones_filter').hide();
+        },
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "ids" },
+            { data: "nam" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return `${(data * 100).toFixed(2)}%` //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Esta comision esta siendo auditadda">Auditando</span>`
+                            break;
+                        case 4:
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "ids",
+                render: function (data, method, row) {
+                    return rol.admin ? `
+                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
+                    <div class="dropdown-menu">
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                    </div>` : ''
+                }
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+            } else if (data["stado"] == 9) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["stado"] == 15) {
+                $(row).css("background-color", "#FFFFCC");
+            } else if (data["stado"] == 1) {
+                $(row).css({ "background-color": "#FEC782", "color": "#FFFFFF" });
+            }
+        }
+    });
+    var aasesor = null, iid = null;
+    comisiones.on('click', 'td:not(.control, .t)', function () {
+        var fila = $(this).parents('tr');
+        var data = comisiones.row(fila).data(); //console.log(data)
+        if (!aasesor && data.stado === 9) {
+            aasesor = data.nam; console.log(data.bank)
+            iid = data.ids;
+            fila.toggleClass('selected');
+        } else if (iid === data.ids) {
+            $(fila).removeClass('selected');
+            aasesor = null;
+            iid = null;
+        } else if (aasesor !== data.nam && aasesor) {
+            SMSj('error', 'No puede seleccionar este pago ya que no pertenece al asesor')
+        } else {
+            data.stado === 9 ? fila.toggleClass('selected') : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
+        }
+    });
+    var EstadoCC = (id, std, actualstd) => {
+        if ((actualstd === 4 && rol.admin) || actualstd !== 4) {
+            $.ajax({
+                type: 'POST',
+                url: '/links/reportes/std',
+                data: { ids: id, std },
+                beforeSend: function (xhr) {
+                    $('#Modalimg').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: true,
+                        toggle: true
+                    });
+                },
+                success: function (data) {
+                    if (data) {
+                        $('#ModalEventos').modal('hide');
+                        SMSj('success', `Solicitud procesada correctamente`);
+                        comisiones.ajax.reload(null, false)
+                    } else {
+                        $('#ModalEventos').modal('hide');
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente`)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        } else {
+            SMSj('error', `Solicitud no pude ser procesada, no cuentas con los permisos`)
+        }
+    }
+    var CuentaCobro = () => {
+        var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', CC = '',
+            ID = '', BANCO = '', TCTA = '', NCTA = '', TOTAL = 0,
+            MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0,
+            cuerpo = [], Ids = [];
+
+        var enviarCuentaCobro = () => {
+            var fd = new FormData();
+            var doc = new jsPDF('p', 'mm', 'a4');
+            var img2 = new Image();
+            var img = new Image();
+            var totalPagesExp = '{total_pages_count_string}'
+            //doc.addPage("a3"); 
+            img.src = '/img/avatars/avatar.png'
+            img2.src = `https://api.qrserver.com/v1/create-qr-code/?color=000000&bgcolor=FFFFFF&data=BEGIN%3AVCARD%0AVERSION%3A2.1%0AFN%3ARED+ELITE%0AN%3AELITE%3BRED%0ATITLE%3ABIENES+RAICES%0ATEL%3BCELL%3A3007753983%0ATEL%3BHOME%3BVOICE%3A3012673944%0AEMAIL%3BHOME%3BINTERNET%3Aadmin%40redelite.co%0AEMAIL%3BWORK%3BINTERNET%3Ainfo%40redelite.co%0AURL%3Ahttps%3A%2F%2Fredelite.co%0AADR%3A%3B%3BLA+GRANJA%3BTURBACO%3B%3B131001%3BCOLOMBIA%0AORG%3AGRUPO+ELITE+FINCA+RAIZ+S.A.S.%0AEND%3AVCARD%0A&qzone=1&margin=0&size=400x400&ecc=L`
+            cuerpo.push({
+                concepto: {
+                    content: 'TOTALES:', colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                },
+                total: {
+                    content: '$' + Moneda(Math.round(TOTAL)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                },
+                monto: {
+                    content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: '', colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'TOTAL COMISION:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '$' + Moneda(Math.round(MONTO)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(MONTO)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'RETEFUENTE:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '-$' + Moneda(Math.round(RETEFUENTE)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(RETEFUENTE)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'RETEICA:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '-$' + Moneda(Math.round(RETEICA)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(RETEICA)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: 'PAGAR:', colSpan: 3, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC"
+                    }
+                },
+                descp: {
+                    content: '$' + Moneda(Math.round(PAGAR)), colSpan: 1, styles: {
+                        halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 8, //fillColor: "#FFFFCC" `${NumeroALetras(totl)} MCT********`
+                    }
+                },
+                benefactor: {
+                    content: `${NumeroALetras(PAGAR)} MCT********`, colSpan: 6, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: '', colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            cuerpo.push({
+                id: {
+                    content: `Depositar el DINERO a la siguieinte CUENTA ${BANCO.toUpperCase()} ${TCTA} ${NCTA}`, colSpan: 11, styles: {
+                        halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                        fontStyle: 'bolditalic', fontSize: 7, //fillColor: "#FFFFCC"
+                    }
+                }
+            })
+            /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+            fd.append('total', PAGAR)
+            fd.append('descuentos', RETEFUENTE + RETEICA)
+            fd.append('solicitudes', Ids)
+            fd.append('usuario', RG)
+            fd.append('fechas', moment().format('YYYY-MM-DD HH:mm'))
+            /*fd.append('acumulado', acumulad);
+            doc.output('dataurlnewwindow')*/
+            $.ajax({
+                type: 'POST',
+                url: '/links/solicitudes/cuentacobro',
+                data: fd,
+                processData: false,
+                contentType: false,
+                beforeSend: function (xhr) {
+                    $('#Modalimg').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                },
+                success: function (dat) {
+                    if (dat) {
+                        doc.autoTable({
+                            head: [
+                                {
+                                    id: 'ID', fecha: 'Fecha', concepto: 'Concepto', descp: 'Descp', porciento: '%',
+                                    benefactor: 'Benefactor', proyecto: 'Proyecto', mz: 'Mz', lt: 'Lt', total: 'Total', monto: 'Monto'
+                                },
+                            ],
+                            body: cuerpo,
+                            didDrawPage: function (data) {
+                                // Header
+                                doc.setTextColor(0)
+                                doc.setFontStyle('normal')
+                                if (img) {
+                                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                    doc.addImage(img2, 'png', data.settings.margin.left + 130, 40, 45, 45)
+                                }
+                                doc.setFontSize(15)
+                                doc.text('CUENTA DE COBRO ' + dat.id, 105, 25, null, null, "center");
+                                doc.setFontSize(9)
+                                doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38)
+                                doc.setFontSize(12)
+                                doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45)
+                                doc.setFontSize(10)
+                                doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
+                                doc.setFontSize(8)
+                                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
+
+                                doc.setFontSize(10)
+                                doc.text('DEBE A:', data.settings.margin.left, 63)
+                                doc.setFontSize(12)
+                                doc.text(NOMBRE, data.settings.margin.left, 70)
+                                doc.setFontSize(10)
+                                doc.text('CC: ' + CC, data.settings.margin.left, 75)
+                                doc.setFontSize(10)
+                                doc.text(MOVIL, data.settings.margin.left, 78)
+                                doc.setFontSize(8)
+                                doc.text(EMAIL, data.settings.margin.left, 81)
+
+                                doc.setFontSize(9)
+                                doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
+
+
+                                // Footer
+                                var str = 'Page ' + doc.internal.getNumberOfPages()
+                                // Total page number plugin only available in jspdf v1.0+
+                                if (typeof doc.putTotalPages === 'function') {
+                                    str = str + ' of ' + totalPagesExp
+                                }
+                                doc.setFontSize(8)
+
+                                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                                var pageSize = doc.internal.pageSize
+                                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                                doc.text(/*str*/ `Atententamente:`, data.settings.margin.left, pageHeight - 45)
+                                doc.text(/*str*/ NOMBRE, data.settings.margin.left, pageHeight - 40)
+                                doc.text(/*str*/ `Por medio de la presente certifico que mis ingresos son por honorarios, los cuales se encuentran descritos como Rentas de Trabajo (Articulo 103\nE.T.), ademas para realizar mis labores profecionales no tengo subcontratados a mas de 2 personas (Paragrafo 2 del articlo 383 E.T.). Por tanto\nsolicito se me aplique la misma tasa de retencion de los asalariados estiplada en la tabla de retencion en la fuente contenida en el articulo 383 del E.T.`, data.settings.margin.left, pageHeight - 27)
+                            },
+                            margin: { top: 95 },
+                        })
+                        // Total page number plugin only available in jspdf v1.0+
+                        if (typeof doc.putTotalPages === 'function') {
+                            doc.putTotalPages(totalPagesExp)
+                        }
+                        doc.output('save', 'CUENTA DE COBRO ' + dat.id + '.pdf')
+                        var blob = doc.output('blob')
+                        fd.append('pdf', blob)
+                        fd.append('ID', dat.id)
+                        $.ajax({
+                            type: 'POST',
+                            url: '/links/solicitudes/cuentacobro',
+                            data: fd,
+                            processData: false,
+                            contentType: false,
+                            success: function (data) {
+                                $('#ModalEventos').modal('hide');
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                comisiones.ajax.reload(null, false)
+                            },
+                            error: function (data) {
+                                console.log(data);
+                            }
+                        });
+
+                    } else {
+                        $('#ModalEventos').modal('hide');
+                        SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        };
+        comisiones
+            .rows('.selected')
+            .data()
+            .filter(function (value, index) {
+                if (index < 1) {
+                    ID = value.i;
+                    RG = value.idu;
+                    CC = value.docu;
+                    NOMBRE = value.nam;
+                    EMAIL = value.mail;
+                    MOVIL = value.clu;
+                    BANCO = value.bank;
+                    TCTA = value.tipocta;
+                    NCTA = value.numerocuenta;
+                }
+                TOTAL += value.total;
+                MONTO += parseFloat(value.monto);
+                PAGAR += value.pagar;
+                RETEFUENTE += value.retefuente;
+                RETEICA += value.reteica;
+                Ids.push(value.ids);
+                cuerpo.push({
+                    id: {
+                        content: value.ids, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    fecha: {
+                        content: value.fech, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    concepto: {
+                        content: value.concepto, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    descp: {
+                        content: value.descp, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    porciento: {
+                        content: `%${(value.porciento * 100).toFixed(2)}`, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    benefactor: {
+                        content: value.fullname, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    proyecto: {
+                        content: value.proyect, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    mz: {
+                        content: value.mz, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    lt: {
+                        content: value.n, colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'auto', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    total: {
+                        content: '$' + Moneda(Math.round(value.total)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    },
+                    monto: {
+                        content: '$' + Moneda(Math.round(value.monto)), colSpan: 1, styles: {
+                            halign: 'left', cellWidth: 'wrap', textColor: '#7f8c8d',
+                            fontStyle: 'bolditalic', fontSize: 6, //fillColor: "#FFFFCC"
+                        }
+                    }
+                })
+            });
+        if (BANCO) {
+            enviarCuentaCobro();
+        } else if (!TOTAL) {
+            SMSj('error', 'Debe seleccionar al menos una comicion, para generar una cuenta de cobro');
+            return false;
+        } else {
+            $('#idbank').val(ID)
+            $('#BANK').modal({
+                backdrop: 'static',
+                keyboard: false,
+                toggle: true
+            });
+        }
+        $('#bank').submit((e) => {
+            e.preventDefault();
+            var datos = $('#bank').serialize();
+            $.ajax({
+                type: 'POST',
+                url: '/links/reportes/bank',
+                data: datos,
+                beforeSend: (x) => {
+                    $('#BANK').modal('hide');
+                    $('#ModalEventos').modal({
+                        backdrop: 'static',
+                        keyboard: false,
+                        show: true
+                    });
+                },
+                success: (data) => {
+                    if (data) {
+                        BANCO = data.banco;
+                        TCTA = data.cta;
+                        NCTA = data.numero;
+                        SMSj('success', 'Cuenta Bancaria registrada correctamente');
+                        enviarCuentaCobro();
+                    }
+                },
+                error: function (data) {
+                    console.log(data);
+                }
+            })
+        })
+    }
+
+    var comisionesOLD = $('#comisionesOLD').DataTable({
+        dom: 'Bfrtip',
+        buttons: [
+            {
+                extend: 'pageLength',
+                text: 'Ver',
+                orientation: 'landscape'
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
+                            <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path>
+                            <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path>
+                            <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path>
+                            <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path>
+                            <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path>
+                            <path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
+                            <path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path>
+                            <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>`,
+                attr: {
+                    title: 'Generar cuenta de cobro',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    //CuentaCobro();
+                }
+            },
+            {
+                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
+                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+                </svg>`,
+                attr: {
+                    title: 'Inspeccion de linea desendente',
+                    id: ''
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    /*$.ajax({
+                        type: 'POST',
+                        url: '/links/desendentes',
+                        beforeSend: function (xhr) {
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                comisiones.ajax.reload(null, false);
+                                $('#ModalEventos').modal('hide');
+                            } else {
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide');
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })*/
+                }
+            }
+        ],
+        deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: {
+            details: {
+                type: 'column'
+            }
+        },
+        columnDefs: [{
+            className: 'control',
+            orderable: true,
+            targets: 0
+        },
+        { responsivePriority: 1, targets: -1 },
+        { responsivePriority: 1, targets: -2 }],
+        order: [[1, "desc"]],
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/comisionOLD",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: null,
+                defaultContent: ''
+            },
+            { data: "ids" },
+            { data: "nam" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "total",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "monto",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            {
+                data: "porciento",
+                render: function (data, method, row) {
+                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "retefuente",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "reteica",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            }, {
+                data: "pagar",
+                render: function (data, method, row) {
+                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
+                }
+            },
+            { data: "concepto" },
+            { data: "descp" },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-success">Disponible</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "ids",
+                //defaultContent: 
+                render: function (data, method, row) {
+                    return rol.admin ? `<div class="btn-group btn-group-sm">
+                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
+                                            aria-haspopup="true" aria-expanded="false">Acción</button>
+                                        <div class="dropdown-menu">
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                                        </div>
+                                    </div>` : ''
+                }
+            }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
+            } else if (data["stado"] == 9) {
+                $(row).css("background-color", "#40E0D0");
+            } else if (data["stado"] == 15) {
+                $(row).css("background-color", "#FFFFCC");
+            }
+        }
+    });
+}
 //////////////////////////////////* REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname === `/links/reportes`) {
     $('.sidebar-item').removeClass('active');
     $(`a[href='${window.location.pathname}']`).parent().addClass('active');
-    minDateFilter = "";
-    maxDateFilter = "";
-    $.fn.dataTableExt.afnFiltering.push(
-        function (oSettings, aData, iDataIndex) {
-            if (typeof aData._date == 'undefined') {
-                aData._date = new Date(aData[6]).getTime();
-            }
-            if (minDateFilter && !isNaN(minDateFilter)) {
-                if (aData._date < minDateFilter) {
-                    return false;
-                }
-            }
-            if (maxDateFilter && !isNaN(maxDateFilter)) {
-                if (aData._date > maxDateFilter) {
-                    return false;
-                }
-            }
-            return true;
-        }
-    );
+    
     $('.card-header').on('click', function () {
         var papa = $(this).parents('.accordion');
         if ($(this).find('i').hasClass('fa-angle-down')) {
@@ -2225,20 +3063,22 @@ if (window.location.pathname === `/links/reportes`) {
         $('#Mora').html(data.meses ? `Mes(es) mora: ${data.meses}` : 'Mes(es) mora: Al dia');
         $('#Deuda').html(data.deuda ? `Deuda: $${Moneda(data.deuda)}` : 'Deuda: $0.000');
         $('#Abono').html(data.abonos ? `Abonado: $${Moneda(data.abonos)}` : 'Abonado: $0.000');
-        $('#Saldo').html('Saldo: $' + Moneda(data.Total - (data.abonos || 0)));
-        /* Comi.ajax.url("/links/productos/0").load(function () {
-            tabledit.columns.adjust().draw();
-        }); */
-        Comi.column(9).search(data.lote).draw();
-        Recibos.column(9).search(data.id).draw();
+        $('#Saldo').html('Saldo: $' + Moneda(data.Total - (data.abonos || 0)));        
+        //Comi.column(9).search(data.lote).draw();
+        //Recibos.column(9).search(data.id).draw();
         $('#ModalEstadoDetalles').modal({
             backdrop: 'static',
             keyboard: true,
             toggle: true
         });
         $('#ModalEstadoDetalles').on('shown.bs.modal', function (e) {
-            Recibos.columns.adjust().responsive.recalc();
-            Comi.columns.adjust().responsive.recalc();
+            Comi.ajax.url("/links/comisiones/" + data.id).load(function () {
+                Comi.columns.adjust().responsive.recalc();
+            });
+            Recibos.ajax.url("/links/rcb/" + data.id).load(function () {
+                Recibos.columns.adjust().responsive.recalc();
+            });
+            
         });
 
     })
@@ -2281,14 +3121,6 @@ if (window.location.pathname === `/links/reportes`) {
         comisiones.search(this.value).draw();
     });
     //////////////////////* Table3 *///////////////////////
-    $.ajax({
-        url: '/links/reportes/msg',
-        type: 'POST',
-        async: false,
-        success: function (data) {
-
-        }
-    });
     var area, productos, descuentos, total, abonos, salds,
         Fehsi = 'Origenes', Fehsf = 'Actualidad', proyct = 'TODOS LOS PROYECTOS';
     var f = [{
@@ -2334,9 +3166,6 @@ if (window.location.pathname === `/links/reportes`) {
             caseInsensitive: true,
         },
         responsive: {
-            /* details: {
-                type: 'column'
-            } */
             details: {
                 display: $.fn.dataTable.Responsive.display.childRowImmediate,
                 type: 'none',
@@ -2350,7 +3179,7 @@ if (window.location.pathname === `/links/reportes`) {
         ],
         ajax: {
             method: "POST",
-            url: "/links/reportes/recibos",
+            url: "/links/rcb/nada",
             dataSrc: "data"
         },
         initComplete: function (settings, json, row) {
@@ -2427,9 +3256,6 @@ if (window.location.pathname === `/links/reportes`) {
         }
     });
     Recibos.on("mouseenter", ".Reci", function () {
-        /* var fila = $(this).parents('tr');
-        var data = Recibos.row(fila).data(); */
-
         $('.recivos').popover({
             trigger: "hover",
             delay: { "show": 500, "hide": 100 },
@@ -2439,8 +3265,8 @@ if (window.location.pathname === `/links/reportes`) {
             //content: `<img src='https://grupoelitefincaraiz.com/${$(this).prop('id')}' alt='...' class='img-thumbnail'>`,
         });
     });
-    //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////  
-    var estadoscuentas = $('#estadoscuentas').DataTable({
+    //////////////////////* ESTADOS DE CUENTA RESUMIDOS */////////////////////// 
+/*     var estadoscuentas = $('#estadoscuentas').DataTable({
         processing: true,
         autowidth: true,
         //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
@@ -2451,12 +3277,6 @@ if (window.location.pathname === `/links/reportes`) {
             dataSrc: "data"
         },
         columns: [
-            /*{
-                className: 'control',
-                orderable: true,
-                data: null,
-                defaultContent: ''
-            },*/
             {
                 data: "mz",
                 render: function (data, method, row) {
@@ -2708,86 +3528,7 @@ if (window.location.pathname === `/links/reportes`) {
                 id: ''
             },
             className: 'btn btn-secondary'
-        },
-            /*{
-                extend: 'pdfHtml5',
-                text: 'PDF',
-                footer: true,
-                header: true,
-                title: "ESTADOS DE CUENTAS",
-                orientation: 'portrait',
-                customize: function (doc) {
-                    var lastColX = null;
-                    var lastColY = null;
-                    var bod = []; // esto se convertirá en nuestro nuevo cuerpo (una matriz de matrices (líneas))
-                    //Recorre todas las líneas de la tabla
-                    doc.content[1].table.body.forEach(function (line, i) {
-                        //Agrupar según la primera columna (ignorar las celdas vacías)
-                        if(lastColX != line[0].text && line[0].text != ''){
-                            //Agregar línea con encabezado de grupo
-                            bod.push([
-                                {
-                                    text:line[0].text, 
-                                    style:'tableHeader'
-                                },'','','','']);
-                            //Última actualización
-                            lastColX=line[0].text;
-                        }
-                        //Agrupe según la segunda columna (ignore las celdas vacías) con un estilo diferente
-                        if (lastColY != line[1].text && line[1].text != '') {
-                            //Agregar línea con encabezado de grupo
-                            bod.push(['', { text: line[1].text, style: 'subheader' }, '', '', '']);
-                            //Última actualización
-                            lastColY = line[1].text;
-                        }
-                        //Agregar línea con datos excepto datos agrupados
-                        if (i < doc.content[1].table.body.length - 1) {
-                            bod.push(['', '', 
-                                { text: line[2].text, style: 'defaultStyle' },
-                                { text: line[3].text, style: 'defaultStyle' },
-                                { text: line[4].text, style: 'defaultStyle' },
-                                { text: line[5].text, style: 'defaultStyle' },
-                                { text: line[6].text, style: 'defaultStyle' },
-                                { text: line[7].text, style: 'defaultStyle' }
-                            ]);
-                        }
-                        //Haga la última línea en negrita, azul y un poco más grande
-                        else {
-                            bod.push(['', '', { text: line[2].text, style: 'lastLine' },
-                                { text: line[3].text, style: 'lastLine' },
-                                { text: line[4].text, style: 'lastLine' }]);
-                        }
-     
-                    });
-                    //Sobrescriba el cuerpo de la tabla anterior con el nuevo.
-                    doc.content[1].table.headerRows = 12;
-                    doc.content[1].table.widths = [50, 50, 150, 100, 100];
-                    doc.content[1].table.body = bod;
-                    doc.content[1].layout = 'lightHorizontalLines';
-     
-                    doc.styles = {
-                        subheader: {
-                            fontSize: 7,
-                            bold: true,
-                            color: 'black'
-                        },
-                        tableHeader: {
-                            bold: true,
-                            fontSize: 5,
-                            color: 'black'
-                        },
-                        lastLine: {
-                            bold: true,
-                            fontSize: 10,
-                            color: 'blue'
-                        },
-                        defaultStyle: {
-                            fontSize: 5,
-                            color: 'black'
-                        }
-                    }
-                }
-            }*/
+        }
         ],
         fixedHeader: {
             headerOffset: -9
@@ -2800,11 +3541,7 @@ if (window.location.pathname === `/links/reportes`) {
             regex: true,
             caseInsensitive: true,
         },
-        responsive: true/*{
-            details: {
-                type: 'column'
-            }
-        }*/,
+        responsive: true,
         initComplete: function (settings, json) {
             //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
         },
@@ -2824,21 +3561,6 @@ if (window.location.pathname === `/links/reportes`) {
                 .reduce(function (a, b) {
                     return intVal(a) + intVal(b);
                 }, 0);
-            // Total en todas las páginas
-            /*area2 = api
-                .column(3, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);*/
-            // Total en esta página
-            /*pageTotal = api
-                .column(4, { page: 'current' })
-                .data()
-                .reduce(function (a, b) {
-                    console.log(a, b)
-                    return intVal(a) + intVal(b);
-                }, 0);*/
             productos = api
                 .column(3, { order: 'applied', search: 'applied' })
                 .data()
@@ -2864,18 +3586,11 @@ if (window.location.pathname === `/links/reportes`) {
                     return intVal(a) + intVal(b);
                 }, 0);
             //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-            // Actualizar pie de página
-            /*$(api.column(13).footer()).html(
-                $('#saldos').val('$' + pageTotal + ' ( $' + total + ' total)')
-     
-            );*/
         },
         rowCallback: function (row, data, index) {
-            /*if (data["estado"] == 9) {
-                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-            }*/
         }
     });
+    
     $('.min, .max').on('keyup', function () {
         var col = $(this).hasClass('min') ? 1 : 2;
         var buscar = this.value ? "^" + this.value + "$" : '';
@@ -2884,7 +3599,7 @@ if (window.location.pathname === `/links/reportes`) {
             .search(buscar, true, false, true)
             .draw();
     });
-
+ */
     /*$('#resumen').click(function () {
         $('#stadoreportes').hide('slow');
         $('#stadocuentasd').hide('slow');
@@ -4408,7 +5123,7 @@ if (window.location.pathname === `/links/reportes`) {
             language: languag,
             ajax: {
                 method: "POST",
-                url: "/links/reportes/comision",
+                url: "/links/comisiones/nada",
                 dataSrc: "data"
             },
             initComplete: function (settings, json, row) {
@@ -4686,12 +5401,12 @@ if (window.location.pathname === `/links/reportes`) {
                     data: "ids",
                     render: function (data, method, row) {
                         return rol.admin ? `
-                    <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
-                    <div class="dropdown-menu">
-                        <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
-                        <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
-                        <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
-                    </div>` : ''
+                        <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
+                        <div class="dropdown-menu">
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                        </div>` : ''
                     }
                 }
             ],
@@ -4764,7 +5479,7 @@ if (window.location.pathname === `/links/reportes`) {
                 ID = '', BANCO = '', TCTA = '', NCTA = '', TOTAL = 0,
                 MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0,
                 cuerpo = [], Ids = [];
-
+    
             var enviarCuentaCobro = () => {
                 var fd = new FormData();
                 var doc = new jsPDF('p', 'mm', 'a4');
@@ -4948,7 +5663,7 @@ if (window.location.pathname === `/links/reportes`) {
                                     doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
                                     doc.setFontSize(8)
                                     doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
-
+    
                                     doc.setFontSize(10)
                                     doc.text('DEBE A:', data.settings.margin.left, 63)
                                     doc.setFontSize(12)
@@ -4959,11 +5674,11 @@ if (window.location.pathname === `/links/reportes`) {
                                     doc.text(MOVIL, data.settings.margin.left, 78)
                                     doc.setFontSize(8)
                                     doc.text(EMAIL, data.settings.margin.left, 81)
-
+    
                                     doc.setFontSize(9)
                                     doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
-
-
+    
+    
                                     // Footer
                                     var str = 'Page ' + doc.internal.getNumberOfPages()
                                     // Total page number plugin only available in jspdf v1.0+
@@ -4971,7 +5686,7 @@ if (window.location.pathname === `/links/reportes`) {
                                         str = str + ' of ' + totalPagesExp
                                     }
                                     doc.setFontSize(8)
-
+    
                                     // jsPDF 1.4+ uses getWidth, <1.4 uses .width
                                     var pageSize = doc.internal.pageSize
                                     var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
@@ -5004,7 +5719,7 @@ if (window.location.pathname === `/links/reportes`) {
                                     console.log(data);
                                 }
                             });
-
+    
                         } else {
                             $('#ModalEventos').modal('hide');
                             SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
@@ -5149,210 +5864,6 @@ if (window.location.pathname === `/links/reportes`) {
             })
         }
     }
-    var comisionesOLD;
-    rol.externo ? '' : comisionesOLD = $('#comisionesOLD').DataTable({
-        dom: 'Bfrtip',
-        buttons: [
-            {
-                extend: 'pageLength',
-                text: 'Ver',
-                orientation: 'landscape'
-            },
-            {
-                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-                        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                        stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack">
-                            <path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path>
-                            <path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path>
-                            <path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path>
-                            <path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path>
-                            <path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path>
-                            <path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path>
-                            <path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path>
-                            <path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>`,
-                attr: {
-                    title: 'Generar cuenta de cobro',
-                    id: ''
-                },
-                className: 'btn btn-secondary',
-                action: function () {
-                    //CuentaCobro();
-                }
-            },
-            {
-                text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
-                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
-                    stroke-linecap="round" stroke-linejoin="round" class="feather feather-filter">
-                    <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
-                </svg>`,
-                attr: {
-                    title: 'Inspeccion de linea desendente',
-                    id: ''
-                },
-                className: 'btn btn-secondary',
-                action: function () {
-                    /*$.ajax({
-                        type: 'POST',
-                        url: '/links/desendentes',
-                        beforeSend: function (xhr) {
-                            $('#ModalEventos').modal({
-                                backdrop: 'static',
-                                keyboard: true,
-                                toggle: true
-                            });
-                        },
-                        success: function (data) {
-                            if (data) {
-                                SMSj('success', `Solicitud procesada correctamente`);
-                                comisiones.ajax.reload(null, false);
-                                $('#ModalEventos').modal('hide');
-                            } else {
-                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
-                                $('#ModalEventos').modal('hide');
-                            }
-                        },
-                        error: function (data) {
-                            console.log(data);
-                        }
-                    })*/
-                }
-            }
-        ],
-        deferRender: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: true,
-        },
-        responsive: {
-            details: {
-                type: 'column'
-            }
-        },
-        columnDefs: [{
-            className: 'control',
-            orderable: true,
-            targets: 0
-        },
-        { responsivePriority: 1, targets: -1 },
-        { responsivePriority: 1, targets: -2 }],
-        //{className: "dt-center", targets: "_all"}],
-        order: [[1, "desc"]],
-        language: languag,
-        ajax: {
-            method: "POST",
-            url: "/links/reportes/comisionOLD",
-            dataSrc: "data"
-        },
-        /*initComplete: function (settings, json, row) {
-                                        alert(row);
-        },*/
-        columns: [
-            {
-                data: null,
-                defaultContent: ''
-            },
-            { data: "ids" },
-            { data: "nam" },
-            {
-                data: "fech",
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD') //pone la fecha en un formato entendible
-                }
-            },
-            { data: "fullname" },
-            { data: "nombre" },
-            {
-                data: "total",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            {
-                data: "monto",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            {
-                data: "porciento",
-                render: function (data, method, row) {
-                    return `%${(data * 100).toFixed(2)}` //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            }, {
-                data: "retefuente",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            }, {
-                data: "reteica",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            }, {
-                data: "pagar",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            },
-            { data: "concepto" },
-            { data: "descp" },
-            { data: "proyect" },
-            { data: "mz" },
-            { data: "n" },
-            {
-                data: "stado",
-                render: function (data, method, row) {
-                    switch (data) {
-                        case 4:
-                            return `<span class="badge badge-pill badge-dark">Pagada</span>`
-                            break;
-                        case 6:
-                            return `<span class="badge badge-pill badge-danger">Declinada</span>`
-                            break;
-                        case 3:
-                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
-                            break;
-                        case 15:
-                            return `<span class="badge badge-pill badge-warning">Inactiva</span>`
-                            break;
-                        case 9:
-                            return `<span class="badge badge-pill badge-success">Disponible</span>`
-                            break;
-                        default:
-                            return `<span class="badge badge-pill badge-primary">Sin info</span>`
-                    }
-                }
-            },
-            {
-                className: 't',
-                data: "ids",
-                //defaultContent: 
-                render: function (data, method, row) {
-                    return rol.admin ? `<div class="btn-group btn-group-sm">
-                                        <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
-                                            aria-haspopup="true" aria-expanded="false">Acción</button>
-                                        <div class="dropdown-menu">
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
-                                            <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
-                                        </div>
-                                    </div>` : ''
-                }
-            }
-        ],
-        rowCallback: function (row, data, index) {
-            if (data["stado"] == 3) {
-                $(row).css("background-color", "#00FFFF");
-            } else if (data["stado"] == 4) {
-                $(row).css({ "background-color": "#008080", "color": "#FFFFCC" });
-            } else if (data["stado"] == 9) {
-                $(row).css("background-color", "#40E0D0");
-            } else if (data["stado"] == 15) {
-                $(row).css("background-color", "#FFFFCC");
-            }
-        }
-    });
     $('#min, #max').on('keyup', function () {
         var col = $(this).attr('id') === 'min' ? 3 : 4;
         var col2 = $(this).attr('id') === 'min' ? 15 : 16;
@@ -5378,256 +5889,6 @@ if (window.location.pathname === `/links/reportes`) {
     $('#collapse4').on('shown.bs.collapse', function () {
         comisiones.columns.adjust().responsive.recalc();
     });
-    var th = () => {
-        /*
-            var doc = new jsPDF()
-            var img2 = new Image();
-            var img = new Image();
-            img.src = '/img/avatars/avatar.png'
-            img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
-            var totalPagesExp = '{total_pages_count_string}'
-        
-            //doc.setFontSize(18)
-            //doc.text('With content', 14, 22)
-            doc.setTextColor(0)
-            doc.setFontStyle('normal')
-            if (img) {
-                doc.addImage(img, 'png', 13, 10, 15, 20)
-                doc.addImage(img2, 'png', 183, 15, 15, 15)
-            }
-            doc.setFontSize(15)
-            doc.setTextColor(110)
-            doc.text('CONSTRUCCIONES CAMPESTRES', 105, 25, null, null, "center");
-           
-        
-            doc.setFontSize(11)
-            doc.setTextColor(0)
-        
-            // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-            var pageSize = doc.internal.pageSize
-            var pageWidth = pageSize.width ? pageSize.width : pageSize.getWidth()
-            var titulo = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, pageWidth - 10, {})
-            var parrafo = doc.splitTextToSize(`Entre los suscritos a saber, por una parte, `, pageWidth - 10, {})
-            var text1 = doc.splitTextToSize(`PONTEVEDRA PROMOTORA S.A.S., `, pageWidth - 10, {})
-            var text2 = doc.splitTextToSize(`sociedad comercial legalmente constituida, con domicilio principal en la ciudad de Turbaco-Bolivar, con matrícula mercantil número `, pageWidth - 10, {})
-            var text3 = doc.splitTextToSize(`09-394948-12 `, pageWidth - 10, {})
-            var text4 = doc.splitTextToSize(`de fecha 03-05-2018, con `, pageWidth - 10, {})
-            var text5 = doc.splitTextToSize(`Nit. 901177360-5`, pageWidth - 10, {})
-            var text6 = doc.splitTextToSize(`, representada legalmente  por  `, pageWidth - 10, {})
-            var text6 = doc.splitTextToSize(`JUANA TERESA BRAY BOHORQUEZ`, pageWidth - 10, {})
-            var text7 = doc.splitTextToSize(`, mujer, mayor de edad, identificada con la `, pageWidth - 10, {})
-            var text8 = doc.splitTextToSize(`C.C 45.582.407`, pageWidth - 10, {})
-            var text9 = doc.splitTextToSize(`del Carmen de Bolívar, quien para los efectos del presente contrato será  LA  PROMITENTE VENDEDORA; y por la otra parte, `, pageWidth - 10, {})
-            var text10 = doc.splitTextToSize(`LAURA ANDREA RICAURTE VALDERRAMA`, pageWidth - 10, {})
-            var text11 = doc.splitTextToSize(`C.C 1.050.952.779`, pageWidth - 10, {})
-            var text12 = doc.splitTextToSize(` y `, pageWidth - 10, {})
-            var text13 = doc.splitTextToSize(`MARIA JOSE RICAURTE VALDERRAMA`, pageWidth - 10, {})
-            var text14 = doc.splitTextToSize(`C.C 1.047.496.162`, pageWidth - 10, {})
-            var text15 = doc.splitTextToSize(` de CARTAGENA-BOLIVAR, con Dirección Cartagena, Bolívar Urbanización la Española Mz o Casa 6 quien para los efectos de este contrato será `, pageWidth - 10, {})
-            var text16 = doc.splitTextToSize(` EL PROMITENTE COMPRADOR`, pageWidth - 10, {})
-            var text17 = doc.splitTextToSize(`, acordamos celebrar el presente `, pageWidth - 10, {})
-            var text18 = doc.splitTextToSize(`CONTRATO DE PROMESA DE COMPRAVENTA`, pageWidth - 10, {})
-            var text19 = doc.splitTextToSize(`, previas las siguientes consideraciones:`, pageWidth - 10, {})
-            doc.text(titulo, 105, 40, null, null, "center");
-        
-            doc.setTextColor(100)
-            doc.text(parrafo, 13, 50)
-            doc.setTextColor(0)
-            doc.text(text1, 13, 50)
-            doc.text("This is centred text.", 105, 80, null, null, "center");
-            doc.text("And a little bit more underneath it.", 105, 90, null, null, "center");
-            doc.text("This is right aligned text", 200, 100, null, null, "right");
-            doc.text("And some more", 200, 110, null, null, "right");
-            doc.text("Back to left", 20, 120);*/
-        /*doc.setTextColor(100)
-        doc.text(text2, 13, 50)
-        doc.setTextColor(0)
-        doc.text(text3, 13, 50)
-        doc.setTextColor(100)
-        doc.text(text4, 13, 50)
-        doc.setTextColor(0)
-        doc.text(text5, 13, 50)
-        doc.setTextColor(100)
-        doc.text(text6, 13, 50)
-        doc.setTextColor(0)
-        doc.text(text7, 13, 50)
-        doc.setTextColor(100)
-        doc.text(text8, 13, 50)
-        doc.setTextColor(0)
-        doc.text(text9, 13, 50)*/
-        //doc.addPage("a3"); 
-        /*doc.autoTable({
-            head: [
-                { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
-            ],
-            body: [{
-                id: '',
-                name: '',
-                email: '',
-                city: 'RECIBO DE CAJA',
-                expenses: 'data.ids'
-            },
-            {
-                id: 'CLIENTE',
-                name: 'data.nombre + ',
-                email: 'CC:  + data.document',
-                city: 'data.movil',
-                expenses: ''
-            },
-            {
-                id: 'PRODUCTO',
-                name: 'data.proyect',
-                email: 'MZ.  data.mz',
-                city: 'LT. ',
-                expenses: ''
-            },
-            {
-                id: 'CONCEPTO',
-                name: 'ABONO',
-                email: 'data.descp',
-                city: 'CUOTA #',
-                expenses: 'NO APLICA'
-            },
-            {
-                id: 'F PAGO',
-                name: 'data.formap',
-                email: 'R  data.recibo',
-                city: 'MONTO',
-                expenses: '$ + Moneda(data.monto)'
-            },
-            {
-                id: 'BONO',
-                name: 'NO APLICA',
-                email: 'R5 0',
-                city: 'MONTO',
-                expenses: '$'
-            },
-            {
-                id: 'TOTAL',
-                name: `MCT********`,
-                email: '',
-                city: '',
-                expenses: '$'
-            },
-            {
-                id: 'SLD FECHA',
-                name: ` MCT********`,
-                email: '',
-                city: '',
-                expenses: '$'
-            },
-            {
-                id: 'TOTAL SLD',
-                name: `MCT********`,
-                email: '',
-                city: '',
-                expenses: '$'
-            }],
-            //html: '#tablarecibo',
-            //showHead: false,
-            columnStyles: {
-                //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                id: { textColor: 0, fontStyle: 'bold' },
-                0: { cellWidth: '50' },
-                1: { cellWidth: 'auto' },
-                2: { cellWidth: 'wrap' },
-                3: { cellWidth: 'wrap' },
-            },
-            /*didDrawPage: function (data) {
-                // Header
-                doc.setTextColor(0)
-                doc.setFontStyle('normal')
-                if (img) {
-                    doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
-                    doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
-                }
-                doc.setFontSize(15)
-                doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
-                doc.setFontSize(7)
-                doc.text('2020-08-28', data.settings.margin.left + 170, 8)
-                doc.setFontSize(10)
-                doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
-                doc.setFontSize(10)
-                doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
-                doc.setFontSize(8)
-                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
-     
-                doc.setDrawColor(0, 255, 0)
-                    .setLineWidth(1 / 72)
-                doc.setFontSize(8)
-                doc.text(`CONTRATO DE PROMESA DE COMPRAVENTA LOTE 5 MANZANA 10 DEL PROYECTO URBANISTICO CONDOMINIO PRADO DE PONTEVEDRA.`, data.settings.margin.left, 40)
-     
-                // Footer
-                var str = 'Page ' + doc.internal.getNumberOfPages()
-                // Total page number plugin only available in jspdf v1.0+
-                if (typeof doc.putTotalPages === 'function') {
-                    str = str + ' of ' + totalPagesExp
-                }
-                doc.setFontSize(8)
-     
-                // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                var pageSize = doc.internal.pageSize
-                var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-                doc.text(`https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
-            },*//*
-margin: { top: 200 },
-startY: 200,
-showHead: 'firstPage',
-})
-// Total page number plugin only available in jspdf v1.0+
-if (typeof doc.putTotalPages === 'function') {
-doc.putTotalPages(totalPagesExp)
-}
-doc.output('dataurlnewwindow')
-
-var pageWidth = 8.5,
-lineHeight = 1.2,
-margin = 0.5,
-maxLineWidth = pageWidth - margin * 2,
-fontSize = 24,
-ptsPerInch = 72,
-oneLineHeight = (fontSize * lineHeight) / ptsPerInch,
-text =
-"Two households, both alike in dignity,\n" +
-"In fair Verona, where we lay our scene,\n" +
-"From ancient grudge break to new mutiny,\n" +
-"Where civil blood makes civil hands unclean.\n" +
-"From forth the fatal loins of these two foes\n" +
-"A pair of star-cross'd lovers take their life;\n" +
-"Whole misadventured piteous overthrows\n" +
-"Do with their death bury their parents' strife.\n" +
-"The fearful passage of their death-mark'd love,\n" +
-"And the continuance of their parents' rage,\n" +
-// Tenga en cuenta que lo siguiente se ajustará automáticamente a dos líneas.
-"Which, but their children's end, nought could remove, Is now the two hours' traffic of our stage;\n" +
-"The which if you with patient ears attend,\n" +
-"What here shall miss, our toil shall strive to mend.",
-doc = new jsPDF({
-unit: "in",
-lineHeight: lineHeight
-}).setProperties({ title: "String Splitting" });
-
-// splitTextToSize toma su cadena y la convierte en una matriz de cadenas,
-// cada uno de los cuales se puede mostrar dentro del maxLineWidth especificado.
-var textLines = doc
-.setFont("helvetica")
-.setFontSize(fontSize)
-.splitTextToSize(text, maxLineWidth);
-
-// doc.text ahora puede agregar esas líneas fácilmente; de lo contrario, habría salido de la pantalla el texto.
-doc.text(textLines, margin, margin + 2 * oneLineHeight);
-
-// También puede calcular la altura del texto de manera muy simple:
-var textHeight = (textLines.length * fontSize * lineHeight) / ptsPerInch;
-doc
-.setFont("Helvetica", "bold")
-.text(
-"Text Height: " + textHeight + " inches",
-margin,
-margin + oneLineHeight
-);
-*/
-    }
 }
 /////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}` && !rol.externo) {
@@ -7992,7 +8253,6 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
         fila.toggleClass('selected');
         $('#ModalEventos').modal({
             toggle: true,
-            backdrop: 'static',
             keyboard: true,
         });
         $("#cuadro2").show("slow");
@@ -8020,10 +8280,31 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
         $(this).find('input').mask('#.##$', { reverse: true });
         $(this).find('input').select()
     });
+    var subirExcel = () => {
+        var formData = new FormData(document.getElementById("productoExcel"));
+        $.ajax({
+            url: '/links/excelcrearproducto',
+            data: formData,
+            type: 'POST',
+            processData: false,
+            contentType: false,
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal('toggle');
+            },
+            success: function (data) {
+                if (data.res) {
+                    SMSj('success', data.msg)
+                } else {
+                    SMSj('error', data.msg)
+                }
+                $('#fileExcel').val(null)
+            }
+        });
+    }
     var table2 = $('#datatable2').DataTable({
         dom: 'Bfrtip',
-        buttons: ['pageLength',
-            rol.subadmin ? {
+        buttons: rol.subadmin && ['pageLength',
+            /* {
                 text: `<div class="mb-0">
                             <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">+ Producto</span>
                         </div>`,
@@ -8050,7 +8331,33 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
                     $('#inicio').val(start.format("YYYY-MM-DD"))
                     $('#fin').val(end.format("YYYY-MM-DD"))
                 }
-            } : 'print',
+            } */
+            {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" data-feather="file-text"></i> <span class="align-middle">Crear</span>
+                        </div>`,
+                attr: {
+                    title: 'Descarga formato excel para crear productos',
+                    id: 'crear'
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    window.location.href = '/uploads/CREACION DE PRODUCTOS.xlsx';
+                }
+            }, {
+                text: `<div class="mb-0">
+                            <i class="align-middle mr-2" type="file" name="image" data-feather="file-text"></i> <span class="align-middle">Subir</span>
+                        </div>`,
+                attr: {
+                    title: 'Sube un excel para crear productos',
+                    id: 'subir'
+                },
+                className: 'btn btn-secondary',
+                action: function () {
+                    $('#fileExcel').click();
+                    //window.location.href = '/uploads/CREACION DE PRODUCTOS.xlsx';
+                }
+            }
         ],
         deferRender: true,
         autoWidth: false,
