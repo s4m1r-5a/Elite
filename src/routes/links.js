@@ -3702,7 +3702,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
         WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
-        AND pr.tipobsevacion IS NULL ${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
+        AND pr.tipobsevacion IS NULL ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id} 
 
         respuesta = { "data": solicitudes };
         res.send(respuesta);
