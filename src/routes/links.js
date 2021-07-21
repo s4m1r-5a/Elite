@@ -1569,40 +1569,66 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 })
 router.get('/prueba2', async (req, res) => {
     const ruta = path.join(__dirname, '../public/uploads/libroej.json');
-    const ruta2 = path.join(__dirname, '../public/uploads/Libro de ejemplo.xlsx');
+    const ruta2 = path.join(__dirname, '../public/uploads/CREACION DE PRODUCTOS.xlsx');
 
-    fs.exists(ruta2, function (exists) {
+    /* fs.exists(ruta2, function (exists) {
         console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
         if (exists) {
             fs.unlink(ruta2, function (err) {
                 if (err) console.log(err);
-                console.log('Archivo eliminado');
+                console.log('Archivo eliminado'); 
                 return 'Archivo eliminado';
             });
         } else {
             console.log('El archivo no exise');
             return 'El archivo no exise';
         }
-    })
-    const content = await pool.query(`SELECT d.proyect, l.mz, l.n lt, c.nombre, c.documento, 
+    }) */
+    /* const content = await pool.query(`SELECT d.proyect, l.mz, l.n lt, c.nombre, c.documento, 
     c.movil, s.fech fecha, s.concepto, s.descp, s.stado, s.monto, s.recibo, 
     REPLACE(s.img, "/uploads", "https://grupoelitefincaraiz.com/uploads") img 
     FROM solicitudes s INNER JOIN preventa p ON p.id = s.orden 
     INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
     INNER JOIN clientes c ON c.idc = p.cliente WHERE s.concepto IN('PAGO', 'ABONO') 
     AND d.proyect IN('PRADOS DE PONTEVEDRA', 'COLINAS DE PONTEVEDRA') 
-    ORDER BY d.proyect, l.mz, l.n, s.fech`);
+    ORDER BY d.proyect, l.mz, l.n, s.fech`); */
+    //const content = await pool.query(`SELECT * FROM productos ORDER BY id`);
     //console.log(datos)
 
     //let content = JSON.parse(fs.readFileSync(ruta, 'utf8'));
     //console.log(content)
 
-    let newWB = XLSX.utils.book_new()
+    /* let newWB = XLSX.utils.book_new()
     let newWS = XLSX.utils.json_to_sheet(content)
     XLSX.utils.book_append_sheet(newWB, newWS, 'samir');
-    XLSX.writeFile(newWB, ruta2)
+    XLSX.writeFile(newWB, ruta2) */
 
-    res.redirect('/uploads/Libro de ejemplo.xlsx')
+    const excel = XLSX.readFile(ruta2);
+    const hojas = excel.SheetNames;
+    const hoja = hojas[0], productos = hojas[1], proyecto = hojas[2];
+    console.log(hojas, hoja, productos, proyecto)
+    //const datos = XLSX.utils.sheet_to_json(excel.Sheets[hoja]);
+    const proyectoJson = await XLSX.utils.sheet_to_json(excel.Sheets[proyecto], {
+        cellDates: true
+    });
+    const productosJson = await XLSX.utils.sheet_to_json(excel.Sheets[productos]);
+    if (!proyectoJson[0].id) {
+        delete proyectoJson[0].id;
+        proyectoJson[0] = {
+            ...proyectoJson[0],
+            fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
+            fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
+        }
+        const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
+        const datos = await productosJson.filter(e => e.mz).map(async (e, i) => {
+            const das = await pool.query('INSERT INTO productosd SET ? ', {
+                ...e,
+                producto: proyectoAdd.insertId
+            });
+            return das.insertId;
+        });
+    }
+    res.send(true)
 
 
     /* var data = JSON.stringify({
@@ -1982,6 +2008,61 @@ router.post('/excelprod', async (req, res) => {
     })
     //res.json(e);
     res.send(e);
+});
+router.get('/excelformato', async (req, res) => {
+    //res.redirect('/uploads/Libro de ejemplo.xlsx')
+    res.send('/uploads/Libro de ejemplo.xlsx');
+});
+router.post('/excelcrearproducto', async (req, res) => {
+    console.log(req.files)
+    const fil = req.files[0];
+    let resp = {};
+
+    /* const ruta = path.join(__dirname, '../public/uploads/libroej.json');
+    const ruta2 = path.join(__dirname, '../public/uploads/CREACION DE PRODUCTOS.xlsx'); */
+
+    const excel = XLSX.readFile(fil.path);
+    const hojas = excel.SheetNames;
+    const productos = hojas[1];
+    const proyecto = hojas[2];
+
+    const proyectoJson = await XLSX.utils.sheet_to_json(excel.Sheets[proyecto]);
+    const productosJson = await XLSX.utils.sheet_to_json(excel.Sheets[productos]);
+
+    if (!proyectoJson[0].id) {
+        delete proyectoJson[0].id;
+        proyectoJson[0] = {
+            ...proyectoJson[0],
+            fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
+            fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
+        }
+        const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
+        const datos = await productosJson.filter(e => e.mz).map(async (e, i) => {
+            const das = await pool.query('INSERT INTO productosd SET ? ', {
+                ...e,
+                producto: proyectoAdd.insertId
+            });
+            return das.insertId;
+        });
+        resp = { res: true, msg: "El producto fue creado con exito." }
+    } else {
+        resp = { res: false, msg: "El producto no fue creado porque el excel iba con un id de producto." }
+    }
+    fs.exists(fil.path, function (exists) {
+        if (exists) {
+            fs.unlink(fil.path, function (err) {
+                if (err) console.log(err);
+                //console.log('Archivo eliminado');
+                return true;
+            });
+        } else {
+            //resp.msg += '\nEl archivo no se elimino por que no exise';
+            //console.log('El archivo no exise');
+            return false;
+        }
+    })
+    console.log('quien va primero')
+    res.send(resp);
 });
 //////////////* RED *//////////////////////////////////
 router.get('/red', noExterno, async (req, res) => {
@@ -3248,6 +3329,31 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     respuesta = { "data": w.filter(Boolean) };
     res.send(respuesta);
 })
+//////////////* COMISIONES *//////////////////////////////////
+router.get('/comisiones', isLoggedIn, (req, res) => {
+    res.render('links/comisiones');
+});
+router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+
+    if (id !== 'nada' && !req.user.externo) {
+        const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+        s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
+        u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
+        cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+        INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
+        INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
+        INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
+        WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
+        AND pr.tipobsevacion IS NULL AND pr.id = ?`, id);
+
+        respuesta = { "data": solicitudes };
+        res.send(respuesta);
+    } else {
+        respuesta = { "data": [] }; 
+        res.send(respuesta);
+    }
+});
 //////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, (req, res) => {
     res.render('links/reportes');
@@ -3367,17 +3473,6 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         sqlr += ' END WHERE id IN(' + idss + ')';
         //console.log(sqlr)
         await pool.query(sqlr);*/
-
-    } else if (id === 'recibos') {
-        let prd;
-        if (req.user.externo) {
-            const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
-            prd = prcd.map(e => e.producto);
-        }
-        let n = prd ? `AND orden IN (${prd})` : '';
-        const so = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN ('PAGO','ABONO') ${n} ORDER BY ids`);
-        respuesta = { "data": so };
-        res.send(respuesta);
 
     } else if (id == 'estadosc') {
 
@@ -3680,12 +3775,20 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
         res.send(true);
-    } else if (id === 'msg') {
-
-        console.log(req.headers.origin)
-
     }
 });
+router.post('/rcb/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    if (id !== 'nada') {
+        const so = await pool.query(`SELECT * FROM solicitudes 
+        WHERE concepto IN ('PAGO','ABONO') AND orden = ? ORDER BY ids`, id);
+        respuesta = { "data": so };
+        res.send(respuesta);
+    } else {
+        respuesta = { "data": [] }; 
+        res.send(respuesta);
+    }
+})
 router.post('/std/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
     if (id === 'bank') {
@@ -3719,7 +3822,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.id = ? AND p.tipobsevacion IS NULL`, id); //  AND p.status IN(2, 3)
 
-    console.log(comi, id, asesor, directas, sep, bon) // incntivo
+    //console.log(comi, id, asesor, directas, sep, bon) // incntivo
 
     if (directas.length > 0) {
         var hoy = moment().format('YYYY-MM-DD');
@@ -4016,7 +4119,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
         const { ids, acumulado, ahora, idExtracto } = req.body;
 
         const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-        const R = await PagosAbonos(ids, pdf, req.user.fullname); 
+        const R = await PagosAbonos(ids, pdf, req.user.fullname);
         var w = { acumulado, aprobado: ahora };
         idExtracto && (w.extrato = idExtracto);
         if (R) {

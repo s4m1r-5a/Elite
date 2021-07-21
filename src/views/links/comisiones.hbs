@@ -1,0 +1,356 @@
+{{#if user.externo}}
+
+{{else if user.auxicontbl}}
+
+<div class="accordion" id="accordion2">
+    <div class="card">
+        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
+            aria-controls="collapse">
+            <strong class="text-muted">COMISIONES</strong><br>
+            <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
+            <i class="fas fa-angle-down float-right"></i>
+        </div>
+        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion2">
+            <div class="card-body text-center responsive">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#men1" role="button"
+                            aria-expanded="false" aria-controls="men">Ver</a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="#men2" role="button"
+                            aria-expanded="false" aria-controls="men2">
+                            <i class="align-middle" data-feather="sliders"></i>
+                        </a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0"
+                            onclick="CuentaCobro()">
+                            <i class="align-middle" data-feather="slack"></i>
+                        </a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0" role="button"
+                            aria-expanded="false" aria-controls="men2">
+                            <input id="busq2" type="text" class="edi text-center"
+                                style="width: 150px; padding: 1px; border: 0;" placeholder="Buscar...">
+                        </a>
+
+                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#men3" role="button"
+                            aria-expanded="false" aria-controls="menu3">Buscar</a>
+                    </div>
+                </nav>
+                <div class="accordion" id="men">
+                    <nav class="nav flex-column flex-sm-row collapse" id="men1" aria-labelledby="headingOne"
+                        data-parent="#men">
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', -1)"><i class="fas fa-tasks"></i> Todas</a>
+                    </nav>
+                    <nav class="nav nav-fill collapse" id="men2" aria-labelledby="headingOne" data-parent="#men">
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Disponible')"><i class="fas fa-donate"></i>
+                            Disponibles</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
+                            Pendientes</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Declinada')"><i class="fas fa-comments-dollar"></i>
+                            Declinadas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Inactiva')"><i class="fas fa-landmark"></i>
+                            Inactivas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Auditando')"><i class="fas fa-landmark"></i>
+                            Auditando</a>
+                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Pagada')"><i class="fas fa-coins"></i>
+                            Pagadas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
+                            onclick="STAD('#comisiones', '', '')"><i class="fas fa-chart-pie"></i>
+                            Todas</a>
+                    </nav>
+                    <div class="collapse" id="men3" aria-labelledby="headingOne" data-parent="#men">
+                        <div class="card card-body">
+                            <select class="select2 productos"></select>
+                        </div>
+                    </div>
+                </div>
+                <table id="comisiones" class="table table-sm table-striped table-hover display nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Id</th>
+                            <th>Asesor</th>
+                            <th>Fecha</th>
+                            <th>Benefactor</th>
+                            <th>Cliente</th>
+                            <th>Venta</th>
+                            <th>Monto</th>
+                            <th>%</th>
+                            <th>Retefuente</th>
+                            <th>Reteica</th>
+                            <th>Total</th>
+                            <th>Concepto</th>
+                            <th>Descp</th>
+                            <th>Proyct</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
+                            <th>Estado</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="accordion" id="accordion3">
+    <div class="card bg-light mt-2">
+        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse5" aria-expanded="true"
+            aria-controls="collapse">
+            <strong class="text-muted">COMISIONES OLVIDADAS</strong><br>
+            <small class="text-muted">Haz caso omiso a lo que se muestra aquiS</small>
+            <i class="fas fa-angle-up float-right"></i>
+        </div>
+        <div id="collapse5" class="collapse" aria-labelledby="headingOne" data-parent="#accordion3">
+            <div class="card-body text-center">
+                <table id="comisionesOLD" class="table table-sm table-striped table-hover display nowrap show"
+                    style="width:100%">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Id</th>
+                            <th>Asesor</th>
+                            <th>Fecha</th>
+                            <th>Benefactor</th>
+                            <th>Cliente</th>
+                            <th>Venta</th>
+                            <th>Monto</th>
+                            <th>%</th>
+                            <th>Retefuente</th>
+                            <th>Reteica</th>
+                            <th>Total</th>
+                            <th>Concepto</th>
+                            <th>Descp</th>
+                            <th>Proyct</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
+                            <th data-priority="2">Estado</th>
+                            <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+                            <th data-priority="1">Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{else}}
+
+
+<div class="accordion" id="accordion2">
+    <div class="card">
+        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
+            aria-controls="collapse">
+            <strong class="text-muted">COMISIONES</strong><br>
+            <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
+            <i class="fas fa-angle-down float-right"></i>
+        </div>
+        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion2">
+            <div class="card-body text-center responsive">
+                <nav>
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#men1" role="button"
+                            aria-expanded="false" aria-controls="men">Ver</a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="#men2" role="button"
+                            aria-expanded="false" aria-controls="men2">
+                            <i class="align-middle" data-feather="sliders"></i>
+                        </a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0"
+                            onclick="CuentaCobro()">
+                            <i class="align-middle" data-feather="slack"></i>
+                        </a>
+
+                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0" role="button"
+                            aria-expanded="false" aria-controls="men2">
+                            <input id="busq2" type="text" class="edi text-center"
+                                style="width: 150px; padding: 1px; border: 0;" placeholder="Buscar...">
+                        </a>
+
+                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#men3" role="button"
+                            aria-expanded="false" aria-controls="menu3">Buscar</a>
+                    </div>
+                </nav>
+                <div class="accordion" id="men">
+                    <nav class="nav flex-column flex-sm-row collapse" id="men1" aria-labelledby="headingOne"
+                        data-parent="#men">
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
+                            onclick="VER('#comisiones', -1)"><i class="fas fa-tasks"></i> Todas</a>
+                    </nav>
+                    <nav class="nav nav-fill collapse" id="men2" aria-labelledby="headingOne" data-parent="#men">
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Disponible')"><i class="fas fa-donate"></i>
+                            Disponibles</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
+                            Pendientes</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Declinada')"><i class="fas fa-comments-dollar"></i>
+                            Declinadas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Inactiva')"><i class="fas fa-landmark"></i>
+                            Inactivas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Auditando')"><i class="fas fa-landmark"></i>
+                            Auditando</a>
+                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
+                            onclick="STAD('#comisiones', 17, 'Pagada')"><i class="fas fa-coins"></i>
+                            Pagadas</a>
+                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
+                            onclick="STAD('#comisiones', '', '')"><i class="fas fa-chart-pie"></i>
+                            Todas</a>
+                    </nav>
+                    <div class="collapse" id="men3" aria-labelledby="headingOne" data-parent="#men">
+                        <div class="card card-body">
+                            <select class="select2 productos"></select>
+                        </div>
+                    </div>
+                </div>
+                <table id="comisiones" class="table table-sm table-striped table-hover display nowrap w-100">
+                    <thead>
+                        <tr>
+                            <th></th>
+                            <th>Id</th>
+                            <th>Asesor</th>
+                            <th>Fecha</th>
+                            <th>Benefactor</th>
+                            <th>Cliente</th>
+                            <th>Venta</th>
+                            <th>Monto</th>
+                            <th>%</th>
+                            <th>Retefuente</th>
+                            <th>Reteica</th>
+                            <th>Total</th>
+                            <th>Concepto</th>
+                            <th>Descp</th>
+                            <th>Proyct</th>
+                            <th>Mz</th>
+                            <th>Lt</th>
+                            <th>Estado</th>
+                            <th>Accion</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{/if}}
+
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="BANK" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Datos Bancarios</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Ingrese los datos de la cuenta bancaria donde recibira los pagos de RED ELITE. Recuerde que la cuenta
+                    debe pertenecer a quien solicita la comicion</p>
+                <table class="table table-sm my-2">
+                    <form action="/links/reportes/bank" method="POST" id="bank">
+                        <tbody>
+                            <tr>
+                                <th>
+                                    <select class="form-control-no-border edi" name="banco"
+                                        style="padding: 1px; width: 80%; background-color: transparent;" required="">
+                                        <option value="nada">SELECCIONE UN BANCO</option>
+                                        <option value="Banco Agrario de Colombia">Banco Agrario de
+                                            Colombia
+                                        </option>
+                                        <option value="Banco AV Villas">Banco AV Villas</option>
+                                        <option value="Banco Caja Social">Banco Caja Social</option>
+                                        <option value="Banco de Occidente">Banco de Occidente</option>
+                                        <option value="Banco Popular">Banco Popular</option>
+                                        <option value="Banco Falabella">Banco Falabella</option>
+                                        <option value="Banco Finandina">Banco Finandina</option>
+                                        <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca
+                                        </option>
+                                        <option value="Banco Santander">Banco Santander</option>
+                                        <option value="Banco de Occidente">Banco de Occidente</option>
+                                        <option value="Bancóldex">Bancóldex</option>
+                                        <option value="Bancolombia">Bancolombia</option>
+                                        <option value="BBVA Colombia">BBVA Colombia</option>
+                                        <option value="Banco de Bogotá">Banco de Bogotá</option>
+                                        <option value="Citi Colombia">Citi Colombia</option>
+                                        <option value="Citibank">Citibank</option>
+                                        <option value="Colpatria">Colpatria</option>
+                                        <option value="Davivienda">Davivienda</option>
+                                        <option value="GNB Sudameris">GNB Sudameris</option>
+                                        <option value="Nequi">Nequi</option>
+                                        <option value="Multibank S.A.">Multibank S.A.</option>
+                                        <option value="Mundo mujer">Mundo mujer</option>
+                                        <option value="Red Multibanca Colpatria">Red Multibanca
+                                            Colpatria
+                                        </option>
+                                    </select>
+                                </th>
+                                <td>
+                                    <select class="form-control-no-border edi" name="cta"
+                                        style="padding: 1px; width: 80%; background-color: transparent;" required="">
+                                        <option value="nada">TIPO CTA.</option>
+                                        <option value="CTE">CTE</option>
+                                        <option value="AHO">AHO</option>
+                                    </select>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th colspan="2">
+                                    <input id="idbank" type="hidden" name="idbank">
+                                    <input class="" type="text" name="numero" data-toggle="tooltip" data-placement="top"
+                                        data-container="body" title="Ingresa el numero de la cuenta bancaria"
+                                        autocomplete="off" data-toggle="dropdown" aria-haspopup="true"
+                                        aria-expanded="false" style="width: 100%;" required>
+                                </th>
+                            </tr>
+                            <tr>
+                                <th colspan="2">
+                                    <button type="submit" class="btn btn-primary btn-sm float-right">Enviar</button>
+                                </th>
+                            </tr>
+                        </tbody>
+                    </form>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
