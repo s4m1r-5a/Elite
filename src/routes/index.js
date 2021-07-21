@@ -54,6 +54,7 @@ router.post('/webhook', async function (req, res) {
     //console.log(req.body)
     for (var i in messages) {
 
+        const msgId = messages[i].id;
         const author = messages[i].author;
         const body = messages[i].body;
         const chatId = messages[i].chatId;
@@ -194,16 +195,34 @@ router.post('/webhook', async function (req, res) {
         } else if (/group/.test(body)) {
             let arrayPhones = [author.replace("@c.us", "")];
             await apiChatApi('group', { groupName: 'Bot group', phones: arrayPhones, messageText: 'Welcome to the new group!' });
-        } else if (/^\s?#\s?$|[a-zA-Z]+/.test(body)) {
+        } else if (/[a-zA-Z0-9]+/.test(body)) {
             const max_time = moment().unix();
-            const min_time = moment().subtract(2, "hours").unix();
-            const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=1&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
+            const min_time = moment().subtract(5, "hours").unix();
+            const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=200&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
             const chat = await axios(Url);
-            chat.length && console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
-            if ((chat.data.messages.length - 1) > 0) {
-                await apiChatApi('message', { chatId: chatId, body: 'No comprendo lo que dice' });
+            let msgs = 0, res = 0;
+            chat.data.messages.map((e, i) => {
+                if (!e.fromMe) {
+                    msgs++
+                } else if (e.body == 7) {
+                    res++
+                }
+            });
+
+            //console.log(Url, chat.data.messages, msgs, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId);
+            //chat.length && console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
+
+            if ((msgs) > 1 && !res) {
+                await apiChatApi('message', { chatId: chatId, quotedMsgId: msgId, body: '_☝️No comprendo lo que dices_' });
+            } else if ((msgs) > 0 && !res) {
+                await apiChatApi('message', {
+                    chatId: chatId, quotedMsgId: msgId, body: `_☝️*No comprendo lo que dices.*_ 
+
+                _Si lo que deseas es *chatear* 💬 con una *persona* 🙋🏼‍♀️🙋🏽‍♂️ solo envíame un *7*_
+                
+                _O si lo que prefieres es volver a ver el *menú* ⚙️ de opciones envíame un *#*_` });
             } else {
-                const text = `_🤖 *¡Hola!* Soy el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
+                const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
     
                 ➖➖➖➖➖➖➖
 _*¡* Déjame mostrarte lo que puedo hacer *!*_
@@ -227,6 +246,30 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
                 var r = await apiChatApi('message', { chatId: chatId, body: text });
                 console.log(r, 'lo que respondio del envio')
             }
+        } else if (/^\s?#\s?$/.test(body)) {
+            const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
+    
+                ➖➖➖➖➖➖➖
+_*¡* Déjame mostrarte lo que puedo hacer *!*_
+                ➖➖➖➖➖➖➖    
+    
+_😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
+
+                _*1* - Estado de cuenta_
+                _*2* - Enviar recibo(s) de caja_
+                _*3* - Realizar pago o abono_
+                _*4* - Conocer mi saldo a la fecha_
+                _~*5* - Auditar producto~_
+                _~*6* - Actualizar datos de contacto~_    
+                _*7* - Chatear con una persona_
+                _~*8* - Agendar llamada o cita~_
+                
+_Empieza a probar, estoy esperando 👀_
+                
+_Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_`;
+
+            var r = await apiChatApi('message', { chatId: chatId, body: text });
+            //console.log(r, 'lo que respondio del envio de #')
         }
     }
     //https://grupoelitefincaraiz.com/webhook
@@ -253,7 +296,7 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
     res.end();
 
 });
-console.log(path.join(__dirname, '/public/uploads/estadodecuenta-${estado[0].cparacion}.pdf'))
+//console.log(path.join(__dirname, '/public/uploads/estadodecuenta-${estado[0].cparacion}.pdf'))
 const transpoter = nodemailer.createTransport({
     host: 'smtp.hostinger.co',
     port: 587,
