@@ -225,7 +225,8 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
                     msgs++
                     if (e.body == 7) res = true;
                 });
-
+                
+            if (res) return false;
             //console.log(Url, chat.data.messages, msgs, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId);
 
             if (msgs > 2 && !res) {
