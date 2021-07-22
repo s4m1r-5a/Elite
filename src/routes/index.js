@@ -212,19 +212,19 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
             const min_time = moment().subtract(5, "hours").unix();
             const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=0&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
             const chat = await axios(Url);
-            let msgs = 0, res = 0;
+            let msgs = 0, res = false;
 
             /* chat.data.messages.sort((a, b) => {
                 return b.messageNumber - a.messageNumber
             }); */  //Si queremos ordenar los números en orden descendente, esta vez necesitamos restar el segundo parámetro (b) del primero (a):
 
-            chat.data.messages.map((e, i) => {
-                if (!e.fromMe) {
+            chat.data.messages
+                .filter((e) => {
+                    return !e.fromMe
+                }).map((e, i) => {
                     msgs++
-                } else if (e.body == 7) {
-                    res++
-                }
-            });
+                    if (e.body == 7) res = true;
+                });
 
             //console.log(Url, chat.data.messages, msgs, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId);
 
