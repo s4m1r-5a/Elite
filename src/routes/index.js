@@ -62,7 +62,31 @@ router.post('/webhook', async function (req, res) {
 
         if (messages[i].fromMe || /@g.us/.test(chatId)) return;
 
-        if (body == 1) {
+        const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
+    
+        ➖➖➖➖➖➖➖
+_*¡* Déjame mostrarte lo que puedo hacer *!*_
+        ➖➖➖➖➖➖➖    
+
+_😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
+
+_*1* - Estado de cuenta_
+_*2* - Enviar recibo(s) de caja_
+_*3* - Realizar pago o abono_
+_*4* - Conocer mi saldo a la fecha_
+_~*5* - Auditar producto~_
+_~*6* - Actualizar datos de contacto~_    
+_*7* - Chatear con una persona_
+_~*8* - Agendar llamada o cita~_
+         
+_Empieza a probar, estoy esperando 👀_
+         
+_Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_`;
+
+        if (body == 0) {
+            await apiChatApi('message', { chatId: chatId, body: `👋🏼  _*¡bey!* fue un placer servirte, estaré atenta para cuando necesites_` });
+        } else if (body == 1) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             const res = await EstadoCuenta(chatId.replace('@c.us', ''), senderName, author);
             if (res.sent) {
                 await apiChatApi('message', { chatId: chatId, body: `😃 _Tú solicitud fue procesada exitosamente._\n\n_Te la enviamos también al correo que diste al momento de tu registro_ 👊🤝 🕜\n\nEnvíanos la opción de tu preferencia 🤔🤔 👇🏼\n \n# - *_Volver al menú principal_*\n5 - *_Auditar los pagos_*\n0 - *_Salir_*` });
@@ -70,6 +94,7 @@ router.post('/webhook', async function (req, res) {
                 await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
             }
         } else if (body == 2) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             const cel = chatId.replace('@c.us', '').slice(-10);
             const recibos = await pool.query(`SELECT s.*, c.nombre FROM solicitudes s 
             INNER JOIN preventa p ON s.orden = p.id INNER JOIN clientes c ON p.cliente = c.idc 
@@ -102,6 +127,7 @@ router.post('/webhook', async function (req, res) {
             await apiChatApi('sendLink', dataLink);
             await apiChatApi('message', { chatId: chatId, body: `_Solo debes ingresar el numero de *documento* del comprador y seguir los pasos_` });
         } else if (body == 4) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             const cel = chatId.replace('@c.us', '').slice(-10);
             const recibos = await pool.query(`SELECT s.monto, c.nombre, l.valor, p.ahorro
             FROM solicitudes s INNER JOIN productosd l ON l.id = s.lt 
@@ -129,37 +155,23 @@ router.post('/webhook', async function (req, res) {
             await apiChatApi('labelChat', { labelId: "7", chatId });
             await apiChatApi('message', { chatId: chatId, body: `😃 _Pronto te antenderemos recuerda que hay personas antes que tu. Una ves llegue tu turno una persona te contactara_\n\n_De antemano agradecemos por tu paciencia_` });
         } else if (/^\s?[0-9]+#\s?$/.test(body)) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             QuienEs(body.replace('#', '').trim(), chatId);
         } else if (/^\s?[a-zA-Z0-9]{5}@7\s?$/.test(body)) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             const Code = await pool.query(`SELECT * FROM clientes WHERE code = ?`, body.trim());
             if (Code.length) {
                 await pool.query(`UPDATE clientes SET code = ? WHERE  code = ?`, [chatId.replace('@c.us', ''), body.trim()]);
                 await apiChatApi('message', { chatId: chatId, body: `CODIGO APROBADO` });
-                await apiChatApi('message', {
-                    chatId: chatId, body: `_🤖 😃¡Bienvenido! *${Code[0].nombre.split(" ")[0]}*_
-    
-                    ➖➖➖➖➖➖➖
-    _*¡* Déjame mostrarte lo que puedo hacer *!*_
-                    ➖➖➖➖➖➖➖    
-        
-    _😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
-    
-                    _*1* - Estado de cuenta_
-                    _*2* - Enviar recibo(s) de caja_
-                    _*3* - Realizar pago o abono_
-                    _*4* - Conocer mi saldo a la fecha_
-                    _*5* - Auditar producto_
-                    _*6* - Actualizar datos de contacto_
-                    _*7* - Chatear con un asesor_
-                    _*8* - Agendar llamada o cita_
-                    
-    _Empieza a probar, estoy esperando 👀_
-                    
-    _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_` });
+                const newText = text.replace('*¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos',
+                    `_🤖 😃¡Bienvenido! *${Code[0].nombre.split(" ")[0]}* envianos nuevamente el *numero* de la opcion de tu preferencia`)
+                await apiChatApi('message', { chatId: chatId, body: newText });
+
             } else {
                 await apiChatApi('message', { chatId: chatId, body: `CODIGO INVALIDO` });
             }
         } else if (/^\s?rc[0-9]+\s?$|^\s?rc##\s?$/i.test(body)) {
+            await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
             const res = await RecibosCaja(chatId.replace('@c.us', ''), senderName, author, body.trim().replace(/rc/i, ''));
             !res && await apiChatApi('message', { chatId: chatId, body: `😔 _¡Valla! parece que el sistema no te reconoce aún._\n\n_Envíanos tu número de documento seguido del carácter *#* y así poder verificar_ 🧐 🕜` });
         } else if (/help/.test(body)) {
@@ -198,9 +210,14 @@ router.post('/webhook', async function (req, res) {
         } else if (/[a-zA-Z0-9]+/.test(body)) {
             const max_time = moment().unix();
             const min_time = moment().subtract(5, "hours").unix();
-            const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=200&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
+            const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=0&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
             const chat = await axios(Url);
             let msgs = 0, res = 0;
+
+            /* chat.data.messages.sort((a, b) => {
+                return b.messageNumber - a.messageNumber
+            }); */  //Si queremos ordenar los números en orden descendente, esta vez necesitamos restar el segundo parámetro (b) del primero (a):
+
             chat.data.messages.map((e, i) => {
                 if (!e.fromMe) {
                     msgs++
@@ -210,66 +227,25 @@ router.post('/webhook', async function (req, res) {
             });
 
             //console.log(Url, chat.data.messages, msgs, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId);
-            //chat.length && console.log(Url, chat.data.messages, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId, moment.unix(chat.data.messages[0].time).format('YYYY-MM-DD H:mm:ss'));
 
-            if ((msgs) > 1 && !res) {
-                await apiChatApi('message', { chatId: chatId, quotedMsgId: msgId, body: '_☝️No comprendo lo que dices_' });
-            } else if ((msgs) > 0 && !res) {
+            if (msgs > 2 && !res) {
+
                 await apiChatApi('message', {
-                    chatId: chatId, quotedMsgId: msgId, body: `_☝️*No comprendo lo que dices.*_ 
+                    chatId: chatId, quotedMsgId: msgId, body: `_☝️*No comprendo lo que dices.*_
+                \n_Si lo que deseas es *chatear* 💬 con una *persona* 🙋🏼‍♀️🙋🏽‍♂️ solo envíame un *7*_               
+                \n_O si lo que prefieres es volver a ver el *menú* ⚙️ de opciones envíame un *#*_` });
 
-                _Si lo que deseas es *chatear* 💬 con una *persona* 🙋🏼‍♀️🙋🏽‍♂️ solo envíame un *7*_
-                
-                _O si lo que prefieres es volver a ver el *menú* ⚙️ de opciones envíame un *#*_` });
+            } else if (msgs > 1 && !res) {
+
+                await apiChatApi('message', { chatId: chatId, quotedMsgId: msgId, body: '_☝️No comprendo lo que dices_' });
+
             } else {
-                const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
-    
-                ➖➖➖➖➖➖➖
-_*¡* Déjame mostrarte lo que puedo hacer *!*_
-                ➖➖➖➖➖➖➖    
-    
-_😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
-
-                _*1* - Estado de cuenta_
-                _*2* - Enviar recibo(s) de caja_
-                _*3* - Realizar pago o abono_
-                _*4* - Conocer mi saldo a la fecha_
-                _~*5* - Auditar producto~_
-                _~*6* - Actualizar datos de contacto~_    
-                _*7* - Chatear con una persona_
-                _~*8* - Agendar llamada o cita~_
-                
-_Empieza a probar, estoy esperando 👀_
-                
-_Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_`;
 
                 var r = await apiChatApi('message', { chatId: chatId, body: text });
-                console.log(r, 'lo que respondio del envio')
             }
         } else if (/^\s?#\s?$/.test(body)) {
-            const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
-    
-                ➖➖➖➖➖➖➖
-_*¡* Déjame mostrarte lo que puedo hacer *!*_
-                ➖➖➖➖➖➖➖    
-    
-_😮 (Para seleccionar la opción deseada, simplemente envíame el *número* que la antepone)_
-
-                _*1* - Estado de cuenta_
-                _*2* - Enviar recibo(s) de caja_
-                _*3* - Realizar pago o abono_
-                _*4* - Conocer mi saldo a la fecha_
-                _~*5* - Auditar producto~_
-                _~*6* - Actualizar datos de contacto~_    
-                _*7* - Chatear con una persona_
-                _~*8* - Agendar llamada o cita~_
-                
-_Empieza a probar, estoy esperando 👀_
-                
-_Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"*_`;
 
             var r = await apiChatApi('message', { chatId: chatId, body: text });
-            //console.log(r, 'lo que respondio del envio de #')
         }
     }
     //https://grupoelitefincaraiz.com/webhook
