@@ -31,7 +31,7 @@ const transpoter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: 'info@grupoelitefincaraiz.co',
-        pass: 'KYs4_$1gij'
+        pass: 'C0l0mb1@1q2w3e4r5t*'
     },
     tls: {
         rejectUnauthorized: false
@@ -1569,7 +1569,7 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 })
 router.get('/prueba2', async (req, res) => {
     const ruta = path.join(__dirname, '../public/uploads/libroej.json');
-    const ruta2 = path.join(__dirname, '../public/uploads/CREACION DE PRODUCTOS.xlsx');
+    const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
 
     /* fs.exists(ruta2, function (exists) {
         console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
@@ -1595,15 +1595,24 @@ router.get('/prueba2', async (req, res) => {
     //const content = await pool.query(`SELECT * FROM productos ORDER BY id`);
     //console.log(datos)
 
+    const content = await pool.query(`SELECT p.id, d.proyect, l.mz, l.n lt, c.nombre, 
+    c.documento, c.movil, SUM(s.monto) monto, COUNT(s.ids) pagos    
+    FROM preventa p INNER JOIN solicitudes s ON p.id = s.orden 
+    INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
+    INNER JOIN clientes c ON c.idc = p.cliente 
+    WHERE s.concepto IN('PAGO', 'ABONO') AND d.proyect IN('CAÑAVERAL CAMPESTRE') AND p.tipobsevacion IS NULL 
+    GROUP BY p.id
+    ORDER BY l.n`);
+
     //let content = JSON.parse(fs.readFileSync(ruta, 'utf8'));
     //console.log(content)
 
-    /* let newWB = XLSX.utils.book_new()
+    let newWB = XLSX.utils.book_new()
     let newWS = XLSX.utils.json_to_sheet(content)
     XLSX.utils.book_append_sheet(newWB, newWS, 'samir');
-    XLSX.writeFile(newWB, ruta2) */
-
-    const excel = XLSX.readFile(ruta2);
+    XLSX.writeFile(newWB, ruta2)
+    res.redirect('/uploads/lista de clientes.xlsx')
+    /* const excel = XLSX.readFile(ruta2);
     const hojas = excel.SheetNames;
     const hoja = hojas[0], productos = hojas[1], proyecto = hojas[2];
     console.log(hojas, hoja, productos, proyecto)
@@ -1628,7 +1637,7 @@ router.get('/prueba2', async (req, res) => {
             return das.insertId;
         });
     }
-    res.send(true)
+    res.send(true) */
 
 
     /* var data = JSON.stringify({

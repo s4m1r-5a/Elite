@@ -208,6 +208,7 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
             let arrayPhones = [author.replace("@c.us", "")];
             await apiChatApi('group', { groupName: 'Bot group', phones: arrayPhones, messageText: 'Welcome to the new group!' });
         } else if (/[a-zA-Z0-9]+/.test(body)) {
+
             const max_time = moment().unix();
             const min_time = moment().subtract(5, "hours").unix();
             const Url = `https://api.chat-api.com/instance107218/messages?chatId=${chatId}&limit=0&min_time=${min_time}&max_time=${max_time}&token=5jn3c5dxvcj27fm0`;
@@ -220,16 +221,22 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
 
             chat.data.messages
                 .filter((e) => {
-                    return !e.fromMe
+                    return !e.fromMe || /ayudarte/i.test(e.body)
                 }).map((e, i) => {
                     msgs++
-                    if (e.body == 7) res = true;
+                    if (e.body == 7 || /ayudarte/i.test(e.body)) res = true;
                 });
-                
-            if (res) return false;
+
+            if (res) return;
             //console.log(Url, chat.data.messages, msgs, moment.unix(max_time).format('YYYY-MM-DD H:mm:ss'), max_time, moment.unix(min_time).format('YYYY-MM-DD H:mm:ss'), min_time, chatId);
 
-            if (msgs > 2 && !res) {
+            if (msgs > 3 && !res) {
+                await apiChatApi('labelChat', { labelId: "7", chatId });
+                await apiChatApi('message', {
+                    chatId: chatId, quotedMsgId: msgId, body: `_☝️*Se te asignara una persona que pueda ayudarte a despejar tus dudas*, en el lapso de un breve momento te atenderemos. Agradecemos por tu espera en linea_`
+                });
+
+            } else if (msgs > 2 && !res) {
 
                 await apiChatApi('message', {
                     chatId: chatId, quotedMsgId: msgId, body: `_☝️*No comprendo lo que dices.*_
