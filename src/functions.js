@@ -15,7 +15,7 @@ const transpoter = nodemailer.createTransport({
     secure: false,
     auth: {
         user: 'info@grupoelitefincaraiz.co',
-        pass: 'C0l0mb1@'
+        pass: 'C0l0mb1@1q2w3e4r5t*'
     },
     tls: {
         rejectUnauthorized: false
