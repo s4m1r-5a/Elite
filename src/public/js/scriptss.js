@@ -2556,7 +2556,7 @@ if (window.location.pathname === `/links/comisiones` && !rol.externo) {
 if (window.location.pathname === `/links/reportes`) {
     $('.sidebar-item').removeClass('active');
     $(`a[href='${window.location.pathname}']`).parent().addClass('active');
-    
+
     $('.card-header').on('click', function () {
         var papa = $(this).parents('.accordion');
         if ($(this).find('i').hasClass('fa-angle-down')) {
@@ -3063,7 +3063,7 @@ if (window.location.pathname === `/links/reportes`) {
         $('#Mora').html(data.meses ? `Mes(es) mora: ${data.meses}` : 'Mes(es) mora: Al dia');
         $('#Deuda').html(data.deuda ? `Deuda: $${Moneda(data.deuda)}` : 'Deuda: $0.000');
         $('#Abono').html(data.abonos ? `Abonado: $${Moneda(data.abonos)}` : 'Abonado: $0.000');
-        $('#Saldo').html('Saldo: $' + Moneda(data.Total - (data.abonos || 0)));        
+        $('#Saldo').html('Saldo: $' + Moneda(data.Total - (data.abonos || 0)));
         //Comi.column(9).search(data.lote).draw();
         //Recibos.column(9).search(data.id).draw();
         $('#ModalEstadoDetalles').modal({
@@ -3072,13 +3072,13 @@ if (window.location.pathname === `/links/reportes`) {
             toggle: true
         });
         $('#ModalEstadoDetalles').on('shown.bs.modal', function (e) {
-            Comi.ajax.url("/links/comisiones/" + data.id).load(function () {
+            !rol.externo && Comi.ajax.url("/links/comisiones/" + data.id).load(function () {
                 Comi.columns.adjust().responsive.recalc();
             });
             Recibos.ajax.url("/links/rcb/" + data.id).load(function () {
                 Recibos.columns.adjust().responsive.recalc();
             });
-            
+
         });
 
     })
@@ -3266,340 +3266,340 @@ if (window.location.pathname === `/links/reportes`) {
         });
     });
     //////////////////////* ESTADOS DE CUENTA RESUMIDOS */////////////////////// 
-/*     var estadoscuentas = $('#estadoscuentas').DataTable({
-        processing: true,
-        autowidth: true,
-        //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
-        order: [[0, 'asc'], [1, 'asc']],
-        ajax: {
-            method: "POST",
-            url: "/links/reportes/estadosc",
-            dataSrc: "data"
-        },
-        columns: [
-            {
-                data: "mz",
-                render: function (data, method, row) {
-                    return data === 'no' ? 0 : data
-                }
+    /*     var estadoscuentas = $('#estadoscuentas').DataTable({
+            processing: true,
+            autowidth: true,
+            //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
+            order: [[0, 'asc'], [1, 'asc']],
+            ajax: {
+                method: "POST",
+                url: "/links/reportes/estadosc",
+                dataSrc: "data"
             },
-            { data: "n" },
-            { data: "mtr2" },
-            {
-                data: "vrmt2",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "nombre",
-                className: 'te'
-            },
-            {
-                data: "fecha",
-                className: 'te',
-                render: function (data, method, row) {
-                    return moment(data).format('YYYY-MM-DD')
-                }
-            },
-            {
-                data: "valor",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "descuento",
-                className: 'te',
-                render: function (data, method, row) {
-                    return data + '%'
-                }
-            },
-            {
-                data: "ahorro",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "total",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                data: "montos",
-                className: 'te',
-                render: $.fn.dataTable.render.number('.', '.', 0, '$')
-            },
-            {
-                className: 't',
-                data: "montos",
-                render: function (data, method, row) {
-                    return '$' + Moneda(row.total - data);
-                }
-            },
-            {
-                data: "proyect",
-                className: 'te'
-            },
-        ],
-        drawCallback: function (settings) {
-            var api = this.api();
-            var rows = api.rows({ page: 'current' }).nodes();
-            var last = null;
-            var total = 0;
-            var filas = api.column(0, { page: 'current' }).data();
-            var intVal = function (i) {
-                var t = i.replace(/[\$,]/g, '')
-                return typeof i === 'string' ?
-                    t.replace(/\./g, '') * 1 :
-                    typeof i === 'number' ?
-                        i : 0;
-            };
-            filas.each(function (group, i) {
-                if (last !== group) {
-                    if (last != null) {
-                        $(rows).eq(i - 1).after(
+            columns: [
+                {
+                    data: "mz",
+                    render: function (data, method, row) {
+                        return data === 'no' ? 0 : data
+                    }
+                },
+                { data: "n" },
+                { data: "mtr2" },
+                {
+                    data: "vrmt2",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "nombre",
+                    className: 'te'
+                },
+                {
+                    data: "fecha",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        return moment(data).format('YYYY-MM-DD')
+                    }
+                },
+                {
+                    data: "valor",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "descuento",
+                    className: 'te',
+                    render: function (data, method, row) {
+                        return data + '%'
+                    }
+                },
+                {
+                    data: "ahorro",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "total",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    data: "montos",
+                    className: 'te',
+                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
+                },
+                {
+                    className: 't',
+                    data: "montos",
+                    render: function (data, method, row) {
+                        return '$' + Moneda(row.total - data);
+                    }
+                },
+                {
+                    data: "proyect",
+                    className: 'te'
+                },
+            ],
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+                var total = 0;
+                var filas = api.column(0, { page: 'current' }).data();
+                var intVal = function (i) {
+                    var t = i.replace(/[\$,]/g, '')
+                    return typeof i === 'string' ?
+                        t.replace(/\./g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+                filas.each(function (group, i) {
+                    if (last !== group) {
+                        if (last != null) {
+                            $(rows).eq(i - 1).after(
+                                `<tr class="total">
+                                        <td colspan=2>Total:</td>
+                                        <td colspan="10">${Moneda(total)}</td>
+                                     </tr>`
+                            );
+                            total = 0;
+                        }
+                        $(rows).eq(i).before(
+                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                                    <td colspan="13" class="text-center">MANZANA ${group}</td>
+                                </tr>`
+                        );
+                        last = group;
+                    }
+                    total += intVal($(rows).eq(i).children()[10].textContent);
+                    if (i == filas.length - 1) {
+                        $(rows).eq(i).after(
                             `<tr class="total">
                                     <td colspan=2>Total:</td>
                                     <td colspan="10">${Moneda(total)}</td>
-                                 </tr>`
+                                </tr>`
                         );
-                        total = 0;
                     }
-                    $(rows).eq(i).before(
-                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                                <td colspan="13" class="text-center">MANZANA ${group}</td>
-                            </tr>`
-                    );
-                    last = group;
-                }
-                total += intVal($(rows).eq(i).children()[10].textContent);
-                if (i == filas.length - 1) {
-                    $(rows).eq(i).after(
-                        `<tr class="total">
-                                <td colspan=2>Total:</td>
-                                <td colspan="10">${Moneda(total)}</td>
-                            </tr>`
-                    );
-                }
-            });
-        },
-        dom: 'Bfrtip',
-        buttons: [{
-            extend: 'collection',
-            text: '<i class="align-middle feather-md" data-feather="menu"></i>',
-            orientation: 'landscape',
-            buttons: [{
-                text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-                extend: 'copy'
+                });
             },
-            {
-                text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
-                extend: 'print',
-                title: ``,
+            dom: 'Bfrtip',
+            buttons: [{
+                extend: 'collection',
+                text: '<i class="align-middle feather-md" data-feather="menu"></i>',
                 orientation: 'landscape',
-                footer: true,
-                exportOptions: {
-                    columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                    //modifier: true
+                buttons: [{
+                    text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                    extend: 'copy'
                 },
-                customize: function (win) {
-                    $(win.document.body)
-                        .css('font-size', '10pt')
-                        .prepend(
-                            `                
-                    <div class="card">
-                        <!--<div class="text-right mb-2">
-                            <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
-                        </div>-->
-                        <div class="row">
-                            <div class="col-sm-5">
-                                <div class="card border-primary text-left">
-                                    <div class="row no-gutters">
-                                        <div class="col-md-2">
-                                            <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
-                                        </div>
-                                        <div class="col-md-9">
-                                            <div class="card-body text-primary h4">
-                                                <div class="mb-0">
-                                                    <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
-                                                </div>   
-                                                <div class="mb-0">
-                                                    <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                {
+                    text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
+                    extend: 'print',
+                    title: ``,
+                    orientation: 'landscape',
+                    footer: true,
+                    exportOptions: {
+                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
+                        //modifier: true
+                    },
+                    customize: function (win) {
+                        $(win.document.body)
+                            .css('font-size', '10pt')
+                            .prepend(
+                                `                
+                        <div class="card">
+                            <!--<div class="text-right mb-2">
+                                <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
+                            </div>-->
+                            <div class="row">
+                                <div class="col-sm-5">
+                                    <div class="card border-primary text-left">
+                                        <div class="row no-gutters">
+                                            <div class="col-md-2">
+                                                <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                            </div>
+                                            <div class="col-md-9">
+                                                <div class="card-body text-primary h4">
+                                                    <div class="mb-0">
+                                                        <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
+                                                    </div>   
+                                                    <div class="mb-0">
+                                                        <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                                    </div>
+                                                    <div class="mb-0">
+                                                        <span class="align-middle text-dark">PRODUCTOS</span>
+                                                        <span class="align-middle card-text">${productos} LOTES</span>
+                                                    </div>
+                                                    <div class="mb-0">
+                                                        <span class="align-middle text-dark">AREA</span>
+                                                        <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
+                                                    </div>                                            
                                                 </div>
-                                                <div class="mb-0">
-                                                    <span class="align-middle text-dark">PRODUCTOS</span>
-                                                    <span class="align-middle card-text">${productos} LOTES</span>
-                                                </div>
-                                                <div class="mb-0">
-                                                    <span class="align-middle text-dark">AREA</span>
-                                                    <span class="align-middle card-text">${Math.round(area, 2)} MTR2</span>
-                                                </div>                                            
                                             </div>
                                         </div>
+                                    </div> 
+                                </div>
+                                <div class="col-sm-7">
+                                <div class="card border-primary text-left">
+                                <div class="row no-gutters">
+                                    <div class="col-md-6">
+                                        <div class="card-body text-primary h4">
+                                            <div class="mb-0">                                          
+                                                <span class="align-middle text-dark">DESCUENTOS</span>
+                                                <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">TOTALES</span>
+                                                <span class="align-middle card-text">$${Moneda(total)}</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">ABONOS</span>
+                                                <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                            </div>
+                                            <div class="mb-0">
+                                                <span class="align-middle text-dark">SALDOS</span>
+                                                <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                            </div>                                            
+                                        </div>
                                     </div>
-                                </div> 
-                            </div>
-                            <div class="col-sm-7">
-                            <div class="card border-primary text-left">
-                            <div class="row no-gutters">
-                                <div class="col-md-6">
+                                    <div class="col-md-6">
                                     <div class="card-body text-primary h4">
-                                        <div class="mb-0">                                          
-                                            <span class="align-middle text-dark">DESCUENTOS</span>
-                                            <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
-                                        </div>
-                                        <div class="mb-0">
-                                            <span class="align-middle text-dark">TOTALES</span>
-                                            <span class="align-middle card-text">$${Moneda(total)}</span>
-                                        </div>
-                                        <div class="mb-0">
-                                            <span class="align-middle text-dark">ABONOS</span>
-                                            <span class="align-middle text-success">$${Moneda(abonos)}</span>
-                                        </div>
-                                        <div class="mb-0">
-                                            <span class="align-middle text-dark">SALDOS</span>
-                                            <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
-                                        </div>                                            
+                                    <div class="mb-0">
+                                        <span class="align-middle text-warning">${proyct}</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle card-text">CONCEPTO RESUMEN</span>
+                                    </div>
+                                    <div class="mb-0">
+                                        <span class="align-middle card-text">SISTEMA DE REPORTES</span>
+                                    </div>                                            
+                                </div>
                                     </div>
                                 </div>
-                                <div class="col-md-6">
-                                <div class="card-body text-primary h4">
-                                <div class="mb-0">
-                                    <span class="align-middle text-warning">${proyct}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <span class="align-middle card-text">ESTADOS DE CUENTAS</span>
-                                </div>
-                                <div class="mb-0">
-                                    <span class="align-middle card-text">CONCEPTO RESUMEN</span>
-                                </div>
-                                <div class="mb-0">
-                                    <span class="align-middle card-text">SISTEMA DE REPORTES</span>
-                                </div>                                            
                             </div>
                                 </div>
                             </div>
-                        </div>
-                            </div>
-                        </div>
-                    </div>`
-                        );
-
-                    $(win.document.body).find('table')
-                        .addClass('compact')
-                        .css('font-size', 'inherit');
-                },
-                autoPrint: true
-            }
-            ]
-        },
-        {
-            extend: 'pageLength',
-            text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
-            orientation: 'landscape'
-        },
-        {
-            extend: 'collection',
-            text: `<i class="align-middle feather-md" data-feather="home"></i>`,
-            //orientation: 'landscape',
-            buttons: f
-        },
-        {
-            text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
-            attr: {
-                title: 'Fecha',
-                id: 'Date'
-            },
-            className: 'btn btn-secondary fech'
-        },
-        {
-            text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
-                placeholder="MZ">`,
-            attr: {
-                title: 'Busqueda por MZ',
-                id: ''
-            },
-            className: 'btn btn-secondary'
-        },
-        {
-            text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
-                placeholder="LT">`,
-            attr: {
-                title: 'Busqueda por LT',
-                id: ''
-            },
-            className: 'btn btn-secondary'
-        }
-        ],
-        fixedHeader: {
-            headerOffset: -9
-        },
-        //ordering: true,
-        language: languag,
-        //deferRender: true,
-        paging: true,
-        search: {
-            regex: true,
-            caseInsensitive: true,
-        },
-        responsive: true,
-        initComplete: function (settings, json) {
-            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-        },
-        footerCallback: function (row, data, start, end, display) {
-            var api = this.api(), data;
-            // Elimine el formato para obtener datos enteros para la suma
-            var intVal = function (i) {
-                return typeof i === 'string' ?
-                    i.replace(/[\$,]/g, '') * 1 :
-                    typeof i === 'number' ?
-                        i : 0;
-            };
-            // Total en todas las páginas visibles (encontradas)
-            area = api
-                .column(3, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
-            productos = api
-                .column(3, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b, x) {
-                    return x;
-                }, 0);
-            descuentos = api
-                .column(8, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
-            total = api
-                .column(9, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
-            abonos = api
-                .column(10, { order: 'applied', search: 'applied' })
-                .data()
-                .reduce(function (a, b) {
-                    return intVal(a) + intVal(b);
-                }, 0);
-            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-        },
-        rowCallback: function (row, data, index) {
-        }
-    });
+                        </div>`
+                            );
     
-    $('.min, .max').on('keyup', function () {
-        var col = $(this).hasClass('min') ? 1 : 2;
-        var buscar = this.value ? "^" + this.value + "$" : '';
-        estadoscuentas
-            .columns(col)
-            .search(buscar, true, false, true)
-            .draw();
-    });
- */
+                        $(win.document.body).find('table')
+                            .addClass('compact')
+                            .css('font-size', 'inherit');
+                    },
+                    autoPrint: true
+                }
+                ]
+            },
+            {
+                extend: 'pageLength',
+                text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+                orientation: 'landscape'
+            },
+            {
+                extend: 'collection',
+                text: `<i class="align-middle feather-md" data-feather="home"></i>`,
+                //orientation: 'landscape',
+                buttons: f
+            },
+            {
+                text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
+                attr: {
+                    title: 'Fecha',
+                    id: 'Date'
+                },
+                className: 'btn btn-secondary fech'
+            },
+            {
+                text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
+                    placeholder="MZ">`,
+                attr: {
+                    title: 'Busqueda por MZ',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            },
+            {
+                text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
+                    placeholder="LT">`,
+                attr: {
+                    title: 'Busqueda por LT',
+                    id: ''
+                },
+                className: 'btn btn-secondary'
+            }
+            ],
+            fixedHeader: {
+                headerOffset: -9
+            },
+            //ordering: true,
+            language: languag,
+            //deferRender: true,
+            paging: true,
+            search: {
+                regex: true,
+                caseInsensitive: true,
+            },
+            responsive: true,
+            initComplete: function (settings, json) {
+                //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+            },
+            footerCallback: function (row, data, start, end, display) {
+                var api = this.api(), data;
+                // Elimine el formato para obtener datos enteros para la suma
+                var intVal = function (i) {
+                    return typeof i === 'string' ?
+                        i.replace(/[\$,]/g, '') * 1 :
+                        typeof i === 'number' ?
+                            i : 0;
+                };
+                // Total en todas las páginas visibles (encontradas)
+                area = api
+                    .column(3, { order: 'applied', search: 'applied' })
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+                productos = api
+                    .column(3, { order: 'applied', search: 'applied' })
+                    .data()
+                    .reduce(function (a, b, x) {
+                        return x;
+                    }, 0);
+                descuentos = api
+                    .column(8, { order: 'applied', search: 'applied' })
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+                total = api
+                    .column(9, { order: 'applied', search: 'applied' })
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+                abonos = api
+                    .column(10, { order: 'applied', search: 'applied' })
+                    .data()
+                    .reduce(function (a, b) {
+                        return intVal(a) + intVal(b);
+                    }, 0);
+                //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+            },
+            rowCallback: function (row, data, index) {
+            }
+        });
+        
+        $('.min, .max').on('keyup', function () {
+            var col = $(this).hasClass('min') ? 1 : 2;
+            var buscar = this.value ? "^" + this.value + "$" : '';
+            estadoscuentas
+                .columns(col)
+                .search(buscar, true, false, true)
+                .draw();
+        });
+     */
     /*$('#resumen').click(function () {
         $('#stadoreportes').hide('slow');
         $('#stadocuentasd').hide('slow');
@@ -5479,7 +5479,7 @@ if (window.location.pathname === `/links/reportes`) {
                 ID = '', BANCO = '', TCTA = '', NCTA = '', TOTAL = 0,
                 MONTO = 0, PAGAR = 0, RETEFUENTE = 0, RETEICA = 0,
                 cuerpo = [], Ids = [];
-    
+
             var enviarCuentaCobro = () => {
                 var fd = new FormData();
                 var doc = new jsPDF('p', 'mm', 'a4');
@@ -5663,7 +5663,7 @@ if (window.location.pathname === `/links/reportes`) {
                                     doc.text('Nit: 901311748-3', data.settings.margin.left, 50)
                                     doc.setFontSize(8)
                                     doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53)
-    
+
                                     doc.setFontSize(10)
                                     doc.text('DEBE A:', data.settings.margin.left, 63)
                                     doc.setFontSize(12)
@@ -5674,11 +5674,11 @@ if (window.location.pathname === `/links/reportes`) {
                                     doc.text(MOVIL, data.settings.margin.left, 78)
                                     doc.setFontSize(8)
                                     doc.text(EMAIL, data.settings.margin.left, 81)
-    
+
                                     doc.setFontSize(9)
                                     doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90)
-    
-    
+
+
                                     // Footer
                                     var str = 'Page ' + doc.internal.getNumberOfPages()
                                     // Total page number plugin only available in jspdf v1.0+
@@ -5686,7 +5686,7 @@ if (window.location.pathname === `/links/reportes`) {
                                         str = str + ' of ' + totalPagesExp
                                     }
                                     doc.setFontSize(8)
-    
+
                                     // jsPDF 1.4+ uses getWidth, <1.4 uses .width
                                     var pageSize = doc.internal.pageSize
                                     var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
@@ -5719,7 +5719,7 @@ if (window.location.pathname === `/links/reportes`) {
                                     console.log(data);
                                 }
                             });
-    
+
                         } else {
                             $('#ModalEventos').modal('hide');
                             SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
@@ -6649,8 +6649,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
-    $('footer').hide()
-    $('nav').hide()
+    $('footer').hide();
+    $('nav').hide();
+    let col = 8
+    if (rol.auxicontbl) $('#botonesI').removeClass('d-none');
+
     var table = $('#datatable').DataTable({
         paging: false,
         info: false,
@@ -6674,6 +6677,10 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 render: function (data, method, row) {
                     return moment(data).format('YYYY-MM-DD')
                 }
+            },
+            {
+                data: "proyeccion",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
             {
                 data: "cuota",
@@ -6709,6 +6716,10 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 }
             },
             {
+                data: "proyeccion2",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
                 data: "cuota2",
                 render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
@@ -6740,7 +6751,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 
         },
         columnDefs: [
-            { "visible": false, "targets": 0 }
+            { "visible": false, "targets": [0, 3, 8] }
         ],
         order: [[0, "desc"], [1, 'asc']],
         drawCallback: function (settings) {
@@ -6750,15 +6761,9 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 
             api.column(0, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
-                    $(rows).eq(i).before(
-                        `<tr class="group">
-            <td colspan="8">
-                <div class="text-right text-muted">
-                    ${group}
-                </div>
-            </td>
-                        </tr>`
-                    );
+                    $(rows).eq(i).before(`<tr class="group">
+                    <td colspan="${col}"><div class="text-right text-muted">
+                    ${group}</div></td></tr>`);
                     last = group;
                 }
             });
@@ -6766,29 +6771,51 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     });
 
     $(document).ready(function () {
-        var g = $('#fechaFactura').text()
-        var j = $('#fechaFactura').html()
-        $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'))
-        $('#fechaOrden').html('..............................' + moment(j).format('YYYY-MM-DD'))
-        $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())))
-        var totalp = Moneda($('.totalp').html())
-        var m2 = Moneda($('.m2').html())
-        var totali = Moneda($('.totali').html())
-        var ahorro = Moneda($('.ahorro').html())
-        var extrao = Moneda($('.extrao').html())
-        var separar = Moneda($('.separar').html())
-        var cuota = Moneda($('#cuota').html())
+        var g = $('#fechaFactura').text();
+        var j = $('#fechaFactura').html();
+        $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'));
+        $('#fechaOrden').html('..............................' + moment(j).format('YYYY-MM-DD'));
+        $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())));
+        var totalp = Moneda($('.totalp').html());
+        var m2 = Moneda($('.m2').html());
+        var totali = Moneda($('.totali').html());
+        var ahorro = Moneda($('.ahorro').html());
+        var extrao = Moneda($('.extrao').html());
+        var separar = Moneda($('.separar').html());
+        var cuota = Moneda($('#cuota').html());
         var total = parseFloat($('.totalp').html()) - parseFloat($('.ahorro').html());
         var saldot = total - parseFloat($('#saldofecha').val());
         $('.totalote').html('$' + Moneda(total));
         $('.saldofecha').html('$' + Moneda(saldot));
-        $('.totalp').html('Valor $' + totalp)
-        $('.m2').text('$' + m2)
-        $('.totali').html('Total inicial $' + totali)
-        $('.ahorro').html('$' + ahorro)
-        $('.extrao').html('$' + extrao)
-        $('.separar').html('$' + separar)
-        $('#cuota').html('$' + cuota)
+        $('.totalp').html('Valor $' + totalp);
+        $('.m2').text('$' + m2);
+        $('.totali').html('Total inicial $' + totali);
+        $('.ahorro').html('$' + ahorro);
+        $('.extrao').html('$' + extrao);
+        $('.separar').html('$' + separar);
+        $('#cuota').html('$' + cuota);
+
+        $('#option1').click(function () {
+            col = 8;
+            table.columns().visible(true, true);
+            table.columns([0, 3, 8]).visible(false, false);
+            table.columns.adjust().draw(false);
+        });
+        $('#option2').click(function () {
+            col = 6;
+            table.columns().visible(true, true);
+            table.columns([0, 4, 5, 9, 10]).visible(false, false);
+            table.columns.adjust().draw(false);
+        });
+        $('#option3').click(function () {
+            col = 10;
+            table.columns().visible(true, true);
+            table.columns([0]).visible(false, false);
+            table.columns.adjust().draw(false);
+        });
+        $('#option4').click(function () {
+            window.addEventListener("load", window.print());
+        });
 
         //window.print();   
         //<a href="invoice-print.html" target="_blank" class="btn btn-default"><i class="fas fa-print"></i> Print</a>

@@ -29,7 +29,7 @@ module.exports = (io, emitter) => {
         io.sockets.emit('typing', msg);
     })
     emitter.on('chatUpdate', (msg, status) => {
-        console.log(msg, status);
+        //console.log(msg, status);
         io.sockets.emit('typing', msg);
     })
 
