@@ -4,6 +4,20 @@
 {{#each orden}}
 <main id="imprimir" class="content">
     <div class="card">
+        <div class="btn-group btn-group-toggle fixed-top d-none" data-toggle="buttons" id="botonesI">
+            <label class="btn btn-secondary active" id="option1">
+                <input type="radio" name="options" autocomplete="off" checked> Actual
+            </label>
+            <label class="btn btn-secondary" id="option2">
+                <input type="radio" name="options" autocomplete="off"> Inicial
+            </label>
+            <label class="btn btn-secondary" id="option3">
+                <input type="radio" name="options" autocomplete="off"> Combinado
+            </label>
+            <label class="btn btn-secondary" id="option4">
+                <input type="radio" name="options" autocomplete="off"> Imprimir
+            </label>
+        </div>
         <div class="card-header text-right">
             <h4 class="card-title">ORDEN DE SEPARACIÓN {{lote}}</h4>
             <small class="text-muted">Asesor </small><span class="badge badge-dark text-md-center">{{fullname}}</span>
@@ -146,10 +160,12 @@
                         <th></th>
                         <th>#</th>
                         <th>Fecha</th>
+                        <th>Proyeccion</th>
                         <th>Cuota</th>
                         <th>Estado</th>
                         <th>#</th>
                         <th>Fecha</th>
+                        <th>Proyeccion</th>
                         <th>Cuota</th>
                         <th>Estado</th>
                     </tr>

@@ -3244,7 +3244,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     var u = Math.round((p - i) / 2);
     var m = (p - i) / 2;
     var v = i / 2;
-    //console.log(p, i)
+    //console.log('paso por aqui ', orden)
     w = await orden
         .map((t, c) => {
             if ((t.tipo === 'INICIAL' && i === 0) || (t.tipo === 'FINANCIACION' && p === 0)) {
@@ -3252,6 +3252,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: '',
                     ncuota2: '',
                     fecha2: '',
+                    proyeccion2: '',
                     cuota2: '',
                     estado2: ''
                 };
@@ -3262,6 +3263,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: '',
                     ncuota2: '',
                     fecha2: '',
+                    proyeccion2: '',
                     cuota2: '',
                     estado2: ''
                 }
@@ -3272,6 +3274,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: '',
                     ncuota2: '',
                     fecha2: '',
+                    proyeccion2: '',
                     cuota2: '',
                     estado2: ''
                 }
@@ -3282,6 +3285,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: t.id,
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,
+                    proyeccion2: t.proyeccion,
                     cuota2: t.cuota,
                     estado2: t.estado
                 };
@@ -3294,6 +3298,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                         id2: '',
                         ncuota2: '',
                         fecha2: '',
+                        proyeccion2: '',
                         cuota2: '',
                         estado2: ''
                     }
@@ -3305,6 +3310,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: '',
                     ncuota2: '',
                     fecha2: '',
+                    proyeccion2: '',
                     cuota2: '',
                     estado2: ''
                 }
@@ -3315,6 +3321,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     id2: t.id,
                     ncuota2: t.ncuota,
                     fecha2: t.fechs,
+                    proyeccion2: t.proyeccion,
                     cuota2: t.cuota,
                     estado2: t.estado
                 }
@@ -3327,6 +3334,7 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                         id2: '',
                         ncuota2: '',
                         fecha2: '',
+                        proyeccion2: '',
                         cuota2: '',
                         estado2: ''
                     }
@@ -3359,7 +3367,7 @@ router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": solicitudes };
         res.send(respuesta);
     } else {
-        respuesta = { "data": [] }; 
+        respuesta = { "data": [] };
         res.send(respuesta);
     }
 });
@@ -3794,7 +3802,7 @@ router.post('/rcb/:id', isLoggedIn, async (req, res) => {
         respuesta = { "data": so };
         res.send(respuesta);
     } else {
-        respuesta = { "data": [] }; 
+        respuesta = { "data": [] };
         res.send(respuesta);
     }
 })
@@ -3819,7 +3827,8 @@ router.post('/desendentes', noExterno, async (req, res) => {
         })
     }
 
-    const directas = await pool.query(`SELECT p0.usuario papa, p1.usuario abuelo, p2.usuario bisabuelo, 
+    const directas = await pool.query(`SELECT p0.usuario papa, p0.sucursal sp, p1.usuario abuelo, 
+            p1.sucursal sa, p2.usuario bisabuelo, p2.sucursal sb, u.sucursal, 
             MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.*, r.incntivo
             FROM pines p0 LEFT JOIN pines p1 ON p0.usuario = p1.acreedor 
             LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
@@ -3861,31 +3870,31 @@ router.post('/desendentes', noExterno, async (req, res) => {
                 asesor, 0, a.separar, a.lote, 0, 0, a.incentivo, a.ordn
             ]);
 
-            a.directa === null && estdStatus ? f.push([
+            !a.directa && estdStatus ? f.push([
                 hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
                 asesor, a.comision, val, a.lote, retefuente,
                 reteica, monto - (retefuente + reteica), a.ordn
             ]) : '';
 
-            a.papa && !a.uno && estdStatus ? f.push([
+            a.papa && !a.sp && !a.uno && estdStatus ? f.push([
                 hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                 a.papa, a.linea1, val, a.lote, retefuenteP,
                 reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
             ]) : '';
 
-            a.abuelo && !a.dos && estdStatus ? f.push([
+            a.abuelo && !a.sa && !a.dos && estdStatus ? f.push([
                 hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
                 a.abuelo, a.linea2, val, a.lote, retefuenteA,
                 reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
             ]) : '';
 
-            a.bisabuelo && !a.tres && estdStatus ? f.push([
+            a.bisabuelo && !a.sb && !a.tres && estdStatus ? f.push([
                 hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
                 a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                 reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
             ]) : '';
 
-            if (bon && a.bonoextra > 0.0000 && estdStatus) {
+            if (bon && a.bonoextra > 0.0000 && estdStatus && !a.sucursal && a.bextra > 0) {
                 montoC = val * a.bonoextra;
                 retefuenteC = montoC * 0.10;
                 reteicaC = montoC * 8 / 1000;
@@ -4964,8 +4973,9 @@ async function Desendentes(pin, stados, pasado) {
 
     var j = asesor[0]
     if (j.sucursal) {
-        const directas = await pool.query(`SELECT p0.usuario papa, p1.usuario abuelo, 
-            p2.usuario bisabuelo, p.id ordn, p.*, l.*, o.*, u.*, c.* 
+        const directas = await pool.query(`SELECT p0.usuario papa, p0.sucursal sp, p1.usuario abuelo, 
+            p1.sucursal sa, p2.usuario bisabuelo, p2.sucursal sb, u.sucursal, 
+            p.id ordn, p.*, l.*, o.*, u.*, c.* 
             FROM pines p0 LEFT JOIN pines p1 ON p0.usuario = p1.acreedor 
             LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
             INNER JOIN preventa p ON p0.acreedor = p.asesor
@@ -5004,17 +5014,17 @@ async function Desendentes(pin, stados, pasado) {
                         j.acreedor, i, val, a.lote, retefuente,
                         reteica, monto - (retefuente + reteica), a.ordn
                     ]]
-                    a.papa ? f.push([
+                    a.papa && !a.sp && j.papa < 6 ? f.push([
                         hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                         a.papa, a.linea1, val, a.lote, retefuenteP,
                         reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
                     ]) : '';
-                    a.abuelo ? f.push([
+                    a.abuelo && !a.sa && j.abue < 6 ? f.push([
                         hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
                         a.abuelo, a.linea2, val, a.lote, retefuenteA,
                         reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
                     ]) : '';
-                    a.bisabuelo ? f.push([
+                    a.bisabuelo && !a.sb && j.bisab < 6 ? f.push([
                         hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
@@ -5032,7 +5042,8 @@ async function Desendentes(pin, stados, pasado) {
         }
         return true
     } else {
-        const directas = await pool.query(`SELECT p0.usuario papa, p1.usuario abuelo, p2.usuario bisabuelo, 
+        const directas = await pool.query(`SELECT p0.usuario papa, p0.sucursal sp, p1.usuario abuelo, 
+            p1.sucursal sa, p2.usuario bisabuelo, p2.sucursal sb, u.sucursal,
             MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.* 
             FROM pines p0 LEFT JOIN pines p1 ON p0.usuario = p1.acreedor 
             LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
@@ -5118,22 +5129,22 @@ async function Desendentes(pin, stados, pasado) {
                         j.acreedor, a.comision, val, a.lote, retefuente,
                         reteica, monto - (retefuente + reteica), a.ordn
                     ]]
-                    a.papa && j.papa < 6 ? f.push([
+                    a.papa && !a.sp && j.papa < 6 ? f.push([
                         hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                         a.papa, a.linea1, val, a.lote, retefuenteP,
                         reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
                     ]) : '';
-                    a.abuelo && j.abue < 6 ? f.push([
+                    a.abuelo && !a.sa && j.abue < 6 ? f.push([
                         hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
                         a.abuelo, a.linea2, val, a.lote, retefuenteA,
                         reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
                     ]) : '';
-                    a.bisabuelo && j.bisab < 6 ? f.push([
+                    a.bisabuelo && !a.sb && j.bisab < 6 ? f.push([
                         hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
-                    if (a.bonoextra > 0.0000) {
+                    if (a.bonoextra > 0.0000 && !a.sucursal && a.bextra > 0) {
                         montoC = val * a.bonoextra;
                         retefuenteC = montoC * 0.10;
                         reteicaC = montoC * 8 / 1000;

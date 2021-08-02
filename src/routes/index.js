@@ -36,10 +36,6 @@ GROUP BY p.id
 HAVING meses > 1 AND deuda > 0
 ORDER BY meses DESC;`;
 
-
-
-
-
 router.get('/', async (req, res) => {
     res.render('index');
 });
@@ -221,10 +217,10 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
 
             chat.data.messages
                 .filter((e) => {
-                    return !e.fromMe || /ayudarte/i.test(e.body)
+                    return !e.fromMe || /ayudarte|ayudarle/i.test(e.body)
                 }).map((e, i) => {
                     msgs++
-                    if (e.body == 7 || /ayudarte/i.test(e.body)) res = true;
+                    if (e.body == 7 || /ayudarte|ayudarle/i.test(e.body)) res = true;
                 });
 
             if (res) return;
