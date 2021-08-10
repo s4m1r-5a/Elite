@@ -3354,6 +3354,7 @@ router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
 
     if (id !== 'nada' && !req.user.externo) {
+
         const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
@@ -5007,13 +5008,21 @@ async function Desendentes(pin, stados, pasado) {
                     var montoB = val * a.linea3
                     var retefuenteB = montoB * 0.10
                     var reteicaB = montoB * 8 / 1000
-                    var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+
+                    var std = a.obsevacion === 'CARTERA' ? 1 : 15;
+                    var Lote = { directa: j.acreedor, uno: a.papa, dos: a.abuelo, tres: a.bisabuelo };
                     bonop += val
+
                     var f = [[
                         hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
                         j.acreedor, i, val, a.lote, retefuente,
                         reteica, monto - (retefuente + reteica), a.ordn
                     ]]
+                    a.external && !a.comiempresa ? f.push([
+                        hoy, montoP, 'COMISION DIRECTA', std, 'VENTA INDIRECTA',
+                        '00000000000000012345', montoGE, val, a.lote, retefuenteGE,
+                        reteicaGE, montoGE - (retefuenteGE + reteicaGE), a.ordn
+                    ]) : '';
                     a.papa && !a.sp && j.papa < 6 ? f.push([
                         hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                         a.papa, a.linea1, val, a.lote, retefuenteP,
@@ -5029,11 +5038,31 @@ async function Desendentes(pin, stados, pasado) {
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
+                    if (a.external && !a.comiempresa) {
+
+                        var montoGE = val * a.maxcomis;
+
+                        Lote.comiempresa = montoGE;
+
+                        f.push([
+                            hoy, montoP, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
+                            '00000000000000012345', montoGE, val, a.lote, 0, 0, montoGE, a.ordn
+                        ]);
+                    }
+                    if (a.external && !a.comisistema) {
+
+                        var montoST = val * a.sistema;
+
+                        Lote.comisistema = montoST;
+
+                        f.push([
+                            hoy, montoP, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                            '00000000000000012345', montoST, val, a.lote, 0, 0, montoST, a.ordn
+                        ]);
+                    }
                     pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
                         porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
-                    pool.query(`UPDATE productosd SET ? WHERE id = ?`,
-                        [{ directa: j.acreedor, uno: a.papa, dos: a.abuelo, tres: a.bisabuelo }, a.lote]
-                    );
+                    pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
                 }
                 if (a.mes === mes || a.pagobono) {
                     cortp += val;
@@ -5122,8 +5151,11 @@ async function Desendentes(pin, stados, pasado) {
                     var montoB = val * a.linea3
                     var retefuenteB = montoB * 0.10
                     var reteicaB = montoB * 8 / 1000
+
                     var std = a.obsevacion === 'CARTERA' ? 1 : 15;
+                    var Lote = { directa: j.acreedor, uno: a.papa, dos: a.abuelo, tres: a.bisabuelo };
                     bonop += val
+
                     var f = [[
                         hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
                         j.acreedor, a.comision, val, a.lote, retefuente,
@@ -5144,6 +5176,34 @@ async function Desendentes(pin, stados, pasado) {
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
+                    if (a.external && !a.comiempresa) {
+
+                        var montoGE = val * a.maxcomis;
+                        var retefuenteGE = montoGE * 0.10;
+                        var reteicaGE = montoGE * 8 / 1000;
+
+                        Lote.comiempresa = montoGE;
+
+                        f.push([
+                            hoy, montoP, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
+                            '00000000000000012345', montoGE, val, a.lote, retefuenteGE,
+                            reteicaGE, montoGE - (retefuenteGE + reteicaGE), a.ordn
+                        ]);
+                    }
+                    if (a.external && !a.comisistema) {
+
+                        var montoST = val * a.sistema;
+                        var retefuenteST = montoST * 0.10;
+                        var reteicaST = montoST * 8 / 1000;
+
+                        Lote.comisistema = montoST;
+
+                        f.push([
+                            hoy, montoP, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                            '00000000000000012345', montoST, val, a.lote, retefuenteST,
+                            reteicaST, montoST - (retefuenteST + reteicaST), a.ordn
+                        ]);
+                    }
                     if (a.bonoextra > 0.0000 && !a.sucursal && a.bextra > 0) {
                         montoC = val * a.bonoextra;
                         retefuenteC = montoC * 0.10;
@@ -5156,9 +5216,7 @@ async function Desendentes(pin, stados, pasado) {
                     }
                     pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
                         porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
-                    pool.query(`UPDATE productosd SET ? WHERE id = ?`,
-                        [{ directa: j.acreedor, uno: a.papa, dos: a.abuelo, tres: a.bisabuelo }, a.lote]
-                    );
+                    pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
                 }
                 if (a.mes === mes || a.pagobono) {
                     cortp += val;
