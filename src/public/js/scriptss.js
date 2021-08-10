@@ -3266,146 +3266,146 @@ if (window.location.pathname === `/links/reportes`) {
         });
     });
     //////////////////////* ESTADOS DE CUENTA RESUMIDOS */////////////////////// 
-    /*     var estadoscuentas = $('#estadoscuentas').DataTable({
-            processing: true,
-            autowidth: true,
-            //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
-            order: [[0, 'asc'], [1, 'asc']],
-            ajax: {
-                method: "POST",
-                url: "/links/reportes/estadosc",
-                dataSrc: "data"
+    var estadoscuentas = $('#estadoscuentas').DataTable({
+        processing: true,
+        autowidth: true,
+        //columnDefs: [{ targets: [-1], visible: false, searchable: true }],
+        order: [[0, 'asc'], [1, 'asc']],
+        ajax: {
+            method: "POST",
+            url: "/links/reportes/estadosc",
+            dataSrc: "data"
+        },
+        columns: [
+            {
+                data: "mz",
+                render: function (data, method, row) {
+                    return /[0-9]/.test(data) ? data : 0 //esta asi para que odener por numeros
+                }
             },
-            columns: [
-                {
-                    data: "mz",
-                    render: function (data, method, row) {
-                        return data === 'no' ? 0 : data
-                    }
-                },
-                { data: "n" },
-                { data: "mtr2" },
-                {
-                    data: "vrmt2",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "nombre",
-                    className: 'te'
-                },
-                {
-                    data: "fecha",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        return moment(data).format('YYYY-MM-DD')
-                    }
-                },
-                {
-                    data: "valor",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "descuento",
-                    className: 'te',
-                    render: function (data, method, row) {
-                        return data + '%'
-                    }
-                },
-                {
-                    data: "ahorro",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "total",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    data: "montos",
-                    className: 'te',
-                    render: $.fn.dataTable.render.number('.', '.', 0, '$')
-                },
-                {
-                    className: 't',
-                    data: "montos",
-                    render: function (data, method, row) {
-                        return '$' + Moneda(row.total - data);
-                    }
-                },
-                {
-                    data: "proyect",
-                    className: 'te'
-                },
-            ],
-            drawCallback: function (settings) {
-                var api = this.api();
-                var rows = api.rows({ page: 'current' }).nodes();
-                var last = null;
-                var total = 0;
-                var filas = api.column(0, { page: 'current' }).data();
-                var intVal = function (i) {
-                    var t = i.replace(/[\$,]/g, '')
-                    return typeof i === 'string' ?
-                        t.replace(/\./g, '') * 1 :
-                        typeof i === 'number' ?
-                            i : 0;
-                };
-                filas.each(function (group, i) {
-                    if (last !== group) {
-                        if (last != null) {
-                            $(rows).eq(i - 1).after(
-                                `<tr class="total">
+            { data: "n" },
+            { data: "mtr2" },
+            {
+                data: "vrmt2",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "nombre",
+                className: 'te'
+            },
+            {
+                data: "fecha",
+                className: 'te',
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            {
+                data: "valor",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "descuento",
+                className: 'te',
+                render: function (data, method, row) {
+                    return data + '%'
+                }
+            },
+            {
+                data: "ahorro",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "total",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "montos",
+                className: 'te',
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                className: 't',
+                data: "montos",
+                render: function (data, method, row) {
+                    return '$' + Moneda(row.total - data);
+                }
+            },
+            {
+                data: "proyect",
+                className: 'te'
+            },
+        ],
+        drawCallback: function (settings) {
+            var api = this.api();
+            var rows = api.rows({ page: 'current' }).nodes();
+            var last = null;
+            var total = 0;
+            var filas = api.column(0, { page: 'current' }).data();
+            var intVal = function (i) {
+                var t = i.replace(/[\$,]/g, '')
+                return typeof i === 'string' ?
+                    t.replace(/\./g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            filas.each(function (group, i) {
+                if (last !== group) {
+                    if (last != null) {
+                        $(rows).eq(i - 1).after(
+                            `<tr class="total">
                                         <td colspan=2>Total:</td>
                                         <td colspan="10">${Moneda(total)}</td>
                                      </tr>`
-                            );
-                            total = 0;
-                        }
-                        $(rows).eq(i).before(
-                            `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
+                        );
+                        total = 0;
+                    }
+                    $(rows).eq(i).before(
+                        `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
                                     <td colspan="13" class="text-center">MANZANA ${group}</td>
                                 </tr>`
-                        );
-                        last = group;
-                    }
-                    total += intVal($(rows).eq(i).children()[10].textContent);
-                    if (i == filas.length - 1) {
-                        $(rows).eq(i).after(
-                            `<tr class="total">
+                    );
+                    last = group;
+                }
+                total += intVal($(rows).eq(i).children()[10].textContent);
+                if (i == filas.length - 1) {
+                    $(rows).eq(i).after(
+                        `<tr class="total">
                                     <td colspan=2>Total:</td>
                                     <td colspan="10">${Moneda(total)}</td>
                                 </tr>`
-                        );
-                    }
-                });
-            },
-            dom: 'Bfrtip',
+                    );
+                }
+            });
+        },
+        dom: 'Bfrtip',
+        buttons: [{
+            extend: 'collection',
+            text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+            orientation: 'landscape',
             buttons: [{
-                extend: 'collection',
-                text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+                text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+                extend: 'copy'
+            },
+            {
+                text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
+                extend: 'print',
+                title: ``,
                 orientation: 'landscape',
-                buttons: [{
-                    text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-                    extend: 'copy'
+                footer: true,
+                exportOptions: {
+                    columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11],
+                    //modifier: true
                 },
-                {
-                    text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
-                    extend: 'print',
-                    title: ``,
-                    orientation: 'landscape',
-                    footer: true,
-                    exportOptions: {
-                        columns: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12],
-                        //modifier: true
-                    },
-                    customize: function (win) {
-                        $(win.document.body)
-                            .css('font-size', '10pt')
-                            .prepend(
-                                `                
+                customize: function (win) {
+                    $(win.document.body)
+                        .css('font-size', '10pt')
+                        .prepend(
+                            `                
                         <div class="card">
                             <!--<div class="text-right mb-2">
                                 <span class="badge badge-dark text-md-center">PRADOS DE PONTEVEDRA</span>
@@ -3415,7 +3415,7 @@ if (window.location.pathname === `/links/reportes`) {
                                     <div class="card border-primary text-left">
                                         <div class="row no-gutters">
                                             <div class="col-md-2">
-                                                <img src="https://grupoelitered.com.co/img/avatars/avatar.svg" class="card-img" alt="...">
+                                                <img src="https://grupoelitefincaraiz.com/img/avatars/avatar.svg" class="card-img" alt="...">
                                             </div>
                                             <div class="col-md-9">
                                                 <div class="card-body text-primary h4">
@@ -3482,131 +3482,131 @@ if (window.location.pathname === `/links/reportes`) {
                                 </div>
                             </div>
                         </div>`
-                            );
-    
-                        $(win.document.body).find('table')
-                            .addClass('compact')
-                            .css('font-size', 'inherit');
-                    },
-                    autoPrint: true
-                }
-                ]
-            },
-            {
-                extend: 'pageLength',
-                text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
-                orientation: 'landscape'
-            },
-            {
-                extend: 'collection',
-                text: `<i class="align-middle feather-md" data-feather="home"></i>`,
-                //orientation: 'landscape',
-                buttons: f
-            },
-            {
-                text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
-                attr: {
-                    title: 'Fecha',
-                    id: 'Date'
+                        );
+
+                    $(win.document.body).find('table')
+                        .addClass('compact')
+                        .css('font-size', 'inherit');
                 },
-                className: 'btn btn-secondary fech'
+                autoPrint: true
+            }
+            ]
+        },
+        {
+            extend: 'pageLength',
+            text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+            orientation: 'landscape'
+        },
+        {
+            extend: 'collection',
+            text: `<i class="align-middle feather-md" data-feather="home"></i>`,
+            //orientation: 'landscape',
+            buttons: f
+        },
+        {
+            text: `<i class="align-middle feather-md" data-feather="calendar"></i>`,
+            attr: {
+                title: 'Fecha',
+                id: 'Date'
             },
-            {
-                text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
+            className: 'btn btn-secondary fech'
+        },
+        {
+            text: `<input type="text" class="edi text-center min" style="width: 30px; padding: 1px;"
                     placeholder="MZ">`,
-                attr: {
-                    title: 'Busqueda por MZ',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
             },
-            {
-                text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
+            className: 'btn btn-secondary'
+        },
+        {
+            text: `<input type="text" class="edi text-center max" style="width: 30px; padding: 1px;"
                     placeholder="LT">`,
-                attr: {
-                    title: 'Busqueda por LT',
-                    id: ''
-                },
-                className: 'btn btn-secondary'
-            }
-            ],
-            fixedHeader: {
-                headerOffset: -9
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
             },
-            //ordering: true,
-            language: languag,
-            //deferRender: true,
-            paging: true,
-            search: {
-                regex: true,
-                caseInsensitive: true,
-            },
-            responsive: true,
-            initComplete: function (settings, json) {
-                //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-            },
-            footerCallback: function (row, data, start, end, display) {
-                var api = this.api(), data;
-                // Elimine el formato para obtener datos enteros para la suma
-                var intVal = function (i) {
-                    return typeof i === 'string' ?
-                        i.replace(/[\$,]/g, '') * 1 :
-                        typeof i === 'number' ?
-                            i : 0;
-                };
-                // Total en todas las páginas visibles (encontradas)
-                area = api
-                    .column(3, { order: 'applied', search: 'applied' })
-                    .data()
-                    .reduce(function (a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0);
-                productos = api
-                    .column(3, { order: 'applied', search: 'applied' })
-                    .data()
-                    .reduce(function (a, b, x) {
-                        return x;
-                    }, 0);
-                descuentos = api
-                    .column(8, { order: 'applied', search: 'applied' })
-                    .data()
-                    .reduce(function (a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0);
-                total = api
-                    .column(9, { order: 'applied', search: 'applied' })
-                    .data()
-                    .reduce(function (a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0);
-                abonos = api
-                    .column(10, { order: 'applied', search: 'applied' })
-                    .data()
-                    .reduce(function (a, b) {
-                        return intVal(a) + intVal(b);
-                    }, 0);
-                //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-            },
-            rowCallback: function (row, data, index) {
-            }
-        });
-        
-        $('.min, .max').on('keyup', function () {
-            var col = $(this).hasClass('min') ? 1 : 2;
-            var buscar = this.value ? "^" + this.value + "$" : '';
-            estadoscuentas
-                .columns(col)
-                .search(buscar, true, false, true)
-                .draw();
-        });
-     */
-    /*$('#resumen').click(function () {
+            className: 'btn btn-secondary'
+        }
+        ],
+        fixedHeader: {
+            headerOffset: -9
+        },
+        //ordering: true,
+        language: languag,
+        //deferRender: true,
+        paging: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: true,
+        initComplete: function (settings, json) {
+            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+        },
+        footerCallback: function (row, data, start, end, display) {
+            var api = this.api(), data;
+            // Elimine el formato para obtener datos enteros para la suma
+            var intVal = function (i) {
+                return typeof i === 'string' ?
+                    i.replace(/[\$,]/g, '') * 1 :
+                    typeof i === 'number' ?
+                        i : 0;
+            };
+            // Total en todas las páginas visibles (encontradas)
+            area = api
+                .column(3, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            productos = api
+                .column(3, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b, x) {
+                    return x;
+                }, 0);
+            descuentos = api
+                .column(8, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            total = api
+                .column(9, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            abonos = api
+                .column(10, { order: 'applied', search: 'applied' })
+                .data()
+                .reduce(function (a, b) {
+                    return intVal(a) + intVal(b);
+                }, 0);
+            //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+        },
+        rowCallback: function (row, data, index) {
+        }
+    });
+
+    $('.min, .max').on('keyup', function () {
+        var col = $(this).hasClass('min') ? 1 : 2;
+        var buscar = this.value ? "^" + this.value + "$" : '';
+        estadoscuentas
+            .columns(col)
+            .search(buscar, true, false, true)
+            .draw();
+    });
+
+    $('#resumen').click(function () {
         $('#stadoreportes').hide('slow');
         $('#stadocuentasd').hide('slow');
         $('#stadocuentasr').show('slow');
         $('#reports').show('slow');
         estadoscuentas.columns.adjust().draw();
-    })*/
+    })
     //////////////////////* ESTADOS DE CUENTA DETALLADOS */////////////////////// 
     var body = [];
     var estadoscuentas2 = $('#estadoscuentas2').DataTable({
@@ -5167,20 +5167,23 @@ if (window.location.pathname === `/links/reportes`) {
                             case 1:
                                 return `<span class="badge badge-pill badge-warning" title="Esta comision esta siendo auditadda">Auditando</span>`
                                 break;
+                            case 3:
+                                return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                                break;
                             case 4:
                                 return `<span class="badge badge-pill badge-dark">Pagada</span>`
                                 break;
                             case 6:
                                 return `<span class="badge badge-pill badge-danger">Declinada</span>`
                                 break;
-                            case 3:
-                                return `<span class="badge badge-pill badge-info">Pendiente</span>`
-                                break;
-                            case 15:
-                                return `<span class="badge badge-pill badge-warning">Inactiva</span>`
+                            case 8:
+                                return `<span class="badge badge-pill badge-primary">Compensando</span>`
                                 break;
                             case 9:
                                 return `<span class="badge badge-pill badge-success">Disponible</span>`
+                                break;
+                            case 15:
+                                return `<span class="badge badge-pill badge-warning">Inactiva</span>`
                                 break;
                             default:
                                 return `<span class="badge badge-pill badge-primary">Sin info</span>`
