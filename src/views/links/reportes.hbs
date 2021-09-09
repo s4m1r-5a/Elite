@@ -617,6 +617,55 @@
     </div>
 </div>
 
+<!-- BEGIN primary modal -->
+<div class="modal fade" id="DctoMora" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-sm" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Decuento sobre moras</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form class="row gx-3 gy-2 align-items-center" id="formularioDcto">
+                    <input name="producto" type="hidden" id="prodmora">
+                    <div class="col-sm-3 mb-3">
+                        <label class="visually-hidden" for="dcto">Descuento</label>
+                        <input type="text" class="form-control text-center" id="dcto" placeholder="Dcto" name="dcto">
+                    </div>
+                    <div class="col-sm-5 mb-3">
+                        <label class="visually-hidden" for="dctoMonto">Monto</label>
+                        <input type="text" class="form-control text-center" id="dctoMonto" placeholder="Monto" name="monto">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <label class="visually-hidden" for="dctoMonto">Limite</label>
+                        <input type="text" class="form-control" id="FechaLimite" placeholder="Fecha Limite" name="limite">
+                    </div>
+                    <div class="col-sm-4 mb-3">
+                        <select class="form-select" id="typo" name="tipo">
+                            <option value=" " selected>Tipo</option>
+                            <option value="DCTO">DCTO</option>
+                            <option value="CONVENIO">CONVENIO</option>
+                        </select>
+                    </div>
+                    <div class="col-5 mb-3">
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="stopMora" name="stop">
+                            <label class="form-check-label" for="stopMora">
+                                Detener Mora?
+                            </label>
+                        </div>
+                    </div>
+                    <div class="col-auto mb-3">
+                        <button type="submit" class="btn btn-primary float-right">Aplicar</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
 {{#if user.externo}}
 
 {{else if user.auxicontbl}}

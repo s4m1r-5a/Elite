@@ -1192,7 +1192,7 @@ if (window.location.pathname == `/links/pagos`) {
                             data.cuotas.filter((r) => {
                                 return r.separacion == m
                             }).map((r, x) => {
-                                mor = r.mora; //console.log(r, x, !x ? r.id : 'no hay nada')
+                                mor = r.mora;
                                 mora += mor;
                                 cuot += r.cuota;
                                 c = mora + cuot;
@@ -1204,17 +1204,15 @@ if (window.location.pathname == `/links/pagos`) {
                                 $('#Concepto').html(r.tipo);
                                 $('#Cuotan').html(Moneda(r.ncuota));
                                 $('#Cuota').html(Moneda(r.cuota));
-                                $('#Mora').html(Moneda(mor));
-                                $('#mora, .mora').val(mor);
+                                $('#Mora').html(Moneda(mora));
+                                $('#mora, .mora').val(mora);
                                 $('#Facturas').html(x + 1);
                                 $('.Totalf').html(Moneda(r.cuota + mor));
                                 $('.Total, .Total3').html(Moneda(c));
-                                //$('.Total3').html(Moneda(mora + cuot));
                                 $('#Total, #Total2').val(c);
                                 $('#Description, #transferDescription').val(r.tipo + ' ' + Description);
                                 $('#factrs').val(x + 1);
                                 $('#idC').val(idC);
-                                //$('#idC').val(r.id);
                                 cont++
                             })
                             if (cont === 0) {
@@ -1691,7 +1689,7 @@ if (window.location.pathname == `/links/pagos`) {
 
 }
 //////////////////////////////////* COMISIONES */////////////////////////////////////////////////////////////
-if (window.location.pathname === `/links/comisiones` && !rol.externo) {
+if (window.location.pathname === `/links/comisiones` && rol.contador) {
     $('.sidebar-item').removeClass('active');
     $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 
@@ -1796,13 +1794,23 @@ if (window.location.pathname === `/links/comisiones` && !rol.externo) {
         language: languag,
         ajax: {
             method: "POST",
-            url: "/links/reportes/comision",
+            url: "/links/comisiones",
             dataSrc: "data"
         },
-        initComplete: function (settings, json, row) {
-            //$('#collapse4').collapse('toggle');
-            //$('#ModalEventos').modal('hide');
+        initComplete: function (settings, json) {
             $('#comisiones_filter').hide();
+            this.api().columns(13).every(function () {
+                var column = this;
+
+                column.data().unique().sort().each(function (d, j) {
+                    $('#men2').append(
+                        `<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                        onclick="STAD('#comisiones', 13, '${d}')"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
+                    );
+                });
+                $('#men2').append(`<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+                onclick="STAD('#comisiones', 13, '')"><i class="fas fa-undo"></i> Todos</a>`)
+            });
         },
         columns: [
             {
@@ -1838,11 +1846,6 @@ if (window.location.pathname === `/links/comisiones` && !rol.externo) {
                 }
             }, {
                 data: "retefuente",
-                render: function (data, method, row) {
-                    return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
-                }
-            }, {
-                data: "reteica",
                 render: function (data, method, row) {
                     return '$' + Moneda(Math.round(data)) //replaza cualquier caracter y espacio solo deja letras y numeros
                 }
@@ -2797,6 +2800,9 @@ if (window.location.pathname === `/links/reportes`) {
                     } else if (rol.subadmin) {
                         return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
                         aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
+                    } else if (rol.contador) {
+                        `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>
+                        <a class="flex-sm-fill text-sm-center ml-2" href="#" onclick="Excel(${data}, '${row.proyecto}', '${row.nombre}', '${row.mz}', '${row.n}')"><i class="fas fa-file-alt"></i>Ex</a>`
                     } else {
                         return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
                     }
@@ -2866,7 +2872,6 @@ if (window.location.pathname === `/links/reportes`) {
             var rows = api.rows({ page: 'current' }).nodes();
             var filas = api.column(0, { page: 'current' }).data();
             filas.each(function (g, i) {
-
                 AdminSuper = rol.subadmin;
                 resOrden = rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
                 //<a class="flex-sm-fill text-sm-center nav-link" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a> 
@@ -2877,10 +2882,22 @@ if (window.location.pathname === `/links/reportes`) {
                         <nav class="nav flex-sm-row collapse" id="Ord${g.id}" aria-labelledby="headingOne" data-parent="#datatable2">
 
                         ${AdminSuper && !resOrden ? `
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Excel(${g.id}, '${g.proyecto}', '${g.nombre}', '${g.mz}', '${g.n}')"><i class="fas fa-file-alt"></i> Excel</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
                         <a class="flex-sm-fill text-sm-center nav-link anular" href="#"><i class="fas fa-ban"></i> Anular</a>                                
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="GestComi(${g.id},'${g.asesor}')"><i class="fas fa-sitemap"></i> Comisiones</a>`
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="GestComi(${g.id},'${g.asesor}')"><i class="fas fa-sitemap"></i> Comisiones</a>
+                        <div class="dropdown">
+                            <a class="flex-sm-fill text-sm-center nav-link dropdown-toggle" href="#" data-toggle="dropdown">
+                                <i class="fas fa-sitemap"></i> Mora
+                            </a>
+                            <div class="dropdown-menu dropdown-menu-right">
+                                <a class="dropdown-item" href="#">Quitar Mora</a>
+					            <a class="dropdown-item" href="#">Parar Mora</a>
+					            <a class="dropdown-item" href="#">Anular Dct.</a>
+                                <a class="dropdown-item" onclick="asignarDctoMora(${g.id})" href="#">Descuento</a>
+                            </div>
+                        </div>`
                         : ''}                              
                         ${!resOrden ? `
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
@@ -4761,6 +4778,87 @@ if (window.location.pathname === `/links/reportes`) {
             }
         });
     })
+    var asignarDctoMora = (id) => {
+        $('#dctoMonto').mask('#.##$', { reverse: true, selectOnFocus: true });
+        $('#stopMora').prop("checked", false);
+        $('#dctoMonto, #dcto').prop("disabled", false).val(null);
+        $(`#typo option[value=' ']`).prop("selected", true);
+        $('#prodmora').val(id);
+
+        $('#DctoMora').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+        $("#FechaLimite").daterangepicker({
+            locale: {
+                'format': 'YYYY-MM-DD',
+                'separator': ' - ',
+                'applyLabel': 'Aplicar',
+                'cancelLabel': 'Cancelar',
+                'fromLabel': 'De',
+                'toLabel': '-',
+                'customRangeLabel': 'Personalizado',
+                'weekLabel': 'S',
+                'daysOfWeek': ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                'monthNames': ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+                'firstDay': 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2021,
+            maxYear: parseInt(moment().format('YYYY'), 10),
+        });
+        $('#typo').change(function () {
+            if ($(this).val() === "CONVENIO") {
+                $('#stopMora').prop("checked", true);
+                $('#dctoMonto').prop("disabled", false);
+                $('#dcto').prop("disabled", true).val(null);
+            } else {
+                $('#dcto').prop("disabled", false);
+                $('#stopMora').prop("checked", false);
+            };
+        })
+        $('#dctoMonto, #dcto').change(function () {
+            if ($(this).prop('id') === "dcto" && $(this).val()) {
+                $('#dctoMonto').prop("disabled", true).val(null);
+            } else if ($(this).prop('id') === "dctoMonto" && $(this).val()) {
+                $('#dcto').prop("disabled", true).val(null);
+            } else {
+                $('#dctoMonto, #dcto').prop("disabled", false).val(null);
+            };
+        });
+    }
+    $('#formularioDcto').submit(function (e) {
+        e.preventDefault();
+        var dat = $(this).serialize(); //new FormData(this); //
+        $.ajax({
+            type: 'POST',
+            url: '/links/reportes/dctomora',
+            data: dat,
+            beforeSend: function (xhr) {
+                $('#DctoMora').modal('hide');
+                /* $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                }); */
+            },
+            success: function (data) {
+                if (data.std) {
+                    //$('#ModalEventos').modal('hide');
+                    SMSj('success', data.msj);
+                    //table.ajax.reload(null, false)
+                } else {
+                    //$('#ModalEventos').modal('hide');
+                    SMSj('error', data.msj)
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        });
+    });
     var Eliminar = (eli) => {
         if (!rol.externo) {
             if (confirm("Seguro deseas eliminar esta separacion?")) {
@@ -4843,6 +4941,29 @@ if (window.location.pathname === `/links/reportes`) {
                 }
             });
         }
+    }
+    var Excel = (id, proyecto, nombre, mz, n) => {
+        console.log(id, proyecto, nombre, mz, n)
+        var D = { k: id, h: moment().format('YYYY-MM'), proyecto, nombre, mz, n };
+        $.ajax({
+            url: '/links/reportes/excel',
+            data: D,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    tableOrden.ajax.reload(null, false)
+                    $('#ModalEventos').modal('hide')
+                    window.location.href = data;
+                }
+            }
+        });
     }
     var Verificar = (id) => {
         var D = { k: id, h: moment().format('YYYY-MM') };
@@ -6690,6 +6811,16 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
             {
+                data: "diasmora",
+                render: function (data, method, row) {
+                    return Math.round(data)
+                }
+            },
+            {
+                data: "mora",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
                 data: "estado",
                 render: function (data, method, row) {
                     switch (data) {
@@ -6727,6 +6858,16 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
                 render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
             {
+                data: "diasmora2",
+                render: function (data, method, row) {
+                    return Math.round(data)
+                }
+            },
+            {
+                data: "mora2",
+                render: $.fn.dataTable.render.number('.', '.', 2, '$')
+            },
+            {
                 data: "estado2",
                 render: function (data, method, row) {
                     switch (data) {
@@ -6754,7 +6895,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
 
         },
         columnDefs: [
-            { "visible": false, "targets": [0, 3, 8] }
+            { "visible": false, "targets": [0, 3, 5, 6, 10, 12, 13] }
         ],
         order: [[0, "desc"], [1, 'asc']],
         drawCallback: function (settings) {
@@ -6801,22 +6942,28 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         $('#option1').click(function () {
             col = 8;
             table.columns().visible(true, true);
-            table.columns([0, 3, 8]).visible(false, false);
+            table.columns([0, 3, 5, 6, 10, 12, 13]).visible(false, false);
             table.columns.adjust().draw(false);
         });
         $('#option2').click(function () {
             col = 6;
             table.columns().visible(true, true);
-            table.columns([0, 4, 5, 9, 10]).visible(false, false);
+            table.columns([0, 4, 5, 6, 7, 11, 12, 13, 14]).visible(false, false);
             table.columns.adjust().draw(false);
         });
         $('#option3').click(function () {
-            col = 10;
+            col = 12;
+            table.columns().visible(true, true);
+            table.columns([0, 3, 10]).visible(false, false);
+            table.columns.adjust().draw(false);
+        });
+        $('#option4').click(function () {
+            col = 14;
             table.columns().visible(true, true);
             table.columns([0]).visible(false, false);
             table.columns.adjust().draw(false);
         });
-        $('#option4').click(function () {
+        $('#option5').click(function () {
             window.addEventListener("load", window.print());
         });
 
@@ -8323,8 +8470,11 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
             },
             success: function (data) {
                 if (data.res) {
+                    $('#ModalEventos').modal('hide')
                     SMSj('success', data.msg)
+                    table2.ajax.reload(null, false)
                 } else {
+                    $('#ModalEventos').modal('hide')
                     SMSj('error', data.msg)
                 }
                 $('#fileExcel').val(null)
@@ -8650,14 +8800,14 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
         autoWidth: false,
         paging: true,
         responsive: {
-            /*details: {
-                type: 'column'
-            }*/
             details: {
+                type: 'column'
+            }
+            /* details: {
                 display: $.fn.dataTable.Responsive.display.childRowImmediate,
                 type: 'none',
                 target: ''
-            }
+            } */
         },
         fixedHeader: {
             header: true,

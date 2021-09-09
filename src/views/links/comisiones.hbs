@@ -1,6 +1,4 @@
-{{#if user.externo}}
-
-{{else if user.auxicontbl}}
+{{#if user.auxicontbl}}
 
 <div class="accordion" id="accordion2">
     <div class="card">
@@ -10,7 +8,7 @@
             <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
             <i class="fas fa-angle-down float-right"></i>
         </div>
-        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion2">
+        <div id="collapse4" class="collapse show" aria-labelledby="headingOne" data-parent="#accordion2">
             <div class="card-body text-center responsive">
                 <nav>
                     <div class="nav nav-tabs" id="nav-tab" role="tablist">
@@ -55,25 +53,25 @@
                     </nav>
                     <nav class="nav nav-fill collapse" id="men2" aria-labelledby="headingOne" data-parent="#men">
                         <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Disponible')"><i class="fas fa-donate"></i>
+                            onclick="STAD('#comisiones', 16, 'Disponible')"><i class="fas fa-donate"></i>
                             Disponibles</a>
                         <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
+                            onclick="STAD('#comisiones', 16, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
                             Pendientes</a>
                         <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Declinada')"><i class="fas fa-comments-dollar"></i>
+                            onclick="STAD('#comisiones', 16, 'Declinada')"><i class="fas fa-comments-dollar"></i>
                             Declinadas</a>
                         <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Inactiva')"><i class="fas fa-landmark"></i>
+                            onclick="STAD('#comisiones', 16, 'Inactiva')"><i class="fas fa-landmark"></i>
                             Inactivas</a>
                         <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Auditando')"><i class="fas fa-landmark"></i>
+                            onclick="STAD('#comisiones', 16, 'Auditando')"><i class="fas fa-landmark"></i>
                             Auditando</a>
                         <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pagada')"><i class="fas fa-coins"></i>
+                            onclick="STAD('#comisiones', 16, 'Pagada')"><i class="fas fa-coins"></i>
                             Pagadas</a>
                         <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', '', '')"><i class="fas fa-chart-pie"></i>
+                            onclick="STAD('#comisiones', '16', '')"><i class="fas fa-chart-pie"></i>
                             Todas</a>
                     </nav>
                     <div class="collapse" id="men3" aria-labelledby="headingOne" data-parent="#men">
@@ -94,8 +92,7 @@
                             <th>Venta</th>
                             <th>Monto</th>
                             <th>%</th>
-                            <th>Retefuente</th>
-                            <th>Reteica</th>
+                            <th>Iva</th>
                             <th>Total</th>
                             <th>Concepto</th>
                             <th>Descp</th>

@@ -1,4 +1,3 @@
-
 const nodemailer = require('nodemailer')
 const pool = require('./database');
 const axios = require('axios');
@@ -8,6 +7,8 @@ const PdfPrinter = require('pdfmake')
 const Roboto = require('./public/fonts/Roboto');
 const moment = require('moment');
 const e = require('connect-flash');
+const puppeteer = require('puppeteer');
+
 moment.locale('es');
 const transpoter = nodemailer.createTransport({
     host: 'smtpout.secureserver.net',
@@ -853,6 +854,549 @@ async function EstadoCuenta(movil, nombre, author) {
         return { sent: false };
     }
 }
+async function EstadoDeCuenta(Orden) {
+    const Proyeccion = await pool.query(`SELECT c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, 
+    r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
+    o.proyect, k.pin AS cupon, q.pin AS bono, s.stado, p.ahorro, l.mz, l.n, l.valor, p.vrmt2, l.mtr2, p.fecha, s.ids, 
+    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, q.monto mtb, c.mora,
+    c.cuota, c.diaspagados, c.diasmora, c.tasa tasamora, c.estado FROM cuotas c LEFT JOIN relacioncuotas r ON r.cuota = c.id 
+    LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN preventa p ON c.separacion = p.id 
+    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
+    LEFT JOIN cupones k ON k.id = p.cupon LEFT JOIN cupones q ON s.bono = q.id 
+    INNER JOIN clientes cl ON p.cliente = cl.idc WHERE p.id = ? ORDER BY TIMESTAMP(c.fechs) ASC;`, Orden);
+    if (Proyeccion.length) {
+        const cuerpo = []
+        let totalAbonado = 0;
+        let totalMora = 0;
+        let moraAdeudada = 0;
+        let totalDeuda = 0;
+        let p = false;
+        let IDs = null;
+
+        Proyeccion.map((e, i) => {
+            totalAbonado += IDs === e.ids ? 0 : e.monto ? e.monto : 0;
+            moraAdeudada += e.estado === 3 ? e.mora : 0;
+            totalMora += e.totalmora + (e.estado === 3 ? e.mora : 0);
+            totalDeuda += e.estado === 3 ? e.cuota + e.mora : 0;
+            const PrecioDiaMora = e.mora ? e.mora / e.diasmora : 0;
+            const TotalDias = Math.round(e.diasmora - e.diaspagados);
+            const TotalMora = Math.round(PrecioDiaMora * TotalDias);
+            const TotalCuota = Math.round(e.cuota + TotalMora);
+            const Ids = IDs === e.ids && e.monto ? false : true;
+
+            if (!i) {
+                cuerpo.push(
+                    [
+                        { text: `Tipo`, style: 'tableHeader', alignment: 'center' },
+                        { text: 'F.Limite', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Cuota', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Dias', style: 'tableHeader', alignment: 'center' },
+                        { text: 'T.Usr', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Dcto.', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Mora', style: 'tableHeader', alignment: 'center' },
+                        { text: 'T.Cuota', style: 'tableHeader', alignment: 'center' },
+                        { text: 'F.Pago', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Monto', style: 'tableHeader', alignment: 'center' },
+                        { text: 'C.Saldo', style: 'tableHeader', alignment: 'center' }
+                    ],
+                    [e.tipo + '-' + e.ncuota, moment(e.fechs).format('L'),
+                    '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
+                    e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100) + '%' : (e.tasamora * 100) + '%',
+                    e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
+                    '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
+                    Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
+            } else {
+                !e.monto && p && cuerpo.push([p.tipo + '-' + p.ncuota, moment(p.fechs).format('L'),
+                '$' + Moneda(p.cuota), p.s.TotalDias, (e.tasamora * 100) + '%', '0%', '$' + Moneda(p.s.TotalMora),
+                '$' + Moneda(p.s.TotalCuota), '', '$0', '$' + Moneda(p.s.TotalCuota)]);
+
+                cuerpo.push([e.tipo + '-' + e.ncuota, moment(e.fechs).format('L'),
+                '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
+                e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100) + '%' : (e.tasamora * 100) + '%',
+                e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
+                '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
+                Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
+            }
+            IDs = e.ids;
+            p = e.monto && e.saldocuota ? e : false;
+            e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
+        });
+        ////////////////////////* CREAR PDF *//////////////////////////////
+        const printer = new PdfPrinter(Roboto);
+        let docDefinition = {
+            background: function (currentPage, pageSize) {
+                return { image: path.join(__dirname, '/public/img/avatars/avatar1.png'), width: pageSize.width, opacity: 0.1 } //, height: pageSize.height
+            },
+            pageSize: 'a4',
+            footer: function (currentPage, pageCount) {
+                return {
+                    alignment: 'center',
+                    margin: [40, 3, 40, 3],
+                    columns: [
+                        {
+                            width: 30,
+                            margin: [10, 0, 15, 0],
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [30, 30]
+                        },
+                        [
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                margin: [0, 7, 0, 0],
+                                fontSize: 8,
+                                columns: [
+                                    { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
+                                    { text: 'info@grupoelitefincaraiz.co' },
+                                    { text: 'https://grupoelitefincaraiz.com', link: 'https://grupoelitefincaraiz.com' }
+                                ]
+                            },
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 8,
+                                columns: [
+                                    { text: 'Nit: 901311748-3' },
+                                    { text: '57 300-285-1046', link: 'https://wa.me/573007861987?text=Hola' },
+                                    { text: 'Mz L lt 17 Urb. la granja, Turbaco' }
+                                ]
+                            }
+                        ],
+                        {
+                            width: 30,
+                            //alignment: 'right',
+                            margin: [10, 0, 15, 0],
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [30, 30]
+                        }
+                    ]
+                };
+            },
+            header: function (currentPage, pageCount, pageSize) {
+                // you can apply any logic and return any valid pdfmake element
+                return [
+                    {
+                        width: 20,
+                        alignment: 'right',
+                        margin: [10, 3, 10, 3],
+                        image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                        fit: [20, 20]
+                    }
+                ]
+            },
+            //watermark: { text: 'Grupo Elite', color: 'blue', opacity: 0.1, bold: true, italics: false, fontSize: 200 }, //, angle: 180
+            //watermark: { image: path.join(__dirname, '/public/img/avatars/avatar.png'), width: 100, opacity: 0.3, fit: [100, 100] }, //, angle: 180
+            info: {
+                title: 'Estado de cuenta',
+                author: 'RedElite',
+                subject: 'Detallado del estado de los pagos de un producto',
+                keywords: 'estado de cuenta',
+                creator: 'Grupo Elite',
+                producer: 'G.E.'
+            },
+            content: [ // pageBreak: 'before',
+                {
+                    columns: [
+                        [
+                            { text: 'ESTADO DE CUENTA', style: 'header' },
+                            'Conoce aqui el estado el estado de tus pagos y montos',
+                            { text: Proyeccion[0].nombre, style: 'subheader' },
+                            {
+                                text: `Doc. ${Proyeccion[0].documento}         Movil ${Proyeccion[0].movil}        ${Proyeccion[0].email}`,
+                                italics: true, color: 'gray', fontSize: 9
+                            },
+                            {
+                                style: 'tableBody',
+                                color: '#444',
+                                table: {
+                                    widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                                    body: [
+                                        [
+                                            { text: Proyeccion[0].proyect, bold: true, fontSize: 10, color: 'blue', colSpan: 5 }, {}, {}, {}, {},
+                                            { text: `MZ: ${Proyeccion[0].mz ? Proyeccion[0].mz : 'No aplica'}`, bold: true, fontSize: 10, color: 'blue' },
+                                            { text: `LT: ${Proyeccion[0].n}`, bold: true, fontSize: 10, color: 'blue' }
+                                        ],
+                                        ['Area', 'Vr.mtr2', 'Valor', 'Cupon', 'Dcto.', 'Ahorro', 'Total'],
+                                        [
+                                            { text: Proyeccion[0].mtr2, style: 'tableHeader', alignment: 'center' },
+                                            { text: `$${Moneda(Proyeccion[0].vrmt2)}`, style: 'tableHeader', alignment: 'center' },
+                                            { text: `$${Moneda(Proyeccion[0].valor)}`, style: 'tableHeader', alignment: 'center' },
+                                            { text: Proyeccion[0].cupon, style: 'tableHeader', alignment: 'center' },
+                                            { text: `${Proyeccion[0].descuento}%`, style: 'tableHeader', alignment: 'center' },
+                                            { text: `- $${Moneda(Proyeccion[0].ahorro)}`, style: 'tableHeader', alignment: 'center' },
+                                            { text: `$${Moneda(Proyeccion[0].total)}`, style: 'tableHeader', alignment: 'center' }
+                                        ]
+                                    ]
+                                }
+                            }
+                        ],
+                        {
+                            width: 100,
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [100, 100]
+                        }
+                    ]
+                },
+                {
+                    style: 'tableBody',
+                    color: '#444',
+                    table: {
+                        widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                        headerRows: 1,
+                        // keepWithHeaderRows: 1,
+                        body: cuerpo
+                    }
+                },
+                { text: 'A continuacion se describiran los totales de la tabla anterior', style: 'subheader' },
+                {
+                    ul: [
+                        {
+                            text: [
+                                { text: 'Total Abonado: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalAbonado)}\n`, italics: true, bold: true, fontSize: 11, color: 'green' },
+                                { text: NumeroALetras(totalAbonado).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Total Mora: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalMora)}\n`, italics: true, bold: true, fontSize: 11, color: 'gray' },
+                                { text: NumeroALetras(totalMora).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Mora Adeudada: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(moraAdeudada)}\n`, italics: true, bold: true, fontSize: 11, color: 'red' },
+                                { text: NumeroALetras(moraAdeudada).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Total Saldo: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalDeuda)}\n`, italics: true, bold: true, fontSize: 11, color: 'blue' },
+                                { text: NumeroALetras(totalDeuda).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        }
+                    ]
+                },
+                /* {
+                    fontSize: 11,
+                    italics: true,
+                    text: [
+                        '\nLos montos que se muestran de color ',
+                        { text: 'azul ', bold: true, color: 'blue' },
+                        'no se suman al total  ',
+                        { text: 'abonado, ', bold: true, color: 'green' },
+                        'ya que estos montos aun no cuentan con la ',
+                        { text: 'aprobacion ', bold: true, color: 'green' },
+                        'del area de ',
+                        { text: 'contabilidad. ', bold: true },
+                        'Una ves se hallan aprobado se sumaran al saldo ',
+                        { text: 'abonado.\n\n', bold: true, color: 'green' },
+                    ]
+                } */
+            ],
+            styles: {
+                header: {
+                    fontSize: 13,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 11,
+                    bold: true,
+                    margin: [0, 5, 0, 2]
+                },
+                tableBody: {
+                    fontSize: 8,
+                    margin: [0, 5, 0, 5]
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 9,
+                    color: 'black'
+                },
+                small: {
+                    fontSize: 8,
+                    italics: true,
+                    color: 'gray',
+                    alignment: 'right'
+                }
+            }
+        }
+        let ruta = path.join(__dirname, `/public/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`);
+        let pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(ruta));
+        pdfDoc.end();
+
+        var dataFile = {
+            phone: '573012673944',
+            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
+        };
+        let r = await apiChatApi('sendFile', dataFile);
+        r.msg = Proyeccion[0].cparacion;
+        await EnviarEmail(
+            's4m1r.5a@gmail.com', //Proyeccion[0].email
+            `Estado de cuenta Lt: ${Proyeccion[0].n}`,
+            Proyeccion[0].nombre,
+            false,
+            'Grupo Elite te da la bienvenida',
+            [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
+        );
+        return r  //JSON.stringify(estado);
+    } else {
+        return { sent: false };
+    }
+}
+async function ReciboDeCaja(movil, nombre, author) {
+    const estado = await pool.query(`SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, s.stado, 
+    p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp,s.monto, s.img, cu.descuento, p.id cparacion,
+    c.nombre, c.documento, c.email, c.movil, cp.monto mtb, pd.mtr2 FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+    INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
+    LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
+    INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+    LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc
+    WHERE s.stado != 6 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL 
+    AND (c.movil LIKE '%${cel}%' OR c.code LIKE '%${cel}%' OR c.nombre = '${nombre}'
+    OR c2.movil LIKE '%${cel}%' OR c2.code LIKE '%${cel}%' OR c2.nombre = '${nombre}'
+    OR c3.movil LIKE '%${cel}%' OR c3.code LIKE '%${cel}%' OR c3.nombre = '${nombre}'
+    OR c4.movil LIKE '%${cel}%' OR c4.code LIKE '%${cel}%' OR c4.nombre = '${nombre}')`);
+    if (estado.length) {
+        const cuerpo = []
+        let totalAbonado = 0;
+        estado.map((e, i) => {
+            totalAbonado += e.stado === 4 ? e.monto : 0;
+            if (!i) {
+                cuerpo.push(
+                    [
+                        { text: `Area: ${e.mtr2} mt2`, style: 'tableHeader', colSpan: 2, alignment: 'center' },
+                        {}, { text: `Vr Mt2: $${Moneda(e.vrmt2)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {},
+                        { text: '$' + Moneda(e.valor), style: 'tableHeader', alignment: 'center', colSpan: 2 }, {}
+                    ],
+                    [
+                        'Cupon', 'Dsto', { text: 'Ahorro', colSpan: 2 }, {},
+                        { text: `Total lote`, colSpan: 2 }, {}
+                    ],
+                    [
+                        { text: e.cupon, style: 'tableHeader', alignment: 'center' },
+                        { text: `${e.descuento}%`, style: 'tableHeader', alignment: 'center' },
+                        { text: `-$${Moneda(e.ahorro)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {},
+                        { text: `$${Moneda(e.total)}`, style: 'tableHeader', colSpan: 2, alignment: 'center' }, {}
+                    ],
+                    ['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto'],
+                    [moment(e.fech).format('L'), `RC${e.ids}`,
+                    { text: e.stado === 4 ? 'Aprobado' : 'Pendiente', color: e.stado === 4 ? 'green' : 'blue' },
+                    e.formap, e.descp, {
+                        text: '$' + Moneda(e.monto),
+                        color: e.stado === 4 ? 'green' : 'blue',
+                        decoration: e.stado !== 4 && 'lineThrough',
+                        decorationStyle: e.stado !== 4 && 'double'
+                    }]);
+            } else {
+                cuerpo.push([moment(e.fech).format('L'), `RC${e.ids}`,
+                { text: e.stado === 4 ? 'Aprobado' : 'Pendiente', color: e.stado === 4 ? 'green' : 'blue' },
+                e.formap, e.descp, {
+                    text: '$' + Moneda(e.monto),
+                    color: e.stado === 4 ? 'green' : 'blue',
+                    decoration: e.stado !== 4 && 'lineThrough',
+                    decorationStyle: e.stado !== 4 && 'double'
+                }]);
+            }
+        })
+        cuerpo.push(
+            [
+                { text: 'TOTAL ABONADO', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
+                { text: '$' + Moneda(totalAbonado), style: 'tableHeader', alignment: 'center', colSpan: 2 }, {}
+            ],
+            [
+                { text: NumeroALetras(totalAbonado), style: 'small', colSpan: 6 },
+                {}, {}, {}, {}, {}
+            ],
+            [
+                { text: 'SALDO A LA FECHA', style: 'tableHeader', alignment: 'center', colSpan: 4 }, {}, {}, {},
+                { text: '$' + Moneda(estado[0].total - totalAbonado), style: 'tableHeader', alignment: 'center', colSpan: 2 }, {}
+            ],
+            [
+                { text: NumeroALetras(estado[0].total - totalAbonado), style: 'small', colSpan: 6 },
+                {}, {}, {}, {}, {}
+            ]
+        )
+        ////////////////////////* CREAR PDF *//////////////////////////////
+        const printer = new PdfPrinter(Roboto);
+        let docDefinition = {
+            background: function (currentPage, pageSize) {
+                return { image: path.join(__dirname, '/public/img/avatars/avatar1.png'), width: pageSize.width, opacity: 0.1 } //, height: pageSize.height
+            },
+            pageSize: {
+                width: 595.28,
+                height: 'auto'
+            },
+            /* footer: function (currentPage, pageCount) { return currentPage.toString() + ' of ' + pageCount; },
+            header: function (currentPage, pageCount, pageSize) {
+                // you can apply any logic and return any valid pdfmake element
+
+                return [
+                    { text: 'simple text', alignment: (currentPage % 2) ? 'right' : 'right' },
+                    { canvas: [{ type: 'rect', x: 170, y: 32, w: pageSize.width - 170, h: 40 }] }
+                ]
+            }, */
+            //watermark: { text: 'Grupo Elite', color: 'blue', opacity: 0.1, bold: true, italics: false, fontSize: 200 }, //, angle: 180
+            //watermark: { image: path.join(__dirname, '/public/img/avatars/avatar.png'), width: 100, opacity: 0.3, fit: [100, 100] }, //, angle: 180
+            info: {
+                title: 'Estado de cuenta',
+                author: 'RedElite',
+                subject: 'Detallado del estado de los pagos de un producto',
+                keywords: 'estado de cuenta',
+                creator: 'Grupo Elite',
+                producer: 'G.E.'
+            },
+            content: [ // pageBreak: 'before',
+                {
+                    columns: [
+                        [
+                            { text: 'ESTADO DE CUENTA', style: 'header' },
+                            'Conoce aqui el estado el estado de tus pagos y montos',
+                            { text: estado[0].nombre, style: 'subheader' },
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 9, margin: [0, 0, 0, 5],
+                                columns: [
+                                    { text: `Doc. ${estado[0].documento}` },
+                                    { text: `Movil ${estado[0].movil}` },
+                                    { text: estado[0].email },
+                                ]
+                            },
+                            {
+                                alignment: 'justify', italics: true,
+                                columns: [
+                                    { width: 250, text: estado[0].proyect },
+                                    { text: `MZ: ${estado[0].mz ? estado[0].mz : 'No aplica'}` },
+                                    { text: `LT: ${estado[0].n}` }
+                                ]
+                            }
+                        ],
+                        {
+                            width: 100,
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [100, 100]
+                        }
+                    ]
+                },
+                {
+                    style: 'tableBody',
+                    color: '#444',
+                    table: {
+                        widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                        headerRows: 4,
+                        // keepWithHeaderRows: 1,
+                        body: cuerpo
+                    }
+                },
+                {
+                    fontSize: 11,
+                    italics: true,
+                    text: [
+                        '\nLos montos que se muestran de color ',
+                        { text: 'azul ', bold: true, color: 'blue' },
+                        'no se suman al total  ',
+                        { text: 'abonado, ', bold: true, color: 'green' },
+                        'ya que estos montos aun no cuentan con la ',
+                        { text: 'aprobacion ', bold: true, color: 'green' },
+                        'del area de ',
+                        { text: 'contabilidad. ', bold: true },
+                        'Una ves se hallan aprobado se sumaran al saldo ',
+                        { text: 'abonado.\n\n', bold: true, color: 'green' },
+                    ]
+                },
+                {
+                    columns: [
+                        {
+                            width: 100,
+                            qr: 'https://grupoelitefincaraiz.com',
+                            fit: '50',
+                            foreground: 'yellow', background: 'black'
+                        },
+                        [
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 10,
+                                columns: [
+                                    { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
+                                    { text: 'https://grupoelitefincaraiz.com', link: 'https://grupoelitefincaraiz.com' }
+                                ]
+                            },
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 10,
+                                columns: [
+                                    { text: 'Nit: 901311748-3' },
+                                    { text: 'info@grupoelitefincaraiz.co' }
+                                ]
+                            },
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 10,
+                                columns: [
+                                    { text: 'Mz L lt 17 Urb. la granja, Turbaco' },
+                                    { text: '57 300-285-1046', link: 'https://wa.me/573007861987?text=Hola' }
+                                ]
+                            }
+                        ]
+                    ]
+                }
+            ],
+            styles: {
+                header: {
+                    fontSize: 18,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 16,
+                    bold: true,
+                    margin: [0, 5, 0, 2]
+                },
+                tableBody: {
+                    margin: [0, 5, 0, 5]
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 13,
+                    color: 'black'
+                },
+                small: {
+                    fontSize: 9,
+                    italics: true,
+                    color: 'gray',
+                    alignment: 'right'
+                }
+            }
+        }
+        let ruta = path.join(__dirname, `/public/uploads/estadodecuenta-${estado[0].cparacion}.pdf`);
+        let pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(ruta));
+        pdfDoc.end();
+
+        var dataFile = {
+            phone: author,
+            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${estado[0].cparacion}.pdf`,
+            filename: `ESTADO DE CUENTA ${estado[0].cparacion}.pdf`
+        };
+        let r = await apiChatApi('sendFile', dataFile);
+        r.msg = estado[0].cparacion;
+        await EnviarEmail(
+            estado[0].email,
+            `Estado de cuenta Lt: ${estado[0].n}`,
+            estado[0].nombre,
+            false,
+            'Grupo Elite te da la bienvenida',
+            [{ fileName: `Estado de cuenta ${estado[0].cparacion}.pdf`, ruta }]
+        );
+        return r  //JSON.stringify(estado);
+    } else {
+        return { sent: false };
+    }
+}
 async function Saldos(lote, fecha, solicitud) {
     console.log(lote, solicitud, fecha);
     const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
@@ -1099,5 +1643,80 @@ async function apiChatApi(method, params) {
     //console.log(apiResponse.data)
     return apiResponse.data;
 }
+async function tasaUsura() {
+    //const slow3G = puppeteer.networkConditions['Slow 3G']; 
+    const Tex = '#vue-container > div.InternaIndicadores > div > div.flex-grow-1.wrapContentBody > div > div > div.grid-container > div > div > div.d-flex.CardDetailIndicator.multiple > div > div:nth-child(1) > div.priceIndicator > div > div.flex-grow-1 > span.price'
+    const browser = await puppeteer.launch({ timeout: 1000000, headless: false });//{ headless: false }
+    const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(1000000)
+    //await page.emulateNetworkConditions(slow3G);
+    await page.goto('https://www.larepublica.co/indicadores-economicos/bancos/tasa-de-usura');
+    await page.waitForSelector(Tex);
+    const tasa = await page.evaluate((Tex) => {
+        return parseFloat(document.querySelector(Tex).innerText.slice(0, -2).replace(/,/, '.'));
+    }, Tex);
+    //console.log('Tasa:', tasa);
 
-module.exports = { NumeroALetras, EstadoCuenta, apiChatApi, QuienEs, EnviarEmail, RecibosCaja };
+    await browser.close();
+    return tasa;
+}
+async function consultarDocumentos(tipo, docu) {
+
+    const pregResp = [
+        { pre: "¿ Cuanto es 4 + 3 ?", res: "7" },
+        { pre: "¿ Cuanto es 2 X 3 ?", res: "6" },
+        { pre: "¿ Cual es la Capital del Vallle del Cauca?", res: "Cali" },
+        { pre: "¿ Cual es la Capital de Antioquia (sin tilde)?", res: "Medellin" },
+        { pre: "¿ Cual es la Capital del Atlantico?", res: "Barranquilla" },
+        { pre: "¿ Cuanto es 9 - 2 ?", res: "7" },
+        { pre: "¿ Cuanto es 5 + 3 ?", res: "8" },
+        { pre: "¿ Cual es la Capital de Colombia (sin tilde)?", res: "Bogota" },
+        { pre: "¿ Cuanto es 3 X 3 ?", res: "9" },
+        { pre: "¿Escriba los dos ultimos digitos del documento a consultar?", res: docu.slice(-2) },
+        { pre: "¿Escriba los tres primeros digitos del documento a consultar?", res: docu.slice(0, 3) }
+    ]
+    //const slow3G = puppeteer.networkConditions['Slow 3G']; 
+    const tipoDoc = '#ddlTipoID'
+    const cc = '#ddlTipoID > option:nth-child(2)'
+    const browser = await puppeteer.launch(); //{ headless: false }
+    const page = await browser.newPage();
+    await page.setDefaultNavigationTimeout(1000000)
+    //await page.emulateNetworkConditions(slow3G);
+    await page.goto("https://apps.procuraduria.gov.co/webcert/inicio.aspx?tpo=1");
+    await page.waitForSelector(tipoDoc);
+    await page.select(tipoDoc, tipo);
+    await page.type('#txtNumID', docu);
+    const Query = await page.$eval('#lblPregunta', e => e.innerText);
+    let res = pregResp.filter((e) => e.pre === Query)
+    //console.log(Query, res[0]?.res);
+
+    while (!res[0]?.res) {
+        await page.click('#ImageButton1', { delay: 500 });
+        await page.waitForSelector('#lblPregunta');
+        const Query = await page.$eval('#lblPregunta', e => e.innerText);
+        res = pregResp.filter((e) => e.pre === Query);
+        //console.log(Query, res[0]?.res, !!res[0]?.res);
+    }
+    await page.type('#txtRespuestaPregunta', res[0]?.res);
+    await page.click('#btnConsultar');
+    await page.waitForTimeout(3000)
+    const Nombres = await page.$$eval('#divSec > div > span', e => e.map(r => r.innerText));
+    const Antecedentes = await page.$eval('#divSec > h2', e => e.innerText);
+    console.log(Nombres, Antecedentes)
+    //document.querySelector('#lblPregunta').children[1].selected = true
+
+    await browser.close();
+    return { Nombres, Antecedentes };
+} //consultarDocumentos('1', '3817359')
+
+module.exports = {
+    NumeroALetras,
+    EstadoCuenta,
+    apiChatApi,
+    QuienEs,
+    EnviarEmail,
+    RecibosCaja,
+    tasaUsura,
+    consultarDocumentos,
+    EstadoDeCuenta
+};
