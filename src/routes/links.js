@@ -15,15 +15,17 @@ const readline = require('readline');
 const { google, containeranalysis_v1alpha1 } = require('googleapis');
 const moment = require('moment');
 const nodemailer = require('nodemailer');
-const { isNull } = require('util');
-const { Console } = require('console');
-const { send } = require('process');
 const path = require('path');
 const mysqldump = require('mysqldump')
-const XLSX = require('xlsx')
+//const XLSX = require('xlsx')
+const XLSX = require('xlsx-js-style')
 const PdfPrinter = require('pdfmake')
 const Roboto = require('../public/fonts/Roboto');
-
+const {
+    tasaUsura,
+    consultarDocumentos, EstadoDeCuenta
+} = require('../functions.js')
+//DELETE
 
 const transpoter = nodemailer.createTransport({
     host: 'smtpout.secureserver.net',
@@ -57,9 +59,7 @@ var url = 'https://bin.chat-api.com/1bd03zz1'
     if(!error) {
         console.log(body);
     }
-
     horizontal bar
-
 GRUPO ELITE FINCA RAÍZ
 GRUPO ELITE FINCA RAÍZ S.A.S, GERENCIA
 GRUPO ELITE FINCA RAÍZ S.A.S
@@ -67,9 +67,8 @@ GRUPO ELITE FINCA RAÍZ S.A.S
 Mz L lote 17
 Turbaco, Bolivar / Colombia
 https://grupoelitefincaraiz.com
-
-
 });*/
+
 /*request(url, function (error, response, body) {
     if (error) return console.error('Failed: %s', error.message);
 ¿
@@ -96,6 +95,26 @@ END:VCARD*/
 
 // ELIMINAR ASESORES QUE NO TIENEN VENTAS EN EL SISTEMA
 // DELETE u FROM users u LEFT JOIN preventa p ON u.id = p.asesor WHERE p.asesor IS NULL
+
+
+////////////////* COMISIONES DE GRUPO ELITE *////////////////////////////
+var lm = `SELECT p.id, d.proyect proyecto, p.fecha, l.mz, l.n lt, l.mtr2, l.mtr, l.valor, e.pin, e.descuento, p.ahorro, l.valor - p.ahorro Total, p.status, l.estado,
+
+(SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as deuda, 
+(SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as meses,
+(SELECT MAX(TIMESTAMP(fech)) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id) as ultimoabono, 
+(SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id AND stado = 4) as abonos, d.maxcomis * 100 as comi, (l.valor - p.ahorro) * d.maxcomis as comision, c.nombre, c.documento, u.fullname
+
+        FROM preventa p 
+        INNER JOIN productosd l ON p.lote = l.id 
+        INNER JOIN productos d ON l.producto = d.id 
+        INNER JOIN clientes c ON p.cliente = c.idc 
+        INNER JOIN users u ON p.asesor = u.id 
+        LEFT JOIN cupones e ON p.id = e.producto 
+        WHERE p.tipobsevacion IS NULL
+        GROUP BY p.id, e.id
+        ORDER BY p.fecha;`
+
 router.post('/desarrollo', async (req, res) => {
     desarrollo = req.headers.origin;
     /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
@@ -360,31 +379,73 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-/* cron.schedule("5 9,16 * * *", async () => {
+cron.schedule("37 11,17 * * *", async () => {
     const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
-    ORDER BY fechs ASC) as deuda, 
+    ORDER BY fechs ASC) as deuda, (SELECT SUM(mora) FROM cuotas 
+    WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as mora,  
     (SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
     ORDER BY fechs ASC) as meses
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    INNER JOIN clientes c ON p.cliente = c.idc WHERE p.tipobsevacion IS NULL GROUP BY p.id 
+    INNER JOIN clientes c ON p.cliente = c.idc 
+    WHERE p.tipobsevacion IS NULL AND d.proyect IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE') GROUP BY p.id
     HAVING meses > 1 AND deuda > 0 ORDER BY meses DESC`; // LIMIT 5
     const yt = await pool.query(sql);
 
-    let cont = 0, deuda = 0;
+    let cont = 0, deuda = 0, mora = 0;
     for (i = 0; i < yt.length; i++) {
         let data = yt[i];
         //if (i === 3) { continue; } \n
         cont = i + 1;
-        let body = `_Hola *${data.nombre}*, le recordamos ponerse al día con el lote *${data.n}* manzana *${data.mz}* del proyecto *${data.proyect}*, hasta la fecha tiene un saldo vencido de *${data.meses} mes(es)*, por un monto de *$${Moneda(data.deuda)}*, te invitamos a realizar los pagos y así evitar incurrir en el cobro de intereses por mora, para mayor información escribanos al WhatsApp 3002851046, si está al día con sus pagos haga caso omiso a este mensaje._\n
-        \n_Ahora puedes realizar tus pagos en linea o subir tus constancias de pago por transferencia o consignación bancaria al siguiente link *https://grupoelitefincaraiz.com/links/pagos*, solo debes ingresar tu numero de documento y listo_\n
-        \n_*GRUPO ELITE FINCA RAÍZ S.A.S*_`;
+        let body = `_Apreciado *${data.nombre}*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${data.meses} mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${data.proyect}* *Lt-${data.n}* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(data.mora)}*. Evite futuros cobros jurídicos. Para ponerse al día con tu obligación comunícate al celular *301 5685850* o al correo electrónico cobranzasgrupoelite@gmail.com_\n
+        \n_Ahora puedes realizar tus pagos en linea o subir tus constancias de pago por transferencia o consignación bancaria al siguiente link https://grupoelitefincaraiz.com/links/pagos, solo debes ingresar tu numero de documento y listo_\n
+        \n_*GRUPO ELITE FINCA RAÍZ S.A.S*_`
         const tt = await EnviarWTSAP(data.movil, body);
-        //console.log(tt, cont)
+        deuda += data.deuda
+        mora += data.mora
     }
-    const ty = await EnviarWTSAP('57 3012673944', `_Hoy *${moment().format('llll')}*, el sistema detecto *${yt.length} Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(deuda)}*_`);
-    console.log(yt.length, cont, ty);
-}) */
+    await EnviarWTSAP('57 3012673944', `_Hoy *${moment().format('llll')}*, el sistema detecto *${yt.length} Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(mora)}* y una *deuda total* de *$${Moneda(deuda)}*_`);
+});
+cron.schedule("0 2 * * *", async () => {
+
+    const finmes = moment().endOf('month').format('DD');
+    const dia = moment().format('DD');
+    if (dia === '01') {
+        const tasa = await tasaUsura();
+        const newTasa = { teano: tasa / 100, fecha: moment().format('YYYY-MM-DD') }
+        await pool.query(`INSERT INTO intereses SET ? `, newTasa);
+        var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
+        await EnviarWTSAP('57 3004880579', bod);
+    }
+
+    ////////////////////* DIAS DE MORA *////////////////////////////////////////////////
+    const intr = await pool.query(`SELECT c.id, c.separacion, c.fechs,
+    (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
+    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
+    INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
+    AND d.moras = 1 GROUP BY c.id`);
+    if (intr.length) {
+        let moraVr = `CASE`;
+        let moraTs = `CASE`;
+        intr.map((e) => {
+            moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * (DATEDIFF(CURDATE(), c.fechs) - c.diaspagados) * ${e.tasa} / 365`;
+            moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
+
+        })
+        moraVr += ` ELSE c.mora END`;
+        moraTs += ` ELSE c.tasa END`;
+
+        await pool.query(`UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
+        c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL`);
+    }
+    ////////////////* RESTABLECER LOS ID DE LAS RELACIONES DE CUOTAS ELIMINADOS *///////////////////
+    await pool.query(`SET  @num := 0`);
+    await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`)
+    await pool.query(`ALTER TABLE relacioncuotas AUTO_INCREMENT =1`)
+    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED`)
+    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED AUTO_INCREMENT`)
+
+});
 cron.schedule("*/10 * 5 5 * *", async () => {
     function authorize(credentials, callback) {
         const { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -917,7 +978,7 @@ cron.schedule("*/20 * * * *", async () => {
                 path: 'https://grupoelitefincaraiz.com/uploads/h0i0vq907gp9-s1e7-a9p13394tv11wl10.pdf'
             }
         ] */
-}); //console.log(path.join(__dirname))
+});
 router.get('/msg', async (req, res) => {
 
 
@@ -1505,8 +1566,10 @@ router.get('/msg', async (req, res) => {
 
     res.send(true);
 })
-router.get('/roles', isLoggedIn, (req, res) => {
-    //desarrollo = req.headers.host;
+router.get('/roles', isLoggedIn, async (req, res) => {
+
+
+
     res.send(req.user)
 });
 router.get('/add', isLoggedIn, (req, res) => {
@@ -1879,7 +1942,7 @@ router.post('/extractos', async (req, res) => {
     //res.json(e);
     res.send(e);
 });
-//////////////////* PRODUCTOS */////////////////////
+////////////////////* PRODUCTOS */////////////////////
 router.get('/productos', noExterno, async (req, res) => {
     const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
     res.render('links/productos', { proveedores });
@@ -2026,6 +2089,7 @@ router.post('/excelcrearproducto', async (req, res) => {
     console.log(req.files)
     const fil = req.files[0];
     let resp = {};
+    let subProductos = null;
 
     /* const ruta = path.join(__dirname, '../public/uploads/libroej.json');
     const ruta2 = path.join(__dirname, '../public/uploads/CREACION DE PRODUCTOS.xlsx'); */
@@ -2042,17 +2106,18 @@ router.post('/excelcrearproducto', async (req, res) => {
         delete proyectoJson[0].id;
         proyectoJson[0] = {
             ...proyectoJson[0],
+            porcentage: proyectoJson[0].porcentage * 100,
             fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
             fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
         }
         const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
-        const datos = await productosJson.filter(e => e.mz).map(async (e, i) => {
-            const das = await pool.query('INSERT INTO productosd SET ? ', {
-                ...e,
-                producto: proyectoAdd.insertId
-            });
-            return das.insertId;
+        subProductos = await productosJson.filter(e => e.mz).map((e) => {
+            const r = [e.mz, e.n, e.mtr2, e.mtr, e.valor, e.inicial,
+            e.estado, proyectoAdd.insertId, e.descripcion];
+            return r
         });
+        await pool.query(`INSERT INTO productosd 
+        (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`, [subProductos]);
         resp = { res: true, msg: "El producto fue creado con exito." }
     } else {
         resp = { res: false, msg: "El producto no fue creado porque el excel iba con un id de producto." }
@@ -2070,10 +2135,10 @@ router.post('/excelcrearproducto', async (req, res) => {
             return false;
         }
     })
-    console.log('quien va primero')
+    //console.log('quien va primero')
     res.send(resp);
 });
-//////////////* RED *//////////////////////////////////
+/////////////////////* RED *////////////////////////
 router.get('/red', noExterno, async (req, res) => {
     res.render('links/red');
 });
@@ -2468,11 +2533,13 @@ router.post('/recibo', async (req, res) => {
     concpto !== 'ABONO' ? await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id) : '';
     await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
     await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
-
     let pago = {
         fech: ahora, facturasvenc: factrs, lt, acumulado, orden,
         concepto: 'PAGO', stado: 3, descp: concpto, formap
     }
+    const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', orden);
+    acuerdo.length && (pago.acuerdo = acuerdo);
+
     var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
     if (Array.isArray(nrecibo)) {
         for (i = 0; i <= nrecibo.length - 1; i++) {
@@ -2792,7 +2859,7 @@ router.get('/bono/:id', noExterno, async (req, res) => {
     const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id)
     res.send(bono);
 });
-//////////////* ORDEN *//////////////////////////////////
+///////////////////////* ORDEN *//////////////////////////////////
 router.get('/orden', noExterno, async (req, res) => {
     moment.locale('es');
     const { id, h } = req.query;
@@ -2962,9 +3029,19 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
 router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     //console.log(req.params)
     const { id } = req.params
+
+    ////////////////////* CORREGIR PROYECION *////////////////////////
+    await ProyeccionPagos(id)
+    const e = await Estados(id);
+    var estado = e.pendients ? 8 : e.std
+    await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+    SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, id]);
+    ////////////////////* END *//////////////////////////////////////
+
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
             INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`
     const orden = await pool.query(sql, id);
+
     const r = await pool.query(`SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS monto, SUM(s.monto) AS monto1
                  FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
                  LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO')  AND pr.id = ? `, id
@@ -3007,7 +3084,7 @@ router.get('/editordn/:id', noExterno, async (req, res) => {
     const { id } = req.params;
     const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
     const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND descp != 'SEPARACION' AND orden = ? AND stado IN(3, 4)`, id);
-    console.log(iD, id.indexOf('*') < 0, id.indexOf('*'));
+    //console.log(iD, id.indexOf('*') < 0, id.indexOf('*'));
     if (comi.length > 0 && id.indexOf('*') < 0) {
 
         req.flash('error', 'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) pendiente(s) o paga(s)');
@@ -3036,7 +3113,7 @@ router.get('/editordn/:id', noExterno, async (req, res) => {
             WHERE p.tipobsevacion IS NULL AND p.id = ?`;
 
         const orden = await pool.query(sql, iD);
-        const cuotas = await pool.query(sql2, iD); console.log(cuotas)
+        const cuotas = await pool.query(sql2, iD); //console.log(cuotas)
         res.render('links/editordn', { iD, orden, cuotas });
     }
 })
@@ -3244,7 +3321,6 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     var u = Math.round((p - i) / 2);
     var m = (p - i) / 2;
     var v = i / 2;
-    //console.log('paso por aqui ', orden)
     w = await orden
         .map((t, c) => {
             if ((t.tipo === 'INICIAL' && i === 0) || (t.tipo === 'FINANCIACION' && p === 0)) {
@@ -3254,7 +3330,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: '',
                     proyeccion2: '',
                     cuota2: '',
-                    estado2: ''
+                    estado2: '',
+                    diasmora2: '',
+                    mora2: ''
                 };
                 return Object.assign(t, s);
             }
@@ -3265,7 +3343,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: '',
                     proyeccion2: '',
                     cuota2: '',
-                    estado2: ''
+                    estado2: '',
+                    diasmora2: '',
+                    mora2: ''
                 }
                 return Object.assign(orden[0], s);
             }
@@ -3276,7 +3356,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: '',
                     proyeccion2: '',
                     cuota2: '',
-                    estado2: ''
+                    estado2: '',
+                    diasmora2: '',
+                    mora2: ''
                 }
                 return Object.assign(t, s);
 
@@ -3287,7 +3369,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: t.fechs,
                     proyeccion2: t.proyeccion,
                     cuota2: t.cuota,
-                    estado2: t.estado
+                    estado2: t.estado,
+                    diasmora2: t.diasmora,
+                    mora2: t.mora
                 };
                 return Object.assign(y[t.ncuota - e], s);
 
@@ -3300,7 +3384,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                         fecha2: '',
                         proyeccion2: '',
                         cuota2: '',
-                        estado2: ''
+                        estado2: '',
+                        diasmora2: '',
+                        mora2: ''
                     }
                     return Object.assign(y[e], h)
                 }
@@ -3312,7 +3398,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: '',
                     proyeccion2: '',
                     cuota2: '',
-                    estado2: ''
+                    estado2: '',
+                    diasmora2: '',
+                    mora2: ''
                 }
                 return Object.assign(t, s);
 
@@ -3323,7 +3411,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                     fecha2: t.fechs,
                     proyeccion2: t.proyeccion,
                     cuota2: t.cuota,
-                    estado2: t.estado
+                    estado2: t.estado,
+                    diasmora2: t.diasmora,
+                    mora2: t.mora
                 }
                 return Object.assign(o[t.ncuota - u], s);
 
@@ -3336,7 +3426,9 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
                         fecha2: '',
                         proyeccion2: '',
                         cuota2: '',
-                        estado2: ''
+                        estado2: '',
+                        diasmora2: '',
+                        mora2: ''
                     }
                     return Object.assign(o[u], h)
                 }
@@ -3346,9 +3438,76 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
     respuesta = { "data": w.filter(Boolean) };
     res.send(respuesta);
 })
-//////////////* COMISIONES *//////////////////////////////////
-router.get('/comisiones', isLoggedIn, (req, res) => {
+////////////////////* COMISIONES *//////////////////////////////////
+router.get('/comisiones', isLoggedIn, async (req, res) => {
+    const comis = await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
+    l.valor - p.ahorro Total, (l.valor - p.ahorro) * p.iniciar / 100 Inicial, d.maxcomis, d.sistema,
+    ( SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND l.comiempresa = 0 AND l.comisistema = 0 
+    GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
+    const hoy = moment().format('YYYY-MM-DD HH:mm'); console.log(comis)
+    var f = [];
+    var sql = `UPDATE productosd SET comiempresa = CASE id`;
+    var sql2 = `, comisistema = CASE id`;
+    var sq = false;
+
+    if (comis.length > 0) {
+        await comis.map(async (a, x) => {
+
+            var monto = a.Total * a.maxcomis;
+            var iva = monto * 0.19;
+            //var Lote = { comiempresa: monto };
+            sql += ` WHEN ${a.lote} THEN ${monto}`;
+            f.push([
+                hoy, monto, 'GESTION VENTAS', 9, 'VENTA INDIRECTA',
+                '00000000000000012345', a.maxcomis, a.Total, a.lote, iva,
+                0, monto + iva, a.ordn
+            ]);
+
+            if (a.sistema) {
+                sq = true
+                var montoST = a.Total * a.sistema;
+                var ivaST = montoST * 0.19;
+                //Lote.comisistema = montoST;
+                sql2 += ` WHEN ${a.lote} THEN ${montoST}`
+
+                f.push([
+                    hoy, montoST, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                    '00000000000000012345', a.sistema, a.Total, a.lote, ivaST,
+                    0, montoST + ivaST, a.ordn
+                ]);
+            }
+            //await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
+
+        });
+        sql += ' ELSE comiempresa END';
+        sql2 += ' ELSE comisistema END';
+        await pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
+            porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
+        await pool.query(`${sql}${sq ? sql2 : ''}`);
+    }
     res.render('links/comisiones');
+});
+router.post('/comisiones', isLoggedIn, async (req, res) => {
+    let prd = false;
+    if (req.user.externo) {
+        const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+        prd = prcd.map(e => e.producto);
+    }
+    let d = prd ? `AND p.id IN (${prd})` : ''; console.log(prd, d, 'aqui')
+
+    const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
+    s.descp, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
+    pd.n, s.retefuente, s.reteica, pagar, us.id, us.fullname, s.lt, cl.nombre, p.proyect 
+    FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+    INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
+    INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
+    INNER JOIN clientes cl ON pr.cliente = cl.idc 
+    WHERE s.concepto IN('GESTION ADMINISTRATIVA','GESTION VENTAS') AND pr.tipobsevacion IS NULL ${d}`);
+
+    respuesta = { "data": solicitudes };
+    res.send(respuesta);
 });
 router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
     const { id } = req.params;
@@ -3372,7 +3531,7 @@ router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
     }
 });
-//////////////* REPORTES *//////////////////////////////////
+//////////////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, (req, res) => {
     res.render('links/reportes');
 });
@@ -3793,6 +3952,510 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, k]);
         res.send(true);
+    } else if (id === 'excel') {
+        const { k, h, proyecto, nombre, mz, n } = req.body;
+        const ruta = path.join(__dirname, '../public/uploads/CUOTAS.xlsx');
+
+        fs.exists(ruta, function (exists) {
+            console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
+            if (exists) {
+                fs.unlink(ruta, function (err) {
+                    if (err) console.log(err);
+                    console.log('Archivo eliminado');
+                    return 'Archivo eliminado';
+                });
+            } else {
+                console.log('El archivo no exise');
+                return 'El archivo no exise';
+            }
+        })
+
+        /* `SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.lt, s.orden, c.id, c.separacion, c.tipo, c.ncuota, c.fechs, c.estado, c.mora, c.diasmora FROM solicitudes s INNER JOIN cuotas c ON c.separacion = s.orden WHERE c.separacion = 46 AND s.concepto IN('PAGO', 'ABONO') 
+        GROUP BY s.ids, c.id 
+        ORDER BY c.fechs, s.fech;` */
+
+        let content = await pool.query(`SELECT c.id ID, c.fechs FECHA, c.tipo TIPO, c.ncuota N, c.proyeccion CUOTA, 
+        MAX(CASE WHEN MONTH(s.fech) = MONTH(c.fechs) AND YEAR(s.fech) = YEAR(c.fechs) THEN s.fech END) FECHAPAGO, 
+        SUM(CASE WHEN MONTH(s.fech) = MONTH(c.fechs) AND YEAR(s.fech) = YEAR(c.fechs) THEN s.monto END) MONTO,
+        MAX(CASE WHEN MONTH(s.fech) = MONTH(c.fechs) AND YEAR(s.fech) = YEAR(c.fechs) THEN s.ids END) IDS, 
+        c.cuota CUOT, e.estado ESTADO, c.diasmora DIASMORA, i.teano TEA, c.mora MORA, c.descuentomora DTO, 
+        c.totaldiasmora TOTALDIASM, c.totalmora TOTALMORA
+        FROM cuotas c INNER JOIN solicitudes s ON s.orden = c.separacion 
+        INNER JOIN estados e ON c.estado = e.id LEFT JOIN intereses i ON c.tasa = i.id
+        WHERE c.separacion = 46 AND s.concepto IN('PAGO', 'ABONO')
+        GROUP BY c.id
+        ORDER BY c.fechs`, k);
+
+        let newWB = XLSX.utils.book_new()
+        let newWS = XLSX.utils.json_to_sheet([{ Orden: k, Fecha: h, Proyecto: proyecto, Mz: mz, Lt: n, Cliente: nombre }])
+        let Ws = await Object.assign(newWS, {
+            A4: {
+                t: 's', v: 'ID', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            B4: {
+                t: 's', v: 'FECHA', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            C4: {
+                t: 's', v: 'TIPO', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            D4: {
+                t: 's', v: 'N', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            E4: {
+                t: 's', v: 'CUOTA', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            F4: {
+                t: 's', v: 'FECHAPAGO', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            G4: {
+                t: 's', v: 'MONTO', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            H4: {
+                t: 's', v: 'IDS', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            I4: {
+                t: 's', v: 'CUOT', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            J4: {
+                t: 's', v: 'ESTADO', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            K4: {
+                t: 's', v: 'DIASM', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            L4: {
+                t: 's', v: 'TEA', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            M4: {
+                t: 's', v: 'MORA', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            N4: {
+                t: 's', v: 'DTO', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            O4: {
+                t: 's', v: 'TLDIASM', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" }
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+            P4: {
+                t: 's', v: 'TOTALMORA', s: {									// Establecer un estilo separado para una celda
+                    font: {
+                        name: 'MV Boli',
+                        //sz: 24,
+                        bold: true,
+                        color: { rgb: "FFFFAA00" },
+                        /* underline: true, // Subrayado
+                        italic: true,
+                        strike: true, // Tachado
+                        outline: false,
+                        shadow: false, */
+                    },
+                    alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                    fill: { bgColor: { rgb: 'ffff00' } }
+                }
+            },
+
+        });
+        Ws['A1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+        Ws['B1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+        Ws['C1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+        Ws['D1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+        Ws['E1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+        Ws['F1'].s = {									// Establecer un estilo separado para una celda
+            font: {
+                name: 'MV Boli',
+                bold: true,
+                color: { rgb: "FFFFAA00" },
+            },
+            alignment: { horizontal: "center", vertical: "center", wrapText: false },
+            fill: { bgColor: { rgb: 'ffff00' } }
+        }
+
+        let cont = 5;
+        await content.map((e) => {
+            Ws['A' + cont] = { t: 'n', v: e.ID };
+            Ws['B' + cont] = { t: 's', v: e.FECHA };
+            Ws['C' + cont] = { t: 's', v: e.TIPO };
+            Ws['D' + cont] = { t: 'n', v: e.N };
+            Ws['E' + cont] = { t: 'n', v: e.CUOTA, z: "$#,##0.00" };
+            Ws['F' + cont] = { t: 's', v: e.FECHAPAGO ? e.FECHAPAGO : '' };
+            Ws['G' + cont] = { t: 'n', v: e.MONTO ? e.MONTO : 0, z: "$#,##0.00" };
+            Ws['H' + cont] = { t: 'n', v: e.IDS ? e.IDS : 0 };
+            Ws['I' + cont] = { t: 'n', v: e.CUOT, z: "$#,##0.00" };
+            Ws['J' + cont] = { t: 's', v: e.ESTADO };
+            Ws['K' + cont] = { t: 'n', v: e.DIASMORA };
+            Ws['L' + cont] = { t: 'n', v: e.TEA ? e.TEA : 0, z: '0.00%' };
+            Ws['M' + cont] = { t: 'n', v: e.MORA ? e.MORA : 0, z: "$#,##0.00" };
+            Ws['N' + cont] = { t: 'n', v: e.DTO, z: '0.00%' };
+            Ws['O' + cont] = { t: 'n', v: e.TOTALDIASM, z: '0%' };
+            Ws['P' + cont] = { t: 'n', v: e.TOTALMORA, z: "$#,##0.00" };
+            cont++;
+        })
+        Ws['A' + cont] = {
+            t: 's', v: '.', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['B' + cont] = {
+            t: 's', v: '.', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['C' + cont] = {
+            t: 's', v: '.', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['D' + cont] = {
+            t: 's', v: 'TOTAL', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['E' + cont] = {
+            t: 'n', f: `SUM(E5:E${cont - 1})`, z: "$#,##0.00", s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['F' + cont] = {
+            t: 's', v: 'ABONADO', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['G' + cont] = {
+            t: 'n', f: `SUM(G5:G${cont - 1})`, z: "$#,##0.00", s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['H' + cont] = {
+            t: 's', v: 'DEUDA', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['I' + cont] = {
+            t: 'n', f: `SUM(I5:I${cont - 1})`, z: "$#,##0.00", s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['J' + cont] = {
+            t: 's', v: 'DIAS', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['K' + cont] = {
+            t: 'n', f: `SUM(K5:K${cont - 1})`, s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['L' + cont] = {
+            t: 's', v: 'MORA', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['M' + cont] = {
+            t: 'n', f: `SUM(M5:M${cont - 1})`, z: "$#,##0.00", s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['N' + cont] = {
+            t: 's', v: '.', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['O' + cont] = {
+            t: 's', v: 'TOTALMORA', s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['P' + cont] = {
+            t: 'n', f: `SUM(P5:P${cont - 1})`, z: "$#,##0.00", s: {									// Establecer un estilo separado para una celda
+                font: {
+                    name: 'MV Boli',
+                    bold: true,
+                    color: { rgb: "FFFFAA00" },
+                },
+                alignment: { horizontal: "center", vertical: "center", wrapText: false },
+                fill: { bgColor: { rgb: 'ffff00' } }
+            }
+        };
+        Ws['!ref'] = 'A1:P' + cont
+        XLSX.utils.book_append_sheet(newWB, newWS, 'FINANCIACION');
+        XLSX.writeFile(newWB, ruta)
+        res.send('/uploads/CUOTAS.xlsx');
+    } else if (id === 'dctomora' && req.user.contador) {
+        const { producto, dcto, monto, limite, tipo, stop } = req.body;
+        const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', producto);
+        if (!acuerdo.length) {
+            const newAcuerdo = { producto, limite, tipo, autoriza: req.user.fullname }
+            dcto && (newAcuerdo.dcto = parseFloat(dcto) / 100);
+            monto && (newAcuerdo.monto = parseFloat(monto));
+            stop && (newAcuerdo.stop = 1);
+            await pool.query(`INSERT INTO acuerdos SET ? `, newAcuerdo);
+            res.send({ std: true, msj: 'Acuerdo establecido xitosamente' });
+        } else {
+            res.send({ std: false, msj: 'Existe un Acuerdo vigente establecido, no es posible crear uno nuevo' });
+        }
     }
 });
 router.post('/rcb/:id', isLoggedIn, async (req, res) => {
@@ -3864,36 +4527,49 @@ router.post('/desendentes', noExterno, async (req, res) => {
             var retefuenteB = montoB * 0.10
             var reteicaB = montoB * 8 / 1000
             var std = a.obsevacion === 'CARTERA' ? 4 : 15;
+            var Lote = {};
             var f = [];
 
-            sep && a.incntivo && f.push([
+            sep && a.incntivo && a.incentivo && f.push([
                 hoy, a.incentivo, 'COMISION DIRECTA', std, 'SEPARACION',
                 asesor, 0, a.separar, a.lote, 0, 0, a.incentivo, a.ordn
             ]);
 
-            !a.directa && estdStatus ? f.push([
-                hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
-                asesor, a.comision, val, a.lote, retefuente,
-                reteica, monto - (retefuente + reteica), a.ordn
-            ]) : '';
+            if (!a.directa && estdStatus) {
+                f.push([
+                    hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
+                    asesor, a.comision, val, a.lote, retefuente,
+                    reteica, monto - (retefuente + reteica), a.ordn
+                ])
+                Lote.directa = asesor;
+            }
 
-            a.papa && !a.sp && !a.uno && estdStatus ? f.push([
-                hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
-                a.papa, a.linea1, val, a.lote, retefuenteP,
-                reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
-            ]) : '';
+            if (a.papa && !a.sp && !a.uno && estdStatus) {
+                f.push([
+                    hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
+                    a.papa, a.linea1, val, a.lote, retefuenteP,
+                    reteicaP, montoP - (retefuenteP + reteicaP), a.ordn
+                ])
+                Lote.uno = a.papa;
+            }
 
-            a.abuelo && !a.sa && !a.dos && estdStatus ? f.push([
-                hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
-                a.abuelo, a.linea2, val, a.lote, retefuenteA,
-                reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
-            ]) : '';
+            if (a.abuelo && !a.sa && !a.dos && estdStatus) {
+                f.push([
+                    hoy, montoA, 'COMISION INDIRECTA', std, 'SEGUNDA LINEA',
+                    a.abuelo, a.linea2, val, a.lote, retefuenteA,
+                    reteicaA, montoA - (retefuenteA + reteicaA), a.ordn
+                ])
+                Lote.dos = a.abuelo;
+            }
 
-            a.bisabuelo && !a.sb && !a.tres && estdStatus ? f.push([
-                hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
-                a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
-                reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
-            ]) : '';
+            if (a.bisabuelo && !a.sb && !a.tres && estdStatus) {
+                f.push([
+                    hoy, montoB, 'COMISION INDIRECTA', std, 'TERCERA LINEA',
+                    a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
+                    reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
+                ])
+                Lote.tres = a.bisabuelo
+            }
 
             if (bon && a.bonoextra > 0.0000 && estdStatus && !a.sucursal && a.bextra > 0) {
                 montoC = val * a.bonoextra;
@@ -3906,18 +4582,46 @@ router.post('/desendentes', noExterno, async (req, res) => {
                 ]);
             };
 
+            if (a.external && !a.comiempresa) {
+
+                var montoGE = val * a.maxcomis;
+                var ivaGE = montoGE * 0.19;
+                //var reteicaGE = montoGE * 8 / 1000;
+
+                Lote.comiempresa = montoGE;
+
+                f.push([
+                    hoy, montoGE, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
+                    '00000000000000012345', a.maxcomis, val, a.lote, ivaGE,
+                    0, montoGE + ivaGE, a.ordn
+                ]);
+            }
+
+            if (a.external && !a.comisistema && a.sistema) {
+
+                var montoST = val * a.sistema;
+                var ivaST = montoST * 0.19;
+                //var reteicaST = montoST * 8 / 1000;
+
+                Lote.comisistema = montoST;
+
+                f.push([
+                    hoy, montoST, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                    '00000000000000012345', a.sistema, val, a.lote, ivaST,
+                    0, montoST + ivaST, a.ordn
+                ]);
+            }
+
             if (f.length > 0) {
                 await pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
                             porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
-                await pool.query(`UPDATE productosd SET ? WHERE id = ?`,
-                    [{ directa: asesor, uno: a.papa, dos: a.abuelo, tres: a.bisabuelo }, a.lote]
-                );
+                await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
             }
         });
     }
     res.send(true);
 })
-//////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
+////////////////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
     res.render('links/solicitudes');
 });
@@ -4519,42 +5223,40 @@ async function QuitarCupon(S) {
 }
 async function ProyeccionPagos(S) {
 
-    const Pagos = await pool.query(`SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS BONOS, 
-    SUM(s.monto) AS MONTO, pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
-    LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') AND pr.id = ?`, S);
-
     let W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
     c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
     INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
-    ORDER BY TIMESTAMP(c.fechs) ASC`, S); // p.proyect DESC
-    let op = false;
+    ORDER BY TIMESTAMP(c.fechs) ASC`, S);
+
+
     const x = W[0];
-    const Pg = Pagos[0];
-    const pagos = Pg.BONOS + Pg.MONTO;
     const Cartera = x.obsevacion;
     const Proyeccion = x.proyeccion;
     const separa = x.separar;
     const total = Math.round((x.vrmt2 * x.mtr2) - x.ahorro);
-    const inicial = Math.round((total * x.iniciar / 100) - x.separar);
+    const initials = Math.round(total * x.iniciar / 100);
+    const inicial = x.separar >= initials ? 0 : initials - x.separar;
     const financiacion = Math.round(total - (inicial + x.separar));
-    //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion)
+
+    //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion, x)
     if (Proyeccion > 0) {
         op = true;
-        await pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = proyeccion WHERE separacion = ?`, S);
+        await pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, diaspagados = 0, 
+        diasmora = 0, cuota = proyeccion WHERE separacion = ?`, S);
 
-    } else if (Cartera !== 'CARTERA') {
+    } else { // if (Cartera !== 'CARTERA')
         const extraordinarias = Math.round(x.cuotaextraordinaria * x.extran);
         const cuotaordi = x.cuotaextraordinaria;
         const nini = x.inicialdiferida ? x.inicialdiferida : 0;
         const nfnc = x.numerocuotaspryecto - nini - x.extran;
-        const cuotaini = inicial ? Math.round(inicial / nini) : 0;
-        const cuotafnc = Math.round((financiacion - extraordinarias) / nfnc);
+        const cuotaini = inicial && nini ? Math.round(inicial / nini) : 0;
+        const financiamiento = !nini && inicial ? financiacion + inicial : financiacion;
+        const cuotafnc = Math.round((financiamiento - extraordinarias) / nfnc);
         const cf = x.extraordinariameses;
         mes6 = cuotafnc;
         mes12 = cuotafnc;
-        //console.log(x.inicialdiferida, nfnc, x.numerocuotaspryecto, x.extran, financiacion, extraordinarias, inicial, total, x.vrmt2, x.mtr2, x.ahorro)
 
         if (cuotaordi) {
             cf == 1 ? mes6 = cuotaordi
@@ -4562,17 +5264,18 @@ async function ProyeccionPagos(S) {
                     : mes6 = cuotaordi, mes12 = cuotaordi;
         };
 
-        await pool.query(`UPDATE cuotas SET 
-        estado = 3, mora = 0, abono = 0, cuota = CASE 
+        await pool.query(`UPDATE cuotas SET estado = 3, 
+        mora = 0, abono = 0, diaspagados = 0, 
+        diasmora = 0, cuota = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
-        WHEN tipo = 'INICIAL' THEN ${cuotaini}
+        ${nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ''}        
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 6 THEN ${mes6}
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 12 THEN ${mes12}
         ELSE ${cuotafnc} END, proyeccion = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
-        WHEN tipo = 'INICIAL' THEN ${cuotaini}
+        ${nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ''}
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 6 THEN ${mes6}
         WHEN tipo = 'FINANCIACION' AND 
@@ -4580,173 +5283,228 @@ async function ProyeccionPagos(S) {
         ELSE ${cuotafnc} END 
         WHERE separacion = ?`, S);
 
-    } else {
-        var pagados = 0, nopagados = 0, cuotaa = 0, ID = '', proy = '', sql = 'UPDATE cuotas SET estado = 3, mora = 0, abono = 0, cuota = CASE id ';
+    }
 
-        W.map((c) => {
-            if (c.estado != 13) {
-                nopagados += c.cuota;
-            } else if (c.estado == 13) {
-                pagados += c.cuota;
-            }
+    ////////////////////* ASIGNAR RELACION DE PAGOS CUOTAS *////////////////////////
+    let Cuotas = await pool.query(`SELECT c.*, r.pago FROM cuotas c LEFT JOIN relacioncuotas r ON c.id = r.cuota 
+    WHERE c.separacion = ? ORDER BY TIMESTAMP(c.fechs) ASC`, S);
+
+    if (Cuotas[0].pago) {
+        await pool.query(`DELETE r FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota WHERE c.separacion = ?`, S);
+        Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`, S);
+    }
+    const Abonos = await pool.query(`SELECT s.ids, s.monto, s.fech, s.fecharcb, a.dcto, a.estado FROM solicitudes s 
+    LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.orden = ? 
+    ORDER BY TIMESTAMP(s.fech)`, S);
+
+    const Moras = await pool.query(`SELECT * FROM intereses`);
+
+    let cuotas = Cuotas.map(e => { return { id: e.id, cuota: e.cuota, monto: e.cuota, fechs: e.fechs, estado: 3 } });
+    const fechaLimite = moment('2021-08-31').format('YYYY-MM-DD')
+    let Relacion = [];
+
+    for (i = 0; i < Abonos.length; i++) {
+        const a = Abonos[i];
+        const fechaLMT = a.fecharcb ? moment(a.fecharcb).format('YYYY-MM-DD')
+            : moment(a.fech).format('YYYY-MM-DD');
+        const cobro = fechaLMT >= fechaLimite && a.estado != 6 ? true : false
+        let Monto = a.monto;
+
+        await cuotas.map(async (e, u) => {
+
+            const FechaCuota = moment(e.fechs).format('YYYY-MM-DD');
+            const diffdays = moment(fechaLMT).diff(FechaCuota, 'days');
+            const daysDiff = fechaLMT > FechaCuota ? diffdays : 0;
+
+            const Tas = cobro && daysDiff ?
+                await Moras
+                    .filter(x => moment(x.fecha).format('YYYY-MM-DD') >= moment(e.fechs).startOf('month').format('YYYY-MM-DD')
+                        && moment(x.fecha).format('YYYY-MM-DD') <= moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
+                    ).map(x => x.teano) : [];
+
+            const Tasa = Tas.length ? Math.min(...Tas) : 0;
+
+            let moratoria = Tasa ? daysDiff * e.monto * Tasa / 365 : 0;
+            let dctoMoratorio = Tasa ? moratoria - (moratoria * a.dcto) : 0;
+            let diasmoratorios = Tasa ? daysDiff : 0;
+
+            if (!Monto) return;
+            if (Monto >= e.monto && e.estado === 3) {
+                Relacion.push([
+                    a.ids, e.id, moratoria, diasmoratorios, a.dcto ? a.dcto : 0,
+                    diasmoratorios, dctoMoratorio, moratoria, e.monto, 0, 13, Tasa
+                ]);
+                Monto = Math.sign(Monto - e.monto) > 0 ? Monto - e.monto : 0;
+                cuotas[u].monto = 0;
+                cuotas[u].estado = 13;
+
+            } else if (Monto > 0 && e.estado === 3) {
+                var mor = Tasa ? Math.abs(e.monto - dctoMoratorio) : 0;
+                var cuot = Math.abs((e.monto + dctoMoratorio) - Monto);
+                var diaspagados = Tasa ? mor / (dctoMoratorio / diasmoratorios) : 0;
+
+                Relacion.push([
+                    a.ids, e.id, moratoria, diasmoratorios, a.dcto ? a.dcto : 0,
+                    diaspagados, dctoMoratorio, mor, e.monto, cuot, 3, Tasa
+                ])
+                Monto = Math.sign(Monto - e.monto) > 0 ? Monto - cuot : 0;
+                cuotas[u].monto = cuot;
+            };
+        });
+    };
+    Relacion.length && await pool.query(`INSERT INTO relacioncuotas 
+        (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa) 
+        VALUES ?`, [Relacion]);
+
+    await pool.query(`UPDATE cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
+    SET c.cuota = r.saldocuota, c.estado = 3, c.diaspagados = r.diaspagados 
+    WHERE c.separacion = ? AND r.stdcuota = 3`, S);
+
+    await pool.query(`UPDATE cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
+    SET c.cuota = r.saldocuota, c.estado = 13, c.diaspagados = r.diaspagados 
+    WHERE c.separacion = ? AND r.stdcuota = 13`, S);
+
+    ////////////////////////////////* END *///////////////////////////////////////
+
+    ///////////////////////////////* MORAS */////////////////////////////////////////////
+    const intr = await pool.query(`SELECT c.id, c.separacion, c.fechs,
+    (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
+    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
+    INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
+    AND d.moras = 1 AND c.separacion = ? GROUP BY c.id`, S);
+
+    if (intr.length) {
+        let moraVr = `CASE`;
+        let moraTs = `CASE`;
+        intr.map((e) => {
+            moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * (DATEDIFF(CURDATE(), c.fechs) - c.diaspagados) * ${e.tasa} / 365`;
+            moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
+
         })
-        var tol = pagados + nopagados;
-        if (tol === total) {
-            pool.query(`UPDATE cuotas SET estado = 3, mora = 0, abono = 0, proyeccion = cuota WHERE separacion = ?`, S);
-        } else if (total > tol) {
-            tol = total - tol;
-            W.map((c) => {
-                ID += c.id.toString() + ', ';
-                if (!cuotaa && c.estado != 13) {
-                    cuotaa = Math.round(tol + c.cuota);
-                    sql += ' WHEN ' + c.id + ' THEN ' + cuotaa;
-                    proy += ' WHEN ' + c.id + ' THEN ' + cuotaa;
-                } else {
-                    sql += ' WHEN ' + c.id + ' THEN ' + c.cuota;
-                    proy += ' WHEN ' + c.id + ' THEN ' + c.cuota;
-                }
-            });
-            //console.log(sql, tol, total, pagados, nopagados)
-            ID = ID.slice(0, -2);
-            sql += ' END, proyeccion = CASE id ' + proy + ' END WHERE id IN(' + ID + ')';
-            await pool.query(sql);
-        }
+        moraVr += ` ELSE c.mora END`;
+        moraTs += ` ELSE c.tasa END`;
+
+        await pool.query(`UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
+        c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = ?`, S);
     }
 
-    if (!op) {
-        W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
-        p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
-        p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
-        c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
-        INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
-        ORDER BY TIMESTAMP(c.fechs) ASC`, S);
-    }
-
-    if (pagos > 0) {
-        var sql = 'UPDATE cuotas SET estado = CASE id';
-        var ID = '';
-        var montocuotas = pagos;
-        var cuotaa = '';
-
-        W.map((c) => {
-            if (montocuotas >= c.proyeccion) {
-                ID += c.id.toString() + ', ';
-                sql += ' WHEN ' + c.id + ' THEN ' + 13;
-                montocuotas = montocuotas - c.proyeccion;
-            } else if (montocuotas > 0) {
-                montocuotas = c.proyeccion - montocuotas;
-                ID += c.id.toString() + ', ';
-                sql += ' WHEN ' + c.id + ' THEN ' + 3;
-                cuotaa = ', cuota = CASE id WHEN ' + c.id + ' THEN ' + montocuotas + ' ELSE cuota END';
-                montocuotas = 0;
-            }
-        })
-        ID = ID.slice(0, -2);
-        sql += ' END' + cuotaa + ' WHERE id IN(' + ID + ')';
-        await pool.query(sql);
-    }
+    //////////////////////////* ENVIAR PDF *///////////////////////////////////
+    await EstadoDeCuenta(S)
 }
-async function Prueva(S) {
-    /*const directas = await pool.query(`SELECT * FROM preventa p 
-            INNER JOIN productosd l ON p.lote = l.id
-            INNER JOIN productos o ON l.producto = o.id
-            INNER JOIN users u ON p.asesor = u.id
-            INNER JOIN clientes c ON p.cliente = c.idc
-            WHERE l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL LIMIT 1`);*/
-    const asesor = await pool.query(`SELECT u.*, r.venta, r.bono FROM users u 
-        INNER JOIN rangos r ON u.nrango = r.id WHERE u.sucursal IS NULL LIMIT 1`);
-    //console.log(asesor)
-    //await pool.query(`UPDATE productosd SET ? WHERE estado IN(10, 13)`, { fechar: S, uno: null, dos: null, tres: null, directa: null });
-    return asesor
-}
-async function Pa(S, fn) {
-    var month = moment().subtract(S, 'month').format('YYYY-MM-DD HH:mm')
-    var u = await fn(month)
-    console.log(u)
-}
-//Pa(1, Prueva)
-//SELECT * FROM `cuotas` WHERE `separacion` = 275 AND (`fechs` LIKE '%-12-%' OR `fechs` LIKE '%-06-%')
-//Pa(2, Prueva);
-//Desendentes('15', 10)
-
 async function PagosAbonos(Tid, pdf, user) {
     //u. obsevacion pr
-    const SS = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, u.nrango, c.mora, 
-    pd.valor, pr.ahorro, pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, 
-    pr.lote, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, r.incntivo, 
-    pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, c.abono, pr.obsevacion,
-    s.ids, s.descp, pr.id cparacion, s.pago, c.estado std FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id
-    INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
+    const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
+    pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
+    cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, cp.pin bono, 
+    cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pr.obsevacion, s.ids, s.descp, 
+    pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, a.tipo tipoacuerdo FROM solicitudes s
+    INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
-    LEFT JOIN cupones cp ON s.bono = cp.id WHERE  pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
+    LEFT JOIN cupones cp ON s.bono = cp.id LEFT JOIN acuerdos a ON s.acuerdo = a.id 
+    WHERE pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
 
     const S = SS[0];
     const T = S.cparacion;
-    const fech = moment(S.fechs).format('YYYY-MM-DD');
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
     const monto = S.bono && S.formap !== 'BONO' ? S.monto + S.mount : S.monto;
     const std = S.obsevacion === 'CARTERA' ? 1 : 15;
-    //console.log(S, monto)
+
     if (S.stado === 4 || S.stado === 6) {
         Eli(pdf)
         return { std: false, msg: S.stado === 4 ? `Este pago ya ha sido aprobado.` : 'Este pago se encuentra declinado.' }
     };
-    if (S.concepto === 'ABONO') {
-        var montocuotas = monto;
-        const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
+    //if (S.concepto === 'ABONO') {
+    var montocuotas = monto;
+    const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
 
-        if (Cuotas.length > 0 && monto > 0) {
-            await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: 4, aprueba: user }, Tid]);
-            var sql = `UPDATE cuotas SET estado = 13, mora = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
-            var sql2 = '', idS = '';
+    if (Cuotas.length > 0 && monto > 0) {
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ concepto: 'ABONO', descp: Cuotas[0].tipo, stado: 4, aprueba: user }, Tid]);
 
-            Cuotas.map((c) => {
-                var cuot = c.cuota + c.mora;
-                if (montocuotas >= cuot) {
-                    idS += c.id.toString() + ', ';
-                    montocuotas = montocuotas - (c.cuota + c.mora);
-                    //console.log(c, cuota, cuot, montocuotas, montocuotas >= cuot)
-                } else if (montocuotas > 0) {
-                    var mor = montocuotas >= c.mora ? 0 : c.mora - montocuotas
-                    var cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
-                    var abono = c.abono + montocuotas; console.log(c, c.cuota, cuot, montocuotas, montocuotas >= cuot, abono)
-                    sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', cuota = ` + cuo + ', mora = ' + mor + ', abono = ' + abono + ' WHERE id = ' + c.id;
-                    montocuotas = 0;
+        /* var sql = `UPDATE cuotas SET estado = 13, mora = 0, diasmora = 0, diaspagados = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
+        var sql2 = '', idS = '';
+        let unionPagoCuotas = [];
+
+        Cuotas.map(async (c) => {
+            var Mora = S.dcto ? c.mora - (c.mora * S.dcto) : c.mora;
+            var Cuota = c.cuota + Mora;
+
+            if (montocuotas >= Cuota) {
+
+                if (c.tipo === 'SEPARACION' && S.incentivo && S.incntivo) {
+                    const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
+                    if (!sep.length) {
+                        var solicitar = {
+                            fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: std, descp: 'SEPARACION', orden: T,
+                            asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
+                        }
+                        await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
+                    }
                 }
-            });
-            idS = idS.slice(0, -2);
-            sql += ' WHERE id IN(' + idS + ')';
-            try {
-                idS ? await pool.query(sql) : console.log(sql, 'no sql');
-                sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
-            }
-            catch (e) {
-                console.log(e);
-            }
-            if (montocuotas > 0) {
-                var pin = ID(5),
-                    motivo = `${fech} Excedente del pago total del producto con id de ORDEN ${T}, id de pago ${Tid}`;
-                const bono = {
-                    pin, descuento: 0, estado: 9, clients: S.idc, concept: 'EXCEDENTE',
-                    tip: 'BONO', monto: montocuotas, motivo,
+
+                idS += c.id.toString() + ', ';
+                montocuotas = montocuotas - Cuota;
+                unionPagoCuotas.push([
+                    Tid, c.id, c.diasmora, c.mora, c.diasmora, Mora, c.cuota
+                ]);
+
+            } else if (montocuotas > 0) {
+                let mora = 0;
+                let diademora = c.diasmora - c.diaspagados;
+                let cuota = montocuotas > c.mora ? c.cuota - (montocuotas + Mora) : c.cuota;
+                let cuotaMonto = montocuotas > c.mora ? montocuotas - Mora : 0;
+
+                if (montocuotas < Mora) {
+                    mora = Mora - montocuotas;
+                    diademora = montocuotas / (c.mora / c.diasmora);
                 }
-                const bno = await pool.query('INSERT INTO cupones SET ? ', bono);
-                var respts = `El monto consignado es mayor al del valor total del producto con id de ORDEN ${T}, se genero un BONO con el excedente idBono:${bno.insertId}` //
-                await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ observaciones: respts }, Tid]);
+                let abono = c.abono + montocuotas;
+                unionPagoCuotas.push([
+                    Tid, c.id, c.diasmora, c.mora, diademora, mora, cuotaMonto
+                ]);
+                sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', 
+                    cuota = ${cuota}, mora = ${mora}, abono = ${abono}, diasmora = ${c.diasmora}, diaspagados =  ${c.diaspagados + diademora} 
+                    WHERE id = ${c.id}`
+                montocuotas = 0;
+            }
+        });
+        idS = idS.slice(0, -2);
+        sql += ' WHERE id IN(' + idS + ')';
 
-                var nombr = S.nombre.split(" ")[0],
-                    bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
+        try {
+            idS ? await pool.query(sql) : console.log(sql, 'no sql');
+            sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
+            unionPagoCuotas.length && pool.query(`INSERT INTO relacioncuotas (pago, cuota, dias, mora, diaspagados, totalmora, montocuota) VALUES ?`,
+                [unionPagoCuotas]
+            );
 
-                EnviarWTSAP(S.movil, bodi);
-            };
-        } else {
-            return { std: false, msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente' }
         }
+        catch (e) {
+            console.log(e);
+        }
+        if (montocuotas > 0) {
+            var pin = ID(5),
+                motivo = `${fech2} Excedente del pago total del producto con id de ORDEN ${T}, id de pago ${Tid}`;
+            const bono = {
+                pin, descuento: 0, estado: 9, clients: S.idc, concept: 'EXCEDENTE',
+                tip: 'BONO', monto: montocuotas, motivo,
+            }
+            const bno = await pool.query('INSERT INTO cupones SET ? ', bono);
+            var respts = `El monto consignado es mayor al del valor total del producto con id de ORDEN ${T}, se genero un BONO con el excedente idBono:${bno.insertId}` //
+            await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ observaciones: respts }, Tid]);
 
-    } else if (S.concepto === 'PAGO') {
+            var nombr = S.nombre.split(" ")[0],
+                bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
+
+            EnviarWTSAP(S.movil, bodi);
+        }; */
+    } else {
+        return { std: false, msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente' }
+    }
+
+    /* } else if (S.concepto === 'PAGO') {
         var cuota = S.cuota + S.mora;
+
         if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo && monto >= cuota) {
             const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
             if (!sep.length) {
@@ -4756,10 +5514,7 @@ async function PagosAbonos(Tid, pdf, user) {
                 }
                 await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
             }
-        } /*else if (S.tipo === 'SEPARACION' && monto < cuota) {
-            Eli(pdf);
-            return false;
-        }*/
+        }
         if (monto >= cuota || S.std === 13) {
             var montocuotas = monto - cuota;
             await pool.query(`UPDATE solicitudes s  
@@ -4781,20 +5536,37 @@ async function PagosAbonos(Tid, pdf, user) {
             const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
 
             if (Cuotas.length > 0 && montocuotas > 0) {
-                var sql = `UPDATE cuotas SET estado = 13, mora = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
+                var sql = `UPDATE cuotas SET estado = 13, mora = 0, diasmora = 0, diaspagados = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
                 var sql2 = '', idS = '';
+                let unionPagoCuotas = [];
 
                 Cuotas.map((c) => {
                     var cuot = c.cuota + c.mora;
                     if (montocuotas >= cuot) {
                         idS += c.id.toString() + ', ';
                         montocuotas = montocuotas - (c.cuota + c.mora);
-                        //console.log(c, cuota, cuot, montocuotas, montocuotas >= cuot)
+                        unionPagoCuotas.push([
+                            Tid, c.id, c.diasmora, c.mora, c.diasmora, c.mora
+                        ]);
+
                     } else if (montocuotas > 0) {
-                        var mor = montocuotas >= c.mora ? 0 : c.mora - montocuotas
-                        var cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
-                        var abono = c.abono + montocuotas;
-                        sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', cuota = ` + cuo + ', mora = ' + mor + ', abono = ' + abono + ' WHERE id = ' + c.id;
+
+                        let mor = 0, diademora = c.diasmora
+                        let cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
+
+                        if (montocuotas < c.mora) {
+                            mor = c.mora - montocuotas;
+                            diademora = montocuotas / (c.mora / c.diasmora);
+                        }
+                        let abono = c.abono + montocuotas;
+                        unionPagoCuotas.push([
+                            Tid, c.id, c.diasmora, c.mora, diademora, mor
+                        ]);
+
+
+                        sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', 
+                         cuota = ${cuo}, mora = ${mor}, abono = ${abono}, diasmora = ${c.diasmora}, diaspagados = ${diademora} 
+                         WHERE id = ${c.id}`
                         montocuotas = 0;
                     }
                 })
@@ -4803,6 +5575,9 @@ async function PagosAbonos(Tid, pdf, user) {
                 try {
                     idS ? await pool.query(sql) : console.log(sql, 'no sql');
                     sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
+                    unionPagoCuotas.length && pool.query(`INSERT INTO relacioncuotas (pago, cuota, dias, mora, diaspagados, totalmora) VALUES ?`,
+                        [unionPagoCuotas]
+                    );
                 }
                 catch (e) {
                     console.log(e);
@@ -4830,8 +5605,11 @@ async function PagosAbonos(Tid, pdf, user) {
                 ]
             );
         }
-    }
+    } */
+
+    var stt = await ProyeccionPagos(T)
     var st = await Estados(T)
+
     await pool.query(`UPDATE solicitudes s 
         INNER JOIN productosd l ON s.lt = l.id 
         SET ? WHERE s.ids = ?`,
@@ -5018,11 +5796,6 @@ async function Desendentes(pin, stados, pasado) {
                         j.acreedor, i, val, a.lote, retefuente,
                         reteica, monto - (retefuente + reteica), a.ordn
                     ]]
-                    a.external && !a.comiempresa ? f.push([
-                        hoy, montoP, 'COMISION DIRECTA', std, 'VENTA INDIRECTA',
-                        '00000000000000012345', montoGE, val, a.lote, retefuenteGE,
-                        reteicaGE, montoGE - (retefuenteGE + reteicaGE), a.ordn
-                    ]) : '';
                     a.papa && !a.sp && j.papa < 6 ? f.push([
                         hoy, montoP, 'COMISION INDIRECTA', std, 'PRIMERA LINEA',
                         a.papa, a.linea1, val, a.lote, retefuenteP,
@@ -5038,28 +5811,37 @@ async function Desendentes(pin, stados, pasado) {
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
+
                     if (a.external && !a.comiempresa) {
 
                         var montoGE = val * a.maxcomis;
+                        var ivaGE = montoGE * 0.19;
+                        //var reteicaGE = montoGE * 8 / 1000;
 
                         Lote.comiempresa = montoGE;
 
                         f.push([
-                            hoy, montoP, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
-                            '00000000000000012345', montoGE, val, a.lote, 0, 0, montoGE, a.ordn
+                            hoy, montoGE, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
+                            '00000000000000012345', a.maxcomis, val, a.lote, ivaGE,
+                            0, montoGE + ivaGE, a.ordn
                         ]);
                     }
-                    if (a.external && !a.comisistema) {
+
+                    if (a.external && !a.comisistema && a.sistema) {
 
                         var montoST = val * a.sistema;
+                        var ivaST = montoST * 0.19;
+                        //var reteicaST = montoST * 8 / 1000;
 
                         Lote.comisistema = montoST;
 
                         f.push([
-                            hoy, montoP, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
-                            '00000000000000012345', montoST, val, a.lote, 0, 0, montoST, a.ordn
+                            hoy, montoST, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                            '00000000000000012345', a.sistema, val, a.lote, ivaST,
+                            0, montoST + ivaST, a.ordn
                         ]);
                     }
+
                     pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
                         porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
                     pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
@@ -5176,34 +5958,7 @@ async function Desendentes(pin, stados, pasado) {
                         a.bisabuelo, a.linea3, val, a.lote, retefuenteB,
                         reteicaB, montoB - (retefuenteB + reteicaB), a.ordn
                     ]) : '';
-                    if (a.external && !a.comiempresa) {
 
-                        var montoGE = val * a.maxcomis;
-                        var retefuenteGE = montoGE * 0.10;
-                        var reteicaGE = montoGE * 8 / 1000;
-
-                        Lote.comiempresa = montoGE;
-
-                        f.push([
-                            hoy, montoP, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
-                            '00000000000000012345', montoGE, val, a.lote, retefuenteGE,
-                            reteicaGE, montoGE - (retefuenteGE + reteicaGE), a.ordn
-                        ]);
-                    }
-                    if (a.external && !a.comisistema) {
-
-                        var montoST = val * a.sistema;
-                        var retefuenteST = montoST * 0.10;
-                        var reteicaST = montoST * 8 / 1000;
-
-                        Lote.comisistema = montoST;
-
-                        f.push([
-                            hoy, montoP, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
-                            '00000000000000012345', montoST, val, a.lote, retefuenteST,
-                            reteicaST, montoST - (retefuenteST + reteicaST), a.ordn
-                        ]);
-                    }
                     if (a.bonoextra > 0.0000 && !a.sucursal && a.bextra > 0) {
                         montoC = val * a.bonoextra;
                         retefuenteC = montoC * 0.10;
@@ -5214,6 +5969,37 @@ async function Desendentes(pin, stados, pasado) {
                             reteicaC, montoC - (retefuenteC + reteicaC), a.ordn
                         ]);
                     }
+
+                    if (a.external && !a.comiempresa) {
+
+                        var montoGE = val * a.maxcomis;
+                        var ivaGE = montoGE * 0.19;
+                        //var reteicaGE = montoGE * 8 / 1000;
+
+                        Lote.comiempresa = montoGE;
+
+                        f.push([
+                            hoy, montoGE, 'GESTION VENTAS', std, 'VENTA INDIRECTA',
+                            '00000000000000012345', a.maxcomis, val, a.lote, ivaGE,
+                            0, montoGE + ivaGE, a.ordn
+                        ]);
+                    }
+
+                    if (a.external && !a.comisistema && a.sistema) {
+
+                        var montoST = val * a.sistema;
+                        var ivaST = montoST * 0.19;
+                        //var reteicaST = montoST * 8 / 1000;
+
+                        Lote.comisistema = montoST;
+
+                        f.push([
+                            hoy, montoST, 'GESTION ADMINISTRATIVA', 8, 'ADMIN PROYECTOS',
+                            '00000000000000012345', a.sistema, val, a.lote, ivaST,
+                            0, montoST + ivaST, a.ordn
+                        ]);
+                    }
+
                     pool.query(`INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
                         porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
                     pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
@@ -5372,12 +6158,6 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
     chatid ? options.data.chatId = chatid : options.data.phone = cel;
 
     const tt = await axios(options);
-    //console.log(tt.data)
-
-    /* request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    }); */
     smsj ? await sms(desarrollo ? '57 3012673944' : cel, smsj) : '';
     return tt.data
 }

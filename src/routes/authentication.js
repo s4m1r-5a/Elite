@@ -189,6 +189,8 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1;`);
   }
 
+  `SELECT c.*, DATEDIFF(CURDATE(), c.fechs) diferencia  FROM cuotas c WHERE  c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = 46`
+
   ////// 5 MEJORES ASESORES DEL AÑO Y DEL MES //////////////
   asesoresA = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
   COUNT(IF(s.descp = 'VENTA DIRECTA', 1, null)) iniciales FROM preventa p INNER JOIN users u ON p.asesor = u.id 

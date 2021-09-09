@@ -602,7 +602,7 @@ async function PagosAbonos(Tid, user) {
                 } else if (montocuotas > 0) {
                     var mor = montocuotas >= c.mora ? 0 : c.mora - montocuotas
                     var cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
-                    var abono = c.abono + montocuotas; console.log(c, c.cuota, cuot, montocuotas, montocuotas >= cuot, abono)
+                    var abono = c.abono + montocuotas; //console.log(c, c.cuota, cuot, montocuotas, montocuotas >= cuot, abono)
                     sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', cuota = ` + cuo + ', mora = ' + mor + ', abono = ' + abono + ' WHERE id = ' + c.id;
                     montocuotas = 0;
                 }
@@ -616,6 +616,8 @@ async function PagosAbonos(Tid, user) {
             catch (e) {
                 console.log(e);
             }
+
+            ////////////* VALOR EXCEDENDETE SI SOBREPASA EL VALOR DEL LOTE *////////
             if (montocuotas > 0) {
                 var pin = ID(5),
                     motivo = `${fech} Excedente del pago total del producto con id de ORDEN ${T}, id de pago ${Tid}`;
@@ -632,6 +634,7 @@ async function PagosAbonos(Tid, user) {
 
                 EnviarWTSAP(S.movil, bodi);
             };
+            
         } else {
             return false
         }

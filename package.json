@@ -39,10 +39,12 @@
     "passport-local": "^1.0.0",
     "pdfmake": "^0.1.71",
     "phantomjs": "^2.1.7",
+    "puppeteer": "^10.2.0",
     "request": "^2.88.0",
     "socket.io": "^3.1.0",
     "timeago.js": "^4.0.0-beta.1",
-    "xlsx": "^0.17.0"
+    "xlsx": "^0.17.0",
+    "xlsx-js-style": "^1.0.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.4"
