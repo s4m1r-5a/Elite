@@ -5388,7 +5388,7 @@ async function ProyeccionPagos(S) {
         c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = ?`, S);
     }
 
-    //////////////////////////* ENVIAR PDF *///////////////////////////////////
+    //////////////////////////* ENVIAR PDF *///////////////////////////
     await EstadoDeCuenta(S)
 }
 async function PagosAbonos(Tid, pdf, user) {
