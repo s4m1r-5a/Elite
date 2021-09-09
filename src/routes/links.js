@@ -4478,6 +4478,11 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
         res.send(true);
     }
 })
+router.get('/cedula/:id', isLoggedIn, async (req, res) => {
+    const { id } = req.params;
+    const datos = await consultarDocumentos('1', id)
+    res.json(datos);
+})
 router.post('/desendentes', noExterno, async (req, res) => {
     const { id, asesor } = req.body;
     let sep = true, bon = true;
