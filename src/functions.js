@@ -854,6 +854,226 @@ async function EstadoCuenta(movil, nombre, author) {
         return { sent: false };
     }
 }
+async function FacturaDeCobro(ids) {
+    const Proyeccion = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, 
+    s.porciento, s.total, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
+    pd.n, s.retefuente, s.pagar, s.lt, cl.nombre, p.proyect, u.document
+    FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+    INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
+    INNER JOIN productos p ON pd.producto = p.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
+    WHERE s.ids IN(${ids})`);
+    let cuerpo = [];
+    if (Proyeccion.length) {
+
+        Proyeccion.map((e, i) => {
+            if (!i) {
+                cuerpo.push(
+                    [
+                        { text: `Id`, style: 'tableHeader', alignment: 'center' },
+                        { text: 'Fecha', style: 'tableHeader', alignment: 'center' },
+                        //{ text: 'Cliente', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Proyecto', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Mz', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Lt', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Concepto', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Venta', style: 'tableHeader', alignment: 'center' },
+                        { text: '%', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Monto', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Iva', style: 'tableHeader', alignment: 'center' },
+                        { text: 'Total', style: 'tableHeader', alignment: 'center' }
+                    ],
+                    [e.ids, moment(e.fech).format('L'), e.proyect, e.mz, e.n, e.concepto,  //e.nombre,
+                    '$' + Moneda(e.total), (e.porciento * 100) + '%', '$' + Moneda(e.monto || 0),
+                    '$' + Moneda(e.retefuente), '$' + Moneda(e.pagar)]
+                );
+            } else {
+                cuerpo.push([e.ids, moment(e.fech).format('L'), e.proyect, e.mz, e.n, e.concepto, //, e.nombre
+                '$' + Moneda(e.total), (e.porciento * 100) + '%', '$' + Moneda(e.monto || 0),
+                '$' + Moneda(e.retefuente), '$' + Moneda(e.pagar)]);
+            }
+        });
+        ////////////////////////* CREAR PDF *//////////////////////////////
+        const printer = new PdfPrinter(Roboto);
+        let docDefinition = {
+            background: function (currentPage, pageSize) {
+                return { image: path.join(__dirname, '/public/img/avatars/avatar1.png'), width: pageSize.width, opacity: 0.1 } //, height: pageSize.height
+            },
+            pageSize: 'a4',
+            footer: function (currentPage, pageCount) {
+                return {
+                    alignment: 'center',
+                    margin: [40, 3, 40, 3],
+                    columns: [
+                        {
+                            width: 30,
+                            margin: [10, 0, 15, 0],
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [30, 30]
+                        },
+                        [
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                margin: [0, 7, 0, 0],
+                                fontSize: 8,
+                                columns: [
+                                    { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
+                                    { text: 'info@grupoelitefincaraiz.co' },
+                                    { text: 'https://grupoelitefincaraiz.com', link: 'https://grupoelitefincaraiz.com' }
+                                ]
+                            },
+                            {
+                                alignment: 'justify', italics: true, color: 'gray',
+                                fontSize: 8,
+                                columns: [
+                                    { text: 'Nit: 901311748-3' },
+                                    { text: '57 300-285-1046', link: 'https://wa.me/573007861987?text=Hola' },
+                                    { text: 'Mz L lt 17 Urb. la granja, Turbaco' }
+                                ]
+                            }
+                        ],
+                        {
+                            width: 30,
+                            //alignment: 'right',
+                            margin: [10, 0, 15, 0],
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [30, 30]
+                        }
+                    ]
+                };
+            },
+            header: function (currentPage, pageCount, pageSize) {
+                // you can apply any logic and return any valid pdfmake element
+                return [
+                    {
+                        width: 20,
+                        alignment: 'right',
+                        margin: [10, 3, 10, 3],
+                        image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                        fit: [20, 20]
+                    }
+                ]
+            },
+            info: {
+                title: 'Estado de cuenta',
+                author: 'RedElite',
+                subject: 'Detallado del estado de los pagos de un producto',
+                keywords: 'estado de cuenta',
+                creator: 'Grupo Elite',
+                producer: 'G.E.'
+            },
+            content: [ // pageBreak: 'before',
+                {
+                    columns: [
+                        [
+                            { text: Proyeccion[0].nam, style: 'header' },
+                            { text: 'Estado de comisiones pendientes', style: 'subheader' },
+                            /* {
+                                text: `Doc. ${Proyeccion[0].document}         Movil ${Proyeccion[0].clu}        ${Proyeccion[0].mail}`,
+                                italics: true, color: 'gray', fontSize: 9
+                            } */
+                        ],
+                        {
+                            width: 100,
+                            image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+                            fit: [100, 100]
+                        }
+                    ]
+                },
+                {
+                    style: 'tableBody',
+                    color: '#444',
+                    table: {
+                        widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                        headerRows: 1,
+                        // keepWithHeaderRows: 1,
+                        body: cuerpo
+                    }
+                },
+                /* { text: 'A continuacion se describiran los totales de la tabla anterior', style: 'subheader' },
+                {
+                    ul: [
+                        {
+                            text: [
+                                { text: 'Total Abonado: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalAbonado)}\n`, italics: true, bold: true, fontSize: 11, color: 'green' },
+                                { text: NumeroALetras(totalAbonado).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Total Mora: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalMora)}\n`, italics: true, bold: true, fontSize: 11, color: 'gray' },
+                                { text: NumeroALetras(totalMora).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Mora Adeudada: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(moraAdeudada)}\n`, italics: true, bold: true, fontSize: 11, color: 'red' },
+                                { text: NumeroALetras(moraAdeudada).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        },
+                        {
+                            text: [
+                                { text: 'Total Saldo: ', fontSize: 10, bold: true },
+                                { text: `$${Moneda(totalDeuda)}\n`, italics: true, bold: true, fontSize: 11, color: 'blue' },
+                                { text: NumeroALetras(totalDeuda).toLowerCase(), fontSize: 8, italics: true, color: 'gray' }
+                            ]
+                        }
+                    ]
+                }, */
+                /* {
+                    fontSize: 11,
+                    italics: true,
+                    text: [
+                        '\nLos montos que se muestran de color ',
+                        { text: 'azul ', bold: true, color: 'blue' },
+                        'no se suman al total  ',
+                        { text: 'abonado, ', bold: true, color: 'green' },
+                        'ya que estos montos aun no cuentan con la ',
+                        { text: 'aprobacion ', bold: true, color: 'green' },
+                        'del area de ',
+                        { text: 'contabilidad. ', bold: true },
+                        'Una ves se hallan aprobado se sumaran al saldo ',
+                        { text: 'abonado.\n\n', bold: true, color: 'green' },
+                    ]
+                } */
+            ],
+            styles: {
+                header: {
+                    fontSize: 13,
+                    bold: true,
+                    margin: [0, 0, 0, 10]
+                },
+                subheader: {
+                    fontSize: 11,
+                    bold: true,
+                    margin: [0, 5, 0, 2]
+                },
+                tableBody: {
+                    fontSize: 8,
+                    margin: [0, 5, 0, 5]
+                },
+                tableHeader: {
+                    bold: true,
+                    fontSize: 9,
+                    color: 'black'
+                },
+                small: {
+                    fontSize: 8,
+                    italics: true,
+                    color: 'gray',
+                    alignment: 'right'
+                }
+            }
+        }
+        let ruta = path.join(__dirname, `/public/uploads/facturasdecobro-${Proyeccion[0].ids}.pdf`);
+        let pdfDoc = printer.createPdfKitDocument(docDefinition);
+        pdfDoc.pipe(fs.createWriteStream(ruta));
+        pdfDoc.end();
+        return `/uploads/facturasdecobro-${Proyeccion[0].ids}.pdf`;
+    }
+}
 async function EstadoDeCuenta(Orden) {
     const Proyeccion = await pool.query(`SELECT c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
@@ -1128,8 +1348,8 @@ async function EstadoDeCuenta(Orden) {
         pdfDoc.pipe(fs.createWriteStream(ruta));
         pdfDoc.end();
 
-        var dataFile = {
-            phone: '573012673944',
+        /* var dataFile = {
+            phone: '573012673944', //Proyeccion[0].movil,
             body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
             filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
         };
@@ -1142,8 +1362,8 @@ async function EstadoDeCuenta(Orden) {
             false,
             'Grupo Elite te da la bienvenida',
             [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
-        );
-        return r  //JSON.stringify(estado);
+        ); */
+        return true  //JSON.stringify(estado);
     } else {
         return { sent: false };
     }
@@ -1718,5 +1938,6 @@ module.exports = {
     RecibosCaja,
     tasaUsura,
     consultarDocumentos,
-    EstadoDeCuenta
+    EstadoDeCuenta,
+    FacturaDeCobro
 };

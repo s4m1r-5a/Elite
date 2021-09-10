@@ -81,6 +81,10 @@ var STAD = (tabla, col, std) => {
     $(tabla).DataTable().columns().search('');
     $(tabla).DataTable().columns(col).search(std).draw();
 }
+var STAD3 = (tabla, col, std) => {
+    //$(tabla).DataTable().columns().search('');
+    $(tabla).DataTable().columns(col).search(std).draw();
+}
 ////////////////////* ESTADO DE EL MODAL DE EVENTOS /////////////////////
 $('#ModalEventos').on('hide.bs.modal', function (e) {
     console.log('lo mandaron a cerrar')
@@ -1805,11 +1809,11 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
                 column.data().unique().sort().each(function (d, j) {
                     $('#men2').append(
                         `<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                        onclick="STAD('#comisiones', 13, '${d}')"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
+                        onclick="STAD3('#comisiones', 13, '${d}')"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
                     );
                 });
                 $('#men2').append(`<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                onclick="STAD('#comisiones', 13, '')"><i class="fas fa-undo"></i> Todos</a>`)
+                onclick="STAD3('#comisiones', 13, '')"><i class="fas fa-undo"></i> Todos</a>`)
             });
         },
         columns: [
@@ -1964,6 +1968,34 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
         } else {
             SMSj('error', `Solicitud no pude ser procesada, no cuentas con los permisos`)
         }
+    }
+    var FaturaCobro = () => {
+        let id = null;
+        comisiones
+            .rows({ search: 'applied' })
+            .data()
+            .filter(function (value, index) {
+                id += id ? ', ' + value.ids : value.ids
+            });
+        $.ajax({
+            type: 'POST',
+            url: '/links/comision/pdf',
+            data: { ids: id },
+            beforeSend: (x) => {
+                $('#ModalEventos').modal({
+                    show: true
+                });
+            },
+            success: (data) => {
+                if (data) {
+                    $('#ModalEventos').modal('hide')
+                    window.open(data, '_blank');
+                }
+            },
+            error: function (data) {
+                console.log(data);
+            }
+        })
     }
     var CuentaCobro = () => {
         var NOMBRE = '', EMAIL = '', MOVIL = '', RG = '', CC = '',
@@ -2796,15 +2828,15 @@ if (window.location.pathname === `/links/reportes`) {
                 data: "id",
                 render: function (data, method, row) {
                     if (row.tipobsevacion === 'ANULADA' && rol.admin && row.estado != 9 && row.estado != 15) {
-                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
+                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>`;
                     } else if (rol.subadmin) {
                         return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
                         aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
                     } else if (rol.contador) {
-                        `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>
+                        `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>
                         <a class="flex-sm-fill text-sm-center ml-2" href="#" onclick="Excel(${data}, '${row.proyecto}', '${row.nombre}', '${row.mz}', '${row.n}')"><i class="fas fa-file-alt"></i>Ex</a>`
                     } else {
-                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}" target="_blank"><i class="fas fa-print"></i></a>`;
+                        return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>`;
                     }
                 }
             },
@@ -2882,7 +2914,7 @@ if (window.location.pathname === `/links/reportes`) {
                         <nav class="nav flex-sm-row collapse" id="Ord${g.id}" aria-labelledby="headingOne" data-parent="#datatable2">
 
                         ${AdminSuper && !resOrden ? `
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Excel(${g.id}, '${g.proyecto}', '${g.nombre}', '${g.mz}', '${g.n}')"><i class="fas fa-file-alt"></i> Excel</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Pdfs(${g.id})"><i class="fas fa-file-alt"></i> Pdf</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
                         <a class="flex-sm-fill text-sm-center nav-link anular" href="#"><i class="fas fa-ban"></i> Anular</a>                                
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
@@ -2901,7 +2933,7 @@ if (window.location.pathname === `/links/reportes`) {
                         : ''}                              
                         ${!resOrden ? `
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/ordendeseparacion/${g.id}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/ordendeseparacion/${g.id}/${g.tipobsevacion}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Verificar(${g.id})"><i class="fas fa-glasses"></i> Estado</a>`
                         : ''}
                         ${g.kupn && AdminSuper && !resOrden ? `<a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="RestKupon(${g.id})"><i class="fas fa-undo"></i> Restablecer Cupon</a>` : ''}
@@ -4942,6 +4974,29 @@ if (window.location.pathname === `/links/reportes`) {
             });
         }
     }
+    var Pdfs = (id) => {
+        var D = { k: id, h: moment().format('YYYY-MM') };
+        $.ajax({
+            url: '/links/reportes/pdfs',
+            data: D,
+            type: 'POST',
+            beforeSend: function (xhr) {
+                $('#ModalEventos').modal({
+                    backdrop: 'static',
+                    keyboard: true,
+                    toggle: true
+                });
+            },
+            success: function (data) {
+                if (data) {
+                    tableOrden.ajax.reload(null, false)
+                    $('#ModalEventos').modal('hide')
+                    window.open(data, '_blank');
+                    //window.location.href = data;
+                }
+            }
+        });
+    }
     var Excel = (id, proyecto, nombre, mz, n) => {
         console.log(id, proyecto, nombre, mz, n)
         var D = { k: id, h: moment().format('YYYY-MM'), proyecto, nombre, mz, n };
@@ -6772,7 +6827,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}`) {
+if (window.location.pathname == `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}/${window.location.pathname.split('/')[4]}`) {
     $('footer').hide();
     $('nav').hide();
     let col = 8

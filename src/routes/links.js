@@ -22,9 +22,9 @@ const XLSX = require('xlsx-js-style')
 const PdfPrinter = require('pdfmake')
 const Roboto = require('../public/fonts/Roboto');
 const {
-    tasaUsura,
+    tasaUsura, FacturaDeCobro,
     consultarDocumentos, EstadoDeCuenta
-} = require('../functions.js')
+} = require('../functions.js');
 //DELETE
 
 const transpoter = nodemailer.createTransport({
@@ -440,10 +440,26 @@ cron.schedule("0 2 * * *", async () => {
     }
     ////////////////* RESTABLECER LOS ID DE LAS RELACIONES DE CUOTAS ELIMINADOS *///////////////////
     await pool.query(`SET  @num := 0`);
-    await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`)
-    await pool.query(`ALTER TABLE relacioncuotas AUTO_INCREMENT =1`)
-    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED`)
-    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED AUTO_INCREMENT`)
+    await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`);
+    await pool.query(`ALTER TABLE relacioncuotas AUTO_INCREMENT =1`);
+    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED`);
+    await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED AUTO_INCREMENT`);
+
+    const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
+    (l.valor - p.ahorro) * d.cobrosistema Inicial, ( SELECT SUM(monto) 
+    FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND d.cobrosistema > 0 GROUP BY p.id 
+    HAVING abonos >= Inicial ORDER BY p.id`);
+
+    if (comi.length) {
+        let ids = null;
+        await comi.map(e => ids += ids ? ', ' + e.ordn : e.ordn);
+        await pool.query(`UPDATE solicitudes s SET s.fech = ${moment().format('YYYY-MM-DD')}, 
+        s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
+    }
+
+
 
 });
 cron.schedule("*/10 * 5 5 * *", async () => {
@@ -3026,16 +3042,18 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
         res.send(dataSet);
     }
 });
-router.get('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
+router.get('/ordendeseparacion/:id/:tp', isLoggedIn, async (req, res) => {
     //console.log(req.params)
-    const { id } = req.params
+    const { id, tp } = req.params
 
     ////////////////////* CORREGIR PROYECION *////////////////////////
-    await ProyeccionPagos(id)
-    const e = await Estados(id);
-    var estado = e.pendients ? 8 : e.std
-    await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+    if (tp !== 'ANULADA') {
+        await ProyeccionPagos(id)
+        const e = await Estados(id);
+        var estado = e.pendients ? 8 : e.std
+        await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
     SET ? WHERE p.id = ?`, [{ 'l.estado': estado }, id]);
+    }
     ////////////////////* END *//////////////////////////////////////
 
     sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
@@ -3446,7 +3464,7 @@ router.get('/comisiones', isLoggedIn, async (req, res) => {
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
     WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND l.comiempresa = 0 AND l.comisistema = 0 
     GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
-    const hoy = moment().format('YYYY-MM-DD HH:mm'); console.log(comis)
+    const hoy = moment().format('YYYY-MM-DD HH:mm'); //console.log(comis)
     var f = [];
     var sql = `UPDATE productosd SET comiempresa = CASE id`;
     var sql2 = `, comisistema = CASE id`;
@@ -3487,6 +3505,22 @@ router.get('/comisiones', isLoggedIn, async (req, res) => {
             porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`, [f]);
         await pool.query(`${sql}${sq ? sql2 : ''}`);
     }
+
+    const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
+    (l.valor - p.ahorro) * d.cobrosistema Inicial, ( SELECT SUM(monto) 
+    FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND d.cobrosistema > 0 GROUP BY p.id 
+    HAVING abonos >= Inicial ORDER BY p.id`);
+
+    if (comi.length) {
+        let ids = null;
+        await comi.map(e => ids += ids ? ', ' + e.ordn : e.ordn);
+        await pool.query(`UPDATE solicitudes s SET s.fech = ${moment().format('YYYY-MM-DD')}, 
+        s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
+    }
+
+
     res.render('links/comisiones');
 });
 router.post('/comisiones', isLoggedIn, async (req, res) => {
@@ -3499,7 +3533,7 @@ router.post('/comisiones', isLoggedIn, async (req, res) => {
 
     const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
     s.descp, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
-    pd.n, s.retefuente, s.reteica, pagar, us.id, us.fullname, s.lt, cl.nombre, p.proyect 
+    pd.n, s.retefuente, s.reteica, s.pagar, us.id, us.fullname, s.lt, cl.nombre, p.proyect 
     FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
@@ -3531,6 +3565,17 @@ router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
         res.send(respuesta);
     }
 });
+router.post('/comision/:item', isLoggedIn, async (req, res) => {
+    const { item } = req.params;
+    if (item === 'pdf') {
+        const { ids } = req.body;
+        console.log(ids);
+        const r = await FacturaDeCobro(ids)
+        /* const cobro = await pool.query(`SELECT * FROM solicitudes WHERE ids IN(${ids})`);
+        console.log(cobro) */
+        res.send(r)
+    }
+})
 //////////////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, (req, res) => {
     res.render('links/reportes');
@@ -4456,6 +4501,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         } else {
             res.send({ std: false, msj: 'Existe un Acuerdo vigente establecido, no es posible crear uno nuevo' });
         }
+    } else if (id === 'pdfs') {
+        const { k, h } = req.body;
+        await EstadoDeCuenta(k)
+        res.send(`/uploads/estadodecuenta-${k}.pdf`)
     }
 });
 router.post('/rcb/:id', isLoggedIn, async (req, res) => {
@@ -5235,7 +5284,7 @@ async function ProyeccionPagos(S) {
     INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
     ORDER BY TIMESTAMP(c.fechs) ASC`, S);
 
-
+    if (!W.length) return;
     const x = W[0];
     const Cartera = x.obsevacion;
     const Proyeccion = x.proyeccion;
@@ -5394,7 +5443,7 @@ async function ProyeccionPagos(S) {
     }
 
     //////////////////////////* ENVIAR PDF *///////////////////////////
-    await EstadoDeCuenta(S)
+    //await EstadoDeCuenta(S)
 }
 async function PagosAbonos(Tid, pdf, user) {
     //u. obsevacion pr
