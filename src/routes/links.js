@@ -379,7 +379,7 @@ router.post('/desarrollo', async (req, res) => {
 
 });
 var co = 0
-cron.schedule("37 11,17 * * *", async () => {
+cron.schedule("0 10 * * 1,3,5", async () => {
     const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
     ORDER BY fechs ASC) as deuda, (SELECT SUM(mora) FROM cuotas 
@@ -397,7 +397,7 @@ cron.schedule("37 11,17 * * *", async () => {
         let data = yt[i];
         //if (i === 3) { continue; } \n
         cont = i + 1;
-        let body = `_Apreciado *${data.nombre}*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${data.meses} mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${data.proyect}* *Lt-${data.n}* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(data.mora)}*. Evite futuros cobros jurídicos. Para ponerse al día con tu obligación comunícate al celular *301 5685850* o al correo electrónico cobranzasgrupoelite@gmail.com_\n
+        let body = `_Apreciado *${data.nombre}*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${data.meses} mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${data.proyect}* *Lt-${data.n}* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(data.mora)}*. Evite futuros cobros jurídicos. Para ponerse al día con tu obligación comunícate al celular *300-285-1046* o al correo electrónico cobranzasgrupoelite@gmail.com_\n
         \n_Ahora puedes realizar tus pagos en linea o subir tus constancias de pago por transferencia o consignación bancaria al siguiente link https://grupoelitefincaraiz.com/links/pagos, solo debes ingresar tu numero de documento y listo_\n
         \n_*GRUPO ELITE FINCA RAÍZ S.A.S*_`
         const tt = await EnviarWTSAP(data.movil, body);

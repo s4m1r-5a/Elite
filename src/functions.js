@@ -1121,7 +1121,7 @@ async function EstadoDeCuenta(Orden) {
                     ],
                     [e.tipo + '-' + e.ncuota, moment(e.fechs).format('L'),
                     '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
-                    e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100) + '%' : (e.tasamora * 100) + '%',
+                    e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
                     e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
                     '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
                     Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
@@ -1132,7 +1132,7 @@ async function EstadoDeCuenta(Orden) {
 
                 cuerpo.push([e.tipo + '-' + e.ncuota, moment(e.fechs).format('L'),
                 '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
-                e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100) + '%' : (e.tasamora * 100) + '%',
+                e.montocuota ? e.dias : TotalDias, e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
                 e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
                 '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
                 Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
