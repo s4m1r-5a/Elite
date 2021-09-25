@@ -6164,10 +6164,10 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 }
                 $('#ModalEventos').modal('hide')
                 if (T) {
-                    CONT(separar);
+                    CONT();
                     T = false;
                 } else {
-                    FINANCIAR(1, '', $('#Separar').val().replace(/\./g, ''));
+                    FINANCIAR(1, '');
                 }
             } else {
                 var link = '/links/cartera/' + $(this).val();
@@ -6221,45 +6221,29 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             }
         })
         $('#financiacion-btn').click(function () {
-            if (eliminar) {
-                SMSj('info', 'No es posible agregar cuotas despues de haber eliminado una, actualiza el modulo y agrega las cuotas luego si podras eliminar las cuotas que desees');
+            var Spr = parseFloat($('#Separar').val().replace(/\./g, ''));
+            var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
+            var Fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+            if (Spr >= Ini + Fnc) {
+                SMSj('info', 'No es posible agregar cuotas ya que la separacion cubre el coste del producto, edite primero la separacion para poder realizar cambios en esta accion');
             } else {
                 var c = 1;
-                crearcartera
-                    .rows()
-                    .data()
-                    .filter((x, c) => {
-                        return $(x[4]).val() === 'FINANCIACION';
-                    }).map((x, j) => {
-                        c = j + 2;
-                    })
+                crearcartera.rows().data().map(x => $(x[3]).val() === 'FINANCIACION' && c++);
                 $('#financiacion').val(c);
-                if ($('#Separar').val()) {
-                    FINANCIAR('FINANCIACION', c, parseFloat($('#Separar').val().replace(/\./g, '')))
-                } else {
-                    FINANCIAR('FINANCIACION', c, 0)
-                }
+                FINANCIAR('FINANCIACION', c, Spr);
             }
         })
         $('#inicialcuotas-btn').click(function () {
-            if (eliminar) {
-                SMSj('info', 'No es posible agregar cuotas despues de haber eliminado una, actualiza el modulo y agrega las cuotas que desees primero luego si podras eliminar las cuotas que desees');
+            var Spr = parseFloat($('#Separar').val().replace(/\./g, ''));
+            var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
+            if (Spr >= Ini) {
+                SMSj('info', 'No es posible agregar cuotas ya que la separacion cubre el coste de la cuota inicial del producto, edite primero la separacion para poder realizar cambios en esta accion');
             } else {
                 var c = 1;
-                crearcartera
-                    .rows()
-                    .data()
-                    .filter((x, c) => {
-                        return $(x[4]).val() === 'INICIAL';
-                    }).map((x, j) => {
-                        c = j + 2;
-                    })
-                $('#inicialcuotas').val(c)
-                if ($('#Separar').val()) {
-                    FINANCIAR('INICIAL', c, parseFloat($('#Separar').val().replace(/\./g, '')))
-                } else {
-                    FINANCIAR('INICIAL', c, 0);
-                }
+                crearcartera.rows().data().map(x => $(x[3]).val() === 'INICIAL' && c++);
+                console.log(c)
+                $('#inicialcuotas').val(c);
+                FINANCIAR('INICIAL', c, Spr);
             }
         })
         $('#cupon').change(function () {
@@ -6293,11 +6277,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                                 $('#destotal').val(Moneda(Math.round(precio)));
                                 $('#ini').val(Moneda(Math.round(inicial)))
                                 $('#fnc').val(Moneda(Math.round(precio - inicial)));
-                                if ($('#Separar').val()) {
-                                    CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
-                                } else {
-                                    CONT(0, 1);
-                                }
+                                CONT();
                             }
                             bono = data[0].pin;
                         } else {
@@ -6324,11 +6304,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 
             $('#ini').val(Moneda(Math.round(inicl)));
             $('#fnc').val(Moneda(Math.round(total - inicl)));
-            if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
-            } else {
-                CONT(0, 1)
-            }
+            CONT()
         })
         $('#vmtr2').change(function () {
             var vmtr = $(this).val().replace(/\./g, '');
@@ -6348,13 +6324,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 $('#desinicial').val(Moneda(Math.round(inicl)));
                 //.mask('#.##$', { reverse: true, selectOnFocus: true });
             }
-            $('#ini').val(Moneda(Math.round(inicl)))
-            $('#fnc').val(Moneda(Math.round(total - inicl)))
-            if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
-            } else {
-                CONT(0, 1)
-            }
+            $('#ini').val(Moneda(Math.round(inicl)));
+            $('#fnc').val(Moneda(Math.round(total - inicl)));
+            CONT();
         })
         $('#cuadro2').submit(function (e) {
             var asesors = $('#asesores').val();
@@ -6391,17 +6363,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         var f = data.orden.map((x, v) => {
             return [
                 '',
-                `<input class="text-center id" type="text" name="id" style="width: 100%;" value="${x.id}" disabled>`,
                 `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" value="${x.fechs}" required>`,
                 `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${x.ncuota}" required>`,
                 `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${x.tipo}">`,
                 `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;"  ${!v ? 'id="Separar"' : ''} 
-                data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" value="${Moneda(x.cuota)}" required>`,
-                `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" value="${x.proyeccion ? Moneda(x.proyeccion) : Moneda(x.cuota)}" disabled>`,
-                `<select size="1" class="text-center std" name="std" disabled>
-                <option value="3" selected="selected">Pendiente</option>
-                <option value="13">Pagada</option>
-                </select>`,
+                data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" value="${Moneda(x.proyeccion)}" required>`,
                 `${x.tipo !== 'SEPARACION' ? '<a>' : ''}<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                     stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
             <polyline points="3 6 5 6 21 6"></polyline>
@@ -6411,10 +6377,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             </svg>${x.tipo !== 'SEPARACION' ? '</a >' : ''}`
             ]
         });
-        $('#inicialcuotas').val(ncal);
-        $('#financiacion').val(financia);
-        crearcartera.rows.add(f).draw(false);
-        $('#Separar').val(Moneda(separar));
+
+        $('#inicialcuotas').val(ncal); // Numero de financiacion de la cuota inicial
+        $('#financiacion').val(financia); // Numero de financiacion
+        crearcartera.rows.add(f).draw(false).columns.adjust().responsive.recalc();
+        $('#Separar').val(Moneda(separar)); // Cuota de separacion
 
 
         data.productos.map((x, v) => {
@@ -6440,7 +6407,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         });
         clientes.val([c1, c2, c3, c4]).trigger('change');
 
-        CONT(separar)
+        CONT()
     });
 
     var crearcartera = $('#crearcartera').DataTable({
@@ -6451,22 +6418,15 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         info: false,
         autoWidth: false,
         paging: false,
-        order: [[1, 'asc'], [2, 'asc']],
+        order: [[1, 'asc']],
         responsive: true,
-        columnDefs: [
-            { className: 'control', orderable: true, targets: 0 },
-            //{ "visible": false, "targets": 3 }
-            /*{ responsivePriority: 1, targets: [1, 2, 3, 4, 7] },
-            { responsivePriority: 2, targets: 5 },
-            { responsivePriority: 10003, targets: 6 },
-            { responsivePriority: 10002, targets: 8 }*/
-        ],
+        columnDefs: [{ className: 'control', orderable: true, targets: 0 }],
         drawCallback: function (settings) {
             var api = this.api();
             var rows = api.rows({ page: 'current' }).nodes();
             var last = null;
 
-            api.column(4, { page: 'current' }).data().each(function (group, i) {
+            api.column(3, { page: 'current' }).data().each(function (group, i) {
                 if (last !== group) {
                     $(rows).eq(i).before(
                         '<tr class="group"><td colspan="8">' + $(group).val() || group + '</td></tr>'
@@ -6489,20 +6449,21 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     crearcartera.on('click', 'tr a', function () {
         var fila = $(this).parents('tr');
         var tipo = fila.find(`.tipo`).val();
-        var id = fila.find(`.id`).val();
+        var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
+        var Fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
         crearcartera.row(fila).remove().draw(false);
-        var cuotai = $('#inicialcuotas').val() - 1;
-        var cuotaf = $('#financiacion').val() - 1;
-        eliminar += `& acion=eliminar & idcuota=${id}`;
-        tipo === 'INICIAL' ? $('#inicialcuotas').val(cuotai) : $('#financiacion').val(cuotaf);
-        if ($('#Separar').val()) {
-            CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1)
+        var cuotai = Math.sign($('#inicialcuotas').val() - 1) > 0 ? $('#inicialcuotas').val() - 1 : 0;
+        var cuotaf = Math.sign($('#financiacion').val() - 1) > 0 ? $('#financiacion').val() - 1 : 0;
+        if (tipo === 'INICIAL') {
+            $('#inicialcuotas').val(cuotai);
+            !cuotai && $('#Separar').val(Moneda(Ini));
         } else {
-            CONT(0, 1)
-        }
-    });
-    crearcartera.on('click', '.tabl .cuota', function () {
-        $(this).mask('#.##$', { reverse: true, selectOnFocus: true });
+            $('#financiacion').val(cuotaf);
+            !cuotaf && !cuotai ?
+                $('#Separar').val(Moneda(Ini + Fnc))
+                : !cuotaf ? $('#Separar').val(Moneda(Fnc)) : '';
+        };
+        CONT();
     });
     crearcartera.on('click', '.quitar', function () {
         if ($(this).html() === 'Quitar Bono') {
@@ -6517,11 +6478,12 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#ini').val($('#inicial').val())
             $('#fnc').val(Moneda(Math.round(to - inc)));
             $(this).html('Restablecer Bono');
-            if ($('#Separar').val()) {
+            CONT();
+            /* if ($('#Separar').val()) {
                 CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
             } else {
                 CONT(0, 1);
-            }
+            } */
         } else {
             $(this).html('Quitar Bono');
             var precio = parseFloat($('#total').cleanVal());
@@ -6537,20 +6499,20 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#destotal').val(Moneda(Math.round(precio)));
             $('#ini').val(Moneda(Math.round(inicial)))
             $('#fnc').val(Moneda(Math.round(precio - inicial)));
-            if ($('#Separar').val()) {
+            CONT();
+            /* if ($('#Separar').val()) {
                 CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
             } else {
                 CONT(0, 1);
-            }
+            } */
         }
     })
     crearcartera.on('click', '.guardar', function () {
-        $('#crearcartera').find('.id, .rcuota, .std, #ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial').prop('disabled', false);
+        $('#crearcartera').find('#ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial').prop('disabled', false);
         var datos = $('#crearcartera thead').find(`input, select`).serialize();
-        datos += '&' + crearcartera.$('input, select').serialize();
-        datos += eliminar;
-        crearcartera.$('.id, .rcuota, .std, #ini, #fnc, #total, #inicial').prop('disabled', true);
-        //console.log(datos) 
+        datos += '&' + crearcartera.$('input').serialize();
+        crearcartera.$('#ini, #fnc, #total, #inicial').prop('disabled', true);
+        //console.log(datos)
         $.ajax({
             type: 'POST',
             url: '/links/ordne',
@@ -6573,94 +6535,184 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             }
         })
     });
+    crearcartera.on('click', '.tabl .cuota', function () {
+        $(this).mask('#.##$', { reverse: true, selectOnFocus: true });
+    });
     crearcartera.on('change', '.tabl .cuota', function () {
+
         var fila = $(this).parents('tr');
         var tipo = fila.find(`.tipo`).val();
         var total = 0, valor = 0, num = 0;
-        var montorecibos = Montos || 0; //console.log(realcuotai, realcuotaf)
 
-        if (tipo === 'INICIAL') {
+        var TotalIni = parseFloat($('#ini').val().replace(/\./g, ''));
+        var TotalFnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+        var TotalSprc = parseFloat($('#Separar').val().replace(/\./g, ''));
+        var excedente = TotalSprc > TotalIni ? TotalSprc - TotalIni : 0;
+        var nu = $('#inicialcuotas').val();
+        var nf = $('#financiacion').val();
+        realcuotai = Math.round((TotalIni - TotalSprc) / nu);
+        realcuotaf = Math.round((TotalFnc - excedente) / nf);
+
+        if (tipo === 'SEPARACION') {
+            if (TotalSprc === (TotalIni + TotalFnc)) {
+                $('#crearcartera .tabl tr').filter((c, i) => {
+                    return $(i).find(`.tipo`).val() !== 'SEPARACION';
+                }).map((c, i) => {
+                    crearcartera.row(i).remove().draw(false);
+                });
+                nu = $('#inicialcuotas').val(0);
+                nf = $('#financiacion').val(0);
+            } else if (TotalSprc > (TotalIni + TotalFnc)) {
+                SMSj('info', 'No es posible agregar un valor mayor al del total del producto, se restableceran los valores predeterminados del producto');
+                TotalSprc = parseFloat($('#Separar').val('1.000.000').replace(/\./g, ''));
+                if (nu == 0) {
+                    nu = $('#inicialcuotas').val(1);
+                    FINANCIAR('INICIAL', 1, parseFloat(TotalSprc))
+                };
+                if (nf == 0) {
+                    nf = $('#financiacion').val(1);
+                    FINANCIAR('FINANCIACION', 1, parseFloat(TotalSprc))
+                }
+                if (nu != 0 && nf != 0) {
+                    CONT();
+                };
+
+            } else if (TotalSprc > TotalIni) {
+                $('#crearcartera .tabl tr').filter((c, i) => {
+                    return $(i).find(`.tipo`).val() === 'INICIAL';
+                }).map((c, i) => {
+                    crearcartera.row(i).remove().draw(false);
+                });
+                nu = $('#inicialcuotas').val(0);
+                nf < 1 ? FINANCIAR('FINANCIACION', 1, TotalSprc) : CONT();
+            } else {
+                if (nu == 0) {
+                    nu = $('#inicialcuotas').val(1);
+                    FINANCIAR('INICIAL', 1, TotalSprc)
+                };
+                if (nf == 0) {
+                    nf = $('#financiacion').val(1);
+                    FINANCIAR('FINANCIACION', 1, TotalSprc)
+                } else {
+                    CONT()
+                };
+            }
+        } else if (tipo === 'INICIAL') {
             $('#crearcartera .tabl tr').filter((c, i) => {
-                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
-                return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai;
+                var e = $(i).find(`.cuota`).val() === undefined ? 0 : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai && realcuotai > 0;
             }).map((c, i) => {
                 num = c + 1;
-                var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                var e = $(i).find(`.cuota`).val() === undefined ? 0 : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
                 valor += parseFloat(e);
-            })
+            });
+            var n = nu - num;
 
-            var n = $('#inicialcuotas').val() - num;
-            var ini = $('#ini').val().replace(/\./g, '');
-            total = ini - valor;
-            cuota = Math.round(total / n);
-            if (n > 0) {
+            if (valor === TotalIni - TotalSprc && n !== 0) {
+                var u = 1;
+                $('#crearcartera .tabl tr').filter((c, i) => {
+                    var e = $(i).find(`.cuota`).val() === undefined ? 0 : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                    return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) === realcuotai;
+                }).map((c, i) => {
+                    crearcartera.row(i).remove().draw(false);
+                });
+                $('#crearcartera .tabl tr').each((e, i) => {
+                    if ($(i).find(`.tipo`).val() === 'INICIAL') {
+                        $(i).find(`.n`).val(u++);
+                    }
+                });
+                realcuotai = (TotalIni - TotalSprc) / nu;
+
+            } else if (valor > TotalIni - TotalSprc) {
+                SMSj('info', 'No es posible agregar un valor mayor al de la cuota inicial, se restableceran los valores de la cuota inicial');
+                realcuotai = (TotalIni - TotalSprc) / nu;
+                var u = 1;
                 $('#crearcartera .tabl tr').each((e, i) => {
                     var tpo = $(i).find(`.tipo`).val()
                     if (tpo === 'INICIAL') {
-                        var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
-                        if (parseFloat(c) === realcuotai) {
-                            $(i).find(`.cuota`).val(Moneda(cuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-                        }
+                        $(i).find(`.n`).val(u++);
+                        $(i).find(`.cuota`).val(Moneda(realcuotai));
                     }
-                })
-            }
-            realcuotai = cuota;
+                });
+
+            } else {
+                total = TotalIni - TotalSprc - valor;
+                cuota = Math.round(total / n);
+                if (n > 0) {
+                    var u = 1;
+                    $('#crearcartera .tabl tr').each((e, i) => {
+                        var tpo = $(i).find(`.tipo`).val()
+                        if (tpo === 'INICIAL') {
+                            var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                            $(i).find(`.n`).val(u++);
+                            if (parseFloat(c) === realcuotai) {
+                                $(i).find(`.cuota`).val(Moneda(cuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
+                            }
+                        }
+                    })
+                }
+                realcuotai = cuota;
+            };
+
         } else if (tipo === 'FINANCIACION') {
             $('#crearcartera .tabl tr').filter((c, i) => {
                 var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
-                return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) !== realcuotaf;
+                return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) !== realcuotaf && realcuotaf > 0;
             }).map((c, i) => {
                 num = c + 1;
                 var e = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
                 valor += parseFloat(e);
-            })
+            });
+            var n = nf - num;
 
-            var n = $('#financiacion').val() - num;
-            var fnc = $('#fnc').val().replace(/\./g, '');
-            total = fnc - valor;
-            cuota = Math.round(total / n);
-            if (n > 0) {
+            if (valor === TotalFnc - excedente && n !== 0) {
+                var u = 1;
+                $('#crearcartera .tabl tr').filter((c, i) => {
+                    var e = $(i).find(`.cuota`).val() === undefined ? 0 : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                    return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) === realcuotaf;
+                }).map((c, i) => {
+                    crearcartera.row(i).remove().draw(false);
+                });
+                $('#crearcartera .tabl tr').each((e, i) => {
+                    if ($(i).find(`.tipo`).val() === 'FINANCIACION') {
+                        $(i).find(`.n`).val(u++);
+                    }
+                });
+                realcuotaf = valor / num;
+
+            } else if (valor > TotalFnc - excedente) {
+                SMSj('info', 'No es posible agregar un valor mayor al de la financiacion del producto, se restableceran los valores de la financiacion');
+                realcuotaf = (TotalFnc - excedente) / nf;
+                var u = 1;
                 $('#crearcartera .tabl tr').each((e, i) => {
                     var tpo = $(i).find(`.tipo`).val()
                     if (tpo === 'FINANCIACION') {
-                        var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
-                        if (parseFloat(c) === realcuotaf) {
-                            $(i).find(`.cuota`).val(Moneda(cuota));
-                        }
+                        $(i).find(`.n`).val(u++);
+                        $(i).find(`.cuota`).val(Moneda(realcuotaf));
                     }
-                })
-            }
-            realcuotaf = cuota;
-        }
-        $('#crearcartera .tabl tr').each((e, i) => {
-            var tpo = $(i).find(`.tipo`).val();
-            var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
-            if (montorecibos > 0 && tpo !== undefined) {
-                if (montorecibos >= cuota) {
-                    $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value = '13']`).attr("selected", true);
-                    montorecibos = montorecibos - cuota;
+                });
 
-                } else if (montorecibos < cuota) {
-                    $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value = '3']`).attr("selected", true);
-                    montorecibos = 0;
-                }
             } else {
-                $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value = '3']`).attr("selected", true);
-            }
-        })
-        //$(this).val(Moneda(estacuota))//.mask('#.##$', { reverse: true, selectOnFocus: true });
-    });
-    crearcartera.on('change', '#Separar', function () {
-        if ($(this).val().length > 3) {
-            CONT(parseFloat($(this).val().replace(/\./g, '')), 1)
-        } else {
-            $(this).val(0)
-            CONT(0, 1)
+                total = (TotalFnc - excedente) - valor;
+                cuota = Math.round(total / n);
+                if (n > 0) {
+                    var u = 1;
+                    $('#crearcartera .tabl tr').each((e, i) => {
+                        var tpo = $(i).find(`.tipo`).val()
+                        if (tpo === 'FINANCIACION') {
+                            var c = $(i).find(`.cuota`).val() === undefined ? '' : $(i).find(`.cuota`).val().length > 3 ? $(i).find(`.cuota`).val().replace(/\./g, '') : $(i).find(`.cuota`).val();
+                            $(i).find(`.n`).val(u++);
+                            if (parseFloat(c) === realcuotaf) {
+                                $(i).find(`.cuota`).val(Moneda(cuota))
+                            }
+                        }
+                    })
+                }
+                realcuotaf = cuota;
+            };
         }
-    })
+        $('#cuot').val(TotalSprc >= TotalIni + TotalFnc ? TotalSprc : realcuotaf);
+    });
     crearcartera.on('change', '.tabl .fecha', function () {
         var t = moment().format('YYYY-MM-DD')
         var fech = $(this).val() ? $(this).val() : t;
@@ -6677,65 +6729,59 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         })
     })
 
-    var CONT = (sepa, typo) => {
-        var p = sepa > 0 ? parseFloat(sepa) : 0
-        var ini = parseFloat($('#ini').val().replace(/\./g, '')) - p;
-        var fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+    var CONT = () => {
+        var Separacion = parseFloat($('#Separar').val().replace(/\./g, ''));
+        var totalCuotaInicial = parseFloat($('#ini').val().replace(/\./g, '')); // Total de la cuota inicial sin la separacion
+        var ini = Math.sign(totalCuotaInicial - Separacion) > 0 ? totalCuotaInicial - Separacion : 0;
+        var fnc = parseFloat($('#fnc').val().replace(/\./g, '')); // Total de la finaciacion del producto
         var ic = parseFloat($('#inicialcuotas').val());
         var fc = parseFloat($('#financiacion').val());
+        var excedente = 0;
+
         var cuotai = parseFloat(ini) / ic;
         var cuotaf = parseFloat(fnc) / fc;
-        var montorecibos = Montos || 0;
         var fecha = $('#crearcartera .tabl tr').find(`.fecha`)[0].value;
-        var n = 0, s;
-        $('#cuot').val(cuotaf);
-        if (ic === 0 && fc === 0) {
-            $('#Separar').val(Moneda(Math.round(ini + p + fnc)));
-            $('#cuot').val(0);
+        var n = 1, s, l = 1, k = 1;
+
+        if (Separacion >= totalCuotaInicial + fnc) {
+            ic = parseFloat($('#inicialcuotas').val(0));
+            fc = parseFloat($('#financiacion').val(0));
             cuotai = 0;
             cuotaf = 0;
-        } else if (ic === 0 && fc !== 0) {
-            $('#Separar').val(Moneda(Math.round(ini + p)));
+        } else if (Separacion === totalCuotaInicial) {
+            ic = parseFloat($('#inicialcuotas').val(0));
             cuotai = 0;
-        } else if (ic !== 0 && fc === 0) {
-            $('#Separar').val(Moneda(Math.round(p + fnc)));
-            $('#cuot').val(0);
-            cuotaf = 0;
+        } else if (Separacion > totalCuotaInicial) {
+            excedente = Separacion - totalCuotaInicial;
+            ic = parseFloat($('#inicialcuotas').val(0));
+            if (fc < 1) {
+                fc = 1;
+                parseFloat($('#financiacion').val(fc));
+            }
+            cuotaf = (fnc - excedente) / fc;
+            cuotai = 0;
         }
+
+        $('#cuot').val(cuotaf ? cuotaf : Separacion);
+
         $('#crearcartera .tabl tr').each((e, i) => {
             var fe = $(i).find(`.fecha`).val();
             var tpo = $(i).find(`.tipo`).val();
-            if (tpo === 'INICIAL' && typo) { // && typo === tpo 
-                $(i).find(`.n`).val(e - 2);
-                $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)))
+            if (tpo === 'INICIAL' && cuotai) {
+                $(i).find(`.n`).val(l++);
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotai)));
+                $(i).find(`.rcuota`).val(Moneda(Math.round(cuotai)));
             }
-            if (tpo === 'FINANCIACION' && typo) {// && typo === tpo
-                var co = parseFloat($('#inicialcuotas').val()) + 3;
-                $(i).find(`.n`).val(e - co)
-                $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)))
+            if (tpo === 'FINANCIACION' && cuotaf) {
+                $(i).find(`.n`).val(k++);
+                $(i).find(`.cuota`).val(Moneda(Math.round(cuotaf)));
+                $(i).find(`.rcuota`).val(Moneda(Math.round(cuotaf)));
             }
-            var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
-            if (montorecibos > 0 && tpo !== undefined) {
-                if (montorecibos >= cuota) {
-                    $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                    $(i).find(`.std option[value = '13']`).attr("selected", true);
-                    montorecibos = montorecibos - cuota;
-
-                } else if (montorecibos < cuota) {
-                    $(i).find(`.rcuota`).val(Moneda(Math.round(cuota - montorecibos)));
-                    $(i).find(`.std option[value = '3']`).attr("selected", true);
-                    montorecibos = 0;
-                }
-            } else {
-                $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
-                $(i).find(`.std option[value = '3']`).attr("selected", true);
-            } //console.log(fe !== undefined && typo && fe !== fecha, fe , typo, fecha, n)
-            if (fe !== undefined && typo && fe !== fecha) {
-                n++;
-                s = moment(fecha).add(n, 'month').format('YYYY-MM-DD')
+            if (fe !== undefined && fe !== fecha) {
+                s = moment(fecha).add(n++, 'month').format('YYYY-MM-DD')
                 $(i).find(`.fecha`).val(s);
             }
-        })
+        });
         realcuotai = Math.round(cuotai);
         realcuotaf = Math.round(cuotaf);
         $(".fecha").daterangepicker({
@@ -6764,37 +6810,27 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         if (!datos.length) {
             datos.push([
                 '',
-                `< input class= "text-center id" type = "text" name = "id" style = "width: 100%;" value = "0" disabled > `,
-                `< input class= "text-center fecha" type = "text" name = "fecha" style = "width: 100%;" required > `,
-                `< input class= "text-center n" type = "text" name = "n" style = "width: 100%;" value = "${cnt ? cnt : 1}" required > `,
-                `< input class= "text-center tipo" type = "hidden" name = "tipo" style = "width: 100%;" value = "SEPARACION" > `,
-                `< input class= "text-center cuota" type = "text" name = "cuota" id = "Separar" style = "width: 100%;" data - mask="000.000.000" data - mask - reverse="true" data - mask - selectonfocus="true" required > `,
-                `< input class= "text-center rcuota" type = "text" name = "rcuota" style = "width: 100%;" disabled > `,
-                `< select size = "1" class= "text-center std" name = "std" disabled >
-                <option value="3" selected="selected">Pendiente</option>
-                <option value="13">Pagada</option>
-                </select > `,
-                `< svg xmlns = "http://www.w3.org/2000/svg" width = "24" height = "24" viewBox = "0 0 24 24" fill = "none"
-        stroke = "currentColor" stroke - width="2" stroke - linecap="round" stroke - linejoin="round" class="feather feather-trash-2" >
+                `< input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
+                `< input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt != 0 && cnt ? cnt : 1}" required>`,
+                `< input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
+                `< input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" 
+                data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
+                `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                     <polyline points="3 6 5 6 21 6"></polyline>
                     <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                     <line x1="10" y1="11" x2="10" y2="17"></line>
                     <line x1="14" y1="11" x2="14" y2="17"></line>
-                </svg > `
+                </svg> `
             ])
         }
         tipo != 1 ? datos.push([
             '',
-            `<input class="text-center id" type="text" name="id" style="width: 100%;" value="0" disabled>`,
             `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+            `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt != 0 && cnt ? cnt : 1}" required>`,
             `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
-            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
-            `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
-            `<select size="1" class="text-center std" name="std" disabled>
-            <option value="3" selected="selected">Pendiente</option>
-            <option value="13">Pagada</option>
-            </select>`,
+            `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" 
+            data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
             `<a><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2">
                 <polyline points="3 6 5 6 21 6"></polyline>
@@ -6806,23 +6842,23 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         crearcartera.clear().draw(false);
         var dat = [];
         datos.filter((x, c) => {
-            return $(x[4]).val() === 'SEPARACION';
+            return $(x[3]).val() === 'SEPARACION';
         }).map((x, c) => {
             dat.push(x);
         })
         datos.filter((x, c) => {
-            return $(x[4]).val() === 'INICIAL';
+            return $(x[3]).val() === 'INICIAL';
         }).map((x, c) => {
             dat.push(x);
         })
         datos.filter((x, c) => {
-            return $(x[4]).val() === 'FINANCIACION';
+            return $(x[3]).val() === 'FINANCIACION';
         }).map((x, c) => {
             dat.push(x);
-        })
-        crearcartera.rows.add(dat).draw(false);
+        });
+        crearcartera.rows.add(dat).draw(false).columns.adjust().responsive.recalc();
         separ ? $('#Separar').val(Moneda(separ)) : '';
-        CONT(separ, tipo);
+        CONT();
     }
 
 }

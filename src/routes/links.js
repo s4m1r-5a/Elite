@@ -25,6 +25,7 @@ const {
     tasaUsura, FacturaDeCobro,
     consultarDocumentos, EstadoDeCuenta
 } = require('../functions.js');
+const { Console } = require('console');
 //DELETE
 
 const transpoter = nodemailer.createTransport({
@@ -3144,14 +3145,17 @@ router.post('/ordn/:id', noExterno, async (req, res) => {
     res.send(body);
 })
 router.post('/ordne/', noExterno, async (req, res) => {
-    const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, idcuota, porcentage, inicial,
-        xcntag, ahorro, inicialcuotas, financiacion, id, fecha, n, tipo, mtr2, total, lote,
-        cuota, rcuota, std, preventa, uno, dos, tres, directa, otro, valmtr2 } = req.body;
+    const { cuot, idbono, lt, asesor, clientes, vmtr2, promesa, porcentage, inicial,
+        xcntag, ahorro, inicialcuotas, financiacion, fecha, n, tipo, mtr2, total,
+        cuota, preventa, uno, dos, tres, directa, otro, valmtr2 } = req.body;
 
+    console.log(req.body, cuota[0].replace(/\./g, ''), cuot)
     var vr = parseFloat(vmtr2.replace(/\./g, ''));
     var ini = parseFloat(inicial.replace(/\./g, ''));
     var tot = parseFloat(total.replace(/\./g, ''));
     var ahorr = ahorro ? parseFloat(ahorro.replace(/\./g, '')) : 0;
+
+    // ESTABLECIENDO NUEVOS PARAMETROS
     var orden = {
         'p.lote': lt, 'p.vrmt2': vr,
         'p.cliente': Array.isArray(clientes) ? clientes[0] : clientes,
@@ -3159,7 +3163,7 @@ router.post('/ordne/', noExterno, async (req, res) => {
         'p.cupon': idbono ? idbono : 1,
         'p.inicialdiferida': inicialcuotas,
         'p.ahorro': ahorr,
-        'p.separar': rcuota[0].replace(/\./g, ''),
+        'p.separar': Array.isArray(n) ? cuota[0].replace(/\./g, '') : cuota.replace(/\./g, ''),
         'p.iniciar': xcntag, 'p.cuot': Math.round(cuot)
     }
     if (otro) {
@@ -3202,45 +3206,29 @@ router.post('/ordne/', noExterno, async (req, res) => {
                 break;
         }
     }
+    // ACTUALIZANDO EL PRODUCTO Y LA ORDEN DE SEPARACION
     await pool.query(`UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`, [orden, preventa]);
     await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE orden = ?`, preventa);
+
+    // BUSCANDO LAS COMICIONES ANTES GENERADAS
     const comisiones = await pool.query(`SELECT * FROM solicitudes WHERE descp != 'SEPARACION' 
     AND concepto IN('COMISION DIRECTA', 'COMISION INDIRECTA') AND orden = ?`, preventa);
-    //`UPDATE preventa SET ? WHERE id = ?`
 
-    var ID = '', kuotas = 'UPDATE cuotas SET cuota = CASE id ',
-        numeros = '', rkuotas = '', fechas = '', stds = '', kuot = false;
+    // ELIMINACION DE EL PLAN DE FINACIACION
+    await pool.query('DELETE FROM cuotas WHERE separacion = ?', preventa);
+
+    // INSERTANDO EL NUEVO PLAN DE FINANCIACION
     var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
-
-    id.map((c, i) => {
-        if (c == '0') {
-            kuot = true;
-            cuotas += `(${preventa}, '${tipo[i]}', ${n[i]}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[i].replace(/\./g, '')}),`;
-        } else {
-            ID += c + ', ';
-            kuotas += ' WHEN ' + c + ' THEN ' + rcuota[i].replace(/\./g, '');
-            numeros += ' WHEN ' + c + ' THEN ' + n[i];
-            rkuotas += ' WHEN ' + c + ' THEN ' + cuota[i].replace(/\./g, '');
-            fechas += ' WHEN ' + c + ' THEN ' + `'${fecha[i]}'`;
-            stds += ' WHEN ' + c + ' THEN ' + std[i];
-        }
-    });
-    ID = ID.slice(0, -2);
-    kuotas += ' END, ncuota = CASE id ' + numeros + ' END, proyeccion = CASE id ' + rkuotas + ' END, fechs = CASE id ' + fechas + ' END, estado = CASE id ' + stds + ' END WHERE id IN(' + ID + ')';
-
-    var eli = 'DELETE FROM cuotas WHERE ';
-    if (Array.isArray(idcuota)) {
-        idcuota.map((c, i) => {
-            i === 0 ? eli += 'id IN(' + c + ', ' : eli += c + ', ';
+    if (Array.isArray(n)) {
+        n.map((c, i) => {
+            cuotas += `(${preventa}, '${tipo[i]}', ${c}, '${fecha[i]}', ${cuota[i].replace(/\./g, '')}, 3, ${cuota[i].replace(/\./g, '')}),`;
         });
-        eli = eli.slice(0, -2) + ')';
     } else {
-        eli += 'id = ' + idcuota;
+        cuotas += `(${preventa}, '${tipo}', ${n}, '${fecha}', ${cuota.replace(/\./g, '')}, 3, ${cuota.replace(/\./g, '')}),`;
     }
-    //console.log(req.body, kuotas, cuotas, orden, eli, idcuota ? idcuota : 'nada')
-    await pool.query(kuotas);
-    kuot ? await pool.query(cuotas.slice(0, -1)) : '';
-    idcuota ? await pool.query(eli) : '';
+    await pool.query(cuotas.slice(0, -1));
+
+    // CAMBIAR LOS ESTADO DE COMISIONES EN EL NUEVO PRODUCTO (ESTO SE DA SI CAMBIAN EL LOTE)
     if (otro) {
         const r = await Estados(preventa);
         var estado = r.pendients ? 8 : r.std
@@ -3251,6 +3239,8 @@ router.post('/ordne/', noExterno, async (req, res) => {
         ip += 'estado = ' + estado + ', mtr = ' + vr + ', valor = ' + tot + ', inicial = ' + ini;
         await pool.query(`UPDATE productosd SET ${ip} WHERE id = ?`, lt);
     }
+
+    //CAMBIAR LOS VALORES DE LAS COMICIONES GENERADAS SI EL VALOR DEL PRODUCTO VARIA
     var ttt = tot - ahorr;
     if (comisiones.length > 0) {
         comisiones.filter((x) => {
@@ -3263,8 +3253,7 @@ router.post('/ordne/', noExterno, async (req, res) => {
             var h = { monto, total: ttt, retefuente, reteica, pagar };
             pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [h, x.ids]);
         })
-    }
-
+    };
     res.send(true);
 })
 router.post('/separacion/:id', noExterno, async (req, res) => {
