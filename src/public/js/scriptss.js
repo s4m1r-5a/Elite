@@ -6451,18 +6451,28 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         var tipo = fila.find(`.tipo`).val();
         var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
         var Fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
-        crearcartera.row(fila).remove().draw(false);
-        var cuotai = Math.sign($('#inicialcuotas').val() - 1) > 0 ? $('#inicialcuotas').val() - 1 : 0;
-        var cuotaf = Math.sign($('#financiacion').val() - 1) > 0 ? $('#financiacion').val() - 1 : 0;
+        var ni = parseFloat($('#inicialcuotas').val());
+        var nf = parseFloat($('#financiacion').val());
+
+
         if (tipo === 'INICIAL') {
-            $('#inicialcuotas').val(cuotai);
-            !cuotai && $('#Separar').val(Moneda(Ini));
-        } else {
-            $('#financiacion').val(cuotaf);
-            !cuotaf && !cuotai ?
-                $('#Separar').val(Moneda(Ini + Fnc))
-                : !cuotaf ? $('#Separar').val(Moneda(Fnc)) : '';
+            ni = Math.sign(ni - 1) < 1 ? 0 : ni - 1;
+            $('#inicialcuotas').val(ni);
+        } else if (tipo === 'FINANCIACION') {
+            nf = Math.sign(nf - 1) < 1 ? 0 : nf - 1;
+            $('#financiacion').val(nf);
         };
+
+        if (!nf && !ni) {
+            $('#Separar').val(Moneda(Ini + Fnc));
+        } else if (!ni) {
+            $('#Separar').val(Moneda(Ini));
+        } else if (!nf) {            
+            $('#financiacion').val(1);
+            SMSj('info', 'No es posible eliminar toda la finaciacion sin antes eliminar toda la inicial');
+            return
+        }
+        crearcartera.row(fila).remove().draw(false);
         CONT();
     });
     crearcartera.on('click', '.quitar', function () {
