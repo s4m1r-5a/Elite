@@ -1,6 +1,7 @@
 const express = require('express');
 const morgan = require('morgan');
 const path = require('path');
+require('dotenv').config();
 const exphbs = require('express-handlebars');
 const session = require('express-session');
 const validator = require('express-validator');
@@ -40,7 +41,7 @@ const app = express();
 require('./lib/passport');
 
 // Settings
-app.set('port', process.env.PORT || 5000);
+app.set('port', process.env.PORT);
 app.set('views', path.join(__dirname, 'views'));
 app.engine('.hbs', exphbs({
   defaultLayout: 'main',

@@ -1,26 +1,12 @@
+require('dotenv').config();
 module.exports = {
-    database0: {
-        connectionLimit: 1000,
-        host: '96.43.143.58',
-        user: 'admin',
-        password: 'C0l0mb1@',
-        database: 'pElite',
-        port: 3306
-    },
     database: {
         connectionLimit: 1000,
-        host: '96.43.143.58',
-        user: 'admin',
-        password: 'C0l0mb1@',
-        database: 'elite',
-        port: 3306
-    },
-    database2: {
-        connectionLimit: 1000,
-        host: 'localhost',
-        user: 'samir',
-        password: 'Abcd1234@',
-        database: 'elite'
+        host: process.env.BD_HOST,
+        user: process.env.BD_USER,
+        password: process.env.BD_PASSWORD,
+        database: process.env.DATABASE,
+        port: process.env.BD_PORT
     },
     registro: {
         pin: 'hola'
@@ -55,7 +41,7 @@ module.exports = {
         client_id: '507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com',
         redirect_uris: 'http://localhost:5000/contactos'
     }
-};
+}; 
 /* Configurar Analytics Ads en tu sitio web
 Para conectar Google Analytics con tu sitio web, elige el método que corresponda de entre los siguientes:
 Opción 1: Añadir un ID de seguimiento a través de tu servicio de alojamiento o plataforma de comercio electrónico
