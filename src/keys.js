@@ -55,7 +55,7 @@ module.exports = {
         client_id: '507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com',
         redirect_uris: 'http://localhost:5000/contactos'
     }
-};
+}; //gdhghdghdghdgdh 
 /* Configurar Analytics Ads en tu sitio web
 Para conectar Google Analytics con tu sitio web, elige el método que corresponda de entre los siguientes:
 Opción 1: Añadir un ID de seguimiento a través de tu servicio de alojamiento o plataforma de comercio electrónico
