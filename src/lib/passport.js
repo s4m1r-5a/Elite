@@ -127,9 +127,8 @@ passport.serializeUser((user, done) => {
   done(null, user.id);
 });
 passport.deserializeUser(async (id, done) => {
-  const rows = await pool.query(`SELECT u.*, r.rango, p.admin, p.subadmin, p.contador, p.financiero, 
-  p.auxicontbl, p.asistente, p.externo, e.* FROM users u INNER JOIN rangos r ON u.nrango = r.id 
-  INNER JOIN pines p ON p.id = u.pin INNER JOIN empresa e WHERE u.id = ?`, id);
+  const rows = await pool.query(`SELECT u.*, r.rango, p.admin, p.subadmin, p.contador, p.financiero, p.auxicontbl, p.asistente, 
+  p.externo FROM users u INNER JOIN rangos r ON u.nrango = r.id INNER JOIN pines p ON p.id = u.pin WHERE u.id = ?`, id); 
   done(null, rows[0]);
 });
 function regiId(chars = "01234567890", lon = 20) {

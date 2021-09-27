@@ -2902,7 +2902,7 @@ router.post('/orden', noExterno, async (req, res) => {
     const { numerocuotaspryecto, extraordinariameses, lote, client, ahora, cuot,
         cuotaextraordinaria, cupon, inicialdiferida, ahorro, fecha, cuota, tipod,
         estado, ncuota, tipo, obsevacion, separacion, extran, vrmt2, iniciar } = req.body;
-    console.log(req.body)
+    //console.log(req.body)
     const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
     if (!fp.length) {
         req.flash('error', 'Separación no realizada ya existe una orden con este lote');

@@ -58,6 +58,10 @@ router.post('/webhook', async function (req, res) {
 
         if (messages[i].fromMe || /@g.us/.test(chatId)) return;
 
+        const textFaltanteDelMenu = `
+_~*5* - Auditar producto~_
+_~*6* - Actualizar datos de contacto~_
+_~*8* - Agendar llamada o cita~_`;
         const text = `_🤖 *¡Hola!* Soy *Ana* el Asistente de *RedElite* creado para ofrecerte mayor facilidad de procesos_
     
         ➖➖➖➖➖➖➖
@@ -69,11 +73,8 @@ _😮 (Para seleccionar la opción deseada, simplemente envíame el *número* qu
 _*1* - Estado de cuenta_
 _*2* - Enviar recibo(s) de caja_
 _*3* - Realizar pago o abono_
-_*4* - Conocer mi saldo a la fecha_
-_~*5* - Auditar producto~_
-_~*6* - Actualizar datos de contacto~_    
+_*4* - Conocer mi saldo a la fecha_ 
 _*7* - Chatear con una persona_
-_~*8* - Agendar llamada o cita~_
          
 _Empieza a probar, estoy esperando 👀_
          
@@ -83,6 +84,18 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
             await apiChatApi('message', { chatId: chatId, body: `👋🏼  _*¡bey!* fue un placer servirte, estaré atenta para cuando necesites_` });
         } else if (body == 1) {
             await apiChatApi('message', { chatId: chatId, body: `🕜⚡ _*Espera* un momento mientras *respondemos* a tu *solicitud*_` });
+
+            const orden = await pool.query(`SELECT p.id FROM preventa p 
+            INNER JOIN clientes c ON p.cliente = c.idc 
+            LEFT JOIN clientes c2 ON p.cliente2 = c2.idc 
+            LEFT JOIN clientes c3 ON p.cliente3 = c3.idc 
+            LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+            WHERE p.tipobsevacion IS NULL 
+            AND (c.movil LIKE '%${cel}%' OR c.code LIKE '%${cel}%'
+            OR c2.movil LIKE '%${cel}%' OR c2.code LIKE '%${cel}%'
+            OR c3.movil LIKE '%${cel}%' OR c3.code LIKE '%${cel}%'
+            OR c4.movil LIKE '%${cel}%' OR c4.code LIKE '%${cel}%')`);
+            
             const res = await EstadoCuenta(chatId.replace('@c.us', ''), senderName, author);
             if (res.sent) {
                 await apiChatApi('message', { chatId: chatId, body: `😃 _Tú solicitud fue procesada exitosamente._\n\n_Te la enviamos también al correo que diste al momento de tu registro_ 👊🤝 🕜\n\nEnvíanos la opción de tu preferencia 🤔🤔 👇🏼\n \n# - *_Volver al menú principal_*\n5 - *_Auditar los pagos_*\n0 - *_Salir_*` });
@@ -134,6 +147,7 @@ _Siempre que lo desees puedes volver al *menú principal*. 🔙 Enviándome *"#"
             OR c2.movil LIKE '%${cel}%' OR c2.code LIKE '%${cel}%' OR c2.nombre = '${senderName}'
             OR c3.movil LIKE '%${cel}%' OR c3.code LIKE '%${cel}%' OR c3.nombre = '${senderName}'
             OR c4.movil LIKE '%${cel}%' OR c4.code LIKE '%${cel}%' OR c4.nombre = '${senderName}')`);
+
             if (recibos.length) {
                 let saldo = 0;
                 recibos.map((e, i) => {
@@ -634,7 +648,7 @@ async function PagosAbonos(Tid, user) {
 
                 EnviarWTSAP(S.movil, bodi);
             };
-            
+
         } else {
             return false
         }
