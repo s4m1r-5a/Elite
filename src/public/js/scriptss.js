@@ -176,23 +176,49 @@ $(".fechas").daterangepicker({
 
 var $validationForm = $("#smartwizard-arrows-primary");
 $validationForm.smartWizard({
-    theme: "arrows",
-    showStepURLhash: false,
-    lang: {// Variables del lenguaje
-        next: 'Siguiente',
-        previous: 'Atras'
+    /*showStepURLhash: false,
+        useURLhash: false,*/
+    selected: 0, // Paso inicial seleccionado, 0 - primer paso
+    theme: 'dots', //'arrows''default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+    justified: true, // Justificación del menú Nav.
+    darkMode: false, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+    autoAdjustHeight: false, // Ajustar automáticamente la altura del contenido
+    cycleSteps: false, // Permite recorrer los pasos
+    backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
+    enableURLhash: false, // Habilitar la selección del paso basado en el hash url
+    transition: {
+        animation: 'slide-swing', // Efecto en la navegación, /none/fade/slide-horizontal/slide-vertical/slide-swing
+        speed: '400',  // Velocidad de animación Transion
+        easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
     },
     toolbarSettings: {
-        toolbarPosition: 'bottom', // none, top, bottom, both
-        toolbarButtonPosition: 'right', // left, right
+        toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos - none, top, bottom, both
+        toolbarButtonPosition: 'center', // izquierda, derecha, centro - left, right, center
         showNextButton: true, // show/hide a Next button
-        showPreviousButton: false // show/hide a Previous button
-        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")]
+        showPreviousButton: false, // show/hide a Previous button
+        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
     },
-    autoAdjustHeight: false,
-    backButtonSupport: false,
-    useURLhash: false
-}).on("leaveStep", () => {
+    anchorSettings: {
+        anchorClickable: true, // Activar/Desactivar la navegación del ancla
+        enableAllAnchors: false, // Activa todos los anclajes en los que se puede hacer clic todas las veces
+        markDoneStep: true, // Añadir estado hecho en la navegación
+        markAllPreviousStepsAsDone: true, // Cuando un paso seleccionado por url hash, todos los pasos anteriores se marcan hecho
+        removeDoneStepOnNavigateBack: false, // Mientras navega hacia atrás paso después de paso activo se borrará
+        enableAnchorOnDoneStep: true // Habilitar/Deshabilitar los pasos de navegación
+    },
+    keyboardSettings: {
+        keyNavigation: true, // Activar/Desactivar la navegación del teclado (las teclas izquierda y derecha se utilizan si está habilitada)
+        keyLeft: [37], // Código de tecla izquierdo
+        keyRight: [39] // Código de tecla derecha
+    },
+    lang: { //   Variables de idioma para el botón
+        next: 'Siguiente',
+        previous: 'Anterior'
+    },
+    disabledSteps: [], // Pasos de matriz desactivados
+    errorSteps: [], // Paso de resaltado con errores
+    hiddenSteps: [] // Pasos ocultos
+}).on("leaveStep", (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
     //$('.h').attr("disabled", false);
     //return true
     var fd = $('form').serialize();
@@ -6467,7 +6493,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#Separar').val(Moneda(Ini + Fnc));
         } else if (!ni) {
             $('#Separar').val(Moneda(Ini));
-        } else if (!nf) {            
+        } else if (!nf) {
             $('#financiacion').val(1);
             SMSj('info', 'No es posible eliminar toda la finaciacion sin antes eliminar toda la inicial');
             return
@@ -7016,29 +7042,29 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
     });
 
     $(document).ready(function () {
-        var g = $('#fechaFactura').text();
+        var g = $('#fechaOrden').text();
         var j = $('#fechaFactura').html();
         $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'));
-        $('#fechaOrden').html('..............................' + moment(j).format('YYYY-MM-DD'));
+        $('#fechaOrden').html(moment(g).format('YYYY-MM-DD'));
         $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())));
         var totalp = Moneda($('.totalp').html());
         var m2 = Moneda($('.m2').html());
-        var totali = Moneda($('.totali').html());
+        var inini = parseFloat($('.inini').html());
         var ahorro = Moneda($('.ahorro').html());
-        var extrao = Moneda($('.extrao').html());
         var separar = Moneda($('.separar').html());
-        var cuota = Moneda($('#cuota').html());
         var total = parseFloat($('.totalp').html()) - parseFloat($('.ahorro').html());
         var saldot = total - parseFloat($('#saldofecha').val());
+        var totali = Moneda(total * inini / 100); 
+        var imgs = $('#imgss').val() || '/img/avatars/avatar1.svg';
+        $('#imgs').prop('src', imgs);
         $('.totalote').html('$' + Moneda(total));
         $('.saldofecha').html('$' + Moneda(saldot));
-        $('.totalp').html('Valor $' + totalp);
+        $('.inini').html(inini + '%');
+        $('.totalp').html('$' + totalp);
         $('.m2').text('$' + m2);
-        $('.totali').html('Total inicial $' + totali);
+        $('.totali').html('$' + totali);
         $('.ahorro').html('$' + ahorro);
-        $('.extrao').html('$' + extrao);
         $('.separar').html('$' + separar);
-        $('#cuota').html('$' + cuota);
 
         $('#option1').click(function () {
             col = 8;

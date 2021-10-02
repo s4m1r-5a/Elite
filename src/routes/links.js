@@ -98,6 +98,16 @@ END:VCARD*/
 // DELETE u FROM users u LEFT JOIN preventa p ON u.id = p.asesor WHERE p.asesor IS NULL
 
 
+////////////////* RELACION DE PAGOS Y EXTRACTOS */////////////////////////
+/* `SELECT s.ids id, s.fech fechadepago, d.proyect proyecto, l.mz mz, l.n lt, c.nombre cliente, 
+c.documento, s.monto, s.recibo, s.descp, e.id, e.date fechaRecibo, e.description, e.lugar, 
+e.consignado FROM solicitudes s INNER JOIN extrabanco e ON s.extrato = e.id 
+INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id 
+INNER JOIN productos d ON l.producto = d.id INNER JOIN clientes c ON p.cliente = c.idc 
+WHERE e.date >= '2020-05-01' ORDER BY e.date` */
+
+
+
 ////////////////* COMISIONES DE GRUPO ELITE *////////////////////////////
 var lm = `SELECT p.id, d.proyect proyecto, p.fecha, l.mz, l.n lt, l.mtr2, l.mtr, l.valor, e.pin, e.descuento, p.ahorro, l.valor - p.ahorro Total, p.status, l.estado,
 
@@ -5783,7 +5793,7 @@ async function Desendentes(pin, stados, pasado) {
         OR (l.dos IS NULL AND s.descp = 'SEGUNDA LINEA') 
         OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
         AND s.descp != 'SEPARACION'`);
-
+    console.log(pin)
     const asesor = await pool.query(`SELECT p.*, u.*, r.*, u1.nrango papa, u2.nrango abue, u3.nrango bisab     
         FROM pines p INNER JOIN users u ON p.acreedor = u.id             
         INNER JOIN rangos r ON u.nrango = r.id    
@@ -5794,7 +5804,8 @@ async function Desendentes(pin, stados, pasado) {
         LEFT JOIN users u3 ON p2.usuario = u3.id
         WHERE u.id =  ? LIMIT 1`, pin);
 
-    var j = asesor[0]
+    var j = asesor[0];
+
     if (j.sucursal) {
         const directas = await pool.query(`SELECT p0.usuario papa, p0.sucursal sp, p1.usuario abuelo, 
             p1.sucursal sa, p2.usuario bisabuelo, p2.sucursal sb, u.sucursal, 

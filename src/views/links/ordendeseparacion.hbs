@@ -26,137 +26,152 @@
             <small class="text-muted">Asesor </small><span class="badge badge-dark text-md-center">{{fullname}}</span>
         </div>
         <div class="card-body">
-            <div class="row" id="encabezado">
-                <div class="col-sm-5">
-                    <div class="row no-gutters">
-                        <div class="col-md-3">
-                            <img src="/img/avatars/avatar.svg" class="card-img" alt="...">
-                        </div>
-                        <div class="col-md-9">
-                            <div class="card-body text-primary h4">
-                                <div class="mb-0 float-right">
-                                    <span class="align-middle text-dark">.......................901311748-3
-                                        Nit</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="phone-call"></i>
-                                    <span class="align-middle card-text">+57 300-775-3983</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="mail"></i>
-                                    <span class="align-middle card-text">info@grupoelitered.com.co</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="globe"></i>
-                                    <span class="align-middle card-text">www.grupoelitered.com.co</span>
-                                </div>
-                                <p class="card-text"><small class="text-muted">Barrio la Granja mz L lote 17
-                                        esquina</small>
-                                </p>
+
+            <div class="card-deck mb-1" id="encabezado">
+                <div class="card">
+                    <div class="card-body">
+                        <div class="row no-gutters">
+                            <div class="col-md-4"> 
+                                <img src="{{imagenes}}" id="imgs" class="card-img" alt="..."
+                                    style="background-size: cover;  background-position: 30% 30%;  width: 90%;  height: 90%;">
+                            </div>
+                            <div class="col-md-8">
+                                <ul class="list-group list-group-flush text-primary">
+                                    <li class="list-group-item py-1">
+                                        <span class="float-right">901311748-3 Nit</span>
+                                    </li>
+                                    <li class="list-group-item py-1">
+                                        <i class="mr-1" data-feather="phone-call"></i>
+                                        <span>+57 300-285-1046</span>
+                                    </li>
+                                    <li class="list-group-item py-1">
+                                        <i class="text-primary mr-1" data-feather="mail"></i>
+                                        <span>info@grupoelitefincaraiz.co</span>
+                                    </li>
+                                    <li class="list-group-item py-1">
+                                        <i class="mr-1" data-feather="globe"></i>
+                                        <span>www.grupoelitefincaraiz.co</span>
+                                    </li>
+                                    <li class="list-group-item py-0">
+                                        <small class="text-muted float-right">Barrio la Granja mz L lote 17
+                                            esquina</small>
+                                    </li>
+                                </ul>
                             </div>
                         </div>
                     </div>
                 </div>
-                <div class="col-sm-7">
-                    <div class="row no-gutters">
-                        <div class="col-md-6">
-                            <div class="card-body text-primary h4">
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="user"></i>
-                                    <span class="align-middle card-text text-warning">{{nombre}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="heart"></i> <span
-                                        class="align-middle card-text">{{estadocivil}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="phone-call"></i>
-                                    <span class="align-middle card-text">{{movil}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="mail"></i>
-                                    <small class="align-middle card-text">{{email}}</small>
-                                </div>
-                                <!--<div class="mb-0">
-                                        <i class="align-middle mr-1" data-feather="map"></i>
-                                        <span class="align-middle text-muted">{{direccion}}</span>
-                                    </div>-->
-                                <p class="card-text"><small class="text-muted">{{direccion}}</small></p>
-                            </div>
-                        </div>
-                        <div class="col-md-6">
-                            <div class="card-body text-primary h4">
-                                <div class="mb-0 float-right">
-                                    <span class="align-middle text-dark" id="fechaOrden">{{fecha}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="credit-card"></i>
-                                    <span class="align-middle card-text">CC:</span>
-                                    <span class="align-middle text-muted">{{documento}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="calendar"></i>
-                                    <span class="align-middle card-text">Fec.Nac:</span>
-                                    <span class="align-middle text-muted">{{fechanacimiento}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="calendar"></i>
-                                    <span class="align-middle card-text">Expedida:</span>
-                                    <span class="align-middle text-muted">{{fechaexpedicion}}</span>
-                                </div>
-                                <div class="mb-0">
-                                    <i class="align-middle mr-1" data-feather="map-pin"></i>
-                                    <span class="align-middle card-text">Expedida en:</span>
-                                    <span class="align-middle text-muted">{{lugarexpedicion}}</span>
-                                </div>
-                            </div>
-                        </div>
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item py-1">
+                                <i class="align-middle mr-1" data-feather="user"></i>
+                                <span class="text-warning">{{nombre}}</span>
+                                <small class="text-muted float-right" id="fechaOrden">{{fecha}}</small>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="align-middle mr-1" data-feather="credit-card"></i>
+                                <span class="align-middle card-text">CC:</span>
+                                <span class="text-dark">{{documento}}</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="align-middle mr-1" data-feather="phone-call"></i>
+                                <span class="text-primary">{{movil}}</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="align-middle mr-1" data-feather="mail"></i>
+                                <span class="text-primary">{{email}}</span>
+                            </li>
+                            <li class="list-group-item py-0">
+                                <small class="text-muted float-right">{{direccion}}</small>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
-            <div class="row" id="cliente1">
-                <div class="col-12">
-                    <i class="feather-md" data-feather="user"></i>
-                    Proyecto: <span class="badge badge-dark text-md-center ml-1 mr-5">{{proyect}}</span>
-                    Mz: <span class="badge badge-dark text-md-center ml-1 mr-5">{{mz}}</span>
-                    Lote: <span class="badge badge-dark text-md-center ml-1 mr-5">{{n}}</span>
-                    Mtr²: <span class="badge badge-dark text-md-center ml-1 mr-5">{{mtr2}}</span>
-                    Vr mtr²: <span class="badge badge-dark text-md-center ml-1 m2">{{vrmt2}}</span>
-                    <strong class="float-right totalp">{{valor}}</strong>
-                    <hr class="m-1" />
+
+            <div class="card-group" id="cliente1">
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item py-1">
+                                Proyecto: <span class="badge badge-dark text-md-center float-right">{{proyect}}</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <div class="row">
+                                    <div class="col-6">Mz:
+                                        <span class="badge badge-dark text-md-center float-right">{{mz}}</span>
+                                    </div>
+                                    <div class="col-6">Lt:
+                                        <span class="badge badge-dark text-md-center float-right">{{n}}</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <div class="row">
+                                    <div class="col-6">Mt²:
+                                        <span class="badge badge-dark text-md-center float-right">{{mtr2}}</span>
+                                    </div>
+                                    <div class="col-6">Vrmt²:
+                                        <span class="badge badge-dark text-md-center float-right m2">{{vrmt2}}</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="text-success" data-feather="dollar-sign"></i>
+                                <span>Total:</span>
+                                <span class="badge badge-success text-md-center float-right totalote"></span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <i class="feather-md" data-feather="user"></i>
-                    Descuento: <span class="badge badge-dark text-md-center ml-1 mr-7">{{descuento}}%</span>
-                    Cupon Dto: <span class="badge badge-dark text-md-center ml-1 mr-7">{{pin}}</span>
-                    Ahorro: <span class="badge badge-dark text-md-center ml-1 mr-7 ahorro">{{ahorro}}</span>
-                    <strong class="float-right totalote"></strong>
-                    <span class="float-right mr-2">Total lote: </span>
-                    <hr class="m-1" />
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item py-1">
+                                Descuento: <span
+                                    class="badge badge-dark text-md-center float-right">{{descuento}}%</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                Cupon: <span class="badge badge-dark text-md-center float-right">{{pin}}</span>
+                            </li>
+                            <li class="list-group-item py-1">Ahorro:
+                                <span class="badge badge-dark text-md-center float-right ahorro">{{ahorro}}</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="text-success" data-feather="dollar-sign"></i>
+                                <span>Inicial:</span>
+                                <span class="badge badge-success text-md-center float-right totali">{{inicial}}</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
-                <div class="col-12">
-                    <i class="feather-md" data-feather="user"></i>
-                    Financiación Pryt: <span
-                        class="badge badge-dark text-md-center ml-1 mr-5">{{numerocuotaspryecto}}</span>
-                    <input type="hidden" id="numerocuotaspryecto" value="{{numerocuotaspryecto}}">
-                    Cuotas: <span id="cuota" class="badge badge-dark text-md-center ml-1 mr-6">{{cuot}}</span>
-                    Cuota inicial: <span class="badge badge-dark text-md-center ml-1 mr-6">{{iniciar}}%</span>
-                    Inicial diferida: <span class="badge badge-dark text-md-center ml-1">{{inicialdiferida}}
-                        mes(es)</span>
-                    <strong class="float-right totali">{{inicial}}</strong>
-                    <input type="hidden" id="inicialdiferida" value="{{inicialdiferida}}">
-                    <hr class="m-1" />
-                </div>
-                <div class="col-12">
-                    <i class="feather-md" data-feather="user"></i>
-                    Cuotas Extraordinarias: <span class="badge badge-dark text-md-center ml-1 mr-7">{{extran}}</span>
-                    Mes(es): <span id="cuota" class="badge badge-dark text-md-center ml-1 mr-7">jun & dic</span>
-                    Cuota: <span class="badge badge-dark text-md-center ml-1 mr-7 extrao">{{cuotaextraordinaria}}</span>
-                    <strong class="float-right separar">{{separar}}</strong>
-                    <span class="float-right mr-2">Separacion: </span>
-                    <hr class="m-1" />
+                <div class="card">
+                    <div class="card-body">
+                        <ul class="list-group list-group-flush">
+                            <li class="list-group-item py-1">Valor lote:
+                                <span class="badge badge-dark text-md-center float-right totalp">{{valor}}</span>
+                            </li>
+                            <li class="list-group-item py-1">Cuota inicial:
+                                <span class="badge badge-dark text-md-center float-right inini">{{iniciar}}</span>
+                            </li>
+                            <li class="list-group-item py-1">Financiación:
+                                <span class="badge badge-dark text-md-center float-right">{{numerocuotaspryecto}}</span>
+                            </li>
+                            <li class="list-group-item py-1">
+                                <i class="text-success" data-feather="dollar-sign"></i>
+                                <span>Separacion:</span>
+                                <span class="badge badge-success text-md-center float-right separar">{{separar}}</span>
+                            </li>
+                        </ul>
+                    </div>
                 </div>
             </div>
+
+            <input type="hidden" id="imgss" value="{{imagenes}}">
+            <input type="hidden" id="inicialdiferida" value="{{inicialdiferida}}">
+            <input type="hidden" id="numerocuotaspryecto" value="{{numerocuotaspryecto}}">
+
             <table id="datatable" class="table table-striped table-hover table-sm display nowrap" style="width:100%">
                 <thead>
                     <tr>
@@ -227,9 +242,9 @@
                                 de los
                                 pagos recibidos con un interés equivalente al DTF.
                             </span>
-                            <hr />
                         </li>
                     </ul>
+                    <hr />
                 </div>
                 <div class="col-3 text-center">
                     <div class="row mt-7">
