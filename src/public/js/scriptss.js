@@ -6371,7 +6371,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
             $('#cuadro2').find('input, select').prop('disabled', false);
         })
-    })
+    });
     var proyectos = $('#proyectos');
     var asesores = $('#asesores');
     var clientes = $('#clientes');
@@ -6542,7 +6542,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 CONT(0, 1);
             } */
         }
-    })
+    });
     crearcartera.on('click', '.guardar', function () {
         $('#crearcartera').find('#ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial').prop('disabled', false);
         var datos = $('#crearcartera thead').find(`input, select`).serialize();
@@ -6585,9 +6585,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         var TotalSprc = parseFloat($('#Separar').val().replace(/\./g, ''));
         var excedente = TotalSprc > TotalIni ? TotalSprc - TotalIni : 0;
         var nu = $('#inicialcuotas').val();
-        var nf = $('#financiacion').val();
-        realcuotai = Math.round((TotalIni - TotalSprc) / nu);
-        realcuotaf = Math.round((TotalFnc - excedente) / nf);
+        var nf = $('#financiacion').val();        
+        //realcuotai = Math.round((TotalIni - TotalSprc) / nu);
+        //realcuotaf = Math.round((TotalFnc - excedente) / nf);
 
         if (tipo === 'SEPARACION') {
             if (TotalSprc === (TotalIni + TotalFnc)) {
@@ -6643,6 +6643,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 valor += parseFloat(e);
             });
             var n = nu - num;
+            console.log(valor, TotalIni - TotalSprc, n);
 
             if (valor === TotalIni - TotalSprc && n !== 0) {
                 var u = 1;
@@ -6763,8 +6764,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                 $(i).find(`.fecha`).val(s);
             }
         })
-    })
-
+    });
     var CONT = () => {
         var Separacion = parseFloat($('#Separar').val().replace(/\./g, ''));
         var totalCuotaInicial = parseFloat($('#ini').val().replace(/\./g, '')); // Total de la cuota inicial sin la separacion
@@ -6839,7 +6839,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
             minYear: 2017,
             maxYear: parseInt(moment().format('YYYY'), 10) + 5,
         });
-    }
+    };
     var FINANCIAR = (tipo, cnt, separ) => {
         var table = new $.fn.dataTable.Api('#crearcartera');
         var datos = table.rows({ page: 'current' }).data();
@@ -6895,7 +6895,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         crearcartera.rows.add(dat).draw(false).columns.adjust().responsive.recalc();
         separ ? $('#Separar').val(Moneda(separ)) : '';
         CONT();
-    }
+    };
 
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
@@ -7054,7 +7054,7 @@ if (window.location.pathname == `/links/ordendeseparacion/${window.location.path
         var separar = Moneda($('.separar').html());
         var total = parseFloat($('.totalp').html()) - parseFloat($('.ahorro').html());
         var saldot = total - parseFloat($('#saldofecha').val());
-        var totali = Moneda(total * inini / 100); 
+        var totali = Moneda(total * inini / 100);
         var imgs = $('#imgss').val() || '/img/avatars/avatar1.svg';
         $('#imgs').prop('src', imgs);
         $('.totalote').html('$' + Moneda(total));

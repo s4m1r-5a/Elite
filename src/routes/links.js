@@ -3569,7 +3569,7 @@ router.post('/comision/:item', isLoggedIn, async (req, res) => {
     const { item } = req.params;
     if (item === 'pdf') {
         const { ids } = req.body;
-        console.log(ids);
+        //console.log(ids);
         const r = await FacturaDeCobro(ids)
         /* const cobro = await pool.query(`SELECT * FROM solicitudes WHERE ids IN(${ids})`);
         console.log(cobro) */
@@ -4547,7 +4547,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
 
     const directas = await pool.query(`SELECT p0.usuario papa, p0.sucursal sp, p1.usuario abuelo, 
             p1.sucursal sa, p2.usuario bisabuelo, p2.sucursal sb, u.sucursal, 
-            MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.*, r.incntivo
+            MONTH(fechar) AS mes, p.id ordn, p.*, l.*, o.*, u.*, c.*, r.incntivo 
             FROM pines p0 LEFT JOIN pines p1 ON p0.usuario = p1.acreedor 
             LEFT JOIN pines p2 ON p1.usuario = p2.acreedor
             INNER JOIN preventa p ON p0.acreedor = p.asesor
@@ -4564,8 +4564,10 @@ router.post('/desendentes', noExterno, async (req, res) => {
         var hoy = moment().format('YYYY-MM-DD');
         await directas.map(async (a, x) => {
             var estdStatus = (a.estado === 10 || a.estado === 13) && a.status > 1;
+            var i = a.nrango > 6 ? Math.min(a.sucursal, a.maxcomis) : a.comision;
+            console.log('hkhsskdkhsdhkdksdh' + i)
             var val = a.valor - a.ahorro
-            var monto = val * a.comision
+            var monto = val * i;
             var retefuente = monto * 0.10
             var reteica = monto * 8 / 1000
 
@@ -4592,7 +4594,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
             if (!a.directa && estdStatus) {
                 f.push([
                     hoy, monto, 'COMISION DIRECTA', std, 'VENTA DIRECTA',
-                    asesor, a.comision, val, a.lote, retefuente,
+                    asesor, i, val, a.lote, retefuente,
                     reteica, monto - (retefuente + reteica), a.ordn
                 ])
                 Lote.directa = asesor;
