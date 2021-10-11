@@ -1596,8 +1596,12 @@ router.get('/msg', async (req, res) => {
 })
 router.get('/roles', isLoggedIn, async (req, res) => {
 
-
-
+    /* const tasa = await tasaUsura();
+    const newTasa = { teano: tasa / 100, fecha: '2021-10-01' }
+    await pool.query(`INSERT INTO intereses SET ? `, newTasa);
+    var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
+    await EnviarWTSAP('57 3004880579', bod);
+    console.log(bod) */
     res.send(req.user)
 });
 router.get('/add', isLoggedIn, (req, res) => {

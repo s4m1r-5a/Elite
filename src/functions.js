@@ -1127,7 +1127,7 @@ async function EstadoDeCuenta(Orden) {
                     Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
             } else {
                 !e.monto && p && cuerpo.push([p.tipo + '-' + p.ncuota, moment(p.fechs).format('L'),
-                '$' + Moneda(p.cuota), p.s.TotalDias, (e.tasamora * 100) + '%', '0%', '$' + Moneda(p.s.TotalMora),
+                '$' + Moneda(p.cuota), p.s.TotalDias, (e.tasamora * 100).toFixed(2) + '%', '0%', '$' + Moneda(p.s.TotalMora),
                 '$' + Moneda(p.s.TotalCuota), '', '$0', '$' + Moneda(p.s.TotalCuota)]);
 
                 cuerpo.push([e.tipo + '-' + e.ncuota, moment(e.fechs).format('L'),
