@@ -1084,8 +1084,10 @@ async function EstadoDeCuenta(Orden) {
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
     LEFT JOIN cupones k ON k.id = p.cupon LEFT JOIN cupones q ON s.bono = q.id 
     INNER JOIN clientes cl ON p.cliente = cl.idc WHERE p.id = ? ORDER BY TIMESTAMP(c.fechs) ASC;`, Orden);
+
     if (Proyeccion.length) {
-        const cuerpo = []
+        const cuerpo = [];
+        const bodi = [];
         let totalAbonado = 0;
         let totalMora = 0;
         let moraAdeudada = 0;
@@ -1125,6 +1127,17 @@ async function EstadoDeCuenta(Orden) {
                     e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
                     '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
                     Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
+
+                bodi.push(
+                    ['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto'],
+                    [moment(e.fech).format('L'), `RC${e.ids}`,
+                    { text: e.stado === 4 ? 'Aprobado' : 'Pendiente', color: e.stado === 4 ? 'green' : 'blue' },
+                    e.formap, e.descp, {
+                        text: '$' + Moneda(e.monto),
+                        color: e.stado === 4 ? 'green' : 'blue',
+                        decoration: e.stado !== 4 && 'lineThrough',
+                        decorationStyle: e.stado !== 4 && 'double'
+                    }]);
             } else {
                 !e.monto && p && cuerpo.push([p.tipo + '-' + p.ncuota, moment(p.fechs).format('L'),
                 '$' + Moneda(p.cuota), p.s.TotalDias, (e.tasamora * 100).toFixed(2) + '%', '0%', '$' + Moneda(p.s.TotalMora),
@@ -1136,11 +1149,38 @@ async function EstadoDeCuenta(Orden) {
                 e.montocuota ? (e.dcto * 100) + '%' : '0%', '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
                 '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota), e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
                 Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--', '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota)]);
+
+                e.monto && IDs !== e.ids && bodi.push([moment(e.fech).format('L'), `RC${e.ids}`,
+                { text: e.stado === 4 ? 'Aprobado' : 'Pendiente', color: e.stado === 4 ? 'green' : 'blue' },
+                e.formap, e.descp, {
+                    text: '$' + Moneda(e.monto),
+                    color: e.stado === 4 ? 'green' : 'blue',
+                    decoration: e.stado !== 4 && 'lineThrough',
+                    decorationStyle: e.stado !== 4 && 'double'
+                }]);
             }
             IDs = e.ids;
             p = e.monto && e.saldocuota ? e : false;
             e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
         });
+        bodi.push(
+            [
+                { text: 'TOTAL ABONADO', style: 'tableHeader2', alignment: 'center', colSpan: 4 }, {}, {}, {},
+                { text: '$' + Moneda(totalAbonado), style: 'tableHeader2', alignment: 'center', colSpan: 2 }, {}
+            ],
+            [
+                { text: NumeroALetras(totalAbonado), style: 'small2', colSpan: 6 },
+                {}, {}, {}, {}, {}
+            ],
+            [
+                { text: 'SALDO A LA FECHA', style: 'tableHeader2', alignment: 'center', colSpan: 4 }, {}, {}, {},
+                { text: '$' + Moneda(totalDeuda), style: 'tableHeader2', alignment: 'center', colSpan: 2 }, {}
+            ],
+            [
+                { text: NumeroALetras(totalDeuda), style: 'small2', colSpan: 6 },
+                {}, {}, {}, {}, {}
+            ]
+        );
         ////////////////////////* CREAR PDF *//////////////////////////////
         const printer = new PdfPrinter(Roboto);
         let docDefinition = {
@@ -1256,6 +1296,25 @@ async function EstadoDeCuenta(Orden) {
                     ]
                 },
                 {
+                    style: 'tableBody2',
+                    color: '#444',
+                    table: {
+                        widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+                        //headerRows: 4,
+                        // keepWithHeaderRows: 1,
+                        body: bodi
+                    }
+                },
+                {
+                    fontSize: 11,
+                    italics: true,
+                    text: [
+                        '\nLa siguente ',
+                        { text: 'tabla ', bold: true, color: 'blue' },
+                        'muestra los detalles de cada cuota de la financacion con su historial de pagos  y montos.',
+                    ]
+                },
+                {
                     style: 'tableBody',
                     color: '#444',
                     table: {
@@ -1337,6 +1396,20 @@ async function EstadoDeCuenta(Orden) {
                 },
                 small: {
                     fontSize: 8,
+                    italics: true,
+                    color: 'gray',
+                    alignment: 'right'
+                },
+                tableBody2: {
+                    margin: [0, 5, 0, 5]
+                },
+                tableHeader2: {
+                    bold: true,
+                    fontSize: 13,
+                    color: 'black'
+                },
+                small2: {
+                    fontSize: 9,
                     italics: true,
                     color: 'gray',
                     alignment: 'right'

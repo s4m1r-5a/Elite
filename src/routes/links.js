@@ -2422,9 +2422,9 @@ router.post('/bonos/:id', isLoggedIn, (req, res) => {
     const { monto, ahora, pin, client, motivo } = req.body;
     const datos = {
         pin, descuento: 0, fecha: ahora, estado: 9, clients: client, monto: monto.replace(/\./g, ''),
-        tip: 'BONO', motivo, concept: 'CRUCE CUENTAS', soporte: '/uploads/' + req.files[0].filename
+        tip: 'BONO', motivo, concept: 'PERMUTA', soporte: '/uploads/' + req.files[0].filename
     }
-    //console.log(datos);
+    //console.log(req.body, datos);
     pool.query('INSERT INTO cupones SET ? ', datos);
     res.send(true);
 })
@@ -2625,37 +2625,25 @@ router.post('/recibo', async (req, res) => {
     }
 });
 router.post('/bonus', async (req, res) => {
-    const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin } = req.body;
-    /*const recibe = await pool.query(
-        `SELECT c.id, pr.id e FROM cupones c
-            INNER JOIN clientes cl ON c.clients = cl.idc 
-            INNER JOIN preventa pr ON cl.idc = pr.cliente 
-            OR cl.idc = pr.cliente2 OR cl.idc = pr.cliente3 
-            OR cl.idc = pr.cliente4 INNER JOIN productosd l ON pr.lote = l.id
-            WHERE c.pin = ? AND l.id = ? AND c.producto IS NULL AND c.estado = 9`,
-        [bono, lt]
-    );*/
+    const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin, orden } = req.body;
     const a = await Bonos(bono, lt);
     if (a) {
         const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto 
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id 
-        WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = ? AND s.lt = ?`, [4, lt]);
+        WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND s.stado = ? AND s.lt = ?`, [4, lt]);
         var l = r[0].monto1 || 0,
             k = r[0].monto || 0;
         var acumulado = l + k;
 
         const pago = {
-            fech: ahora, monto: bonomonto, recibo: bono, facturasvenc: factrs, lt,
-            concepto: 'PAGO', stado: 3, descp: concpto, formap: 'BONO', bono: pin,
-            acumulado
+            fech: ahora, monto: bonomonto, recibo: bono, facturasvenc: factrs, lt, orden,
+            concepto: 'BONO', stado: 3, descp: concpto, formap: 'BONO-' + a.concept, bono: pin,
+            acumulado, observaciones: a.concept + ' - ' + a.motivo, img: a.soporte
         }
-        concpto === 'ABONO' ? pago.concepto = concpto : pago.pago = id,
-            await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id);
         await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
-
         await pool.query('UPDATE cupones SET ? WHERE id = ?',
-            [{ producto: a, estado: 14 }, pin]
+            [{ producto: orden, estado: 14 }, pin]
         );
         const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
         const R = await PagosAbonos(P.insertId, '', 'GRUPO ELITE SISTEMA')
@@ -5463,7 +5451,6 @@ async function PagosAbonos(Tid, pdf, user) {
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
     LEFT JOIN cupones cp ON s.bono = cp.id LEFT JOIN acuerdos a ON s.acuerdo = a.id 
     WHERE pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
-
     const S = SS[0];
     const T = S.cparacion;
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
@@ -5562,123 +5549,23 @@ async function PagosAbonos(Tid, pdf, user) {
         return { std: false, msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente' }
     }
 
-    /* } else if (S.concepto === 'PAGO') {
-        var cuota = S.cuota + S.mora;
-
-        if (S.tipo === 'SEPARACION' && S.incentivo && S.incntivo && monto >= cuota) {
-            const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
-            if (!sep.length) {
-                var solicitar = {
-                    fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: std, descp: 'SEPARACION', orden: T,
-                    asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
-                }
-                await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
-            }
-        }
-        if (monto >= cuota || S.std === 13) {
-            var montocuotas = monto - cuota;
-            await pool.query(`UPDATE solicitudes s  
-                INNER JOIN preventa p ON s.lt = p.lote
-                INNER JOIN productosd l ON s.lt = l.id 
-                INNER JOIN cuotas c ON s.pago = c.id SET ? 
-                WHERE s.ids = ?`,
-                [
-                    {
-                        's.aprueba': user,
-                        's.stado': 4,
-                        'c.estado': 13,
-                        'c.mora': 0,
-                        'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                        'l.fechar': moment(fech2).format('YYYY-MM-DD')
-                    }, Tid
-                ]
-            );
-            const Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`);
-
-            if (Cuotas.length > 0 && montocuotas > 0) {
-                var sql = `UPDATE cuotas SET estado = 13, mora = 0, diasmora = 0, diaspagados = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
-                var sql2 = '', idS = '';
-                let unionPagoCuotas = [];
-
-                Cuotas.map((c) => {
-                    var cuot = c.cuota + c.mora;
-                    if (montocuotas >= cuot) {
-                        idS += c.id.toString() + ', ';
-                        montocuotas = montocuotas - (c.cuota + c.mora);
-                        unionPagoCuotas.push([
-                            Tid, c.id, c.diasmora, c.mora, c.diasmora, c.mora
-                        ]);
-
-                    } else if (montocuotas > 0) {
-
-                        let mor = 0, diademora = c.diasmora
-                        let cuo = montocuotas > c.mora ? c.cuota - (montocuotas + c.mora) : c.cuota;
-
-                        if (montocuotas < c.mora) {
-                            mor = c.mora - montocuotas;
-                            diademora = montocuotas / (c.mora / c.diasmora);
-                        }
-                        let abono = c.abono + montocuotas;
-                        unionPagoCuotas.push([
-                            Tid, c.id, c.diasmora, c.mora, diademora, mor
-                        ]);
-
-
-                        sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', 
-                         cuota = ${cuo}, mora = ${mor}, abono = ${abono}, diasmora = ${c.diasmora}, diaspagados = ${diademora} 
-                         WHERE id = ${c.id}`
-                        montocuotas = 0;
-                    }
-                })
-                idS = idS.slice(0, -2);
-                sql += ' WHERE id IN(' + idS + ')';
-                try {
-                    idS ? await pool.query(sql) : console.log(sql, 'no sql');
-                    sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
-                    unionPagoCuotas.length && pool.query(`INSERT INTO relacioncuotas (pago, cuota, dias, mora, diaspagados, totalmora) VALUES ?`,
-                        [unionPagoCuotas]
-                    );
-                }
-                catch (e) {
-                    console.log(e);
-                }
-            }
-        } else if (monto < cuota) {
-            var mor = monto >= S.mora ? 0 : S.mora - monto
-            var cuo = monto > S.mora ? S.cuota - (monto + S.mora) : S.cuota;
-            await pool.query(
-                `UPDATE solicitudes s  
-                INNER JOIN preventa p ON s.lt = p.lote
-                INNER JOIN productosd l ON s.lt = l.id 
-                INNER JOIN cuotas c ON s.pago = c.id SET ? 
-                WHERE s.ids = ?`,
-                [
-                    {
-                        's.aprueba': user,
-                        's.stado': 4,
-                        'c.estado': 3,
-                        'c.cuota': cuo,
-                        'c.mora': mor,
-                        'c.fechapago': moment(fech2).format('YYYY-MM-DD HH:mm'),
-                        'c.abono': S.abono + monto
-                    }, Tid
-                ]
-            );
-        }
-    } */
-
-    var stt = await ProyeccionPagos(T)
+    await ProyeccionPagos(T)
     var st = await Estados(T)
-
-    await pool.query(`UPDATE solicitudes s 
+    try {
+        await pool.query(`UPDATE solicitudes s 
         INNER JOIN productosd l ON s.lt = l.id 
         SET ? WHERE s.ids = ?`,
-        [
-            {
-                'l.estado': st.std, 's.pdf': pdf
-            }, Tid
-        ]
-    );
+            [
+                {
+                    'l.estado': st.std, 's.pdf': pdf
+                }, Tid
+            ]
+        );
+    }
+    catch (e) {
+        console.log(e);
+    }
+
 
     var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${S.recibo}* Monto *${Moneda(monto)}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
     var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`
@@ -5689,7 +5576,7 @@ async function PagosAbonos(Tid, pdf, user) {
 }
 async function Bonos(pin, lote) {
     const recibe = await pool.query(
-        `SELECT pr.id FROM cupones c
+        `SELECT pr.id, c.* FROM cupones c
             INNER JOIN clientes cl ON c.clients = cl.idc 
             INNER JOIN preventa pr ON cl.idc 
             IN(pr.cliente, pr.cliente2, pr.cliente3, pr.cliente4) 
@@ -5698,7 +5585,7 @@ async function Bonos(pin, lote) {
         [pin, lote]
     );
     if (recibe.length > 0) {
-        const IdSeparacion = recibe[0].id;
+        const IdSeparacion = recibe[0];
         return IdSeparacion;
     } else {
         return false;

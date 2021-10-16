@@ -1302,17 +1302,7 @@ if (window.location.pathname == `/links/pagos`) {
         } else if (currentStepNumber === 1) {
             var T = $('.Total').html();
             var T2 = $('.Total2').val();
-            if (T != 0 || T2 || bono) {
-                skdt = true
-                //$('.sw-btn-next').html('Pagar');
-                $('.sw-btn-next').hide();
-            } else {
-                skdt = false
-                SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
-            }
-            if (T === '0' && !T2 && bono) {
-                skdt = false
-                //$('input').prop('disabled', false);
+            if (bono) {
                 $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
                 var fd = $('#recbo').serialize();
                 $.ajax({
@@ -1329,14 +1319,29 @@ if (window.location.pathname == `/links/pagos`) {
                     success: function (data) {
                         if (data) {
                             $('#ModalEventos').modal('hide');
-                            SMSj('success', `El bono fue redimido exitosamente`);
-                            validationForm.smartWizard("reset");
+                            if (T != 0 || T2) {
+                                SMSj('success', `El bono fue redimido exitosamente, continue con el resto del pago`);
+                                bono = 0;
+                                skdt = true
+                                $("#smartwizard").smartWizard("next");
+                                $('.sw-btn-next').hide();
+                            } else {
+                                SMSj('success', `El bono fue redimido exitosamente`);
+                                skdt = false
+                                $("#smartwizard").smartWizard("reset");
+                            }
                         } else {
                             $('#ModalEventos').modal('hide');
                             SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
                         }
                     }
                 });
+            } else if (T != 0 || T2) {
+                skdt = true
+                $('.sw-btn-next').hide();
+            } else {
+                skdt = false
+                SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
             }
         } else if (currentStepNumber === 2) {
             //alert(currentStepNumber);
@@ -6585,7 +6590,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         var TotalSprc = parseFloat($('#Separar').val().replace(/\./g, ''));
         var excedente = TotalSprc > TotalIni ? TotalSprc - TotalIni : 0;
         var nu = $('#inicialcuotas').val();
-        var nf = $('#financiacion').val();        
+        var nf = $('#financiacion').val();
         //realcuotai = Math.round((TotalIni - TotalSprc) / nu);
         //realcuotaf = Math.round((TotalFnc - excedente) / nf);
 
