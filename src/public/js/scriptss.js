@@ -1319,7 +1319,7 @@ if (window.location.pathname == `/links/pagos`) {
                     success: function (data) {
                         if (data) {
                             $('#ModalEventos').modal('hide');
-                            if (T != 0 || T2) {
+                            if (T2) {
                                 SMSj('success', `El bono fue redimido exitosamente, continue con el resto del pago`);
                                 bono = 0;
                                 skdt = true
