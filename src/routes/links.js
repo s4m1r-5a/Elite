@@ -5273,9 +5273,10 @@ async function ProyeccionPagos(S) {
 
     let W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
-    p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, c.proyeccion,
-    c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
-    INNER JOIN productosd l ON p.lote = l.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
+    p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, 
+    c.proyeccion, c.cuota, c.estado, l.mtr2, d.moras FROM preventa p 
+    INNER JOIN cuotas c ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
+    INNER JOIN productos d ON l.producto = d.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
     ORDER BY TIMESTAMP(c.fechs) ASC`, S);
 
     if (!W.length) return;
@@ -5287,6 +5288,7 @@ async function ProyeccionPagos(S) {
     const initials = Math.round(total * x.iniciar / 100);
     const inicial = x.separar >= initials ? 0 : initials - x.separar;
     const financiacion = Math.round(total - (inicial + x.separar));
+    const mOra = x.moras;
 
     //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion, x)
     if (Proyeccion > 0) {
@@ -5342,9 +5344,8 @@ async function ProyeccionPagos(S) {
         Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`, S);
     }
     const Abonos = await pool.query(`SELECT s.ids, s.monto, s.fech, s.fecharcb, a.dcto, a.estado FROM solicitudes s 
-    LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE s.concepto IN('PAGO', 'ABONO') AND s.stado = 4 AND s.orden = ? 
+    LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND s.stado = 4 AND s.orden = ? 
     ORDER BY TIMESTAMP(s.fech)`, S);
-
     const Moras = await pool.query(`SELECT * FROM intereses`);
 
     let cuotas = Cuotas.map(e => { return { id: e.id, cuota: e.cuota, monto: e.cuota, fechs: e.fechs, estado: 3 } });
@@ -5355,58 +5356,74 @@ async function ProyeccionPagos(S) {
         const a = Abonos[i];
         const fechaLMT = a.fecharcb ? moment(a.fecharcb).format('YYYY-MM-DD')
             : moment(a.fech).format('YYYY-MM-DD');
-        const cobro = fechaLMT >= fechaLimite && a.estado != 6 ? true : false
+        const cobro = fechaLMT >= fechaLimite && a.estado != 6 && mOra ? true : false
         let Monto = a.monto;
 
-        await cuotas.map(async (e, u) => {
-
-            const FechaCuota = moment(e.fechs).format('YYYY-MM-DD');
+        for (o = 0; o < cuotas.length; o++) {
+            const q = cuotas[o];
+            const FechaCuota = moment(q.fechs).format('YYYY-MM-DD');
             const diffdays = moment(fechaLMT).diff(FechaCuota, 'days');
             const daysDiff = fechaLMT > FechaCuota ? diffdays : 0;
-
             const Tas = cobro && daysDiff ?
                 await Moras
-                    .filter(x => moment(x.fecha).format('YYYY-MM-DD') >= moment(e.fechs).startOf('month').format('YYYY-MM-DD')
+                    .filter(x => moment(x.fecha).format('YYYY-MM-DD') >= moment(q.fechs).startOf('month').format('YYYY-MM-DD')
                         && moment(x.fecha).format('YYYY-MM-DD') <= moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
                     ).map(x => x.teano) : [];
 
-            const Tasa = Tas.length ? Math.min(...Tas) : 0;
-
-            let moratoria = Tasa ? daysDiff * e.monto * Tasa / 365 : 0;
+            const Tasa = Tas.length ? await Math.min(...Tas) : 0;
+            let moratoria = Tasa ? daysDiff * q.monto * Tasa / 365 : 0;
             let dctoMoratorio = Tasa ? moratoria - (moratoria * a.dcto) : 0;
             let diasmoratorios = Tasa ? daysDiff : 0;
+            cuotas[o].tasa = Tasa;
+            cuotas[o].moratoria = moratoria;
+            cuotas[o].dctoMoratorio = dctoMoratorio;
+            cuotas[o].diasmoratorios = diasmoratorios;
+            cuotas[o].monto = q.monto + dctoMoratorio;
+        }
 
-            if (!Monto) return;
+        await cuotas.map(async (e, u) => {
+
+            if (!Monto) return false;
+
             if (Monto >= e.monto && e.estado === 3) {
                 Relacion.push([
-                    a.ids, e.id, moratoria, diasmoratorios, a.dcto ? a.dcto : 0,
-                    diasmoratorios, dctoMoratorio, moratoria, e.monto, 0, 13, Tasa
+                    a.ids, e.id, e.moratoria, e.diasmoratorios, a.dcto ? a.dcto : 0,
+                    e.diasmoratorios, e.dctoMoratorio, e.dctoMoratorio, e.monto - e.dctoMoratorio, 0, 13, e.tasa
                 ]);
                 Monto = Math.sign(Monto - e.monto) > 0 ? Monto - e.monto : 0;
                 cuotas[u].monto = 0;
                 cuotas[u].estado = 13;
+                console.log('mayor ', Monto, e)
 
             } else if (Monto > 0 && e.estado === 3) {
-                var mor = Tasa ? Math.abs(e.monto - dctoMoratorio) : 0;
-                var cuot = Math.abs((e.monto + dctoMoratorio) - Monto);
-                var diaspagados = Tasa ? mor / (dctoMoratorio / diasmoratorios) : 0;
+                //var mor = e.tasa ? Math.abs(e.monto - e.dctoMoratorio) : 0;
+                var cuot = Math.abs(e.monto - Monto);
+                var dpg = !e.tasa ? 0 : Monto / (e.dctoMoratorio / e.diasmoratorios)
+                var diaspagados = !e.tasa ? 0 : dpg >= e.diasmoratorios ? e.diasmoratorios : dpg;
+                var morapaga = dpg >= e.diasmoratorios ? e.dctoMoratorio : Monto;
 
                 Relacion.push([
-                    a.ids, e.id, moratoria, diasmoratorios, a.dcto ? a.dcto : 0,
-                    diaspagados, dctoMoratorio, mor, e.monto, cuot, 3, Tasa
+                    a.ids, e.id, e.moratoria, e.diasmoratorios, a.dcto ? a.dcto : 0,
+                    diaspagados, e.dctoMoratorio, morapaga, e.monto - e.dctoMoratorio, cuot, 3, e.tasa
                 ])
                 Monto = Math.sign(Monto - e.monto) > 0 ? Monto - cuot : 0;
                 cuotas[u].monto = cuot;
+                console.log('menor ', Monto, e, Relacion)
             };
+            //return e.id, Monto, e.tasa, !!Monto;
         });
+        //console.log('ejecucion de map terminada ', j);
     };
     Relacion.length && await pool.query(`INSERT INTO relacioncuotas 
         (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa) 
         VALUES ?`, [Relacion]);
 
-    await pool.query(`UPDATE cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
-    SET c.cuota = r.saldocuota, c.estado = 3, c.diaspagados = r.diaspagados 
-    WHERE c.separacion = ? AND r.stdcuota = 3`, S);
+    await pool.query(`UPDATE cuotas c INNER JOIN (SELECT r.cuota, MIN(r.saldocuota) saldocuota, 
+        MIN(r.diaspagados) diaspagados, MIN(r.stdcuota) stdcuota FROM relacioncuotas r
+        INNER JOIN cuotas c ON r.cuota = c.id WHERE c.separacion = ? AND r.stdcuota = 3
+        GROUP BY r.cuota) r ON c.id = r.cuota 
+        SET c.cuota = r.saldocuota, c.estado = 3, c.diaspagados = r.diaspagados 
+        WHERE c.separacion = ? AND r.stdcuota = 3`, [S, S]);
 
     await pool.query(`UPDATE cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
     SET c.cuota = r.saldocuota, c.estado = 13, c.diaspagados = r.diaspagados 
@@ -5435,7 +5452,6 @@ async function ProyeccionPagos(S) {
         await pool.query(`UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
         c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = ?`, S);
     }
-
     //////////////////////////* ENVIAR PDF *///////////////////////////
     //await EstadoDeCuenta(S)
 }
@@ -5443,14 +5459,13 @@ async function PagosAbonos(Tid, pdf, user) {
     //u. obsevacion pr
     const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
     pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
-    cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, cp.pin bono, 
-    cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pr.obsevacion, s.ids, s.descp, 
-    pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, a.tipo tipoacuerdo FROM solicitudes s
+    cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, s.formap, 
+    s.concepto, pr.obsevacion, s.ids, s.descp, pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, 
+    a.tipo tipoacuerdo FROM solicitudes s
     INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
-    LEFT JOIN cupones cp ON s.bono = cp.id LEFT JOIN acuerdos a ON s.acuerdo = a.id 
-    WHERE pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
+    LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
     const S = SS[0];
     const T = S.cparacion;
     const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
@@ -5467,84 +5482,6 @@ async function PagosAbonos(Tid, pdf, user) {
 
     if (Cuotas.length > 0 && monto > 0) {
         await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ concepto: 'ABONO', descp: Cuotas[0].tipo, stado: 4, aprueba: user }, Tid]);
-
-        /* var sql = `UPDATE cuotas SET estado = 13, mora = 0, diasmora = 0, diaspagados = 0, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}'`;
-        var sql2 = '', idS = '';
-        let unionPagoCuotas = [];
-
-        Cuotas.map(async (c) => {
-            var Mora = S.dcto ? c.mora - (c.mora * S.dcto) : c.mora;
-            var Cuota = c.cuota + Mora;
-
-            if (montocuotas >= Cuota) {
-
-                if (c.tipo === 'SEPARACION' && S.incentivo && S.incntivo) {
-                    const sep = await pool.query(`SELECT * FROM solicitudes WHERE descp = 'SEPARACION' AND lt = ${S.lote} AND stado != 6 AND asesor = ${S.asesor}`);
-                    if (!sep.length) {
-                        var solicitar = {
-                            fech: fech2, monto: S.incentivo, concepto: 'COMISION DIRECTA', stado: std, descp: 'SEPARACION', orden: T,
-                            asesor: S.asesor, porciento: 0, total: S.cuota, lt: S.lote, retefuente: 0, reteica: 0, pagar: S.incentivo
-                        }
-                        await pool.query(`INSERT INTO solicitudes SET ?`, solicitar);
-                    }
-                }
-
-                idS += c.id.toString() + ', ';
-                montocuotas = montocuotas - Cuota;
-                unionPagoCuotas.push([
-                    Tid, c.id, c.diasmora, c.mora, c.diasmora, Mora, c.cuota
-                ]);
-
-            } else if (montocuotas > 0) {
-                let mora = 0;
-                let diademora = c.diasmora - c.diaspagados;
-                let cuota = montocuotas > c.mora ? c.cuota - (montocuotas + Mora) : c.cuota;
-                let cuotaMonto = montocuotas > c.mora ? montocuotas - Mora : 0;
-
-                if (montocuotas < Mora) {
-                    mora = Mora - montocuotas;
-                    diademora = montocuotas / (c.mora / c.diasmora);
-                }
-                let abono = c.abono + montocuotas;
-                unionPagoCuotas.push([
-                    Tid, c.id, c.diasmora, c.mora, diademora, mora, cuotaMonto
-                ]);
-                sql2 = `UPDATE cuotas SET estado = 3, fechapago = '${moment(fech2).format('YYYY-MM-DD HH:mm')}', 
-                    cuota = ${cuota}, mora = ${mora}, abono = ${abono}, diasmora = ${c.diasmora}, diaspagados =  ${c.diaspagados + diademora} 
-                    WHERE id = ${c.id}`
-                montocuotas = 0;
-            }
-        });
-        idS = idS.slice(0, -2);
-        sql += ' WHERE id IN(' + idS + ')';
-
-        try {
-            idS ? await pool.query(sql) : console.log(sql, 'no sql');
-            sql2 ? await pool.query(sql2) : console.log(sql2, 'no sql2');
-            unionPagoCuotas.length && pool.query(`INSERT INTO relacioncuotas (pago, cuota, dias, mora, diaspagados, totalmora, montocuota) VALUES ?`,
-                [unionPagoCuotas]
-            );
-
-        }
-        catch (e) {
-            console.log(e);
-        }
-        if (montocuotas > 0) {
-            var pin = ID(5),
-                motivo = `${fech2} Excedente del pago total del producto con id de ORDEN ${T}, id de pago ${Tid}`;
-            const bono = {
-                pin, descuento: 0, estado: 9, clients: S.idc, concept: 'EXCEDENTE',
-                tip: 'BONO', monto: montocuotas, motivo,
-            }
-            const bno = await pool.query('INSERT INTO cupones SET ? ', bono);
-            var respts = `El monto consignado es mayor al del valor total del producto con id de ORDEN ${T}, se genero un BONO con el excedente idBono:${bno.insertId}` //
-            await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ observaciones: respts }, Tid]);
-
-            var nombr = S.nombre.split(" ")[0],
-                bodi = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(bono.monto)}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`;
-
-            EnviarWTSAP(S.movil, bodi);
-        }; */
     } else {
         return { std: false, msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente' }
     }
