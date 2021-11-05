@@ -8434,7 +8434,8 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
                     render: function (data, method, row) {
                         return '$' + Moneda(Math.round(row.valor / data));
                     }
-                }
+                },
+                { data: "id" }
             ],
             deferRender: true,
             autoWidth: true,
