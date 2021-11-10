@@ -10860,7 +10860,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         email: '',
                                         city: '',
                                         expenses: '$' + Moneda(totl)
-                                    },
+                                    }/* ,
                                     {
                                         id: 'SLD FECHA',
                                         name: `${NumeroALetras(saldo)} MCT********`,
@@ -10874,7 +10874,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         email: '',
                                         city: '',
                                         expenses: '$' + Moneda(saldo - totl)
-                                    }],
+                                    } */],
                                     //html: '#tablarecibo',
                                     showHead: false,
                                     columnStyles: {
