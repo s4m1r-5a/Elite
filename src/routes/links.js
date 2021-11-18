@@ -467,11 +467,13 @@ cron.schedule("0 2 * * *", async () => {
     HAVING abonos >= Inicial ORDER BY p.id`);
 
     if (comi.length) {
-        let ids = null;  
+        let ids = null;
         await comi.map(e => ids += ids ? ', ' + e.ordn : e.ordn);
         await pool.query(`UPDATE solicitudes s SET s.fech = NOW(), 
         s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
-    };
+    }
+
+
 
 });
 cron.schedule("*/10 * 5 5 * *", async () => {
@@ -1955,7 +1957,7 @@ router.post('/extrabank', async (req, res) => {
         concpt1: concpt1 ? concpt1 : null, concpt2: concpt2 ? concpt2 : null,
         otro: otro ? otro : null, consignado: consignado ? consignado.replace(/[\$,]/g, '') * 1 : 0
     };
-    await pool.query('INSERT INTO extrabanco SET ? ', b);       
+    await pool.query('INSERT INTO extrabanco SET ? ', b);
     //console.log(b, cont) //, bank.insertId              uniddadenlinea@unidadvictimas.gov.co
     //res.send(cont);                                     Actualizar estado fallecido - bogota 031- 4261111
     res.send(consignado);
@@ -5946,7 +5948,7 @@ async function ProyeccionPagos(S) {
                 Monto = Math.sign(Monto - e.monto) > 0 ? Monto - e.monto : 0;
                 cuotas[u].monto = 0;
                 cuotas[u].estado = 13;
-                //console.log('mayor ', Monto, e)
+                console.log('mayor ', Monto, e)
 
             } else if (Monto > 0 && e.estado === 3) {
                 //var mor = e.tasa ? Math.abs(e.monto - e.dctoMoratorio) : 0;
@@ -5961,7 +5963,7 @@ async function ProyeccionPagos(S) {
                 ])
                 Monto = Math.sign(Monto - e.monto) > 0 ? Monto - cuot : 0;
                 cuotas[u].monto = cuot;
-                //console.log('menor ', Monto, e, Relacion)
+                console.log('menor ', Monto, e, Relacion)
             };
             //return e.id, Monto, e.tasa, !!Monto;
         });
@@ -5985,7 +5987,7 @@ async function ProyeccionPagos(S) {
     (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
     FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
     INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
-    AND d.moras = 1 AND c.separacion = ? GROUP BY c.id HAVING tasa IS NOT NULL`, S);
+    AND d.moras = 1 AND c.separacion = ? GROUP BY c.id`, S);
 
     if (intr.length) {
         let moraVr = `CASE`;
