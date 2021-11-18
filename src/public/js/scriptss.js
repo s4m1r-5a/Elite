@@ -11200,21 +11200,1511 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
             <option value="18">18 Cuotas</option>
+<<<<<<< HEAD
+            `)
+
+        } else if (months > 6) {
+            $('#ncuotas').html(`
+=======
             `);
     } else if (months > 6) {
       $("#ncuotas").html(`
+>>>>>>> a8cd6d89450d22494cc5d96f3cfea5117350937d
             <option value="0">0 Cuota</option>             
             <option value="1">1 Cuota</option>
             <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
             <option value="12">12 Cuotas</option>
+<<<<<<< HEAD
+            `)
+
+        } else {
+            $('#ncuotas').html(`
+=======
             `);
     } else {
       $("#ncuotas").html(`
+>>>>>>> a8cd6d89450d22494cc5d96f3cfea5117350937d
             <option value="0">0 Cuota</option>             
             <option value="1">1 Cuota</option>
             <option value="2">2 Cuotas</option>
             <option value="6">6 Cuotas</option>
+<<<<<<< HEAD
+        `)
+        };
+    };
+    $('.val').mask('#.##$', { reverse: true });
+    var meses = 0;
+    var groupColumn = 2;
+    var dic = 0;
+    var jun = 0;
+    var fcha = moment(fch).startOf('month').format('YYYY-MM-DD');
+    var h = 1;
+    var sprcn = parseFloat($('#separacion').val());
+    var porcentage = parseFloat($('#porcentage').val());
+    var precio = parseFloat($('#vrlote').cleanVal());
+    var cpara = sprcn.toString().length > 3 ? sprcn : precio * sprcn / 100;
+    var separacion = sprcn.toString().length > 3 ? sprcn : precio * sprcn / 100;
+    $('#abono').val(separacion).mask('#.##$', { reverse: true });
+    var inicial = parseFloat($('#cuotainicial').cleanVal());
+    var cuota = precio - inicial;
+    var cuotaextrao;
+    var cut = 0;
+    var u = parseFloat($('#diferinicial').val());
+    var mesesextra = '';
+    var D = parseFloat($('#dia').val());
+    var oficial70 = '$' + Moneda((100 - porcentage) * precio / 100);
+    var oficial30 = '$' + Moneda(inicial);
+    var bono = '';
+    var meses = 0;
+    var cuota30 = Moneda(Math.round((inicial - separacion) / u));
+    Meses(0)
+    $(`#ncuotas option[value='6']`).prop('selected', true);
+    var N = parseFloat($('#ncuotas').val());
+    var cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
+    $('#cuota').val(cuota70.replace(/\./g, ''))
+    console.log(cuota, cuota70, meses, u, N, (N - (meses + u) || 1))
+    $.ajax({
+        url: '/links/tabla/1',
+        type: 'POST',
+        data: {
+            separacion: Moneda(separacion),
+            cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
+            cuota30: N === 1 ? 0 : cuota30,
+            oficial30,
+            oficial70,
+            N,
+            u,
+            fcha,
+            fcha2: moment(fch).format('YYYY-MM-DD'),
+            mesesextra: '',
+            extra: ''
+        },
+        async: false
+    });
+    $(document).ready(function () {
+        if ($('#mesje').text()) {
+            $('#ModalMensaje').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+            });
+        }
+
+        $('.di').css("background-color", "#FFFFCC");
+        $(`.pais option[value='57']`).prop("selected", true);
+        $('.documento').mask("AAAAAAAAAAA");
+        $('.document').mask("AAAAAAAAAAA");
+        $('.movil').mask("57 ***-***-****");
+        $('.pais').change(function () {
+            var card = $(this).parents('div.row').attr("id")
+            $(`#${card} .movil`).val('')
+            $(`#${card} .movil`).mask(`${$(this).val()} ***-***-****`).focus();
+        })
+        $('.pai').change(function () {
+            $(`.movi`).val('')
+            $(`.movi`).mask(`${$(this).val()} ***-***-****`).focus();
+        })
+        $('.movil, .documento').on('change', function () {
+            var card = $(this).parents('div.row').attr("id")
+            if (($(this).hasClass("movil") && !$(`#${card} .documento`).val()) || $(this).hasClass("documento")) {
+                $.ajax({
+                    url: '/links/cel/' + $(this).cleanVal(),
+                    type: 'GET',
+                    async: false,
+                    success: function (data) {
+                        if (data.length > 0) {
+                            $(`#${card} .client`).val(data[0].idc);
+                            $(`#${card} .nombres`).val(data[0].nombre);
+                            $(`#${card} .movil`).val(data[0].movil).mask('**** $$$-$$$-$$$$', { reverse: true });
+                            var pais = data[0].movil.split(" ");
+                            data[0].movil.indexOf(" ") > 0 ? $(`#${card} .pais option[value='${pais[0]}']`).prop("selected", true) :
+                                $(`#${card} .pais option[value='57']`).prop("selected", true);
+                            $(`#${card} .email`).val(data[0].email);
+                            $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
+                            $(`#${card} .movil`).mask("57 ***-***-****");
+                        } else {
+                            SMSj('info', 'Cliente no encontrado, proceda con el registro')
+                            $('#AddCliente input').val('')
+                            $('#AddCliente .document').val($(`#${card} .documento`).val())
+                            $('#AddCliente .movi').val($(`#${card} .movil`).val()).mask('**** $$$-$$$-$$$$', { reverse: true })
+                            $('#AddCliente').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                            $('#crearcliente').submit(function (e) {
+                                e.preventDefault();
+                                $('.ya').val(moment().format('YYYY-MM-DD HH:mm'))
+                                //var fd = $('#crearcliente').serialize();
+                                var formData = new FormData(document.getElementById("crearcliente"));
+                                $.ajax({
+                                    url: '/links/clientes/agregar',
+                                    data: formData,
+                                    type: 'PUT',
+                                    processData: false,
+                                    contentType: false,
+                                    beforeSend: function (xhr) {
+                                        $('#AddCliente').modal('hide')
+                                        $('#ModalEventos').modal({
+                                            toggle: true,
+                                            backdrop: 'static',
+                                            keyboard: true,
+                                        });
+                                    },
+                                    success: function (data) {
+                                        if (data) {
+                                            SMSj('success', 'Cliente registrado correctamente')
+                                            $(`#${card} .client`).val(data.code);
+                                            $(`#${card} .nombres`).val($('#AddCliente .nombr').val().toLocaleUpperCase());
+                                            $(`#${card} .movil`).val($('#AddCliente .movi').val()).mask('**** $$$-$$$-$$$$', { reverse: true });
+                                            $(`#${card} .email`).val($('#AddCliente .mail').val());
+                                            $(`#${card} .documento`).val($('#AddCliente .document').val()).mask('AAAAAAAAAA');
+                                            $('#ModalEventos').modal('hide')
+                                        }
+                                    }
+                                });
+                            });
+                        }
+                    }
+                });
+            }
+        })
+        var ya = moment(fch).format('YYYY-MM-DD HH:mm');
+        $('.ya').val(ya)
+
+        var Años = (inic, dia, month) => {
+            dic = 0;
+            jun = 0;
+            var t1 = new Date(moment(fch).add(inic, 'month').startOf('month')).valueOf()
+            var t2 = new Date(moment(fch).add(month, 'month').endOf('month')).valueOf()
+            var r = $('#Emeses').val() || 0;
+            var data = new Array();
+            var q = 0;
+            var t3
+
+            while (t1 < t2) {
+                t1 = new Date(moment(fch).add(inic + q, 'month').endOf('month')).valueOf()
+                t3 = new Date(moment(fch).add(inic + q, 'month').startOf('month'))
+                data.push(t3)
+                q++
+            }
+
+            data.filter((r) => {
+                return r.getMonth() === 5 || r.getMonth() === 11;
+            }).map((r) => {
+                r.getMonth() === 5 ? jun++ : dic++;
+            });
+
+            /*$('#Emeses option[value="1"]').length ? $('#Emeses option[value="1"]').remove() : '';
+            $('#Emeses option[value="2"]').length ? $('#Emeses option[value="2"]').remove() : '';
+            $('#Emeses option[value="3"]').length ? $('#Emeses option[value="3"]').remove() : '';*/
+
+            if (jun > 0 && dic > 0) {
+                $('#Emeses').html(` 
+                            <option value="">Niguna</option>                       
+                            <option value="1">Junio</option>
+                            <option value="2">Diciembre</option>
+                            <option value="3">Jun & Dic</option>
+                        `);
+            } else if (jun > 0 && dic === 0) {
+                $('#Emeses').html(` 
+                            <option value="">Niguna</option>                       
+                            <option value="1">Junio</option>
+                        `);
+            } else if (jun === 0 && dic > 0) {
+                $('#Emeses').html(`
+                            <option value="">Niguna</option>
+                            <option value="2">Diciembre</option>
+                        `);
+            } else {
+                $('#Emeses').html(`<option value="">Niguna</option>`);
+            }
+            if (r) {
+                $(`#Emeses option[value='${r}']`).attr("selected", true);
+            }
+            fcha = moment(fch).format(`YYYY-MM-${dia}`);
+        }
+
+        Años(2, 1, 6);
+        $('.hoy').text(moment().format('YYYY-MM-DD'))
+        $('.totalote').val(Moneda(precio))
+        $('#p70').val(Moneda(cuota));
+
+        function Dt() {
+            bono = '';
+            $('#dto').val('0%');
+            $('#ahorro').val('$0');
+            $('#bono').val('');
+            $('#bonoid').val('');
+            $('.totalote').val($('#vrlote').val());
+            precio = parseFloat($('#vrlote').cleanVal());
+            inicial = precio * porcentage / 100
+            $('#cuotainicial').val(Moneda(inicial));
+            $('#p70').val(Moneda(precio - inicial));
+        };
+        $('#AgregarClient').click(function () {
+            $('#cliente2').show('slow');
+            $('.cliente2 input').prop('required', true);
+        });
+        $('#AgregarClient2').click(function () {
+            $('#cliente3').show('slow');
+            $('.cliente3 input').prop('required', true);
+        });
+        $('#AgregarClient3').click(function () {
+            $('#cliente4').show('slow');
+            $('.cliente4 input').prop('required', true);
+        });
+        $('.atras').click(function () {
+            $('.cliente2').hide('slow');
+            $('.cliente2 input').val('');
+            $('.cliente2 input').prop('required', false);
+        });
+        $('.atras3').click(function () {
+            $('.cliente3').hide('slow');
+            $('.cliente3 input').val('');
+            $('.cliente3 input').prop('required', false);
+        });
+        $('.atras4').click(function () {
+            $('.cliente4').hide('slow');
+            $('.cliente4 input').val('');
+            $('.cliente4 input').prop('required', false);
+        });
+        $('.edi').on('change', function () {
+            $('#acepto').prop("checked", false)
+            u = parseFloat($('#diferinicial').val());
+            D = parseFloat($('#dia').val());
+            N = parseFloat($('#ncuotas').val());
+
+
+            if ($(this).attr('id') === 'ncuotas' && $(this).val() === '0') {
+                $('#abono').val(Moneda(precio));
+            }
+
+            if ($(this).attr('id') === 'abono') {
+                if (parseFloat($(this).cleanVal()) < cpara || !$('#abono').val()) {
+                    $('#abono').val(Moneda(cpara))
+                    SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite')
+                } else if (parseFloat($(this).cleanVal()) > precio || !$('#abono').val()) {
+                    $('#abono').val(Moneda(cpara))
+                    SMSj('info', 'La separacion no ser mayor al valor del producto')
+                }
+            }
+            var abono = parseFloat($('#abono').val().replace(/\./g, ''));
+
+            if ($(`#ncuotas`).is(':disabled') && abono < precio) {
+                $(`#ncuotas option[value='1']`).prop('selected', true);
+                N = 1;
+            }
+
+            if (N > 1 && abono < inicial && $('#diferinicial').val() === '0') {
+                $(`#diferinicial option[value='1']`).prop('selected', true);
+                u = 1;
+            }
+
+            if (N < 6) {
+                $(`#Emeses option[value='0']`).attr('selected', true);
+                $('#cuotaestrao').val(null);
+            }
+
+            if (N === 2 && parseFloat($('#diferinicial').val()) > 1) {
+                $(`#diferinicial option[value='1']`).prop('selected', true);
+                u = 1;
+            }
+
+            Años(u + 1, D, N)
+            if ($(this).attr('id') === 'bono') {
+                if ($(this).val() !== bono && $(this).val()) {
+                    h = 1;
+                    $.ajax({
+                        url: '/links/bono/' + $(this).val(),
+                        type: 'GET',
+                        async: false,
+                        success: function (data) {
+                            if (data.length) {
+                                var fecha = moment(data[0].fecha).add(59, 'days').endOf("days");
+                                if (data[0].producto != null) {
+                                    SMSj('error', 'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado');
+                                    Dt();
+                                } else if (fecha < new Date()) {
+                                    SMSj('error', 'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado');
+                                    Dt();
+                                } else if (data[0].estado != 9) {
+                                    SMSj('error', 'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada');
+                                    Dt();
+                                } else {
+                                    var ahorr = Math.round(precio * data[0].descuento / 100)
+                                    $('#bonoid').val(data[0].id);
+                                    $('#ahorro').val(Moneda(ahorr));
+                                    precio = precio - ahorr;
+                                    inicial = precio * porcentage / 100;
+                                    $('#dto').val(data[0].descuento + '%');
+                                    $('#cuotainicial').val(Moneda(Math.round(inicial)))
+                                    $('#p70').val(Moneda(Math.round(precio - inicial)));
+                                    $('.totalote').val(Moneda(Math.round(precio)))
+                                    parseFloat($('#abono').val().replace(/\./g, '')) > precio ? $('#abono').val(Moneda(precio)) : '';
+                                }
+                                bono = data[0].pin;
+                            } else {
+                                Dt();
+                                SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado')
+                            }
+                        }
+                    });
+                } else {
+                    Dt();
+                    SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado')
+                }
+            }
+
+            if (u > 1 && h === 1) {
+                h = 2
+                Dt();
+                $('#bono').val('').attr('disabled', true);
+                SMSj('info', 'Recuerde que si difiere la cuota inicial a mas de 1 no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado');
+            } else if (u > 1) {
+                Dt();
+                $('#bono').attr('disabled', true);
+            } else {
+                h = 1
+                $('#bono').attr('disabled', false);
+            }
+
+            separacion = abono;
+            var Estra = () => {
+                cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
+                var co = $('#cuotaestrao').val() ? $('#Emeses').val() : "0";
+                switch (co) {
+                    case "1":
+                        cut = cuotaextrao * jun
+                        mesesextra = 6
+                        meses = jun
+                        break;
+                    case "2":
+                        cut = cuotaextrao * dic
+                        mesesextra = 12
+                        meses = dic
+                        break;
+                    case "3":
+                        cut = cuotaextrao * (jun + dic)
+                        mesesextra = 2
+                        meses = jun + dic
+                        break;
+                    default:
+                        cut = 0
+                        mesesextra = 0
+                        meses = 0
+                }
+                cuota = cuota - cut;
+                $('#extran').val(meses)
+            }
+            if (separacion === precio) {
+                Años(0, D, N)
+                cuota = 0;
+                Estra()
+                cuota30 = 0;
+                cuota70 = 0;
+                $(`#diferinicial option[value='0']`).attr('selected', true);
+                $(`#Emeses option[value='0']`).attr('selected', true);
+                $('#cuotaestrao').val(null);
+                $('#cuotaestrao').attr('disabled', true);
+                $("#diferinicial").attr('disabled', true);
+                $(`#Emeses`).attr('disabled', true);
+                $(`#ncuotas`).attr('disabled', true);
+                $(`#dia`).attr('disabled', true);
+
+            } else if (separacion >= inicial) {
+                Años(0, D, N)
+                resl = separacion - inicial;
+                cuota = Math.round(precio - resl - inicial);
+                Estra()
+                cuota30 = 0;
+                cuota70 = Moneda(Math.round(cuota / (N - meses)));
+                $(`#diferinicial option[value='0']`).attr('selected', true);
+                $("#diferinicial").attr('disabled', true);
+            } else {
+                cuota = Math.round(precio - inicial);
+                Estra()
+                cuota30 = Moneda(Math.round((inicial - separacion) / u))
+                cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
+                $("#diferinicial").prop('disabled', false);
+                $(`#Emeses`).prop('disabled', false);
+                $('#cuotaestrao').prop('disabled', false);
+                $(`#dia`).attr('disabled', false);
+                $(`#ncuotas`).attr('disabled', false);
+            }
+
+            recolecta = {
+                separacion: Moneda(separacion),
+                cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
+                cuota30: N === 1 ? 0 : cuota30,
+                oficial30,
+                oficial70,
+                N,
+                u,
+                fcha,
+                fcha2: moment(fch).format('YYYY-MM-DD'),
+                mesesextra,
+                extra: $('#cuotaestrao').val()
+            }
+            cuota70 ? $('#cuota').val(cuota70.replace(/\./g, '')) : $('#cuota').val(0);
+            $.ajax({
+                url: '/links/tabla/1',
+                type: 'POST',
+                data: recolecta,
+                async: false,
+                success: function (data) {
+                    tabla.ajax.reload(function (json) {
+                        //SMSj('success', 'Se realizaron cambios exitosamente')
+                    }); console.log('aqi')
+                }
+            });
+        })
+        var tabla = $("#datatables-clients").DataTable({
+            dom: '<"toolbar">',
+            info: false,
+            /*responsive: {
+                details: {
+                    display: $.fn.dataTable.Responsive.display.childRowImmediate,
+                    type: 'none',
+                    target: ''
+                }
+            }*/
+            responsive: true,
+            ajax: {
+                method: "POST",
+                url: "/links/tabla/2",
+                dataSrc: "data"
+            },
+            columns: [
+                { data: "n" },
+                {
+                    data: "fecha",
+                    render: function (data, method, row) {
+                        return moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
+                    }
+                },
+                { data: "oficial" },
+                { data: "cuota" },
+                { data: "stado" },
+                { data: "n2" },
+                {
+                    data: "fecha2",
+                    render: function (data, method, row) {
+                        return data ? moment.utc(data).format('YYYY-MM-DD') + `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">` : '';
+                    }
+                },
+                { data: "cuota2" },
+                { data: "stado2" }
+            ],
+            columnDefs: [
+                { "visible": false, "targets": groupColumn },
+                { responsivePriority: 1, targets: 0 },
+                { responsivePriority: 2, targets: 1 },
+                { responsivePriority: 3, targets: 3 },
+                { responsivePriority: 4, targets: 4 }
+            ],
+            order: [[groupColumn, 'asc']],
+            displayLength: 50,
+            initComplete: function (settings, json) {
+                //hacer algo apenas cargue la tabla
+            },
+            drawCallback: function (settings) {
+                var api = this.api();
+                var rows = api.rows({ page: 'current' }).nodes();
+                var last = null;
+
+                api.column(groupColumn, { page: 'current' }).data().each(function (group, i) {
+                    if (last !== group) {
+                        $(rows).eq(i).before(
+                            '<tr class="group"><td colspan="8">' + group + '</td></tr>'
+                        );
+
+                        last = group;
+                    }
+                });
+            }
+        });
+    });
+    var opcion = 'no';
+    $('#enviodeorden').submit(function (e) {
+        if (opcion === 'no') {
+            e.preventDefault();
+            var datos = { movil: $('#movil').cleanVal() }
+            $.ajax({
+                url: '/links/codigo',
+                type: 'POST',
+                data: datos,
+                //async: false,
+                success: function (data) {
+                    $('#codigodeverificacion').val(data);
+                }
+            });
+            $('#modalorden').modal('toggle');
+            $('#modalorden').one('shown.bs.modal', function () {
+                $('#modalorden #codeg').focus();
+            })
+        } else {
+            $('#enviodeorden input').prop('disabled', false);
+        }
+
+    })
+    $('#enviarorden').click(function () {
+        var code1 = $('#codigodeverificacion').val()
+        var code2 = $('#codeg').val()
+        if (code1 == code2) {
+            opcion = 'si';
+            $('#modalorden').modal('toggle');
+            $('#enviodeorden').submit();
+        } else {
+            $('#modalorden').modal('toggle');
+            SMSj('error', 'Codigo de confirmación incorrecto, intentelo nuevamente')
+        }
+
+    })
+};
+/////////////////////////////* SOLICITUDES *//////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/solicitudes`) {
+    $('.sidebar-item').removeClass('active');
+    $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+    minDateFilter = "";
+    maxDateFilter = "";
+    var idExtracto = false;
+    var dateExtracto = false;
+
+    $.fn.dataTableExt.afnFiltering.push(
+        function (oSettings, aData, iDataIndex) {
+            if (typeof aData._date == 'undefined') {
+                aData._date = new Date(aData[3]).getTime()
+                //console.log(aData._date, aData[3], aData.length)
+            }
+            if (minDateFilter && !isNaN(minDateFilter)) {
+                if (aData._date < minDateFilter) {
+                    return false;
+                }
+            }
+            if (maxDateFilter && !isNaN(maxDateFilter)) {
+                if (aData._date > maxDateFilter) {
+                    return false;
+                }
+            }
+            return true;
+        }
+    );
+    $('.card-header').on('click', function () {
+        var papa = $(this).parents('.accordion');
+        if ($(this).find('i').hasClass('fa-angle-down')) {
+            $(papa).find('.card-header i').removeClass("fa-angle-up");
+            $(papa).find('.card-header i').addClass("fa-angle-down");
+
+            $(this).find('i').removeClass("fa-angle-down");
+            $(this).find('i').addClass("fa-angle-up");
+
+        } else {
+            $(this).find('i').removeClass("fa-angle-up");
+            $(this).find('i').addClass("fa-angle-down");
+        }
+    });
+    $(document).ready(function () {
+        $("#Date_search").html("");
+        $('a.toggle-vis').on('click', function (e) {
+            e.preventDefault();
+            var column = table.column($(this).attr('data-column'));
+            column.visible(!column.visible());
+        });
+    });
+    var Color = (val) => {
+        var elemen = $(`#t-${val}`);
+        if (elemen.hasClass('i')) {
+            elemen.css('background-color', 'transparent');
+            elemen.removeClass('.i');
+        } else {
+            elemen.css('background-color', '#FFFFCC');
+            elemen.addClass('i');
+        }
+    }
+    var Recibos = $('#Recibos').DataTable({
+        //lengthMenu: -1,
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/pago",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            //$('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+        },
+        columns: [
+            {
+                className: 't',
+                data: "ids"
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "fech",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD HH:mm A') //pone la fecha en un formato entendible
+                }
+            },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "facturasvenc" },
+            {
+                data: "recibo",
+                render: function (data, method, row) {
+                    return data.replace(/~/g, '')
+                }
+            },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            { data: "tipobsevacion" },
+            { data: "descrip" },
+            { data: "cparacion" },
+            { data: "bonoanular" },
+            {
+                data: "montoa",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "ordenanu" }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        }
+    });
+    var table = $('#datatable').DataTable({
+        //dom: 'Bfrtip',
+        /*lengthMenu: [
+            [10, 25, 50, -1],
+            ['10 filas', '25 filas', '50 filas', 'Ver todo']
+        ],*/
+        lengthChange: false,
+        /*buttons: [{
+            extend: 'pageLength',
+            text: 'Ver',
+            orientation: 'landscape'
+        },
+        {
+            text: `ed`,
+            attr: {
+                title: 'Fecha',
+                id: 'gg'
+            },
+            className: 'btn btn-secondary'
+        },
+        {
+            text: `<input id="min" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+            placeholder="MZ">`,
+            attr: {
+                title: 'Busqueda por MZ',
+                id: ''
+            },
+            className: 'btn btn-secondary min'
+        },
+        {
+            text: `<input id="max" type="text" class="edi text-center" style="width: 40px; padding: 1px;"
+            placeholder="LT">`,
+            attr: {
+                title: 'Busqueda por LT',
+                id: ''
+            },
+            className: 'btn btn-secondary max'
+        }, //<i class="align-middle feather-md" data-feather="calendar"></i> src\public\bank\Movimientos.xlsm
+        admin === '1' ? {
+            text: `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" 
+            viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" 
+            stroke-linecap="round" stroke-linejoin="round" class="feather feather-download">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                <polyline points="7 10 12 15 17 10"></polyline>
+                <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>`,
+            attr: {
+                title: 'Descargar movimientos bacarios'
+            },
+            className: 'btn btn-secondary',
+            action: function () {
+                const link = document.createElement('a');
+                link.href = '/bank/Movimientos.xlsm';
+                link.download = "Movimientos.xlsm";
+                link.dispatchEvent(new MouseEvent('click'));
+            }
+        } : '',
+        {
+            extend: 'collection',
+            text: 'Stds',
+            orientation: 'landscape',
+            buttons: [
+                {
+                    text: 'COPIAR',
+                    extend: 'copy'
+                },
+                {
+                    text: `PENDIENTES`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD(11, 'Pendiente');
+                    }
+                },
+                {
+                    text: `APROBADOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD(11, 'Aprobada');
+                    }
+                },
+                {
+                    text: `ANULADOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD(11, 'Anulada');
+                    }
+                },
+                {
+                    text: `TODOS`,
+                    className: 'btn btn-secondary',
+                    action: function () {
+                        STAD('', '');
+                    }
+                }
+            ]
+        }
+        ],*/
+        deferRender: true,
+        paging: true,
+        autoWidth: true,
+        search: {
+            regex: true,
+            caseInsensitive: true,
+        },
+        responsive: true,
+        order: [[0, "desc"]], //[0, "asc"]
+        language: languag2,
+        ajax: {
+            method: "POST",
+            url: "/links/solicitudes/pago",
+            dataSrc: "data"
+        },
+        initComplete: function (settings, json, row) {
+            //$('#datatable_filter').prepend("<h3 class='float-left mt-2'>PAGOS</h3>");
+        },
+        columns: [
+            {
+                className: 't',
+                data: "ids"
+            },
+            { data: "fullname" },
+            { data: "nombre" },
+            {
+                data: "fech"
+            },
+            {
+                data: "fecharcb",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            { data: "proyect" },
+            { data: "mz" },
+            { data: "n" },
+            { data: "descp" },
+            {
+                data: "monto",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "facturasvenc" },
+            {
+                data: "recibo",
+                render: function (data, method, row) {
+                    return data.replace(/~/g, '')
+                }
+            },
+            {
+                data: "stado",
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 4:
+                            return `<span class="badge badge-pill badge-success">Aprobada</span>`
+                            break;
+                        case 6:
+                            return `<span class="badge badge-pill badge-danger">Anulada</span>`
+                            break;
+                        case 3:
+                            return `<span class="badge badge-pill badge-info">Pendiente</span>`
+                            break;
+                        default:
+                            return `<span class="badge badge-pill badge-secondary">sin formato</span>`
+                    }
+                }
+            },
+            {
+                className: 't',
+                data: "pdf",
+                render: function (data, method, row) {
+                    return data ? `<a href="${data}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i></a>`
+                        : `<a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`;
+                }
+            },
+            { data: "aprueba" },
+            {
+                data: "estado",
+                className: 'te',
+                render: function (data, method, row) {
+                    switch (data) {
+                        case 1:
+                            return `<span class="badge badge-pill badge-warning" title="Estado en el que aun no se a ingresado ningun pago desde el momento de la separacion\nLote ${row.lote}">Pendiente</span>`
+                            break;
+                        case 8:
+                            return `<span class="badge badge-pill badge-info" title="Pago que se encuentra pendiente de aprobar por el area de contabilidad\nLote ${row.lote}">Tramitando</span>`
+                            break;
+                        case 9:
+                            return `<span class="badge badge-pill badge-danger" title="Lote ${row.lote}">Anulada</span>`
+                            break;
+                        case 10:
+                            return `<span class="badge badge-pill badge-success" title="Pago total del valor de la cuota inicial del lote\nLote ${row.lote}">Separado</span>`
+                            break;
+                        case 12:
+                            return `<span class="badge badge-pill badge-dark" title="Primer pago que se le realiza al lote por concepto de separacion\nLote ${row.lote}">Apartado</span>`
+                            break;
+                        case 13:
+                            return `<span class="badge badge-pill badge-primary" title="Pago total del valor del lote\nLote ${row.lote}">Vendido</span>`
+                            break;
+                        case 15:
+                            return `<span class="badge badge-pill badge-tertiary" title="Lote ${row.lote}">Inactivo</span>` //secondary
+                            break;
+                    }
+                }
+            },
+            { data: "cparacion" },
+            { data: "extr" },
+            {
+                data: "consignado",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            {
+                data: "date",
+                render: function (data, method, row) {
+                    return moment(data).format('YYYY-MM-DD')
+                }
+            },
+            { data: "description" },
+            { data: "lugar" },
+            { data: "tipobsevacion" },
+            { data: "descrip" },
+            { data: "bonoanular" },
+            {
+                data: "montoa",
+                render: $.fn.dataTable.render.number('.', '.', 0, '$')
+            },
+            { data: "ordenanu" }
+        ],
+        rowCallback: function (row, data, index) {
+            if (data["stado"] == 6) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            } else if (data["stado"] == 3) {
+                $(row).css("background-color", "#00FFFF");
+            } else if (data["stado"] == 4) {
+                $(row).css("background-color", "#40E0D0");
+            }
+        }
+    });
+    $('#busq').on('keyup', function () {
+        table.search(this.value).draw();
+    });
+    $('#datatable_filter').hide();
+    $('#min, #max').on('keyup', function () {
+        var col = $(this).attr('id') === 'min' ? 6 : 7;
+        table
+            .columns(col)
+            .search(this.value)
+            .draw();
+    });
+    table.on('click', 'td:not(.t)', function () {
+        var fila = $(this).parents('tr');
+        var data = table.row(fila).data(); //console.log(data)
+        var imagenes = data.img === null ? '' : data.img.indexOf(",") > 0 ? data.img.split(",") : data.img
+        IDS = data.ids
+        fila.toggleClass('selected');
+        BancoExt.$('tr.selected').removeClass('selected');
+
+        if (Array.isArray(imagenes)) {
+            var marg = 100 / (imagenes.length - 1);
+            imge = imagenes.length - 1
+            //$("#Modalimg img:not(.foto)").remove();
+            $("#Modalimg .foto").remove();
+            $("#descargaimg .imag").remove();
+            imagenes.map((e) => {
+                if (e) {
+                    $("#descargaimg").append(`<a class="imag mr-2" href="${e}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
+                    $("#Modalimg .fotos").append(
+                        `<div class="foto" style="
+                        width: ${marg}%;
+                        padding-top: calc(100% / (16/9));
+                        background-image: url('${e}');
+                        background-size: 100%;
+                        background-position: center;
+                        background-repeat: no-repeat;float: left;">
+                    </div>`);
+                }
+            })
+        } else if (imagenes) {
+            imge = 1
+            $("#Modalimg .foto").remove();
+            $("#descargaimg .imag").remove();
+            $("#descargaimg").html(`<a class="imag" href="${data.img}" target="_blank"><span class="badge badge-dark">Img</span></a>`)
+            $("#Modalimg .fotos").append(
+                `<div class="foto" style="
+                    width: 100%;
+                    padding-top: calc(100% / (16/9));
+                    background-image: url('${data.img}');
+                    background-size: 100%;
+                    background-position: center;
+                    background-repeat: no-repeat;float: left;">
+                </div>`);
+        }
+
+        $('.imag').on('click', function () {
+            const link = document.createElement('a');
+            link.href = $(this).attr('href'); //'/bank/Movimientos.xlsm';
+            link.download = "recibo" + data.ids + ".jpg";
+            link.dispatchEvent(new MouseEvent('click'));
+        });
+        var fechaRecibo = moment.utc(data.fecharcb).format('YYYY-MM-DD');
+        var fechaExtrato = moment.utc(data.date).format('YYYY-MM-DD');
+        $('#Modalimg .fecha').html(moment.utc(data.fech).format('YYYY-MM-DD HH:mm'));
+        $('#Modalimg .cliente').html(data.nombre);
+        $('#Modalimg .proyecto').html(data.proyect);
+        $('#Modalimg .mz').html('MZ: ' + data.mz);
+        $('#Modalimg .lote').html('LT: ' + data.n);
+        $('#Modalimg .recibo').html('RCB ' + data.recibo.replace(/~/g, ' ')).parents('tr').css({ "background-color": "#162723", "color": "#FFFFFF" });
+        $('#Modalimg .fechaRcb').html(fechaRecibo);
+        $('#Modalimg .fatvc').html(data.facturasvenc); //'FAT.VEC: ' + 
+        $('#Modalimg .monto').html('$' + Moneda(data.monto)).parents('td').css({ "background-color": "#162723", "color": "#FFFFFF" });;
+        $('#montopago').val(data.monto);
+        $('#Modalimg .bonoo').html(data.bono || 'NO APLICA');
+        $('#Modalimg .bonom').html('$' + Moneda(data.mount || 0));
+        $('#apde').attr('data-toggle', "dropdown");
+        $('#apde').next().html(`<a class="dropdown-item">Enviar</a>`);
+        $('#stadopago').val(data.stado);
+        $('#idSolicitud').val(data.ids);
+        $('#aprobadoEl').html(data.aprobado && 'Aprobado el ' + moment(data.aprobado).format('llll'));
+
+        let esFecha = moment(data.fecharcb, true).isValid();
+        !esFecha && alert('Debe establecer una fecha al recibo a continuacion donde se muestra "Fecha inválida"');
+
+        var nuevaFechaRecibo = moment($('#Modalimg .fechaRcb').html(), true).isValid()
+            ? $('#Modalimg .fechaRcb').html() : false;
+
+        var diferenciaDeFechas = Math.abs(moment(data.fecharcb).diff(moment(data.date), 'days'));
+
+        fechaExtrato < fechaRecibo && alert('La fecha del recibo no coincide con la del extrato, y esto no es posible ya que causara una contabilidad erronea');
+
+        if (!isNaN(diferenciaDeFechas) && diferenciaDeFechas > 5) {
+            alert('La diferencia de dias entre la fecha del extato y la fecha del recibo es de ' + diferenciaDeFechas + ' dias, para fines contables esto no debe ser posible por favor revice el caso, de lo contrario seguira generandose este aviso');
+        }
+        switch (data.stado) {
+            case 4:
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-success">Aprobada</span>`);
+                if (data.extr && !rol.externo) {
+                    BuscarFechaRcb(data.fecharcb, data.extr)
+                    //BancoExt.columns(0,).search(data.extr).draw();
+                    $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
+                                            <a class="dropdown-item">Enviar</a>`);
+                } else if (!rol.externo) {
+                    //BancoExt.columns(0).search('').draw();
+                    BuscarFechaRcb(data.fecharcb)
+                    $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
+                                            <a class="dropdown-item">Enviar</a>`);
+                }
+                break;
+            case 6:
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
+                break;
+            case 3:
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
+                //BancoExt.columns(0).search('').draw();
+                !rol.externo && BuscarFechaRcb(data.fecharcb);
+                $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
+                                        <a class="dropdown-item">Declinar</a>`);
+                break;
+            default:
+                $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
+        }
+        var zoom = 200
+        $(".foto").on({
+            mousedown: function () {
+                zoom += 50
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseup: function () {
+
+            },
+            mousewheel: function (e) {
+                //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+                if (e.deltaY > 0) { zoom += 50 } else { zoom < 150 ? zoom = 100 : zoom -= 50 }
+                $(this).css("background-size", zoom + "%")
+            },
+            mousemove: function (e) {
+                let width = this.offsetWidth;
+                let height = this.offsetHeight;
+                let mouseX = e.offsetX;
+                let mouseY = e.offsetY;
+
+                let bgPosX = (mouseX / width * 100);
+                let bgPosY = (mouseY / height * 100);
+
+                this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+            },
+            mouseenter: function (e) {
+                $(this).css("background-size", zoom + "%")
+            },
+            mouseleave: function () {
+                $(this).css("background-size", "100%")
+                this.style.backgroundPosition = "center";
+            }
+        });
+        if (rol.contador) {
+            $('.dropdown-item').show()
+            $('#nove').show()
+        } else {
+            $('.dropdown-item').hide()
+        }
+        $('#Modalimg').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+        });
+
+        $('.dropdown-item').on('click', function () {
+            var accion = $(this).text(), porque = '', fd = new FormData(), mensaje = false;
+            //console.log(accion)
+            //var w = Seleccion();
+            fd.append('pdef', data.pdf);
+            fd.append('ids', data.ids);
+            fd.append('movil', data.movil);
+            fd.append('nombre', data.nombre);
+            fd.append('extr', extr);
+            fd.append('Orden', data.cparacion)
+            fd.append('ahora', moment().format('YYYY-MM-DD HH:mm'));
+
+            idExtracto && fd.append('idExtracto', idExtracto);
+            //console.log(w.length, imge, accion, totalasociados);
+
+            if (accion === 'Declinar' && rol.contador) {
+                porque = prompt("Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago", "Solicitud rechazada por que");
+                if (porque) {
+                    fd.append('img', data.img);
+                    fd.append('por', porque);
+                    fd.append('fullname', data.fullname);
+                    fd.append('cel', data.cel);
+                    fd.append('mz', data.mz);
+                    fd.append('n', data.n);
+                    fd.append('proyect', data.proyect);
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                                $('#ModalEventos').modal('hide')
+                            } else {
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`)
+                                $('#ModalEventos').modal('hide')
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+            } else if (accion === 'Asociar' && rol.contador && !rol.externo) {
+                if (!idExtracto) {
+                    alert('Debe seleccionar un extrato antes de intentar asociar al pago');
+                    return false;
+                }
+
+                if (!nuevaFechaRecibo) {
+                    alert('Debe establecer una fecha al recibo antes de asociar');
+                    return false;
+                }
+                $.ajax({
+                    type: 'PUT',
+                    url: '/links/solicitudes/' + accion,
+                    data: fd,
+                    processData: false,
+                    contentType: false,
+                    beforeSend: function (xhr) {
+                        $('#Modalimg').modal('hide');
+                        $('#ModalEventos').modal({
+                            backdrop: 'static',
+                            keyboard: true,
+                            toggle: true
+                        });
+                    },
+                    success: function (data) {
+                        if (data) {
+                            SMSj('success', `Solicitud procesada correctamente`);
+                            $('#ModalEventos').modal('hide')
+                            table.ajax.reload(null, false)
+                            BancoExt.ajax.reload(null, false)
+                        } else {
+                            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                            $('#ModalEventos').modal('hide')
+                        }
+                    },
+                    error: function (data) {
+                        console.log(data);
+                    }
+                })
+            } else if (accion === 'Desasociar' && rol.contador && !rol.externo) {
+                //console.log(extr)
+                if (!idExtracto) {
+                    alert('Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción');
+                } else if (confirm("Seguro deseas desasociar este extrato del pago?")) {
+                    var ed = data.ids;
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false)
+                                BancoExt.ajax.reload(null, false)
+                                $('#ModalEventos').modal('hide')
+                                Buscar(ed);
+                            } else {
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide')
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+            } else if ((accion === 'Enviar' || accion === 'Aprobar') && rol.contador) {
+                if (!rol.externo && !idExtracto && accion === 'Aprobar') {
+                    alert('Debe asociar un extrato al pago que desea aprobar');
+                    return false;
+                }
+                if (!rol.externo && !nuevaFechaRecibo) {
+                    alert('Debe establecer una fecha al recibo antes de realizar esta accion');
+                    return false;
+                }
+
+                data.pdf ? mensaje = confirm("Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente")
+                    : mensaje = true;
+
+                if (mensaje) {
+                    $.ajax({
+                        type: 'POST',
+                        url: '/links/solicitudes/saldo',
+                        data: {
+                            solicitud: data.ids,
+                            lote: data.lote,
+                            fecha: data.fech
+                        },
+                        async: true,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (dat) {
+                            /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                            if (dat) {
+                                var acumulad = dat.d === 'NO' ? 0 : dat.d;
+                                var doc = new jsPDF('l', 'mm', 'a5');
+                                var totall = data.valor - data.ahorro;
+                                var fech = data.fech
+                                var saldo = totall - acumulad;
+                                var bon = data.mount === null ? 0 : data.mount;
+                                var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon
+                                var img2 = new Image();
+                                var img = new Image();
+                                img.src = '/img/avatars/avatar.png'
+                                img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`
+                                var totalPagesExp = '{total_pages_count_string}'
+                                //doc.addPage("a3"); 
+                                doc.autoTable({
+                                    head: [
+                                        { id: 'ID', name: 'Name', email: 'Email', city: 'City', expenses: 'Sum' },
+                                    ],
+                                    body: [{
+                                        id: '',
+                                        name: '',
+                                        email: '',
+                                        city: 'RECIBO DE CAJA',
+                                        expenses: data.ids
+                                    },
+                                    {
+                                        id: 'CLIENTE',
+                                        name: data.nombre + ' ' + data.email,
+                                        email: 'CC: ' + data.documento,
+                                        city: data.movil,
+                                        expenses: ''
+                                    },
+                                    {
+                                        id: 'PRODUCTO',
+                                        name: data.proyect,
+                                        email: 'MZ. ' + data.mz,
+                                        city: 'LT. ' + data.n,
+                                        expenses: ''
+                                    },
+                                    {
+                                        id: 'CONCEPTO',
+                                        name: 'PAGO',
+                                        email: data.descp,
+                                        city: 'CUOTA #',
+                                        expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+                                    },
+                                    {
+                                        id: 'F PAGO',
+                                        name: data.formap,
+                                        email: 'R ' + data.recibo,
+                                        city: 'MONTO',
+                                        expenses: '$' + Moneda(data.monto)
+                                    },
+                                    {
+                                        id: 'BONO',
+                                        name: data.bono === null ? 'NO APLICA' : data.bono,
+                                        email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                                        city: 'MONTO',
+                                        expenses: '$' + Moneda(bon)
+                                    },
+                                    {
+                                        id: 'TOTAL',
+                                        name: `${NumeroALetras(totl)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(totl)
+                                    }/* ,
+                                    {
+                                        id: 'SLD FECHA',
+                                        name: `${NumeroALetras(saldo)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(saldo)
+                                    },
+                                    {
+                                        id: 'TOTAL SLD',
+                                        name: `${NumeroALetras(saldo - totl)} MCT********`,
+                                        email: '',
+                                        city: '',
+                                        expenses: '$' + Moneda(saldo - totl)
+                                    } */],
+                                    //html: '#tablarecibo',
+                                    showHead: false,
+                                    columnStyles: {
+                                        //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+                                        id: { textColor: 0, fontStyle: 'bold' },
+                                        0: { cellWidth: '50' },
+                                        1: { cellWidth: 'auto' },
+                                        2: { cellWidth: 'wrap' },
+                                        3: { cellWidth: 'wrap' },
+                                    },
+                                    didDrawPage: function (data) {
+                                        // Header
+                                        doc.setTextColor(0)
+                                        doc.setFontStyle('normal')
+                                        if (img) {
+                                            doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20)
+                                            doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20)
+                                        }
+                                        doc.setFontSize(15)
+                                        doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15)
+                                        doc.setFontSize(7)
+                                        doc.text(fech, data.settings.margin.left + 165, 8)
+                                        doc.setFontSize(10)
+                                        doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20)
+                                        doc.setFontSize(10)
+                                        doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25)
+                                        doc.setFontSize(8)
+                                        doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left + 18, 30)
+
+                                        // Footer
+                                        var str = 'Page ' + doc.internal.getNumberOfPages()
+                                        // Total page number plugin only available in jspdf v1.0+
+                                        if (typeof doc.putTotalPages === 'function') {
+                                            str = str + ' of ' + totalPagesExp
+                                        }
+                                        doc.setFontSize(8)
+
+                                        // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+                                        var pageSize = doc.internal.pageSize
+                                        var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
+                                        doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+                                    },
+                                    margin: { top: 34 },
+                                })
+                                // Total page number plugin only available in jspdf v1.0+
+                                if (typeof doc.putTotalPages === 'function') {
+                                    doc.putTotalPages(totalPagesExp)
+                                }
+                                var blob = doc.output('blob')
+                                /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+                                fd.append('pdf', blob);
+                                fd.append('acumulado', acumulad);
+                                $.ajax({
+                                    type: 'PUT',
+                                    url: '/links/solicitudes/' + accion,
+                                    data: fd,
+                                    processData: false,
+                                    contentType: false,
+                                    success: function (data) {
+                                        if (data.std) {
+                                            SMSj('success', data.msg);
+                                            table.ajax.reload(null, false)
+                                            $('#ModalEventos').modal('hide')
+                                        } else {
+                                            SMSj('error', data.msg)
+                                            $('#ModalEventos').modal('hide')
+                                        }
+                                    },
+                                    error: function (data) {
+                                        console.log(data);
+                                    }
+                                })
+                            } else {
+                                SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar');
+                                $('#ModalEventos').modal('hide');
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                } else {
+                    $.ajax({
+                        type: 'PUT',
+                        url: '/links/solicitudes/' + accion,
+                        data: fd,
+                        processData: false,
+                        contentType: false,
+                        beforeSend: function (xhr) {
+                            $('#Modalimg').modal('hide');
+                            $('#ModalEventos').modal({
+                                backdrop: 'static',
+                                keyboard: true,
+                                toggle: true
+                            });
+                        },
+                        success: function (data) {
+                            if (data) {
+                                SMSj('success', `Solicitud procesada correctamente`);
+                                table.ajax.reload(null, false);
+                                $('#ModalEventos').modal('hide');
+                            } else {
+                                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                                $('#ModalEventos').modal('hide');
+                            }
+                        },
+                        error: function (data) {
+                            console.log(data);
+                        }
+                    })
+                }
+=======
         `);
     }
   };
@@ -11375,6 +12865,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
                   },
                 });
               });
+>>>>>>> a8cd6d89450d22494cc5d96f3cfea5117350937d
             }
           },
         });
