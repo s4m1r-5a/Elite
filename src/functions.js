@@ -1274,7 +1274,7 @@ async function EstadoDeCuenta(Orden) {
                     columns: [
                         [
                             { text: 'ESTADO DE CUENTA', style: 'header' },
-                            'Conoce aqui el estado el estado de tus pagos y montos',
+                            'Conoce aqui el estado de tus pagos y montos',
                             { text: Proyeccion[0].nombre, style: 'subheader' },
                             {
                                 text: `Doc. ${Proyeccion[0].documento}         Movil ${Proyeccion[0].movil}        ${Proyeccion[0].email}`,
