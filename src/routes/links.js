@@ -6802,7 +6802,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
     await directas.map(async (a, x) => {
       var estdStatus = (a.estado === 10 || a.estado === 13) && a.status > 1;
       var i = a.nrango > 6 ? Math.min(a.sucursal, a.maxcomis) : a.comision;
-      console.log("hkhsskdkhsdhkdksdh" + i);
+      //console.log("hkhsskdkhsdhkdksdh" + i);
       var val = a.valor - a.ahorro;
       var monto = val * i;
       var retefuente = monto * 0.1;
@@ -7790,7 +7790,7 @@ async function ProyeccionPagos(S) {
   const Abonos = await pool.query(
     `SELECT s.ids, s.monto, s.fech, s.fecharcb, a.dcto, a.estado FROM solicitudes s 
     LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND s.stado = 4 AND s.orden = ? 
-    ORDER BY TIMESTAMP(s.fech)`,
+    ORDER BY TIMESTAMP(s.fecharcb), TIMESTAMP(s.fech)`,
     S
   );
   const Moras = await pool.query(`SELECT * FROM intereses`);

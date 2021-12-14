@@ -1400,7 +1400,7 @@ async function FacturaDeCobro(ids) {
 }
 async function EstadoDeCuenta(Orden) {
   const Proyeccion = await pool.query(
-    `SELECT c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, 
+    `SELECT c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
     o.proyect, k.pin AS cupon, s.stado, p.ahorro, l.mz, l.n, l.valor, p.vrmt2, l.mtr2, p.fecha, s.ids, 
     s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora,
@@ -1408,7 +1408,7 @@ async function EstadoDeCuenta(Orden) {
     LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN preventa p ON c.separacion = p.id 
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
     LEFT JOIN cupones k ON k.id = p.cupon INNER JOIN clientes cl ON p.cliente = cl.idc 
-    WHERE p.id = ? ORDER BY TIMESTAMP(c.fechs) ASC;`,
+    WHERE p.id = ? ORDER BY TIMESTAMP(c.fechs) ASC, TIMESTAMP(s.fecharcb) ASC;`,
     Orden
   );
 
@@ -1459,7 +1459,11 @@ async function EstadoDeCuenta(Orden) {
             e.montocuota ? e.dcto * 100 + "%" : "0%",
             "$" + Moneda(e.montocuota ? e.totalmora : TotalMora),
             "$" + Moneda(e.montocuota ? e.totalcuota : TotalCuota),
-            e.fech && (Ids ? moment(e.fech).format("L") : "--/--/----"),
+            e.fecharcb
+              ? Ids
+                ? moment(e.fecharcb).format("L")
+                : "--/--/----"
+              : e.fech && (Ids ? moment(e.fech).format("L") : "--/--/----"),
             Ids ? "$" + Moneda(e.monto || 0) : "$---,---,--",
             "$" + Moneda(e.montocuota ? e.saldocuota : TotalCuota),
           ]
@@ -1468,7 +1472,7 @@ async function EstadoDeCuenta(Orden) {
         bodi.push(
           ["Fecha", "Recibo", "Estado", "Forma de pago", "Tipo", "Monto"],
           [
-            moment(e.fech).format("L"),
+            e.fecharcb ? moment(e.fecharcb).format("L") : "--/--/----",
             `RC${e.ids}`,
             {
               text: e.stado === 4 ? "Aprobado" : "Pendiente",
@@ -1512,7 +1516,11 @@ async function EstadoDeCuenta(Orden) {
           e.montocuota ? e.dcto * 100 + "%" : "0%",
           "$" + Moneda(e.montocuota ? e.totalmora : TotalMora),
           "$" + Moneda(e.montocuota ? e.totalcuota : TotalCuota),
-          e.fech && (Ids ? moment(e.fech).format("L") : "--/--/----"),
+          e.fecharcb
+            ? Ids
+              ? moment(e.fecharcb).format("L")
+              : "--/--/----"
+            : e.fech && (Ids ? moment(e.fech).format("L") : "--/--/----"),
           Ids ? "$" + Moneda(e.monto || 0) : "$---,---,--",
           "$" + Moneda(e.montocuota ? e.saldocuota : TotalCuota),
         ]);
@@ -1520,7 +1528,7 @@ async function EstadoDeCuenta(Orden) {
         e.monto &&
           IDs !== e.ids &&
           bodi.push([
-            moment(e.fech).format("L"),
+            e.fecharcb ? moment(e.fecharcb).format("L") : "--/--/----",
             `RC${e.ids}`,
             {
               text: e.stado === 4 ? "Aprobado" : "Pendiente",
@@ -1994,7 +2002,7 @@ async function EstadoDeCuenta(Orden) {
             'Grupo Elite te da la bienvenida',
             [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
         ); */
-    return true; //JSON.stringify(estado);
+    return ruta; //JSON.stringify(estado);
   } else {
     return { sent: false };
   }
