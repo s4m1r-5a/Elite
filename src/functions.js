@@ -1545,7 +1545,7 @@ async function EstadoDeCuenta(Orden) {
           ]);
         }
       }
-      IDs.push(e.ids);
+      e.ids && IDs.push(e.ids);
       p = e.monto && e.saldocuota ? e : false;
       e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
     });
