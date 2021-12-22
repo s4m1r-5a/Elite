@@ -1420,18 +1420,19 @@ async function EstadoDeCuenta(Orden) {
     let moraAdeudada = 0;
     let totalDeuda = 0;
     let p = false;
-    let IDs = null;
+    let IDs = [];
 
     Proyeccion.map((e, i) => {
-      totalAbonado += IDs === e.ids ? 0 : e.monto ? e.monto : 0;
+      const IDs2 = IDs.some((s) => s === e.ids);
+      totalAbonado += IDs2 ? 0 : e.monto ? e.monto : 0;
       moraAdeudada += e.estado === 3 ? e.mora : 0;
       totalMora += e.totalmora + (e.estado === 3 ? e.mora : 0);
-      totalDeuda += e.estado === 3 ? e.cuota + e.mora : 0;
+      totalDeuda += e.estado === 3 && !IDs2 ? e.cuota + e.mora : 0;
       const PrecioDiaMora = e.mora ? e.mora / e.diasmora : 0;
       const TotalDias = Math.round(e.diasmora - e.diaspagados);
       const TotalMora = Math.round(PrecioDiaMora * TotalDias);
       const TotalCuota = Math.round(e.cuota + TotalMora);
-      const Ids = IDs === e.ids && e.monto ? false : true;
+      const Ids = IDs2 && e.monto ? false : true;
 
       if (!i) {
         cuerpo.push(
@@ -1525,8 +1526,7 @@ async function EstadoDeCuenta(Orden) {
           "$" + Moneda(e.montocuota ? e.saldocuota : TotalCuota),
         ]);
 
-        e.monto &&
-          IDs !== e.ids &&
+        if (e.monto && !IDs2) {
           bodi.push([
             e.fecharcb ? moment(e.fecharcb).format("L") : "--/--/----",
             `RC${e.ids}`,
@@ -1543,8 +1543,9 @@ async function EstadoDeCuenta(Orden) {
               decorationStyle: e.stado !== 4 && "double",
             },
           ]);
+        }
       }
-      IDs = e.ids;
+      IDs.push(e.ids);
       p = e.monto && e.saldocuota ? e : false;
       e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
     });
