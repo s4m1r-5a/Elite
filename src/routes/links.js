@@ -3245,7 +3245,11 @@ router.post("/excelcrearproducto", async (req, res) => {
         (proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000
       ),
     };
-    // const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
+    const proyectoAdd = await pool.query(
+      "INSERT INTO productos SET ? ",
+      proyectoJson
+    );
+    //console.log(productosJson);
     subProductos = await productosJson
       .filter((e) => e.n)
       .map((e) => {
@@ -3262,10 +3266,13 @@ router.post("/excelcrearproducto", async (req, res) => {
         ];
         return r;
       });
-    //await pool.query(`INSERT INTO productosd
-    //(mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`, [subProductos]);
+    await pool.query(
+      `INSERT INTO productosd
+    (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`,
+      [subProductos]
+    );
     resp = { res: true, msg: "El producto fue creado con exito." };
-  } else {
+  } /* else {
     const prood = proyectoJson[0].id;
     proyectoJson[0] = {
       ...proyectoJson[0],
@@ -3347,7 +3354,7 @@ router.post("/excelcrearproducto", async (req, res) => {
     }
     resp = { res: true, msg: "El producto fue creado con exito." };
     //console.log(proyectoJson);
-  }
+  } */
   fs.exists(fil.path, function (exists) {
     if (exists) {
       fs.unlink(fil.path, function (err) {
