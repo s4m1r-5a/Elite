@@ -4481,6 +4481,7 @@ router.post("/orden", noExterno, async (req, res) => {
     extran,
     vrmt2,
     iniciar,
+    tipoDto,
   } = req.body;
   //console.log(req.body)
   const fp = await pool.query(
@@ -4514,8 +4515,9 @@ router.post("/orden", noExterno, async (req, res) => {
       vrmt2: vrmt2.replace(/\./g, ""),
       iniciar,
       cuot,
+      dto: tipoDto,
     };
-    console.log(separ);
+    //console.log(separ);
     const h = await pool.query("INSERT INTO preventa SET ? ", separ);
     await pool.query("UPDATE productosd set ? WHERE id = ?", [
       { estado: 1, tramitando: ahora },
@@ -4553,6 +4555,7 @@ router.get("/cel/:id", async (req, res) => {
 router.post("/codigo", noExterno, async (req, res) => {
   const { movil } = req.body;
   const codigo = ID2(5);
+  console.log(codigo);
   EnviarWTSAP(
     movil,
     `_*Grupo Elite* te da la Bienvenida, usa este codigo *${codigo}* para confirmar tu separacion_ \n\n_*GRUPO ELITE FICA RAÍZ*_`,
@@ -4582,24 +4585,7 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
     var j = Math.round(parseFloat(u) / 2);
     var o = parseFloat(u) / 2;
     var y = 0;
-    console.log(
-      fcha,
-      fcha2,
-      "c70" + cuota70,
-      "c30" + cuota30,
-      oficial70,
-      oficial30,
-      N,
-      u,
-      mesesextra,
-      extra,
-      separacion,
-      v,
-      p,
-      j,
-      o,
-      y
-    );
+
     l = {
       n: `1 <input value="1" type="hidden" name="ncuota">`,
       fecha: fcha2,
@@ -4729,7 +4715,7 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
       }
       dataSet.data.push(d);
     }
-    //console.log(dataSet)
+    //console.log(dataSet);
     res.send(true);
   } else {
     res.send(dataSet);
@@ -4819,7 +4805,7 @@ router.get("/editordn/:id", noExterno, async (req, res) => {
             p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
             p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
             c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, pd.uno, pd.dos, 
-            COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, 
+            COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, p.dto,
             pt.valmtr2, pt.porcentage, COALESCE(SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, 
             if((s.concepto = 'PAGO' OR s.concepto = 'ABONO') AND s.stado = 4, s.monto, 0))), 0) AS Montos, p.status 
             FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
@@ -4876,6 +4862,7 @@ router.post("/ordne/", noExterno, async (req, res) => {
     directa,
     otro,
     valmtr2,
+    tipoDto,
   } = req.body;
 
   console.log(req.body, cuota[0].replace(/\./g, ""), cuot);
@@ -4900,6 +4887,7 @@ router.post("/ordne/", noExterno, async (req, res) => {
       : cuota.replace(/\./g, ""),
     "p.iniciar": xcntag,
     "p.cuot": Math.round(cuot),
+    "p.dto": tipoDto,
   };
   if (otro) {
     orden["l.uno"] = null;
@@ -7517,8 +7505,16 @@ async function Estados(S) {
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
   );
   const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
-    ROUND((l.valor - pr.ahorro) * pr.iniciar /100) AS INICIAL, 
-    ROUND((l.valor - pr.ahorro) * (100 - pr.iniciar) /100) AS FINANCIACION,
+    CASE pr.dto
+      WHEN "INICIAL" THEN ROUND((l.valor * pr.iniciar /100) - pr.ahorro)   
+      WHEN "TODO" THEN ROUND((l.valor - pr.ahorro) * pr.iniciar /100)
+      ELSE ROUND(l.valor * pr.iniciar /100)
+    END AS INICIAL,
+    CASE pr.dto
+      WHEN "FINANCIACION" THEN ROUND((l.valor * (100 - pr.iniciar) /100) - pr.ahorro)
+      WHEN "TODO" THEN ROUND((l.valor - pr.ahorro) * (100 - pr.iniciar) /100)
+      ELSE ROUND(l.valor * (100 - pr.iniciar) /100)
+    END AS FINANCIACION,
     l.valor - pr.ahorro AS TOTAL FROM preventa pr INNER JOIN productosd l 
     ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
 
@@ -7552,9 +7548,10 @@ async function Estados(S) {
     return { std: 1, estado: "PENDIENTE", pendients };
   }
 }
+
 async function RestablecerCupon(S) {
   const W = await pool.query(
-    `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, 
+    `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, 
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, 
     c.proyeccion, c.cuota, c.estado, l.mtr2, e.id idcupon, e.descuento FROM preventa p 
@@ -7567,13 +7564,29 @@ async function RestablecerCupon(S) {
   const x = W[0];
   const separa = x.separar;
   const valor = Math.round(x.vrmt2 * x.mtr2);
-  const ahorro = Math.round((valor * x.descuento) / 100);
-  const total = Math.round(valor - ahorro);
-  const incl = Math.round((total * x.iniciar) / 100 - separa);
+  const ahorro =
+    x.dto === "INICIAL"
+      ? Math.round((((valor * x.iniciar) / 100) * x.descuento) / 100)
+      : x.dto === "FINANCIACION"
+      ? Math.round(((valor - (valor * x.iniciar) / 100) * x.descuento) / 100)
+      : Math.round((valor * x.descuento) / 100);
+
+  const total = x.dto === "TODO" ? Math.round(valor - ahorro) : valor;
+
+  const initials =
+    x.dto === "INICIAL"
+      ? Math.round((total * x.iniciar) / 100 - ahorro)
+      : Math.round((total * x.iniciar) / 100);
+
+  const incl = initials - separa;
   const inicial = Math.sign(incl) >= 0 ? incl : 0;
   const nini = x.inicialdiferida ? x.inicialdiferida : 0;
   const cuotaini = inicial ? Math.round(inicial / nini) : 0;
-  const financiacion = Math.round(total - (inicial + separa));
+
+  const financiacion =
+    x.dto === "FINANCIACION"
+      ? Math.round(total - inicial - ahorro)
+      : Math.round(total - inicial);
 
   if (x.proyeccion > 0) {
     var Extra = 0,
@@ -7700,13 +7713,13 @@ async function QuitarCupon(S) {
 }
 async function ProyeccionPagos(S) {
   let W = await pool.query(
-    `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
+    `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, e.descuento,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, 
     c.proyeccion, c.cuota, c.estado, l.mtr2, d.moras FROM preventa p 
     INNER JOIN cuotas c ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
-    INNER JOIN productos d ON l.producto = d.id WHERE p.id = ? AND p.tipobsevacion IS NULL 
-    ORDER BY TIMESTAMP(c.fechs) ASC`,
+    INNER JOIN productos d ON l.producto = d.id LEFT JOIN cupones e ON p.cupon = e.id 
+    WHERE p.id = ? AND p.tipobsevacion IS NULL ORDER BY TIMESTAMP(c.fechs) ASC`,
     S
   );
 
@@ -7715,10 +7728,28 @@ async function ProyeccionPagos(S) {
   const Cartera = x.obsevacion;
   const Proyeccion = x.proyeccion;
   const separa = x.separar;
-  const total = Math.round(x.vrmt2 * x.mtr2 - x.ahorro);
-  const initials = Math.round((total * x.iniciar) / 100);
-  const inicial = x.separar >= initials ? 0 : initials - x.separar;
-  const financiacion = Math.round(total - (inicial + x.separar));
+  const valor = Math.round(x.vrmt2 * x.mtr2);
+  const ahorro =
+    x.dto === "INICIAL"
+      ? Math.round((((valor * x.iniciar) / 100) * x.descuento) / 100)
+      : x.dto === "FINANCIACION"
+      ? Math.round(((valor - (valor * x.iniciar) / 100) * x.descuento) / 100)
+      : Math.round((valor * x.descuento) / 100);
+
+  const total = x.dto === "TODO" ? Math.round(valor - ahorro) : valor;
+
+  const initials =
+    x.dto === "INICIAL"
+      ? Math.round((total * x.iniciar) / 100 - ahorro)
+      : Math.round((total * x.iniciar) / 100);
+
+  const inicial = x.separar >= initials ? 0 : initials - separa;
+
+  const financiacion =
+    x.dto === "FINANCIACION"
+      ? Math.round(total - (inicial + x.separar) - ahorro)
+      : Math.round(total - (inicial + x.separar));
+
   const mOra = x.moras; //                                        determina si el proyecto cobra mora o no
 
   //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion, x)
@@ -8224,7 +8255,7 @@ async function Desendentes(pin, stados, pasado) {
         OR (l.dos IS NULL AND s.descp = 'SEGUNDA LINEA') 
         OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
         AND s.descp != 'SEPARACION'`);
-  console.log(pin);
+  //console.log(pin);
   const asesor = await pool.query(
     `SELECT p.*, u.*, r.*, u1.nrango papa, u2.nrango abue, u3.nrango bisab     
         FROM pines p INNER JOIN users u ON p.acreedor = u.id             

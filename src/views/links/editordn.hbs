@@ -11,6 +11,7 @@
                         {{/each}}
                         {{#each orden}}
                         <input type="hidden" id="ecesr" value="{{asesor}}">
+                        <input type="hidden" id="dto" value="{{dto}}">
                         <input type="hidden" id="status" value="{{status}}">
                         <input type="hidden" id="clent1" value="{{cliente}}">
                         <input type="hidden" id="clent2" value="{{cliente2}}">
@@ -349,10 +350,20 @@
                                 </tr>
                                 <tr>
                                     <th colspan="9">
+                                        <label class="">TIPO DTO.</label>
+                                        <select class="form-control-no-border" 
+                                          style="padding: 1px;text-align:center;"
+                                          id="tipoDto" name="tipoDto" required>
+                                            <option value="TODO">TODO</option>
+                                            {{!-- <option value="SEPARACION">SEPARACION</option> --}}
+                                            <option value="INICIAL">INICIAL</option>
+                                            <option value="FINANCIACION">FINANCIACION</option>
+                                            <option value="NINGUNO">NINGUNO</option>
+                                        </select>
                                         <button type="button" class="btn btn-primary btn-sm float-right guardar">Guardar
                                             Cambios</button>
-                                        <button type="button" class="btn btn-primary btn-sm float-right quitar mr-2"
-                                            style="display: none;">Quitar Bono</button>
+                                        <button type="button" class="btn btn-primary btn-sm float-right quitar mr-2" 
+                                            style="display: none;">Quitar Bono</button>                                        
                                     </th>
                                 </tr>
                                 <tr>

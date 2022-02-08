@@ -424,14 +424,17 @@ async function Eli(img) {
   });
 }
 function Moneda(valor) {
-  valor = valor
-    .toString()
-    .split("")
-    .reverse()
-    .join("")
-    .replace(/(?=\d*\.?)(\d{3})/g, "$1.");
-  valor = valor.split("").reverse().join("").replace(/^[\.]/, "");
-  return valor;
+  if (valor) {
+    valor = valor
+      .toString()
+      .split("")
+      .reverse()
+      .join("")
+      .replace(/(?=\d*\.?)(\d{3})/g, "$1.");
+    valor = valor.split("").reverse().join("").replace(/^[\.]/, "");
+    return valor;
+  }
+  return 0;
 }
 /*const SCOPES = ['https://www.googleapis.com/auth/contacts'];
 const TOKEN_PATH = 'token.json';

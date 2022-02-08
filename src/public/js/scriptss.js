@@ -3515,14 +3515,12 @@ if (window.location.pathname === `/links/reportes`) {
         $(row).css({ "background-color": "#008080", color: "white" });
       }
       if (data["obsevacion"] === "CARTERA") {
-        $(row)
-          .find(`.ids`)
-          .css({
-            "background-color": "#EB0C1A",
-            color: "white",
-            "border-radius": "10%",
-            "text-align": "center",
-          });
+        $(row).find(`.ids`).css({
+          "background-color": "#EB0C1A",
+          color: "white",
+          "border-radius": "10%",
+          "text-align": "center",
+        });
       }
       var caso = data["meses"];
       var msg = caso
@@ -3530,64 +3528,49 @@ if (window.location.pathname === `/links/reportes`) {
         : "Se encuentra al dia con sus pagos";
       switch (true) {
         case caso >= 10:
-          return $(row)
-            .find(`.deuda`)
-            .prop("title", msg)
-            .css({
-              "background-color": "red",
-              color: "white",
-              "border-radius": "10%",
-              "text-align": "center",
-              cursor: "pointer",
-            });
+          return $(row).find(`.deuda`).prop("title", msg).css({
+            "background-color": "red",
+            color: "white",
+            "border-radius": "10%",
+            "text-align": "center",
+            cursor: "pointer",
+          });
           break;
         case caso >= 5:
-          return $(row)
-            .find(`.deuda`)
-            .prop("title", msg)
-            .css({
-              "background-color": "navy",
-              color: "white",
-              "border-radius": "10%",
-              "text-align": "center",
-              cursor: "pointer",
-            });
+          return $(row).find(`.deuda`).prop("title", msg).css({
+            "background-color": "navy",
+            color: "white",
+            "border-radius": "10%",
+            "text-align": "center",
+            cursor: "pointer",
+          });
           break;
         case caso >= 3:
-          return $(row)
-            .find(`.deuda`)
-            .prop("title", msg)
-            .css({
-              "background-color": "purple",
-              color: "white",
-              "border-radius": "10%",
-              "text-align": "center",
-              cursor: "pointer",
-            });
+          return $(row).find(`.deuda`).prop("title", msg).css({
+            "background-color": "purple",
+            color: "white",
+            "border-radius": "10%",
+            "text-align": "center",
+            cursor: "pointer",
+          });
           break;
         case caso >= 1:
-          return $(row)
-            .find(`.deuda`)
-            .prop("title", msg)
-            .css({
-              "background-color": "blue",
-              color: "white",
-              "border-radius": "10%",
-              "text-align": "center",
-              cursor: "pointer",
-            });
+          return $(row).find(`.deuda`).prop("title", msg).css({
+            "background-color": "blue",
+            color: "white",
+            "border-radius": "10%",
+            "text-align": "center",
+            cursor: "pointer",
+          });
           break;
         default:
-          return $(row)
-            .find(`.deuda`)
-            .prop("title", msg)
-            .css({
-              "background-color": "green",
-              color: "white",
-              "border-radius": "10%",
-              "text-align": "center",
-              cursor: "pointer",
-            });
+          return $(row).find(`.deuda`).prop("title", msg).css({
+            "background-color": "green",
+            color: "white",
+            "border-radius": "10%",
+            "text-align": "center",
+            cursor: "pointer",
+          });
       }
     },
     initComplete: function (settings, json) {
@@ -7328,22 +7311,26 @@ if (
     }
     return true;
   });
+  var dto = $("#dto").val();
   var Montos = parseFloat($("#Montos").val());
   var Pagos = parseFloat($("#Pagos").val());
   var vrmt2 = parseFloat($("#vrmt2").val());
   var mtro2 = parseFloat($("#mtro2").val());
   var iniciar = parseFloat($("#iniciar").val());
   var separar = parseFloat($("#separar").val());
-  var descuento = parseFloat($("#descuento").val());
+  const descuento = parseFloat($("#descuento").val());
+  var kuponDto = parseFloat($("#descuento").val());
   var extran = parseFloat($("#extran").val());
   var ncal = parseFloat($("#ncal").val());
   var financia = parseFloat($("#financia").val());
   var valor = vrmt2 * mtro2;
   var status = $("#status").val();
-  var kupon = $("#kupon").val();
+  const kupon = $("#kupon").val();
   var cuota = $("#cuota").val();
-  var pin = $("#pin").val();
-  pin = pin === "NO" || !pin ? 0 : pin;
+  const pin =
+    $("#pin").val() === "NO" || !$("#pin").val() || $("#pin").val() === ""
+      ? 0
+      : $("#pin").val();
   var OrdnSepr = $("#ID-Sep").val();
   var prodct = $("#prodct").val() || 0;
   var ecesr = $("#ecesr").val() || 0;
@@ -7352,6 +7339,7 @@ if (
   var c3 = $("#clent3").val() || 0;
   var c4 = $("#clent4").val() || 0;
   var ya = moment(new Date()).format("YYYY-MM-DD");
+  $(`#tipoDto option[value='${dto}']`).prop("selected", true);
   var R = true,
     T = true,
     eliminar = "";
@@ -7360,6 +7348,50 @@ if (
     backdrop: "static",
     keyboard: true,
   });
+
+  function Totales(valor, descuento, tipoDto) {
+    var precio = valor;
+    console.log(valor, descuento, tipoDto);
+    var ahorr = 0;
+    var Xdto = parseFloat($(`#xcntag`).val());
+    inicial = (precio * Xdto) / 100;
+    var financ = precio - inicial;
+
+    if (tipoDto === "SEPARACION" && descuento) {
+      // HAY QUE LLENARLO DESPUES
+    } else if (tipoDto === "INICIAL" && descuento) {
+      ahorr = Math.round((inicial * descuento) / 100);
+      inicial = inicial - ahorr;
+      precio = financ + inicial;
+    } else if (tipoDto === "FINANCIACION" && descuento) {
+      ahorr = Math.round((financ * descuento) / 100);
+      financ = financ - ahorr;
+      precio = financ + inicial;
+    } else if (tipoDto === "TODO" && descuento) {
+      ahorr = Math.round((precio * descuento) / 100);
+      precio = precio - ahorr;
+      inicial = (precio * Xdto) / 100;
+      financ = precio - inicial;
+    } else {
+      kuponDto = false;
+      $("#idbono").val("");
+      $("#cupon").val("");
+      $("#ahorro").val("");
+      $("#cuponx100to").val("");
+      $("#desinicial").val("");
+      $("#destotal").val("");
+      $("#ini").val(Moneda(Math.round(inicial)));
+      $("#fnc").val(Moneda(Math.round(financ)));
+      return;
+    }
+
+    $("#ahorro").val(Moneda(ahorr));
+    $("#cuponx100to").val(descuento + "%");
+    $("#desinicial").val(Moneda(Math.round(inicial)));
+    $("#destotal").val(Moneda(Math.round(precio)));
+    $("#ini").val(Moneda(Math.round(inicial)));
+    $("#fnc").val(Moneda(Math.round(financ)));
+  }
   $(document).ready(function () {
     var bono = 0;
     $(".select2").each(function () {
@@ -7391,18 +7423,19 @@ if (
         $("#fnc").val(Moneda(Math.round(valor - ini)));
         if (pin) {
           $(".quitar").show("slow");
-          var precio = valor;
-          var ahorr = Math.round((valor * descuento) / 100);
+          /* var precio = valor;
+          var ahorr = Math.round((valor * descuento) / 100); */
           $("#idbono").val(kupon);
           $("#cupon").val(pin);
-          $("#ahorro").val(Moneda(ahorr));
+          Totales(valor, descuento, dto);
+          /* $("#ahorro").val(Moneda(ahorr));
           precio = precio - ahorr;
           inicial = (precio * iniciar) / 100;
           $("#cuponx100to").val(descuento + "%");
           $("#desinicial").val(Moneda(Math.round(inicial)));
           $("#destotal").val(Moneda(Math.round(precio)));
           $("#ini").val(Moneda(Math.round(inicial)));
-          $("#fnc").val(Moneda(Math.round(precio - inicial)));
+          $("#fnc").val(Moneda(Math.round(precio - inicial))); */
         }
         $("#ModalEventos").modal("hide");
         if (T) {
@@ -7432,18 +7465,19 @@ if (
                 $("#ini").val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
                 $("#fnc").val(Moneda(Math.round(data.valor - data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
                 if (pin) {
-                  var precio = data.valor;
-                  var ahorr = Math.round((data.valor * descuento) / 100);
+                  /* var precio = data.valor;
+                  var ahorr = Math.round((data.valor * descuento) / 100); */
                   $("#idbono").val(kupon);
                   $("#cupon").val(pin);
-                  $("#ahorro").val(Moneda(ahorr));
+                  Totales(data.valor, descuento, dto);
+                  /* $("#ahorro").val(Moneda(ahorr));
                   precio = precio - ahorr;
                   inicial = (precio * iniciar) / 100;
                   $("#cuponx100to").val(descuento + "%");
                   $("#desinicial").val(Moneda(Math.round(inicial)));
                   $("#destotal").val(Moneda(Math.round(precio)));
                   $("#ini").val(Moneda(Math.round(inicial)));
-                  $("#fnc").val(Moneda(Math.round(precio - inicial)));
+                  $("#fnc").val(Moneda(Math.round(precio - inicial))); */
                 } else {
                   $("#idbono").val("");
                   $("#cupon").val("");
@@ -7503,7 +7537,13 @@ if (
         FINANCIAR("INICIAL", c, Spr);
       }
     });
+    $("#tipoDto").change(function () {
+      dto = $(this).val();
+      var total = $("#total").val().replace(/\./g, "");
+      Totales(total, kuponDto, dto);
+    });
     $("#cupon").change(function () {
+      var total = $("#total").val().replace(/\./g, "");
       if ($(this).val() !== bono && $(this).val()) {
         $.ajax({
           url: "/links/bono/" + $(this).val(),
@@ -7518,31 +7558,29 @@ if (
                   "Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado"
                 );
                 $(this).val("");
+                Totales(total, false, dto);
               } else if (fecha < new Date()) {
                 SMSj(
                   "error",
                   "Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado"
                 );
                 $(this).val("");
+                Totales(total, false, dto);
               } else if (data[0].estado != 9) {
                 SMSj(
                   "error",
                   "Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada"
                 );
                 $(this).val(""); //L0X66
+                Totales(total, false, dto);
               } else {
-                var precio = parseFloat($("#total").cleanVal());
-                var porcentage = parseFloat($("#xcntag").val());
-                var ahorr = Math.round((precio * data[0].descuento) / 100);
+                if (dto === "NINGUNO") {
+                  $(`#tipoDto option[value='TODO']`).prop("selected", true);
+                  dto = "TODO";
+                }
+                kuponDto = data[0].descuento;
+                Totales(total, kuponDto, dto);
                 $("#idbono").val(data[0].id);
-                $("#ahorro").val(Moneda(ahorr));
-                precio = precio - ahorr;
-                inicial = (precio * porcentage) / 100;
-                $("#cuponx100to").val(data[0].descuento + "%");
-                $("#desinicial").val(Moneda(Math.round(inicial)));
-                $("#destotal").val(Moneda(Math.round(precio)));
-                $("#ini").val(Moneda(Math.round(inicial)));
-                $("#fnc").val(Moneda(Math.round(precio - inicial)));
                 CONT();
               }
               bono = data[0].pin;
@@ -7551,6 +7589,7 @@ if (
                 "error",
                 "Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado"
               );
+              kuponDto = false;
             }
           },
         });
@@ -7559,13 +7598,19 @@ if (
           "error",
           "Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado"
         );
+
         bono !== 0 ? $(this).val(bono) : "";
+        Totales(total, kuponDto, dto);
       }
     });
     $("#xcntag").change(function () {
       var porcntg = $(this).val();
       var total = $("#total").val().replace(/\./g, "");
       var inicl = (total * porcntg) / 100;
+      $("#inicial").val(Moneda(Math.round(inicl)));
+
+      Totales(total, kuponDto, dto);
+      /* var inicl = (total * porcntg) / 100;
       $("#inicial").val(Moneda(Math.round(inicl)));
       var totaldesc = $("#destotal").val().replace(/\./g, "");
       if (totaldesc) {
@@ -7575,7 +7620,7 @@ if (
       }
 
       $("#ini").val(Moneda(Math.round(inicl)));
-      $("#fnc").val(Moneda(Math.round(total - inicl)));
+      $("#fnc").val(Moneda(Math.round(total - inicl))); */
       CONT();
     });
     $("#vmtr2").change(function () {
@@ -7588,7 +7633,9 @@ if (
       $("#total").val(Moneda(Math.round(total)));
       $("#inicial").val(Moneda(Math.round(inicl)));
       if (pin) {
-        var ahorr = Math.round((total * descuento) / 100);
+        Totales(total, kuponDto, dto);
+      }
+      /*  var ahorr = Math.round((total * descuento) / 100);
         $("#ahorro").val(Moneda(ahorr));
         total = total - ahorr;
         inicl = (total * porcntg) / 100;
@@ -7597,7 +7644,7 @@ if (
         //.mask('#.##$', { reverse: true, selectOnFocus: true });
       }
       $("#ini").val(Moneda(Math.round(inicl)));
-      $("#fnc").val(Moneda(Math.round(total - inicl)));
+      $("#fnc").val(Moneda(Math.round(total - inicl))); */
       CONT();
     });
     $("#cuadro2").submit(function (e) {
@@ -7770,44 +7817,18 @@ if (
   });
   crearcartera.on("click", ".quitar", function () {
     if ($(this).html() === "Quitar Bono") {
-      var inc = parseFloat($("#inicial").val().replace(/\./g, ""));
       var to = parseFloat($("#total").val().replace(/\./g, ""));
-      $("#idbono").val("");
-      $("#cupon").val("");
-      $("#ahorro").val("");
-      $("#cuponx100to").val("");
-      $("#desinicial").val("");
-      $("#destotal").val("");
-      $("#ini").val($("#inicial").val());
-      $("#fnc").val(Moneda(Math.round(to - inc)));
+      Totales(to, false, dto);
       $(this).html("Restablecer Bono");
       CONT();
-      /* if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
-            } else {
-                CONT(0, 1);
-            } */
     } else {
       $(this).html("Quitar Bono");
       var precio = parseFloat($("#total").cleanVal());
-      var porcentage = parseFloat($("#xcntag").val());
-      var ahorr = Math.round((precio * descuento) / 100);
       $("#idbono").val(kupon);
       $("#cupon").val(pin);
-      $("#ahorro").val(Moneda(ahorr));
-      precio = precio - ahorr;
-      inicial = (precio * porcentage) / 100;
-      $("#cuponx100to").val(descuento + "%");
-      $("#desinicial").val(Moneda(Math.round(inicial)));
-      $("#destotal").val(Moneda(Math.round(precio)));
-      $("#ini").val(Moneda(Math.round(inicial)));
-      $("#fnc").val(Moneda(Math.round(precio - inicial)));
+      kuponDto = descuento;
+      Totales(precio, kuponDto, dto);
       CONT();
-      /* if ($('#Separar').val()) {
-                CONT(parseFloat($('#Separar').val().replace(/\./g, '')), 1);
-            } else {
-                CONT(0, 1);
-            } */
     }
   });
   crearcartera.on("click", ".guardar", function () {
@@ -9561,6 +9582,7 @@ if (window.location.pathname == `/links/cartera`) {
     };
   }
 }
+
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
 if (
   window.location == `${window.location.origin}/links/productos` &&
@@ -11219,6 +11241,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
     }
   };
   $(".val").mask("#.##$", { reverse: true });
+  const descuentos = JSON.parse($("#descuentos").val());
   var meses = 0;
   var groupColumn = 2;
   var dic = 0;
@@ -11243,12 +11266,13 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
   var bono = "";
   var meses = 0;
   var cuota30 = Moneda(Math.round((inicial - separacion) / u));
+  var tipoDto = "NINGUNO";
   Meses(0);
   $(`#ncuotas option[value='6']`).prop("selected", true);
   var N = parseFloat($("#ncuotas").val());
   var cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
   $("#cuota").val(cuota70.replace(/\./g, ""));
-  console.log(cuota, cuota70, meses, u, N, N - (meses + u) || 1);
+  //console.log(cuota, cuota70, meses, u, N, N - (meses + u) || 1);
   $.ajax({
     url: "/links/tabla/1",
     type: "POST",
@@ -11466,6 +11490,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
       inicial = (precio * porcentage) / 100;
       $("#cuotainicial").val(Moneda(inicial));
       $("#p70").val(Moneda(precio - inicial));
+      tipoDto = "NINGUNO";
     }
     $("#AgregarClient").click(function () {
       $("#cliente2").show("slow");
@@ -11542,6 +11567,38 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
       }
 
       Años(u + 1, D, N);
+
+      if (descuentos.inicial && N < 2 && bono !== "" && descuentos.todo) {
+        var Dto = parseFloat($("#dto").val().slice(0, -1));
+        precio = parseFloat($("#vrlote").cleanVal());
+        var Ahorr = Math.round((precio * Dto) / 100);
+        precio = precio - Ahorr;
+        inicial = (precio * porcentage) / 100;
+        $("#cuotainicial").val(Moneda(Math.round(inicial)));
+        $("#p70").val(Moneda(precio - inicial));
+        $("#ahorro").val(Moneda(Ahorr));
+        $(".totalote").val(Moneda(Math.round(precio)));
+        parseFloat($("#abono").val().replace(/\./g, "")) > precio
+          ? $("#abono").val(Moneda(precio))
+          : "";
+        tipoDto = "TODO";
+      } else if (descuentos.inicial && N > 1 && bono !== "") {
+        var Dto = parseFloat($("#dto").val().slice(0, -1));
+        precio = parseFloat($("#vrlote").cleanVal());
+        inicial = (precio * porcentage) / 100;
+        var Ahorr = Math.round((inicial * Dto) / 100);
+        inicial = inicial - Ahorr;
+        $("#cuotainicial").val(Moneda(Math.round(inicial)));
+        $("#p70").val(Moneda(precio - inicial));
+        $("#ahorro").val(Moneda(Ahorr));
+        precio = precio - Ahorr;
+        $(".totalote").val(Moneda(Math.round(precio)));
+        parseFloat($("#abono").val().replace(/\./g, "")) > precio
+          ? $("#abono").val(Moneda(precio))
+          : "";
+        tipoDto = "INICIAL";
+      }
+
       if ($(this).attr("id") === "bono") {
         if ($(this).val() !== bono && $(this).val()) {
           h = 1;
@@ -11571,14 +11628,34 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
                   );
                   Dt();
                 } else {
-                  var ahorr = Math.round((precio * data[0].descuento) / 100);
+                  var ahorr = 0;
+                  //var ahorr = Math.round((precio * data[0].descuento) / 100);
                   $("#bonoid").val(data[0].id);
+
+                  if (descuentos.inicial) {
+                    ahorr = Math.round((inicial * data[0].descuento) / 100);
+                    inicial = inicial - ahorr;
+                    tipoDto = "INICIAL";
+                  } else if (descuentos.financiacion) {
+                    ahorr = Math.round(
+                      ((precio - inicial) * data[0].descuento) / 100
+                    );
+                    var finan = precio - inicial - ahorr;
+                    $("#p70").val(Moneda(Math.round(finan)));
+                    tipoDto = "FINANCIACION";
+                  } else if (descuentos.todo) {
+                    ahorr = Math.round((precio * data[0].descuento) / 100);
+                    inicial = ((precio - ahorr) * porcentage) / 100;
+                    $("#p70").val(Moneda(Math.round(precio - inicial - ahorr)));
+                    tipoDto = "TODO";
+                  } else {
+                    Dt();
+                    SMSj("error", "Este proyecto no posee descuentos");
+                  }
                   $("#ahorro").val(Moneda(ahorr));
                   precio = precio - ahorr;
-                  inicial = (precio * porcentage) / 100;
-                  $("#dto").val(data[0].descuento + "%");
+                  $("#dto").val(ahorr ? data[0].descuento + "%" : "0%");
                   $("#cuotainicial").val(Moneda(Math.round(inicial)));
-                  $("#p70").val(Moneda(Math.round(precio - inicial)));
                   $(".totalote").val(Moneda(Math.round(precio)));
                   parseFloat($("#abono").val().replace(/\./g, "")) > precio
                     ? $("#abono").val(Moneda(precio))
@@ -11598,7 +11675,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
           Dt();
           SMSj(
             "error",
-            "Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado"
+            "Cupon de descuento invalido. Comuniquese con uno de nuestros asesores encargado"
           );
         }
       }
@@ -11695,6 +11772,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
         mesesextra,
         extra: $("#cuotaestrao").val(),
       };
+
       cuota70
         ? $("#cuota").val(cuota70.replace(/\./g, ""))
         : $("#cuota").val(0);
@@ -11707,7 +11785,6 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
           tabla.ajax.reload(function (json) {
             //SMSj('success', 'Se realizaron cambios exitosamente')
           });
-          console.log("aqi");
         },
       });
     });
@@ -11803,6 +11880,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
         data: datos,
         //async: false,
         success: function (data) {
+          console.log(data);
           $("#codigodeverificacion").val(data);
         },
       });
@@ -11811,6 +11889,7 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
         $("#modalorden #codeg").focus();
       });
     } else {
+      $("#typeDto").val(tipoDto);
       $("#enviodeorden input").prop("disabled", false);
     }
   });
