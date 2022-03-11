@@ -1,87 +1,149 @@
-<div class="accordion" id="accordion">
+<div class='accordion' id='accordion'>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">PAGOS</strong><br>
-            <small class="text-muted">Muestra los pagos realizados por los clientes</small>
-            <i class="fas fa-angle-down float-right"></i>
+  <div class='card'>
+    <div
+      class='card-header'
+      type='button'
+      data-toggle='collapse'
+      data-target='#collapse'
+      aria-expanded='true'
+      aria-controls='collapse'
+    >
+      <strong class='text-muted'>PAGOS</strong><br />
+      <small class='text-muted'>Muestra los pagos realizados por los clientes</small>
+      <i class='fas fa-angle-down float-right'></i>
+    </div>
+    <div id='collapse' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+      <div class='card-body responsive'>
+        <nav>
+          <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+            <a
+              class='nav-item nav-link d-none d-sm-block'
+              data-toggle='collapse'
+              href='#menu1'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu'
+            >
+              <i class='align-middle' data-feather='eye-off'></i>
+            </a>
+
+            <a
+              class='nav-item nav-link'
+              data-toggle='collapse'
+              href='#menu2'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu2'
+            >
+              <i class='align-middle' data-feather='sliders'></i>
+            </a>
+
+            <a class='nav-item nav-link d-none d-sm-block fech' id='Date' href='javascript:void 0'>
+              <i class='align-middle' data-feather='calendar'></i>
+            </a>
+
+            <a class='nav-item nav-link d-none d-sm-block' href='javascript:void 0' onclick='bajarPdf()'>
+              <i class='align-middle' data-feather='download-cloud'></i>
+            </a>
+
+            <a class='nav-item nav-link'>
+              <input
+                id='min'
+                type='text'
+                class='edi text-center'
+                style='width: 30px; padding: 1px; border: 0;'
+                placeholder='MZ'
+              />
+            </a>
+
+            <a class='nav-item nav-link'>
+              <input
+                id='max'
+                type='text'
+                class='edi text-center'
+                style='width: 30px; padding: 1px; border: 0;'
+                placeholder='LT'
+              />
+            </a>
+
+            <a class='nav-item nav-link d-none d-sm-block'>
+              <input
+                id='busq'
+                type='text'
+                class='edi text-center'
+                style='width: 200px; padding: 1px; border: 0;'
+                placeholder='Buscar...'
+              />
+            </a>
+
+            <a
+              class='nav-item nav-link d-none'
+              data-toggle='collapse'
+              href='#menu3'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu3'
+            >Buscar</a>
+          </div>
+        </nav>
+        <div class='accordion' id='menu'>
+          <nav class='nav flex-column flex-sm-row collapse' id='menu1' aria-labelledby='headingOne' data-parent='#menu'>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 10)"><i
+                class='fas fa-tasks'
+              ></i>
+              10 Filas</a>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 20)"><i
+                class='fas fa-tasks'
+              ></i>
+              20 Filas</a>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 30)"><i
+                class='fas fa-tasks'
+              ></i>
+              30 Filas</a>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 50)"><i
+                class='fas fa-tasks'
+              ></i>
+              50 Filas</a>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 100)"><i
+                class='fas fa-tasks'
+              ></i>
+              100 Filas</a>
+            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', -1)"><i
+                class='fas fa-tasks'
+              ></i>
+              Todas</a>
+          </nav>
+          <nav class='nav nav-fill collapse' id='menu2' aria-labelledby='headingOne' data-parent='#menu'>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="STAD('#datatable', 12, 'Pendiente')"
+            ><i class='fas fa-cart-arrow-down'></i>
+              Pendientes</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="STAD('#datatable', 12, 'Aprobada')"
+            ><i class='fas fa-handshake'></i>
+              Aprobados</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="STAD('#datatable', 12, 'Anulada')"
+            ><i class='far fa-thumbs-down'></i>
+              Anulados</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="STAD('#datatable', '', '')"
+            ><i class='far fa-thumbs-down'></i>
+              Todos</a>
+          </nav>
         </div>
-        <div id="collapse" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body responsive">
-                <nav>
-                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#menu1"
-                            role="button" aria-expanded="false" aria-controls="menu">
-                            <i class="align-middle" data-feather="eye-off"></i>
-                        </a>
-
-                        <a class="nav-item nav-link" data-toggle="collapse" href="#menu2" role="button"
-                            aria-expanded="false" aria-controls="menu2">
-                            <i class="align-middle" data-feather="sliders"></i>
-                        </a>
-
-                        <a class="nav-item nav-link d-none d-sm-block fech" id="Date" href="javascript:void 0">
-                            <i class="align-middle" data-feather="calendar"></i>
-                        </a>
-
-                        <a class="nav-item nav-link d-none d-sm-block" href="javascript:void 0" onclick="bajarPdf()">
-                            <i class="align-middle" data-feather="download-cloud"></i>
-                        </a>
-
-                        <a class="nav-item nav-link ">
-                            <input id="min" type="text" class="edi text-center"
-                                style="width: 30px; padding: 1px; border: 0;" placeholder="MZ">
-                        </a>
-
-                        <a class="nav-item nav-link">
-                            <input id="max" type="text" class="edi text-center"
-                                style="width: 30px; padding: 1px; border: 0;" placeholder="LT">
-                        </a>
-
-                        <a class="nav-item nav-link d-none d-sm-block">
-                            <input id="busq" type="text" class="edi text-center"
-                                style="width: 200px; padding: 1px; border: 0;" placeholder="Buscar...">
-                        </a>
-
-                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#menu3" role="button"
-                            aria-expanded="false" aria-controls="menu3">Buscar</a>
-                    </div>
-                </nav>
-                <div class="accordion" id="menu">
-                    <nav class="nav flex-column flex-sm-row collapse" id="menu1" aria-labelledby="headingOne"
-                        data-parent="#menu">
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable', -1)"><i class="fas fa-tasks"></i> Todas</a>
-                    </nav>
-                    <nav class="nav nav-fill collapse" id="menu2" aria-labelledby="headingOne" data-parent="#menu">
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 12, 'Pendiente')"><i class="fas fa-cart-arrow-down"></i>
-                            Pendientes</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 12, 'Aprobada')"><i class="fas fa-handshake"></i>
-                            Aprobados</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', 12, 'Anulada')"><i class="far fa-thumbs-down"></i>
-                            Anulados</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="STAD('#datatable', '', '')"><i class="far fa-thumbs-down"></i>
-                            Todos</a>
-                    </nav>
-                </div>
-                <!-- TABLAS -->
-                <input type="hidden" id="tu" value="{{user.id}}">
-                <!--<div class="card" style="display: none;">
+        <!-- TABLAS -->
+        <input type='hidden' id='tu' value='{{user.id}}' />
+        <!--<div class="card" style="display: none;">
                     <div class="card-header"></div>
                     <div class="card-body">
                         <table id="Recibos" class="table table-sm table-striped table-hover display nowrap"
@@ -115,42 +177,41 @@
                         </table>
                     </div>
                 </div>-->
-                <table id="datatable" class="table table-sm table-striped table-hover display nowrap"
-                    style="width:100%">
-                    <thead>
-                        <tr>
-                            <th data-priority="1">Id</th>
-                            <th>Asesor</th>
-                            <th>Cliente</th>
-                            <th>Fecha</th>
-                            <th>FechaRcb</th>
-                            <th>Proyecto</th>
-                            <th data-priority="1">Mz</th>
-                            <th data-priority="1">Lt</th>
-                            <th data-priority="3">Descp</th>
-                            <th data-priority="2">Monto</th>
-                            <th data-priority="6">Facturas V</th>
-                            <th data-priority="5">Recibo</th>
-                            <th data-priority="1">Estado</th>
-                            <th data-priority="1">Rcb</th>
-                            <th>Aprueba</th>
-                            <th>Estado LT</th>
-                            <th>Orden</th>
-                            <th>Extrato</th>
-                            <th>Consignacion</th>
-                            <th>FechaConsignacion</th>
-                            <th>Descp</th>
-                            <th>Lugar</th>
-                            <th>Obv</th>
-                            <th>Motivo</th>
-                            <th>Bono Anul</th>
-                            <th>Monto Anul</th>
-                            <th>Orden Anul</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-                {{!-- <table id="BancoExt" class="table table-sm table-striped table-hover display nowrap"
+        <table id='datatable' class='table table-sm table-striped table-hover display nowrap' style='width:100%'>
+          <thead>
+            <tr>
+              <th data-priority='1'>Id</th>
+              <th>Asesor</th>
+              <th>Cliente</th>
+              <th>Fecha</th>
+              <th>FechaRcb</th>
+              <th>Proyecto</th>
+              <th data-priority='1'>Mz</th>
+              <th data-priority='1'>Lt</th>
+              <th data-priority='3'>Descp</th>
+              <th data-priority='2'>Monto</th>
+              <th data-priority='6'>Facturas V</th>
+              <th data-priority='5'>Recibo</th>
+              <th data-priority='1'>Estado</th>
+              <th data-priority='1'>Rcb</th>
+              <th>Aprueba</th>
+              <th>Estado LT</th>
+              <th>Orden</th>
+              <th>Extrato</th>
+              <th>Consignacion</th>
+              <th>FechaConsignacion</th>
+              <th>Descp</th>
+              <th>Lugar</th>
+              <th>Obv</th>
+              <th>Motivo</th>
+              <th>Bono Anul</th>
+              <th>Monto Anul</th>
+              <th>Orden Anul</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        {{! <table id="BancoExt" class="table table-sm table-striped table-hover display nowrap"
                     style="width:100%;font-size:9px;">
                     <thead>
                         <tr>
@@ -165,475 +226,532 @@
                         </tr>
                     </thead>
                     <tbody></tbody>
-                </table> --}}
-            </div>
-        </div>
+                </table> }}
+      </div>
     </div>
+  </div>
 
-    {{#if user.externo}}
+  {{#if user.externo}}{{else if user.auxicontbl}}
 
-    {{else if user.auxicontbl}}
-
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">DEVOLUCIONES</strong><br>
-            <small class="text-muted">Obten al detalle el estdo de cuente de tus clientes</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse2" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body responsive">
-                <!-- TABLAS -->
-                <table id="devoluciones"
-                    class="table table-sm table-striped table-hover display nowrap table-responsive" style="width:100%">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Id</th>
-                            <th>Fecha</th>
-                            <th>Cliente</th>
-                            <th>Jarra</th>
-                            <th>Abonado</th>
-                            <th>Pagos</th>
-                            <th>% Jarra</th>
-                            <th>Devolver</th>
-                            <th>Concepto</th>
-                            <th>Descp</th>
-                            <th>Tipo</th>
-                            <th>Proyct</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th>Asesor</th>
-                            <th data-priority="2">Estado</th>
-                            <th>Motivo</th>
-                            <th>Orden</th>
-                            <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse2'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>DEVOLUCIONES</strong><br />
+        <small class='text-muted'>Obten al detalle el estdo de cuente de tus clientes</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse2' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+        <div class='card-body responsive'>
+          <!-- TABLAS -->
+          <table
+            id='devoluciones'
+            class='table table-sm table-striped table-hover display nowrap table-responsive'
+            style='width:100%'
+          >
+            <thead>
+              <tr>
+                <th></th>
+                <th>Id</th>
+                <th>Fecha</th>
+                <th>Cliente</th>
+                <th>Jarra</th>
+                <th>Abonado</th>
+                <th>Pagos</th>
+                <th>% Jarra</th>
+                <th>Devolver</th>
+                <th>Concepto</th>
+                <th>Descp</th>
+                <th>Tipo</th>
+                <th>Proyct</th>
+                <th>Mz</th>
+                <th>Lt</th>
+                <th>Asesor</th>
+                <th data-priority='2'>Estado</th>
+                <th>Motivo</th>
+                <th>Orden</th>
+                <!--<th style="width:5%;" data-priority="10000">Recibo</th>
                             <th style="width:5%;" data-priority="2">Estado</th>-->
-                            <th data-priority="1">Accion</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
+                <th data-priority='1'>Accion</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
+      </div>
     </div>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse3" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">CUENTAS DE COBRO</strong><br>
-            <small class="text-muted">Aqui encontraras el resumen del estado de cuentas de tus
-                clientes</small>
-            <i class="fas fa-angle-down float-right"></i>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse3'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>CUENTAS DE COBRO</strong><br />
+        <small class='text-muted'>Aqui encontraras el resumen del estado de cuentas de tus clientes</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse3' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+        <div class='card-body'>
+          <!-- TABLAS -->
+          <table
+            id='comisiones'
+            class='table table-sm table-striped table-hover display nowrap table-responsive'
+            style='width:100%'
+          >
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th></th>
+                <th>Fecha</th>
+                <th>Benefactor</th>
+                <th>Cliente</th>
+                <th>Venta</th>
+                <th>Monto</th>
+                <th>%</th>
+                <th>Retefuente</th>
+                <th>Reteica</th>
+                <th>Total</th>
+                <th>Concepto</th>
+                <th>Descp</th>
+                <th>Proyct</th>
+                <th>Mz</th>
+                <th>Lt</th>
+                <th data-priority='2'>Estado</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
-        <div id="collapse3" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body">
-                <!-- TABLAS -->
-                <table id="comisiones" class="table table-sm table-striped table-hover display nowrap table-responsive"
-                    style="width:100%">
-                    <thead>
-                        <tr>
-                            <th>Id</th>
-                            <th></th>
-                            <th>Fecha</th>
-                            <th>Benefactor</th>
-                            <th>Cliente</th>
-                            <th>Venta</th>
-                            <th>Monto</th>
-                            <th>%</th>
-                            <th>Retefuente</th>
-                            <th>Reteica</th>
-                            <th>Total</th>
-                            <th>Concepto</th>
-                            <th>Descp</th>
-                            <th>Proyct</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th data-priority="2">Estado</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">PAYU</strong><br>
-            <small class="text-muted">Aqui proximamente</small>
-            <i class="fas fa-angle-down float-right"></i>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse4'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>PAYU</strong><br />
+        <small class='text-muted'>Aqui proximamente</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse4' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+        <div class='card-body'>
+          <!-- TABLAS -->
         </div>
-        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body">
-                <!-- TABLAS -->
-            </div>
-        </div>
+      </div>
     </div>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse5" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">BANCOLOMBIA</strong><br>
-            <small class="text-muted">Aqui proximamente</small>
-            <i class="fas fa-angle-down float-right"></i>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse5'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>BANCOLOMBIA</strong><br />
+        <small class='text-muted'>Aqui proximamente</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse5' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+        <div class='card-body'>
+          <!-- TABLAS -->
         </div>
-        <div id="collapse5" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body">
-                <!-- TABLAS -->
-            </div>
-        </div>
+      </div>
     </div>
 
-    {{/if}}
+  {{/if}}
 
 </div>
 
-
-
-<div class="card d-none">
-    <div class="card-header">
-        <h5 class="card-title">Table with Buttons</h5>
-        <h6 class="card-subtitle text-muted">This extension provides a framework with common options that can be
-            used with DataTables.</h6>
-        <div class="">
-            <input type="text" class="form-control-no-border reditar" id="Date_search" data-toggle="tooltip"
-                data-placement="top" data-container="body" title="Haz click para editar fecha"
-                style="width: 300px; padding: 1px;">
-        </div>
+<div class='card d-none'>
+  <div class='card-header'>
+    <h5 class='card-title'>Table with Buttons</h5>
+    <h6 class='card-subtitle text-muted'>This extension provides a framework with common options that can be used with
+      DataTables.</h6>
+    <div class=''>
+      <input
+        type='text'
+        class='form-control-no-border reditar'
+        id='Date_search'
+        data-toggle='tooltip'
+        data-placement='top'
+        data-container='body'
+        title='Haz click para editar fecha'
+        style='width: 300px; padding: 1px;'
+      />
     </div>
-    <div class="card-body responsive">
+  </div>
+  <div class='card-body responsive'>
 
-        <hr>
-        <h3>BONOS</h3>
-        <table id="bonos" class="table table-sm table-striped table-hover display nowrap table-responsive"
-            style="width:100%">
-            <thead>
+    <hr />
+    <h3>BONOS</h3>
+    <table
+      id='bonos'
+      class='table table-sm table-striped table-hover display nowrap table-responsive'
+      style='width:100%'
+    >
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Asesor</th>
+          <th>Fecha</th>
+          <th>Venta</th>
+          <th>Monto</th>
+          <th>%</th>
+          <th>Retefuente</th>
+          <th>Reteica</th>
+          <th>Total</th>
+          <th>Concepto</th>
+          <th>Descp</th>
+          <th data-priority='2'>Estado</th>
+          <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+          <th data-priority='1'>Accion</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+    <hr />
+    <h3>PREMIOS</h3>
+    <table
+      id='premios'
+      class='table table-sm table-striped table-hover display nowrap table-responsive'
+      style='width:100%'
+    >
+      <thead>
+        <tr>
+          <th>Id</th>
+          <th>Cliente</th>
+          <th>Fecha</th>
+          <th>proyecto</th>
+          <th>lote</th>
+          <th>Monto</th>
+          <th>Facturas V</th>
+          <th>Recibo</th>
+          <th data-priority='2'>Estado</th>
+          <!--<th style="width:5%;" data-priority="10000">Recibo</th>
+                            <th style="width:5%;" data-priority="2">Estado</th>-->
+          <th data-priority='1'>Accion</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+  </div>
+</div>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='Modalimg' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <div id='descargaimg'>
+        </div>
+        <div class='d-inline-block mt-1 mr-3 mb-0 float-right'>
+          <a class='reditar' data-dismiss='modal' aria-label='Close'>
+            <i class='feather mr-0' data-feather='x'></i></a>
+        </div>
+      </div>
+      <div class='modal-body'>
+        <input type='hidden' id='extr' />
+        <input type='hidden' id='idSolicitud' />
+        <div class='row no-gutters'>
+          <div class='col-md-8 fotos' width='100%' height='200'>
+            <!--<img src="" class="card-img foto" alt="...">-->
+          </div>
+          <div class='col-md-4'>
+            <small class='text-muted float-right' id='aprobadoEl'></small>
+            <table class='table table-sm my-2'>
+              <tbody>
                 <tr>
+                  <th colspan='2'>
+                    <small class='text-muted fecha float-right'></small>
+                  </th>
+                </tr>
+                <tr>
+                  <th colspan='2'>
+                    <span class='cliente'></span>
+                  </th>
+                </tr>
+                <tr>
+                  <th colspan='2'>
+                    <span class='proyecto'></span>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <span class='mz'></span>
+                  </th>
+                  <td>
+                    <span class='lote'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span class='recibo'></span>
+                  </th>
+                  <th>
+                    <a class='fechaRcb float-right'></a>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <span>FAT.VEC:</span>
+                  </th>
+                  <td>
+                    <span class='badge badge-dark fatvc'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>MONTO:</span>
+                  </th>
+                  <td>
+                    <input type='hidden' id='montopago' />
+                    <span class='monto'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>BONO:</span>
+                  </th>
+                  <td>
+                    <span class='bonoo'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>BONO VR.:</span>
+                  </th>
+                  <td>
+                    <span class='bonom'></span>estado
+                  </td>
+                </tr>
+                <tr>
+                  <input type='hidden' id='stadopago' />
+                  <th colspan='1' class='estado'></th>
+                  <td>
+                    <div class='btn-group btn-group-sm float-right' style='display: none;' id='nove'>
+                      <button
+                        type='button'
+                        class='btn btn-secondary dropdown-toggle'
+                        id='apde'
+                        aria-haspopup='true'
+                        aria-expanded='false'
+                      >Acción</button>
+                      <div class='dropdown-menu'></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          {{#if user.externo}}{{else if user.auxicontbl}}
+            <div class='col-12'>
+              <table id='BancoExt' class='table table-sm' style='width:100%;font-size:9px;'>
+                <thead>
+                  <tr>
                     <th>Id</th>
-                    <th>Asesor</th>
                     <th>Fecha</th>
-                    <th>Venta</th>
-                    <th>Monto</th>
-                    <th>%</th>
-                    <th>Retefuente</th>
-                    <th>Reteica</th>
-                    <th>Total</th>
                     <th>Concepto</th>
-                    <th>Descp</th>
-                    <th data-priority="2">Estado</th>
-                    <!--<th style="width:5%;" data-priority="10000">Recibo</th>
-                            <th style="width:5%;" data-priority="2">Estado</th>-->
-                    <th data-priority="1">Accion</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        </table>
-        <hr>
-        <h3>PREMIOS</h3>
-        <table id="premios" class="table table-sm table-striped table-hover display nowrap table-responsive"
-            style="width:100%">
-            <thead>
-                <tr>
-                    <th>Id</th>
-                    <th>Cliente</th>
-                    <th>Fecha</th>
-                    <th>proyecto</th>
-                    <th>lote</th>
+                    <th>Lugar</th>
+                    <th>Descrp</th>
                     <th>Monto</th>
-                    <th>Facturas V</th>
-                    <th>Recibo</th>
-                    <th data-priority="2">Estado</th>
-                    <!--<th style="width:5%;" data-priority="10000">Recibo</th>
-                            <th style="width:5%;" data-priority="2">Estado</th>-->
-                    <th data-priority="1">Accion</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
+                    <th>Pago</th>
+                    <th>RcbMonto</th>
+                    <th>Cuenta</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+            </div>
+          {{/if}}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='PagOCC' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Adjuntar reciibo</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <span class='badge badge-dark' id='nombr'></span>
+        <table class='table table-sm my-2' id='recibosss'>
+          <form enctype='multipart/form-data' id='recboCC' action='/links/solicitudes/rcbcc' method='POST'>
+            <input type='hidden' id='ids' name='ids' />
+            <tbody>
+              <tr>
+                <th colspan='2'>
+                  <i class='feather-md' data-feather='file-plus'></i>
+                  <input
+                    class='form-control-no-border edi'
+                    type='file'
+                    name='image'
+                    data-toggle='tooltip'
+                    data-placement='top'
+                    data-container='body'
+                    title='Selecciones las imagenes de recibos'
+                    autocomplete='off'
+                    data-toggle='dropdown'
+                    aria-haspopup='true'
+                    aria-expanded='false'
+                    id='file2'
+                    multiple
+                    style='width: 50%;'
+                    onchange='preview(this);'
+                    required
+                  />
+                  <span class='montorecibos badge badge-dark'></span>
+                  <input type='hidden' name='montorcb' id='montorecibos' />
+                  <input type='hidden' name='recibos' id='nrbc' />
+                </th>
+              </tr>
+              <tr id='trarchivos'>
+                <th colspan='2' class='image-wrap' id='recibos1' width='100%' height='200'></th>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <button type='submit' class='btn btn-primary btn-sm float-right'>Enviar</button>
+                </th>
+              </tr>
+            </tbody>
+          </form>
         </table>
+      </div>
     </div>
-</div>
-
-
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="Modalimg" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div id="descargaimg">
-                </div>
-                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
-                    <a class="reditar" data-dismiss="modal" aria-label="Close">
-                        <i class="feather mr-0" data-feather="x"></i></a>
-                </div>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="extr">
-                <input type="hidden" id="idSolicitud">
-                <div class="row no-gutters">
-                    <div class="col-md-8 fotos" width="100%" height="200">
-                        <!--<img src="" class="card-img foto" alt="...">-->
-                    </div>
-                    <div class="col-md-4">
-                        <small class="text-muted float-right" id="aprobadoEl"></small>
-                        <table class="table table-sm my-2">
-                            <tbody>
-                                <tr>
-                                    <th colspan="2">
-                                        <small class="text-muted fecha float-right"></small>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colspan="2">
-                                        <span class="cliente"></span>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colspan="2">
-                                        <span class="proyecto"></span>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span class="mz"></span>
-                                    </th>
-                                    <td>
-                                        <span class="lote"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span class="recibo"></span>
-                                    </th>
-                                    <th>
-                                        <a class="fechaRcb float-right"></a>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>FAT.VEC:</span>
-                                    </th>
-                                    <td>
-                                        <span class="badge badge-dark fatvc"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>MONTO:</span>
-                                    </th>
-                                    <td>
-                                        <input type="hidden" id="montopago">
-                                        <span class="monto"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>BONO:</span>
-                                    </th>
-                                    <td>
-                                        <span class="bonoo"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>BONO VR.:</span>
-                                    </th>
-                                    <td>
-                                        <span class="bonom"></span>estado
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <input type="hidden" id="stadopago">
-                                    <th colspan="1" class="estado"></th>
-                                    <td>
-                                        <div class="btn-group btn-group-sm float-right" style="display: none;"
-                                            id="nove">
-                                            <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
-                                                aria-haspopup="true" aria-expanded="false">Acción</button>
-                                            <div class="dropdown-menu"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    {{#if user.externo}}
-
-                    {{else if user.auxicontbl}}
-                    <div class="col-12">
-                        <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
-                            <thead>
-                                <tr>
-                                    <th>Id</th>
-                                    <th>Fecha</th>
-                                    <th>Concepto</th>
-                                    <th>Lugar</th>
-                                    <th>Descrp</th>
-                                    <th>Monto</th>
-                                    <th>Pago</th>
-                                    <th>RcbMonto</th>
-                                </tr>
-                            </thead>
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                    {{/if}}
-                </div>
-            </div>
-        </div>
-    </div>
+  </div>
 </div>
 
 <!-- BEGIN primary modal -->
-<div class="modal fade" id="PagOCC" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Adjuntar reciibo</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <span class="badge badge-dark" id="nombr"></span>
-                <table class="table table-sm my-2" id="recibosss">
-                    <form enctype="multipart/form-data" id="recboCC" action="/links/solicitudes/rcbcc" method="POST">
-                        <input type="hidden" id="ids" name="ids">
-                        <tbody>
-                            <tr>
-                                <th colspan="2">
-                                    <i class="feather-md" data-feather="file-plus"></i>
-                                    <input class="form-control-no-border edi" type="file" name="image"
-                                        data-toggle="tooltip" data-placement="top" data-container="body"
-                                        title="Selecciones las imagenes de recibos" autocomplete="off"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="file2"
-                                        multiple style="width: 50%;" onchange="preview(this);" required>
-                                    <span class="montorecibos badge badge-dark"></span>
-                                    <input type="hidden" name="montorcb" id="montorecibos">
-                                    <input type="hidden" name="recibos" id="nrbc">
-                                </th>
-                            </tr>
-                            <tr id="trarchivos">
-                                <th colspan="2" class="image-wrap" id="recibos1" width="100%" height="200"></th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <button type="submit" class="btn btn-primary btn-sm float-right">Enviar</button>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </form>
-                </table>
-            </div>
+<div class='modal fade' id='Modalimg2' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <div id='descargaimg'>
         </div>
-    </div>
-</div>
-
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="Modalimg2" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div id="descargaimg">
-                </div>
-                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
-                    <a class="reditar" data-dismiss="modal" aria-label="Close">
-                        <i class="feather mr-0" data-feather="x"></i></a>
-                </div>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="extr">
-                <div class="row no-gutters">
-                    <div class="col-md-8 fotos" width="100%" height="200">
-                        <!--<img src="" class="card-img foto" alt="...">-->
-                    </div>
-                    <div class="col-md-4">
-                        <table class="table table-sm my-2">
-                            <tbody>
-                                <tr>
-                                    <th colspan="2">
-                                        <small class="text-muted fecha float-right"></small>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colspan="2">
-                                        <span class="cliente"></span>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th colspan="2">
-                                        <span class="proyecto"></span>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span class="mz"></span>
-                                    </th>
-                                    <td>
-                                        <span class="lote"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th colspan="2">
-                                        <span class="recibo"></span>
-                                    </th>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>FAT.VEC:</span>
-                                    </th>
-                                    <td>
-                                        <span class="badge badge-dark fatvc"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>MONTO:</span>
-                                    </th>
-                                    <td>
-                                        <input type="hidden" id="montopago">
-                                        <span class="monto"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>BONO:</span>
-                                    </th>
-                                    <td>
-                                        <span class="bonoo"></span>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <th>
-                                        <span>BONO VR.:</span>
-                                    </th>
-                                    <td>
-                                        <span class="bonom"></span>estado
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <input type="hidden" id="stadopago">
-                                    <th colspan="1" class="estado"></th>
-                                    <td>
-                                        <div class="btn-group btn-group-sm float-right" style="display: none;"
-                                            id="nove">
-                                            <button type="button" class="btn btn-secondary dropdown-toggle" id="apde"
-                                                aria-haspopup="true" aria-expanded="false">Acción</button>
-                                            <div class="dropdown-menu"></div>
-                                        </div>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="col-12">
-                        <table id="BancoExt" class="table table-sm" style="width:100%;font-size:9px;">
-                            <tbody></tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
+        <div class='d-inline-block mt-1 mr-3 mb-0 float-right'>
+          <a class='reditar' data-dismiss='modal' aria-label='Close'>
+            <i class='feather mr-0' data-feather='x'></i></a>
         </div>
+      </div>
+      <div class='modal-body'>
+        <input type='hidden' id='extr' />
+        <div class='row no-gutters'>
+          <div class='col-md-8 fotos' width='100%' height='200'>
+            <!--<img src="" class="card-img foto" alt="...">-->
+          </div>
+          <div class='col-md-4'>
+            <table class='table table-sm my-2'>
+              <tbody>
+                <tr>
+                  <th colspan='2'>
+                    <small class='text-muted fecha float-right'></small>
+                  </th>
+                </tr>
+                <tr>
+                  <th colspan='2'>
+                    <span class='cliente'></span>
+                  </th>
+                </tr>
+                <tr>
+                  <th colspan='2'>
+                    <span class='proyecto'></span>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <span class='mz'></span>
+                  </th>
+                  <td>
+                    <span class='lote'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th colspan='2'>
+                    <span class='recibo'></span>
+                  </th>
+                </tr>
+                <tr>
+                  <th>
+                    <span>FAT.VEC:</span>
+                  </th>
+                  <td>
+                    <span class='badge badge-dark fatvc'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>MONTO:</span>
+                  </th>
+                  <td>
+                    <input type='hidden' id='montopago' />
+                    <span class='monto'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>BONO:</span>
+                  </th>
+                  <td>
+                    <span class='bonoo'></span>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <span>BONO VR.:</span>
+                  </th>
+                  <td>
+                    <span class='bonom'></span>estado
+                  </td>
+                </tr>
+                <tr>
+                  <input type='hidden' id='stadopago' />
+                  <th colspan='1' class='estado'></th>
+                  <td>
+                    <div class='btn-group btn-group-sm float-right' style='display: none;' id='nove'>
+                      <button
+                        type='button'
+                        class='btn btn-secondary dropdown-toggle'
+                        id='apde'
+                        aria-haspopup='true'
+                        aria-expanded='false'
+                      >Acción</button>
+                      <div class='dropdown-menu'></div>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div class='col-12'>
+            <table id='BancoExt' class='table table-sm' style='width:100%;font-size:9px;'>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
     </div>
+  </div>
 </div>

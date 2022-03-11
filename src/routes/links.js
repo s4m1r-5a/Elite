@@ -1,61 +1,56 @@
-const express = require("express");
+const express = require('express');
 //const {Builder, By, Key, until} = require('selenium-webdriver');
 const router = express.Router();
-const crypto = require("crypto");
-const pool = require("../database");
-const { isLoggedIn, noExterno, isLogged, Admins } = require("../lib/auth");
-const sms = require("../sms.js");
-const { registro, dataSet, Contactos } = require("../keys");
-const request = require("request");
-const cron = require("node-cron");
-const axios = require("axios");
-const fetch = require("node-fetch");
-const fs = require("fs");
-const readline = require("readline");
-const { google, containeranalysis_v1alpha1 } = require("googleapis");
-const moment = require("moment");
-const nodemailer = require("nodemailer");
-const path = require("path");
-const mysqldump = require("mysqldump");
+const crypto = require('crypto');
+const pool = require('../database');
+const { isLoggedIn, noExterno, isLogged, Admins } = require('../lib/auth');
+const sms = require('../sms.js');
+const { registro, dataSet, Contactos } = require('../keys');
+const request = require('request');
+const cron = require('node-cron');
+const axios = require('axios');
+const fetch = require('node-fetch');
+const fs = require('fs');
+const readline = require('readline');
+const { google, containeranalysis_v1alpha1 } = require('googleapis');
+const moment = require('moment');
+const nodemailer = require('nodemailer');
+const path = require('path');
+const mysqldump = require('mysqldump');
 //const XLSX = require('xlsx')
-const XLSX = require("xlsx-js-style");
-const PdfPrinter = require("pdfmake");
-const Roboto = require("../public/fonts/Roboto");
-const {
-  tasaUsura,
-  FacturaDeCobro,
-  consultarDocumentos,
-  EstadoDeCuenta,
-} = require("../functions.js");
-const { Console } = require("console");
+const XLSX = require('xlsx-js-style');
+const PdfPrinter = require('pdfmake');
+const Roboto = require('../public/fonts/Roboto');
+const { tasaUsura, FacturaDeCobro, consultarDocumentos, EstadoDeCuenta } = require('../functions.js');
+const { Console } = require('console');
 //DELETE
 
 const transpoter = nodemailer.createTransport({
-  host: "smtpout.secureserver.net",
+  host: 'smtpout.secureserver.net',
   port: 80,
   secure: false,
   auth: {
-    user: "info@grupoelitefincaraiz.co",
-    pass: "C0l0mb1@1q2w3e4r5t*",
+    user: 'info@grupoelitefincaraiz.co',
+    pass: 'C0l0mb1@1q2w3e4r5t*'
   },
   tls: {
-    rejectUnauthorized: false,
-  },
+    rejectUnauthorized: false
+  }
 });
 const SCOPES = [
-  "https://www.googleapis.com/auth/contacts",
-  "https://www.googleapis.com/auth/drive",
-  "https://www.googleapis.com/auth/drive.file",
-  "https://www.googleapis.com/auth/drive.readonly",
-  "https://www.googleapis.com/auth/drive.metadata.readonly",
-  "https://www.googleapis.com/auth/drive.appdata",
-  "https://www.googleapis.com/auth/drive.metadata",
-  "https://www.googleapis.com/auth/drive.photos.readonly",
+  'https://www.googleapis.com/auth/contacts',
+  'https://www.googleapis.com/auth/drive',
+  'https://www.googleapis.com/auth/drive.file',
+  'https://www.googleapis.com/auth/drive.readonly',
+  'https://www.googleapis.com/auth/drive.metadata.readonly',
+  'https://www.googleapis.com/auth/drive.appdata',
+  'https://www.googleapis.com/auth/drive.metadata',
+  'https://www.googleapis.com/auth/drive.photos.readonly'
 ];
-const TOKEN_PATH = ["token-drive.json", "token-people.json"];
-moment.locale("es");
+const TOKEN_PATH = ['token-drive.json', 'token-people.json'];
+moment.locale('es');
 var desarrollo = false;
-var url = "https://bin.chat-api.com/1bd03zz1"; // •	v2HD9b0f^K
+var url = 'https://bin.chat-api.com/1bd03zz1'; // •	v2HD9b0f^K
 
 //////////////////////////////////////////////////////////// REPLACE INTO cuotas SELECT * FROM elite.cuotas; /////////////////////////////////////
 
@@ -184,9 +179,9 @@ var lm = `SELECT p.id, d.proyect proyecto, p.fecha, l.mz, l.n lt, l.mtr2, l.mtr,
         GROUP BY p.id, e.id
         ORDER BY p.fecha;`;
 
-router.post("/desarrollo", async (req, res) => {
+router.post('/desarrollo', async (req, res) => {
   desarrollo = req.headers.origin;
-  console.log("paso siempre por aqui", desarrollo);
+  console.log('paso siempre por aqui', desarrollo);
   /*var Dia = moment().subtract(1, 'days').endOf("days").format('YYYY-MM-DD HH:mm');
     const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
     INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
@@ -432,7 +427,7 @@ router.post("/desarrollo", async (req, res) => {
   res.send(true);
 });
 var co = 0;
-cron.schedule("0 10 13,28 * *", async () => {
+cron.schedule('0 10 13,28 * *', async () => {
   const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
     ORDER BY fechs ASC) as deuda, (SELECT SUM(mora) FROM cuotas 
@@ -456,11 +451,7 @@ cron.schedule("0 10 13,28 * *", async () => {
       data.nombre
     }*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${
       data.meses
-    } mes(es)* por *$${Moneda(
-      data.deuda
-    )}* correspondiente a la compra de su lote campestre *${
-      data.proyect
-    }* *Lt-${
+    } mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${data.proyect}* *Lt-${
       data.n
     }* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(
       data.mora
@@ -472,24 +463,24 @@ cron.schedule("0 10 13,28 * *", async () => {
     mora += data.mora;
   }
   await EnviarWTSAP(
-    "57 3012673944",
-    `_Hoy *${moment().format("llll")}*, el sistema detecto *${
+    '57 3012673944',
+    `_Hoy *${moment().format('llll')}*, el sistema detecto *${
       yt.length
     } Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(
       mora
     )}* y una *deuda total* de *$${Moneda(deuda)}*_`
   );
 });
-cron.schedule("0 2 * * *", async () => {
-  const finmes = moment().endOf("month").format("DD");
-  const dia = moment().format("DD");
-  const fecha = moment().format("YYYY-MM-DD");
-  if (dia === "01") {
+cron.schedule('0 2 * * *', async () => {
+  const finmes = moment().endOf('month').format('DD');
+  const dia = moment().format('DD');
+  const fecha = moment().format('YYYY-MM-DD');
+  if (dia === '01') {
     const tasa = await tasaUsura();
     const newTasa = { teano: tasa / 100, fecha };
     await pool.query(`INSERT INTO intereses SET ? `, newTasa);
     var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
-    await EnviarWTSAP("57 3004880579", bod);
+    await EnviarWTSAP('57 3004880579', bod);
   }
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
@@ -502,7 +493,7 @@ cron.schedule("0 2 * * *", async () => {
   if (intr.length) {
     let moraVr = `CASE`;
     let moraTs = `CASE`;
-    intr.map((e) => {
+    intr.map(e => {
       moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * (DATEDIFF(CURDATE(), c.fechs) - c.diaspagados) * ${e.tasa} / 365`;
       moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
     });
@@ -516,12 +507,8 @@ cron.schedule("0 2 * * *", async () => {
   await pool.query(`SET  @num := 0`);
   await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`);
   await pool.query(`ALTER TABLE relacioncuotas AUTO_INCREMENT =1`);
-  await pool.query(
-    `ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED`
-  );
-  await pool.query(
-    `ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED AUTO_INCREMENT`
-  );
+  await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED`);
+  await pool.query(`ALTER TABLE relacioncuotas MODIFY COLUMN id INT(11) UNSIGNED AUTO_INCREMENT`);
 
   const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
     (l.valor - p.ahorro) * d.cobrosistema Inicial, ( SELECT SUM(monto) 
@@ -532,19 +519,15 @@ cron.schedule("0 2 * * *", async () => {
 
   if (comi.length) {
     let ids = null;
-    await comi.map((e) => (ids += ids ? ", " + e.ordn : e.ordn));
+    await comi.map(e => (ids += ids ? ', ' + e.ordn : e.ordn));
     await pool.query(`UPDATE solicitudes s SET s.fech = NOW(), 
         s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
   }
 });
-cron.schedule("*/10 * 5 5 * *", async () => {
+cron.schedule('*/10 * 5 5 * *', async () => {
   function authorize(credentials, callback) {
     const { client_secret, client_id, redirect_uris } = credentials.installed;
-    const oAuth2Client = new google.auth.OAuth2(
-      client_id,
-      client_secret,
-      redirect_uris[0]
-    );
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH[0], (err, token) => {
@@ -555,68 +538,63 @@ cron.schedule("*/10 * 5 5 * *", async () => {
   }
   function getAccessToken(oAuth2Client, callback) {
     const authUrl = oAuth2Client.generateAuthUrl({
-      access_type: "offline",
-      scope: SCOPES,
+      access_type: 'offline',
+      scope: SCOPES
     });
-    console.log("Authorize this app by visiting this url:", authUrl);
+    console.log('Authorize this app by visiting this url:', authUrl);
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
+      output: process.stdout
     });
-    rl.question("Enter the code from that page here: ", (code) => {
+    rl.question('Enter the code from that page here: ', code => {
       rl.close();
       oAuth2Client.getToken(code, (err, token) => {
-        if (err) return console.error("Error retrieving access token", err);
+        if (err) return console.error('Error retrieving access token', err);
         oAuth2Client.setCredentials(token);
         // Store the token to disk for later program executions
-        fs.writeFile(TOKEN_PATH[0], JSON.stringify(token), (err) => {
+        fs.writeFile(TOKEN_PATH[0], JSON.stringify(token), err => {
           if (err) return console.error(err);
-          console.log("Token stored to", TOKEN_PATH[0]);
+          console.log('Token stored to', TOKEN_PATH[0]);
         });
         callback(oAuth2Client);
       });
     });
   }
-  if (desarrollo && desarrollo !== "http://localhost:5000") {
-    var mensajeP = "Proyectos ",
-      mensajeO = "Ordenes ",
-      mensajeR = "Recibocaja ";
-    const proyectos = await pool.query(
-      `SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`
-    );
+  if (desarrollo && desarrollo !== 'http://localhost:5000') {
+    var mensajeP = 'Proyectos ',
+      mensajeO = 'Ordenes ',
+      mensajeR = 'Recibocaja ';
+    const proyectos = await pool.query(`SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`);
     mensajeP += proyectos.length;
     if (proyectos.length) {
-      proyectos.map(async (x) => {
+      proyectos.map(async x => {
         function Proyectos(auth) {
-          const drive = google.drive({ version: "v3", auth });
+          const drive = google.drive({ version: 'v3', auth });
           var fileMetadata = {
             name: x.proyect,
-            folderColorRgb: "green",
+            folderColorRgb: 'green',
             description: x.categoria,
-            mimeType: "application/vnd.google-apps.folder",
+            mimeType: 'application/vnd.google-apps.folder'
           };
           drive.files.create(
             {
               resource: fileMetadata,
-              fields: "id",
+              fields: 'id'
             },
             (err, file) => {
               if (err) {
                 console.error(err);
               } else {
-                console.log("Folder Id: ", file.data.id);
-                mensajeP += " Folder Id: " + file.data.id;
-                pool.query(`UPDATE productos SET ? WHERE id = ?`, [
-                  { drive: file.data.id },
-                  x.id,
-                ]);
+                console.log('Folder Id: ', file.data.id);
+                mensajeP += ' Folder Id: ' + file.data.id;
+                pool.query(`UPDATE productos SET ? WHERE id = ?`, [{ drive: file.data.id }, x.id]);
               }
             }
           );
         }
 
-        fs.readFile("credentials.json", (err, content) => {
-          if (err) return console.log("Error loading client secret file:", err);
+        fs.readFile('credentials.json', (err, content) => {
+          if (err) return console.log('Error loading client secret file:', err);
           // Authorize a client with credentials, then call the Google Drive API.
           authorize(JSON.parse(content), Proyectos);
         });
@@ -629,56 +607,44 @@ cron.schedule("*/10 * 5 5 * *", async () => {
          WHERE d.drive IS NOT NULL AND p.drive IS NULL AND l.estado NOT IN(9, 1, 15) LIMIT 20`);
     mensajeO += ordenes.length;
     if (ordenes.length) {
-      ordenes.map(async (x) => {
+      ordenes.map(async x => {
         function Ordenes(auth) {
-          const drive = google.drive({ version: "v3", auth });
+          const drive = google.drive({ version: 'v3', auth });
           var fileMetadata = {
             name: `MZ-${x.mz} LT-${x.n} ${x.id}-${x.lote}`,
-            folderColorRgb:
-              x.tipobsevacion === "ANULADA"
-                ? "red"
-                : x.estado === 13
-                ? "green"
-                : "blue",
+            folderColorRgb: x.tipobsevacion === 'ANULADA' ? 'red' : x.estado === 13 ? 'green' : 'blue',
             description:
-              x.tipobsevacion === "ANULADA"
-                ? "ORDEN ANULADA - " +
+              x.tipobsevacion === 'ANULADA'
+                ? 'ORDEN ANULADA - ' +
                   x.descrip +
-                  " - CARPETA: " +
+                  ' - CARPETA: ' +
                   x.drive +
-                  " - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO"
+                  ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
                 : x.estado === 13
-                ? "ORDEN CULMINADA - CARPETA: " +
-                  x.drive +
-                  " - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO"
-                : "ORDEN ACTIVA - CARPETA: " +
-                  x.drive +
-                  " - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO",
-            mimeType: "application/vnd.google-apps.folder",
-            parents: [x.drive],
+                ? 'ORDEN CULMINADA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
+                : 'ORDEN ACTIVA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
+            mimeType: 'application/vnd.google-apps.folder',
+            parents: [x.drive]
           };
           drive.files.create(
             {
               resource: fileMetadata,
-              fields: "id",
+              fields: 'id'
             },
             (err, file) => {
               if (err) {
                 console.error(err);
               } else {
-                console.log("Folder Id: ", file.data.id);
-                mensajeO += " Folder Id: " + file.data.id;
-                pool.query(`UPDATE preventa SET ? WHERE id = ?`, [
-                  { drive: file.data.id },
-                  x.id,
-                ]);
+                console.log('Folder Id: ', file.data.id);
+                mensajeO += ' Folder Id: ' + file.data.id;
+                pool.query(`UPDATE preventa SET ? WHERE id = ?`, [{ drive: file.data.id }, x.id]);
               }
             }
           );
         }
 
-        fs.readFile("credentials.json", (err, content) => {
-          if (err) return console.log("Error loading client secret file:", err);
+        fs.readFile('credentials.json', (err, content) => {
+          if (err) return console.log('Error loading client secret file:', err);
           // Authorize a client with credentials, then call the Google Drive API.
           authorize(JSON.parse(content), Ordenes);
         });
@@ -690,85 +656,73 @@ cron.schedule("*/10 * 5 5 * *", async () => {
         WHERE d.drive IS NOT NULL AND p.drive IS NOT NULL AND s.drive IS NULL AND s.pdf IS NOT NULL AND s.stado != 3`);
     mensajeR += recibocaja.length;
     if (recibocaja.length) {
-      recibocaja.map(async (x) => {
+      recibocaja.map(async x => {
         function RecivoCaja(auth) {
-          const drive = google.drive({ version: "v3", auth });
+          const drive = google.drive({ version: 'v3', auth });
           var fileMetadata = {
             name: `${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`,
             description:
               x.stado === 4
-                ? "APROBADA - CARPETA: " + x.drive + " - ARCHIVO: " + x.pdf
-                : "DECLINADA - CARPETA: " + x.drive + " - ARCHIVO: " + x.pdf,
-            parents: [x.drive],
+                ? 'APROBADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf
+                : 'DECLINADA - CARPETA: ' + x.drive + ' - ARCHIVO: ' + x.pdf,
+            parents: [x.drive]
           };
-          var f = x.pdf.indexOf("/uploads/");
+          var f = x.pdf.indexOf('/uploads/');
           var media = {
-            mimeType: "application/pdf",
-            body: fs.createReadStream(
-              path.join(__dirname, "../public" + x.pdf.substr(f))
-            ),
+            mimeType: 'application/pdf',
+            body: fs.createReadStream(path.join(__dirname, '../public' + x.pdf.substr(f)))
             //body: fs.createReadStream(path.join(__dirname, '../public/uploads/--l54j4f2000-xh-wjo3d85n3o08017he9.pdf'))
           };
           drive.files.create(
             {
               resource: fileMetadata,
               media: media,
-              fields: "id",
+              fields: 'id'
             },
             (err, file) => {
               if (err) {
                 console.error(err);
               } else {
                 console.log(
-                  "File Id: ",
+                  'File Id: ',
                   file.data.id,
-                  " NAME: ",
+                  ' NAME: ',
                   file.data.name,
                   file.data,
                   ` ${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`
                 );
                 //mensajeR += ' File Id: ' + file.data.id;
-                pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
-                  { drive: file.data.id },
-                  x.ids,
-                ]);
+                pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
               }
             }
           );
         }
 
-        fs.readFile("credentials.json", (err, content) => {
-          if (err) return console.log("Error loading client secret file:", err);
+        fs.readFile('credentials.json', (err, content) => {
+          if (err) return console.log('Error loading client secret file:', err);
           // Authorize a client with credentials, then call the Google Drive API.
           authorize(JSON.parse(content), RecivoCaja);
         });
       });
     }
-    await EnviarWTSAP(
-      "57 3007753983",
-      mensajeP + " " + mensajeO + " " + mensajeR
-    );
+    await EnviarWTSAP('57 3007753983', mensajeP + ' ' + mensajeO + ' ' + mensajeR);
     console.log(co++, ordenes.length, proyectos.length, recibocaja.length);
   }
-  await EnviarWTSAP("57 3007753983", desarrollo);
+  await EnviarWTSAP('57 3007753983', desarrollo);
 });
-cron.schedule("7 10 * * *", async () => {
-  if (desarrollo && desarrollo !== "http://localhost:5000") {
-    var Dia = moment()
-      .subtract(1, "days")
-      .endOf("days")
-      .format("YYYY-MM-DD HH:mm");
-    const f =
-      await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+cron.schedule('7 10 * * *', async () => {
+  if (desarrollo && desarrollo !== 'http://localhost:5000') {
+    var Dia = moment().subtract(1, 'days').endOf('days').format('YYYY-MM-DD HH:mm');
+    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
         INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
-    f.map((x) => {
+    f.map(x => {
       body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     });
     //await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
   }
 });
-cron.schedule("0 0 * * *", async () => {
+cron.schedule('0 0 * * *', async () => {
   /*mysqldump({
         connection: {
             host: '96.43.143.58',
@@ -780,10 +734,7 @@ cron.schedule("0 0 * * *", async () => {
         dumpToFile: './elite.sql',
         //compressFile: true,
     });*/
-  var Dia = moment()
-    .subtract(1, "days")
-    .endOf("days")
-    .format("YYYY-MM-DD HH:mm");
+  var Dia = moment().subtract(1, 'days').endOf('days').format('YYYY-MM-DD HH:mm');
   /*await pool.query(`UPDATE productosd l INNER JOIN preventa p ON l.id = p.lote 
     SET l.estado = 9, l.tramitando = NULL WHERE TIMESTAMP(p.fecha) < '${Dia}' 
     AND p.tipobsevacion IS NULL AND l.estado = 1`);
@@ -796,22 +747,18 @@ ORDER BY suma DESC LIMIT 10
 
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
-  if (desarrollo && desarrollo !== "http://localhost:5000") {
-    const f =
-      await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+  if (desarrollo && desarrollo !== 'http://localhost:5000') {
+    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
         INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
-    f.map((x) => {
+    f.map(x => {
       body += `_ID: *${x.id}* MZ: *${x.mz}* LT: *${x.n}* - ${x.fecha}_\n`;
     });
     //await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
 
     /////////////////////////////////////////* QUITAR QUPONES *//////////////////////////////////////////
 
-    var diacupon = moment()
-      .subtract(3, "days")
-      .endOf("days")
-      .format("YYYY-MM-DD HH:mm:ss");
+    var diacupon = moment().subtract(3, 'days').endOf('days').format('YYYY-MM-DD HH:mm:ss');
 
     const separaciones =
       await pool.query(`SELECT p.id, p.fecha, l.estado FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
@@ -821,18 +768,15 @@ ORDER BY suma DESC LIMIT 10
     });
   }
 });
-cron.schedule("0 0 1 * *", async () => {
+cron.schedule('0 0 1 * *', async () => {
   let m = new Date();
   var mes = m.getMonth() + 1;
-  var hoy = moment().format("YYYY-MM-DD");
+  var hoy = moment().format('YYYY-MM-DD');
   const asesor = await pool.query(`SELECT u.*, r.venta, r.bono FROM users u 
         INNER JOIN rangos r ON u.nrango = r.id WHERE u.sucursal IS NULL`);
   if (asesor.length > 0) {
     await asesor.map(async (j, x) => {
-      var porcentual =
-        Math.sign(j.bono - j.rangoabajo) > 0
-          ? Math.abs(j.bono - j.rangoabajo)
-          : 0;
+      var porcentual = Math.sign(j.bono - j.rangoabajo) > 0 ? Math.abs(j.bono - j.rangoabajo) : 0;
 
       if (j.nrango === 4 && j.cortep >= j.venta && !j.pagobono) {
         var monto = j.cortep * porcentual;
@@ -841,22 +785,18 @@ cron.schedule("0 0 1 * *", async () => {
         var f = {
           fech: hoy,
           monto,
-          concepto: "BONOS",
+          concepto: 'BONOS',
           stado: 15,
           porciento: porcentual,
-          descp: "BONO GERENCIAL",
+          descp: 'BONO GERENCIAL',
           asesor: j.id,
           total: j.cortep,
           retefuente,
           reteica,
-          pagar: monto - (retefuente + reteica),
+          pagar: monto - (retefuente + reteica)
         };
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
-      } else if (
-        (j.nrango === 3 || j.nrango === 2 || j.nrango === 1) &&
-        j.cortep >= j.venta &&
-        !j.pagobono
-      ) {
+      } else if ((j.nrango === 3 || j.nrango === 2 || j.nrango === 1) && j.cortep >= j.venta && !j.pagobono) {
         var corte;
         switch (mes) {
           case 1:
@@ -896,27 +836,16 @@ cron.schedule("0 0 1 * *", async () => {
             corte = 3;
             break;
         }
-        var acumulado =
-          corte === 1
-            ? j.corte1
-            : corte === 2
-            ? j.corte2
-            : corte === 3
-            ? j.corte3
-            : "";
+        var acumulado = corte === 1 ? j.corte1 : corte === 2 ? j.corte2 : corte === 3 ? j.corte3 : '';
         var monto = (acumulado + j.cortep) * porcentual;
         var retefuente = monto * 0.1;
         var reteica = (monto * 8) / 1000;
         var descp =
-          j.nrango === 1
-            ? "BONO PRESIDENCIAL"
-            : j.nrango === 2
-            ? "BONO VICEPRESIDENCIAL"
-            : "BONO GERENCIAL ELITE";
+          j.nrango === 1 ? 'BONO PRESIDENCIAL' : j.nrango === 2 ? 'BONO VICEPRESIDENCIAL' : 'BONO GERENCIAL ELITE';
         var f = {
           fech: hoy,
           monto,
-          concepto: "BONOS",
+          concepto: 'BONOS',
           stado: 15,
           porciento: porcentual,
           descp,
@@ -924,23 +853,23 @@ cron.schedule("0 0 1 * *", async () => {
           total: acumulado + j.cortep,
           retefuente,
           reteica,
-          pagar: monto - (retefuente + reteica),
+          pagar: monto - (retefuente + reteica)
         };
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
       }
     });
   }
   var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-  await EnviarWTSAP("57 3007753983", bod);
+  await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 0 2,17 * *", async () => {
+cron.schedule('0 0 2,17 * *', async () => {
   await pool.query(
     `UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 15`
   );
   var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-  await EnviarWTSAP("57 3007753983", bod);
+  await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 0 3,18 * *", async () => {
+cron.schedule('0 0 3,18 * *', async () => {
   /*const finmes = moment().endOf('month').format('DD');
     const dia = moment().endOf('month').format('DD');
     if (dia === finmes || dia === '15') {
@@ -952,63 +881,61 @@ cron.schedule("0 0 3,18 * *", async () => {
     `UPDATE solicitudes SET stado = 15 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 9`
   );
   var bod = `_Hemos *Bloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-  await EnviarWTSAP("57 3007753983", bod);
+  await EnviarWTSAP('57 3007753983', bod);
 });
-cron.schedule("0 1 1 1,4,7,10 *", async () => {
-  var hoy = moment().format("YYYY-MM-DD");
+cron.schedule('0 1 1 1,4,7,10 *', async () => {
+  var hoy = moment().format('YYYY-MM-DD');
   const asesor = await pool.query(`SELECT u.*, r.venta, r.ventas FROM users u 
         INNER JOIN rangos r ON u.nrango = r.id WHERE u.sucursal IS NULL`);
 
   if (asesor.length > 0) {
     await asesor.map(async (j, x) => {
       if (j.totalcortep >= j.venta && j.totalcorte >= j.ventas) {
-        const r = await pool.query(
-          `SELECT * FROM rangos WHERE ventas BETWEEN 500000000 AND ${j.totalcorte} LIMIT 1`
-        );
+        const r = await pool.query(`SELECT * FROM rangos WHERE ventas BETWEEN 500000000 AND ${j.totalcorte} LIMIT 1`);
         if (r.length > 0) {
           var y = r[0];
           var retefuente = y.premio * 0.1;
           var reteica = (y.premio * 8) / 1000;
           var descp =
             y.id === 5
-              ? "NUEVO DIRECTOR"
+              ? 'NUEVO DIRECTOR'
               : y.id === 4
-              ? "NUEVO GERENTE"
+              ? 'NUEVO GERENTE'
               : y.id === 3
-              ? "NUEVO GERENTE ELITE"
+              ? 'NUEVO GERENTE ELITE'
               : y.id === 2
-              ? "NUEVO VICEPRESIDENTE"
-              : "NUEVO PRESIDENTE";
+              ? 'NUEVO VICEPRESIDENTE'
+              : 'NUEVO PRESIDENTE';
           var f = {
             fech: hoy,
             monto: y.premio,
-            concepto: "PREMIACION",
+            concepto: 'PREMIACION',
             stado: 15,
             descp,
             asesor: j.id,
             total: j.totalcorte,
             retefuente,
             reteica,
-            pagar: y.premio - (retefuente + reteica),
+            pagar: y.premio - (retefuente + reteica)
           };
           await pool.query(`INSERT INTO solicitudes SET ?`, f);
           await pool.query(`UPDATE users SET ? WHERE id = ?`, [
             {
               nrango: y.id /*cortep: 0, corte1: 0, corte2: 0,
-                            corte3: 0, totalcorte: 0, totalcortep: 0*/,
+                            corte3: 0, totalcorte: 0, totalcortep: 0*/
             },
-            j.id,
+            j.id
           ]);
         }
       }
     });
   }
   var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-  await EnviarWTSAP("57 3007753983", bod);
+  await EnviarWTSAP('57 3007753983', bod);
 });
 let rt = [],
   t = 1;
-cron.schedule("*/20 * * * *", async () => {
+cron.schedule('*/20 * * * *', async () => {
   /* var hdh;
     console.log(rt[t]);
     rt.length && ( 
@@ -1213,341 +1140,341 @@ cron.schedule("*/20 * * * *", async () => {
             }
         ] */
 });
-router.get("/msg", async (req, res) => {
+router.get('/msg', async (req, res) => {
   ////////////////////////* CREAR PDF *//////////////////////////////
   const printer = new PdfPrinter(Roboto);
   let docDefinition = {
     content: [
-      { text: "Tables", style: "header" },
-      "Official documentation is in progress, this document is just a glimpse of what is possible with pdfmake and its layout engine.",
+      { text: 'Tables', style: 'header' },
+      'Official documentation is in progress, this document is just a glimpse of what is possible with pdfmake and its layout engine.',
       {
-        text: "A simple table (no headers, no width specified, no spans, no styling)",
-        style: "subheader",
+        text: 'A simple table (no headers, no width specified, no spans, no styling)',
+        style: 'subheader'
       },
-      "The following table has nothing more than a body array",
+      'The following table has nothing more than a body array',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
-            ["Column 1", "Column 2", "Column 3"],
-            ["One value goes here", "Another one here", "OK?"],
-          ],
-        },
+            ['Column 1', 'Column 2', 'Column 3'],
+            ['One value goes here', 'Another one here', 'OK?']
+          ]
+        }
       },
-      { text: "A simple table with nested elements", style: "subheader" },
-      "It is of course possible to nest any other type of nodes available in pdfmake inside table cells",
+      { text: 'A simple table with nested elements', style: 'subheader' },
+      'It is of course possible to nest any other type of nodes available in pdfmake inside table cells',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
-            ["Column 1", "Column 2", "Column 3"],
+            ['Column 1', 'Column 2', 'Column 3'],
             [
               {
                 stack: [
                   "Let's try an unordered list",
                   {
-                    ul: ["item 1", "item 2"],
-                  },
-                ],
+                    ul: ['item 1', 'item 2']
+                  }
+                ]
               },
               [
-                "or a nested table",
+                'or a nested table',
                 {
                   table: {
                     body: [
-                      ["Col1", "Col2", "Col3"],
-                      ["1", "2", "3"],
-                      ["1", "2", "3"],
-                    ],
-                  },
-                },
+                      ['Col1', 'Col2', 'Col3'],
+                      ['1', '2', '3'],
+                      ['1', '2', '3']
+                    ]
+                  }
+                }
               ],
               {
                 text: [
-                  "Inlines can be ",
-                  { text: "styled\n", italics: true },
-                  { text: "easily as everywhere else", fontSize: 10 },
-                ],
-              },
-            ],
-          ],
-        },
+                  'Inlines can be ',
+                  { text: 'styled\n', italics: true },
+                  { text: 'easily as everywhere else', fontSize: 10 }
+                ]
+              }
+            ]
+          ]
+        }
       },
-      { text: "Defining column widths", style: "subheader" },
-      "Tables support the same width definitions as standard columns:",
+      { text: 'Defining column widths', style: 'subheader' },
+      'Tables support the same width definitions as standard columns:',
       {
         bold: true,
-        ul: ["auto", "star", "fixed value"],
+        ul: ['auto', 'star', 'fixed value']
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
-          widths: [100, "*", 200, "*"],
+          widths: [100, '*', 200, '*'],
           body: [
-            ["width=100", "star-sized", "width=200", "star-sized"],
+            ['width=100', 'star-sized', 'width=200', 'star-sized'],
             [
-              "fixed-width cells have exactly the specified width",
+              'fixed-width cells have exactly the specified width',
               {
-                text: "nothing interesting here",
+                text: 'nothing interesting here',
                 italics: true,
-                color: "gray",
+                color: 'gray'
               },
               {
-                text: "nothing interesting here",
+                text: 'nothing interesting here',
                 italics: true,
-                color: "gray",
+                color: 'gray'
               },
               {
-                text: "nothing interesting here",
+                text: 'nothing interesting here',
                 italics: true,
-                color: "gray",
-              },
-            ],
-          ],
-        },
+                color: 'gray'
+              }
+            ]
+          ]
+        }
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
-          widths: ["*", "auto"],
+          widths: ['*', 'auto'],
           body: [
             [
-              "This is a star-sized column. The next column over, an auto-sized column, will wrap to accomodate all the text in this cell.",
-              "I am auto sized.",
-            ],
-          ],
-        },
+              'This is a star-sized column. The next column over, an auto-sized column, will wrap to accomodate all the text in this cell.',
+              'I am auto sized.'
+            ]
+          ]
+        }
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
-          widths: ["*", "auto"],
+          widths: ['*', 'auto'],
           body: [
             [
-              "This is a star-sized column. The next column over, an auto-sized column, will not wrap to accomodate all the text in this cell, because it has been given the noWrap style.",
-              { text: "I am auto sized.", noWrap: true },
-            ],
-          ],
-        },
+              'This is a star-sized column. The next column over, an auto-sized column, will not wrap to accomodate all the text in this cell, because it has been given the noWrap style.',
+              { text: 'I am auto sized.', noWrap: true }
+            ]
+          ]
+        }
       },
-      { text: "Defining row heights", style: "subheader" },
+      { text: 'Defining row heights', style: 'subheader' },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           heights: [20, 50, 70],
           body: [
-            ["row 1 with height 20", "column B"],
-            ["row 2 with height 50", "column B"],
-            ["row 3 with height 70", "column B"],
-          ],
-        },
+            ['row 1 with height 20', 'column B'],
+            ['row 2 with height 50', 'column B'],
+            ['row 3 with height 70', 'column B']
+          ]
+        }
       },
-      "With same height:",
+      'With same height:',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           heights: 40,
           body: [
-            ["row 1", "column B"],
-            ["row 2", "column B"],
-            ["row 3", "column B"],
-          ],
-        },
+            ['row 1', 'column B'],
+            ['row 2', 'column B'],
+            ['row 3', 'column B']
+          ]
+        }
       },
-      "With height from function:",
+      'With height from function:',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           heights: function (row) {
             return (row + 1) * 25;
           },
           body: [
-            ["row 1", "column B"],
-            ["row 2", "column B"],
-            ["row 3", "column B"],
-          ],
-        },
+            ['row 1', 'column B'],
+            ['row 2', 'column B'],
+            ['row 3', 'column B']
+          ]
+        }
       },
-      { text: "Column/row spans", pageBreak: "before", style: "subheader" },
-      "Each cell-element can set a rowSpan or colSpan",
+      { text: 'Column/row spans', pageBreak: 'before', style: 'subheader' },
+      'Each cell-element can set a rowSpan or colSpan',
       {
-        style: "tableExample",
-        color: "#444",
+        style: 'tableExample',
+        color: '#444',
         table: {
-          widths: [200, "auto", "auto"],
+          widths: [200, 'auto', 'auto'],
           headerRows: 2,
           // keepWithHeaderRows: 1,
           body: [
             [
               {
-                text: "Header with Colspan = 2",
-                style: "tableHeader",
+                text: 'Header with Colspan = 2',
+                style: 'tableHeader',
                 colSpan: 2,
-                alignment: "center",
+                alignment: 'center'
               },
               {},
-              { text: "Header 3", style: "tableHeader", alignment: "center" },
+              { text: 'Header 3', style: 'tableHeader', alignment: 'center' }
             ],
             [
-              { text: "Header 1", style: "tableHeader", alignment: "center" },
-              { text: "Header 2", style: "tableHeader", alignment: "center" },
-              { text: "Header 3", style: "tableHeader", alignment: "center" },
+              { text: 'Header 1', style: 'tableHeader', alignment: 'center' },
+              { text: 'Header 2', style: 'tableHeader', alignment: 'center' },
+              { text: 'Header 3', style: 'tableHeader', alignment: 'center' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
             [
               {
                 rowSpan: 3,
-                text: "rowSpan set to 3\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor",
+                text: 'rowSpan set to 3\nLorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor'
               },
-              "Sample value 2",
-              "Sample value 3",
+              'Sample value 2',
+              'Sample value 3'
             ],
-            ["", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
+            ['', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
             [
-              "Sample value 1",
+              'Sample value 1',
               {
                 colSpan: 2,
                 rowSpan: 2,
-                text: "Both:\nrowSpan and colSpan\ncan be defined at the same time",
+                text: 'Both:\nrowSpan and colSpan\ncan be defined at the same time'
               },
-              "",
+              ''
             ],
-            ["Sample value 1", "", ""],
-          ],
-        },
+            ['Sample value 1', '', '']
+          ]
+        }
       },
-      { text: "Headers", pageBreak: "before", style: "subheader" },
-      "You can declare how many rows should be treated as a header. Headers are automatically repeated on the following pages",
+      { text: 'Headers', pageBreak: 'before', style: 'subheader' },
+      'You can declare how many rows should be treated as a header. Headers are automatically repeated on the following pages',
       {
         text: [
-          "It is also possible to set keepWithHeaderRows to make sure there will be no page-break between the header and these rows. Take a look at the document-definition and play with it. If you set it to one, the following table will automatically start on the next page, since there's not enough space for the first row to be rendered here",
+          "It is also possible to set keepWithHeaderRows to make sure there will be no page-break between the header and these rows. Take a look at the document-definition and play with it. If you set it to one, the following table will automatically start on the next page, since there's not enough space for the first row to be rendered here"
         ],
-        color: "gray",
-        italics: true,
+        color: 'gray',
+        italics: true
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           // dontBreakRows: true,
           // keepWithHeaderRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
             [
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-              "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.",
-            ],
-          ],
-        },
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
+              'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.'
+            ]
+          ]
+        }
       },
-      { text: "Styling tables", style: "subheader" },
-      "You can provide a custom styler for the table. Currently it supports:",
+      { text: 'Styling tables', style: 'subheader' },
+      'You can provide a custom styler for the table. Currently it supports:',
       {
-        ul: ["line widths", "line colors", "cell paddings"],
+        ul: ['line widths', 'line colors', 'cell paddings']
       },
-      "with more options coming soon...\n\npdfmake currently has a few predefined styles (see them on the next page)",
+      'with more options coming soon...\n\npdfmake currently has a few predefined styles (see them on the next page)',
       {
-        text: "noBorders:",
+        text: 'noBorders:',
         fontSize: 14,
         bold: true,
-        pageBreak: "before",
-        margin: [0, 0, 0, 8],
+        pageBreak: 'before',
+        margin: [0, 0, 0, 8]
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
-        layout: "noBorders",
+        layout: 'noBorders'
       },
       {
-        text: "headerLineOnly:",
+        text: 'headerLineOnly:',
         fontSize: 14,
         bold: true,
-        margin: [0, 20, 0, 8],
+        margin: [0, 20, 0, 8]
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
-        layout: "headerLineOnly",
+        layout: 'headerLineOnly'
       },
       {
-        text: "lightHorizontalLines:",
+        text: 'lightHorizontalLines:',
         fontSize: 14,
         bold: true,
-        margin: [0, 20, 0, 8],
+        margin: [0, 20, 0, 8]
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
-        layout: "lightHorizontalLines",
+        layout: 'lightHorizontalLines'
       },
       {
-        text: "but you can provide a custom styler as well",
-        margin: [0, 20, 0, 8],
+        text: 'but you can provide a custom styler as well',
+        margin: [0, 20, 0, 8]
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
         layout: {
           hLineWidth: function (i, node) {
@@ -1557,11 +1484,11 @@ router.get("/msg", async (req, res) => {
             return i === 0 || i === node.table.widths.length ? 2 : 1;
           },
           hLineColor: function (i, node) {
-            return i === 0 || i === node.table.body.length ? "black" : "gray";
+            return i === 0 || i === node.table.body.length ? 'black' : 'gray';
           },
           vLineColor: function (i, node) {
-            return i === 0 || i === node.table.widths.length ? "black" : "gray";
-          },
+            return i === 0 || i === node.table.widths.length ? 'black' : 'gray';
+          }
           // hLineStyle: function (i, node) { return {dash: { length: 10, space: 4 }}; },
           // vLineStyle: function (i, node) { return {dash: { length: 10, space: 4 }}; },
           // paddingLeft: function(i, node) { return 4; },
@@ -1569,43 +1496,43 @@ router.get("/msg", async (req, res) => {
           // paddingTop: function(i, node) { return 2; },
           // paddingBottom: function(i, node) { return 2; },
           // fillColor: function (rowIndex, node, columnIndex) { return null; }
-        },
+        }
       },
-      { text: "zebra style", margin: [0, 20, 0, 8] },
+      { text: 'zebra style', margin: [0, 20, 0, 8] },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
         layout: {
           fillColor: function (rowIndex, node, columnIndex) {
-            return rowIndex % 2 === 0 ? "#CCCCCC" : null;
-          },
-        },
+            return rowIndex % 2 === 0 ? '#CCCCCC' : null;
+          }
+        }
       },
-      { text: "and can be used dash border", margin: [0, 20, 0, 8] },
+      { text: 'and can be used dash border', margin: [0, 20, 0, 8] },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           headerRows: 1,
           body: [
             [
-              { text: "Header 1", style: "tableHeader" },
-              { text: "Header 2", style: "tableHeader" },
-              { text: "Header 3", style: "tableHeader" },
+              { text: 'Header 1', style: 'tableHeader' },
+              { text: 'Header 2', style: 'tableHeader' },
+              { text: 'Header 3', style: 'tableHeader' }
             ],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-            ["Sample value 1", "Sample value 2", "Sample value 3"],
-          ],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3'],
+            ['Sample value 1', 'Sample value 2', 'Sample value 3']
+          ]
         },
         layout: {
           hLineWidth: function (i, node) {
@@ -1615,10 +1542,10 @@ router.get("/msg", async (req, res) => {
             return i === 0 || i === node.table.widths.length ? 2 : 1;
           },
           hLineColor: function (i, node) {
-            return "black";
+            return 'black';
           },
           vLineColor: function (i, node) {
-            return "black";
+            return 'black';
           },
           hLineStyle: function (i, node) {
             if (i === 0 || i === node.table.body.length) {
@@ -1631,219 +1558,219 @@ router.get("/msg", async (req, res) => {
               return null;
             }
             return { dash: { length: 4 } };
-          },
+          }
           // paddingLeft: function(i, node) { return 4; },
           // paddingRight: function(i, node) { return 4; },
           // paddingTop: function(i, node) { return 2; },
           // paddingBottom: function(i, node) { return 2; },
           // fillColor: function (i, node) { return null; }
-        },
+        }
       },
       {
-        text: "Optional border",
+        text: 'Optional border',
         fontSize: 14,
         bold: true,
-        pageBreak: "before",
-        margin: [0, 0, 0, 8],
+        pageBreak: 'before',
+        margin: [0, 0, 0, 8]
       },
-      "Each cell contains an optional border property: an array of 4 booleans for left border, top border, right border, bottom border.",
+      'Each cell contains an optional border property: an array of 4 booleans for left border, top border, right border, bottom border.',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
             [
               {
                 border: [false, true, false, false],
-                fillColor: "#eeeeee",
-                text: "border:\n[false, true, false, false]",
+                fillColor: '#eeeeee',
+                text: 'border:\n[false, true, false, false]'
               },
               {
                 border: [false, false, false, false],
-                fillColor: "#dddddd",
-                text: "border:\n[false, false, false, false]",
+                fillColor: '#dddddd',
+                text: 'border:\n[false, false, false, false]'
               },
               {
                 border: [true, true, true, true],
-                fillColor: "#eeeeee",
-                text: "border:\n[true, true, true, true]",
-              },
+                fillColor: '#eeeeee',
+                text: 'border:\n[true, true, true, true]'
+              }
             ],
             [
               {
                 rowSpan: 3,
                 border: [true, true, true, true],
-                fillColor: "#eeeeff",
-                text: "rowSpan: 3\n\nborder:\n[true, true, true, true]",
+                fillColor: '#eeeeff',
+                text: 'rowSpan: 3\n\nborder:\n[true, true, true, true]'
               },
               {
                 border: undefined,
-                fillColor: "#eeeeee",
-                text: "border:\nundefined",
+                fillColor: '#eeeeee',
+                text: 'border:\nundefined'
               },
               {
                 border: [true, false, false, false],
-                fillColor: "#dddddd",
-                text: "border:\n[true, false, false, false]",
-              },
+                fillColor: '#dddddd',
+                text: 'border:\n[true, false, false, false]'
+              }
             ],
             [
-              "",
+              '',
               {
                 colSpan: 2,
                 border: [true, true, true, true],
-                fillColor: "#eeffee",
-                text: "colSpan: 2\n\nborder:\n[true, true, true, true]",
+                fillColor: '#eeffee',
+                text: 'colSpan: 2\n\nborder:\n[true, true, true, true]'
               },
-              "",
+              ''
             ],
             [
-              "",
+              '',
               {
                 border: undefined,
-                fillColor: "#eeeeee",
-                text: "border:\nundefined",
+                fillColor: '#eeeeee',
+                text: 'border:\nundefined'
               },
               {
                 border: [false, false, true, true],
-                fillColor: "#dddddd",
-                text: "border:\n[false, false, true, true]",
-              },
-            ],
-          ],
+                fillColor: '#dddddd',
+                text: 'border:\n[false, false, true, true]'
+              }
+            ]
+          ]
         },
         layout: {
-          defaultBorder: false,
-        },
+          defaultBorder: false
+        }
       },
-      "For every cell without a border property, whether it has all borders or not is determined by layout.defaultBorder, which is false in the table above and true (by default) in the table below.",
+      'For every cell without a border property, whether it has all borders or not is determined by layout.defaultBorder, which is false in the table above and true (by default) in the table below.',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
             [
               {
                 border: [false, false, false, false],
-                fillColor: "#eeeeee",
-                text: "border:\n[false, false, false, false]",
+                fillColor: '#eeeeee',
+                text: 'border:\n[false, false, false, false]'
               },
               {
-                fillColor: "#dddddd",
-                text: "border:\nundefined",
+                fillColor: '#dddddd',
+                text: 'border:\nundefined'
               },
               {
-                fillColor: "#eeeeee",
-                text: "border:\nundefined",
-              },
+                fillColor: '#eeeeee',
+                text: 'border:\nundefined'
+              }
             ],
             [
               {
-                fillColor: "#dddddd",
-                text: "border:\nundefined",
+                fillColor: '#dddddd',
+                text: 'border:\nundefined'
               },
               {
-                fillColor: "#eeeeee",
-                text: "border:\nundefined",
+                fillColor: '#eeeeee',
+                text: 'border:\nundefined'
               },
               {
                 border: [true, true, false, false],
-                fillColor: "#dddddd",
-                text: "border:\n[true, true, false, false]",
-              },
-            ],
-          ],
-        },
+                fillColor: '#dddddd',
+                text: 'border:\n[true, true, false, false]'
+              }
+            ]
+          ]
+        }
       },
-      "And some other examples with rowSpan/colSpan...",
+      'And some other examples with rowSpan/colSpan...',
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
-            ["", "column 1", "column 2", "column 3"],
+            ['', 'column 1', 'column 2', 'column 3'],
             [
-              "row 1",
+              'row 1',
               {
                 rowSpan: 3,
                 colSpan: 3,
                 border: [true, true, true, true],
-                fillColor: "#cccccc",
-                text: "rowSpan: 3\ncolSpan: 3\n\nborder:\n[true, true, true, true]",
+                fillColor: '#cccccc',
+                text: 'rowSpan: 3\ncolSpan: 3\n\nborder:\n[true, true, true, true]'
               },
-              "",
-              "",
+              '',
+              ''
             ],
-            ["row 2", "", "", ""],
-            ["row 3", "", "", ""],
-          ],
+            ['row 2', '', '', ''],
+            ['row 3', '', '', '']
+          ]
         },
         layout: {
-          defaultBorder: false,
-        },
+          defaultBorder: false
+        }
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
             [
               {
                 colSpan: 3,
-                text: "colSpan: 3\n\nborder:\n[false, false, false, false]",
-                fillColor: "#eeeeee",
-                border: [false, false, false, false],
+                text: 'colSpan: 3\n\nborder:\n[false, false, false, false]',
+                fillColor: '#eeeeee',
+                border: [false, false, false, false]
               },
-              "",
-              "",
+              '',
+              ''
             ],
-            ["border:\nundefined", "border:\nundefined", "border:\nundefined"],
-          ],
-        },
+            ['border:\nundefined', 'border:\nundefined', 'border:\nundefined']
+          ]
+        }
       },
       {
-        style: "tableExample",
+        style: 'tableExample',
         table: {
           body: [
             [
               {
                 rowSpan: 3,
-                text: "rowSpan: 3\n\nborder:\n[false, false, false, false]",
-                fillColor: "#eeeeee",
-                border: [false, false, false, false],
+                text: 'rowSpan: 3\n\nborder:\n[false, false, false, false]',
+                fillColor: '#eeeeee',
+                border: [false, false, false, false]
               },
-              "border:\nundefined",
-              "border:\nundefined",
+              'border:\nundefined',
+              'border:\nundefined'
             ],
-            ["", "border:\nundefined", "border:\nundefined"],
-            ["", "border:\nundefined", "border:\nundefined"],
-          ],
-        },
-      },
+            ['', 'border:\nundefined', 'border:\nundefined'],
+            ['', 'border:\nundefined', 'border:\nundefined']
+          ]
+        }
+      }
     ],
     styles: {
       header: {
         fontSize: 18,
         bold: true,
-        margin: [0, 0, 0, 10],
+        margin: [0, 0, 0, 10]
       },
       subheader: {
         fontSize: 16,
         bold: true,
-        margin: [0, 10, 0, 5],
+        margin: [0, 10, 0, 5]
       },
       tableExample: {
-        margin: [0, 5, 0, 15],
+        margin: [0, 5, 0, 15]
       },
       tableHeader: {
         bold: true,
         fontSize: 13,
-        color: "black",
-      },
+        color: 'black'
+      }
     },
     defaultStyle: {
       // alignment: 'justify'
-    },
+    }
   };
   let ruta = path.join(__dirname);
   let pdfDoc = printer.createPdfKitDocument(docDefinition);
-  pdfDoc.pipe(fs.createWriteStream(ruta + "/tables.pdf"));
+  pdfDoc.pipe(fs.createWriteStream(ruta + '/tables.pdf'));
   pdfDoc.end();
   ///////////////////////* PDF END *////////////////////////////////
 
@@ -1872,19 +1799,20 @@ router.get("/msg", async (req, res) => {
 
   res.send(true);
 });
-router.get("/roles", isLoggedIn, async (req, res) => {
+router.get('/roles', isLoggedIn, async (req, res) => {
   /* const tasa = await tasaUsura();
-    const newTasa = { teano: tasa / 100, fecha: '2021-10-01' }
-    await pool.query(`INSERT INTO intereses SET ? `, newTasa);
-    var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
-    await EnviarWTSAP('57 3004880579', bod);
-    console.log(bod) */
+  const newTasa = { teano: tasa / 100, fecha: "2021-10-01" };
+  await pool.query(`INSERT INTO intereses SET ? `, newTasa);
+  var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
+  await EnviarWTSAP("57 3004880579", bod);
+  console.log(bod); */
+  //console.log(req.user);
   res.send(req.user);
 });
-router.get("/add", isLoggedIn, (req, res) => {
-  res.render("links/add");
+router.get('/add', isLoggedIn, (req, res) => {
+  res.render('links/add');
 });
-router.get("/authorize", isLoggedIn, async (req, res) => {
+router.get('/authorize', isLoggedIn, async (req, res) => {
   /*
         var data = JSON.stringify({
             "data": [
@@ -1918,16 +1846,16 @@ router.get("/authorize", isLoggedIn, async (req, res) => {
             });*/
 
   var config = {
-    method: "GET",
-    url: "https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize",
-    headers: { accept: "text/html" },
+    method: 'GET',
+    url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize',
+    headers: { accept: 'text/html' },
     qs: {
-      client_id: "37eb1267-6c33-46b1-a76f-33a553fd812f",
-      response_type: "code",
-      scope: "Transfer-Intention:write:app",
-      redirect_uri: "http://localhost:5000/links/authorize",
-      state: "samirsa",
-    },
+      client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+      response_type: 'code',
+      scope: 'Transfer-Intention:write:app',
+      redirect_uri: 'http://localhost:5000/links/authorize',
+      state: 'samirsa'
+    }
   };
   var datos;
   request(config, function (error, response, body) {
@@ -1938,12 +1866,9 @@ router.get("/authorize", isLoggedIn, async (req, res) => {
 
   //res.send(datos);
 });
-router.get("/prueba2", async (req, res) => {
-  const ruta = path.join(__dirname, "../public/uploads/libroej.json");
-  const ruta2 = path.join(
-    __dirname,
-    "../public/uploads/lista de clientes.xlsx"
-  );
+router.get('/prueba2', async (req, res) => {
+  const ruta = path.join(__dirname, '../public/uploads/libroej.json');
+  const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
 
   /* fs.exists(ruta2, function (exists) {
         console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
@@ -1969,8 +1894,7 @@ router.get("/prueba2", async (req, res) => {
   //const content = await pool.query(`SELECT * FROM productos ORDER BY id`);
   //console.log(datos)
 
-  const content =
-    await pool.query(`SELECT p.id, d.proyect, l.mz, l.n lt, c.nombre, 
+  const content = await pool.query(`SELECT p.id, d.proyect, l.mz, l.n lt, c.nombre, 
     c.documento, c.movil, SUM(s.monto) monto, COUNT(s.ids) pagos    
     FROM preventa p INNER JOIN solicitudes s ON p.id = s.orden 
     INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
@@ -1984,9 +1908,9 @@ router.get("/prueba2", async (req, res) => {
 
   let newWB = XLSX.utils.book_new();
   let newWS = XLSX.utils.json_to_sheet(content);
-  XLSX.utils.book_append_sheet(newWB, newWS, "samir");
+  XLSX.utils.book_append_sheet(newWB, newWS, 'samir');
   XLSX.writeFile(newWB, ruta2);
-  res.redirect("/uploads/lista de clientes.xlsx");
+  res.redirect('/uploads/lista de clientes.xlsx');
   /* const excel = XLSX.readFile(ruta2);
     const hojas = excel.SheetNames;
     const hoja = hojas[0], productos = hojas[1], proyecto = hojas[2];
@@ -2044,31 +1968,31 @@ router.get("/prueba2", async (req, res) => {
             console.log(error);
         }); */
 });
-router.post("/callback", async (req, res) => {
+router.post('/callback', async (req, res) => {
   console.log(req.body);
 });
-router.post("/prueba2", async (req, res) => {
+router.post('/prueba2', async (req, res) => {
   console.log(req.body);
 });
-router.post("/authorize", isLoggedIn, async (req, res) => {
+router.post('/authorize', isLoggedIn, async (req, res) => {
   console.log(req.body);
   const options = {
-    method: "POST",
-    url: "https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize",
+    method: 'POST',
+    url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/authorize',
     headers: {
-      "content-type": "application/x-www-form-urlencoded",
-      accept: "text/html",
+      'content-type': 'application/x-www-form-urlencoded',
+      accept: 'text/html'
     },
     form: {
-      client_id: "37eb1267-6c33-46b1-a76f-33a553fd812f",
-      scope: "Transfer-Intention:write:app",
-      "resource-owner": "Samir Saldarriaga",
-      redirect_uri: "http://localhost:5000/links/prueba2",
-      "original-url":
-        "/bancolombiabluemix-dev/sandbox/v1/security/oauth-otp-pymes/oauth2/authorize?client_id=37eb1267-6c33-46b1-a76f-33a553fd812f&response_type=code&scope=Transfer-Intention%3Awrite%3Aapp&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Flinks%2Fauthorize&state=samirsa",
-      "dp-state": "VA",
-      "dp-data": "jabuna",
-    },
+      client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+      scope: 'Transfer-Intention:write:app',
+      'resource-owner': 'Samir Saldarriaga',
+      redirect_uri: 'http://localhost:5000/links/prueba2',
+      'original-url':
+        '/bancolombiabluemix-dev/sandbox/v1/security/oauth-otp-pymes/oauth2/authorize?client_id=37eb1267-6c33-46b1-a76f-33a553fd812f&response_type=code&scope=Transfer-Intention%3Awrite%3Aapp&redirect_uri=http%3A%2F%2Flocalhost%3A5000%2Flinks%2Fauthorize&state=samirsa',
+      'dp-state': 'VA',
+      'dp-data': 'jabuna'
+    }
   };
   request(options, function (error, response, body) {
     if (error) throw new Error(error);
@@ -2105,9 +2029,8 @@ router.post("/authorize", isLoggedIn, async (req, res) => {
                 console.log(error);
             });*/
 });
-router.get("/proyecciones", async (req, res) => {
-  var W =
-    await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
+router.get('/proyecciones', async (req, res) => {
+  var W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs,
     c.cuota, c.estado, l.mtr2 FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id
@@ -2126,7 +2049,7 @@ router.get("/proyecciones", async (req, res) => {
   var cf = 0;
   var mes6 = 0;
   var mes12 = 0;
-  W.map((x) => {
+  W.map(x => {
     separa = x.separar;
     total = Math.round(x.vrmt2 * x.mtr2);
     inicial = Math.round((total * x.iniciar) / 100 - x.separar);
@@ -2142,12 +2065,7 @@ router.get("/proyecciones", async (req, res) => {
   mes6 = cuotafnc;
   mes12 = cuotafnc;
   if (cuotaordi) {
-    cf == 1
-      ? (mes6 = cuotaordi)
-      : cf == 2
-      ? (mes12 = cuotaordi)
-      : (mes6 = cuotaordi),
-      (mes12 = cuotaordi);
+    cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
   }
   await pool.query(
     `UPDATE cuotas SET 
@@ -2163,44 +2081,41 @@ router.get("/proyecciones", async (req, res) => {
     orden
   );
 
-  cuataa =
-    ", cuota = CASE tipo WHEN " + x.tipo + " THEN " + montocuotas + " END";
-  var sql = "UPDATE cuotas SET mora = 0, estado = CASE id";
-  var ID = "",
+  cuataa = ', cuota = CASE tipo WHEN ' + x.tipo + ' THEN ' + montocuotas + ' END';
+  var sql = 'UPDATE cuotas SET mora = 0, estado = CASE id';
+  var ID = '',
     montocuotas = pagos,
-    cuotaa = "";
+    cuotaa = '';
 
-  Cuots.map((c) => {
+  Cuots.map(c => {
     if (montocuotas >= c.cuota) {
-      ID += c.id.toString() + ", ";
-      sql += " WHEN " + c.id + " THEN " + 13;
+      ID += c.id.toString() + ', ';
+      sql += ' WHEN ' + c.id + ' THEN ' + 13;
       montocuotas = montocuotas - c.cuota;
     } else if (montocuotas > 0) {
       montocuotas = c.cuota - montocuotas;
-      ID += c.id.toString() + ", ";
-      sql += " WHEN " + c.id + " THEN " + 3;
-      cuataa =
-        ", cuota = CASE id WHEN " + c.id + " THEN " + montocuotas + " END";
+      ID += c.id.toString() + ', ';
+      sql += ' WHEN ' + c.id + ' THEN ' + 3;
+      cuataa = ', cuota = CASE id WHEN ' + c.id + ' THEN ' + montocuotas + ' END';
       montocuotas = 0;
     }
   });
   ID = ID.slice(0, -2);
-  sql += " END" + cuotaa + " WHERE id IN(" + ID + ")";
+  sql += ' END' + cuotaa + ' WHERE id IN(' + ID + ')';
   await pool.query(sql);
   res.send(true);
 });
 //////////////////* CHATS */////////////////////
-router.get("/chats", isLoggedIn, async (req, res) => {
+router.get('/chats', isLoggedIn, async (req, res) => {
   const cliente = await pool.query(`SELECT movil FROM clientes`);
-  var moviles = cliente.map((x) => {
-    return x.movil.replace(/ /g, "").length === 10
-      ? "57" + x.movil.replace(/ /g, "") + "@c.us"
-      : x.movil.replace(/ /g, "") + "@c.us";
+  var moviles = cliente.map(x => {
+    return x.movil.replace(/ /g, '').length === 10
+      ? '57' + x.movil.replace(/ /g, '') + '@c.us'
+      : x.movil.replace(/ /g, '') + '@c.us';
   });
   async function chats() {
-    const options = { method: "GET" };
-    const url =
-      "https://api.chat-api.com/instance107218/dialogs?token=5jn3c5dxvcj27fm0&limit=50&page=0";
+    const options = { method: 'GET' };
+    const url = 'https://api.chat-api.com/instance107218/dialogs?token=5jn3c5dxvcj27fm0&limit=50&page=0';
 
     const apiRes = await fetch(url, options);
     const jsonResponse = await apiRes.json();
@@ -2217,12 +2132,12 @@ router.get("/chats", isLoggedIn, async (req, res) => {
   //res.send({ dialogs: a.filter(Boolean) });
   res.send({ dialogs: 0 });
 });
-router.get("/chats/:id", isLoggedIn, async (req, res) => {
+router.get('/chats/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  if (id === "bank") {
+  if (id === 'bank') {
   } else {
     async function chats() {
-      const options = { method: "GET" };
+      const options = { method: 'GET' };
       const url = `https://api.chat-api.com/instance107218/messagesHistory?token=5jn3c5dxvcj27fm0&page=0&count=50&chatId=${id}`;
 
       const apiRes = await fetch(url, options);
@@ -2234,9 +2149,8 @@ router.get("/chats/:id", isLoggedIn, async (req, res) => {
   }
 });
 //////////////////* BANCO */////////////////////
-router.post("/extrabank", async (req, res) => {
-  const { date, description, lugar, concpt1, concpt2, otro, consignado, cont } =
-    req.body;
+router.post('/extrabank', async (req, res) => {
+  const { date, description, lugar, concpt1, concpt2, otro, consignado, cont } = req.body;
   //var f = moment(Date(date)).format('YYYY-MM-DD');
   const b = {
     date,
@@ -2245,14 +2159,14 @@ router.post("/extrabank", async (req, res) => {
     concpt1: concpt1 ? concpt1 : null,
     concpt2: concpt2 ? concpt2 : null,
     otro: otro ? otro : null,
-    consignado: consignado ? consignado.replace(/[\$,]/g, "") * 1 : 0,
+    consignado: consignado ? consignado.replace(/[\$,]/g, '') * 1 : 0
   };
-  await pool.query("INSERT INTO extrabanco SET ? ", b);
+  await pool.query('INSERT INTO extrabanco SET ? ', b);
   //console.log(b, cont) //, bank.insertId              uniddadenlinea@unidadvictimas.gov.co
   //res.send(cont);                                     Actualizar estado fallecido - bogota 031- 4261111
   res.send(consignado);
 });
-router.post("/extractos", async (req, res) => {
+router.post('/extractos', async (req, res) => {
   console.log(req.body);
   const solicitudes =
     await pool.query(`SELECT e.*, s.ids, s.fech, s.monto, s.concepto, cl.nombre, p.proyect, pd.mz, pd.n, s.excdnt, x.xtrabank, x.pagos
@@ -2261,30 +2175,30 @@ router.post("/extractos", async (req, res) => {
   //console.log(solicitudes)
   //respuesta = { "data": solicitudes };
   //[{"id":64,"date":"2020-01-02T05:00:00.000Z","description":"PAGO INTERBANC ERASMO HERRER","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":2000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":65,"date":"2020-01-02T05:00:00.000Z","description":"TRANSFERENCIA CTA CAJERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":700000,"xcdnt":0,"ids":1579,"fech":"2021-01-06 10:42","monto":7276000,"concepto":"PAGO","nombre":"MAYRA ALEXANDRA MEDINA PALACIOS","proyect":"ALTOS DE CAÑAVERAL","mz":"no","n":1,"excdnt":0,"xtrabank":65,"pagos":1579},{"id":66,"date":"2020-01-02T05:00:00.000Z","description":"INTERESES DE SOBREGIRO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-31,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":67,"date":"2020-01-03T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1200000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":68,"date":"2020-01-03T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":0,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":69,"date":"2020-01-04T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"PASEO LA CASTELLA","concpt1":null,"concpt2":null,"otro":null,"consignado":1115000,"xcdnt":0,"ids":1579,"fech":"2021-01-06 10:42","monto":7276000,"concepto":"PAGO","nombre":"MAYRA ALEXANDRA MEDINA PALACIOS","proyect":"ALTOS DE CAÑAVERAL","mz":"no","n":1,"excdnt":0,"xtrabank":69,"pagos":1579},{"id":70,"date":"2020-01-04T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"PASEO LA CASTELLA","concpt1":null,"concpt2":null,"otro":null,"consignado":400000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":71,"date":"2020-01-04T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":72,"date":"2020-01-04T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":1731,"fech":"2021-01-18 12:02","monto":2573000,"concepto":"PAGO","nombre":"WILLIE ALBERTO TORRES CARDONA","proyect":"PRADOS DE PONTEVEDRA","mz":"9","n":13,"excdnt":0,"xtrabank":72,"pagos":1731},{"id":73,"date":"2020-01-07T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":74,"date":"2020-01-07T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"SANTA LUCIA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":75,"date":"2020-01-07T05:00:00.000Z","description":"CONS. NAL EFEC","lugar":"ABREGO","concpt1":null,"concpt2":null,"otro":null,"consignado":1450000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":76,"date":"2020-01-07T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-52,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":77,"date":"2020-01-07T05:00:00.000Z","description":"COMIS CONSIG NAL EFECTIVO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-11000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":78,"date":"2020-01-07T05:00:00.000Z","description":"VALOR IVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-2090,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":79,"date":"2020-01-08T05:00:00.000Z","description":"PAGO INTERBANC DORA MARIA CAMP","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1800000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":80,"date":"2020-01-08T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":81,"date":"2020-01-08T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1247000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":82,"date":"2020-01-08T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":2000000,"xcdnt":0,"ids":1579,"fech":"2021-01-06 10:42","monto":7276000,"concepto":"PAGO","nombre":"MAYRA ALEXANDRA MEDINA PALACIOS","proyect":"ALTOS DE CAÑAVERAL","mz":"no","n":1,"excdnt":0,"xtrabank":82,"pagos":1579},{"id":83,"date":"2020-01-09T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"CARTAGENA","concpt1":null,"concpt2":null,"otro":null,"consignado":400000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":84,"date":"2020-01-09T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"SANTA LUCIA","concpt1":null,"concpt2":null,"otro":null,"consignado":3500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":85,"date":"2020-01-09T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":86,"date":"2020-01-09T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":3000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":87,"date":"2020-01-10T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":526000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":88,"date":"2020-01-10T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":2207240,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":89,"date":"2020-01-10T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-84000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":90,"date":"2020-01-10T05:00:00.000Z","description":"PAGO A PROV JUANA TERESA BRAY","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-20000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":91,"date":"2020-01-10T05:00:00.000Z","description":"PAGO A PROV Tierra Linda Condo","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":92,"date":"2020-01-11T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":93,"date":"2020-01-11T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-24475,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":94,"date":"2020-01-11T05:00:00.000Z","description":"PAGO A PROV JUANA TERESA BRAY","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-5000000,"xcdnt":0,"ids":1009,"fech":"2020-11-25 09:52","monto":1139242,"concepto":"PAGO","nombre":"CAROLINA PONTON SUAREZ","proyect":"PRADOS DE PONTEVEDRA","mz":"15","n":3,"excdnt":4,"xtrabank":94,"pagos":1009},{"id":95,"date":"2020-01-11T05:00:00.000Z","description":"PAGO A PROV GEOVANYS SILVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-223800,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":96,"date":"2020-01-11T05:00:00.000Z","description":"PAGO A PROV MIGUEL PATERNINA J","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-895000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":97,"date":"2020-01-12T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":3000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":98,"date":"2020-01-12T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":99,"date":"2020-01-13T05:00:00.000Z","description":"PAGO INTERBANC MAYRA MARAYA CO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":4670715,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":100,"date":"2020-01-13T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":101,"date":"2020-01-13T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":102,"date":"2020-01-14T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"EL AMPARO","concpt1":null,"concpt2":null,"otro":null,"consignado":6000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":103,"date":"2020-01-14T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":35000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":104,"date":"2020-01-14T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-52,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":105,"date":"2020-01-14T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-51,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":106,"date":"2020-01-14T05:00:00.000Z","description":"CUOTA MANEJO TARJETA DEBITO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-12670,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":107,"date":"2020-01-14T05:00:00.000Z","description":"COMISION CONSIGNACION LOCAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-11000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":108,"date":"2020-01-14T05:00:00.000Z","description":"VALOR IVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-2090,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":109,"date":"2020-01-15T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1350000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":110,"date":"2020-01-15T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1810000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":111,"date":"2020-01-15T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":3000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":112,"date":"2020-01-15T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"ARJONA","concpt1":null,"concpt2":null,"otro":null,"consignado":8800000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":113,"date":"2020-01-15T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":114,"date":"2020-01-15T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":115,"date":"2020-01-15T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":4701950,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":116,"date":"2020-01-15T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-77132,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":117,"date":"2020-01-15T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-52,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":118,"date":"2020-01-15T05:00:00.000Z","description":"RETIRO SUCURSAL CON TARJETA","lugar":"ARJONA","concpt1":null,"concpt2":null,"otro":null,"consignado":-11283000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":119,"date":"2020-01-15T05:00:00.000Z","description":"PAGO A PROV ANA MILENA SANJULI","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-2000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":120,"date":"2020-01-15T05:00:00.000Z","description":"PAGO A PROV GABRIEL OLIVERA BA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-3000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":121,"date":"2020-01-15T05:00:00.000Z","description":"PAGO A PROV S Y D INVERSIONES","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-3000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":122,"date":"2020-01-15T05:00:00.000Z","description":"COMISION CONSIGNACION LOCAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-11000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":123,"date":"2020-01-15T05:00:00.000Z","description":"VALOR IVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-2090,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":124,"date":"2020-01-16T05:00:00.000Z","description":"REV COMISION CONSIGNAC LOCAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":22000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":125,"date":"2020-01-16T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"PASEO LA CASTELLA","concpt1":null,"concpt2":null,"otro":null,"consignado":2000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":126,"date":"2020-01-16T05:00:00.000Z","description":"REVERSION VALOR IVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":4180,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":127,"date":"2020-01-16T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-45376,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":128,"date":"2020-01-16T05:00:00.000Z","description":"PAGO A PROV GEOVANYS SILVA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1320160,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":129,"date":"2020-01-16T05:00:00.000Z","description":"PAGO A PROV GUSTAVO RIVERA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-8050000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":130,"date":"2020-01-16T05:00:00.000Z","description":"PAGO A PROV S Y D INVERSIONES","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-2000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":131,"date":"2020-01-17T05:00:00.000Z","description":"CONSIG LOC CAJER MULTIFUNCIONA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1200000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":132,"date":"2020-01-17T05:00:00.000Z","description":"COBRO COMISION ACH COLOMBIA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-17850,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":133,"date":"2020-01-17T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-5648,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":134,"date":"2020-01-17T05:00:00.000Z","description":"PAGO PSE SEGUROS DEL ESTADO S","lugar":"ARJONA","concpt1":null,"concpt2":null,"otro":null,"consignado":-390800,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":135,"date":"2020-01-17T05:00:00.000Z","description":"PAGO A PROV ARNOLDO SALCEDO MA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":136,"date":"2020-01-17T05:00:00.000Z","description":"COBRO IVA PAGOS AUTOMATICOS","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-3392,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":137,"date":"2020-01-18T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"PASEO LA CASTELLA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":138,"date":"2020-01-18T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-6080,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":139,"date":"2020-01-18T05:00:00.000Z","description":"PAGO A PROV ILCEBEK GONZALEZ","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-20000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":140,"date":"2020-01-18T05:00:00.000Z","description":"PAGO A PROV MIGUEL PATERNINA J","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-300000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":141,"date":"2020-01-18T05:00:00.000Z","description":"PAGO A PROV COMPULAGO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1200000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":142,"date":"2020-01-20T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1835,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":143,"date":"2020-01-20T05:00:00.000Z","description":"PAGO PSE Fiduciaria Corficolo","lugar":"ARJONA","concpt1":null,"concpt2":null,"otro":null,"consignado":-458730,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":144,"date":"2020-01-21T05:00:00.000Z","description":"PAGO DE PROV PROMOTORA MANACA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":10000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":145,"date":"2020-01-21T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-7709,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":146,"date":"2020-01-21T05:00:00.000Z","description":"COMPRA EN EDS LA GIR","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-94831,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":147,"date":"2020-01-21T05:00:00.000Z","description":"PAGO A PROV JULI PALACIO ROBLE","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-1118800,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":148,"date":"2020-01-21T05:00:00.000Z","description":"PAGO A PROV PEDRO ROMERO RINCO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-713600,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":149,"date":"2020-01-22T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":2626000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":150,"date":"2020-01-22T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":151,"date":"2020-01-22T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-20000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":152,"date":"2020-01-22T05:00:00.000Z","description":"PAGO A PROV JUANA TERESA BRAY","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-5000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":153,"date":"2020-01-23T05:00:00.000Z","description":"CONSIGNACION CORRESPONSAL CB","lugar":"CANAL CORRESPONSA","concpt1":null,"concpt2":null,"otro":null,"consignado":500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":154,"date":"2020-01-23T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":155,"date":"2020-01-23T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-36966,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":156,"date":"2020-01-23T05:00:00.000Z","description":"PAGO A PROV S Y D INVERSIONES","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":157,"date":"2020-01-23T05:00:00.000Z","description":"PAGO A PROV ILCEBEK GONZALEZ","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-8741600,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":158,"date":"2020-01-24T05:00:00.000Z","description":"CONSIGNACION LOCAL EFECTIVO","lugar":"SANTA LUCIA","concpt1":null,"concpt2":null,"otro":null,"consignado":5242000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":159,"date":"2020-01-24T05:00:00.000Z","description":"4XMIL GRAVAMEN MVTO FINANCIERO","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-231,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":160,"date":"2020-01-24T05:00:00.000Z","description":"CUOTA MANEJO SUC VIRT EMPRESA","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-48440,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":161,"date":"2020-01-24T05:00:00.000Z","description":"IVA CUOTA MANEJO SUC VIRT EMP","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":-9203,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":162,"date":"2020-01-25T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":1000000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":163,"date":"2020-01-25T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":164,"date":"2020-01-25T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC VIRTUAL","lugar":null,"concpt1":null,"concpt2":null,"otro":null,"consignado":500000,"xcdnt":0,"ids":null,"fech":null,"monto":null,"concepto":null,"nombre":null,"proyect":null,"mz":null,"n":null,"excdnt":null,"xtrabank":null,"pagos":null},{"id":165,"date":"2020-01-25T05:00:00.000Z","description":"TRANSFERENCIA CTA SUC
-  let e = solicitudes.map((x) => {
+  let e = solicitudes.map(x => {
     return [x.id, x.data, x.description];
   });
   //res.json(e);
   res.send(e);
 });
 ////////////////////* PRODUCTOS */////////////////////
-router.get("/productos", noExterno, async (req, res) => {
+router.get('/productos', noExterno, async (req, res) => {
   const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
-  res.render("links/productos", { proveedores });
+  res.render('links/productos', { proveedores });
 });
-router.post("/productos", noExterno, async (req, res) => {
-  const fila = await pool.query("SELECT * FROM productos");
+router.post('/productos', noExterno, async (req, res) => {
+  const fila = await pool.query('SELECT * FROM productos');
   respuesta = { data: fila };
   res.send(respuesta);
 });
-router.post("/productos/:id", noExterno, async (req, res) => {
+router.post('/productos/:id', noExterno, async (req, res) => {
   const { id } = req.params;
-  if (id === "eliminar") {
+  if (id === 'eliminar') {
     const { id } = req.body;
-    await pool.query("DELETE FROM productosd WHERE producto = ?", id);
-    await pool.query("DELETE FROM productos WHERE id = ?", id);
+    await pool.query('DELETE FROM productosd WHERE producto = ?', id);
+    await pool.query('DELETE FROM productos WHERE id = ?', id);
     res.send(true);
-  } else if (id === "editar") {
+  } else if (id === 'editar') {
     const { id } = req.body;
     await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
         LEFT JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
@@ -2300,34 +2214,29 @@ router.post("/productos/:id", noExterno, async (req, res) => {
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, l.mtr = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END 
         WHERE l.producto = ${id} AND p.tipobsevacion IS NOT NULL AND l.estado IN(9, 15)`);
 
-    const fila = await pool.query("SELECT * FROM productos WHERE id = ?", id);
+    const fila = await pool.query('SELECT * FROM productos WHERE id = ?', id);
     res.send(fila[0]);
-  } else if (id === "nuevo") {
-    const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } =
-      req.body;
+  } else if (id === 'nuevo') {
+    const { producto, mz, n, mtr2, estado, valor, inicial, descripcion } = req.body;
     const nuevo = {
       producto,
-      mz: mz ? mz.toUpperCase() : "no",
+      mz: mz ? mz.toUpperCase() : 'no',
       n,
       mtr2,
       estado,
       valor,
       inicial,
-      descripcion,
+      descripcion
     };
-    const fila = await pool.query("INSERT INTO productosd SET ? ", nuevo);
-    await pool.query(
-      `UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`
-    );
+    const fila = await pool.query('INSERT INTO productosd SET ? ', nuevo);
+    await pool.query(`UPDATE productos SET cantidad = cantidad + 1 WHERE id = ${producto}`);
     res.send(true);
-  } else if (id === "emili") {
+  } else if (id === 'emili') {
     const { id, prod } = req.body;
-    await pool.query("DELETE FROM productosd WHERE id = ?", id);
-    await pool.query(
-      `UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`
-    );
+    await pool.query('DELETE FROM productosd WHERE id = ?', id);
+    await pool.query(`UPDATE productos SET cantidad = cantidad - 1 WHERE id = ${prod}`);
     res.send(true);
-  } else if (id === "update") {
+  } else if (id === 'update') {
     const {
       alterable,
       editar,
@@ -2355,7 +2264,7 @@ router.post("/productos/:id", noExterno, async (req, res) => {
       valor,
       inicial,
       descripcion,
-      valorproyect,
+      valorproyect
     } = req.body;
 
     if (idlote === undefined) {
@@ -2370,16 +2279,15 @@ router.post("/productos/:id", noExterno, async (req, res) => {
         estados: 7,
         fechaini: fecha,
         fechafin,
-        separaciones:
-          separacion.length > 3 ? separacion.replace(/\./g, "") : separacion,
-        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, "") : 0,
+        separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+        incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0,
         comision,
         maxcomis,
         linea1,
         linea2,
-        linea3,
+        linea3
       };
-      await pool.query("UPDATE productos SET ? WHERE id = ?", [produc, editar]);
+      await pool.query('UPDATE productos SET ? WHERE id = ?', [produc, editar]);
       await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
             LEFT JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 * l.mtr2 
             WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 ELSE l.mtr * l.mtr2 END, l.inicial = CASE WHEN p.id IS NOT NULL 
@@ -2394,52 +2302,45 @@ router.post("/productos/:id", noExterno, async (req, res) => {
             SET ? WHERE l.id = ?`,
         [
           {
-            "l.mz": mz,
-            "l.n": n,
-            "l.mtr": mtr.replace(/\./g, ""),
-            "l.mtr2": mtr2,
-            "l.estado": estado,
-            "l.valor": valor,
-            "l.inicial": inicial,
-            "l.descripcion": descripcion,
-            "p.categoria": categoria,
-            "p.proyect": title.toUpperCase(),
-            "p.porcentage": porcentage,
-            "p.totalmtr2": totalmtr2,
-            "p.valproyect": valorproyect,
-            "p.mzs": mzs,
-            "p.cantidad": lts,
-            "p.estados": 7,
-            "p.fechaini": fecha,
-            "p.fechafin": fechafin,
-            "p.separaciones":
-              separacion.length > 3
-                ? separacion.replace(/\./g, "")
-                : separacion,
-            "p.incentivo":
-              incentivo.length > 3 ? incentivo.replace(/\./g, "") : 0,
-            "p.comision": comision,
-            "p.maxcomis": maxcomis,
-            "p.linea1": linea1,
-            "p.linea2": linea2,
-            "p.linea3": linea3,
-            "l.ediitado": req.user.fullname,
+            'l.mz': mz,
+            'l.n': n,
+            'l.mtr': mtr.replace(/\./g, ''),
+            'l.mtr2': mtr2,
+            'l.estado': estado,
+            'l.valor': valor,
+            'l.inicial': inicial,
+            'l.descripcion': descripcion,
+            'p.categoria': categoria,
+            'p.proyect': title.toUpperCase(),
+            'p.porcentage': porcentage,
+            'p.totalmtr2': totalmtr2,
+            'p.valproyect': valorproyect,
+            'p.mzs': mzs,
+            'p.cantidad': lts,
+            'p.estados': 7,
+            'p.fechaini': fecha,
+            'p.fechafin': fechafin,
+            'p.separaciones': separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+            'p.incentivo': incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0,
+            'p.comision': comision,
+            'p.maxcomis': maxcomis,
+            'p.linea1': linea1,
+            'p.linea2': linea2,
+            'p.linea3': linea3,
+            'l.ediitado': req.user.fullname
           },
-          idlote,
+          idlote
         ]
       );
       res.send(true);
     }
   } else {
-    const fila = await pool.query(
-      "SELECT * FROM productosd WHERE producto = ?",
-      id
-    );
+    const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
     respuesta = { data: fila };
     res.send(respuesta);
   }
 });
-router.put("/produc/:id", noExterno, async (req, res) => {
+router.put('/produc/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const { valor } = req.body;
   await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
@@ -2447,7 +2348,7 @@ router.put("/produc/:id", noExterno, async (req, res) => {
     WHERE pd.producto = ${id} AND pd.estado = 9`);
   res.send(true);
 });
-router.put("/productos/:id", noExterno, async (req, res) => {
+router.put('/productos/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const { valor } = req.body;
   await pool.query(`UPDATE productosd pd INNER JOIN productos p ON pd.producto = p.id 
@@ -2455,7 +2356,7 @@ router.put("/productos/:id", noExterno, async (req, res) => {
     p.valproyect = p.totalmtr2 * ${valor}, pd.mtr = ${valor} WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`);
   res.send(respuesta);
 });
-router.post("/regispro", noExterno, async (req, res) => {
+router.post('/regispro', noExterno, async (req, res) => {
   const {
     categoria,
     title,
@@ -2481,7 +2382,7 @@ router.post("/regispro", noExterno, async (req, res) => {
     maxcomis,
     linea1,
     linea2,
-    linea3,
+    linea3
   } = req.body;
   const produc = {
     //mzs cantidad
@@ -2489,81 +2390,70 @@ router.post("/regispro", noExterno, async (req, res) => {
     proyect: title.toUpperCase(),
     porcentage,
     totalmtr2,
-    valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, "") : valmtr2,
+    valmtr2: valmtr2.length > 3 ? valmtr2.replace(/\./g, '') : valmtr2,
     valproyect,
     mzs,
     cantidad: lts,
     estados: 7,
     fechaini: fecha,
     fechafin,
-    separaciones:
-      separacion.length > 3 ? separacion.replace(/\./g, "") : separacion,
-    incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, "") : 0,
+    separaciones: separacion.length > 3 ? separacion.replace(/\./g, '') : separacion,
+    incentivo: incentivo.length > 3 ? incentivo.replace(/\./g, '') : 0,
     comision,
     maxcomis,
     linea1,
     linea2,
-    linea3,
+    linea3
   };
   console.log(req.body, produc);
-  const datos = await pool.query("INSERT INTO productos SET ? ", produc);
-  var producdata =
-    "INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ";
+  const datos = await pool.query('INSERT INTO productos SET ? ', produc);
+  var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
   if (Array.isArray(n)) {
     await n.map((t, i) => {
-      producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${
-        descripcion[i]
-      }', ${std[i]}, ${vmtr2[i].replace(/\./g, "")}, ${vrlt[i].replace(
-        /\./g,
-        ""
-      )}, ${vri[i].replace(/\./g, "")}),`;
+      producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${std[i]}, ${vmtr2[
+        i
+      ].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(/\./g, '')}),`;
     });
   } else {
-    producdata += `(${
-      datos.insertId
-    }, '${mz}', ${n}, ${mtr2}, '${descripcion}', ${std}, ${vmtr2.replace(
+    producdata += `(${datos.insertId}, '${mz}', ${n}, ${mtr2}, '${descripcion}', ${std}, ${vmtr2.replace(
       /\./g,
-      ""
-    )}, ${vrlt.replace(/\./g, "")}, ${vri.replace(/\./g, "")}),`;
+      ''
+    )}, ${vrlt.replace(/\./g, '')}, ${vri.replace(/\./g, '')}),`;
   }
   await pool.query(producdata.slice(0, -1));
-  req.flash("success", "Producto registrado exitosamente");
-  res.redirect("/links/productos");
+  req.flash('success', 'Producto registrado exitosamente');
+  res.redirect('/links/productos');
 });
-router.post("/regisubpro", async (req, res) => {
-  pool.query("INSERT INTO productosd SET ? ", req.body);
+router.post('/regisubpro', async (req, res) => {
+  pool.query('INSERT INTO productosd SET ? ', req.body);
   res.send(true);
 });
-router.post("/excelprod", async (req, res) => {
+router.post('/excelprod', async (req, res) => {
   const pro = await pool.query(`SELECT * FROM productos`);
-  let e = pro.map((x) => {
-    return x.id + "-" + x.proyect;
+  let e = pro.map(x => {
+    return x.id + '-' + x.proyect;
   });
   //res.json(e);
   res.send(e);
 });
-router.get("/excelformato", async (req, res) => {
+router.get('/excelformato', async (req, res) => {
   //res.redirect('/uploads/Libro de ejemplo.xlsx')
-  res.send("/uploads/Libro de ejemplo.xlsx");
+  res.send('/uploads/Libro de ejemplo.xlsx');
 
   const { k, h, proyecto, nombre, mz, n } = req.body;
-  const ruta = path.join(__dirname, "../public/uploads/CUOTAS.xlsx");
+  const ruta = path.join(__dirname, '../public/uploads/CUOTAS.xlsx');
 
   fs.exists(ruta, function (exists) {
-    console.log(
-      "Archivo " + exists,
-      " ruta " + ruta,
-      " html " + req.headers.origin
-    );
+    console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
     if (exists) {
       fs.unlink(ruta, function (err) {
         if (err) console.log(err);
-        console.log("Archivo eliminado");
-        return "Archivo eliminado";
+        console.log('Archivo eliminado');
+        return 'Archivo eliminado';
       });
     } else {
-      console.log("El archivo no exise");
-      return "El archivo no exise";
+      console.log('El archivo no exise');
+      return 'El archivo no exise';
     }
   });
 
@@ -2587,305 +2477,303 @@ router.get("/excelformato", async (req, res) => {
   );
 
   let newWB = XLSX.utils.book_new();
-  let newWS = XLSX.utils.json_to_sheet([
-    { Orden: k, Fecha: h, Proyecto: proyecto, Mz: mz, Lt: n, Cliente: nombre },
-  ]);
+  let newWS = XLSX.utils.json_to_sheet([{ Orden: k, Fecha: h, Proyecto: proyecto, Mz: mz, Lt: n, Cliente: nombre }]);
   let Ws = await Object.assign(newWS, {
     A4: {
-      t: "s",
-      v: "ID",
+      t: 's',
+      v: 'ID',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     B4: {
-      t: "s",
-      v: "FECHA",
+      t: 's',
+      v: 'FECHA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     C4: {
-      t: "s",
-      v: "TIPO",
+      t: 's',
+      v: 'TIPO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     D4: {
-      t: "s",
-      v: "N",
+      t: 's',
+      v: 'N',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     E4: {
-      t: "s",
-      v: "CUOTA",
+      t: 's',
+      v: 'CUOTA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     F4: {
-      t: "s",
-      v: "FECHAPAGO",
+      t: 's',
+      v: 'FECHAPAGO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     G4: {
-      t: "s",
-      v: "MONTO",
+      t: 's',
+      v: 'MONTO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     H4: {
-      t: "s",
-      v: "IDS",
+      t: 's',
+      v: 'IDS',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     I4: {
-      t: "s",
-      v: "CUOT",
+      t: 's',
+      v: 'CUOT',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     J4: {
-      t: "s",
-      v: "ESTADO",
+      t: 's',
+      v: 'ESTADO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     K4: {
-      t: "s",
-      v: "DIASM",
+      t: 's',
+      v: 'DIASM',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     L4: {
-      t: "s",
-      v: "TEA",
+      t: 's',
+      v: 'TEA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     M4: {
-      t: "s",
-      v: "MORA",
+      t: 's',
+      v: 'MORA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     N4: {
-      t: "s",
-      v: "DTO",
+      t: 's',
+      v: 'DTO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     O4: {
-      t: "s",
-      v: "TLDIASM",
+      t: 's',
+      v: 'TLDIASM',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     },
     P4: {
-      t: "s",
-      v: "TOTALMORA",
+      t: 's',
+      v: 'TOTALMORA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           //sz: 24,
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
           /* underline: true, // Subrayado
                     italic: true,
                     strike: true, // Tachado
@@ -2893,330 +2781,330 @@ router.get("/excelformato", async (req, res) => {
                     shadow: false, */
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
-    },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
+    }
   });
-  Ws["A1"].s = {
+  Ws['A1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
-  Ws["B1"].s = {
+  Ws['B1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
-  Ws["C1"].s = {
+  Ws['C1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
-  Ws["D1"].s = {
+  Ws['D1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
-  Ws["E1"].s = {
+  Ws['E1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
-  Ws["F1"].s = {
+  Ws['F1'].s = {
     // Establecer un estilo separado para una celda
     font: {
-      name: "MV Boli",
+      name: 'MV Boli',
       bold: true,
-      color: { rgb: "FFFFAA00" },
+      color: { rgb: 'FFFFAA00' }
     },
-    alignment: { horizontal: "center", vertical: "center", wrapText: false },
-    fill: { bgColor: { rgb: "ffff00" } },
+    alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+    fill: { bgColor: { rgb: 'ffff00' } }
   };
 
   let cont = 5;
-  await content.map((e) => {
-    Ws["A" + cont] = { t: "n", v: e.ID };
-    Ws["B" + cont] = { t: "s", v: e.FECHA };
-    Ws["C" + cont] = { t: "s", v: e.TIPO };
-    Ws["D" + cont] = { t: "n", v: e.N };
-    Ws["E" + cont] = { t: "n", v: e.CUOTA, z: "$#,##0.00" };
-    Ws["F" + cont] = { t: "s", v: e.FECHAPAGO ? e.FECHAPAGO : "" };
-    Ws["G" + cont] = { t: "n", v: e.MONTO ? e.MONTO : 0, z: "$#,##0.00" };
-    Ws["H" + cont] = { t: "n", v: e.IDS ? e.IDS : 0 };
-    Ws["I" + cont] = { t: "n", v: e.CUOT, z: "$#,##0.00" };
-    Ws["J" + cont] = { t: "s", v: e.ESTADO };
-    Ws["K" + cont] = { t: "n", v: e.DIASMORA };
-    Ws["L" + cont] = { t: "n", v: e.TEA ? e.TEA : 0, z: "0.00%" };
-    Ws["M" + cont] = { t: "n", v: e.MORA ? e.MORA : 0, z: "$#,##0.00" };
-    Ws["N" + cont] = { t: "n", v: e.DTO, z: "0.00%" };
-    Ws["O" + cont] = { t: "n", v: e.TOTALDIASM, z: "0%" };
-    Ws["P" + cont] = { t: "n", v: e.TOTALMORA, z: "$#,##0.00" };
+  await content.map(e => {
+    Ws['A' + cont] = { t: 'n', v: e.ID };
+    Ws['B' + cont] = { t: 's', v: e.FECHA };
+    Ws['C' + cont] = { t: 's', v: e.TIPO };
+    Ws['D' + cont] = { t: 'n', v: e.N };
+    Ws['E' + cont] = { t: 'n', v: e.CUOTA, z: '$#,##0.00' };
+    Ws['F' + cont] = { t: 's', v: e.FECHAPAGO ? e.FECHAPAGO : '' };
+    Ws['G' + cont] = { t: 'n', v: e.MONTO ? e.MONTO : 0, z: '$#,##0.00' };
+    Ws['H' + cont] = { t: 'n', v: e.IDS ? e.IDS : 0 };
+    Ws['I' + cont] = { t: 'n', v: e.CUOT, z: '$#,##0.00' };
+    Ws['J' + cont] = { t: 's', v: e.ESTADO };
+    Ws['K' + cont] = { t: 'n', v: e.DIASMORA };
+    Ws['L' + cont] = { t: 'n', v: e.TEA ? e.TEA : 0, z: '0.00%' };
+    Ws['M' + cont] = { t: 'n', v: e.MORA ? e.MORA : 0, z: '$#,##0.00' };
+    Ws['N' + cont] = { t: 'n', v: e.DTO, z: '0.00%' };
+    Ws['O' + cont] = { t: 'n', v: e.TOTALDIASM, z: '0%' };
+    Ws['P' + cont] = { t: 'n', v: e.TOTALMORA, z: '$#,##0.00' };
     cont++;
   });
-  Ws["A" + cont] = {
-    t: "s",
-    v: ".",
+  Ws['A' + cont] = {
+    t: 's',
+    v: '.',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["B" + cont] = {
-    t: "s",
-    v: ".",
+  Ws['B' + cont] = {
+    t: 's',
+    v: '.',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["C" + cont] = {
-    t: "s",
-    v: ".",
+  Ws['C' + cont] = {
+    t: 's',
+    v: '.',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["D" + cont] = {
-    t: "s",
-    v: "TOTAL",
+  Ws['D' + cont] = {
+    t: 's',
+    v: 'TOTAL',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["E" + cont] = {
-    t: "n",
+  Ws['E' + cont] = {
+    t: 'n',
     f: `SUM(E5:E${cont - 1})`,
-    z: "$#,##0.00",
+    z: '$#,##0.00',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["F" + cont] = {
-    t: "s",
-    v: "ABONADO",
+  Ws['F' + cont] = {
+    t: 's',
+    v: 'ABONADO',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["G" + cont] = {
-    t: "n",
+  Ws['G' + cont] = {
+    t: 'n',
     f: `SUM(G5:G${cont - 1})`,
-    z: "$#,##0.00",
+    z: '$#,##0.00',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["H" + cont] = {
-    t: "s",
-    v: "DEUDA",
+  Ws['H' + cont] = {
+    t: 's',
+    v: 'DEUDA',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["I" + cont] = {
-    t: "n",
+  Ws['I' + cont] = {
+    t: 'n',
     f: `SUM(I5:I${cont - 1})`,
-    z: "$#,##0.00",
+    z: '$#,##0.00',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["J" + cont] = {
-    t: "s",
-    v: "DIAS",
+  Ws['J' + cont] = {
+    t: 's',
+    v: 'DIAS',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["K" + cont] = {
-    t: "n",
+  Ws['K' + cont] = {
+    t: 'n',
     f: `SUM(K5:K${cont - 1})`,
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["L" + cont] = {
-    t: "s",
-    v: "MORA",
+  Ws['L' + cont] = {
+    t: 's',
+    v: 'MORA',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["M" + cont] = {
-    t: "n",
+  Ws['M' + cont] = {
+    t: 'n',
     f: `SUM(M5:M${cont - 1})`,
-    z: "$#,##0.00",
+    z: '$#,##0.00',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["N" + cont] = {
-    t: "s",
-    v: ".",
+  Ws['N' + cont] = {
+    t: 's',
+    v: '.',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["O" + cont] = {
-    t: "s",
-    v: "TOTALMORA",
+  Ws['O' + cont] = {
+    t: 's',
+    v: 'TOTALMORA',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["P" + cont] = {
-    t: "n",
+  Ws['P' + cont] = {
+    t: 'n',
     f: `SUM(P5:P${cont - 1})`,
-    z: "$#,##0.00",
+    z: '$#,##0.00',
     s: {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
-    },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
+    }
   };
-  Ws["!ref"] = "A1:P" + cont;
+  Ws['!ref'] = 'A1:P' + cont;
   //XLSX.utils.book_append_sheet(newWB, newWS, 'FINANCIACION');
   //XLSX.writeFile(newWB, ruta)
   //res.send('/uploads/CUOTAS.xlsx');
 });
-router.post("/excelcrearproducto", async (req, res) => {
+router.post('/excelcrearproducto', async (req, res) => {
   //console.log(req.files)
   const fil = req.files[0];
   let resp = {};
@@ -3238,23 +3126,16 @@ router.post("/excelcrearproducto", async (req, res) => {
     proyectoJson[0] = {
       ...proyectoJson[0],
       porcentage: proyectoJson[0].porcentage * 100,
-      fechaini: new Date(
-        (proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000
-      ),
-      fechafin: new Date(
-        (proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000
-      ),
+      fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
+      fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
     };
-    const proyectoAdd = await pool.query(
-      "INSERT INTO productos SET ? ",
-      proyectoJson
-    );
+    const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
     //console.log(productosJson);
     subProductos = await productosJson
-      .filter((e) => e.n)
-      .map((e) => {
+      .filter(e => e.n)
+      .map(e => {
         const r = [
-          e.mz ? e.mz : "no",
+          e.mz ? e.mz : 'no',
           e.n,
           e.mtr2,
           e.mtr,
@@ -3262,7 +3143,7 @@ router.post("/excelcrearproducto", async (req, res) => {
           e.inicial,
           e.estado,
           proyectoAdd.insertId,
-          e.descripcion,
+          e.descripcion
         ];
         return r;
       });
@@ -3271,7 +3152,7 @@ router.post("/excelcrearproducto", async (req, res) => {
     (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`,
       [subProductos]
     );
-    resp = { res: true, msg: "El producto fue creado con exito." };
+    resp = { res: true, msg: 'El producto fue creado con exito.' };
   } /* else {
     const prood = proyectoJson[0].id;
     proyectoJson[0] = {
@@ -3372,10 +3253,10 @@ router.post("/excelcrearproducto", async (req, res) => {
   res.send(resp);
 });
 /////////////////////* RED *////////////////////////
-router.get("/red", noExterno, async (req, res) => {
-  res.render("links/red");
+router.get('/red', noExterno, async (req, res) => {
+  res.render('links/red');
 });
-router.post("/red", noExterno, async (req, res) => {
+router.post('/red', noExterno, async (req, res) => {
   /*SELECT p.acreedor , p.usuario, p1.acreedor, p1.usuario, p2.acreedor, p2.usuario 
     FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor;*/
 
@@ -3391,19 +3272,14 @@ router.post("/red", noExterno, async (req, res) => {
     LEFT JOIN users u2 ON u2.pin = p2.id 
     LEFT JOIN pines p3 ON p3.usuario = u2.id
     LEFT JOIN users u3 ON u3.pin = p3.id 
-    ${
-      req.user.admin != 1
-        ? "WHERE u.id = " + req.user.id
-        : "WHERE u.id is NOT NULL"
-    }
+    ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : 'WHERE u.id is NOT NULL'}
     ORDER BY u.fullname, nombre1, nombre2, nombre3`);
   respuesta = { data: red };
   res.send(respuesta);
 });
-router.post("/reds", noExterno, async (req, res) => {
+router.post('/reds', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
-    const red =
-      await pool.query(`SELECT u.*, r.*, p.acreedor , p.usuario idpapa, 
+    const red = await pool.query(`SELECT u.*, r.*, p.acreedor , p.usuario idpapa, 
         up.fullname namepapa, rp.rango rangopapa, p1.usuario idabuelo, ua.fullname nameabuelo, 
         ra.rango rangoabuelo, p2.usuario idbisabuelo, ub.fullname namebisabuelo, rb.rango rangobisabuelo          
         FROM pines p LEFT JOIN pines p1 ON p1.acreedor = p.usuario LEFT JOIN pines p2 ON p2.acreedor = p1.usuario        
@@ -3418,14 +3294,14 @@ router.post("/reds", noExterno, async (req, res) => {
     res.send(respuesta);
   }
 });
-router.put("/red", noExterno, async (req, res) => {
+router.put('/red', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
     console.log(S, U, F);
     if (!S) {
       await pool.query(`UPDATE users SET ? WHERE pin = ?`, [
         { nrango: U == 0 ? 5 : 7, sucursal: U == 0 ? null : U },
-        F,
+        F
       ]);
     } else {
       await pool.query(`UPDATE users SET ? WHERE pin = ?`, [{ nrango: U }, F]);
@@ -3433,14 +3309,14 @@ router.put("/red", noExterno, async (req, res) => {
     res.send(true);
   }
 });
-router.put("/reds", noExterno, async (req, res) => {
+router.put('/reds', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
     console.log(S, U, F);
     if (!S) {
       await pool.query(`UPDATE users SET ? WHERE pin = ?`, [
         { nrango: U == 0 ? 5 : 7, sucursal: U == 0 ? null : U },
-        F,
+        F
       ]);
     } else {
       await pool.query(`UPDATE users SET ? WHERE pin = ?`, [{ nrango: U }, F]);
@@ -3449,19 +3325,19 @@ router.put("/reds", noExterno, async (req, res) => {
   }
 });
 ///////////////////* CLIENTES *///////////////////////////
-router.get("/clientes", noExterno, (req, res) => {
+router.get('/clientes', noExterno, (req, res) => {
   console.log(req.user);
-  res.render("links/clientes");
+  res.render('links/clientes');
 });
-router.post("/clientes", noExterno, async (req, res) => {
+router.post('/clientes', noExterno, async (req, res) => {
   //console.log(req.user)
   const cliente = await pool.query(`SELECT * FROM clientes c 
     LEFT JOIN users u ON c.acsor = u.id     
-    ${req.user.asistente ? "" : "WHERE c.acsor = " + req.user.id}`);
+    ${req.user.asistente ? '' : 'WHERE c.acsor = ' + req.user.id}`);
   respuesta = { data: cliente };
   res.send(respuesta);
 });
-router.put("/clientes/:id", isLoggedIn, async (req, res) => {
+router.put('/clientes/:id', isLoggedIn, async (req, res) => {
   const {
     ahora,
     nombres,
@@ -3475,20 +3351,19 @@ router.put("/clientes/:id", isLoggedIn, async (req, res) => {
     movil,
     direccion,
     asesors,
-    id,
+    id
   } = req.body;
   console.log(req.body);
-  var imagenes = "";
-  req.files.map((e) => {
+  var imagenes = '';
+  req.files.map(e => {
     imagenes += `/uploads/${e.filename},`;
   });
-  var indic = movil.indexOf(" ");
-  var movl =
-    indic != -1 ? movil.replace(/-/g, "") : "57 " + movil.replace(/-/g, "");
+  var indic = movil.indexOf(' ');
+  var movl = indic != -1 ? movil.replace(/-/g, '') : '57 ' + movil.replace(/-/g, '');
 
   const clit = {
     nombre: nombres.toUpperCase(),
-    documento: documento.replace(/\./g, ""),
+    documento: documento.replace(/\./g, ''),
     fechanacimiento,
     lugarexpedicion,
     fechaexpedicion,
@@ -3500,38 +3375,35 @@ router.put("/clientes/:id", isLoggedIn, async (req, res) => {
     tipo,
     acsor: req.user.id,
     tiempo: ahora,
-    google: "",
-    imags: imagenes,
+    google: '',
+    imags: imagenes
   };
-  if (req.params.id === "agregar") {
-    const cliente = await pool.query(
-      `SELECT * FROM clientes WHERE documento = ?`,
-      documento
-    );
+  if (req.params.id === 'agregar') {
+    const cliente = await pool.query(`SELECT * FROM clientes WHERE documento = ?`, documento);
 
     if (!cliente.length) {
       var person = {
         resource: {
           names: [{ familyName: nombres.toUpperCase() }],
           emailAddresses: [{ value: email.toLowerCase() }],
-          phoneNumbers: [{ value: "+" + movl, type: "Personal" }],
-          organizations: [{ name: "Red Elite", title: "Cliente" }],
-        },
+          phoneNumbers: [{ value: '+' + movl, type: 'Personal' }],
+          organizations: [{ name: 'Red Elite', title: 'Cliente' }]
+        }
       };
-      await fs.readFile("credentials.json", (err, content) => {
-        if (err) return console.log("Error loading client secret file:", err);
+      await fs.readFile('credentials.json', (err, content) => {
+        if (err) return console.log('Error loading client secret file:', err);
         authorize(JSON.parse(content), crearcontacto);
       });
-      const ir = await pool.query("INSERT INTO clientes SET ? ", clit);
+      const ir = await pool.query('INSERT INTO clientes SET ? ', clit);
       if (asesors) {
         const asr = {
           fullname: nombres.toUpperCase(),
           document: documento,
           cel: movl,
           username: email.toLowerCase(),
-          cli: ir.insertId,
+          cli: ir.insertId
         };
-        await pool.query("UPDATE users SET ? WHERE id = ?", [asr, req.user.id]);
+        await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
       }
       res.send({ code: ir.insertId });
     } else if (cliente.length > 0 && asesors) {
@@ -3540,22 +3412,18 @@ router.put("/clientes/:id", isLoggedIn, async (req, res) => {
         document: documento,
         cel: movl,
         username: email.toLowerCase(),
-        cli: cliente[0].idc,
+        cli: cliente[0].idc
       };
-      await pool.query("UPDATE users SET ? WHERE id = ?", [asr, req.user.id]);
+      await pool.query('UPDATE users SET ? WHERE id = ?', [asr, req.user.id]);
       res.send(true);
     }
-  } else if (req.params.id === "actualizar") {
-  } else if (req.params.id === "eliminar") {
+  } else if (req.params.id === 'actualizar') {
+  } else if (req.params.id === 'eliminar') {
   }
 
   function authorize(credentials, callback) {
     const { client_secret, client_id, redirect_uris } = credentials.installed;
-    const oAuth2Client = new google.auth.OAuth2(
-      client_id,
-      client_secret,
-      redirect_uris[0]
-    );
+    const oAuth2Client = new google.auth.OAuth2(client_id, client_secret, redirect_uris[0]);
 
     // Check if we have previously stored a token.
     fs.readFile(TOKEN_PATH[1], (err, token) => {
@@ -3566,55 +3434,42 @@ router.put("/clientes/:id", isLoggedIn, async (req, res) => {
   }
   function getNewToken(oAuth2Client, callback) {
     const authUrl = oAuth2Client.generateAuthUrl({
-      access_type: "offline",
-      scope: SCOPES[0],
+      access_type: 'offline',
+      scope: SCOPES[0]
     });
-    console.log("Authorize this app by visiting this url:", authUrl);
+    console.log('Authorize this app by visiting this url:', authUrl);
     const rl = readline.createInterface({
       input: process.stdin,
-      output: process.stdout,
+      output: process.stdout
     });
-    rl.question("Enter the code from that page here: ", (code) => {
+    rl.question('Enter the code from that page here: ', code => {
       rl.close();
       oAuth2Client.getToken(code, (err, token) => {
-        if (err) return console.error("Error retrieving access token", err);
+        if (err) return console.error('Error retrieving access token', err);
         oAuth2Client.setCredentials(token);
         // Store the token to disk for later program executions
-        fs.writeFile(TOKEN_PATH[1], JSON.stringify(token), (err) => {
+        fs.writeFile(TOKEN_PATH[1], JSON.stringify(token), err => {
           if (err) return console.error(err);
-          console.log("Token stored to", TOKEN_PATH[1]);
+          console.log('Token stored to', TOKEN_PATH[1]);
         });
         callback(oAuth2Client);
       });
     });
   }
   function crearcontacto(auth) {
-    const service = google.people({ version: "v1", auth });
+    const service = google.people({ version: 'v1', auth });
     service.people.createContact(person, (err, res) => {
-      if (err) return console.error("La API devolvió un " + err);
+      if (err) return console.error('La API devolvió un ' + err);
       clit.google = res.data.resourceName;
-      console.log("Response", res.data.resourceName);
+      console.log('Response', res.data.resourceName);
     });
   }
 });
-router.put("/editclientes", noExterno, async (req, res) => {
-  const {
-    idc,
-    name,
-    tipod,
-    docu,
-    lugarex,
-    fehex,
-    fnaci,
-    ecivil,
-    email,
-    pais,
-    Movil,
-    adres,
-  } = req.body;
+router.put('/editclientes', noExterno, async (req, res) => {
+  const { idc, name, tipod, docu, lugarex, fehex, fnaci, ecivil, email, pais, Movil, adres } = req.body;
 
   console.log(req.body);
-  const movl = pais + " " + Movil.replace(/-/g, "");
+  const movl = pais + ' ' + Movil.replace(/-/g, '');
   const clit = {
     nombre: name.toUpperCase(),
     documento: docu,
@@ -3625,23 +3480,20 @@ router.put("/editclientes", noExterno, async (req, res) => {
     movil: movl,
     email: email.toLowerCase(),
     direccion: adres.toLowerCase(),
-    tipo: tipod,
+    tipo: tipod
   };
-  await pool.query("UPDATE clientes SET ? WHERE idc = ?", [clit, idc]);
+  await pool.query('UPDATE clientes SET ? WHERE idc = ?', [clit, idc]);
   res.send(true);
 });
-router.post("/adjuntar", noExterno, async (req, res) => {
-  var imagenes = "";
-  req.files.map((e) => {
+router.post('/adjuntar', noExterno, async (req, res) => {
+  var imagenes = '';
+  req.files.map(e => {
     imagenes += `/uploads/${e.filename},`;
   });
-  await pool.query("UPDATE clientes SET ? WHERE idc = ?", [
-    { imags: imagenes },
-    req.body.idc,
-  ]);
+  await pool.query('UPDATE clientes SET ? WHERE idc = ?', [{ imags: imagenes }, req.body.idc]);
   res.send(true);
 });
-router.post("/elicliente", noExterno, async (req, res) => {
+router.post('/elicliente', noExterno, async (req, res) => {
   const { id } = req.body;
   try {
     await pool.query(`DELETE FROM clientes WHERE idc = ?`, id);
@@ -3650,41 +3502,38 @@ router.post("/elicliente", noExterno, async (req, res) => {
     res.send(false);
   }
 });
-router.post("/movil", noExterno, async (req, res) => {
+router.post('/movil', noExterno, async (req, res) => {
   const { movil } = req.body;
-  const cliente = await pool.query(
-    "SELECT * FROM clientes WHERE movil = ?",
-    movil
-  );
+  const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
   res.send(cliente);
 });
 /////////////////////////////////////////////////////
-router.get("/social", noExterno, (req, res) => {
+router.get('/social', noExterno, (req, res) => {
   var options = {
-    method: "POST",
-    url: "https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token",
+    method: 'POST',
+    url: 'https://sbapi.bancolombia.com/v1/security/oauth-otp-pymes/oauth2/token',
     headers: {
-      accept: "application/json",
-      "content-type": "application/x-www-form-urlencoded",
+      accept: 'application/json',
+      'content-type': 'application/x-www-form-urlencoded'
       //authorization:  'MzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmOnNUNnJYMndINGlMNGpKOHFROGVWNmJMNWlKOGNNMmdTMWVMOHNZMnBZMGhMNXZYNGVN'
     },
     form: {
-      grant_type: "client_credentials",
-      client_id: "37eb1267-6c33-46b1-a76f-33a553fd812f",
-      client_secret: "sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM",
-      scope: "SOAT Search",
-    },
+      grant_type: 'client_credentials',
+      client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+      client_secret: 'sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM',
+      scope: 'SOAT Search'
+    }
   };
 
   request(options, function (error, response, body) {
-    if (error) return console.error("Failed: %s", error.message);
+    if (error) return console.error('Failed: %s', error.message);
 
-    console.log("Success: ", body);
+    console.log('Success: ', body);
   });
-  res.render("links/social");
+  res.render('links/social');
 });
 //////////////* BONOS *//////////////////////////////////
-router.post("/bonos/:id", isLoggedIn, (req, res) => {
+router.post('/bonos/:id', isLoggedIn, (req, res) => {
   const { monto, ahora, pin, client, motivo } = req.body;
   const datos = {
     pin,
@@ -3692,25 +3541,22 @@ router.post("/bonos/:id", isLoggedIn, (req, res) => {
     fecha: ahora,
     estado: 9,
     clients: client,
-    monto: monto.replace(/\./g, ""),
-    tip: "BONO",
+    monto: monto.replace(/\./g, ''),
+    tip: 'BONO',
     motivo,
-    concept: "PERMUTA",
-    soporte: "/uploads/" + req.files[0].filename,
+    concept: 'PERMUTA',
+    soporte: '/uploads/' + req.files[0].filename
   };
   //console.log(req.body, datos);
-  pool.query("INSERT INTO cupones SET ? ", datos);
+  pool.query('INSERT INTO cupones SET ? ', datos);
   res.send(true);
 });
 //////////////* PAGOS *//////////////////////////////////
-router.get("/pagos", async (req, res) => {
-  res.render("links/pagos");
+router.get('/pagos', async (req, res) => {
+  res.render('links/pagos');
 });
-router.get("/pagos/:id", async (req, res) => {
-  const cliente = await pool.query(
-    "SELECT * FROM clientes WHERE documento = ?",
-    req.params.id
-  );
+router.get('/pagos/:id', async (req, res) => {
+  const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id);
   if (cliente.length > 0) {
     const client = cliente[0];
     const d = await pool.query(
@@ -3719,11 +3565,11 @@ router.get("/pagos/:id", async (req, res) => {
         INNER JOIN productos pr ON pd.producto = pr.id WHERE p.tipobsevacion IS NULL AND (p.cliente = ? OR p.cliente2 = ?)`,
       [client.idc, client.idc]
     );
-    var c = "";
+    var c = '';
     if (d.length > 0) {
       d.length > 1
         ? d.map((b, x) => {
-            c += `${x > 0 ? " OR " : ""}separacion = ${b.id}`;
+            c += `${x > 0 ? ' OR ' : ''}separacion = ${b.id}`;
           })
         : (c = `separacion = ${d[0].id}`);
 
@@ -3736,85 +3582,59 @@ router.get("/pagos/:id", async (req, res) => {
       res.send({ d, client, cuotas, cuentas, status: true });
     } else {
       res.send({
-        paquete: "Aun no realiza una separacion, comuniiquece con un asesor",
-        status: false,
+        paquete: 'Aun no realiza una separacion, comuniiquece con un asesor',
+        status: false
       });
     }
   } else {
     res.send({
-      paquete:
-        "No existe un registro con este numero de documeto, comuniiquece con un asesor",
-      status: false,
+      paquete: 'No existe un registro con este numero de documeto, comuniiquece con un asesor',
+      status: false
     });
   }
 });
-router.post("/pagos", async (req, res) => {
-  const {
-    merchantId,
-    amount,
-    referenceCode,
-    total,
-    factrs,
-    id,
-    concpto,
-    lt,
-    bono,
-    pin,
-    pyt,
-  } = req.body;
-  const codes =
-    await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
+router.post('/pagos', async (req, res) => {
+  const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin, pyt } = req.body;
+  const codes = await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
     ON p.recaudador = r.id WHERE p.producto = '${pyt}' AND r.entidad = 'PAYU'`);
   if (codes.length > 0) {
-    var key =
-      codes[0].code3 +
-      "~" +
-      codes[0].code1 +
-      "~" +
-      referenceCode +
-      "~" +
-      amount +
-      "~COP";
-    var hash = crypto.createHash("md5").update(key).digest("hex");
-    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${
-      pin ? pin : 0
-    }~${id ? id : 0}`;
+    var key = codes[0].code3 + '~' + codes[0].code1 + '~' + referenceCode + '~' + amount + '~COP';
+    var hash = crypto.createHash('md5').update(key).digest('hex');
+    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
     var smg = {
       sig: hash,
       ext,
       merchantId: codes[0].code1,
-      accountId: codes[0].code2,
+      accountId: codes[0].code2
     };
   }
   res.send(smg);
 });
-router.post("/boton", async (req, res) => {
-  const { pyt, mora, transferAmount, transferReference, transferDescription } =
-    req.body;
+router.post('/boton', async (req, res) => {
+  const { pyt, mora, transferAmount, transferReference, transferDescription } = req.body;
   console.log(req.body);
   var data = JSON.stringify({
     data: [
       {
-        commerceTransferButtonId: "h4ShG3NER1C",
+        commerceTransferButtonId: 'h4ShG3NER1C',
         transferReference: transferReference,
         transferAmount: transferAmount,
-        commerceUrl: "https://gateway.com/payment/route?commerce=Telovendo",
+        commerceUrl: 'https://gateway.com/payment/route?commerce=Telovendo',
         transferDescription: transferDescription,
-        confirmationURL:
-          "https://pagos-api-dev.tigocloud.net/bancolombia/callback",
-      },
-    ],
+        confirmationURL: 'https://pagos-api-dev.tigocloud.net/bancolombia/callback'
+      }
+    ]
   });
 
   var config = {
-    method: "post",
-    url: "https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry",
+    method: 'post',
+    url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry',
     headers: {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
       Authorization:
-        "Bearer AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmDtiIF4TAuv9kgn089V6e83QR05QKFMYC3i8QAr2fHyFCkaKFvzS8rhq75wwWVrXJhSpDQgc8e6wxrvoXY2Ts8FOMHb_8wkpk0rz0XYpuKDEAPniWedJvNmb8KP97Qht4PeL2EK3im3uEbkE1P91INYcMVVVzpbGoC_1SyCDcf4E",
+        'Bearer AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmDtiIF4TAuv9kgn089V6e83QR05QKFMYC3i8QAr2fHyFCkaKFvzS8rhq75wwWVrXJhSpDQgc8e6wxrvoXY2Ts8FOMHb_8wkpk0rz0XYpuKDEAPniWedJvNmb8KP97Qht4PeL2EK3im3uEbkE1P91INYcMVVVzpbGoC_1SyCDcf4E'
     },
-    data: data,
+    data: data
   };
   axios(config)
     .then(function (response) {
@@ -3822,16 +3642,16 @@ router.post("/boton", async (req, res) => {
       //var dat = JSON.parse(response.data)
       res.send({
         std: true,
-        msj: "vamos muy bien",
-        href: response.data.data[0].redirectURL,
+        msj: 'vamos muy bien',
+        href: response.data.data[0].redirectURL
       });
     })
     .catch(function (error) {
       //console.log(error);
-      res.send({ std: false, msj: error, href: "/" });
+      res.send({ std: false, msj: error, href: '/' });
     });
 });
-router.post("/recibo", async (req, res) => {
+router.post('/recibo', async (req, res) => {
   const {
     total,
     factrs,
@@ -3850,12 +3670,12 @@ router.post("/recibo", async (req, res) => {
     nrecibo,
     montos,
     feh,
-    orden,
+    orden
   } = req.body;
-  var rcb = ""; //console.log(req.body)
-  if (recibos.indexOf(",")) {
-    var rcbs = recibos.split(",");
-    rcbs.map((s) => {
+  var rcb = ''; //console.log(req.body)
+  if (recibos.indexOf(',')) {
+    var rcbs = recibos.split(',');
+    rcbs.map(s => {
       rcb += `recibo LIKE '%${s}%' OR `;
     });
     rcb = rcb.slice(0, -3);
@@ -3866,15 +3686,13 @@ router.post("/recibo", async (req, res) => {
     excedente = 0;
   var sum = 0,
     saldo = montorcb;
-  const recibe = await pool.query(
-    `SELECT * FROM solicitudes WHERE stado != 6 AND (${rcb})`
-  );
+  const recibe = await pool.query(`SELECT * FROM solicitudes WHERE stado != 6 AND (${rcb})`);
   if (recibe.length > 0) {
     recibe
-      .filter((a) => {
+      .filter(a => {
         return a.rcbexcdnt && a.excdnt;
       })
-      .map((a) => {
+      .map(a => {
         sum += a.monto;
       });
     saldo = montorcb - sum;
@@ -3882,30 +3700,24 @@ router.post("/recibo", async (req, res) => {
       if (g) {
         return res.send({
           std: false,
-          msj:
-            "El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $" +
-            Moneda(sum),
+          msj: 'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum)
         });
       } else {
         req.flash(
-          "error",
-          "El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $" +
-            Moneda(sum)
+          'error',
+          'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum)
         );
-        return res.redirect("/links/pagos");
+        return res.redirect('/links/pagos');
       }
     } else if (!sum) {
       if (g) {
         return res.send({
           std: false,
-          msj: "Solicitud de pago rechazada, recibo o factura duplicada",
+          msj: 'Solicitud de pago rechazada, recibo o factura duplicada'
         });
       } else {
-        req.flash(
-          "error",
-          "Solicitud de pago rechazada, recibo o factura duplicada"
-        );
-        return res.redirect("/links/pagos");
+        req.flash('error', 'Solicitud de pago rechazada, recibo o factura duplicada');
+        return res.redirect('/links/pagos');
       }
     }
   }
@@ -3915,10 +3727,7 @@ router.post("/recibo", async (req, res) => {
   }
 
   if (bono) {
-    await pool.query("UPDATE cupones SET ? WHERE id = ?", [
-      { producto: orden, estado: 14 },
-      pin,
-    ]);
+    await pool.query('UPDATE cupones SET ? WHERE id = ?', [{ producto: orden, estado: 14 }, pin]);
   }
 
   const r = await pool.query(
@@ -3932,10 +3741,8 @@ router.post("/recibo", async (req, res) => {
     k = r[0].monto || 0;
   var acumulado = l + k;
 
-  concpto !== "ABONO"
-    ? await pool.query("UPDATE cuotas SET estado = 1 WHERE id = ?", id)
-    : "";
-  await pool.query("UPDATE productosd SET estado = 8 WHERE id = ?", lt);
+  concpto !== 'ABONO' ? await pool.query('UPDATE cuotas SET estado = 1 WHERE id = ?', id) : '';
+  await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
   await pool.query(`UPDATE solicitudes SET ? WHERE ${rcb}`, { excdnt: 0 });
   let pago = {
     fech: ahora,
@@ -3943,23 +3750,19 @@ router.post("/recibo", async (req, res) => {
     lt,
     acumulado,
     orden,
-    concepto: "PAGO",
+    concepto: 'PAGO',
     stado: 3,
     descp: concpto,
-    formap,
+    formap
   };
-  const acuerdo = await pool.query(
-    "SELECT id FROM acuerdos WHERE producto = ? AND estado = 9",
-    orden
-  );
+  const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', orden);
   acuerdo.length && (pago.acuerdo = acuerdo);
 
-  var reci =
-    "INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ";
+  var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
   if (Array.isArray(nrecibo)) {
     for (i = 0; i <= nrecibo.length - 1; i++) {
       //console.log(i, montos[i], nrecibo.length, parseFloat(montos[i].replace(/\./g, '')))
-      var recib = parseFloat(montos[i].replace(/\./g, ""));
+      var recib = parseFloat(montos[i].replace(/\./g, ''));
       pago.img = `/uploads/${req.files[i].filename}`;
       pago.motorecibos = recib;
       pago.recibo = `~${nrecibo[i]}~`;
@@ -3972,18 +3775,17 @@ router.post("/recibo", async (req, res) => {
         pago.excdnt = 1;
       }
 
-      mora != 0 ? (pago.moras = mora) : "";
-      concpto === "ABONO" ? (pago.concepto = concpto) : (pago.pago = id);
+      mora != 0 ? (pago.moras = mora) : '';
+      concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
-      let pgo = await pool.query("INSERT INTO solicitudes SET ? ", pago);
-      reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${
-        nrecibo[i]
-      }', ${montos[i].replace(/\./g, "")}, '/uploads/${
-        req.files[i].filename
-      }', ${nrecibo[i] === rcbexcdnt ? excedente : 0}),`;
+      let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+      reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${nrecibo[i]}', ${montos[i].replace(
+        /\./g,
+        ''
+      )}, '/uploads/${req.files[i].filename}', ${nrecibo[i] === rcbexcdnt ? excedente : 0}),`;
     }
   } else {
-    var recib = parseFloat(montos.replace(/\./g, ""));
+    var recib = parseFloat(montos.replace(/\./g, ''));
     pago.img = `/uploads/${req.files[0].filename}`;
     pago.motorecibos = recib;
     pago.recibo = `~${nrecibo}~`;
@@ -3995,16 +3797,13 @@ router.post("/recibo", async (req, res) => {
       pago.rcbexcdnt = rcbexcdnt;
       pago.excdnt = 1;
     }
-    mora ? (pago.moras = mora) : "";
-    concpto === "ABONO" ? (pago.concepto = concpto) : (pago.pago = id);
+    mora ? (pago.moras = mora) : '';
+    concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
-    let pgo = await pool.query("INSERT INTO solicitudes SET ? ", pago);
-    reci += `(${
-      pgo.insertId
-    }, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(
-      /\./g,
-      ""
-    )}, '/uploads/${req.files[0].filename}', ${excedente}),`;
+    let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${
+      req.files[0].filename
+    }', ${excedente}),`;
   }
   //console.log(reci.slice(0, -1))
   await pool.query(reci.slice(0, -1));
@@ -4012,16 +3811,15 @@ router.post("/recibo", async (req, res) => {
   if (g) {
     return res.send({
       std: true,
-      msj: "Solicitud de pago enviada correctamente",
+      msj: 'Solicitud de pago enviada correctamente'
     });
   } else {
-    req.flash("success", "Solicitud de pago enviada correctamente");
-    return res.redirect("/links/pagos");
+    req.flash('success', 'Solicitud de pago enviada correctamente');
+    return res.redirect('/links/pagos');
   }
 });
-router.post("/bonus", async (req, res) => {
-  const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin, orden } =
-    req.body;
+router.post('/bonus', async (req, res) => {
+  const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin, orden } = req.body;
   const a = await Bonos(bono, lt);
   if (a) {
     const r = await pool.query(
@@ -4042,47 +3840,41 @@ router.post("/bonus", async (req, res) => {
       facturasvenc: factrs,
       lt,
       orden,
-      concepto: "BONO",
+      concepto: 'BONO',
       stado: 3,
       descp: concpto,
-      formap: "BONO-" + a.concept,
+      formap: 'BONO-' + a.concept,
       bono: pin,
       acumulado,
-      observaciones: a.concept + " - " + a.motivo,
-      img: a.soporte,
+      observaciones: a.concept + ' - ' + a.motivo,
+      img: a.soporte
     };
-    await pool.query("UPDATE productosd SET estado = 8 WHERE id = ?", lt);
-    await pool.query("UPDATE cupones SET ? WHERE id = ?", [
-      { producto: orden, estado: 14 },
-      pin,
-    ]);
-    const P = await pool.query("INSERT INTO solicitudes SET ? ", pago);
-    const R = await PagosAbonos(P.insertId, "", "GRUPO ELITE SISTEMA");
+    await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
+    await pool.query('UPDATE cupones SET ? WHERE id = ?', [{ producto: orden, estado: 14 }, pin]);
+    const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    const R = await PagosAbonos(P.insertId, '', 'GRUPO ELITE SISTEMA');
     res.send(R);
   } else {
     res.send(false);
   }
 });
 /////////////* CARTERAS */////////////////////////////////////
-router.get("/cartera", isLoggedIn, async (req, res) => {
-  res.render("links/cartera");
+router.get('/cartera', isLoggedIn, async (req, res) => {
+  res.render('links/cartera');
 });
-router.post("/cartera/:id", noExterno, async (req, res) => {
+router.post('/cartera/:id', noExterno, async (req, res) => {
   const { id } = req.params;
-  const fila = await pool.query("SELECT * FROM productosd WHERE id = ?", id);
+  const fila = await pool.query('SELECT * FROM productosd WHERE id = ?', id);
   res.send(fila[0]);
 });
-router.post("/cartera", isLoggedIn, async (req, res) => {
+router.post('/cartera', isLoggedIn, async (req, res) => {
   const { h } = req.body;
   let prd;
   if (req.user.externo) {
-    const prcd = await pool.query(
-      "SELECT producto FROM externos WHERE usuario = ?",
-      req.user.pin
-    );
-    prd = prcd.map((e) => e.producto);
+    const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+    prd = prcd.map(e => e.producto);
   }
-  let d = prd ? `AND d.id IN (${prd})` : "";
+  let d = prd ? `AND d.id IN (${prd})` : '';
 
   sql = `SELECT p.id, l.mz, l.n, p.fecha, (
         SELECT MAX(TIMESTAMP(fech))
@@ -4117,12 +3909,10 @@ router.post("/cartera", isLoggedIn, async (req, res) => {
   respuesta = { data: cuotas };
   res.send(respuesta);
 });
-router.post("/rcb", noExterno, async (req, res) => {
+router.post('/rcb', noExterno, async (req, res) => {
   const { rcb } = req.body;
   console.log(req.body);
-  const recibo = await pool.query(
-    `SELECT * FROM solicitudes WHERE recibo LIKE '%${rcb}%'`
-  );
+  const recibo = await pool.query(`SELECT * FROM solicitudes WHERE recibo LIKE '%${rcb}%'`);
   //console.log(recibo)
   if (recibo.length > 0) {
     res.send(false);
@@ -4130,19 +3920,15 @@ router.post("/rcb", noExterno, async (req, res) => {
     res.send(true);
   }
 });
-router.post("/prodlotes", noExterno, async (req, res) => {
+router.post('/prodlotes', noExterno, async (req, res) => {
   const productos =
     await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
     WHERE l.estado IN('9', '15') AND (v.tipobsevacion = 'ANULADA' OR v.id IS NULL) ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`);
-  const asesores = await pool.query(
-    `SELECT * FROM users ORDER BY fullname ASC`
-  );
-  const clientes = await pool.query(
-    `SELECT * FROM clientes ORDER BY nombre ASC`
-  );
+  const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
+  const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
   res.send({ productos, asesores, clientes });
 });
-router.post("/crearcartera", noExterno, async (req, res) => {
+router.post('/crearcartera', noExterno, async (req, res) => {
   const {
     idbono,
     asesor,
@@ -4177,7 +3963,7 @@ router.post("/crearcartera", noExterno, async (req, res) => {
     nrecibo,
     promesa,
     feh,
-    montos,
+    montos
   } = req.body;
 
   //console.log(req.body, req.files, req.body.promesa ? 'si' : 'no')
@@ -4186,19 +3972,19 @@ router.post("/crearcartera", noExterno, async (req, res) => {
     lote: lt,
     asesor: asesor,
     iniciar: xcntag,
-    obsevacion: "CARTERA",
+    obsevacion: 'CARTERA',
     cuot,
     numerocuotaspryecto: parseFloat(inicialcuotas) + parseFloat(financiacion),
     extraordinariameses: 0,
     cuotaextraordinaria: 0,
     cupon: idbono ? idbono : 1,
     inicialdiferida: inicialcuotas,
-    ahorro: ahorro ? ahorro.replace(/\./g, "") : 0,
-    separar: cuota[0].replace(/\./g, ""),
+    ahorro: ahorro ? ahorro.replace(/\./g, '') : 0,
+    separar: cuota[0].replace(/\./g, ''),
     extran: 0,
-    vrmt2: vmtr2.replace(/\./g, ""),
+    vrmt2: vmtr2.replace(/\./g, '')
   };
-  if (promesa && promesa !== "0") {
+  if (promesa && promesa !== '0') {
     separ.promesa = promesa;
     separ.autoriza = req.user.fullname;
     separ.status = promesa;
@@ -4213,31 +3999,24 @@ router.post("/crearcartera", noExterno, async (req, res) => {
         ? (separ.cliente3 = e)
         : i === 3
         ? (separ.cliente4 = e)
-        : "";
+        : '';
     });
   } else {
     separ.cliente = clientes;
   }
-  const h = await pool.query("INSERT INTO preventa SET ? ", separ);
-  idbono
-    ? await pool.query("UPDATE cupones set ? WHERE id = ?", [
-        { estado: 14, producto: h.insertId },
-        idbono,
-      ])
-    : "";
-  var cuotas =
-    "INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ";
-  var reci =
-    "INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher) VALUES ";
+  const h = await pool.query('INSERT INTO preventa SET ? ', separ);
+  idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
+  var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+  var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher) VALUES ';
   await n.map((t, i) => {
-    cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[
+    cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[
       i
-    ].replace(/\./g, "")}, ${std[i]}, ${cuota[i].replace(/\./g, "")}),`;
+    ].replace(/\./g, '')}),`;
   });
   await pool.query(cuotas.slice(0, -1));
 
-  var imagenes = "";
-  req.files.map((e) => {
+  var imagenes = '';
+  req.files.map(e => {
     imagenes += `/uploads/${e.filename},`;
   });
   var fpago = Array.isArray(formap) ? formap[0] : formap;
@@ -4249,49 +4028,43 @@ router.post("/crearcartera", noExterno, async (req, res) => {
     lt,
     acumulado: 0,
     orden: h.insertId,
-    concepto: "ABONO",
+    concepto: 'ABONO',
     stado: 4,
     img: imagenes,
-    descp: "ABONO",
+    descp: 'ABONO',
     formap: fpago,
-    excdnt: 0,
+    excdnt: 0
   };
-  const pgo = await pool.query("INSERT INTO solicitudes SET ? ", pago);
+  const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
   if (Array.isArray(nrecibo)) {
     await nrecibo.map((t, i) => {
-      reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[
-        i
-      ].replace(/\./g, "")}, '/uploads/${req.files[i].filename}'),`;
+      reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${
+        req.files[i].filename
+      }'),`;
     });
   } else {
-    reci += `(${
-      pgo.insertId
-    }, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(
-      /\./g,
-      ""
-    )}, '/uploads/${req.files[0].filename}'),`;
+    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${
+      req.files[0].filename
+    }'),`;
   }
   await pool.query(reci.slice(0, -1));
   const S = await Estados(h.insertId);
-  await pool.query("UPDATE productosd set ? WHERE id = ?", [
+  await pool.query('UPDATE productosd set ? WHERE id = ?', [
     {
       estado: S.std,
-      mtr: vmtr2.replace(/\./g, ""),
-      inicial: inicial.replace(/\./g, ""),
-      valor: total.replace(/\./g, ""),
-      tramitando: ahora,
+      mtr: vmtr2.replace(/\./g, ''),
+      inicial: inicial.replace(/\./g, ''),
+      valor: total.replace(/\./g, ''),
+      tramitando: ahora
     },
-    lt,
+    lt
   ]);
 
-  req.flash(
-    "success",
-    "Cartera creada correctamente, producto en estado " + S.estado
-  );
-  res.redirect("/links/cartera");
+  req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
+  res.redirect('/links/cartera');
 });
 //////////////* CUPONES *//////////////////////////////////
-router.get("/saluda", noExterno, async (req, res) => {
+router.get('/saluda', noExterno, async (req, res) => {
   const r = await pool.query(`SELECT SUM(s.monto) + 
     SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS montos, 
     p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha, 
@@ -4302,32 +4075,29 @@ router.get("/saluda", noExterno, async (req, res) => {
     WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO')
     GROUP BY p.id`);
   console.log(r);
-  res.send("samir todo biaen");
+  res.send('samir todo biaen');
 });
-router.get("/cupones", noExterno, async (req, res) => {
-  res.render("links/cupones");
+router.get('/cupones', noExterno, async (req, res) => {
+  res.render('links/cupones');
 });
-router.post("/cupon", noExterno, async (req, res) => {
+router.post('/cupon', noExterno, async (req, res) => {
   const { dto, std, cliente, ctn } = req.body;
   if (ctn < 1) {
-    var hora = moment().format("YYYY-MM-DD HH:mm");
+    var hora = moment().format('YYYY-MM-DD HH:mm');
     var pin = ID(5);
     const cupon = {
       pin,
       descuento: dto ? dto : 5,
       estado: std ? std : 3,
-      clients: cliente ? cliente : req.user.cli,
+      clients: cliente ? cliente : req.user.cli
     };
-    await pool.query("INSERT INTO cupones SET ? ", cupon);
-    const klint = await pool.query(
-      `SELECT * FROM  clientes WHERE idc = ?`,
-      cupon.clients
-    );
+    await pool.query('INSERT INTO cupones SET ? ', cupon);
+    const klint = await pool.query(`SELECT * FROM  clientes WHERE idc = ?`, cupon.clients);
     const encargado = await pool.query(
       `SELECT u.fullname, u.cel, u.username FROM encargos e INNER JOIN users u ON e.user = u.id  WHERE e.cargo = 'CUPONES'`
     );
     const en = encargado[0];
-    var nom = en.fullname.split(" ")[0];
+    var nom = en.fullname.split(' ')[0];
 
     EnviarWTSAP(
       en.cel,
@@ -4335,18 +4105,18 @@ router.post("/cupon", noExterno, async (req, res) => {
       `${nom} tienes una solicitu de un CUPON ${pin} ${cupon.descuento}% por aprobar de ${klint[0].nombre}`
     );
     res.send({
-      tipo: "success",
-      msj: "Solicitud de cupon enviada correctamente",
+      tipo: 'success',
+      msj: 'Solicitud de cupon enviada correctamente'
     });
   } else {
     res.send({
-      tipo: "error",
-      msj: "Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud",
+      tipo: 'error',
+      msj: 'Ya generaste una solicitud de cupon antes, debes esperar al menos una hora para realizar una nueva solicitud'
     });
   }
 });
-router.post("/cupones", noExterno, async (req, res) => {
-  var d = req.user.auxicontbl > 0 ? "" : "WHERE c.clients = ?";
+router.post('/cupones', noExterno, async (req, res) => {
+  var d = req.user.auxicontbl > 0 ? '' : 'WHERE c.clients = ?';
   var sql = `SELECT c.id, c.pin, c.descuento, c.fecha, c.estado, v.ahorro, p.mz, p.n, t.proyect, cl.nombre, cl.movil, 
     cl.email FROM cupones c LEFT JOIN preventa v ON c.producto = v.id LEFT JOIN productosd p ON v.lote = p.id 
     LEFT JOIN productos t ON p.producto = t.id LEFT JOIN clientes cl ON c.clients = cl.idc ${d} `;
@@ -4355,23 +4125,10 @@ router.post("/cupones", noExterno, async (req, res) => {
   respuesta = { data: cupones };
   res.send(respuesta);
 });
-router.post("/cupones/:d", noExterno, async (req, res) => {
+router.post('/cupones/:d', noExterno, async (req, res) => {
   const { d } = req.params;
-  if (d === "BONO") {
-    const {
-      id,
-      pin,
-      descuento,
-      fecha,
-      estado,
-      ahorro,
-      mz,
-      n,
-      proyect,
-      nombre,
-      movil,
-      email,
-    } = req.body;
+  if (d === 'BONO') {
+    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
     const bono = {
       pin,
       descuento: 0,
@@ -4380,85 +4137,59 @@ router.post("/cupones/:d", noExterno, async (req, res) => {
       tip: qhacer,
       monto: acumulado,
       motivo,
-      concept: causa,
+      concept: causa
     };
-    const a = await pool.query("INSERT INTO cupones SET ? ", bono);
-  } else if (d === "CUPON") {
-  } else if (d === "clientes") {
-    const clientes = await pool.query(
-      `SELECT * FROM clientes ORDER BY nombre ASC`
-    );
+    const a = await pool.query('INSERT INTO cupones SET ? ', bono);
+  } else if (d === 'CUPON') {
+  } else if (d === 'clientes') {
+    const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
     res.send({ clientes });
   } else {
-    const {
-      id,
-      pin,
-      descuento,
-      fecha,
-      estado,
-      ahorro,
-      mz,
-      n,
-      proyect,
-      nombre,
-      movil,
-      email,
-    } = req.body;
-    if (d === "Aprobar") {
-      await pool.query("UPDATE cupones set ? WHERE id = ?", [
-        { estado: 9 },
-        id,
-      ]);
+    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+    if (d === 'Aprobar') {
+      await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
       EnviarWTSAP(
         movil,
         `_*${
-          nombre.split(" ")[0]
+          nombre.split(' ')[0]
         }* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
-        `${
-          nombre.split(" ")[0]
-        } tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
+        `${nombre.split(' ')[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
       );
       res.send(true);
     }
   }
 });
-router.get("/bono/:id", noExterno, async (req, res) => {
-  const bono = await pool.query(
-    "SELECT * FROM cupones WHERE pin = ?",
-    req.params.id
-  );
+router.get('/bono/:id', noExterno, async (req, res) => {
+  const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id);
   res.send(bono);
 });
 ///////////////////////* ORDEN *//////////////////////////////////
-router.get("/orden", noExterno, async (req, res) => {
-  moment.locale("es");
+router.get('/orden', noExterno, async (req, res) => {
+  moment.locale('es');
   const { id, h } = req.query;
-  var ahora = moment(h).subtract(1, "hours").format("YYYY-MM-DD HH:mm");
-  var hora2 = moment(h).subtract(2, "hours").format("YYYY-MM-DD HH:mm");
+  var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
+  var hora2 = moment(h).subtract(2, 'hours').format('YYYY-MM-DD HH:mm');
 
   const proyecto = await pool.query(
     `SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`,
     id
   );
-  var t = proyecto[0].tramitando ? proyecto[0].tramitando : "nada";
-  var p = proyecto[0].tramitando ? proyecto[0].tramitando : "nada";
-  var hora = t.indexOf("*") > 0 ? t.split("*")[1] : hora2;
+  var t = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
+  var p = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
+  var hora = t.indexOf('*') > 0 ? t.split('*')[1] : hora2;
   if (ahora > hora) {
-    await pool.query("UPDATE productosd set ? WHERE id = ?", [
-      { tramitando: req.user.fullname + "*" + h },
-      id,
-    ]);
-    res.render("links/orden", { proyecto, id, mensaje: "" });
-  } else if (req.user.fullname !== t.split("*")[0]) {
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: req.user.fullname + '*' + h }, id]);
+    res.render('links/orden', { proyecto, id, mensaje: '' });
+  } else if (req.user.fullname !== t.split('*')[0]) {
     var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
-      t.split("*")[0]
+      t.split('*')[0]
     } EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`;
-    res.render("links/orden", { proyecto, id, mensaje });
+    res.render('links/orden', { proyecto, id, mensaje });
   } else {
-    res.render("links/orden", { proyecto, id, mensaje: "" });
+    res.render('links/orden', { proyecto, id, mensaje: '' });
   }
 });
-router.post("/orden", noExterno, async (req, res) => {
+router.post('/orden', noExterno, async (req, res) => {
   const {
     numerocuotaspryecto,
     extraordinariameses,
@@ -4481,18 +4212,12 @@ router.post("/orden", noExterno, async (req, res) => {
     extran,
     vrmt2,
     iniciar,
-    tipoDto,
+    tipoDto
   } = req.body;
   //console.log(req.body)
-  const fp = await pool.query(
-    "SELECT * FROM productosd WHERE id = ? AND estado = 9",
-    lote
-  );
+  const fp = await pool.query('SELECT * FROM productosd WHERE id = ? AND estado = 9', lote);
   if (!fp.length) {
-    req.flash(
-      "error",
-      "Separación no realizada ya existe una orden con este lote"
-    );
+    req.flash('error', 'Separación no realizada ya existe una orden con este lote');
     res.redirect(`/links/orden?id=${lote}&h=${ahora}`);
   } else {
     const separ = {
@@ -4504,34 +4229,23 @@ router.post("/orden", noExterno, async (req, res) => {
       asesor: req.user.id,
       numerocuotaspryecto: numerocuotaspryecto ? numerocuotaspryecto : 0,
       extraordinariameses: extraordinariameses ? extraordinariameses : 0,
-      cuotaextraordinaria: cuotaextraordinaria
-        ? cuotaextraordinaria.replace(/\./g, "")
-        : 0,
+      cuotaextraordinaria: cuotaextraordinaria ? cuotaextraordinaria.replace(/\./g, '') : 0,
       cupon: cupon ? cupon : 1,
       inicialdiferida: inicialdiferida || 0,
-      ahorro: ahorro !== "$0" ? ahorro.replace(/\./g, "") : 0,
-      separar: separacion.replace(/\./g, ""),
+      ahorro: ahorro !== '$0' ? ahorro.replace(/\./g, '') : 0,
+      separar: separacion.replace(/\./g, ''),
       extran: extran ? extran : 0,
-      vrmt2: vrmt2.replace(/\./g, ""),
+      vrmt2: vrmt2.replace(/\./g, ''),
       iniciar,
       cuot,
-      dto: tipoDto,
+      dto: tipoDto
     };
     //console.log(separ);
-    const h = await pool.query("INSERT INTO preventa SET ? ", separ);
-    await pool.query("UPDATE productosd set ? WHERE id = ?", [
-      { estado: 1, tramitando: ahora },
-      lote,
-    ]);
-    cupon
-      ? await pool.query("UPDATE cupones set ? WHERE id = ?", [
-          { estado: 14, producto: h.insertId },
-          cupon,
-        ])
-      : "";
+    const h = await pool.query('INSERT INTO preventa SET ? ', separ);
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
+    cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
 
-    var cuotas =
-      "INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ";
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
     if (Array.isArray(ncuota)) {
       await ncuota.map((t, i) => {
         cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}, ${cuota[i]}),`;
@@ -4541,18 +4255,16 @@ router.post("/orden", noExterno, async (req, res) => {
     }
     await pool.query(cuotas.slice(0, -1));
 
-    req.flash("success", "Separación realizada exitosamente");
-    res.redirect("/links/reportes");
+    req.flash('success', 'Separación realizada exitosamente');
+    res.redirect('/links/reportes');
   }
 });
-router.get("/cel/:id", async (req, res) => {
+router.get('/cel/:id', async (req, res) => {
   const { id } = req.params;
-  const datos = await pool.query(
-    `SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`
-  );
+  const datos = await pool.query(`SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`);
   res.send(datos);
 });
-router.post("/codigo", noExterno, async (req, res) => {
+router.post('/codigo', noExterno, async (req, res) => {
   const { movil } = req.body;
   const codigo = ID2(5);
   console.log(codigo);
@@ -4563,23 +4275,11 @@ router.post("/codigo", noExterno, async (req, res) => {
   );
   res.send(codigo);
 });
-router.post("/tabla/:id", noExterno, async (req, res) => {
+router.post('/tabla/:id', noExterno, async (req, res) => {
   if (req.params.id == 1) {
     var data = new Array();
     dataSet.data = data;
-    const {
-      fcha,
-      fcha2,
-      cuota70,
-      cuota30,
-      oficial70,
-      oficial30,
-      N,
-      u,
-      mesesextra,
-      extra,
-      separacion,
-    } = req.body;
+    const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra, separacion } = req.body;
     var v = N == 1 ? 1 : Math.round((parseFloat(N) - parseFloat(u)) / 2);
     var p = (parseFloat(N) - parseFloat(u)) / 2;
     var j = Math.round(parseFloat(u) / 2);
@@ -4590,17 +4290,14 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
       n: `1 <input value="1" type="hidden" name="ncuota">`,
       fecha: fcha2,
       oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>`,
-      cuota: `${separacion} <input value="${separacion.replace(
-        /\./g,
-        ""
-      )}" type="hidden" name="cuota">`,
+      cuota: `${separacion} <input value="${separacion.replace(/\./g, '')}" type="hidden" name="cuota">`,
       stado: `<span class="badge badge-primary">Pendiente</span>
                     <input value="3" type="hidden" name="estado">
                     <input value="SEPARACION" type="hidden" name="tipo">`,
-      n2: "",
-      fecha2: "",
-      cuota2: "",
-      stado2: "",
+      n2: '',
+      fecha2: '',
+      cuota2: '',
+      stado2: ''
     };
     dataSet.data.push(l);
     for (i = 1; i <= v; i++) {
@@ -4608,36 +4305,21 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
       if (i <= j && cuota30 != 0) {
         x = {
           n: i + `<input value="${i}" type="hidden" name="ncuota">`,
-          fecha: moment(fcha).add(i, "month"),
+          fecha: moment(fcha).add(i, 'month'),
           oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
-          cuota:
-            cuota30 +
-            `<input value="${cuota30.replace(
-              /\./g,
-              ""
-            )}" type="hidden" name="cuota">`,
+          cuota: cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
           stado: `<span class="badge badge-primary">Pendiente</span>
                             <input value="3" type="hidden" name="estado">
                             <input value="INICIAL" type="hidden" name="tipo">`,
-          n2:
-            i > o
-              ? ""
-              : `${i + j} <input value="${i + j}" type="hidden" name="ncuota">`,
-          fecha2: i > o ? "" : moment(fcha).add(i + j, "month"),
-          cuota2:
-            i > o
-              ? ""
-              : cuota30 +
-                `<input value="${cuota30.replace(
-                  /\./g,
-                  ""
-                )}" type="hidden" name="cuota">`,
+          n2: i > o ? '' : `${i + j} <input value="${i + j}" type="hidden" name="ncuota">`,
+          fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
+          cuota2: i > o ? '' : cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
           stado2:
             i > o
-              ? ""
+              ? ''
               : `<span class="badge badge-primary">Pendiente</span>
                                           <input value="3" type="hidden" name="estado">
-                                          <input value="INICIAL" type="hidden" name="tipo">`,
+                                          <input value="INICIAL" type="hidden" name="tipo">`
         };
         dataSet.data.push(x);
       } else if (cuota30 == 0) {
@@ -4648,69 +4330,33 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
 
       d = {
         n: i + `<input value="${i}" type="hidden" name="ncuota">`,
-        fecha: moment(fcha).add(y, "month"),
+        fecha: moment(fcha).add(y, 'month'),
         oficial: `<span class="badge badge-dark text-center text-uppercase">Financiamiento ${oficial70}</span>`,
-        cuota:
-          cuota70 +
-          `<input value="${cuota70.replace(
-            /\./g,
-            ""
-          )}" type="hidden" name="cuota">`,
+        cuota: cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
         stado: `<span class="badge badge-primary">Pendiente</span>
                         <input value="3" type="hidden" name="estado">
                         <input value="FINANCIACION" type="hidden" name="tipo">`,
-        n2:
-          i > p
-            ? ""
-            : `${v + i} <input value="${v + i}" type="hidden" name="ncuota">`,
-        fecha2: i > p ? "" : moment(fcha).add(y + v, "month"),
-        cuota2:
-          i > p
-            ? ""
-            : cuota70 +
-              `<input value="${cuota70.replace(
-                /\./g,
-                ""
-              )}" type="hidden" name="cuota">`,
+        n2: i > p ? '' : `${v + i} <input value="${v + i}" type="hidden" name="ncuota">`,
+        fecha2: i > p ? '' : moment(fcha).add(y + v, 'month'),
+        cuota2: i > p ? '' : cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
         stado2:
           i > p
-            ? ""
+            ? ''
             : `<span class="badge badge-primary">Pendiente</span>
                                       <input value="3" type="hidden" name="estado">
-                                      <input value="FINANCIACION" type="hidden" name="tipo">`,
+                                      <input value="FINANCIACION" type="hidden" name="tipo">`
       };
 
       if (d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(
-          /\./g,
-          ""
-        )}" type="hidden" name="cuota">`;
-      } else if (
-        d.fecha._d.getMonth() == 11 &&
-        (mesesextra == 12 || mesesextra == 2)
-      ) {
-        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(
-          /\./g,
-          ""
-        )}" type="hidden" name="cuota">`;
+        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+      } else if (d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
+        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
       }
       if (d.fecha2) {
-        if (
-          d.fecha2._d.getMonth() == 5 &&
-          (mesesextra == 6 || mesesextra == 2)
-        ) {
-          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(
-            /\./g,
-            ""
-          )}" type="hidden" name="cuota">`;
-        } else if (
-          d.fecha2._d.getMonth() == 11 &&
-          (mesesextra == 12 || mesesextra == 2)
-        ) {
-          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(
-            /\./g,
-            ""
-          )}" type="hidden" name="cuota">`;
+        if (d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
+          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+        } else if (d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
+          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
         }
       }
       dataSet.data.push(d);
@@ -4721,19 +4367,19 @@ router.post("/tabla/:id", noExterno, async (req, res) => {
     res.send(dataSet);
   }
 });
-router.get("/ordendeseparacion/:id/:tp", isLoggedIn, async (req, res) => {
+router.get('/ordendeseparacion/:id/:tp', isLoggedIn, async (req, res) => {
   //console.log(req.params)
   const { id, tp } = req.params;
 
   ////////////////////* CORREGIR PROYECION *////////////////////////
-  if (tp !== "ANULADA") {
+  if (tp !== 'ANULADA') {
     await ProyeccionPagos(id);
     const e = await Estados(id);
     var estado = e.pendients ? 8 : e.std;
     await pool.query(
       `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
     SET ? WHERE p.id = ?`,
-      [{ "l.estado": estado }, id]
+      [{ 'l.estado': estado }, id]
     );
   }
   ////////////////////* END *//////////////////////////////////////
@@ -4752,9 +4398,9 @@ router.get("/ordendeseparacion/:id/:tp", isLoggedIn, async (req, res) => {
     k = r[0].monto || 0;
   var total = l + k;
   //console.log(orden)
-  res.render("links/ordendeseparacion", { orden, id, total });
+  res.render('links/ordendeseparacion', { orden, id, total });
 });
-router.get("/ordn/:id", noExterno, async (req, res) => {
+router.get('/ordn/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto,
     p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
@@ -4768,38 +4414,33 @@ router.get("/ordn/:id", noExterno, async (req, res) => {
 
   const orden = await pool.query(sql, id);
   var abono = 0;
-  orden.map((x) => {
-    if (x.concepto === "ABONO" && x.stado == 4) {
+  orden.map(x => {
+    if (x.concepto === 'ABONO' && x.stado == 4) {
       abono = 1;
     }
   });
   if (abono === 1) {
-    req.flash(
-      "error",
-      "Esta separacion no es posible editarla ya que tiene un ABONO aprobado"
-    );
-    res.redirect("/links/reportes");
+    req.flash('error', 'Esta separacion no es posible editarla ya que tiene un ABONO aprobado');
+    res.redirect('/links/reportes');
   } else {
     //console.log(orden)
-    res.render("links/ordn", { orden, id });
+    res.render('links/ordn', { orden, id });
   }
 });
-router.get("/editordn/:id", noExterno, async (req, res) => {
+router.get('/editordn/:id', noExterno, async (req, res) => {
   const { id } = req.params;
-  const iD = id.indexOf("*") > 0 ? id.split("*")[0] : id;
+  const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
   const comi = await pool.query(
     `SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND descp != 'SEPARACION' AND orden = ? AND stado IN(3, 4)`,
     id
   );
   //console.log(iD, id.indexOf('*') < 0, id.indexOf('*'));
-  if (comi.length > 0 && id.indexOf("*") < 0) {
+  if (comi.length > 0 && id.indexOf('*') < 0) {
     req.flash(
-      "error",
-      "Esta Orden no es posible editarla ya que tiene " +
-        comi.length +
-        " comision(es) pendiente(s) o paga(s)"
+      'error',
+      'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) pendiente(s) o paga(s)'
     );
-    res.redirect("/links/reportes");
+    res.redirect('/links/reportes');
   } else {
     sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
             p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
@@ -4823,10 +4464,10 @@ router.get("/editordn/:id", noExterno, async (req, res) => {
 
     const orden = await pool.query(sql, iD);
     const cuotas = await pool.query(sql2, iD); //console.log(cuotas)
-    res.render("links/editordn", { iD, orden, cuotas });
+    res.render('links/editordn', { iD, orden, cuotas });
   }
 });
-router.post("/ordn/:id", noExterno, async (req, res) => {
+router.post('/ordn/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`;
   const orden = await pool.query(sql, id);
@@ -4834,7 +4475,7 @@ router.post("/ordn/:id", noExterno, async (req, res) => {
   body = { data: orden };
   res.send(body);
 });
-router.post("/ordne/", noExterno, async (req, res) => {
+router.post('/ordne/', noExterno, async (req, res) => {
   const {
     cuot,
     idbono,
@@ -4862,82 +4503,76 @@ router.post("/ordne/", noExterno, async (req, res) => {
     directa,
     otro,
     valmtr2,
-    tipoDto,
+    tipoDto
   } = req.body;
 
-  console.log(req.body, cuota[0].replace(/\./g, ""), cuot);
-  var vr = parseFloat(vmtr2.replace(/\./g, ""));
-  var ini = parseFloat(inicial.replace(/\./g, ""));
-  var tot = parseFloat(total.replace(/\./g, ""));
-  var ahorr = ahorro ? parseFloat(ahorro.replace(/\./g, "")) : 0;
+  console.log(req.body, cuota[0].replace(/\./g, ''), cuot);
+  var vr = parseFloat(vmtr2.replace(/\./g, ''));
+  var ini = parseFloat(inicial.replace(/\./g, ''));
+  var tot = parseFloat(total.replace(/\./g, ''));
+  var ahorr = ahorro ? parseFloat(ahorro.replace(/\./g, '')) : 0;
 
   // ESTABLECIENDO NUEVOS PARAMETROS
   var orden = {
-    "p.lote": lt,
-    "p.vrmt2": vr,
-    "p.cliente": Array.isArray(clientes) ? clientes[0] : clientes,
-    "p.asesor": asesor,
-    "p.numerocuotaspryecto":
-      parseFloat(inicialcuotas) + parseFloat(financiacion),
-    "p.cupon": idbono ? idbono : 1,
-    "p.inicialdiferida": inicialcuotas,
-    "p.ahorro": ahorr,
-    "p.separar": Array.isArray(n)
-      ? cuota[0].replace(/\./g, "")
-      : cuota.replace(/\./g, ""),
-    "p.iniciar": xcntag,
-    "p.cuot": Math.round(cuot),
-    "p.dto": tipoDto,
+    'p.lote': lt,
+    'p.vrmt2': vr,
+    'p.cliente': Array.isArray(clientes) ? clientes[0] : clientes,
+    'p.asesor': asesor,
+    'p.numerocuotaspryecto': parseFloat(inicialcuotas) + parseFloat(financiacion),
+    'p.cupon': idbono ? idbono : 1,
+    'p.inicialdiferida': inicialcuotas,
+    'p.ahorro': ahorr,
+    'p.separar': Array.isArray(n) ? cuota[0].replace(/\./g, '') : cuota.replace(/\./g, ''),
+    'p.iniciar': xcntag,
+    'p.cuot': Math.round(cuot),
+    'p.dto': tipoDto
   };
   if (otro) {
-    orden["l.uno"] = null;
-    orden["l.dos"] = null;
-    orden["l.tres"] = null;
-    orden["l.directa"] = null;
-    orden["l.estado"] = 9;
-    orden["l.mtr"] = valmtr2;
-    orden["l.valor"] = Math.round(valmtr2 * mtr2);
-    orden["l.inicial"] = Math.round((valmtr2 * mtr2 * porcentage) / 100);
+    orden['l.uno'] = null;
+    orden['l.dos'] = null;
+    orden['l.tres'] = null;
+    orden['l.directa'] = null;
+    orden['l.estado'] = 9;
+    orden['l.mtr'] = valmtr2;
+    orden['l.valor'] = Math.round(valmtr2 * mtr2);
+    orden['l.inicial'] = Math.round((valmtr2 * mtr2 * porcentage) / 100);
   } else {
     const r = await Estados(preventa);
     var estado = r.pendients ? 8 : r.std;
-    orden["l.mtr"] = vr;
-    orden["l.valor"] = tot;
-    orden["l.inicial"] = ini;
-    orden["l.estado"] = estado;
+    orden['l.mtr'] = vr;
+    orden['l.valor'] = tot;
+    orden['l.inicial'] = ini;
+    orden['l.estado'] = estado;
   }
 
   if (promesa) {
-    orden["p.promesa"] = promesa;
-    orden["p.autoriza"] = req.user.fullname;
-    orden["p.status"] = promesa;
+    orden['p.promesa'] = promesa;
+    orden['p.autoriza'] = req.user.fullname;
+    orden['p.status'] = promesa;
   }
 
   if (Array.isArray(clientes)) {
     switch (clientes.length) {
       case 2:
-        orden["p.cliente2"] = clientes[1];
+        orden['p.cliente2'] = clientes[1];
         break;
       case 3:
-        orden["p.cliente2"] = clientes[1];
-        orden["p.cliente3"] = clientes[2];
+        orden['p.cliente2'] = clientes[1];
+        orden['p.cliente3'] = clientes[2];
         break;
       case 4:
-        orden["p.cliente2"] = clientes[1];
-        orden["p.cliente3"] = clientes[2];
-        orden["p.cliente4"] = clientes[3];
+        orden['p.cliente2'] = clientes[1];
+        orden['p.cliente3'] = clientes[2];
+        orden['p.cliente4'] = clientes[3];
         break;
     }
   }
   // ACTUALIZANDO EL PRODUCTO Y LA ORDEN DE SEPARACION
-  await pool.query(
-    `UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`,
-    [orden, preventa]
-  );
-  await pool.query(
-    `UPDATE solicitudes SET lt = ${lt} WHERE orden = ?`,
+  await pool.query(`UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`, [
+    orden,
     preventa
-  );
+  ]);
+  await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE orden = ?`, preventa);
 
   // BUSCANDO LAS COMICIONES ANTES GENERADAS
   const comisiones = await pool.query(
@@ -4947,22 +4582,22 @@ router.post("/ordne/", noExterno, async (req, res) => {
   );
 
   // ELIMINACION DE EL PLAN DE FINACIACION
-  await pool.query("DELETE FROM cuotas WHERE separacion = ?", preventa);
+  await pool.query('DELETE FROM cuotas WHERE separacion = ?', preventa);
 
   // INSERTANDO EL NUEVO PLAN DE FINANCIACION
-  var cuotas =
-    "INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ";
+  var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
   if (Array.isArray(n)) {
     n.map((c, i) => {
-      cuotas += `(${preventa}, '${tipo[i]}', ${c}, '${fecha[i]}', ${cuota[
-        i
-      ].replace(/\./g, "")}, 3, ${cuota[i].replace(/\./g, "")}),`;
+      cuotas += `(${preventa}, '${tipo[i]}', ${c}, '${fecha[i]}', ${cuota[i].replace(/\./g, '')}, 3, ${cuota[i].replace(
+        /\./g,
+        ''
+      )}),`;
     });
   } else {
-    cuotas += `(${preventa}, '${tipo}', ${n}, '${fecha}', ${cuota.replace(
+    cuotas += `(${preventa}, '${tipo}', ${n}, '${fecha}', ${cuota.replace(/\./g, '')}, 3, ${cuota.replace(
       /\./g,
-      ""
-    )}, 3, ${cuota.replace(/\./g, "")}),`;
+      ''
+    )}),`;
   }
   await pool.query(cuotas.slice(0, -1));
 
@@ -4970,19 +4605,11 @@ router.post("/ordne/", noExterno, async (req, res) => {
   if (otro) {
     const r = await Estados(preventa);
     var estado = r.pendients ? 8 : r.std;
-    var ip = uno ? "uno = " + uno + ", " : "";
-    ip += dos ? "dos = " + dos + ", " : "";
-    ip += tres ? "tres = " + tres + ", " : "";
-    ip += directa ? "directa = " + directa + ", " : "";
-    ip +=
-      "estado = " +
-      estado +
-      ", mtr = " +
-      vr +
-      ", valor = " +
-      tot +
-      ", inicial = " +
-      ini;
+    var ip = uno ? 'uno = ' + uno + ', ' : '';
+    ip += dos ? 'dos = ' + dos + ', ' : '';
+    ip += tres ? 'tres = ' + tres + ', ' : '';
+    ip += directa ? 'directa = ' + directa + ', ' : '';
+    ip += 'estado = ' + estado + ', mtr = ' + vr + ', valor = ' + tot + ', inicial = ' + ini;
     await pool.query(`UPDATE productosd SET ${ip} WHERE id = ?`, lt);
   }
 
@@ -4990,10 +4617,10 @@ router.post("/ordne/", noExterno, async (req, res) => {
   var ttt = tot - ahorr;
   if (comisiones.length > 0) {
     comisiones
-      .filter((x) => {
+      .filter(x => {
         return x.total !== ttt;
       })
-      .map((x) => {
+      .map(x => {
         var monto = ttt * x.porciento;
         var retefuente = monto * 0.1;
         var reteica = (monto * 8) / 1000;
@@ -5004,7 +4631,7 @@ router.post("/ordne/", noExterno, async (req, res) => {
   }
   res.send(true);
 });
-router.post("/separacion/:id", noExterno, async (req, res) => {
+router.post('/separacion/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const fila = await pool.query(
     `SELECT p.extraordinariameses, p.cuotaextraordinaria, p.extran, 
@@ -5014,26 +4641,19 @@ router.post("/separacion/:id", noExterno, async (req, res) => {
   );
   res.send(fila[0]);
 });
-router.post("/prodlotes/:id", noExterno, async (req, res) => {
+router.post('/prodlotes/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const productos = await pool.query(
     `SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
     WHERE l.estado IN('9', '15') AND v.tipobsevacion = 'ANULADA' OR v.id = ? OR v.id IS NULL ORDER BY p.proyect DESC, l.mz ASC, l.n ASC`,
     id
   );
-  const asesores = await pool.query(
-    `SELECT * FROM users ORDER BY fullname ASC`
-  );
-  const clientes = await pool.query(
-    `SELECT * FROM clientes ORDER BY nombre ASC`
-  );
-  const orden = await pool.query(
-    `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`,
-    id
-  );
+  const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
+  const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+  const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`, id);
   res.send({ productos, asesores, clientes, orden });
 });
-router.post("/editarorden", noExterno, async (req, res) => {
+router.post('/editarorden', noExterno, async (req, res) => {
   //console.log(req.body);
   const {
     orden,
@@ -5048,33 +4668,33 @@ router.post("/editarorden", noExterno, async (req, res) => {
     mss,
     porcentage,
     inicial,
-    valor,
+    valor
   } = req.body;
   const actualizar = {
-    "p.extran": mxr,
-    "p.extraordinariameses": mss,
-    "p.vrmt2": vrm2,
-    "p.iniciar": porcentage,
-    "p.ahorro": ahorro,
-    "p.cuot": cuotaFinanciacion,
-    "l.inicial": inicial,
-    "l.valor": valor,
-    "c.cuota": cuotaFinanciacion, //'p.obsevacion',
+    'p.extran': mxr,
+    'p.extraordinariameses': mss,
+    'p.vrmt2': vrm2,
+    'p.iniciar': porcentage,
+    'p.ahorro': ahorro,
+    'p.cuot': cuotaFinanciacion,
+    'l.inicial': inicial,
+    'l.valor': valor,
+    'c.cuota': cuotaFinanciacion //'p.obsevacion',
   };
   if (separar > 0) {
-    actualizar["p.separar"] = separacion;
-    await pool.query(
-      `UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'SEPARACION'`,
-      [{ cuota: separacion }, orden]
-    );
+    actualizar['p.separar'] = separacion;
+    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'SEPARACION'`, [
+      { cuota: separacion },
+      orden
+    ]);
   }
   if (cuotaInicial > 0) {
-    await pool.query(
-      `UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'INICIAL'`,
-      [{ cuota: cuotaInicial }, orden]
-    );
+    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'INICIAL'`, [
+      { cuota: cuotaInicial },
+      orden
+    ]);
   }
-  idpin ? (actualizar["p.cupon"] = idpin) : "";
+  idpin ? (actualizar['p.cupon'] = idpin) : '';
 
   var cf =
     mss == 3
@@ -5106,7 +4726,7 @@ router.post("/editarorden", noExterno, async (req, res) => {
   //console.log(ordn)
   res.send(ordn);
 });
-router.post("/ordendeseparacion/:id", isLoggedIn, async (req, res) => {
+router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   let { p, i } = req.body;
   p = parseFloat(p);
@@ -5120,48 +4740,45 @@ router.post("/ordendeseparacion/:id", isLoggedIn, async (req, res) => {
   var m = (p - i) / 2;
   var v = i / 2;
   w = await orden.map((t, c) => {
-    if (
-      (t.tipo === "INICIAL" && i === 0) ||
-      (t.tipo === "FINANCIACION" && p === 0)
-    ) {
+    if ((t.tipo === 'INICIAL' && i === 0) || (t.tipo === 'FINANCIACION' && p === 0)) {
       s = {
-        id2: "",
-        ncuota2: "",
-        fecha2: "",
-        proyeccion2: "",
-        cuota2: "",
-        estado2: "",
-        diasmora2: "",
-        mora2: "",
+        id2: '',
+        ncuota2: '',
+        fecha2: '',
+        proyeccion2: '',
+        cuota2: '',
+        estado2: '',
+        diasmora2: '',
+        mora2: ''
       };
       return Object.assign(t, s);
     }
-    if (t.tipo === "SEPARACION") {
+    if (t.tipo === 'SEPARACION') {
       s = {
-        id2: "",
-        ncuota2: "",
-        fecha2: "",
-        proyeccion2: "",
-        cuota2: "",
-        estado2: "",
-        diasmora2: "",
-        mora2: "",
+        id2: '',
+        ncuota2: '',
+        fecha2: '',
+        proyeccion2: '',
+        cuota2: '',
+        estado2: '',
+        diasmora2: '',
+        mora2: ''
       };
       return Object.assign(orden[0], s);
     }
-    if (t.tipo === "INICIAL" && i === 1) {
+    if (t.tipo === 'INICIAL' && i === 1) {
       s = {
-        id2: "",
-        ncuota2: "",
-        fecha2: "",
-        proyeccion2: "",
-        cuota2: "",
-        estado2: "",
-        diasmora2: "",
-        mora2: "",
+        id2: '',
+        ncuota2: '',
+        fecha2: '',
+        proyeccion2: '',
+        cuota2: '',
+        estado2: '',
+        diasmora2: '',
+        mora2: ''
       };
       return Object.assign(t, s);
-    } else if (t.tipo === "INICIAL" && t.ncuota > e) {
+    } else if (t.tipo === 'INICIAL' && t.ncuota > e) {
       s = {
         id2: t.id,
         ncuota2: t.ncuota,
@@ -5170,38 +4787,38 @@ router.post("/ordendeseparacion/:id", isLoggedIn, async (req, res) => {
         cuota2: t.cuota,
         estado2: t.estado,
         diasmora2: t.diasmora,
-        mora2: t.mora,
+        mora2: t.mora
       };
       return Object.assign(y[t.ncuota - e], s);
-    } else if (t.tipo === "INICIAL") {
+    } else if (t.tipo === 'INICIAL') {
       y.push(t);
       if (v !== e && t.ncuota === e) {
         h = {
-          id2: "",
-          ncuota2: "",
-          fecha2: "",
-          proyeccion2: "",
-          cuota2: "",
-          estado2: "",
-          diasmora2: "",
-          mora2: "",
+          id2: '',
+          ncuota2: '',
+          fecha2: '',
+          proyeccion2: '',
+          cuota2: '',
+          estado2: '',
+          diasmora2: '',
+          mora2: ''
         };
         return Object.assign(y[e], h);
       }
     }
-    if (t.tipo === "FINANCIACION" && p < 3) {
+    if (t.tipo === 'FINANCIACION' && p < 3) {
       s = {
-        id2: "",
-        ncuota2: "",
-        fecha2: "",
-        proyeccion2: "",
-        cuota2: "",
-        estado2: "",
-        diasmora2: "",
-        mora2: "",
+        id2: '',
+        ncuota2: '',
+        fecha2: '',
+        proyeccion2: '',
+        cuota2: '',
+        estado2: '',
+        diasmora2: '',
+        mora2: ''
       };
       return Object.assign(t, s);
-    } else if (t.tipo === "FINANCIACION" && t.ncuota > u) {
+    } else if (t.tipo === 'FINANCIACION' && t.ncuota > u) {
       s = {
         id2: t.id,
         ncuota2: t.ncuota,
@@ -5210,21 +4827,21 @@ router.post("/ordendeseparacion/:id", isLoggedIn, async (req, res) => {
         cuota2: t.cuota,
         estado2: t.estado,
         diasmora2: t.diasmora,
-        mora2: t.mora,
+        mora2: t.mora
       };
       return Object.assign(o[t.ncuota - u], s);
-    } else if (t.tipo === "FINANCIACION") {
+    } else if (t.tipo === 'FINANCIACION') {
       o.push(t);
       if (m !== u && t.ncuota === u) {
         h = {
-          id2: "",
-          ncuota2: "",
-          fecha2: "",
-          proyeccion2: "",
-          cuota2: "",
-          estado2: "",
-          diasmora2: "",
-          mora2: "",
+          id2: '',
+          ncuota2: '',
+          fecha2: '',
+          proyeccion2: '',
+          cuota2: '',
+          estado2: '',
+          diasmora2: '',
+          mora2: ''
         };
         return Object.assign(o[u], h);
       }
@@ -5235,15 +4852,14 @@ router.post("/ordendeseparacion/:id", isLoggedIn, async (req, res) => {
   res.send(respuesta);
 });
 ////////////////////* COMISIONES *//////////////////////////////////
-router.get("/comisiones", isLoggedIn, async (req, res) => {
-  const comis =
-    await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
+router.get('/comisiones', isLoggedIn, async (req, res) => {
+  const comis = await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
     l.valor - p.ahorro Total, (l.valor - p.ahorro) * p.iniciar / 100 Inicial, d.maxcomis, d.sistema,
     ( SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
     WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND l.comiempresa = 0 AND l.comisistema = 0 
     GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
-  const hoy = moment().format("YYYY-MM-DD HH:mm"); //console.log(comis)
+  const hoy = moment().format('YYYY-MM-DD HH:mm'); //console.log(comis)
   var f = [];
   var sql = `UPDATE productosd SET comiempresa = CASE id`;
   var sql2 = `, comisistema = CASE id`;
@@ -5258,17 +4874,17 @@ router.get("/comisiones", isLoggedIn, async (req, res) => {
       f.push([
         hoy,
         monto,
-        "GESTION VENTAS",
+        'GESTION VENTAS',
         9,
-        "VENTA INDIRECTA",
-        "00000000000000012345",
+        'VENTA INDIRECTA',
+        '00000000000000012345',
         a.maxcomis,
         a.Total,
         a.lote,
         iva,
         0,
         monto + iva,
-        a.ordn,
+        a.ordn
       ]);
 
       if (a.sistema) {
@@ -5281,29 +4897,29 @@ router.get("/comisiones", isLoggedIn, async (req, res) => {
         f.push([
           hoy,
           montoST,
-          "GESTION ADMINISTRATIVA",
+          'GESTION ADMINISTRATIVA',
           8,
-          "ADMIN PROYECTOS",
-          "00000000000000012345",
+          'ADMIN PROYECTOS',
+          '00000000000000012345',
           a.sistema,
           a.Total,
           a.lote,
           ivaST,
           0,
           montoST + ivaST,
-          a.ordn,
+          a.ordn
         ]);
       }
       //await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
     });
-    sql += " ELSE comiempresa END";
-    sql2 += " ELSE comisistema END";
+    sql += ' ELSE comiempresa END';
+    sql2 += ' ELSE comisistema END';
     await pool.query(
       `INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
             porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`,
       [f]
     );
-    await pool.query(`${sql}${sq ? sql2 : ""}`);
+    await pool.query(`${sql}${sq ? sql2 : ''}`);
   }
 
   const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
@@ -5315,27 +4931,23 @@ router.get("/comisiones", isLoggedIn, async (req, res) => {
 
   if (comi.length) {
     let ids = null;
-    await comi.map((e) => (ids += ids ? ", " + e.ordn : e.ordn));
+    await comi.map(e => (ids += ids ? ', ' + e.ordn : e.ordn));
     await pool.query(`UPDATE solicitudes s SET s.fech = NOW(), 
         s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
   }
 
-  res.render("links/comisiones");
+  res.render('links/comisiones');
 });
-router.post("/comisiones", isLoggedIn, async (req, res) => {
+router.post('/comisiones', isLoggedIn, async (req, res) => {
   let prd = false;
   if (req.user.externo) {
-    const prcd = await pool.query(
-      "SELECT producto FROM externos WHERE usuario = ?",
-      req.user.pin
-    );
-    prd = prcd.map((e) => e.producto);
+    const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+    prd = prcd.map(e => e.producto);
   }
-  let d = prd ? `AND p.id IN (${prd})` : "";
-  console.log(prd, d, "aqui");
+  let d = prd ? `AND p.id IN (${prd})` : '';
+  console.log(prd, d, 'aqui');
 
-  const solicitudes =
-    await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
+  const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
     s.descp, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
     pd.n, s.retefuente, s.reteica, s.pagar, us.id, us.fullname, s.lt, cl.nombre, p.proyect 
     FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -5347,10 +4959,10 @@ router.post("/comisiones", isLoggedIn, async (req, res) => {
   respuesta = { data: solicitudes };
   res.send(respuesta);
 });
-router.post("/comisiones/:id", isLoggedIn, async (req, res) => {
+router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
 
-  if (id !== "nada" && !req.user.externo) {
+  if (id !== 'nada' && !req.user.externo) {
     const solicitudes = await pool.query(
       `SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
@@ -5371,9 +4983,9 @@ router.post("/comisiones/:id", isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
-router.post("/comision/:item", isLoggedIn, async (req, res) => {
+router.post('/comision/:item', isLoggedIn, async (req, res) => {
   const { item } = req.params;
-  if (item === "pdf") {
+  if (item === 'pdf') {
     const { ids } = req.body;
     //console.log(ids);
     const r = await FacturaDeCobro(ids);
@@ -5383,11 +4995,11 @@ router.post("/comision/:item", isLoggedIn, async (req, res) => {
   }
 });
 //////////////////////* REPORTES *//////////////////////////////////
-router.get("/reportes", isLoggedIn, (req, res) => {
-  res.render("links/reportes");
+router.get('/reportes', isLoggedIn, (req, res) => {
+  res.render('links/reportes');
 });
 var CODE = null;
-router.post("/anular", noExterno, async (req, res) => {
+router.post('/anular', noExterno, async (req, res) => {
   const {
     id,
     lote,
@@ -5404,14 +5016,14 @@ router.post("/anular", noExterno, async (req, res) => {
     qhacer,
     causa,
     motivo,
-    asesor,
+    asesor
   } = req.body;
   var bonoanular = null;
   console.log(req.body);
   if (estado == 1) {
     return res.send({
       std: false,
-      msg: "No es posible ANULAR una orden que no posea recibo, se aconseja eliminar",
+      msg: 'No es posible ANULAR una orden que no posea recibo, se aconseja eliminar'
     });
   }
   const u = await pool.query(
@@ -5420,11 +5032,10 @@ router.post("/anular", noExterno, async (req, res) => {
   if (u.length > 0) {
     return res.send({
       std: false,
-      msg: "Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion",
+      msg: 'Esta orden aun tiene un pago indefinido, defina el estado del pago primero para continuar con la aunulacion'
     });
   } else {
-    const r =
-      await pool.query(`SELECT SUM(s.monto) AS monto1, p.separar, l.valor, p.ahorro,
+    const r = await pool.query(`SELECT SUM(s.monto) AS monto1, p.separar, l.valor, p.ahorro,
         SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, c.monto, 0)) AS monto, p.status, COUNT(s.monto) pagos
         FROM solicitudes s LEFT JOIN cupones c ON s.bono = c.id INNER JOIN preventa p ON s.orden = p.id 
         INNER JOIN productosd l ON s.lt = l.id WHERE s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL 
@@ -5435,7 +5046,7 @@ router.post("/anular", noExterno, async (req, res) => {
     const acumulado = l + k;
     console.log(acumulado);
 
-    if (qhacer === "BONO" && acumulado > 0) {
+    if (qhacer === 'BONO' && acumulado > 0) {
       var pin = ID(5);
       const bono = {
         pin,
@@ -5446,24 +5057,24 @@ router.post("/anular", noExterno, async (req, res) => {
         tip: qhacer,
         monto: acumulado,
         motivo,
-        concept: causa,
+        concept: causa
       };
-      const a = await pool.query("INSERT INTO cupones SET ? ", bono);
+      const a = await pool.query('INSERT INTO cupones SET ? ', bono);
       bonoanular = a.insertId;
-      var nombr = nombre.split(" ")[0],
-        fullnam = fullname.split(" ")[0],
+      var nombr = nombre.split(' ')[0],
+        fullnam = fullname.split(' ')[0],
         body = `_*${nombr}* se te genero un *BONO de Dto. ${pin}* por un valor de *$${Moneda(
           acumulado
         )}* para que lo uses en uno de nuestros productos._\n_Comunicate ahora con tu asesor a cargo *${fullname}* su movil es *${cel}* y preguntale por el producto de tu interes._\n\n_*GRUPO ELITE FICA RAÍZ*_`,
         body2 = `_*${fullnam}* se genero un *BONO* para el cliente *${nombre}* por consepto de *${causa} - ${motivo}*_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
       EnviarWTSAP(movil, body);
       EnviarWTSAP(cel, body2);
-    } else if (qhacer === "DEVOLUCION" && acumulado > 0) {
+    } else if (qhacer === 'DEVOLUCION' && acumulado > 0) {
       const porciento = t.status == 2 || t == 3 ? 0.2 : 1;
       const total = porciento < 1 ? (t.valor - t.ahorro) * porciento : 1000000; //t.separar deberia traer de productos el valor estipulado  para la separacion hablar con habib;
       const monto = acumulado;
       const facturasvenc = t.pagos;
-      const fech = moment(new Date()).format("YYYY-MM-DD");
+      const fech = moment(new Date()).format('YYYY-MM-DD');
       bonoanular = null;
       const devolucion = {
         fech,
@@ -5478,10 +5089,10 @@ router.post("/anular", noExterno, async (req, res) => {
         lt: lote,
         retefuente: 0,
         facturasvenc,
-        recibo: "NO APLICA",
+        recibo: 'NO APLICA',
         reteica: 0,
         pagar: Math.round(monto - total),
-        formap: porciento < 1 ? "JARRA-TOTAL" : "JARRA-SEPARACION",
+        formap: porciento < 1 ? 'JARRA-TOTAL' : 'JARRA-SEPARACION'
       };
       await pool.query(`INSERT INTO solicitudes SET ?`, devolucion);
     }
@@ -5496,31 +5107,22 @@ router.post("/anular", noExterno, async (req, res) => {
         l.inicial = CASE WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, cp.estado = 6, p.tipobsevacion = 'ANULADA', 
         l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-        ${
-          bonoanular ? "s.bonoanular = " + bonoanular + "," : ""
-        } p.descrip = '${causa} - ${motivo}', 
+        ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
         s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; //console.log(sql)
     await pool.query(sql, lote);
-    res.send({ std: true, msg: "Orden anulada correctamente" });
+    res.send({ std: true, msg: 'Orden anulada correctamente' });
   }
   //respuesta = { "data": ventas };
 });
-router.post("/reportes/:id", isLoggedIn, async (req, res) => {
+router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  if (id == "table2") {
+  if (id == 'table2') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query(
-        "SELECT producto FROM externos WHERE usuario = ?",
-        req.user.pin
-      );
-      prd = prcd.map((e) => e.producto);
+      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      prd = prcd.map(e => e.producto);
     }
-    let d = prd
-      ? `WHERE d.id IN (${prd})`
-      : req.user.asistente
-      ? ""
-      : "WHERE p.asesor = ?";
+    let d = prd ? `WHERE d.id IN (${prd})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
     //let d = prd ? `AND d.id IN (${prd})` : '';
 
     sql = `SELECT p.id, l.id lote, d.proyect proyecto, l.mz, l.n, c.imags, p.promesa, p.status, p.asesor, c.email,
@@ -5556,20 +5158,13 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         sqlr += ' END WHERE id IN(' + idss + ')';
         //console.log(sqlr)
         await pool.query(sqlr);*/
-  } else if (id == "estadosc") {
+  } else if (id == 'estadosc') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query(
-        "SELECT producto FROM externos WHERE usuario = ?",
-        req.user.pin
-      );
-      prd = prcd.map((e) => e.producto);
+      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      prd = prcd.map(e => e.producto);
     }
-    let d = prd
-      ? `AND pt.id IN (${prd})`
-      : req.user.asistente
-      ? ""
-      : "AND p.asesor = " + req.user.id;
+    let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
 
     sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect,
         SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
@@ -5584,20 +5179,13 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     const solicitudes = await pool.query(sql);
     respuesta = { data: solicitudes };
     res.send(respuesta);
-  } else if (id == "estadosc2") {
+  } else if (id == 'estadosc2') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query(
-        "SELECT producto FROM externos WHERE usuario = ?",
-        req.user.pin
-      );
-      prd = prcd.map((e) => e.producto);
+      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      prd = prcd.map(e => e.producto);
     }
-    let d = prd
-      ? `AND pt.id IN (${prd})`
-      : req.user.asistente
-      ? ""
-      : "AND p.asesor = " + req.user.id;
+    let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
 
     sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
         p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
@@ -5641,13 +5229,13 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         }*/
     res.send(respuesta);
     //res.send(true);
-  } else if (id == "eliminar" && !req.user.externo) {
+  } else if (id == 'eliminar' && !req.user.externo) {
     const { k, code } = req.body; //console.log(req.body)
     const R = await Estados(k);
-    await pool.query(
-      `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
-      [{ "l.estado": R.std }, k]
-    );
+    await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`, [
+      { 'l.estado': R.std },
+      k
+    ]);
     const i = await pool.query(
       `SELECT pd.estado, p.lote, p.id, pd.n, pd.mz, pl.proyect 
         FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
@@ -5658,14 +5246,9 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
 
     if (i[0].estado !== 1) {
       var D = () => {
-        var imagenes =
-          U.img === null
-            ? ""
-            : U.img.indexOf(",") > 0
-            ? U.img.split(",")
-            : U.img;
+        var imagenes = U.img === null ? '' : U.img.indexOf(',') > 0 ? U.img.split(',') : U.img;
         if (Array.isArray(imagenes)) {
-          imagenes.map((e) => {
+          imagenes.map(e => {
             Eli(e);
           });
         } else {
@@ -5681,25 +5264,21 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         CODE = ID(7);
         var mensaje = `_*${
           req.user.fullname
-        }* intenta eliminar la orden de separacion *${k}* la cual corresponde al LT: *${
-          u[0].n
-        }* ${u[0].mz === "no" ? "DE" : "MZ: *" + u[0].mz + "* DE"} *${
-          u[0].proyect
-        }*_\n\n`;
-        var concept = "";
-        u.map((x) => {
+        }* intenta eliminar la orden de separacion *${k}* la cual corresponde al LT: *${u[0].n}* ${
+          u[0].mz === 'no' ? 'DE' : 'MZ: *' + u[0].mz + '* DE'
+        } *${u[0].proyect}*_\n\n`;
+        var concept = '';
+        u.map(x => {
           if (x.concepto) {
-            concept += `_MONTO: *$${Moneda(x.monto)}* CONCEPTO: *${
-              x.concepto
-            }*,_\n`;
+            concept += `_MONTO: *$${Moneda(x.monto)}* CONCEPTO: *${x.concepto}*,_\n`;
           }
         });
         mensaje += concept
           ? `_Estas son las solicitudes que se veran afectadas si se elimina esta orden_\n${concept}\n`
-          : "";
+          : '';
         mensaje += `_Codigo de autorizacion para la eliminacion total de la orden y todo aquello que incluya *${CODE}*_`;
-        await EnviarWTSAP("57 3002851046", mensaje);
-        res.send({ r: false, m: "Codigo enviado" });
+        await EnviarWTSAP('57 3002851046', mensaje);
+        res.send({ r: false, m: 'Codigo enviado' });
       } else if (CODE === code.toUpperCase()) {
         CODE = null;
         await pool.query(
@@ -5711,15 +5290,9 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
           u[0].lote
         );
 
-        await pool.query(
-          `DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`,
-          k
-        );
-        await EnviarWTSAP(
-          "57 3002851046",
-          `Orden de separacion *${k}* eliminada correctamente`
-        );
-        res.send({ r: true, m: "El reporte fue eliminado de manera exitosa" });
+        await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
+        await EnviarWTSAP('57 3002851046', `Orden de separacion *${k}* eliminada correctamente`);
+        res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
       } else {
         res.send({ r: false, m: `Codigo de autorizacion invalido` });
       }
@@ -5733,36 +5306,33 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         i[0].lote
       );
 
-      await pool.query(
-        `DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`,
-        k
-      );
+      await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
       await EnviarWTSAP(
-        "57 3002851046",
-        `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${
-          i[0].mz === "no" ? "DE" : "MZ: *" + i[0].mz + "* DE"
-        } ${i[0].proyect}_`
+        '57 3002851046',
+        `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${
+          i[0].proyect
+        }_`
       );
-      res.send({ r: true, m: "El reporte fue eliminado de manera exitosa" });
+      res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
     }
-  } else if (id === "proyectos") {
+  } else if (id === 'proyectos') {
     /////////////* Selecciona el nombre de cada proyecto *///////////////////
     sql = `SELECT DISTINCT pt.proyect FROM preventa p 
         INNER JOIN productosd pd ON p.lote = pd.id 
         INNER JOIN productos pt ON pd.producto = pt.id`;
     const proyectos = await pool.query(sql);
     res.send(proyectos);
-  } else if (id === "verificar") {
+  } else if (id === 'verificar') {
     const { k, h } = req.body;
     const r = await Estados(k);
     var estado = r.pendients ? 8 : r.std;
     await pool.query(
       `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`,
-      [{ "l.estado": estado }, k]
+      [{ 'l.estado': estado }, k]
     );
     res.send(true);
-  } else if (id === "restkupon" && !req.user.externo) {
+  } else if (id === 'restkupon' && !req.user.externo) {
     const { k } = req.body;
     await RestablecerCupon(k);
     const r = await Estados(k);
@@ -5770,10 +5340,10 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     await pool.query(
       `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`,
-      [{ "l.estado": estado }, k]
+      [{ 'l.estado': estado }, k]
     );
     res.send(true);
-  } else if (id === "proyeccion" && !req.user.externo) {
+  } else if (id === 'proyeccion' && !req.user.externo) {
     const { k, h } = req.body;
     await ProyeccionPagos(k);
     const r = await Estados(k);
@@ -5781,10 +5351,10 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     await pool.query(
       `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`,
-      [{ "l.estado": estado }, k]
+      [{ 'l.estado': estado }, k]
     );
     res.send(true);
-  } else if (id === "estadopromesas") {
+  } else if (id === 'estadopromesas') {
     const { k, h, f } = req.body;
     //h = parseFloat(h);
     sql = `SELECT * FROM preventa p
@@ -5794,23 +5364,18 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     const pers = await pool.query(sql, k);
     const p = pers[0];
     if (!p.directa || h >= 2) {
-      await pool.query(
-        `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
-        [
-          {
-            "p.status": h,
-            "p.promesa": h,
-            "p.autoriza": req.user.fullname,
-            "l.fechar": h == 2 && !p.directa ? f : p.fechar,
-          },
-          k,
-        ]
-      );
+      await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`, [
+        {
+          'p.status': h,
+          'p.promesa': h,
+          'p.autoriza': req.user.fullname,
+          'l.fechar': h == 2 && !p.directa ? f : p.fechar
+        },
+        k
+      ]);
       if (h == 1) {
         var bod = `_*${p.nombre}*. RED ELITE a generado tu *PROMESA DE COMPRA VENTA* la cual te sera enviada al correo *${p.email}* una ves la halla autenticado dirijase a una de nuestras oficinas con el documento_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-        var bo = `_*${
-          p.fullname.split(" ")[0]
-        }* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${
+        var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${
           p.mz
         } LT ${p.n}* la cual le sera enviada al correo *${
           p.email
@@ -5823,16 +5388,16 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         await pool.query(
           `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
                     SET ? WHERE p.id = ?`,
-          [{ "l.estado": estado }, k]
+          [{ 'l.estado': estado }, k]
         );
       }
       res.send(true);
     } else {
       res.send(false);
     }
-  } else if (id === "cartera") {
+  } else if (id === 'cartera') {
     const { k, h } = req.body;
-    var f = k ? `AND p.id = ${k}` : "";
+    var f = k ? `AND p.id = ${k}` : '';
     sql = `SELECT p.id, pd.id lote, pt.proyect proyecto, pd.mz, pd.n, c.imags, p.promesa, p.status,   
             pd.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
             t.estado std, t.tipo, t.ncuota, t.fechs, t.cuota, t.abono, t.mora, t.id idcuota
@@ -5842,9 +5407,8 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     const cuotas = await pool.query(sql);
     respuesta = { data: cuotas };
     res.send(respuesta);
-  } else if (id === "comision" && !req.user.externo) {
-    const solicitudes =
-      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+  } else if (id === 'comision' && !req.user.externo) {
+    const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -5852,16 +5416,13 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
         WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
-        AND pr.tipobsevacion IS NULL ${
-          req.user.auxicontbl ? "" : "AND u.id = " + req.user.id
-        }`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}
+        AND pr.tipobsevacion IS NULL ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}
 
     respuesta = { data: solicitudes };
     res.send(respuesta);
-  } else if (id === "comisionOLD" && !req.user.externo) {
+  } else if (id === 'comisionOLD' && !req.user.externo) {
     if (req.user.admin == 1) {
-      const solicitudes =
-        await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+      const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -5873,23 +5434,20 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
       respuesta = { data: solicitudes };
       res.send(respuesta);
     }
-  } else if (id === "bank" && !req.user.externo) {
+  } else if (id === 'bank' && !req.user.externo) {
     const { banco, cta, idbank, numero } = req.body;
     console.log(req.body);
     await pool.query(`UPDATE clientes SET ? WHERE idc = ?`, [
       { bank: banco, tipocta: cta, numerocuenta: numero },
-      idbank,
+      idbank
     ]);
     res.send({ banco, cta, idbank, numero });
-  } else if (id === "std") {
+  } else if (id === 'std') {
     const { ids, std } = req.body;
     console.log(ids, std);
-    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
-      { stado: std },
-      ids,
-    ]);
+    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
     res.send(true);
-  } else if (id === "registrarcb" && !req.user.externo) {
+  } else if (id === 'registrarcb' && !req.user.externo) {
     const { img, id, nrecibo, montos, feh, formap, observacion, j } = req.body;
     console.log(req.body, j);
     if (j) {
@@ -5897,48 +5455,41 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         date: feh,
         formapg: formap,
         rcb: nrecibo,
-        monto: montos.replace(/\./g, ""),
+        monto: montos.replace(/\./g, ''),
         observacion,
-        baucher: img,
+        baucher: img
       };
       await pool.query(`UPDATE recibos SET ? WHERE id = ?`, [rcb, j]);
     } else {
-      var sql1 =
-        "INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ";
-      var sql2 =
-        "INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ";
-      var sql3 = "";
+      var sql1 = 'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
+      var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
+      var sql3 = '';
       id.map((x, i) => {
-        if (formap[i].indexOf("BONO") === 0) {
-          sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(
-            /\./g,
-            ""
-          )}, '${observacion[i]}', '${formap[i]}'),`;
-          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${
-            nrecibo[i]
-          }', ${montos[i].replace(/\./g, "")}, '${
+        if (formap[i].indexOf('BONO') === 0) {
+          sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${
+            formap[i]
+          }'),`;
+          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${
             observacion[i]
           }', '/img/bonos.png'),`;
         } else {
-          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${
-            nrecibo[i]
-          }', ${montos[i].replace(/\./g, "")}, '${observacion[i]}', '${
-            img[i]
-          }'),`;
+          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${
+            observacion[i]
+          }', '${img[i]}'),`;
         }
       });
 
       //console.log(req.body, sql1 + sql3, sql2)
-      sql3 ? await pool.query(sql1 + sql3.slice(0, -1)) : "";
+      sql3 ? await pool.query(sql1 + sql3.slice(0, -1)) : '';
       await pool.query(sql2.slice(0, -1));
     }
     res.send(true);
-  } else if (id === "fechas") {
+  } else if (id === 'fechas') {
     const { id, fecha } = req.body; //console.log(req.body)
     const date = { fecha };
     await pool.query(`UPDATE preventa SET ? WHERE id = ?`, [date, id]);
     res.send(true);
-  } else if (id === "restorden" && !req.user.externo) {
+  } else if (id === 'restorden' && !req.user.externo) {
     const { k } = req.body;
     const sql = `UPDATE cuotas c  
         INNER JOIN preventa p ON c.separacion = p.id
@@ -5956,28 +5507,24 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
     await pool.query(
       `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
         SET ? WHERE p.id = ?`,
-      [{ "l.estado": estado }, k]
+      [{ 'l.estado': estado }, k]
     );
     res.send(true);
-  } else if (id === "excel") {
+  } else if (id === 'excel') {
     const { k, h, proyecto, nombre, mz, n } = req.body;
-    const ruta = path.join(__dirname, "../public/uploads/CUOTAS.xlsx");
+    const ruta = path.join(__dirname, '../public/uploads/CUOTAS.xlsx');
 
     fs.exists(ruta, function (exists) {
-      console.log(
-        "Archivo " + exists,
-        " ruta " + ruta,
-        " html " + req.headers.origin
-      );
+      console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
       if (exists) {
         fs.unlink(ruta, function (err) {
           if (err) console.log(err);
-          console.log("Archivo eliminado");
-          return "Archivo eliminado";
+          console.log('Archivo eliminado');
+          return 'Archivo eliminado';
         });
       } else {
-        console.log("El archivo no exise");
-        return "El archivo no exise";
+        console.log('El archivo no exise');
+        return 'El archivo no exise';
       }
     });
 
@@ -6008,305 +5555,305 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
         Proyecto: proyecto,
         Mz: mz,
         Lt: n,
-        Cliente: nombre,
-      },
+        Cliente: nombre
+      }
     ]);
     let Ws = await Object.assign(newWS, {
       A4: {
-        t: "s",
-        v: "ID",
+        t: 's',
+        v: 'ID',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       B4: {
-        t: "s",
-        v: "FECHA",
+        t: 's',
+        v: 'FECHA',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       C4: {
-        t: "s",
-        v: "TIPO",
+        t: 's',
+        v: 'TIPO',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       D4: {
-        t: "s",
-        v: "N",
+        t: 's',
+        v: 'N',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       E4: {
-        t: "s",
-        v: "CUOTA",
+        t: 's',
+        v: 'CUOTA',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       F4: {
-        t: "s",
-        v: "FECHAPAGO",
+        t: 's',
+        v: 'FECHAPAGO',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       G4: {
-        t: "s",
-        v: "MONTO",
+        t: 's',
+        v: 'MONTO',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       H4: {
-        t: "s",
-        v: "IDS",
+        t: 's',
+        v: 'IDS',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       I4: {
-        t: "s",
-        v: "CUOT",
+        t: 's',
+        v: 'CUOT',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       J4: {
-        t: "s",
-        v: "ESTADO",
+        t: 's',
+        v: 'ESTADO',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       K4: {
-        t: "s",
-        v: "DIASM",
+        t: 's',
+        v: 'DIASM',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       L4: {
-        t: "s",
-        v: "TEA",
+        t: 's',
+        v: 'TEA',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       M4: {
-        t: "s",
-        v: "MORA",
+        t: 's',
+        v: 'MORA',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       N4: {
-        t: "s",
-        v: "DTO",
+        t: 's',
+        v: 'DTO',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       O4: {
-        t: "s",
-        v: "TLDIASM",
+        t: 's',
+        v: 'TLDIASM',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
       },
       P4: {
-        t: "s",
-        v: "TOTALMORA",
+        t: 's',
+        v: 'TOTALMORA',
         s: {
           // Establecer un estilo separado para una celda
           font: {
-            name: "MV Boli",
+            name: 'MV Boli',
             //sz: 24,
             bold: true,
-            color: { rgb: "FFFFAA00" },
+            color: { rgb: 'FFFFAA00' }
             /* underline: true, // Subrayado
                         italic: true,
                         strike: true, // Tachado
@@ -6314,425 +5861,422 @@ router.post("/reportes/:id", isLoggedIn, async (req, res) => {
                         shadow: false, */
           },
           alignment: {
-            horizontal: "center",
-            vertical: "center",
-            wrapText: false,
+            horizontal: 'center',
+            vertical: 'center',
+            wrapText: false
           },
-          fill: { bgColor: { rgb: "ffff00" } },
-        },
-      },
+          fill: { bgColor: { rgb: 'ffff00' } }
+        }
+      }
     });
-    Ws["A1"].s = {
+    Ws['A1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
-    Ws["B1"].s = {
+    Ws['B1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
-    Ws["C1"].s = {
+    Ws['C1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
-    Ws["D1"].s = {
+    Ws['D1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
-    Ws["E1"].s = {
+    Ws['E1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
-    Ws["F1"].s = {
+    Ws['F1'].s = {
       // Establecer un estilo separado para una celda
       font: {
-        name: "MV Boli",
+        name: 'MV Boli',
         bold: true,
-        color: { rgb: "FFFFAA00" },
+        color: { rgb: 'FFFFAA00' }
       },
-      alignment: { horizontal: "center", vertical: "center", wrapText: false },
-      fill: { bgColor: { rgb: "ffff00" } },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: false },
+      fill: { bgColor: { rgb: 'ffff00' } }
     };
 
     let cont = 5;
-    await content.map((e) => {
-      Ws["A" + cont] = { t: "n", v: e.ID };
-      Ws["B" + cont] = { t: "s", v: e.FECHA };
-      Ws["C" + cont] = { t: "s", v: e.TIPO };
-      Ws["D" + cont] = { t: "n", v: e.N };
-      Ws["E" + cont] = { t: "n", v: e.CUOTA, z: "$#,##0.00" };
-      Ws["F" + cont] = { t: "s", v: e.FECHAPAGO ? e.FECHAPAGO : "" };
-      Ws["G" + cont] = { t: "n", v: e.MONTO ? e.MONTO : 0, z: "$#,##0.00" };
-      Ws["H" + cont] = { t: "n", v: e.IDS ? e.IDS : 0 };
-      Ws["I" + cont] = { t: "n", v: e.CUOT, z: "$#,##0.00" };
-      Ws["J" + cont] = { t: "s", v: e.ESTADO };
-      Ws["K" + cont] = { t: "n", v: e.DIASMORA };
-      Ws["L" + cont] = { t: "n", v: e.TEA ? e.TEA : 0, z: "0.00%" };
-      Ws["M" + cont] = { t: "n", v: e.MORA ? e.MORA : 0, z: "$#,##0.00" };
-      Ws["N" + cont] = { t: "n", v: e.DTO, z: "0.00%" };
-      Ws["O" + cont] = { t: "n", v: e.TOTALDIASM, z: "0%" };
-      Ws["P" + cont] = { t: "n", v: e.TOTALMORA, z: "$#,##0.00" };
+    await content.map(e => {
+      Ws['A' + cont] = { t: 'n', v: e.ID };
+      Ws['B' + cont] = { t: 's', v: e.FECHA };
+      Ws['C' + cont] = { t: 's', v: e.TIPO };
+      Ws['D' + cont] = { t: 'n', v: e.N };
+      Ws['E' + cont] = { t: 'n', v: e.CUOTA, z: '$#,##0.00' };
+      Ws['F' + cont] = { t: 's', v: e.FECHAPAGO ? e.FECHAPAGO : '' };
+      Ws['G' + cont] = { t: 'n', v: e.MONTO ? e.MONTO : 0, z: '$#,##0.00' };
+      Ws['H' + cont] = { t: 'n', v: e.IDS ? e.IDS : 0 };
+      Ws['I' + cont] = { t: 'n', v: e.CUOT, z: '$#,##0.00' };
+      Ws['J' + cont] = { t: 's', v: e.ESTADO };
+      Ws['K' + cont] = { t: 'n', v: e.DIASMORA };
+      Ws['L' + cont] = { t: 'n', v: e.TEA ? e.TEA : 0, z: '0.00%' };
+      Ws['M' + cont] = { t: 'n', v: e.MORA ? e.MORA : 0, z: '$#,##0.00' };
+      Ws['N' + cont] = { t: 'n', v: e.DTO, z: '0.00%' };
+      Ws['O' + cont] = { t: 'n', v: e.TOTALDIASM, z: '0%' };
+      Ws['P' + cont] = { t: 'n', v: e.TOTALMORA, z: '$#,##0.00' };
       cont++;
     });
-    Ws["A" + cont] = {
-      t: "s",
-      v: ".",
+    Ws['A' + cont] = {
+      t: 's',
+      v: '.',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["B" + cont] = {
-      t: "s",
-      v: ".",
+    Ws['B' + cont] = {
+      t: 's',
+      v: '.',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["C" + cont] = {
-      t: "s",
-      v: ".",
+    Ws['C' + cont] = {
+      t: 's',
+      v: '.',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["D" + cont] = {
-      t: "s",
-      v: "TOTAL",
+    Ws['D' + cont] = {
+      t: 's',
+      v: 'TOTAL',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["E" + cont] = {
-      t: "n",
+    Ws['E' + cont] = {
+      t: 'n',
       f: `SUM(E5:E${cont - 1})`,
-      z: "$#,##0.00",
+      z: '$#,##0.00',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["F" + cont] = {
-      t: "s",
-      v: "ABONADO",
+    Ws['F' + cont] = {
+      t: 's',
+      v: 'ABONADO',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["G" + cont] = {
-      t: "n",
+    Ws['G' + cont] = {
+      t: 'n',
       f: `SUM(G5:G${cont - 1})`,
-      z: "$#,##0.00",
+      z: '$#,##0.00',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["H" + cont] = {
-      t: "s",
-      v: "DEUDA",
+    Ws['H' + cont] = {
+      t: 's',
+      v: 'DEUDA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["I" + cont] = {
-      t: "n",
+    Ws['I' + cont] = {
+      t: 'n',
       f: `SUM(I5:I${cont - 1})`,
-      z: "$#,##0.00",
+      z: '$#,##0.00',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["J" + cont] = {
-      t: "s",
-      v: "DIAS",
+    Ws['J' + cont] = {
+      t: 's',
+      v: 'DIAS',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["K" + cont] = {
-      t: "n",
+    Ws['K' + cont] = {
+      t: 'n',
       f: `SUM(K5:K${cont - 1})`,
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["L" + cont] = {
-      t: "s",
-      v: "MORA",
+    Ws['L' + cont] = {
+      t: 's',
+      v: 'MORA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["M" + cont] = {
-      t: "n",
+    Ws['M' + cont] = {
+      t: 'n',
       f: `SUM(M5:M${cont - 1})`,
-      z: "$#,##0.00",
+      z: '$#,##0.00',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["N" + cont] = {
-      t: "s",
-      v: ".",
+    Ws['N' + cont] = {
+      t: 's',
+      v: '.',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["O" + cont] = {
-      t: "s",
-      v: "TOTALMORA",
+    Ws['O' + cont] = {
+      t: 's',
+      v: 'TOTALMORA',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["P" + cont] = {
-      t: "n",
+    Ws['P' + cont] = {
+      t: 'n',
       f: `SUM(P5:P${cont - 1})`,
-      z: "$#,##0.00",
+      z: '$#,##0.00',
       s: {
         // Establecer un estilo separado para una celda
         font: {
-          name: "MV Boli",
+          name: 'MV Boli',
           bold: true,
-          color: { rgb: "FFFFAA00" },
+          color: { rgb: 'FFFFAA00' }
         },
         alignment: {
-          horizontal: "center",
-          vertical: "center",
-          wrapText: false,
+          horizontal: 'center',
+          vertical: 'center',
+          wrapText: false
         },
-        fill: { bgColor: { rgb: "ffff00" } },
-      },
+        fill: { bgColor: { rgb: 'ffff00' } }
+      }
     };
-    Ws["!ref"] = "A1:P" + cont;
-    XLSX.utils.book_append_sheet(newWB, newWS, "FINANCIACION");
+    Ws['!ref'] = 'A1:P' + cont;
+    XLSX.utils.book_append_sheet(newWB, newWS, 'FINANCIACION');
     XLSX.writeFile(newWB, ruta);
-    res.send("/uploads/CUOTAS.xlsx");
-  } else if (id === "dctomora" && req.user.contador) {
+    res.send('/uploads/CUOTAS.xlsx');
+  } else if (id === 'dctomora' && req.user.contador) {
     const { producto, dcto, monto, limite, tipo, stop } = req.body;
-    const acuerdo = await pool.query(
-      "SELECT id FROM acuerdos WHERE producto = ? AND estado = 9",
-      producto
-    );
+    const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', producto);
     if (!acuerdo.length) {
       const newAcuerdo = {
         producto,
         limite,
         tipo,
-        autoriza: req.user.fullname,
+        autoriza: req.user.fullname
       };
       dcto && (newAcuerdo.dcto = parseFloat(dcto) / 100);
       monto && (newAcuerdo.monto = parseFloat(monto));
       stop && (newAcuerdo.stop = 1);
       await pool.query(`INSERT INTO acuerdos SET ? `, newAcuerdo);
-      res.send({ std: true, msj: "Acuerdo establecido xitosamente" });
+      res.send({ std: true, msj: 'Acuerdo establecido xitosamente' });
     } else {
       res.send({
         std: false,
-        msj: "Existe un Acuerdo vigente establecido, no es posible crear uno nuevo",
+        msj: 'Existe un Acuerdo vigente establecido, no es posible crear uno nuevo'
       });
     }
-  } else if (id === "pdfs") {
+  } else if (id === 'pdfs') {
     const { k, h } = req.body;
     await EstadoDeCuenta(k);
     res.send(`/uploads/estadodecuenta-${k}.pdf`);
   }
 });
-router.post("/rcb/:id", isLoggedIn, async (req, res) => {
+router.post('/rcb/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  if (id !== "nada") {
+  if (id !== 'nada') {
     const so = await pool.query(
       `SELECT * FROM solicitudes 
         WHERE concepto IN ('PAGO','ABONO') AND orden = ? ORDER BY ids`,
@@ -6745,19 +6289,19 @@ router.post("/rcb/:id", isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
-router.post("/std/:id", isLoggedIn, async (req, res) => {
+router.post('/std/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  if (id === "bank") {
-  } else if (id === "bank") {
+  if (id === 'bank') {
+  } else if (id === 'bank') {
     res.send(true);
   }
 });
-router.get("/cedula/:id", isLoggedIn, async (req, res) => {
+router.get('/cedula/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  const datos = await consultarDocumentos("1", id);
+  const datos = await consultarDocumentos('1', id);
   res.json(datos);
 });
-router.post("/desendentes", noExterno, async (req, res) => {
+router.post('/desendentes', noExterno, async (req, res) => {
   const { id, asesor } = req.body;
   let sep = true,
     bon = true;
@@ -6768,9 +6312,9 @@ router.post("/desendentes", noExterno, async (req, res) => {
     id
   );
   if (comi.length > 0) {
-    comi.map((a) => {
-      a.concepto === "BONO EXTRA" ? (bon = false) : "";
-      a.descp === "SEPARACION" ? (sep = false) : "";
+    comi.map(a => {
+      a.concepto === 'BONO EXTRA' ? (bon = false) : '';
+      a.descp === 'SEPARACION' ? (sep = false) : '';
     });
   }
 
@@ -6793,7 +6337,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
   //console.log(comi, id, asesor, directas, sep, bon) // incntivo
 
   if (directas.length > 0) {
-    var hoy = moment().format("YYYY-MM-DD");
+    var hoy = moment().format('YYYY-MM-DD');
     await directas.map(async (a, x) => {
       var estdStatus = (a.estado === 10 || a.estado === 13) && a.status > 1;
       var i = a.nrango > 6 ? Math.min(a.sucursal, a.maxcomis) : a.comision;
@@ -6814,7 +6358,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
       var montoB = val * a.linea3;
       var retefuenteB = montoB * 0.1;
       var reteicaB = (montoB * 8) / 1000;
-      var std = a.obsevacion === "CARTERA" ? 4 : 15;
+      var std = a.obsevacion === 'CARTERA' ? 4 : 15;
       var Lote = {};
       var f = [];
 
@@ -6824,9 +6368,9 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           a.incentivo,
-          "COMISION DIRECTA",
+          'COMISION DIRECTA',
           std,
-          "SEPARACION",
+          'SEPARACION',
           asesor,
           0,
           a.separar,
@@ -6834,16 +6378,16 @@ router.post("/desendentes", noExterno, async (req, res) => {
           0,
           0,
           a.incentivo,
-          a.ordn,
+          a.ordn
         ]);
 
       if (!a.directa && estdStatus) {
         f.push([
           hoy,
           monto,
-          "COMISION DIRECTA",
+          'COMISION DIRECTA',
           std,
-          "VENTA DIRECTA",
+          'VENTA DIRECTA',
           asesor,
           i,
           val,
@@ -6851,7 +6395,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
           retefuente,
           reteica,
           monto - (retefuente + reteica),
-          a.ordn,
+          a.ordn
         ]);
         Lote.directa = asesor;
       }
@@ -6860,9 +6404,9 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           montoP,
-          "COMISION INDIRECTA",
+          'COMISION INDIRECTA',
           std,
-          "PRIMERA LINEA",
+          'PRIMERA LINEA',
           a.papa,
           a.linea1,
           val,
@@ -6870,7 +6414,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
           retefuenteP,
           reteicaP,
           montoP - (retefuenteP + reteicaP),
-          a.ordn,
+          a.ordn
         ]);
         Lote.uno = a.papa;
       }
@@ -6879,9 +6423,9 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           montoA,
-          "COMISION INDIRECTA",
+          'COMISION INDIRECTA',
           std,
-          "SEGUNDA LINEA",
+          'SEGUNDA LINEA',
           a.abuelo,
           a.linea2,
           val,
@@ -6889,7 +6433,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
           retefuenteA,
           reteicaA,
           montoA - (retefuenteA + reteicaA),
-          a.ordn,
+          a.ordn
         ]);
         Lote.dos = a.abuelo;
       }
@@ -6898,9 +6442,9 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           montoB,
-          "COMISION INDIRECTA",
+          'COMISION INDIRECTA',
           std,
-          "TERCERA LINEA",
+          'TERCERA LINEA',
           a.bisabuelo,
           a.linea3,
           val,
@@ -6908,27 +6452,21 @@ router.post("/desendentes", noExterno, async (req, res) => {
           retefuenteB,
           reteicaB,
           montoB - (retefuenteB + reteicaB),
-          a.ordn,
+          a.ordn
         ]);
         Lote.tres = a.bisabuelo;
       }
 
-      if (
-        bon &&
-        a.bonoextra > 0.0 &&
-        estdStatus &&
-        !a.sucursal &&
-        a.bextra > 0
-      ) {
+      if (bon && a.bonoextra > 0.0 && estdStatus && !a.sucursal && a.bextra > 0) {
         montoC = val * a.bonoextra;
         retefuenteC = montoC * 0.1;
         reteicaC = (montoC * 8) / 1000;
         f.push([
           hoy,
           montoC,
-          "BONO EXTRA",
+          'BONO EXTRA',
           std,
-          "VENTA DIRECTA",
+          'VENTA DIRECTA',
           asesor,
           a.bonoextra,
           val,
@@ -6936,7 +6474,7 @@ router.post("/desendentes", noExterno, async (req, res) => {
           retefuenteC,
           reteicaC,
           montoC - (retefuenteC + reteicaC),
-          a.ordn,
+          a.ordn
         ]);
       }
 
@@ -6950,17 +6488,17 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           montoGE,
-          "GESTION VENTAS",
+          'GESTION VENTAS',
           std,
-          "VENTA INDIRECTA",
-          "00000000000000012345",
+          'VENTA INDIRECTA',
+          '00000000000000012345',
           a.maxcomis,
           val,
           a.lote,
           ivaGE,
           0,
           montoGE + ivaGE,
-          a.ordn,
+          a.ordn
         ]);
       }
 
@@ -6974,17 +6512,17 @@ router.post("/desendentes", noExterno, async (req, res) => {
         f.push([
           hoy,
           montoST,
-          "GESTION ADMINISTRATIVA",
+          'GESTION ADMINISTRATIVA',
           8,
-          "ADMIN PROYECTOS",
-          "00000000000000012345",
+          'ADMIN PROYECTOS',
+          '00000000000000012345',
           a.sistema,
           val,
           a.lote,
           ivaST,
           0,
           montoST + ivaST,
-          a.ordn,
+          a.ordn
         ]);
       }
 
@@ -6994,22 +6532,19 @@ router.post("/desendentes", noExterno, async (req, res) => {
                             porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`,
           [f]
         );
-        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
-          Lote,
-          a.lote,
-        ]);
+        await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
       }
     });
   }
   res.send(true);
 });
 ////////////////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
-router.get("/solicitudes", isLoggedIn, (req, res) => {
-  res.render("links/solicitudes");
+router.get('/solicitudes', isLoggedIn, (req, res) => {
+  res.render('links/solicitudes');
 });
-router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
+router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  if (id === "pago") {
+  if (id === 'pago') {
     /*const u = await pool.query(`SELECT lt, fech FROM solicitudes WHERE concepto IN('PAGO', 'ABONO')`);
         for (x = 0; x < u.length; x++) {
             const r = await pool.query(`SELECT SUM(s.monto) AS monto1, 
@@ -7023,17 +6558,10 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
         }*/
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query(
-        "SELECT producto FROM externos WHERE usuario = ?",
-        req.user.pin
-      );
-      prd = prcd.map((e) => e.producto);
+      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      prd = prcd.map(e => e.producto);
     }
-    let n = prd
-      ? `AND p.id IN (${prd})`
-      : req.user.asistente
-      ? ""
-      : "AND u.id = " + req.user.id;
+    let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
     const so =
       await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
@@ -7046,10 +6574,9 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
         LEFT JOIN cupones cpb ON s.bonoanular = cpb.id WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND (pd.estado IN(9, 15) OR pr.tipobsevacion IS NOT NULL)
     respuesta = { data: so };
     res.send(respuesta);
-  } else if (id == "recibos") {
-    var n = req.user.admin == 1 ? "" : "AND u.id = " + req.user.id;
-    const so =
-      await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, 
+  } else if (id == 'recibos') {
+    var n = req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id;
+    const so = await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, 
         cpb.monto montoa, pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, 
         s.aprueba, pr.descrip, cpb.producto ordenanu, cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, 
         c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, r.baucher, pd.n, s.stado, cp.pin bono, 
@@ -7062,18 +6589,17 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
         LEFT JOIN recibos r ON s.ids = r.registro WHERE s.concepto IN ('PAGO','ABONO') ${n} ORDER BY s.ids`); // AND s.ids = 2247
     respuesta = { data: so }; //console.log(respuesta);
     res.send(respuesta);
-  } else if (id === "devoluciones") {
-    const solicitudes =
-      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, 
+  } else if (id === 'devoluciones') {
+    const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, 
         s.stado, s.formap, s.facturasvenc, s.descp, s.porciento, s.total, u.fullname, s.orden,
         l.mz, l.n, s.pagar, c.movil, c.email, p.descrip, c.nombre, d.proyect FROM solicitudes s 
         INNER JOIN productosd l ON s.lt = l.id INNER JOIN users u ON s.asesor = u.id  
         INNER JOIN preventa p ON s.orden = p.id INNER JOIN productos d ON l.producto = d.id 
         INNER JOIN clientes c ON p.cliente = c.idc WHERE s.concepto = 'DEVOLUCION' 
-        ${req.user.auxicontbl ? "" : "AND u.id = " + req.user.id}`);
+        ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`);
     respuesta = { data: solicitudes }; //console.log(solicitudes)
     res.send(respuesta);
-  } else if (id === "comision") {
+  } else if (id === 'comision') {
     const solicitudes =
       await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, s.descp, s.porciento, pg.stads, s.cuentadecobro,
         s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, pg.deuda, pg.cuentacobro,
@@ -7082,21 +6608,20 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONO EXTRA')  
         AND pr.tipobsevacion IS NULL AND s.cuentadecobro IS NOT NULL ${
-          req.user.auxicontbl ? "" : "AND u.id = " + req.user.id
+          req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id
         }`); //AND stado = 3
     respuesta = { data: solicitudes }; //console.log(solicitudes)
     res.send(respuesta);
-  } else if (id === "bono") {
+  } else if (id === 'bono') {
     const solicitudes = await pool.query(`SELECT * FROM solicitudes s  
         INNER JOIN users u ON s.asesor = u.id WHERE s.concepto = 'BONO'
-        ${req.user.auxicontbl ? "" : "AND u.id = " + req.user.id}`);
+        ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`);
     respuesta = { data: solicitudes };
     //console.log(solicitudes)
     res.send(respuesta);
-  } else if (id === "saldo") {
+  } else if (id === 'saldo') {
     const { lote, solicitud, fecha } = req.body; //console.log(lote, solicitud, fecha)
-    const u =
-      await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
+    const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
         AND lt = ${lote} AND stado = 3 AND TIMESTAMP(fech) < '${fecha}' AND ids != ${solicitud}`);
     //console.log(u)
     if (u.length > 0) return res.send(false);
@@ -7110,43 +6635,37 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
       k = r[0].monto || 0;
     var acumulado = l + k;
 
-    res.send({ d: acumulado ? acumulado : "NO" });
-  } else if (id === "cuentacobro") {
+    res.send({ d: acumulado ? acumulado : 'NO' });
+  } else if (id === 'cuentacobro') {
     const { total, descuentos, solicitudes, usuario, fechas, ID } = req.body;
     if (ID) {
-      var pdf = "/uploads/" + req.files[0].filename; //'https://grupoelitered.com.co/uploads/' +
-      await pool.query(`UPDATE pagos SET ? WHERE id = ?`, [
-        { cuentacobro: pdf },
-        ID,
-      ]);
+      var pdf = '/uploads/' + req.files[0].filename; //'https://grupoelitered.com.co/uploads/' +
+      await pool.query(`UPDATE pagos SET ? WHERE id = ?`, [{ cuentacobro: pdf }, ID]);
       res.send(true);
     } else {
       var cuenta = {
         acredor: usuario,
         deuda: total,
         fechas,
-        descuentos, //, cuentacobro: pdf
+        descuentos //, cuentacobro: pdf
       };
       var ctas = await pool.query(`INSERT INTO pagos SET ?`, cuenta);
-      await pool.query(
-        `UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`,
-        { cuentadecobro: ctas.insertId, stado: 3 }
-      );
+      await pool.query(`UPDATE solicitudes SET ? WHERE ids IN(${solicitudes})`, {
+        cuentadecobro: ctas.insertId,
+        stado: 3
+      });
       console.log(ctas.insertId);
       res.send({ id: ctas.insertId });
     }
-  } else if (id == "eliminar") {
+  } else if (id == 'eliminar') {
     const { k, pdf, porque, nombre, movil } = req.body;
     Eli(pdf);
-    await pool.query(`UPDATE solicitudes SET ? WHERE cuentadecobro = ?`, [
-      { stado: 9 },
-      k,
-    ]);
+    await pool.query(`UPDATE solicitudes SET ? WHERE cuentadecobro = ?`, [{ stado: 9 }, k]);
     await pool.query(`DELETE FROM pagos WHERE id = ?`, k);
     var bod = `_*${nombre}*. Hemos decidido declina la cuenta por cobrar *${k}* porque: *${porque}*_\n\n*_RED ELITE_*`;
     await EnviarWTSAP(movil, bod);
-    res.send({ r: true, m: "Cuenta de cobro eliminada correctamente" });
-  } else if (id == "extractos") {
+    res.send({ r: true, m: 'Cuenta de cobro eliminada correctamente' });
+  } else if (id == 'extractos') {
     /* if (req.user.admin != 1) {
             return res.send(false);
         }; */
@@ -7155,54 +6674,47 @@ router.post("/solicitudes/:id", isLoggedIn, async (req, res) => {
     //console.log(solicitudes)
     respuesta = { data: solicitudes };
     res.send(respuesta);
-  } else if (id == "rcbcc") {
+  } else if (id == 'rcbcc') {
     if (!req.user.contador) {
       return res.send(false);
     }
     const { ids, montorcb, recibos } = req.body;
     var t = {
-      rcbs: "/uploads/" + req.files[0].filename,
+      rcbs: '/uploads/' + req.files[0].filename,
       stads: 4,
       rbc: recibos,
-      monto: montorcb,
+      monto: montorcb
     };
-    await pool.query(
-      "UPDATE pagos p INNER JOIN solicitudes s ON p.id = s.cuentadecobro SET ? WHERE p.id = ?",
-      [
-        {
-          "p.rcbs": "/uploads/" + req.files[0].filename,
-          "p.stads": 4,
-          "p.rbc": recibos,
-          "p.monto": montorcb,
-          "s.stado": 4,
-        },
-        ids,
-      ]
-    );
+    await pool.query('UPDATE pagos p INNER JOIN solicitudes s ON p.id = s.cuentadecobro SET ? WHERE p.id = ?', [
+      {
+        'p.rcbs': '/uploads/' + req.files[0].filename,
+        'p.stads': 4,
+        'p.rbc': recibos,
+        'p.monto': montorcb,
+        's.stado': 4
+      },
+      ids
+    ]);
     res.send(true);
-  } else if (id === "fechas") {
+  } else if (id === 'fechas') {
     const { id, fecha } = req.body;
     console.log(req.body);
-    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
-      { fecharcb: fecha },
-      id,
-    ]);
+    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ fecharcb: fecha }, id]);
     res.send(true);
   }
 });
-router.put("/solicitudes/:id", isLoggedIn, async (req, res) => {
+router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (!req.user.contador) {
     return res.send({
       std: false,
-      msg: `No tienes permiso para realizar esta accion`,
+      msg: `No tienes permiso para realizar esta accion`
     });
   }
   //console.log(req.body, req.files)
   //return res.send(true);
-  if (id === "Declinar") {
-    const { Orden, ids, img, por, cel, fullname, mz, n, proyect, nombre } =
-      req.body;
+  if (id === 'Declinar') {
+    const { Orden, ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body;
     const r = await Estados(Orden);
 
     await pool.query(
@@ -7212,20 +6724,20 @@ router.put("/solicitudes/:id", isLoggedIn, async (req, res) => {
             INNER JOIN productosd l ON s.lt = l.id SET ? WHERE s.ids = ?`,
       [
         {
-          "l.estado": r.std,
-          "c.estado": 3,
-          "cp.producto": null,
-          "cp.estado": 9,
+          'l.estado': r.std,
+          'c.estado': 3,
+          'cp.producto': null,
+          'cp.estado': 9
         },
-        ids,
+        ids
       ]
     );
 
     await pool.query(`DELETE FROM solicitudes WHERE ids = ?`, ids);
 
-    var imagenes = img.indexOf(",") > 0 ? img.split(",") : img;
+    var imagenes = img.indexOf(',') > 0 ? img.split(',') : img;
     if (Array.isArray(imagenes)) {
-      imagenes.map((e) => {
+      imagenes.map(e => {
         Eli(e);
       });
     } else {
@@ -7234,67 +6746,56 @@ router.put("/solicitudes/:id", isLoggedIn, async (req, res) => {
     if (cel) {
       //console.log(cel)
       var body = `_*${
-        fullname.split(" ")[0]
+        fullname.split(' ')[0]
       }*_\n_Solicitud de pago *RECHAZADA*_\n_Proyecto *${proyect}*_\n_Manzana *${mz}* Lote *${n}*_\n_Cliente *${nombre}*_\n\n_*DESCRIPCIÓN*:_\n_${por}_\n\n_*GRUPO ELITE FICA RAÍZ*_`;
-      var sm = `${
-        fullname.split(",")[0]
-      } tu solicitud de pago fue RECHAZADA MZ${mz} LT${n} ${por}`;
+      var sm = `${fullname.split(',')[0]} tu solicitud de pago fue RECHAZADA MZ${mz} LT${n} ${por}`;
       await EnviarWTSAP(cel, body, sm);
     }
     res.send(true);
-  } else if (id === "Enviar") {
+  } else if (id === 'Enviar') {
     const { ids, movil, nombre, pdef } = req.body;
-    var pdf = "";
+    var pdf = '';
     if (!req.files[0]) {
       pdf = pdef;
     } else {
-      pdf = req.headers.origin + "/uploads/" + req.files[0].filename;
-      await pool.query("UPDATE solicitudes SET ? WHERE ids = ?", [
-        { pdf },
-        ids,
-      ]);
+      pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
+      await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
     }
     //console.log(pdf)
     var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
     await EnviarWTSAP(movil, bod);
-    await EnvWTSAP_FILE(movil, pdf, "RECIBO DE CAJA " + ids, "PAGO EXITOSO");
+    await EnvWTSAP_FILE(movil, pdf, 'RECIBO DE CAJA ' + ids, 'PAGO EXITOSO');
     res.send(true);
-  } else if (id === "Asociar") {
+  } else if (id === 'Asociar') {
     const { ids, idExtracto } = req.body;
-    await pool.query("UPDATE solicitudes SET ? WHERE ids = ?", [
-      { extrato: idExtracto },
-      ids,
-    ]);
+    await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ extrato: idExtracto }, ids]);
     res.send(true);
-  } else if (id === "Desasociar") {
+  } else if (id === 'Desasociar') {
     const { ids } = req.body;
-    await pool.query(
-      "UPDATE solicitudes SET extrato = NULL WHERE ids = ?",
-      ids
-    );
+    await pool.query('UPDATE solicitudes SET extrato = NULL WHERE ids = ?', ids);
     res.send(true);
   } else {
     const { ids, acumulado, ahora, idExtracto } = req.body;
 
-    const pdf = req.headers.origin + "/uploads/" + req.files[0].filename;
+    const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
     const R = await PagosAbonos(ids, pdf, req.user.fullname);
     var w = { acumulado, aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
-      await pool.query("UPDATE solicitudes SET ? WHERE ids = ?", [w, ids]);
+      await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [w, ids]);
     }
     res.send(R);
   }
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
-router.post("/afiliado", noExterno, async (req, res) => {
+router.post('/afiliado', noExterno, async (req, res) => {
   const { movil, cajero } = req.body;
   var pin = ID(13);
-  var cel = movil.replace(/-/g, "");
+  var cel = movil.replace(/-/g, '');
   var boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
     *_Registrarte_* _en:_\n*${req.headers.origin}/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*${req.headers.origin}/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`;
 
-  const h = await pool.query("SELECT * FROM pines WHERE celular = ? ", cel);
+  const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
   if (h.length > 0) {
     pin = h[0].id;
     boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
@@ -7308,35 +6809,32 @@ router.post("/afiliado", noExterno, async (req, res) => {
       id: pin,
       categoria: 1,
       usuario: req.user.id,
-      celular: cel,
+      celular: cel
     };
-    await pool.query("INSERT INTO pines SET ? ", nuevoPin);
+    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
   }
   EnviarWTSAP(
     movil,
     boidy,
     `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`
   );
-  req.flash(
-    "success",
-    "Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre"
-  );
-  res.redirect("/tablero");
+  req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
+  res.redirect('/tablero');
 });
-router.post("/id", async (req, res) => {
+router.post('/id', async (req, res) => {
   const { pin } = req.body;
-  const rows = await pool.query("SELECT * FROM pines WHERE id = ?", pin);
+  const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
   if (rows.length > 0 && rows[0].acreedor === null) {
     registro.pin = pin;
-    res.send("Exitoso");
+    res.send('Exitoso');
   } else {
-    res.send("Pin de registro invalido, comuniquese con su distribuidor!");
+    res.send('Pin de registro invalido, comuniquese con su distribuidor!');
   }
 });
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(lon) {
-  let chars = "0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z",
-    code = "";
+  let chars = '0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z',
+    code = '';
   for (x = 0; x < lon; x++) {
     let rand = Math.floor(Math.random() * chars.length);
     code += chars.substr(rand, 1);
@@ -7345,8 +6843,8 @@ function ID(lon) {
 }
 //Eli('uploads/3xcy-02nj3ptv8wt7r5-7235y48fk7ihmz.pdf');
 function ID2(lon) {
-  let chars = "1234567890",
-    code = "";
+  let chars = '1234567890',
+    code = '';
   for (x = 0; x < lon; x++) {
     let rand = Math.floor(Math.random() * chars.length);
     code += chars.substr(rand, 1);
@@ -7354,10 +6852,7 @@ function ID2(lon) {
   return code;
 }
 async function usuario(id) {
-  const usuario = await pool.query(
-    `SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `,
-    id
-  );
+  const usuario = await pool.query(`SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `, id);
   if (usuario.length > 0 && usuario[0].categoria == 2) {
     return usuario[0].usuario;
   } else {
@@ -7369,16 +6864,10 @@ async function saldo(producto, rango, id, monto) {
   if (!producto && monto) {
     operacion = monto;
   } else if (!producto && !monto) {
-    return "NO";
+    return 'NO';
   } else {
-    const produ = await pool.query(
-      `SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`,
-      producto
-    );
-    const rang = await pool.query(
-      `SELECT comision FROM rangos WHERE id = ?`,
-      rango
-    );
+    const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`, producto);
+    const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
     operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision) / 100;
   }
   const saldo = await pool.query(
@@ -7531,21 +7020,21 @@ async function Estados(S) {
     if (pagos >= cuotas.TOTAL) {
       Desendentes(Pagos[0].asesor, 10);
       //console.log(Pagos, Cuotas, Pendientes, { std: 13, estado: 'VENDIDO', pendients });
-      return { std: 13, estado: "VENDIDO", pendients };
+      return { std: 13, estado: 'VENDIDO', pendients };
     } else if (pagos >= cuotas.INICIAL && pagos < cuotas.TOTAL) {
       Desendentes(Pagos[0].asesor, 10);
       //console.log(Pagos, Cuotas, Pendientes, { std: 10, estado: 'SEPARADO', pendients });
-      return { std: 10, estado: "SEPARADO", pendients };
+      return { std: 10, estado: 'SEPARADO', pendients };
     } else if (pagos >= cuotas.SEPARACION && pagos < cuotas.INICIAL) {
       //console.log(Pagos, Cuotas, Pendientes, { std: 12, estado: 'APARTADO', pendients });
-      return { std: 12, estado: "APARTADO", pendients };
+      return { std: 12, estado: 'APARTADO', pendients };
     } else {
       //console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'Aca');
-      return { std: 1, estado: "PENDIENTE", pendients };
+      return { std: 1, estado: 'PENDIENTE', pendients };
     }
   } else {
     //console.log(Pagos, Cuotas, Pendientes, { std: 1, estado: 'PENDIENTE', pendients }, 'aqui');
-    return { std: 1, estado: "PENDIENTE", pendients };
+    return { std: 1, estado: 'PENDIENTE', pendients };
   }
 }
 
@@ -7565,35 +7054,30 @@ async function RestablecerCupon(S) {
   const separa = x.separar;
   const valor = Math.round(x.vrmt2 * x.mtr2);
   const ahorro =
-    x.dto === "INICIAL"
+    x.dto === 'INICIAL'
       ? Math.round((((valor * x.iniciar) / 100) * x.descuento) / 100)
-      : x.dto === "FINANCIACION"
+      : x.dto === 'FINANCIACION'
       ? Math.round(((valor - (valor * x.iniciar) / 100) * x.descuento) / 100)
       : Math.round((valor * x.descuento) / 100);
 
-  const total = x.dto === "TODO" ? Math.round(valor - ahorro) : valor;
+  const total = x.dto === 'TODO' ? Math.round(valor - ahorro) : valor;
 
   const initials =
-    x.dto === "INICIAL"
-      ? Math.round((total * x.iniciar) / 100 - ahorro)
-      : Math.round((total * x.iniciar) / 100);
+    x.dto === 'INICIAL' ? Math.round((total * x.iniciar) / 100 - ahorro) : Math.round((total * x.iniciar) / 100);
 
   const incl = initials - separa;
   const inicial = Math.sign(incl) >= 0 ? incl : 0;
   const nini = x.inicialdiferida ? x.inicialdiferida : 0;
   const cuotaini = inicial ? Math.round(inicial / nini) : 0;
 
-  const financiacion =
-    x.dto === "FINANCIACION"
-      ? Math.round(total - inicial - ahorro)
-      : Math.round(total - inicial);
+  const financiacion = x.dto === 'FINANCIACION' ? Math.round(total - inicial - ahorro) : Math.round(total - inicial);
 
   if (x.proyeccion > 0) {
     var Extra = 0,
       cont = 0;
-    W.filter((c) => {
-      return c.proyeccion !== x.cuot && c.tipo === "FINANCIACION";
-    }).map((c) => {
+    W.filter(c => {
+      return c.proyeccion !== x.cuot && c.tipo === 'FINANCIACION';
+    }).map(c => {
       Extra += c.proyeccion;
       cont++;
     });
@@ -7641,9 +7125,9 @@ async function QuitarCupon(S) {
   if (x.proyeccion > 0) {
     var Extra = 0,
       cont = 0;
-    W.filter((c) => {
-      return c.proyeccion !== x.cuot && c.tipo === "FINANCIACION";
-    }).map((c) => {
+    W.filter(c => {
+      return c.proyeccion !== x.cuot && c.tipo === 'FINANCIACION';
+    }).map(c => {
       Extra += c.proyeccion;
       cont++;
     });
@@ -7676,12 +7160,7 @@ async function QuitarCupon(S) {
     mes12 = cuotafnc;
 
     if (cuotaordi) {
-      cf == 1
-        ? (mes6 = cuotaordi)
-        : cf == 2
-        ? (mes12 = cuotaordi)
-        : (mes6 = cuotaordi),
-        (mes12 = cuotaordi);
+      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
     }
 
     const r = await pool.query(
@@ -7730,27 +7209,25 @@ async function ProyeccionPagos(S) {
   const separa = x.separar;
   const valor = Math.round(x.vrmt2 * x.mtr2);
   const ahorro =
-    x.dto === "INICIAL"
+    x.dto === 'INICIAL'
       ? Math.round((((valor * x.iniciar) / 100) * x.descuento) / 100)
-      : x.dto === "FINANCIACION"
+      : x.dto === 'FINANCIACION'
       ? Math.round(((valor - (valor * x.iniciar) / 100) * x.descuento) / 100)
       : Math.round((valor * x.descuento) / 100);
 
-  const total = x.dto === "TODO" ? Math.round(valor - ahorro) : valor;
+  const total = x.dto === 'TODO' ? Math.round(valor - ahorro) : valor;
 
   const initials =
-    x.dto === "INICIAL"
-      ? Math.round((total * x.iniciar) / 100 - ahorro)
-      : Math.round((total * x.iniciar) / 100);
+    x.dto === 'INICIAL' ? Math.round((total * x.iniciar) / 100 - ahorro) : Math.round((total * x.iniciar) / 100);
 
   const inicial = x.separar >= initials ? 0 : initials - separa;
 
   const financiacion =
-    x.dto === "FINANCIACION"
+    x.dto === 'FINANCIACION'
       ? Math.round(total - (inicial + x.separar) - ahorro)
       : Math.round(total - (inicial + x.separar));
 
-  const mOra = x.moras; //                                        determina si el proyecto cobra mora o no
+  const mOra = x.moras; // determina si el proyecto cobra mora o no
 
   //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion, x)
   if (Proyeccion > 0) {
@@ -7767,20 +7244,14 @@ async function ProyeccionPagos(S) {
     const nini = x.inicialdiferida ? x.inicialdiferida : 0;
     const nfnc = x.numerocuotaspryecto - nini - x.extran;
     const cuotaini = inicial && nini ? Math.round(inicial / nini) : 0;
-    const financiamiento =
-      !nini && inicial ? financiacion + inicial : financiacion;
+    const financiamiento = !nini && inicial ? financiacion + inicial : financiacion;
     const cuotafnc = Math.round((financiamiento - extraordinarias) / nfnc);
     const cf = x.extraordinariameses;
     mes6 = cuotafnc;
     mes12 = cuotafnc;
 
     if (cuotaordi) {
-      cf == 1
-        ? (mes6 = cuotaordi)
-        : cf == 2
-        ? (mes12 = cuotaordi)
-        : (mes6 = cuotaordi),
-        (mes12 = cuotaordi);
+      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
     }
 
     await pool.query(
@@ -7788,16 +7259,14 @@ async function ProyeccionPagos(S) {
         mora = 0, abono = 0, diaspagados = 0, 
         diasmora = 0, cuota = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
-        ${
-          nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ""
-        }        
+        ${nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ''}        
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 6 THEN ${mes6}
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 12 THEN ${mes12}
         ELSE ${cuotafnc} END, proyeccion = CASE 
         WHEN tipo = 'SEPARACION' THEN ${separa} 
-        ${nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ""}
+        ${nini && inicial ? `WHEN tipo = 'INICIAL' THEN ${cuotaini}` : ''}
         WHEN tipo = 'FINANCIACION' AND 
         MONTH(fechs) = 6 THEN ${mes6}
         WHEN tipo = 'FINANCIACION' AND 
@@ -7816,151 +7285,129 @@ async function ProyeccionPagos(S) {
   );
 
   if (Cuotas[0].pago) {
-    await pool.query(
-      `DELETE r FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota WHERE c.separacion = ?`,
-      S
-    );
-    Cuotas = await pool.query(
-      `SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`,
-      S
-    );
+    await pool.query(`DELETE r FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota WHERE c.separacion = ?`, S);
+    Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`, S);
   }
   const Abonos = await pool.query(
     `SELECT s.ids, s.monto, s.fech, s.fecharcb, a.dcto, a.estado FROM solicitudes s 
     LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND s.stado = 4 AND s.orden = ? 
-    ORDER BY TIMESTAMP(s.fecharcb), TIMESTAMP(s.fech)`,
+    ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC`,
     S
   );
   const Moras = await pool.query(`SELECT * FROM intereses`);
 
-  let cuotas = Cuotas.map((e) => {
+  let cuotas = Cuotas.map(e => {
     return {
       id: e.id,
       cuota: e.cuota,
       monto: e.cuota,
       fechs: e.fechs,
-      estado: 3,
+      total: 0,
+      estado: 3
     };
   });
 
-  const fechaLimite = moment("2021-08-31").format("YYYY-MM-DD"); // fecha desde la que el sistema empesara a cobrar mora
+  const fechaLimite = moment('2021-08-31').format('YYYY-MM-DD'); // fecha desde la que el sistema empesara a cobrar mora
   let Relacion = []; //                                             aqui estara la relacion entre pagos y cuotas
+  let idCuota = false;
 
   for (i = 0; i < Abonos.length; i++) {
     const a = Abonos[i]; //                          array de abonos que el cliente a realizado
     const fechaLMT = a.fecharcb //                   fecha del recibo de pago
-      ? moment(a.fecharcb).format("YYYY-MM-DD") //   si la fecha del recibo no existe toma la fecha en que se subio el pago
-      : moment(a.fech).format("YYYY-MM-DD"); //      fecha en que se subio el pago al sistema
+      ? moment(a.fecharcb).format('YYYY-MM-DD') //   si la fecha del recibo no existe toma la fecha en que se subio el pago
+      : moment(a.fech).format('YYYY-MM-DD'); //      fecha en que se subio el pago al sistema
 
-    const cobro =
-      fechaLMT >= fechaLimite && a.estado != 6 && mOra ? true : false; // determinara si debe cobrar mora en la cuota siguiente a analizar
+    const cobro = fechaLMT >= fechaLimite && a.estado != 6 && mOra ? true : false; // determinara si debe cobrar mora en la cuota siguiente a analizar
     let Monto = a.monto; //                                               valor del pago aboonado del cual se ira descontando el valor de la cuota
 
     for (o = 0; o < cuotas.length; o++) {
+      if (!Monto) continue;
       const q = cuotas[o]; //                                             array de cuotas
-      const FechaCuota = moment(q.fechs).format("YYYY-MM-DD"); //         fecha en la que la cuota debe ser pagada
-      const diffdays = moment(fechaLMT).diff(FechaCuota, "days"); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
+      const FechaCuota = idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
+      const diffdays = moment(fechaLMT).diff(FechaCuota, 'days'); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
       const daysDiff = fechaLMT > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
       const Tas =
         cobro && daysDiff
-          ? await Moras.filter(
-              (x) =>
-                moment(x.fecha).format("YYYY-MM-DD") >=
-                  moment(q.fechs).startOf("month").format("YYYY-MM-DD") &&
-                moment(x.fecha).format("YYYY-MM-DD") <=
-                  moment(fechaLMT).startOf("month").format("YYYY-MM-DD")
-            ).map((x) => x.teano)
+          ? Moras.filter(
+              x =>
+                moment(x.fecha).format('YYYY-MM-DD') >= moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
+                moment(x.fecha).format('YYYY-MM-DD') <= moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
+            ).map(x => x.teano)
           : []; //                                                         calculo de interes por mora
 
-      const Tasa = Tas.length ? await Math.min(...Tas) : 0; //             selecciona la tasa mas baja dentro del periodo de la mora
-      let moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; //     valor de la mora
-      let dctoMoratorio = Tasa ? moratoria - moratoria * a.dcto : 0; //    descuento de la mora si existe algun acuerdo
-      let diasmoratorios = Tasa ? daysDiff : 0; //                         dias total de mora
+      const Tasa = Tas.length ? Math.min(...Tas) : 0; //                    selecciona la tasa mas baja dentro del periodo de la mora
+      const saldAnt = idCuota?.id === q.id ? idCuota.saldomora : 0;
+      const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; //     valor de la mora
+      const dctoMoratorio = Tasa ? moratoria - moratoria * a.dcto : 0; //    descuento de la mora si existe algun acuerdo
+      const diasmoratorios = Tasa ? daysDiff : 0; //                         dias total de mora
       cuotas[o].tasa = Tasa;
       cuotas[o].moratoria = moratoria;
       cuotas[o].dctoMoratorio = dctoMoratorio;
       cuotas[o].diasmoratorios = diasmoratorios;
-      cuotas[o].monto = q.monto + dctoMoratorio;
-    }
+      cuotas[o].total = q.monto + dctoMoratorio + saldAnt;
 
-    await cuotas.map(async (e, u) => {
-      if (!Monto) return false;
-
-      if (Monto >= e.monto && e.estado === 3) {
+      if (Monto >= q.total && q.estado === 3) {
         Relacion.push([
           a.ids,
-          e.id,
-          e.moratoria,
-          e.diasmoratorios,
+          q.id,
+          q.moratoria,
+          q.diasmoratorios,
           a.dcto ? a.dcto : 0,
-          e.diasmoratorios,
-          e.dctoMoratorio,
-          e.dctoMoratorio,
-          e.monto - e.dctoMoratorio,
+          q.diasmoratorios,
+          q.dctoMoratorio + saldAnt,
+          q.dctoMoratorio,
+          q.monto,
           0,
           13,
-          e.tasa,
+          q.tasa,
+          FechaCuota,
+          0
         ]);
-        Monto = Math.sign(Monto - e.monto) > 0 ? Monto - e.monto : 0;
-        cuotas[u].monto = 0;
-        cuotas[u].estado = 13;
-        //console.log('mayor ', Monto, e)
-      } else if (Monto > 0 && e.estado === 3) {
-        //var mor = e.tasa ? Math.abs(e.monto - e.dctoMoratorio) : 0;
-        var cuot = Math.abs(e.monto - Monto);
-        var dpg = !e.tasa ? 0 : Monto / (e.dctoMoratorio / e.diasmoratorios);
-        var diaspagados = !e.tasa
-          ? 0
-          : dpg >= e.diasmoratorios
-          ? e.diasmoratorios
-          : dpg;
-        var morapaga = dpg >= e.diasmoratorios ? e.dctoMoratorio : Monto;
+        Monto = Math.sign(Monto - q.total) > 0 ? Monto - q.total : 0;
+        cuotas[o].monto = 0;
+        cuotas[o].estado = 13;
+        idCuota = false;
+      } else if (Monto > 0 && q.estado === 3) {
+        const cuot = Math.abs(q.total - Monto);
+        const saldomora = q.monto >= cuot ? 0 : cuot - q.monto;
+        const totalmora = q.dctoMoratorio + saldAnt;
+        const morapaga = Monto >= totalmora ? totalmora : Monto;
+        const diaspagados = !q.tasa ? 0 : morapaga / (q.dctoMoratorio / q.diasmoratorios);
+        const saldocuota = Monto > totalmora ? q.monto - (Monto - totalmora) : q.monto;
+        //const diaspagados = !q.tasa ? 0 : dpg >= q.diasmoratorios ? q.diasmoratorios : dpg;
+        //const morapaga = dpg >= q.diasmoratorios ? q.dctoMoratorio : Monto;
+
+        if (!idCuota) idCuota = { id: q.id, nwFecha: fechaLMT, saldomora };
+        else if (idCuota?.id === q.id) {
+          idCuota.nwFecha = fechaLMT;
+          idCuota.saldomora = saldomora;
+        }
 
         Relacion.push([
           a.ids,
-          e.id,
-          e.moratoria,
-          e.diasmoratorios,
+          q.id,
+          q.moratoria,
+          q.diasmoratorios,
           a.dcto ? a.dcto : 0,
           diaspagados,
-          e.dctoMoratorio,
+          totalmora, //q.dctoMoratorio,
           morapaga,
-          e.monto - e.dctoMoratorio,
-          cuot,
+          q.monto,
+          saldocuota,
           3,
-          e.tasa,
+          q.tasa,
+          FechaCuota,
+          saldomora
         ]);
-        Monto = Math.sign(Monto - e.monto) > 0 ? Monto - cuot : 0;
-        cuotas[u].monto = cuot;
-        //console.log('menor ', Monto, e, Relacion)
+        Monto = Math.sign(Monto - q.total) > 0 ? Monto - cuot : 0;
+        cuotas[o].monto = saldocuota;
       }
-      //return e.id, Monto, e.tasa, !!Monto;
-    });
-    //console.log('ejecucion de map terminada ', j);
+    }
   }
-  /* console.log(
-    await Relacion.map((r) => {
-      return {
-        pago: r[0],
-        cuota: r[1],
-        mora: r[2],
-        dias: r[3],
-        dcto: r[4],
-        diaspagados: r[5],
-        totalmora: r[6],
-        morapaga: r[7],
-        montocuota: r[8],
-        saldocuota: r[9],
-        stdcuota: r[10],
-        tasa: r[11],
-        monto: r[12],
-      };
-    })
-  ); */
 
   const R = [];
-  await Relacion.reverse().map((r) => {
-    const s = R.some((s) => s.cuota === r[1]);
+  await Relacion.reverse().map(r => {
+    const s = R.some(s => s.cuota === r[1]);
     if (s) return;
     R.push({
       pago: r[0],
@@ -7975,13 +7422,15 @@ async function ProyeccionPagos(S) {
       saldocuota: r[9],
       stdcuota: r[10],
       tasa: r[11],
+      fechaLMT: r[12],
+      saldomora: r[13]
     });
   });
 
   Relacion.length &&
     (await pool.query(
       `INSERT INTO relacioncuotas 
-        (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa) 
+        (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa, fechaLMT, saldomora) 
         VALUES ?`,
       [Relacion]
     ));
@@ -7990,7 +7439,7 @@ async function ProyeccionPagos(S) {
     let cuota = `CASE`;
     let stado = `CASE`;
     let diaspgdos = `CASE`;
-    R.map((e) => {
+    R.map(e => {
       cuota += ` WHEN c.id = ${e.cuota} THEN ${e.saldocuota}`;
       stado += ` WHEN c.id = ${e.cuota} THEN ${e.stdcuota}`;
       diaspgdos += ` WHEN c.id = ${e.cuota} THEN ${e.diaspagados}`;
@@ -8004,32 +7453,33 @@ async function ProyeccionPagos(S) {
       S
     );
   }
-  /* await pool.query(
-    `UPDATE cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
-    SET c.cuota = r.saldocuota, c.estado = 13, c.diaspagados = r.diaspagados 
-    WHERE c.separacion = ? AND r.stdcuota = 13`,
-    S
-  ); */
 
   ////////////////////////////////* END *///////////////////////////////////////
 
   ///////////////////////////////* MORAS */////////////////////////////////////////////
   const intr = await pool.query(
-    `SELECT c.id, c.separacion, c.fechs,
+    `SELECT c.id, c.separacion, c.fechs, c.cuota,
     (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
     FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
     INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
     AND d.moras = 1 AND c.separacion = ? GROUP BY c.id HAVING tasa IS NOT NULL`,
     S
   );
-
+  //console.log('id de cuota sam ', idCuota?.id);
   if (intr.length) {
     let moraVr = `CASE`;
     let moraTs = `CASE`;
-    intr.map((e) => {
-      moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * (DATEDIFF(CURDATE(), c.fechs) - c.diaspagados) * ${e.tasa} / 365`;
-      moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
-    });
+    intr
+      .filter(e => {
+        e.id == idCuota?.id &&
+          (moraVr += ` WHEN c.id = ${idCuota?.id} THEN c.cuota * DATEDIFF(CURDATE(), "${idCuota?.nwFecha}") * ${e.tasa} / 365`);
+        e.id == idCuota?.id && (moraTs += ` WHEN c.id = ${idCuota?.id} THEN ${e.tasa}`);
+        return e.id != idCuota?.id;
+      })
+      .map(e => {
+        moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * DATEDIFF(CURDATE(), c.fechs) * ${e.tasa} / 365`;
+        moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
+      });
     moraVr += ` ELSE c.mora END`;
     moraTs += ` ELSE c.tasa END`;
 
@@ -8044,8 +7494,7 @@ async function ProyeccionPagos(S) {
 }
 async function PagosAbonos(Tid, pdf, user) {
   //u. obsevacion pr
-  const SS =
-    await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
+  const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
     pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
     cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, s.formap, 
     s.concepto, pr.obsevacion, s.ids, s.descp, pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, 
@@ -8056,18 +7505,15 @@ async function PagosAbonos(Tid, pdf, user) {
     LEFT JOIN acuerdos a ON s.acuerdo = a.id WHERE pr.tipobsevacion IS NULL AND s.ids = ${Tid}`);
   const S = SS[0];
   const T = S.cparacion;
-  const fech2 = moment(S.fech).format("YYYY-MM-DD HH:mm");
-  const monto = S.bono && S.formap !== "BONO" ? S.monto + S.mount : S.monto;
-  const std = S.obsevacion === "CARTERA" ? 1 : 15;
+  const fech2 = moment(S.fech).format('YYYY-MM-DD HH:mm');
+  const monto = S.bono && S.formap !== 'BONO' ? S.monto + S.mount : S.monto;
+  const std = S.obsevacion === 'CARTERA' ? 1 : 15;
 
   if (S.stado === 4 || S.stado === 6) {
     Eli(pdf);
     return {
       std: false,
-      msg:
-        S.stado === 4
-          ? `Este pago ya ha sido aprobado.`
-          : "Este pago se encuentra declinado.",
+      msg: S.stado === 4 ? `Este pago ya ha sido aprobado.` : 'Este pago se encuentra declinado.'
     };
   }
   //if (S.concepto === 'ABONO') {
@@ -8078,15 +7524,13 @@ async function PagosAbonos(Tid, pdf, user) {
 
   if (Cuotas.length > 0 && monto > 0) {
     await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
-      { concepto: "ABONO", descp: Cuotas[0].tipo, stado: 4, aprueba: user },
-      Tid,
+      { concepto: 'ABONO', descp: Cuotas[0].tipo, stado: 4, aprueba: user },
+      Tid
     ]);
   } else {
     return {
       std: false,
-      msg: !Cuotas.length
-        ? `No se encontraron cuotas pendientes por pagar`
-        : "El monto es insuficiente",
+      msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente'
     };
   }
 
@@ -8099,29 +7543,25 @@ async function PagosAbonos(Tid, pdf, user) {
         SET ? WHERE s.ids = ?`,
       [
         {
-          "l.estado": st.std,
-          "s.pdf": pdf,
+          'l.estado': st.std,
+          's.pdf': pdf
         },
-        Tid,
+        Tid
       ]
     );
   } catch (e) {
     console.log(e);
   }
 
-  var bod = `_*${S.nombre}*. Hemos procesado tu *${
-    S.concepto
-  }* de manera exitosa. Recibo *${S.recibo}* Monto *${Moneda(
+  var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${S.recibo}* Monto *${Moneda(
     monto
   )}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
-  var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${
-    S.recibo
-  } Bono ${S.bono} Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${
-    S.mz
-  } LOTE ${S.n}`;
+  var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(
+    monto
+  )} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
 
   await EnviarWTSAP(S.movil, bod);
-  await EnvWTSAP_FILE(S.movil, pdf, "RECIBO DE CAJA " + Tid, "PAGO EXITOSO");
+  await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {
@@ -8142,12 +7582,11 @@ async function Bonos(pin, lote) {
   }
 }
 var normalize = (function () {
-  var from = "ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç",
-    to = "AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuuNnCc",
+  var from = 'ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç',
+    to = 'AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuuNnCc',
     mapping = {};
 
-  for (var i = 0, j = from.length; i < j; i++)
-    mapping[from.charAt(i)] = to.charAt(i);
+  for (var i = 0, j = from.length; i < j; i++) mapping[from.charAt(i)] = to.charAt(i);
 
   return function (str) {
     var ret = [];
@@ -8156,7 +7595,7 @@ var normalize = (function () {
       if (mapping.hasOwnProperty(str.charAt(i))) ret.push(mapping[c]);
       else ret.push(c);
     }
-    return ret.join("");
+    return ret.join('');
   };
 })();
 //Desendentes('97890290003800000154', 10) 82113863080099902022
@@ -8169,8 +7608,8 @@ async function Desendentes(pin, stados, pasado) {
   var corte,
     cort = 0,
     cortp = 0,
-    rangofchs = "";
-  var hoy = moment().format("YYYY-MM-DD");
+    rangofchs = '';
+  var hoy = moment().format('YYYY-MM-DD');
   var venta = 0,
     bono = 0,
     bonop = 0,
@@ -8183,15 +7622,11 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 2:
       corte = 2;
-      rangofchs = `AND MONTH(l.fechar) IN(${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 3:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 4:
       corte1 = 1;
@@ -8199,15 +7634,11 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 5:
       corte = 2;
-      rangofchs = `AND MONTH(l.fechar) IN(${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 6:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 7:
       corte = 1;
@@ -8215,15 +7646,11 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 8:
       corte = 2;
-      rangofchs = `AND MONTH(l.fechar) IN(${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 9:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 10:
       corte = 1;
@@ -8231,15 +7658,11 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 11:
       corte = 2;
-      rangofchs = `AND MONTH(l.fechar) IN(${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 12:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
-        mes - 1
-      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     default:
       return false;
@@ -8310,12 +7733,12 @@ async function Desendentes(pin, stados, pasado) {
           var retefuenteB = montoB * 0.1;
           var reteicaB = (montoB * 8) / 1000;
 
-          var std = a.obsevacion === "CARTERA" ? 1 : 15;
+          var std = a.obsevacion === 'CARTERA' ? 1 : 15;
           var Lote = {
             directa: j.acreedor,
             uno: a.papa,
             dos: a.abuelo,
-            tres: a.bisabuelo,
+            tres: a.bisabuelo
           };
           bonop += val;
 
@@ -8323,9 +7746,9 @@ async function Desendentes(pin, stados, pasado) {
             [
               hoy,
               monto,
-              "COMISION DIRECTA",
+              'COMISION DIRECTA',
               std,
-              "VENTA DIRECTA",
+              'VENTA DIRECTA',
               j.acreedor,
               i,
               val,
@@ -8333,16 +7756,16 @@ async function Desendentes(pin, stados, pasado) {
               retefuente,
               reteica,
               monto - (retefuente + reteica),
-              a.ordn,
-            ],
+              a.ordn
+            ]
           ];
           a.papa && !a.sp && j.papa < 6
             ? f.push([
                 hoy,
                 montoP,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "PRIMERA LINEA",
+                'PRIMERA LINEA',
                 a.papa,
                 a.linea1,
                 val,
@@ -8350,16 +7773,16 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteP,
                 reteicaP,
                 montoP - (retefuenteP + reteicaP),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
           a.abuelo && !a.sa && j.abue < 6
             ? f.push([
                 hoy,
                 montoA,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "SEGUNDA LINEA",
+                'SEGUNDA LINEA',
                 a.abuelo,
                 a.linea2,
                 val,
@@ -8367,16 +7790,16 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteA,
                 reteicaA,
                 montoA - (retefuenteA + reteicaA),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
           a.bisabuelo && !a.sb && j.bisab < 6
             ? f.push([
                 hoy,
                 montoB,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "TERCERA LINEA",
+                'TERCERA LINEA',
                 a.bisabuelo,
                 a.linea3,
                 val,
@@ -8384,9 +7807,9 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteB,
                 reteicaB,
                 montoB - (retefuenteB + reteicaB),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
 
           if (a.external && !a.comiempresa) {
             var montoGE = val * a.maxcomis;
@@ -8398,17 +7821,17 @@ async function Desendentes(pin, stados, pasado) {
             f.push([
               hoy,
               montoGE,
-              "GESTION VENTAS",
+              'GESTION VENTAS',
               std,
-              "VENTA INDIRECTA",
-              "00000000000000012345",
+              'VENTA INDIRECTA',
+              '00000000000000012345',
               a.maxcomis,
               val,
               a.lote,
               ivaGE,
               0,
               montoGE + ivaGE,
-              a.ordn,
+              a.ordn
             ]);
           }
 
@@ -8422,17 +7845,17 @@ async function Desendentes(pin, stados, pasado) {
             f.push([
               hoy,
               montoST,
-              "GESTION ADMINISTRATIVA",
+              'GESTION ADMINISTRATIVA',
               8,
-              "ADMIN PROYECTOS",
-              "00000000000000012345",
+              'ADMIN PROYECTOS',
+              '00000000000000012345',
               a.sistema,
               val,
               a.lote,
               ivaST,
               0,
               montoST + ivaST,
-              a.ordn,
+              a.ordn
             ]);
           }
 
@@ -8462,9 +7885,7 @@ async function Desendentes(pin, stados, pasado) {
             INNER JOIN users u ON p.asesor = u.id
             INNER JOIN clientes c ON p.cliente = c.idc
             WHERE p.asesor = ? AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${
-              pasado ? "" : rangofchs
-            }`,
+            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${pasado ? '' : rangofchs}`,
       j.acreedor
     );
 
@@ -8479,9 +7900,7 @@ async function Desendentes(pin, stados, pasado) {
             INNER JOIN rangos r ON u.nrango = r.id 
             INNER JOIN clientes c ON p.cliente = c.idc    
             WHERE p0.acreedor = ? AND p1.acreedor IS NOT NULL AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${
-              pasado ? "" : rangofchs
-            }
+            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${pasado ? '' : rangofchs}
             ORDER BY p.id`,
       j.acreedor
     );
@@ -8498,9 +7917,7 @@ async function Desendentes(pin, stados, pasado) {
             INNER JOIN rangos r ON u.nrango = r.id 
             INNER JOIN clientes c ON p.cliente = c.idc    
             WHERE p0.acreedor = ? AND p2.acreedor IS NOT NULL AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${
-              pasado ? "" : rangofchs
-            }
+            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${pasado ? '' : rangofchs}
             ORDER BY p.id`,
       j.acreedor
     );
@@ -8518,9 +7935,7 @@ async function Desendentes(pin, stados, pasado) {
             INNER JOIN rangos r ON u.nrango = r.id 
             INNER JOIN clientes c ON p.cliente = c.idc    
             WHERE p0.acreedor = ? AND p3.acreedor IS NOT NULL AND l.estado IN(10, 13) 
-            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${
-              pasado ? "" : rangofchs
-            }
+            AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${pasado ? '' : rangofchs}
             ORDER BY p.id`,
       j.acreedor
     );
@@ -8551,12 +7966,12 @@ async function Desendentes(pin, stados, pasado) {
           var retefuenteB = montoB * 0.1;
           var reteicaB = (montoB * 8) / 1000;
 
-          var std = a.obsevacion === "CARTERA" ? 1 : 15;
+          var std = a.obsevacion === 'CARTERA' ? 1 : 15;
           var Lote = {
             directa: j.acreedor,
             uno: a.papa,
             dos: a.abuelo,
-            tres: a.bisabuelo,
+            tres: a.bisabuelo
           };
           bonop += val;
 
@@ -8564,9 +7979,9 @@ async function Desendentes(pin, stados, pasado) {
             [
               hoy,
               monto,
-              "COMISION DIRECTA",
+              'COMISION DIRECTA',
               std,
-              "VENTA DIRECTA",
+              'VENTA DIRECTA',
               j.acreedor,
               a.comision,
               val,
@@ -8574,16 +7989,16 @@ async function Desendentes(pin, stados, pasado) {
               retefuente,
               reteica,
               monto - (retefuente + reteica),
-              a.ordn,
-            ],
+              a.ordn
+            ]
           ];
           a.papa && !a.sp && j.papa < 6
             ? f.push([
                 hoy,
                 montoP,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "PRIMERA LINEA",
+                'PRIMERA LINEA',
                 a.papa,
                 a.linea1,
                 val,
@@ -8591,16 +8006,16 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteP,
                 reteicaP,
                 montoP - (retefuenteP + reteicaP),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
           a.abuelo && !a.sa && j.abue < 6
             ? f.push([
                 hoy,
                 montoA,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "SEGUNDA LINEA",
+                'SEGUNDA LINEA',
                 a.abuelo,
                 a.linea2,
                 val,
@@ -8608,16 +8023,16 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteA,
                 reteicaA,
                 montoA - (retefuenteA + reteicaA),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
           a.bisabuelo && !a.sb && j.bisab < 6
             ? f.push([
                 hoy,
                 montoB,
-                "COMISION INDIRECTA",
+                'COMISION INDIRECTA',
                 std,
-                "TERCERA LINEA",
+                'TERCERA LINEA',
                 a.bisabuelo,
                 a.linea3,
                 val,
@@ -8625,9 +8040,9 @@ async function Desendentes(pin, stados, pasado) {
                 retefuenteB,
                 reteicaB,
                 montoB - (retefuenteB + reteicaB),
-                a.ordn,
+                a.ordn
               ])
-            : "";
+            : '';
 
           if (a.bonoextra > 0.0 && !a.sucursal && a.bextra > 0) {
             montoC = val * a.bonoextra;
@@ -8636,9 +8051,9 @@ async function Desendentes(pin, stados, pasado) {
             f.push([
               hoy,
               montoC,
-              "BONO EXTRA",
+              'BONO EXTRA',
               std,
-              "VENTA DIRECTA",
+              'VENTA DIRECTA',
               j.acreedor,
               a.bonoextra,
               val,
@@ -8646,7 +8061,7 @@ async function Desendentes(pin, stados, pasado) {
               retefuenteC,
               reteicaC,
               montoC - (retefuenteC + reteicaC),
-              a.ordn,
+              a.ordn
             ]);
           }
 
@@ -8660,17 +8075,17 @@ async function Desendentes(pin, stados, pasado) {
             f.push([
               hoy,
               montoGE,
-              "GESTION VENTAS",
+              'GESTION VENTAS',
               std,
-              "VENTA INDIRECTA",
-              "00000000000000012345",
+              'VENTA INDIRECTA',
+              '00000000000000012345',
               a.maxcomis,
               val,
               a.lote,
               ivaGE,
               0,
               montoGE + ivaGE,
-              a.ordn,
+              a.ordn
             ]);
           }
 
@@ -8684,17 +8099,17 @@ async function Desendentes(pin, stados, pasado) {
             f.push([
               hoy,
               montoST,
-              "GESTION ADMINISTRATIVA",
+              'GESTION ADMINISTRATIVA',
               8,
-              "ADMIN PROYECTOS",
-              "00000000000000012345",
+              'ADMIN PROYECTOS',
+              '00000000000000012345',
               a.sistema,
               val,
               a.lote,
               ivaST,
               0,
               montoST + ivaST,
-              a.ordn,
+              a.ordn
             ]);
           }
 
@@ -8718,14 +8133,14 @@ async function Desendentes(pin, stados, pasado) {
           var monto = val * a.linea1;
           var retefuente = monto * 0.1;
           var reteica = (monto * 8) / 1000;
-          var std = a.obsevacion === "CARTERA" ? 1 : 15;
+          var std = a.obsevacion === 'CARTERA' ? 1 : 15;
           bono += val;
           var f = {
             fech: hoy,
             monto,
-            concepto: "COMISION INDIRECTA",
+            concepto: 'COMISION INDIRECTA',
             stado: std,
-            descp: "PRIMERA LINEA",
+            descp: 'PRIMERA LINEA',
             asesor: j.acreedor,
             porciento: a.linea1,
             total: val,
@@ -8733,12 +8148,9 @@ async function Desendentes(pin, stados, pasado) {
             retefuente,
             reteica,
             pagar: monto - (retefuente + reteica),
-            orden: a.ordn,
+            orden: a.ordn
           };
-          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
-            { uno: j.acreedor },
-            a.lote,
-          ]);
+          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ uno: j.acreedor }, a.lote]);
           pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
         if (a.mes === mes) {
@@ -8755,14 +8167,14 @@ async function Desendentes(pin, stados, pasado) {
           var monto = val * a.linea2;
           var retefuente = monto * 0.1;
           var reteica = (monto * 8) / 1000;
-          var std = a.obsevacion === "CARTERA" ? 1 : 15;
+          var std = a.obsevacion === 'CARTERA' ? 1 : 15;
           bono += val;
           var f = {
             fech: hoy,
             monto,
-            concepto: "COMISION INDIRECTA",
+            concepto: 'COMISION INDIRECTA',
             stado: std,
-            descp: "SEGUNDA LINEA",
+            descp: 'SEGUNDA LINEA',
             asesor: j.acreedor,
             porciento: a.linea2,
             total: val,
@@ -8770,12 +8182,9 @@ async function Desendentes(pin, stados, pasado) {
             retefuente,
             reteica,
             pagar: monto - (retefuente + reteica),
-            orden: a.ordn,
+            orden: a.ordn
           };
-          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
-            { dos: j.acreedor },
-            a.lote,
-          ]);
+          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ dos: j.acreedor }, a.lote]);
           pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
         if (a.mes === mes) {
@@ -8792,14 +8201,14 @@ async function Desendentes(pin, stados, pasado) {
           var monto = val * a.linea3;
           var retefuente = monto * 0.1;
           var reteica = (monto * 8) / 1000;
-          var std = a.obsevacion === "CARTERA" ? 1 : 15;
+          var std = a.obsevacion === 'CARTERA' ? 1 : 15;
           bono += val;
           var f = {
             fech: hoy,
             monto,
-            concepto: "COMISION INDIRECTA",
+            concepto: 'COMISION INDIRECTA',
             stado: std,
-            descp: "TERCERA LINEA",
+            descp: 'TERCERA LINEA',
             asesor: j.acreedor,
             porciento: a.linea3,
             total: val,
@@ -8807,12 +8216,9 @@ async function Desendentes(pin, stados, pasado) {
             retefuente,
             reteica,
             pagar: monto - (retefuente + reteica),
-            orden: a.ordn,
+            orden: a.ordn
           };
-          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
-            { tres: j.acreedor },
-            a.lote,
-          ]);
+          pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ tres: j.acreedor }, a.lote]);
           pool.query(`INSERT INTO solicitudes SET ?`, f);
         }
         if (a.mes === mes) {
@@ -8822,29 +8228,16 @@ async function Desendentes(pin, stados, pasado) {
       });
     }
 
-    var rangoniveles = await [
-      Math.max(...repor1),
-      Math.max(...repor2),
-      Math.max(...repor3),
-    ];
+    var rangoniveles = await [Math.max(...repor1), Math.max(...repor2), Math.max(...repor3)];
     var v = {
       totalcorte: venta + personal,
       totalcortep: personal,
       rangoabajo: await Math.max(...rangoniveles),
-      cortep: cortp,
+      cortep: cortp
     };
-    corte === 1
-      ? (v.corte1 = cort)
-      : corte === 2
-      ? (v.corte2 = cort)
-      : corte === 3
-      ? (v.corte3 = cort)
-      : "";
+    corte === 1 ? (v.corte1 = cort) : corte === 2 ? (v.corte2 = cort) : corte === 3 ? (v.corte3 = cort) : '';
 
-    await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [
-      v,
-      pin,
-    ]);
+    await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]);
     return true;
   }
   /////////////////////////* PREMIOS *///////////////////////////////////
@@ -8879,78 +8272,66 @@ async function Eli(img) {
     if (exists) {
       fs.unlink(img, function (err) {
         if (err) throw err;
-        console.log("Archivo eliminado");
-        return "Archivo eliminado";
+        console.log('Archivo eliminado');
+        return 'Archivo eliminado';
       });
     } else {
-      console.log("El archivo no exise");
-      return "El archivo no exise";
+      console.log('El archivo no exise');
+      return 'El archivo no exise';
     }
   });
 }
 function Moneda(valor) {
   valor = valor
     .toString()
-    .split("")
+    .split('')
     .reverse()
-    .join("")
-    .replace(/(?=\d*\.?)(\d{3})/g, "$1.");
-  valor = valor.split("").reverse().join("").replace(/^[\.]/, "");
+    .join('')
+    .replace(/(?=\d*\.?)(\d{3})/g, '$1.');
+  valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
 }
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
   let cel = 0;
   movil
-    ? (cel =
-        movil.indexOf("-") > 0
-          ? "57" + movil.replace(/-/g, "")
-          : movil.indexOf(" ") > 0
-          ? movil
-          : "57" + movil)
-    : "";
+    ? (cel = movil.indexOf('-') > 0 ? '57' + movil.replace(/-/g, '') : movil.indexOf(' ') > 0 ? movil : '57' + movil)
+    : '';
 
   let options = {
-    method: "POST",
-    url: "https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0",
+    method: 'POST',
+    url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
     data: {
-      body,
-    },
+      body
+    }
   };
 
-  q ? (options.data.quotedMsgId = q) : "";
+  q ? (options.data.quotedMsgId = q) : '';
   chatid ? (options.data.chatId = chatid) : (options.data.phone = cel);
 
-  const tt = await axios(options);
-  smsj ? await sms(desarrollo ? "57 3012673944" : cel, smsj) : "";
-  return tt.data;
+  //const tt = await axios(options);
+  //smsj ? await sms(desarrollo ? "57 3012673944" : cel, smsj) : "";
+  //return tt.data;
+  return true;
 }
 async function EnvWTSAP_FILE(movil, body, filename, caption) {
   let cel = 0;
   movil
-    ? (cel =
-        movil.indexOf("-") > 0
-          ? "57" + movil.replace(/-/g, "")
-          : movil.indexOf(" ") > 0
-          ? movil
-          : "57" + movil)
-    : "";
+    ? (cel = movil.indexOf('-') > 0 ? '57' + movil.replace(/-/g, '') : movil.indexOf(' ') > 0 ? movil : '57' + movil)
+    : '';
 
   let options = {
-    method: "POST",
-    url: "https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0",
+    method: 'POST',
+    url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
     data: {
       phone: cel,
       body, //`https://grupoelitered.com.co/uploads/0erdlw-york61mn26n46v141lap-gvk-ro.pdf`,
       filename,
-      caption,
-    },
+      caption
+    }
   };
-  const tt = await axios(options);
-  return tt.data;
-  /* request(options, function (error, response, body) {
-        if (error) return console.error('Failed: %s', error.message);
-        console.log('Success: ', body);
-    }); */
+  //const tt = await axios(options);
+  //return tt.data;
+  return true;
 }
 //s = `SELECT * FROM solicitudes s WHERE s.fech LIKE '%2021-11-03 16:%' ORDER BY ids DESC`
 module.exports = router;
