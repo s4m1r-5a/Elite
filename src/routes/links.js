@@ -6867,7 +6867,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ fecharcb: fecha }, id]);
     res.send(true);
   } else if (id === 'informe') {
-    informes(req.body);
+    const ruta = await informes(req.body);
+    console.log(ruta);
     res.send({ r: true, m: 'todo salio bien', data: `/uploads/informes.pdf` });
   }
 });

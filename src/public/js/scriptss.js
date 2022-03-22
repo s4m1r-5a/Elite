@@ -13262,13 +13262,31 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     ]
   });
   var generarInforme = () => {
-    const filas = table.rows({ search: 'applied' }).data();
-    const rows = []; //
-
+    const filas = table.column(0, { search: 'applied' }).data(); //.rows({ search: 'applied' }).data(ids);
+    const rows = [];
     filas.map(a => rows.push(a));
+    const datos = { datos: JSON.stringify(rows), maxDateFilter, minDateFilter };
+
+    if (!maxDateFilter || !minDateFilter) {
+      const fechas = table
+        .column(4, { search: 'applied' })
+        .data()
+        .filter(r => r);
+
+      const min = fechas.reduce(function (valor1, valor2) {
+        return new Date(valor1) < new Date(valor2) ? valor1 : valor2;
+      });
+      const max = fechas.reduce(function (valor1, valor2) {
+        return new Date(valor1) > new Date(valor2) ? valor1 : valor2;
+      });
+
+      datos.minDateFilter = new Date(min).getTime();
+      datos.maxDateFilter = new Date(max).getTime();
+      console.log(datos.minDateFilter, datos.maxDateFilter);
+    }
     $.ajax({
       url: '/links/solicitudes/informe',
-      data: { datos: JSON.stringify(rows), maxDateFilter, minDateFilter },
+      data: datos,
       type: 'POST',
       beforeSend: function (xhr) {
         $('#ModalEventos').modal({
@@ -13943,7 +13961,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       maxDateFilter = new Date(end).getTime();
       minDateFilter = new Date(start).getTime();
       table.draw();
-      console.log(maxDateFilter, minDateFilter);
+      //console.log(maxDateFilter, minDateFilter);
       $('#Date_search').val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     }
   );
