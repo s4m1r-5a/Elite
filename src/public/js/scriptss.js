@@ -37,7 +37,9 @@ function titleCase(texto) {
     // => dejar el caracter previo como está.
     // => si la primera letra es minúscula, capitalizar
     //    sino, dejar como está.
-    return caracterPrevio + (minuscInicial ? minuscInicial.toLocaleUpperCase(locale) : mayuscInicial);
+    return (
+      caracterPrevio + (minuscInicial ? minuscInicial.toLocaleUpperCase(locale) : mayuscInicial)
+    );
   });
 }
 function init_events(ele) {
@@ -305,7 +307,9 @@ $(document).ready(function () {
                             }');"></div>
                             <div class="badge"></div>
                             <div class="name">${x.name}</div>
-                            <div class="message">${x.metadata.isGroup ? 'Group' : 'Person'} 🍑 ${fecha}</div>
+                            <div class="message">${
+                              x.metadata.isGroup ? 'Group' : 'Person'
+                            } 🍑 ${fecha}</div>
                             <input type="hidden" class="tiempo" value="${x.last_time * 1000}">
                             <input type="hidden" class="idOrg" value="${x.id}">
                         </div>`
@@ -358,7 +362,10 @@ var Chatid = (id, id2, img, name, tiempo) => {
                                 /[^a-zA-Z 0-9]+/g,
                                 ''
                               )}">${body} &nbsp&nbsp&nbsp<small class="float-right"> ${f} &nbsp<i class="${icons} fa-copyright"></i></small></div>`
-                            : `<div class="message stark" id="${x.id.replace(/[^a-zA-Z 0-9]+/g, '')}">${
+                            : `<div class="message stark" id="${x.id.replace(
+                                /[^a-zA-Z 0-9]+/g,
+                                ''
+                              )}">${
                                 x.body
                               } &nbsp&nbsp&nbsp<small class="float-right"> ${f}</small></div>`
                         }`
@@ -595,7 +602,10 @@ $(document).ready(function () {
   var coun = 0;
   $('#pedircupon').click(function () {
     if (!cli) {
-      SMSj('error', 'No puedes solicitar un CUPON sin haber completado tu registro primero. Actualiza tus datos');
+      SMSj(
+        'error',
+        'No puedes solicitar un CUPON sin haber completado tu registro primero. Actualiza tus datos'
+      );
       $('#AddClientes').modal({
         backdrop: 'static',
         keyboard: true,
@@ -847,7 +857,20 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
       new Chart(document.getElementById('chartjs-dashboard-bar'), {
         type: 'bar',
         data: {
-          labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'],
+          labels: [
+            'Ene',
+            'Feb',
+            'Mar',
+            'Abr',
+            'May',
+            'Jun',
+            'Jul',
+            'Ago',
+            'Sep',
+            'Oct',
+            'Nov',
+            'Dic'
+          ],
           datasets: [
             {
               label: 'Directas',
@@ -939,7 +962,12 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
         Moneda($('.c' + m).val()),
         Moneda(reportes[fe].total)
       ],
-      backgroundColor: [window.theme.primary, window.theme.error, window.theme.info, window.theme.success],
+      backgroundColor: [
+        window.theme.primary,
+        window.theme.error,
+        window.theme.info,
+        window.theme.success
+      ],
       borderColor: 'transparent'
     };
     datos.data.datasets.push(newData);
@@ -1262,7 +1290,9 @@ if (window.location.pathname == `/links/pagos`) {
               $('#Email').val(data.client.email);
               data.d.map(r => {
                 $('#proyectos').append(
-                  `<option value="${r.id}">${r.proyect}  ${r.mz == 'no' ? '' : ' Mz. ' + r.mz} Lt. ${r.n}</option>`
+                  `<option value="${r.id}">${r.proyect}  ${
+                    r.mz == 'no' ? '' : ' Mz. ' + r.mz
+                  } Lt. ${r.n}</option>`
                 );
               });
               var Calculo = m => {
@@ -1417,7 +1447,10 @@ if (window.location.pathname == `/links/pagos`) {
               if (data) {
                 $('#ModalEventos').modal('hide');
                 if (T2) {
-                  SMSj('success', `El bono fue redimido exitosamente, continue con el resto del pago`);
+                  SMSj(
+                    'success',
+                    `El bono fue redimido exitosamente, continue con el resto del pago`
+                  );
                   bono = 0;
                   skdt = true;
                   $('#smartwizard').smartWizard('next');
@@ -1438,7 +1471,10 @@ if (window.location.pathname == `/links/pagos`) {
           $('.sw-btn-next').hide();
         } else {
           skdt = false;
-          SMSj('error', `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`);
+          SMSj(
+            'error',
+            `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`
+          );
         }
       } else if (currentStepNumber === 2) {
         //alert(currentStepNumber);
@@ -1643,7 +1679,9 @@ if (window.location.pathname == `/links/pagos`) {
           });
           $('.recis').on('change', function () {
             $(this).parents('.card').find('.rcbexcdnt').val($(this).val());
-            $(this).parents('.card').find('.rcbexcdnt').is(':checked') ? $('#rcbexcdnt').val($(this).val()) : '';
+            $(this).parents('.card').find('.rcbexcdnt').is(':checked')
+              ? $('#rcbexcdnt').val($(this).val())
+              : '';
             var avl = '';
             $('.recis').map(function () {
               s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
@@ -1744,13 +1782,19 @@ if (window.location.pathname == `/links/pagos`) {
             }
           } else {
             DT();
-            SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado');
+            SMSj(
+              'error',
+              'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado'
+            );
           }
         }
       });
     } else {
       DT();
-      SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado');
+      SMSj(
+        'error',
+        'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
+      );
     }
   });
   $('#payu').submit(function (e) {
@@ -1837,7 +1881,10 @@ if (window.location.pathname == `/links/pagos`) {
             window.location.href = data.href;
           }, 2000);
         } else {
-          SMSj('error', 'Existe un error. No es posible continuar, intenta con un metodo de pago diferente');
+          SMSj(
+            'error',
+            'Existe un error. No es posible continuar, intenta con un metodo de pago diferente'
+          );
           $('#ModalEventos').hide();
           setTimeout(function () {
             $('#ModalEventos').modal('hide');
@@ -1973,7 +2020,9 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
                         onclick="STAD3('#comisiones', 13, '${d}')"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
               );
             });
-          $('#men2').append(`<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
+          $(
+            '#men2'
+          ).append(`<a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
                 onclick="STAD3('#comisiones', 13, '')"><i class="fas fa-undo"></i> Todos</a>`);
         });
     },
@@ -2465,7 +2514,11 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
                 doc.setFontSize(10);
                 doc.text('Nit: 901311748-3', data.settings.margin.left, 50);
                 doc.setFontSize(8);
-                doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53);
+                doc.text(
+                  `Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`,
+                  data.settings.margin.left,
+                  53
+                );
 
                 doc.setFontSize(10);
                 doc.text('DEBE A:', data.settings.margin.left, 63);
@@ -2479,7 +2532,11 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
                 doc.text(EMAIL, data.settings.margin.left, 81);
 
                 doc.setFontSize(9);
-                doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90);
+                doc.text(
+                  'A continuacion se detalla el concepto del total adeudado',
+                  data.settings.margin.left,
+                  90
+                );
 
                 // Footer
                 var str = 'Page ' + doc.internal.getNumberOfPages();
@@ -2527,7 +2584,10 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
             });
           } else {
             $('#ModalEventos').modal('hide');
-            SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+            SMSj(
+              'error',
+              `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+            );
           }
         },
         error: function (data) {
@@ -3333,7 +3393,9 @@ if (window.location.pathname === `/links/reportes`) {
         });
       }
       var caso = data['meses'];
-      var msg = caso ? `Se encuentra retrasado ${caso} mes(es) en sus pagos` : 'Se encuentra al dia con sus pagos';
+      var msg = caso
+        ? `Se encuentra retrasado ${caso} mes(es) en sus pagos`
+        : 'Se encuentra al dia con sus pagos';
       switch (true) {
         case caso >= 10:
           return $(row).find(`.deuda`).prop('title', msg).css({
@@ -3466,7 +3528,9 @@ if (window.location.pathname === `/links/reportes`) {
                         onclick="STAD('#datatable2', 2, ${d})"><i class="fas fa-home"></i> ${d.toLowerCase()}</a>`
               );
             });
-          $('#menu2').append(`<a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0">
+          $(
+            '#menu2'
+          ).append(`<a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0">
                     <i class="fas fa-undo"></i> Todos</a>`);
 
           productos.val(null).trigger('change');
@@ -3915,15 +3979,21 @@ if (window.location.pathname === `/links/reportes`) {
                                         <div class="card-body text-primary h4">
                                             <div class="mb-0">                                          
                                                 <span class="align-middle text-dark">DESCUENTOS</span>
-                                                <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                                <span class="align-middle text-danger">$${Moneda(
+                                                  descuentos
+                                                )}</span>
                                             </div>
                                             <div class="mb-0">
                                                 <span class="align-middle text-dark">TOTALES</span>
-                                                <span class="align-middle card-text">$${Moneda(total)}</span>
+                                                <span class="align-middle card-text">$${Moneda(
+                                                  total
+                                                )}</span>
                                             </div>
                                             <div class="mb-0">
                                                 <span class="align-middle text-dark">ABONOS</span>
-                                                <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                                <span class="align-middle text-success">$${Moneda(
+                                                  abonos
+                                                )}</span>
                                             </div>
                                             <div class="mb-0">
                                                 <span class="align-middle text-dark">SALDOS</span>
@@ -4283,7 +4353,9 @@ if (window.location.pathname === `/links/reportes`) {
                                 <td colspan="15">
                                     <nav class="nav nav-justified">
                                         <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                        <a class="nav-item nav-link py-0">$${Moneda(totaloteanterior - vlr)}</a>
+                                        <a class="nav-item nav-link py-0">$${Moneda(
+                                          totaloteanterior - vlr
+                                        )}</a>
                                     </nav>
                                 </td>
                             </tr>
@@ -4352,10 +4424,12 @@ if (window.location.pathname === `/links/reportes`) {
                             <td colspan="15">
                                 <nav class="nav flex-column flex-sm-row">
                                     <a class="flex-sm-fill text-sm-center nav-link py-0">${group}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].proyect}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${datos[i].mz} - LT: ${
-                datos[i].n
-              }</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${
+                                      datos[i].proyect
+                                    }</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${
+                                      datos[i].mz
+                                    } - LT: ${datos[i].n}</a>
                                     <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${Moneda(
                                       datos[i].valor
                                     )}</a>
@@ -4369,7 +4443,9 @@ if (window.location.pathname === `/links/reportes`) {
                                     <a class="flex-sm-fill text-sm-center nav-link py-0">DSTO: ${
                                       datos[i].descuento
                                     }%</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">CUPON: ${datos[i].cupon}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">CUPON: ${
+                                      datos[i].cupon
+                                    }</a>
                                     <a class="flex-sm-fill text-sm-center nav-link py-0">AHORRO: $${Moneda(
                                       datos[i].ahorro
                                     )}</a>
@@ -4379,9 +4455,9 @@ if (window.location.pathname === `/links/reportes`) {
                                 </nav>
                             </td>
                         </tr>
-                        <tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${
-                datos[i].img
-              }', '${datos[i].id}')">
+                        <tr class="pago" style="background: #40E0D0;" onclick="Pago(${
+                          datos[i].ids
+                        }, '${datos[i].img}', '${datos[i].id}')">
                             <td colspan="15">
                                 <nav class="nav nav-justified">
                                     <a class="nav-item nav-link py-0">${gt2}</a>
@@ -4391,7 +4467,9 @@ if (window.location.pathname === `/links/reportes`) {
                                       datos[i].formap === 'BONO'
                                         ? Moneda(datos[i].mtb)
                                         : datos[i].mtb
-                                        ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                        ? Moneda(
+                                            parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
+                                          )
                                         : Moneda(datos[i].monto)
                                     }</a>
                                 </nav>
@@ -4566,9 +4644,9 @@ if (window.location.pathname === `/links/reportes`) {
           $(rows)
             .eq(i - 1)
             .after(
-              `<tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${datos[i].img}', '${
-                datos[i].id
-              }')">
+              `<tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${
+                datos[i].img
+              }', '${datos[i].id}')">
                             <td colspan="15">
                                 <nav class="nav nav-justified">
                                     <a class="nav-item nav-link py-0">${gt2}</a>
@@ -4578,7 +4656,9 @@ if (window.location.pathname === `/links/reportes`) {
                                       datos[i].formap === 'BONO'
                                         ? Moneda(datos[i].mtb)
                                         : datos[i].mtb
-                                        ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
+                                        ? Moneda(
+                                            parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
+                                          )
                                         : Moneda(datos[i].monto)
                                     }</a>
                                 </nav>
@@ -4676,7 +4756,9 @@ if (window.location.pathname === `/links/reportes`) {
                             <td colspan="15">
                                 <nav class="nav nav-justified">
                                     <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                    <a class="nav-item nav-link py-0">$${Moneda(parseFloat(datos[i].total) - vlr)}</a>
+                                    <a class="nav-item nav-link py-0">$${Moneda(
+                                      parseFloat(datos[i].total) - vlr
+                                    )}</a>
                                 </nav>
                             </td>
                         </tr>
@@ -4906,7 +4988,9 @@ if (window.location.pathname === `/links/reportes`) {
                         <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path>
                         <line x1="7" y1="7" x2="7.01" y2="7"></line></svg>
                         <input class="recis text-center" type="text" name="nrecibo" placeholder="Recibo"
-                         autocomplete="off" style="padding: 1px; width: 60%;" value="${data.rcb}" required>
+                         autocomplete="off" style="padding: 1px; width: 60%;" value="${
+                           data.rcb
+                         }" required>
                         </th>
                     </tr>
                     <tr class="op">
@@ -4914,7 +4998,9 @@ if (window.location.pathname === `/links/reportes`) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" 
                             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-dollar-sign">
                             <line x1="12" y1="1" x2="12" y2="23"></line><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"></path></svg>
-                            <input class="montos text-center" type="text" name="montos" value="${Moneda(data.mounto)}"
+                            <input class="montos text-center" type="text" name="montos" value="${Moneda(
+                              data.mounto
+                            )}"
                              placeholder="Monto" autocomplete="off" style="padding: 1px; width: 60%;" required>
                         </th>
                         </td>
@@ -5142,10 +5228,16 @@ if (window.location.pathname === `/links/reportes`) {
       startDate: start,
       endDate: end,
       ranges: {
-        Ayer: [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
         'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
         'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
-        'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
         'Este Mes': [moment().startOf('month'), moment().endOf('month')],
         Hoy: [moment().startOf('days'), moment().endOf('days')]
       }
@@ -5603,7 +5695,9 @@ if (window.location.pathname === `/links/reportes`) {
               $('#ModalEventos').modal('hide');
               SMSj('success', data.m);
             } else if (data.m === 'Codigo enviado') {
-              var Code = prompt('Digite el codigo de autorizacion para realizar la eliminacion de la orden');
+              var Code = prompt(
+                'Digite el codigo de autorizacion para realizar la eliminacion de la orden'
+              );
               if (Code) {
                 D.code = Code;
                 $.ajax({
@@ -5658,7 +5752,10 @@ if (window.location.pathname === `/links/reportes`) {
           } else {
             $('#ModalEventos').modal('hide');
             tableOrden.ajax.reload(null, false);
-            SMSj('error', 'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor');
+            SMSj(
+              'error',
+              'no es posible cambiar su estado ya que esta comicion fue desembolsada al asesor'
+            );
           }
         }
       });
@@ -6646,13 +6743,21 @@ if (window.location.pathname === `/links/reportes`) {
                   doc.setFontSize(15);
                   doc.text('CUENTA DE COBRO ' + dat.id, 105, 25, null, null, 'center');
                   doc.setFontSize(9);
-                  doc.text(moment().format('YYYY-MM-DD HH:mm'), data.settings.margin.left + 155, 38);
+                  doc.text(
+                    moment().format('YYYY-MM-DD HH:mm'),
+                    data.settings.margin.left + 155,
+                    38
+                  );
                   doc.setFontSize(12);
                   doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left, 45);
                   doc.setFontSize(10);
                   doc.text('Nit: 901311748-3', data.settings.margin.left, 50);
                   doc.setFontSize(8);
-                  doc.text(`Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`, data.settings.margin.left, 53);
+                  doc.text(
+                    `Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`,
+                    data.settings.margin.left,
+                    53
+                  );
 
                   doc.setFontSize(10);
                   doc.text('DEBE A:', data.settings.margin.left, 63);
@@ -6666,7 +6771,11 @@ if (window.location.pathname === `/links/reportes`) {
                   doc.text(EMAIL, data.settings.margin.left, 81);
 
                   doc.setFontSize(9);
-                  doc.text('A continuacion se detalla el concepto del total adeudado', data.settings.margin.left, 90);
+                  doc.text(
+                    'A continuacion se detalla el concepto del total adeudado',
+                    data.settings.margin.left,
+                    90
+                  );
 
                   // Footer
                   var str = 'Page ' + doc.internal.getNumberOfPages();
@@ -6714,7 +6823,10 @@ if (window.location.pathname === `/links/reportes`) {
               });
             } else {
               $('#ModalEventos').modal('hide');
-              SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+              SMSj(
+                'error',
+                `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+              );
             }
           },
           error: function (data) {
@@ -6932,7 +7044,10 @@ if (window.location.pathname === `/links/reportes`) {
   });
 }
 /////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}` && !rol.externo) {
+if (
+  window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}` &&
+  !rol.externo
+) {
   minDateFilter = '';
   maxDateFilter = '';
   $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
@@ -6967,7 +7082,8 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
   var status = $('#status').val();
   const kupon = $('#kupon').val();
   var cuota = $('#cuota').val();
-  const pin = $('#pin').val() === 'NO' || !$('#pin').val() || $('#pin').val() === '' ? 0 : $('#pin').val();
+  const pin =
+    $('#pin').val() === 'NO' || !$('#pin').val() || $('#pin').val() === '' ? 0 : $('#pin').val();
   var OrdnSepr = $('#ID-Sep').val();
   var prodct = $('#prodct').val() || 0;
   var ecesr = $('#ecesr').val() || 0;
@@ -7032,7 +7148,8 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
   $(document).ready(function () {
     var bono = 0;
     $('.select2').each(function () {
-      var texto = $(this).attr('id') === 'clientes' ? 'Seleccion de Clientes' : 'Selecciona un Producto';
+      var texto =
+        $(this).attr('id') === 'clientes' ? 'Seleccion de Clientes' : 'Selecciona un Producto';
       $(this)
         .wrap('<div class="position-relative"></div>')
         .select2({
@@ -7216,13 +7333,19 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
               }
               bono = data[0].pin;
             } else {
-              SMSj('error', 'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado');
+              SMSj(
+                'error',
+                'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado'
+              );
               kuponDto = false;
             }
           }
         });
       } else {
-        SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado');
+        SMSj(
+          'error',
+          'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
+        );
 
         bono !== 0 ? $(this).val(bono) : '';
         Totales(total, kuponDto, dto);
@@ -7314,7 +7437,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" value="${x.fechs}" required>`,
         `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${x.ncuota}" required>`,
         `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${x.tipo}">`,
-        `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;"  ${!v ? 'id="Separar"' : ''} 
+        `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;"  ${
+          !v ? 'id="Separar"' : ''
+        } 
                 data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" value="${Moneda(
                   x.proyeccion
                 )}" required>`,
@@ -7384,7 +7509,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
           if (last !== group) {
             $(rows)
               .eq(i)
-              .before('<tr class="group"><td colspan="8">' + $(group).val() || group + '</td></tr>');
+              .before(
+                '<tr class="group"><td colspan="8">' + $(group).val() || group + '</td></tr>'
+              );
 
             last = group;
           }
@@ -7552,7 +7679,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
               : $(i).find(`.cuota`).val().length > 3
               ? $(i).find(`.cuota`).val().replace(/\./g, '')
               : $(i).find(`.cuota`).val();
-          return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai && realcuotai > 0;
+          return (
+            $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai && realcuotai > 0
+          );
         })
         .map((c, i) => {
           num = c + 1;
@@ -7640,7 +7769,11 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
               : $(i).find(`.cuota`).val().length > 3
               ? $(i).find(`.cuota`).val().replace(/\./g, '')
               : $(i).find(`.cuota`).val();
-          return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) !== realcuotaf && realcuotaf > 0;
+          return (
+            $(i).find(`.tipo`).val() === 'FINANCIACION' &&
+            parseFloat(e) !== realcuotaf &&
+            realcuotaf > 0
+          );
         })
         .map((c, i) => {
           num = c + 1;
@@ -7914,7 +8047,9 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
 if (
   window.location.pathname ==
-  `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}/${window.location.pathname.split('/')[4]}`
+  `/links/ordendeseparacion/${window.location.pathname.split('/')[3]}/${
+    window.location.pathname.split('/')[4]
+  }`
 ) {
   $('footer').hide();
   $('nav').hide();
@@ -8148,7 +8283,8 @@ if (window.location.pathname == `/links/cartera`) {
   $(document).ready(function () {
     var bono = 0;
     $('.select2').each(function () {
-      var texto = $(this).attr('id') === 'clientes' ? 'Seleccion de Clientes' : 'Selecciona un Producto';
+      var texto =
+        $(this).attr('id') === 'clientes' ? 'Seleccion de Clientes' : 'Selecciona un Producto';
       $(this)
         .wrap('<div class="position-relative"></div>')
         .select2({
@@ -8269,12 +8405,18 @@ if (window.location.pathname == `/links/cartera`) {
               }
               bono = data[0].pin;
             } else {
-              SMSj('error', 'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado');
+              SMSj(
+                'error',
+                'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado'
+              );
             }
           }
         });
       } else {
-        SMSj('error', 'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado');
+        SMSj(
+          'error',
+          'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
+        );
         bono !== 0 ? $(this).val(bono) : '';
       }
     });
@@ -8736,7 +8878,8 @@ if (window.location.pathname == `/links/cartera`) {
       }
       $('#crearcartera .tabl tr').each((e, i) => {
         var tpo = $(i).find(`.tipo`).val();
-        var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
+        var cuota =
+          tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
         if (montorecibos > 0 && tpo !== undefined) {
           if (montorecibos >= cuota) {
             $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
@@ -8808,7 +8951,8 @@ if (window.location.pathname == `/links/cartera`) {
             .find(`.cuota`)
             .val(Moneda(Math.round(cuotaf)));
         }
-        var cuota = tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
+        var cuota =
+          tpo !== undefined ? parseFloat($(i).find(`.cuota`).val().replace(/\./g, '')) : 0;
         if (montorecibos > 0 && tpo !== undefined) {
           if (montorecibos >= cuota) {
             $(i).find(`.rcuota`).val($(i).find(`.cuota`).val());
@@ -8868,7 +9012,9 @@ if (window.location.pathname == `/links/cartera`) {
         datos.push([
           '',
           `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-          `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+          `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${
+            cnt ? cnt : 1
+          }" required>`,
           `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="SEPARACION">`,
           `<input class="text-center cuota" type="text" name="cuota" id="Separar" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
           `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
@@ -8888,7 +9034,9 @@ if (window.location.pathname == `/links/cartera`) {
       datos.push([
         '',
         `<input class="text-center fecha" type="text" name="fecha" style="width: 100%;" required>`,
-        `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${cnt ? cnt : 1}" required>`,
+        `<input class="text-center n" type="text" name="n" style="width: 100%;" value="${
+          cnt ? cnt : 1
+        }" required>`,
         `<input class="text-center tipo" type="hidden" name="tipo" style="width: 100%;" value="${tipo}">`,
         `<input class="text-center cuota" type="text" name="cuota" style="width: 100%;" data-mask="000.000.000" data-mask-reverse="true" data-mask-selectonfocus="true" required>`,
         `<input class="text-center rcuota" type="text" name="rcuota" style="width: 100%;" disabled>`,
@@ -9884,7 +10032,9 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
           return rol.admin
             ? `<div class="input-group">
                                 <input type="text" class="form-control-no-border text-center edi"
-                                    autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(data)}">
+                                    autocomplete="off" style="padding: 1px; width: 60px;" value="${Moneda(
+                                      data
+                                    )}">
                                 <span class="input-group-append">
                                     <button class="btn btn-primary btn-sm"
                                         type="button">ok</button>
@@ -10015,7 +10165,9 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
       {
         data: 'mtr',
         render: function (data, method, row) {
-          return `<input class="text-center mtr" value="${Moneda(data)}" type="text" name="mtr" style="width: 100%;" ${
+          return `<input class="text-center mtr" value="${Moneda(
+            data
+          )}" type="text" name="mtr" style="width: 100%;" ${
             $('.alterable').val() === 'no' ? 'disabled' : ''
           } required>`;
         }
@@ -10278,7 +10430,10 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
         });
       }
     } else {
-      SMSj('error', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible');
+      SMSj(
+        'error',
+        'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible'
+      );
     }
   });
   tabledit.on('click', 'tr span:not(.t)', function () {
@@ -10359,7 +10514,10 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
       });
       return false;
     } else {
-      SMSj('success', 'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible');
+      SMSj(
+        'success',
+        'El subproducto no se puede eliminar ya que no se encuentra en un estado disponible'
+      );
       fila.find(`.mz`).val(data.mz);
       fila.find(`.lt`).val(data.n);
       fila.find(`.mt2`).val(data.mtr2);
@@ -10390,12 +10548,30 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
       success: function (data) {
         if (data) {
           $('#ideditar').val(data.id);
-          $(`#datatabledit select[name="categoria"] option[value='${data.categoria}']`).prop('selected', true);
-          $(`#datatabledit .comision option[value='${data.comision.toString()}']`).prop('selected', true);
-          $(`#datatabledit .maxcomis option[value='${data.maxcomis.toString()}']`).prop('selected', true);
-          $(`#datatabledit .linea1 option[value='${data.linea1.toString()}']`).prop('selected', true);
-          $(`#datatabledit .linea2 option[value='${data.linea2.toString()}']`).prop('selected', true);
-          $(`#datatabledit .linea3 option[value='${data.linea3.toString()}']`).prop('selected', true);
+          $(`#datatabledit select[name="categoria"] option[value='${data.categoria}']`).prop(
+            'selected',
+            true
+          );
+          $(`#datatabledit .comision option[value='${data.comision.toString()}']`).prop(
+            'selected',
+            true
+          );
+          $(`#datatabledit .maxcomis option[value='${data.maxcomis.toString()}']`).prop(
+            'selected',
+            true
+          );
+          $(`#datatabledit .linea1 option[value='${data.linea1.toString()}']`).prop(
+            'selected',
+            true
+          );
+          $(`#datatabledit .linea2 option[value='${data.linea2.toString()}']`).prop(
+            'selected',
+            true
+          );
+          $(`#datatabledit .linea3 option[value='${data.linea3.toString()}']`).prop(
+            'selected',
+            true
+          );
           $(`#xcntag option[value='${data.porcentage.toString()}']`).prop('selected', true);
           $(`.title`).val(data.proyect);
           $('#totalmtrs2').val(data.totalmtr2);
@@ -10795,7 +10971,10 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
     });
     $('.movil, .documento').on('change', function () {
       var card = $(this).parents('div.row').attr('id');
-      if (($(this).hasClass('movil') && !$(`#${card} .documento`).val()) || $(this).hasClass('documento')) {
+      if (
+        ($(this).hasClass('movil') && !$(`#${card} .documento`).val()) ||
+        $(this).hasClass('documento')
+      ) {
         $.ajax({
           url: '/links/cel/' + $(this).cleanVal(),
           type: 'GET',
@@ -10852,7 +11031,9 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
                         .val($('#AddCliente .movi').val())
                         .mask('**** $$$-$$$-$$$$', { reverse: true });
                       $(`#${card} .email`).val($('#AddCliente .mail').val());
-                      $(`#${card} .documento`).val($('#AddCliente .document').val()).mask('AAAAAAAAAA');
+                      $(`#${card} .documento`)
+                        .val($('#AddCliente .document').val())
+                        .mask('AAAAAAAAAA');
                       $('#ModalEventos').modal('hide');
                     }
                   }
@@ -10987,7 +11168,10 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
       if ($(this).attr('id') === 'abono') {
         if (parseFloat($(this).cleanVal()) < cpara || !$('#abono').val()) {
           $('#abono').val(Moneda(cpara));
-          SMSj('info', 'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite');
+          SMSj(
+            'info',
+            'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite'
+          );
         } else if (parseFloat($(this).cleanVal()) > precio || !$('#abono').val()) {
           $('#abono').val(Moneda(cpara));
           SMSj('info', 'La separacion no ser mayor al valor del producto');
@@ -11027,7 +11211,9 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
         $('#p70').val(Moneda(precio - inicial));
         $('#ahorro').val(Moneda(Ahorr));
         $('.totalote').val(Moneda(Math.round(precio)));
-        parseFloat($('#abono').val().replace(/\./g, '')) > precio ? $('#abono').val(Moneda(precio)) : '';
+        parseFloat($('#abono').val().replace(/\./g, '')) > precio
+          ? $('#abono').val(Moneda(precio))
+          : '';
         tipoDto = 'TODO';
       } else if (descuentos.inicial && N > 1 && bono !== '') {
         var Dto = parseFloat($('#dto').val().slice(0, -1));
@@ -11040,7 +11226,9 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
         $('#ahorro').val(Moneda(Ahorr));
         precio = precio - Ahorr;
         $('.totalote').val(Moneda(Math.round(precio)));
-        parseFloat($('#abono').val().replace(/\./g, '')) > precio ? $('#abono').val(Moneda(precio)) : '';
+        parseFloat($('#abono').val().replace(/\./g, '')) > precio
+          ? $('#abono').val(Moneda(precio))
+          : '';
         tipoDto = 'INICIAL';
       }
 
@@ -11100,18 +11288,26 @@ if (window.location.pathname == `/links/orden` && !rol.externo) {
                   $('#dto').val(ahorr ? data[0].descuento + '%' : '0%');
                   $('#cuotainicial').val(Moneda(Math.round(inicial)));
                   $('.totalote').val(Moneda(Math.round(precio)));
-                  parseFloat($('#abono').val().replace(/\./g, '')) > precio ? $('#abono').val(Moneda(precio)) : '';
+                  parseFloat($('#abono').val().replace(/\./g, '')) > precio
+                    ? $('#abono').val(Moneda(precio))
+                    : '';
                 }
                 bono = data[0].pin;
               } else {
                 Dt();
-                SMSj('error', 'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado');
+                SMSj(
+                  'error',
+                  'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado'
+                );
               }
             }
           });
         } else {
           Dt();
-          SMSj('error', 'Cupon de descuento invalido. Comuniquese con uno de nuestros asesores encargado');
+          SMSj(
+            'error',
+            'Cupon de descuento invalido. Comuniquese con uno de nuestros asesores encargado'
+          );
         }
       }
 
@@ -11344,16 +11540,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
 
   $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
     if (typeof aData._date == 'undefined') {
-      aData._date = new Date(aData[3]).getTime();
-      //console.log(aData._date, aData[3], aData.length)
+      aData._date = new Date(aData[4]).getTime();
+      //console.log(aData._date, aData[3], aData.length);
     }
     if (minDateFilter && !isNaN(minDateFilter)) {
-      if (aData._date < minDateFilter) {
+      if (aData._date < minDateFilter || isNaN(aData._date)) {
         return false;
       }
     }
     if (maxDateFilter && !isNaN(maxDateFilter)) {
-      if (aData._date > maxDateFilter) {
+      if (aData._date > maxDateFilter || isNaN(aData._date)) {
         return false;
       }
     }
@@ -11390,7 +11586,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       elemen.addClass('i');
     }
   };
-  var Recibos = $('#Recibos').DataTable({
+  /* var Recibos = $('#Recibos').DataTable({
     //lengthMenu: -1,
     deferRender: true,
     paging: true,
@@ -11514,7 +11710,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         $(row).css('background-color', '#40E0D0');
       }
     }
-  });
+  }); */
   var table = $('#datatable').DataTable({
     //dom: 'Bfrtip',
     /*lengthMenu: [
@@ -11739,7 +11935,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         data: 'montoa',
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
-      { data: 'ordenanu' }
+      { data: 'ordenanu' },
+      { data: 'aprobado' }
     ],
     rowCallback: function (row, data, index) {
       if (data['stado'] == 6) {
@@ -11762,7 +11959,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   table.on('click', 'td:not(.t)', function () {
     var fila = $(this).parents('tr');
     var data = table.row(fila).data(); //console.log(data);
-    var imagenes = data.img === null ? '' : data.img.indexOf(',') > 0 ? data.img.split(',') : data.img;
+    var imagenes =
+      data.img === null ? '' : data.img.indexOf(',') > 0 ? data.img.split(',') : data.img;
     IDS = data.ids;
     fila.toggleClass('selected');
     BancoExt.$('tr.selected').removeClass('selected');
@@ -11842,7 +12040,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     $('#aprobadoEl').html(data.aprobado && 'Aprobado el ' + moment(data.aprobado).format('llll'));
 
     let esFecha = moment(data.fecharcb, true).isValid();
-    !esFecha && alert('Debe establecer una fecha al recibo a continuacion donde se muestra "Fecha inválida"');
+    !esFecha &&
+      alert('Debe establecer una fecha al recibo a continuacion donde se muestra "Fecha inválida"');
 
     var nuevaFechaRecibo = moment($('#Modalimg .fechaRcb').html(), true).isValid()
       ? $('#Modalimg .fechaRcb').html()
@@ -11888,7 +12087,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                         <a class="dropdown-item">Declinar</a>`);
         break;
       default:
-        $('#Modalimg .estado').html(`<span class="badge badge-pill badge-secondary">sin formato</span>`);
+        $('#Modalimg .estado').html(
+          `<span class="badge badge-pill badge-secondary">sin formato</span>`
+        );
     }
     var zoom = 200;
     $('.foto').on({
@@ -11988,7 +12189,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 table.ajax.reload(null, false);
                 $('#ModalEventos').modal('hide');
               } else {
-                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                SMSj(
+                  'error',
+                  `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+                );
                 $('#ModalEventos').modal('hide');
               }
             },
@@ -12028,7 +12232,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
               table.ajax.reload(null, false);
               BancoExt.ajax.reload(null, false);
             } else {
-              SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+              SMSj(
+                'error',
+                `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+              );
               $('#ModalEventos').modal('hide');
             }
           },
@@ -12036,18 +12243,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             console.log(data);
           }
         });
-      } else if (accion === 'Desasociar' && rol.contador && !rol.externo) {
-        //console.log(extr)
-        if (!idExtracto) {
-          alert('Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción');
+      } else if (accion === 'Desasociar' && rol.id == '15' && !rol.externo) {
+        if (!data.extr) {
+          alert(
+            'Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción'
+          );
         } else if (confirm('Seguro deseas desasociar este extrato del pago?')) {
-          var ed = data.ids;
           $.ajax({
             type: 'PUT',
             url: '/links/solicitudes/' + accion,
-            data: fd,
-            processData: false,
-            contentType: false,
+            data: { ids: data.ids },
             beforeSend: function (xhr) {
               $('#Modalimg').modal('hide');
               $('#ModalEventos').modal({
@@ -12061,10 +12266,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 SMSj('success', `Solicitud procesada correctamente`);
                 table.ajax.reload(null, false);
                 BancoExt.ajax.reload(null, false);
+                //BuscarFechaRcb(data.fecharcb);
                 $('#ModalEventos').modal('hide');
-                Buscar(ed);
+                //Buscar(ed);
               } else {
-                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                SMSj(
+                  'error',
+                  `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+                );
                 $('#ModalEventos').modal('hide');
               }
             },
@@ -12073,7 +12282,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
           });
         }
-      } else if ((accion === 'Enviar' || accion === 'Aprobar') && rol.contador) {
+      } else if (
+        (rol.contador && accion === 'Enviar') ||
+        (accion === 'Aprobar' && rol.id == '15')
+      ) {
         if (!rol.externo && !idExtracto && accion === 'Aprobar' && rol.id !== '15') {
           alert('Debe asociar un extrato al pago que desea aprobar');
           return false;
@@ -12087,7 +12299,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           ? (mensaje = confirm(
               'Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente'
             ))
-          : (mensaje = true);
+          : (mensaje = false); // true
 
         if (mensaje) {
           $.ajax({
@@ -12116,7 +12328,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 var fech = data.fech;
                 var saldo = totall - acumulad;
                 var bon = data.mount === null ? 0 : data.mount;
-                var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon;
+                var totl =
+                  data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon;
                 var img2 = new Image();
                 var img = new Image();
                 img.src = '/img/avatars/avatar.png';
@@ -12267,6 +12480,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                   success: function (data) {
                     if (data.std) {
                       SMSj('success', data.msg);
+                      BancoExt.ajax.reload(null, false);
                       table.ajax.reload(null, false);
                       $('#ModalEventos').modal('hide');
                     } else {
@@ -12279,7 +12493,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                   }
                 });
               } else {
-                SMSj('error', 'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar');
+                SMSj(
+                  'error',
+                  'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar'
+                );
                 $('#ModalEventos').modal('hide');
               }
             },
@@ -12304,11 +12521,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             success: function (data) {
               if (data) {
-                SMSj('success', `Solicitud procesada correctamente`);
+                BancoExt.ajax.reload(null, false);
                 table.ajax.reload(null, false);
+                SMSj('success', `Solicitud procesada correctamente`);
                 $('#ModalEventos').modal('hide');
               } else {
-                SMSj('error', `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`);
+                SMSj(
+                  'error',
+                  `Solicitud no pudo ser procesada correctamente, por fondos insuficientes`
+                );
                 $('#ModalEventos').modal('hide');
               }
             },
@@ -12317,6 +12538,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
           });
         }
+      } else {
+        SMSj('error', `No cuentas con los permisos que requiere esta accion`);
       }
     });
     $('#Modalimg').one('hidden.bs.modal', function () {
@@ -12381,7 +12604,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       }
     );
   });
-  var devoluciones = $('#devoluciones').DataTable({
+  const devoluciones = $('#devoluciones').DataTable({
     dom: 'Bfrtip',
     lengthMenu: [
       [10, 25, 50, 100, -1],
@@ -12528,7 +12751,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     }
   });
   var body = [];
-  var comisiones = $('#comisiones').DataTable({
+  const comisiones = $('#comisiones').DataTable({
     dom: 'Bfrtip',
     deferRender: true,
     paging: true,
@@ -12669,9 +12892,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             $(rows)
               .eq(i - 1)
               .after(
-                `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${
-                  total !== pagar ? 'FFFFCC' : '7f8c8d'
-                };">
+                `<tr class="group" style="background: #${
+                  total !== pagar ? 'F08080' : 'FFFFCC'
+                }; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">
                                 <td>
                                     <div class="text-center">
                                         ${cont}
@@ -12750,10 +12973,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                                             ? `<a class="dropdown-item" href="${group.cuentacobro}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt"></i> Cuenta C.</a>`
                                             : ''
                                         }                                            
-                                            <a class="dropdown-item" onclick="Eliminar(${group.cuentadecobro}, '${
-                group.cuentacobro
-              }', '${group.nam}', '${group.clu}')"><i class="fas fa-trash-alt"></i> Declinar</a>
-                                            <a class="dropdown-item" onclick="PagarCB(${group.cuentadecobro}, '${
+                                            <a class="dropdown-item" onclick="Eliminar(${
+                                              group.cuentadecobro
+                                            }, '${group.cuentacobro}', '${group.nam}', '${
+                group.clu
+              }')"><i class="fas fa-trash-alt"></i> Declinar</a>
+                                            <a class="dropdown-item" onclick="PagarCB(${
+                                              group.cuentadecobro
+                                            }, '${
                 group.nam
               }')"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
@@ -12869,9 +13096,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           $(rows)
             .eq(i)
             .after(
-              `<tr class="group" style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; color: #${
-                total !== pagar ? 'FFFFCC' : '7f8c8d'
-              };">                          
+              `<tr class="group" style="background: #${
+                total !== pagar ? 'F08080' : 'FFFFCC'
+              }; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">                          
                             <td>
                                 <div class="text-center">
                                     ${cont}
@@ -13034,6 +13261,34 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       }
     ]
   });
+  var generarInforme = () => {
+    const filas = table.rows({ search: 'applied' }).data();
+    const rows = []; //
+
+    filas.map(a => rows.push(a));
+    $.ajax({
+      url: '/links/solicitudes/informe',
+      data: { datos: JSON.stringify(rows), maxDateFilter, minDateFilter },
+      type: 'POST',
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      },
+      success: function (data) {
+        if (data.r) {
+          SMSj('success', data.m);
+          $('#ModalEventos').modal('hide');
+          window.open(data.data, '_blank');
+        } else {
+          SMSj('error', data.m);
+          $('#ModalEventos').modal('hide');
+        }
+      }
+    });
+  };
   var bajarPdf = () => {
     const link = document.createElement('a');
     link.href = '/bank/Movimientos.xlsm';
@@ -13082,7 +13337,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       toggle: true
     });
   };
-  function BuscarFechaRcb(start, extra) {
+  var BuscarFechaRcb = (start, extra) => {
     BancoExt.$('tr.selected').removeClass('selected');
     BancoExt.column(0).search('').draw();
     BancoExt.column(1).search('').draw();
@@ -13101,10 +13356,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     } else {
       BancoExt.column(1).search(buscar, true, false).draw();
     }
+    BancoExt.order([
+      [1, 'asc'],
+      [8, 'asc']
+    ]).draw();
     $('.dropdown-item').show();
-  }
+  };
   /* INABILITADOS */
-  var bonos = $('#bonos').DataTable({
+  const bonos = $('#bonos').DataTable({
     /*deferRender: true,
         paging: true,
         search: {
@@ -13198,7 +13457,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
         ]*/
   });
-  var premios = $('#premios').DataTable({
+  const premios = $('#premios').DataTable({
     /*deferRender: true,
         paging: true,
         search: {
@@ -13438,7 +13697,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       });
     }
   };
-  var BancoExt = $('#BancoExt').DataTable({
+  const BancoExt = $('#BancoExt').DataTable({
     //scrollY: "200px",
     //scrollCollapse: true,
     paging: true,
@@ -13468,14 +13727,17 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             },
             { visible: false, targets: [2, 3, 4, 5, 6, 7, 8, 9] }
         ], */
-    order: [[1, 'desc']],
+    order: [
+      [1, 'asc'],
+      [8, 'asc']
+    ], // [1, 'desc']
     language: languag,
     ajax: {
       method: 'POST',
       url: '/links/solicitudes/extractos',
       dataSrc: 'data'
     },
-    drawCallback: function (settings) {
+    /* drawCallback: function (settings) {
       var api = this.api();
       var rows = api.rows({ page: 'current' }).nodes();
       var xtrato = null;
@@ -13484,15 +13746,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         .rows({ page: 'current' })
         .data()
         .each(function (group, i) {
-          /* if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
+          if (xtrato !== group.xtrabank && pagos !== group.pagos && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
                     pagos = group.pagos;
                     xtrato = group.xtrabank;
                 } else if ((xtrato === group.xtrabank || pagos === group.pagos) && group.xtrabank) {
                     $(rows).eq(i).css("background-color", "#40E0D0");
-                } */
+                }
         });
-    },
+    }, */
     columns: [
       { data: 'id' },
       {
@@ -13540,26 +13802,34 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     }
 
     if (monto > data.consignado) {
-      alert('No es posible asociar el pago a este extrato ya que su monto supera el monto del extrato');
+      alert(
+        'No es posible asociar el pago a este extrato ya que su monto supera el monto del extrato'
+      );
       $(this).toggleClass('selected');
       idExtracto = false;
       dateExtracto = false;
       return false;
     } else if (data.monto >= data.consignado) {
-      alert('No sera posible asociar el pago a este extrato ya que este posee un pago que cubre todo su monto');
+      alert(
+        'No sera posible asociar el pago a este extrato ya que este posee un pago que cubre todo su monto'
+      );
       $(this).toggleClass('selected');
       idExtracto = false;
       dateExtracto = false;
       return false;
     } else if (excedentes > data.consignado) {
-      alert('No es posible asociar el pago a este extrato ya que con su monto supera el monto del extrato');
+      alert(
+        'No es posible asociar el pago a este extrato ya que con su monto supera el monto del extrato'
+      );
       $(this).toggleClass('selected');
       idExtracto = false;
       dateExtracto = false;
       return false;
     }
     if (data.consignado < monto) {
-      alert('No es posible asociar el pago a este extrato ya que el valor es menor al pago aprovar');
+      alert(
+        'No es posible asociar el pago a este extrato ya que el valor es menor al pago aprovar'
+      );
       $(this).toggleClass('selected');
       idExtracto = false;
       dateExtracto = false;
@@ -13655,11 +13925,17 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       startDate: moment().subtract(29, 'days'),
       endDate: moment(),
       ranges: {
-        'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
         'Este Mes': [moment().startOf('month'), moment().endOf('month')],
         'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
         'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
-        Ayer: [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
         Hoy: [moment().startOf('days'), moment().endOf('days')]
       }
     },
@@ -13709,11 +13985,17 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       startDate: moment().subtract(29, 'days'),
       endDate: moment(),
       ranges: {
-        'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
         'Este Mes': [moment().startOf('month'), moment().endOf('month')],
         'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
         'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
-        Ayer: [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
         Hoy: [moment().startOf('days'), moment().endOf('days')]
       }
     },
@@ -13763,15 +14045,24 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       startDate: moment().subtract(29, 'days'),
       endDate: moment(),
       ranges: {
-        Ayer: [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
         'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
         'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
-        'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
         'Este Mes': [moment().startOf('month'), moment().endOf('month')],
         Hoy: [moment().startOf('days'), moment().endOf('days')],
         Mañana: [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
         'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf('days')],
-        'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        'Próximo Mes': [
+          moment().add(1, 'month').startOf('month'),
+          moment().add(1, 'month').endOf('month')
+        ]
       }
     },
     function (start, end, label) {
@@ -13779,7 +14070,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       //alert(t)
       maxDateFilter = end;
       minDateFilter = start;
-      BancoExt.draw();
+      BancoExt.order([1, 'asc']).draw();
       $('#Date_search').val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
     }
   );
@@ -13862,7 +14153,9 @@ if (window.location == `${window.location.origin}/links/red` && !rol.externo) {
         render: function (data, method, row) {
           return `<input type="text" class="text-center edir" id="${row.pin}" style="width:40px"
                     data-toggle="tooltip" data-placement="top" data-container="body" onClick="this.select();"
-                    title="Digite porcentage" autocomplete="off" value="${data ? (data * 100).toFixed(1) : 'Red'}"
+                    title="Digite porcentage" autocomplete="off" value="${
+                      data ? (data * 100).toFixed(1) : 'Red'
+                    }"
                     data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" onchange="Porcentag(this);">`;
         }
       },
@@ -14012,7 +14305,9 @@ if (window.location == `${window.location.origin}/links/red` && !rol.externo) {
                                                     <span class="align-middle text-dark">GRUPO ELITE FINCA RAIZ S.A.S</span>
                                                 </div>   
                                                 <div class="mb-0">
-                                                    <span class="align-middle card-text">${Fehsi + '/' + Fehsf}</span>
+                                                    <span class="align-middle card-text">${
+                                                      Fehsi + '/' + Fehsf
+                                                    }</span>
                                                 </div>
                                                 <div class="mb-0">
                                                     <span class="align-middle text-dark">PRODUCTOS</span>
@@ -14037,19 +14332,27 @@ if (window.location == `${window.location.origin}/links/red` && !rol.externo) {
                                     <div class="card-body text-primary h4">
                                         <div class="mb-0">                                          
                                             <span class="align-middle text-dark">DESCUENTOS</span>
-                                            <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                                            <span class="align-middle text-danger">$${Moneda(
+                                              descuentos
+                                            )}</span>
                                         </div>
                                         <div class="mb-0">
                                             <span class="align-middle text-dark">TOTALES</span>
-                                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                                            <span class="align-middle card-text">$${Moneda(
+                                              total
+                                            )}</span>
                                         </div>
                                         <div class="mb-0">
                                             <span class="align-middle text-dark">ABONOS</span>
-                                            <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                                            <span class="align-middle text-success">$${Moneda(
+                                              abonos
+                                            )}</span>
                                         </div>
                                         <div class="mb-0">
                                             <span class="align-middle text-dark">SALDOS</span>
-                                            <span class="align-middle text-warning">$${Moneda(total - abonos)}</span>
+                                            <span class="align-middle text-warning">$${Moneda(
+                                              total - abonos
+                                            )}</span>
                                         </div>                                            
                                     </div>
                                 </div>
@@ -14457,15 +14760,24 @@ if (window.location == `${window.location.origin}/links/red` && !rol.externo) {
       startDate: moment().subtract(29, 'days'),
       endDate: moment(),
       ranges: {
-        Ayer: [moment().subtract(1, 'days').startOf('days'), moment().subtract(1, 'days').endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
         'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
         'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
-        'Mes Pasado': [moment().subtract(1, 'month').startOf('month'), moment().subtract(1, 'month').endOf('month')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
         'Este Mes': [moment().startOf('month'), moment().endOf('month')],
         Hoy: [moment().startOf('days'), moment().endOf('days')],
         Mañana: [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
         'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf('days')],
-        'Próximo Mes': [moment().add(1, 'month').startOf('month'), moment().add(1, 'month').endOf('month')]
+        'Próximo Mes': [
+          moment().add(1, 'month').startOf('month'),
+          moment().add(1, 'month').endOf('month')
+        ]
       }
     },
     function (start, end, label) {
@@ -14528,7 +14840,11 @@ if (window.location == `${window.location.origin}/links/clientes` && !rol.extern
     });
     $('.tipod').change(function () {
       $('.documento').val('');
-      if ($(this).val() === 'Cedula de extranjeria' || $(this).val() === 'Pasaporte' || $(this).val() === 'Nit') {
+      if (
+        $(this).val() === 'Cedula de extranjeria' ||
+        $(this).val() === 'Pasaporte' ||
+        $(this).val() === 'Nit'
+      ) {
         $('.documento').unmask().focus();
       } else {
         $('.documento').mask('#.##$', { reverse: true, selectonfocus: true }).focus();
@@ -15198,7 +15514,8 @@ function NumeroALetras(num, centavos) {
   if (data.centavos > 0) data.letrasCentavos = 'CON ' + NumeroALetras(data.centavos, true);
 
   if (data.enteros == 0) return 'CERO ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
-  if (data.enteros == 1) return Millones(data.enteros) + ' ' + data.letrasMonedaSingular + ' ' + data.letrasCentavos;
+  if (data.enteros == 1)
+    return Millones(data.enteros) + ' ' + data.letrasMonedaSingular + ' ' + data.letrasCentavos;
   else return Millones(data.enteros) + ' ' + data.letrasMonedaPlural + ' ' + data.letrasCentavos;
 } //NumeroALetras()
 //return a promise that resolves with a File instance
@@ -15281,7 +15598,11 @@ function LISTAS(n, fi, ff, p) {
         doc.setFontSize(9);
         doc.text('LISTADO DE PRODUCTOS', 105, 25, null, null, 'center');
         doc.setFontSize(8);
-        doc.text(`Proyecto iniciado en ${FI} y proyectado a finalizar en ${FF}`, data.settings.margin.left, 33);
+        doc.text(
+          `Proyecto iniciado en ${FI} y proyectado a finalizar en ${FF}`,
+          data.settings.margin.left,
+          33
+        );
 
         // Footer
         var str = 'Page ' + doc.internal.getNumberOfPages();

@@ -43,7 +43,19 @@
               <i class='align-middle' data-feather='calendar'></i>
             </a>
 
-            <a class='nav-item nav-link d-none d-sm-block' href='javascript:void 0' onclick='bajarPdf()'>
+            <a
+              class='nav-item nav-link d-none d-sm-block'
+              href='javascript:void 0'
+              onclick='generarInforme()'
+            >
+              <i class='align-middle' data-feather='file-text'></i>
+            </a>
+
+            <a
+              class='nav-item nav-link d-none d-sm-block'
+              href='javascript:void 0'
+              onclick='bajarPdf()'
+            >
               <i class='align-middle' data-feather='download-cloud'></i>
             </a>
 
@@ -88,33 +100,55 @@
           </div>
         </nav>
         <div class='accordion' id='menu'>
-          <nav class='nav flex-column flex-sm-row collapse' id='menu1' aria-labelledby='headingOne' data-parent='#menu'>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 10)"><i
-                class='fas fa-tasks'
-              ></i>
+          <nav
+            class='nav flex-column flex-sm-row collapse'
+            id='menu1'
+            aria-labelledby='headingOne'
+            data-parent='#menu'
+          >
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', 10)"
+            ><i class='fas fa-tasks'></i>
               10 Filas</a>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 20)"><i
-                class='fas fa-tasks'
-              ></i>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', 20)"
+            ><i class='fas fa-tasks'></i>
               20 Filas</a>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 30)"><i
-                class='fas fa-tasks'
-              ></i>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', 30)"
+            ><i class='fas fa-tasks'></i>
               30 Filas</a>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 50)"><i
-                class='fas fa-tasks'
-              ></i>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', 50)"
+            ><i class='fas fa-tasks'></i>
               50 Filas</a>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', 100)"><i
-                class='fas fa-tasks'
-              ></i>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', 100)"
+            ><i class='fas fa-tasks'></i>
               100 Filas</a>
-            <a class='flex-sm-fill text-sm-center nav-link' href='javascript:void 0' onclick="VER('#datatable', -1)"><i
-                class='fas fa-tasks'
-              ></i>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable', -1)"
+            ><i class='fas fa-tasks'></i>
               Todas</a>
           </nav>
-          <nav class='nav nav-fill collapse' id='menu2' aria-labelledby='headingOne' data-parent='#menu'>
+          <nav
+            class='nav nav-fill collapse'
+            id='menu2'
+            aria-labelledby='headingOne'
+            data-parent='#menu'
+          >
             <a
               class='flex-sm-fill text-sm-center nav-link'
               href='javascript:void 0'
@@ -177,7 +211,11 @@
                         </table>
                     </div>
                 </div>-->
-        <table id='datatable' class='table table-sm table-striped table-hover display nowrap' style='width:100%'>
+        <table
+          id='datatable'
+          class='table table-sm table-striped table-hover display nowrap'
+          style='width:100%'
+        >
           <thead>
             <tr>
               <th data-priority='1'>Id</th>
@@ -207,6 +245,7 @@
               <th>Bono Anul</th>
               <th>Monto Anul</th>
               <th>Orden Anul</th>
+              <th>FechaAprobacion</th>
             </tr>
           </thead>
           <tbody></tbody>
@@ -381,8 +420,8 @@
 <div class='card d-none'>
   <div class='card-header'>
     <h5 class='card-title'>Table with Buttons</h5>
-    <h6 class='card-subtitle text-muted'>This extension provides a framework with common options that can be used with
-      DataTables.</h6>
+    <h6 class='card-subtitle text-muted'>This extension provides a framework with common options
+      that can be used with DataTables.</h6>
     <div class=''>
       <input
         type='text'
@@ -545,7 +584,11 @@
                   <input type='hidden' id='stadopago' />
                   <th colspan='1' class='estado'></th>
                   <td>
-                    <div class='btn-group btn-group-sm float-right' style='display: none;' id='nove'>
+                    <div
+                      class='btn-group btn-group-sm float-right'
+                      style='display: none;'
+                      id='nove'
+                    >
                       <button
                         type='button'
                         class='btn btn-secondary dropdown-toggle'
@@ -599,7 +642,12 @@
       <div class='modal-body'>
         <span class='badge badge-dark' id='nombr'></span>
         <table class='table table-sm my-2' id='recibosss'>
-          <form enctype='multipart/form-data' id='recboCC' action='/links/solicitudes/rcbcc' method='POST'>
+          <form
+            enctype='multipart/form-data'
+            id='recboCC'
+            action='/links/solicitudes/rcbcc'
+            method='POST'
+          >
             <input type='hidden' id='ids' name='ids' />
             <tbody>
               <tr>
@@ -730,7 +778,11 @@
                   <input type='hidden' id='stadopago' />
                   <th colspan='1' class='estado'></th>
                   <td>
-                    <div class='btn-group btn-group-sm float-right' style='display: none;' id='nove'>
+                    <div
+                      class='btn-group btn-group-sm float-right'
+                      style='display: none;'
+                      id='nove'
+                    >
                       <button
                         type='button'
                         class='btn btn-secondary dropdown-toggle'

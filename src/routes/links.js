@@ -21,7 +21,13 @@ const mysqldump = require('mysqldump');
 const XLSX = require('xlsx-js-style');
 const PdfPrinter = require('pdfmake');
 const Roboto = require('../public/fonts/Roboto');
-const { tasaUsura, FacturaDeCobro, consultarDocumentos, EstadoDeCuenta } = require('../functions.js');
+const {
+  tasaUsura,
+  FacturaDeCobro,
+  consultarDocumentos,
+  EstadoDeCuenta,
+  informes
+} = require('../functions.js');
 const { Console } = require('console');
 //DELETE
 
@@ -451,7 +457,9 @@ cron.schedule('0 10 13,28 * *', async () => {
       data.nombre
     }*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${
       data.meses
-    } mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${data.proyect}* *Lt-${
+    } mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${
+      data.proyect
+    }* *Lt-${
       data.n
     }* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(
       data.mora
@@ -564,7 +572,9 @@ cron.schedule('*/10 * 5 5 * *', async () => {
     var mensajeP = 'Proyectos ',
       mensajeO = 'Ordenes ',
       mensajeR = 'Recibocaja ';
-    const proyectos = await pool.query(`SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`);
+    const proyectos = await pool.query(
+      `SELECT id, proyect, categoria, drive FROM productos WHERE drive IS NULL`
+    );
     mensajeP += proyectos.length;
     if (proyectos.length) {
       proyectos.map(async x => {
@@ -612,7 +622,8 @@ cron.schedule('*/10 * 5 5 * *', async () => {
           const drive = google.drive({ version: 'v3', auth });
           var fileMetadata = {
             name: `MZ-${x.mz} LT-${x.n} ${x.id}-${x.lote}`,
-            folderColorRgb: x.tipobsevacion === 'ANULADA' ? 'red' : x.estado === 13 ? 'green' : 'blue',
+            folderColorRgb:
+              x.tipobsevacion === 'ANULADA' ? 'red' : x.estado === 13 ? 'green' : 'blue',
             description:
               x.tipobsevacion === 'ANULADA'
                 ? 'ORDEN ANULADA - ' +
@@ -621,8 +632,12 @@ cron.schedule('*/10 * 5 5 * *', async () => {
                   x.drive +
                   ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
                 : x.estado === 13
-                ? 'ORDEN CULMINADA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
-                : 'ORDEN ACTIVA - CARPETA: ' + x.drive + ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
+                ? 'ORDEN CULMINADA - CARPETA: ' +
+                  x.drive +
+                  ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO'
+                : 'ORDEN ACTIVA - CARPETA: ' +
+                  x.drive +
+                  ' - ROJO: ANULADA - AZUL: ACTIVA - VERDE: VENDIDO',
             mimeType: 'application/vnd.google-apps.folder',
             parents: [x.drive]
           };
@@ -692,7 +707,10 @@ cron.schedule('*/10 * 5 5 * *', async () => {
                   ` ${x.descp} ${x.orden}-${x.lt}-${x.ids} ${x.mz}-${x.n}`
                 );
                 //mensajeR += ' File Id: ' + file.data.id;
-                pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ drive: file.data.id }, x.ids]);
+                pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
+                  { drive: file.data.id },
+                  x.ids
+                ]);
               }
             }
           );
@@ -713,7 +731,8 @@ cron.schedule('*/10 * 5 5 * *', async () => {
 cron.schedule('7 10 * * *', async () => {
   if (desarrollo && desarrollo !== 'http://localhost:5000') {
     var Dia = moment().subtract(1, 'days').endOf('days').format('YYYY-MM-DD HH:mm');
-    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+    const f =
+      await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
         INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
     f.map(x => {
@@ -748,7 +767,8 @@ ORDER BY suma DESC LIMIT 10
     await pool.query(`DELETE p FROM preventa p INNER JOIN productosd l ON p.lote = l.id     
     WHERE  TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 9`);*/
   if (desarrollo && desarrollo !== 'http://localhost:5000') {
-    const f = await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
+    const f =
+      await pool.query(`SELECT p.id, l.mz, l.n, DATE_FORMAT(p.fecha, "%e de %b") fecha FROM productosd l 
         INNER JOIN preventa p ON l.id = p.lote WHERE TIMESTAMP(p.fecha) < '${Dia}' AND p.tipobsevacion IS NULL AND l.estado = 1`);
     var body = `_*${Dia}*_\n_Existen *${f.length}* productos a liberar el dia de mañana_\n_Si alguno de estos es tuyo, diligencia el pago lo antes posible de lo contrario estara disponible mañana a las *23:59*_\n_A continuacion se describen los *productos* a liberar_\n\n`; //${JSON.stringify(f)} ${f.length} _*registros en total ${req.body.sitio}*
     f.map(x => {
@@ -796,7 +816,11 @@ cron.schedule('0 0 1 * *', async () => {
           pagar: monto - (retefuente + reteica)
         };
         await pool.query(`INSERT INTO solicitudes SET ?`, f);
-      } else if ((j.nrango === 3 || j.nrango === 2 || j.nrango === 1) && j.cortep >= j.venta && !j.pagobono) {
+      } else if (
+        (j.nrango === 3 || j.nrango === 2 || j.nrango === 1) &&
+        j.cortep >= j.venta &&
+        !j.pagobono
+      ) {
         var corte;
         switch (mes) {
           case 1:
@@ -836,12 +860,17 @@ cron.schedule('0 0 1 * *', async () => {
             corte = 3;
             break;
         }
-        var acumulado = corte === 1 ? j.corte1 : corte === 2 ? j.corte2 : corte === 3 ? j.corte3 : '';
+        var acumulado =
+          corte === 1 ? j.corte1 : corte === 2 ? j.corte2 : corte === 3 ? j.corte3 : '';
         var monto = (acumulado + j.cortep) * porcentual;
         var retefuente = monto * 0.1;
         var reteica = (monto * 8) / 1000;
         var descp =
-          j.nrango === 1 ? 'BONO PRESIDENCIAL' : j.nrango === 2 ? 'BONO VICEPRESIDENCIAL' : 'BONO GERENCIAL ELITE';
+          j.nrango === 1
+            ? 'BONO PRESIDENCIAL'
+            : j.nrango === 2
+            ? 'BONO VICEPRESIDENCIAL'
+            : 'BONO GERENCIAL ELITE';
         var f = {
           fech: hoy,
           monto,
@@ -891,7 +920,9 @@ cron.schedule('0 1 1 1,4,7,10 *', async () => {
   if (asesor.length > 0) {
     await asesor.map(async (j, x) => {
       if (j.totalcortep >= j.venta && j.totalcorte >= j.ventas) {
-        const r = await pool.query(`SELECT * FROM rangos WHERE ventas BETWEEN 500000000 AND ${j.totalcorte} LIMIT 1`);
+        const r = await pool.query(
+          `SELECT * FROM rangos WHERE ventas BETWEEN 500000000 AND ${j.totalcorte} LIMIT 1`
+        );
         if (r.length > 0) {
           var y = r[0];
           var retefuente = y.premio * 0.1;
@@ -2065,7 +2096,8 @@ router.get('/proyecciones', async (req, res) => {
   mes6 = cuotafnc;
   mes12 = cuotafnc;
   if (cuotaordi) {
-    cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
+    cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi),
+      (mes12 = cuotaordi);
   }
   await pool.query(
     `UPDATE cuotas SET 
@@ -2115,7 +2147,8 @@ router.get('/chats', isLoggedIn, async (req, res) => {
   });
   async function chats() {
     const options = { method: 'GET' };
-    const url = 'https://api.chat-api.com/instance107218/dialogs?token=5jn3c5dxvcj27fm0&limit=50&page=0';
+    const url =
+      'https://api.chat-api.com/instance107218/dialogs?token=5jn3c5dxvcj27fm0&limit=50&page=0';
 
     const apiRes = await fetch(url, options);
     const jsonResponse = await apiRes.json();
@@ -2407,15 +2440,21 @@ router.post('/regispro', noExterno, async (req, res) => {
   };
   console.log(req.body, produc);
   const datos = await pool.query('INSERT INTO productos SET ? ', produc);
-  var producdata = 'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
+  var producdata =
+    'INSERT INTO productosd (producto, mz, n, mtr2, descripcion, estado, mtr, valor, inicial) VALUES ';
   if (Array.isArray(n)) {
     await n.map((t, i) => {
-      producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${std[i]}, ${vmtr2[
-        i
-      ].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(/\./g, '')}),`;
+      producdata += `(${datos.insertId}, '${mz[i]}', ${t}, ${mtr2[i]}, '${descripcion[i]}', ${
+        std[i]
+      }, ${vmtr2[i].replace(/\./g, '')}, ${vrlt[i].replace(/\./g, '')}, ${vri[i].replace(
+        /\./g,
+        ''
+      )}),`;
     });
   } else {
-    producdata += `(${datos.insertId}, '${mz}', ${n}, ${mtr2}, '${descripcion}', ${std}, ${vmtr2.replace(
+    producdata += `(${
+      datos.insertId
+    }, '${mz}', ${n}, ${mtr2}, '${descripcion}', ${std}, ${vmtr2.replace(
       /\./g,
       ''
     )}, ${vrlt.replace(/\./g, '')}, ${vri.replace(/\./g, '')}),`;
@@ -2477,7 +2516,9 @@ router.get('/excelformato', async (req, res) => {
   );
 
   let newWB = XLSX.utils.book_new();
-  let newWS = XLSX.utils.json_to_sheet([{ Orden: k, Fecha: h, Proyecto: proyecto, Mz: mz, Lt: n, Cliente: nombre }]);
+  let newWS = XLSX.utils.json_to_sheet([
+    { Orden: k, Fecha: h, Proyecto: proyecto, Mz: mz, Lt: n, Cliente: nombre }
+  ]);
   let Ws = await Object.assign(newWS, {
     A4: {
       t: 's',
@@ -3466,7 +3507,8 @@ router.put('/clientes/:id', isLoggedIn, async (req, res) => {
   }
 });
 router.put('/editclientes', noExterno, async (req, res) => {
-  const { idc, name, tipod, docu, lugarex, fehex, fnaci, ecivil, email, pais, Movil, adres } = req.body;
+  const { idc, name, tipod, docu, lugarex, fehex, fnaci, ecivil, email, pais, Movil, adres } =
+    req.body;
 
   console.log(req.body);
   const movl = pais + ' ' + Movil.replace(/-/g, '');
@@ -3594,13 +3636,16 @@ router.get('/pagos/:id', async (req, res) => {
   }
 });
 router.post('/pagos', async (req, res) => {
-  const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin, pyt } = req.body;
+  const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin, pyt } =
+    req.body;
   const codes = await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
     ON p.recaudador = r.id WHERE p.producto = '${pyt}' AND r.entidad = 'PAYU'`);
   if (codes.length > 0) {
     var key = codes[0].code3 + '~' + codes[0].code1 + '~' + referenceCode + '~' + amount + '~COP';
     var hash = crypto.createHash('md5').update(key).digest('hex');
-    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${id ? id : 0}`;
+    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${
+      id ? id : 0
+    }`;
     var smg = {
       sig: hash,
       ext,
@@ -3700,12 +3745,15 @@ router.post('/recibo', async (req, res) => {
       if (g) {
         return res.send({
           std: false,
-          msj: 'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum)
+          msj:
+            'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' +
+            Moneda(sum)
         });
       } else {
         req.flash(
           'error',
-          'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' + Moneda(sum)
+          'El excedente del anterior pago, no coinside con el moto a pagar de este, excedente de $' +
+            Moneda(sum)
         );
         return res.redirect('/links/pagos');
       }
@@ -3755,7 +3803,10 @@ router.post('/recibo', async (req, res) => {
     descp: concpto,
     formap
   };
-  const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', orden);
+  const acuerdo = await pool.query(
+    'SELECT id FROM acuerdos WHERE producto = ? AND estado = 9',
+    orden
+  );
   acuerdo.length && (pago.acuerdo = acuerdo);
 
   var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
@@ -3801,9 +3852,10 @@ router.post('/recibo', async (req, res) => {
     concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
     let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
-    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${
-      req.files[0].filename
-    }', ${excedente}),`;
+    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(
+      /\./g,
+      ''
+    )}, '/uploads/${req.files[0].filename}', ${excedente}),`;
   }
   //console.log(reci.slice(0, -1))
   await pool.query(reci.slice(0, -1));
@@ -4005,13 +4057,20 @@ router.post('/crearcartera', noExterno, async (req, res) => {
     separ.cliente = clientes;
   }
   const h = await pool.query('INSERT INTO preventa SET ? ', separ);
-  idbono ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, idbono]) : '';
-  var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+  idbono
+    ? await pool.query('UPDATE cupones set ? WHERE id = ?', [
+        { estado: 14, producto: h.insertId },
+        idbono
+      ])
+    : '';
+  var cuotas =
+    'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
   var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher) VALUES ';
   await n.map((t, i) => {
-    cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(/\./g, '')}, ${std[i]}, ${cuota[
-      i
-    ].replace(/\./g, '')}),`;
+    cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${rcuota[i].replace(
+      /\./g,
+      ''
+    )}, ${std[i]}, ${cuota[i].replace(/\./g, '')}),`;
   });
   await pool.query(cuotas.slice(0, -1));
 
@@ -4038,14 +4097,16 @@ router.post('/crearcartera', noExterno, async (req, res) => {
   const pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
   if (Array.isArray(nrecibo)) {
     await nrecibo.map((t, i) => {
-      reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(/\./g, '')}, '/uploads/${
-        req.files[i].filename
-      }'),`;
+      reci += `(${pgo.insertId}, '${feh[i]}', '${formap[i]}', '${t}', ${montos[i].replace(
+        /\./g,
+        ''
+      )}, '/uploads/${req.files[i].filename}'),`;
     });
   } else {
-    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(/\./g, '')}, '/uploads/${
-      req.files[0].filename
-    }'),`;
+    reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(
+      /\./g,
+      ''
+    )}, '/uploads/${req.files[0].filename}'),`;
   }
   await pool.query(reci.slice(0, -1));
   const S = await Estados(h.insertId);
@@ -4128,7 +4189,8 @@ router.post('/cupones', noExterno, async (req, res) => {
 router.post('/cupones/:d', noExterno, async (req, res) => {
   const { d } = req.params;
   if (d === 'BONO') {
-    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } =
+      req.body;
     const bono = {
       pin,
       descuento: 0,
@@ -4145,7 +4207,8 @@ router.post('/cupones/:d', noExterno, async (req, res) => {
     const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
     res.send({ clientes });
   } else {
-    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } = req.body;
+    const { id, pin, descuento, fecha, estado, ahorro, mz, n, proyect, nombre, movil, email } =
+      req.body;
     if (d === 'Aprobar') {
       await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 9 }, id]);
       EnviarWTSAP(
@@ -4153,7 +4216,9 @@ router.post('/cupones/:d', noExterno, async (req, res) => {
         `_*${
           nombre.split(' ')[0]
         }* tienes un cupon *${pin}* aprobado del *${descuento}%* de descuento para lotes *Campestres*_\n\n_Debes tener presente que estos descuentos estan sujetos a terminos y condiciones establecidos por *Grupo Elite.*_\n\n_para mas información cominicate con un una persona del area encargada_\n\n_*GRUPO ELITE FICA RAÍZ*_`,
-        `${nombre.split(' ')[0]} tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
+        `${
+          nombre.split(' ')[0]
+        } tienes un cupon ${pin} aprobado de ${descuento}% GRUPO ELITE FICA RAÍZ`
       );
       res.send(true);
     }
@@ -4178,7 +4243,10 @@ router.get('/orden', noExterno, async (req, res) => {
   var p = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
   var hora = t.indexOf('*') > 0 ? t.split('*')[1] : hora2;
   if (ahora > hora) {
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: req.user.fullname + '*' + h }, id]);
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [
+      { tramitando: req.user.fullname + '*' + h },
+      id
+    ]);
     res.render('links/orden', { proyecto, id, mensaje: '' });
   } else if (req.user.fullname !== t.split('*')[0]) {
     var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
@@ -4242,10 +4310,19 @@ router.post('/orden', noExterno, async (req, res) => {
     };
     //console.log(separ);
     const h = await pool.query('INSERT INTO preventa SET ? ', separ);
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ estado: 1, tramitando: ahora }, lote]);
-    cupon ? await pool.query('UPDATE cupones set ? WHERE id = ?', [{ estado: 14, producto: h.insertId }, cupon]) : '';
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [
+      { estado: 1, tramitando: ahora },
+      lote
+    ]);
+    cupon
+      ? await pool.query('UPDATE cupones set ? WHERE id = ?', [
+          { estado: 14, producto: h.insertId },
+          cupon
+        ])
+      : '';
 
-    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+    var cuotas =
+      'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
     if (Array.isArray(ncuota)) {
       await ncuota.map((t, i) => {
         cuotas += `(${h.insertId}, '${tipo[i]}', ${t}, '${fecha[i]}', ${cuota[i]}, ${estado[i]}, ${cuota[i]}),`;
@@ -4261,7 +4338,9 @@ router.post('/orden', noExterno, async (req, res) => {
 });
 router.get('/cel/:id', async (req, res) => {
   const { id } = req.params;
-  const datos = await pool.query(`SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`);
+  const datos = await pool.query(
+    `SELECT * FROM clientes WHERE movil LIKE '%${id}%' OR documento = '${id}'`
+  );
   res.send(datos);
 });
 router.post('/codigo', noExterno, async (req, res) => {
@@ -4279,7 +4358,19 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
   if (req.params.id == 1) {
     var data = new Array();
     dataSet.data = data;
-    const { fcha, fcha2, cuota70, cuota30, oficial70, oficial30, N, u, mesesextra, extra, separacion } = req.body;
+    const {
+      fcha,
+      fcha2,
+      cuota70,
+      cuota30,
+      oficial70,
+      oficial30,
+      N,
+      u,
+      mesesextra,
+      extra,
+      separacion
+    } = req.body;
     var v = N == 1 ? 1 : Math.round((parseFloat(N) - parseFloat(u)) / 2);
     var p = (parseFloat(N) - parseFloat(u)) / 2;
     var j = Math.round(parseFloat(u) / 2);
@@ -4290,7 +4381,10 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
       n: `1 <input value="1" type="hidden" name="ncuota">`,
       fecha: fcha2,
       oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota De Separacion</span>`,
-      cuota: `${separacion} <input value="${separacion.replace(/\./g, '')}" type="hidden" name="cuota">`,
+      cuota: `${separacion} <input value="${separacion.replace(
+        /\./g,
+        ''
+      )}" type="hidden" name="cuota">`,
       stado: `<span class="badge badge-primary">Pendiente</span>
                     <input value="3" type="hidden" name="estado">
                     <input value="SEPARACION" type="hidden" name="tipo">`,
@@ -4307,13 +4401,18 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
           n: i + `<input value="${i}" type="hidden" name="ncuota">`,
           fecha: moment(fcha).add(i, 'month'),
           oficial: `<span class="badge badge-dark text-center text-uppercase">Cuota Inicial ${oficial30}</span>`,
-          cuota: cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
+          cuota:
+            cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
           stado: `<span class="badge badge-primary">Pendiente</span>
                             <input value="3" type="hidden" name="estado">
                             <input value="INICIAL" type="hidden" name="tipo">`,
           n2: i > o ? '' : `${i + j} <input value="${i + j}" type="hidden" name="ncuota">`,
           fecha2: i > o ? '' : moment(fcha).add(i + j, 'month'),
-          cuota2: i > o ? '' : cuota30 + `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
+          cuota2:
+            i > o
+              ? ''
+              : cuota30 +
+                `<input value="${cuota30.replace(/\./g, '')}" type="hidden" name="cuota">`,
           stado2:
             i > o
               ? ''
@@ -4338,7 +4437,10 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
                         <input value="FINANCIACION" type="hidden" name="tipo">`,
         n2: i > p ? '' : `${v + i} <input value="${v + i}" type="hidden" name="ncuota">`,
         fecha2: i > p ? '' : moment(fcha).add(y + v, 'month'),
-        cuota2: i > p ? '' : cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
+        cuota2:
+          i > p
+            ? ''
+            : cuota70 + `<input value="${cuota70.replace(/\./g, '')}" type="hidden" name="cuota">`,
         stado2:
           i > p
             ? ''
@@ -4348,15 +4450,27 @@ router.post('/tabla/:id', noExterno, async (req, res) => {
       };
 
       if (d.fecha._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(
+          /\./g,
+          ''
+        )}" type="hidden" name="cuota">`;
       } else if (d.fecha._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
-        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+        d.cuota = `<mark> ${extra}</mark> <input value="${extra.replace(
+          /\./g,
+          ''
+        )}" type="hidden" name="cuota">`;
       }
       if (d.fecha2) {
         if (d.fecha2._d.getMonth() == 5 && (mesesextra == 6 || mesesextra == 2)) {
-          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(
+            /\./g,
+            ''
+          )}" type="hidden" name="cuota">`;
         } else if (d.fecha2._d.getMonth() == 11 && (mesesextra == 12 || mesesextra == 2)) {
-          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(/\./g, '')}" type="hidden" name="cuota">`;
+          d.cuota2 = `<mark> ${extra}</mark> <input value="${extra.replace(
+            /\./g,
+            ''
+          )}" type="hidden" name="cuota">`;
         }
       }
       dataSet.data.push(d);
@@ -4438,7 +4552,9 @@ router.get('/editordn/:id', noExterno, async (req, res) => {
   if (comi.length > 0 && id.indexOf('*') < 0) {
     req.flash(
       'error',
-      'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) pendiente(s) o paga(s)'
+      'Esta Orden no es posible editarla ya que tiene ' +
+        comi.length +
+        ' comision(es) pendiente(s) o paga(s)'
     );
     res.redirect('/links/reportes');
   } else {
@@ -4568,10 +4684,10 @@ router.post('/ordne/', noExterno, async (req, res) => {
     }
   }
   // ACTUALIZANDO EL PRODUCTO Y LA ORDEN DE SEPARACION
-  await pool.query(`UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`, [
-    orden,
-    preventa
-  ]);
+  await pool.query(
+    `UPDATE preventa p INNER JOIN productosd l ON l.id = p.lote SET ? WHERE p.id = ?`,
+    [orden, preventa]
+  );
   await pool.query(`UPDATE solicitudes SET lt = ${lt} WHERE orden = ?`, preventa);
 
   // BUSCANDO LAS COMICIONES ANTES GENERADAS
@@ -4585,19 +4701,20 @@ router.post('/ordne/', noExterno, async (req, res) => {
   await pool.query('DELETE FROM cuotas WHERE separacion = ?', preventa);
 
   // INSERTANDO EL NUEVO PLAN DE FINANCIACION
-  var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
+  var cuotas =
+    'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, estado, proyeccion) VALUES ';
   if (Array.isArray(n)) {
     n.map((c, i) => {
-      cuotas += `(${preventa}, '${tipo[i]}', ${c}, '${fecha[i]}', ${cuota[i].replace(/\./g, '')}, 3, ${cuota[i].replace(
+      cuotas += `(${preventa}, '${tipo[i]}', ${c}, '${fecha[i]}', ${cuota[i].replace(
         /\./g,
         ''
-      )}),`;
+      )}, 3, ${cuota[i].replace(/\./g, '')}),`;
     });
   } else {
-    cuotas += `(${preventa}, '${tipo}', ${n}, '${fecha}', ${cuota.replace(/\./g, '')}, 3, ${cuota.replace(
+    cuotas += `(${preventa}, '${tipo}', ${n}, '${fecha}', ${cuota.replace(
       /\./g,
       ''
-    )}),`;
+    )}, 3, ${cuota.replace(/\./g, '')}),`;
   }
   await pool.query(cuotas.slice(0, -1));
 
@@ -4650,7 +4767,10 @@ router.post('/prodlotes/:id', noExterno, async (req, res) => {
   );
   const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
-  const orden = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`, id);
+  const orden = await pool.query(
+    `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`,
+    id
+  );
   res.send({ productos, asesores, clientes, orden });
 });
 router.post('/editarorden', noExterno, async (req, res) => {
@@ -4683,16 +4803,16 @@ router.post('/editarorden', noExterno, async (req, res) => {
   };
   if (separar > 0) {
     actualizar['p.separar'] = separacion;
-    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'SEPARACION'`, [
-      { cuota: separacion },
-      orden
-    ]);
+    await pool.query(
+      `UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'SEPARACION'`,
+      [{ cuota: separacion }, orden]
+    );
   }
   if (cuotaInicial > 0) {
-    await pool.query(`UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'INICIAL'`, [
-      { cuota: cuotaInicial },
-      orden
-    ]);
+    await pool.query(
+      `UPDATE cuotas SET ? WHERE separacion = ? AND estado = 3 AND tipo = 'INICIAL'`,
+      [{ cuota: cuotaInicial }, orden]
+    );
   }
   idpin ? (actualizar['p.cupon'] = idpin) : '';
 
@@ -4853,7 +4973,8 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 });
 ////////////////////* COMISIONES *//////////////////////////////////
 router.get('/comisiones', isLoggedIn, async (req, res) => {
-  const comis = await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
+  const comis =
+    await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
     l.valor - p.ahorro Total, (l.valor - p.ahorro) * p.iniciar / 100 Inicial, d.maxcomis, d.sistema,
     ( SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
@@ -4945,7 +5066,7 @@ router.post('/comisiones', isLoggedIn, async (req, res) => {
     prd = prcd.map(e => e.producto);
   }
   let d = prd ? `AND p.id IN (${prd})` : '';
-  console.log(prd, d, 'aqui');
+  //console.log(prd, d, 'aqui');
 
   const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
     s.descp, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
@@ -5107,7 +5228,9 @@ router.post('/anular', noExterno, async (req, res) => {
         l.inicial = CASE WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, cp.estado = 6, p.tipobsevacion = 'ANULADA', 
         l.uno = NULL, l.dos = NULL, l.tres = NULL, l.directa = NULL,
-        ${bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''} p.descrip = '${causa} - ${motivo}', 
+        ${
+          bonoanular ? 's.bonoanular = ' + bonoanular + ',' : ''
+        } p.descrip = '${causa} - ${motivo}', 
         s.orden = p.id WHERE l.id = ? AND s.concepto != 'DEVOLUCION'`; //console.log(sql)
     await pool.query(sql, lote);
     res.send({ std: true, msg: 'Orden anulada correctamente' });
@@ -5119,7 +5242,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   if (id == 'table2') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      const prcd = await pool.query(
+        'SELECT producto FROM externos WHERE usuario = ?',
+        req.user.pin
+      );
       prd = prcd.map(e => e.producto);
     }
     let d = prd ? `WHERE d.id IN (${prd})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
@@ -5161,10 +5287,17 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   } else if (id == 'estadosc') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      const prcd = await pool.query(
+        'SELECT producto FROM externos WHERE usuario = ?',
+        req.user.pin
+      );
       prd = prcd.map(e => e.producto);
     }
-    let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
+    let d = prd
+      ? `AND pt.id IN (${prd})`
+      : req.user.asistente
+      ? ''
+      : 'AND p.asesor = ' + req.user.id;
 
     sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect,
         SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
@@ -5182,10 +5315,17 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   } else if (id == 'estadosc2') {
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      const prcd = await pool.query(
+        'SELECT producto FROM externos WHERE usuario = ?',
+        req.user.pin
+      );
       prd = prcd.map(e => e.producto);
     }
-    let d = prd ? `AND pt.id IN (${prd})` : req.user.asistente ? '' : 'AND p.asesor = ' + req.user.id;
+    let d = prd
+      ? `AND pt.id IN (${prd})`
+      : req.user.asistente
+      ? ''
+      : 'AND p.asesor = ' + req.user.id;
 
     sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
         p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
@@ -5232,10 +5372,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   } else if (id == 'eliminar' && !req.user.externo) {
     const { k, code } = req.body; //console.log(req.body)
     const R = await Estados(k);
-    await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`, [
-      { 'l.estado': R.std },
-      k
-    ]);
+    await pool.query(
+      `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+      [{ 'l.estado': R.std }, k]
+    );
     const i = await pool.query(
       `SELECT pd.estado, p.lote, p.id, pd.n, pd.mz, pl.proyect 
         FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
@@ -5290,7 +5430,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
           u[0].lote
         );
 
-        await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
+        await pool.query(
+          `DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`,
+          k
+        );
         await EnviarWTSAP('57 3002851046', `Orden de separacion *${k}* eliminada correctamente`);
         res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
       } else {
@@ -5306,12 +5449,15 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         i[0].lote
       );
 
-      await pool.query(`DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`, k);
+      await pool.query(
+        `DELETE p, s FROM preventa p LEFT JOIN solicitudes s ON s.orden = p.id WHERE p.id = ?`,
+        k
+      );
       await EnviarWTSAP(
         '57 3002851046',
-        `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'} ${
-          i[0].proyect
-        }_`
+        `_*${req.user.fullname}* elimino el LT: *${i[0].n}* ${
+          i[0].mz === 'no' ? 'DE' : 'MZ: *' + i[0].mz + '* DE'
+        } ${i[0].proyect}_`
       );
       res.send({ r: true, m: 'El reporte fue eliminado de manera exitosa' });
     }
@@ -5364,20 +5510,23 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const pers = await pool.query(sql, k);
     const p = pers[0];
     if (!p.directa || h >= 2) {
-      await pool.query(`UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`, [
-        {
-          'p.status': h,
-          'p.promesa': h,
-          'p.autoriza': req.user.fullname,
-          'l.fechar': h == 2 && !p.directa ? f : p.fechar
-        },
-        k
-      ]);
+      await pool.query(
+        `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+        [
+          {
+            'p.status': h,
+            'p.promesa': h,
+            'p.autoriza': req.user.fullname,
+            'l.fechar': h == 2 && !p.directa ? f : p.fechar
+          },
+          k
+        ]
+      );
       if (h == 1) {
         var bod = `_*${p.nombre}*. RED ELITE a generado tu *PROMESA DE COMPRA VENTA* la cual te sera enviada al correo *${p.email}* una ves la halla autenticado dirijase a una de nuestras oficinas con el documento_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
-        var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${p.nombre}*. *MZ ${
-          p.mz
-        } LT ${p.n}* la cual le sera enviada al correo *${
+        var bo = `_*${p.fullname.split(' ')[0]}* se a generado la *PROMESA DE COMPRA VENTA* de *${
+          p.nombre
+        }*. *MZ ${p.mz} LT ${p.n}* la cual le sera enviada al correo *${
           p.email
         }*, se recomienda realizar seguimiento al cliente para que haga la autenticacion en el menor tiempo posible_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
         await EnviarWTSAP(p.movil, bod);
@@ -5408,7 +5557,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     respuesta = { data: cuotas };
     res.send(respuesta);
   } else if (id === 'comision' && !req.user.externo) {
-    const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+    const solicitudes =
+      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -5422,7 +5572,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   } else if (id === 'comisionOLD' && !req.user.externo) {
     if (req.user.admin == 1) {
-      const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+      const solicitudes =
+        await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -5461,21 +5612,25 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       };
       await pool.query(`UPDATE recibos SET ? WHERE id = ?`, [rcb, j]);
     } else {
-      var sql1 = 'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
-      var sql2 = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
+      var sql1 =
+        'INSERT INTO cupones (pin, descuento, estado, tip, monto, motivo, concept) VALUES ';
+      var sql2 =
+        'INSERT INTO recibos (registro, date, formapg, rcb, monto, observacion, baucher) VALUES ';
       var sql3 = '';
       id.map((x, i) => {
         if (formap[i].indexOf('BONO') === 0) {
-          sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${observacion[i]}', '${
-            formap[i]
-          }'),`;
-          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${
+          sql3 += `('${nrecibo[i]}', 0, 14, 'BONO', ${montos[i].replace(/\./g, '')}, '${
             observacion[i]
-          }', '/img/bonos.png'),`;
+          }', '${formap[i]}'),`;
+          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(
+            /\./g,
+            ''
+          )}, '${observacion[i]}', '/img/bonos.png'),`;
         } else {
-          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(/\./g, '')}, '${
-            observacion[i]
-          }', '${img[i]}'),`;
+          sql2 += `(${x}, '${feh[i]}', '${formap[i]}', '${nrecibo[i]}', ${montos[i].replace(
+            /\./g,
+            ''
+          )}, '${observacion[i]}', '${img[i]}'),`;
         }
       });
 
@@ -6249,7 +6404,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send('/uploads/CUOTAS.xlsx');
   } else if (id === 'dctomora' && req.user.contador) {
     const { producto, dcto, monto, limite, tipo, stop } = req.body;
-    const acuerdo = await pool.query('SELECT id FROM acuerdos WHERE producto = ? AND estado = 9', producto);
+    const acuerdo = await pool.query(
+      'SELECT id FROM acuerdos WHERE producto = ? AND estado = 9',
+      producto
+    );
     if (!acuerdo.length) {
       const newAcuerdo = {
         producto,
@@ -6558,12 +6716,15 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
         }*/
     let prd;
     if (req.user.externo) {
-      const prcd = await pool.query('SELECT producto FROM externos WHERE usuario = ?', req.user.pin);
+      const prcd = await pool.query(
+        'SELECT producto FROM externos WHERE usuario = ?',
+        req.user.pin
+      );
       prd = prcd.map(e => e.producto);
     }
     let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
     const so =
-      await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar,
+      await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar, e.otro,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
@@ -6670,7 +6831,8 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
             return res.send(false);
         }; */
     const solicitudes = await pool.query(`SELECT e.*, s.ids, s.fech, s.monto 
-        FROM extrabanco e LEFT JOIN solicitudes s ON s.extrato = e.id WHERE e.consignado > 0`);
+        FROM extrabanco e LEFT JOIN solicitudes s ON s.extrato = e.id WHERE e.consignado > 0  
+        ORDER BY TIMESTAMP(e.date) ASC`);
     //console.log(solicitudes)
     respuesta = { data: solicitudes };
     res.send(respuesta);
@@ -6685,22 +6847,28 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
       rbc: recibos,
       monto: montorcb
     };
-    await pool.query('UPDATE pagos p INNER JOIN solicitudes s ON p.id = s.cuentadecobro SET ? WHERE p.id = ?', [
-      {
-        'p.rcbs': '/uploads/' + req.files[0].filename,
-        'p.stads': 4,
-        'p.rbc': recibos,
-        'p.monto': montorcb,
-        's.stado': 4
-      },
-      ids
-    ]);
+    await pool.query(
+      'UPDATE pagos p INNER JOIN solicitudes s ON p.id = s.cuentadecobro SET ? WHERE p.id = ?',
+      [
+        {
+          'p.rcbs': '/uploads/' + req.files[0].filename,
+          'p.stads': 4,
+          'p.rbc': recibos,
+          'p.monto': montorcb,
+          's.stado': 4
+        },
+        ids
+      ]
+    );
     res.send(true);
   } else if (id === 'fechas') {
     const { id, fecha } = req.body;
     console.log(req.body);
     await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ fecharcb: fecha }, id]);
     res.send(true);
+  } else if (id === 'informe') {
+    informes(req.body);
+    res.send({ r: true, m: 'todo salio bien', data: `/uploads/informes.pdf` });
   }
 });
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
@@ -6772,13 +6940,14 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     res.send(true);
   } else if (id === 'Desasociar') {
     const { ids } = req.body;
+    console.log(req.body);
     await pool.query('UPDATE solicitudes SET extrato = NULL WHERE ids = ?', ids);
     res.send(true);
   } else {
     const { ids, acumulado, ahora, idExtracto } = req.body;
 
-    const pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
-    const R = await PagosAbonos(ids, pdf, req.user.fullname);
+    const pdf = req.headers.origin + '/uploads/aprobaciones'; // + req.files[0]?.filename;
+    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto);
     var w = { acumulado, aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
@@ -6818,7 +6987,10 @@ router.post('/afiliado', noExterno, async (req, res) => {
     boidy,
     `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`
   );
-  req.flash('success', 'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre');
+  req.flash(
+    'success',
+    'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre'
+  );
   res.redirect('/tablero');
 });
 router.post('/id', async (req, res) => {
@@ -6852,7 +7024,10 @@ function ID2(lon) {
   return code;
 }
 async function usuario(id) {
-  const usuario = await pool.query(`SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `, id);
+  const usuario = await pool.query(
+    `SELECT p.categoria, p.usuario FROM pines p WHERE p.acreedor = ? `,
+    id
+  );
   if (usuario.length > 0 && usuario[0].categoria == 2) {
     return usuario[0].usuario;
   } else {
@@ -6866,7 +7041,10 @@ async function saldo(producto, rango, id, monto) {
   } else if (!producto && !monto) {
     return 'NO';
   } else {
-    const produ = await pool.query(`SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`, producto);
+    const produ = await pool.query(
+      `SELECT precio, utilidad, stock FROM products WHERE id_producto = ?`,
+      producto
+    );
     const rang = await pool.query(`SELECT comision FROM rangos WHERE id = ?`, rango);
     operacion = produ[0].precio - (produ[0].utilidad * rang[0].comision) / 100;
   }
@@ -7063,14 +7241,17 @@ async function RestablecerCupon(S) {
   const total = x.dto === 'TODO' ? Math.round(valor - ahorro) : valor;
 
   const initials =
-    x.dto === 'INICIAL' ? Math.round((total * x.iniciar) / 100 - ahorro) : Math.round((total * x.iniciar) / 100);
+    x.dto === 'INICIAL'
+      ? Math.round((total * x.iniciar) / 100 - ahorro)
+      : Math.round((total * x.iniciar) / 100);
 
   const incl = initials - separa;
   const inicial = Math.sign(incl) >= 0 ? incl : 0;
   const nini = x.inicialdiferida ? x.inicialdiferida : 0;
   const cuotaini = inicial ? Math.round(inicial / nini) : 0;
 
-  const financiacion = x.dto === 'FINANCIACION' ? Math.round(total - inicial - ahorro) : Math.round(total - inicial);
+  const financiacion =
+    x.dto === 'FINANCIACION' ? Math.round(total - inicial - ahorro) : Math.round(total - inicial);
 
   if (x.proyeccion > 0) {
     var Extra = 0,
@@ -7160,7 +7341,8 @@ async function QuitarCupon(S) {
     mes12 = cuotafnc;
 
     if (cuotaordi) {
-      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
+      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi),
+        (mes12 = cuotaordi);
     }
 
     const r = await pool.query(
@@ -7218,7 +7400,9 @@ async function ProyeccionPagos(S) {
   const total = x.dto === 'TODO' ? Math.round(valor - ahorro) : valor;
 
   const initials =
-    x.dto === 'INICIAL' ? Math.round((total * x.iniciar) / 100 - ahorro) : Math.round((total * x.iniciar) / 100);
+    x.dto === 'INICIAL'
+      ? Math.round((total * x.iniciar) / 100 - ahorro)
+      : Math.round((total * x.iniciar) / 100);
 
   const inicial = x.separar >= initials ? 0 : initials - separa;
 
@@ -7251,7 +7435,8 @@ async function ProyeccionPagos(S) {
     mes12 = cuotafnc;
 
     if (cuotaordi) {
-      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi), (mes12 = cuotaordi);
+      cf == 1 ? (mes6 = cuotaordi) : cf == 2 ? (mes12 = cuotaordi) : (mes6 = cuotaordi),
+        (mes12 = cuotaordi);
     }
 
     await pool.query(
@@ -7285,8 +7470,14 @@ async function ProyeccionPagos(S) {
   );
 
   if (Cuotas[0].pago) {
-    await pool.query(`DELETE r FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota WHERE c.separacion = ?`, S);
-    Cuotas = await pool.query(`SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`, S);
+    await pool.query(
+      `DELETE r FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota WHERE c.separacion = ?`,
+      S
+    );
+    Cuotas = await pool.query(
+      `SELECT * FROM cuotas WHERE separacion = ? ORDER BY TIMESTAMP(fechs) ASC`,
+      S
+    );
   }
   const Abonos = await pool.query(
     `SELECT s.ids, s.monto, s.fech, s.fecharcb, a.dcto, a.estado FROM solicitudes s 
@@ -7323,15 +7514,18 @@ async function ProyeccionPagos(S) {
     for (o = 0; o < cuotas.length; o++) {
       if (!Monto) continue;
       const q = cuotas[o]; //                                             array de cuotas
-      const FechaCuota = idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
+      const FechaCuota =
+        idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
       const diffdays = moment(fechaLMT).diff(FechaCuota, 'days'); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
       const daysDiff = fechaLMT > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
       const Tas =
         cobro && daysDiff
           ? Moras.filter(
               x =>
-                moment(x.fecha).format('YYYY-MM-DD') >= moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
-                moment(x.fecha).format('YYYY-MM-DD') <= moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
+                moment(x.fecha).format('YYYY-MM-DD') >=
+                  moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
+                moment(x.fecha).format('YYYY-MM-DD') <=
+                  moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
             ).map(x => x.teano)
           : []; //                                                         calculo de interes por mora
 
@@ -7492,13 +7686,13 @@ async function ProyeccionPagos(S) {
   //////////////////////////* ENVIAR PDF *///////////////////////////
   //await EstadoDeCuenta(S)
 }
-async function PagosAbonos(Tid, pdf, user) {
+async function PagosAbonos(Tid, pdf, user, extr = false) {
   //u. obsevacion pr
   const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
     pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
     cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, s.formap, 
     s.concepto, pr.obsevacion, s.ids, s.descp, pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, 
-    a.tipo tipoacuerdo FROM solicitudes s
+    s.extrato, a.tipo tipoacuerdo FROM solicitudes s
     INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
@@ -7516,34 +7710,50 @@ async function PagosAbonos(Tid, pdf, user) {
       msg: S.stado === 4 ? `Este pago ya ha sido aprobado.` : 'Este pago se encuentra declinado.'
     };
   }
+  if (S.extrato && extr && S.extrato != extr) {
+    Eli(pdf);
+    return {
+      std: false,
+      msg: `Este pago ya posee un extrato asociado difrente, desasocielo primero si desea continuar con esta solicitud.`
+    };
+  }
   //if (S.concepto === 'ABONO') {
-  var montocuotas = monto;
+  //var montocuotas = monto;
   const Cuotas = await pool.query(
     `SELECT * FROM cuotas WHERE separacion = ${T} AND estado = 3 ORDER BY TIMESTAMP(fechs) ASC`
   );
 
-  if (Cuotas.length > 0 && monto > 0) {
+  console.log(Cuotas.length, monto, T);
+  if (monto > 0) {
+    console.log('no esta pasando por aqui', user);
     await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
-      { concepto: 'ABONO', descp: Cuotas[0].tipo, stado: 4, aprueba: user },
+      {
+        concepto: 'ABONO',
+        descp: Cuotas.length ? Cuotas[0].tipo : 'ABONO',
+        stado: 4,
+        aprueba: user
+      },
       Tid
     ]);
   } else {
     return {
       std: false,
-      msg: !Cuotas.length ? `No se encontraron cuotas pendientes por pagar` : 'El monto es insuficiente'
+      msg: !Cuotas.length
+        ? `No se encontraron cuotas pendientes por pagar`
+        : 'El monto es insuficiente'
     };
   }
 
-  await ProyeccionPagos(T);
-  var st = await Estados(T);
-  try {
+  //await ProyeccionPagos(T);
+  //var st = await Estados(T);
+  /* try {
     await pool.query(
       `UPDATE solicitudes s 
         INNER JOIN productosd l ON s.lt = l.id 
         SET ? WHERE s.ids = ?`,
       [
         {
-          'l.estado': st.std,
+          //'l.estado': st.std,
           's.pdf': pdf
         },
         Tid
@@ -7551,14 +7761,16 @@ async function PagosAbonos(Tid, pdf, user) {
     );
   } catch (e) {
     console.log(e);
-  }
+  } */
 
-  var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${S.recibo}* Monto *${Moneda(
+  var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${
+    S.recibo
+  }* Monto *${Moneda(
     monto
   )}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
-  var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${S.bono} Monto: ${Moneda(
-    monto
-  )} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
+  var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${
+    S.bono
+  } Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
 
   await EnviarWTSAP(S.movil, bod);
   await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
@@ -7626,7 +7838,9 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 3:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
+        mes - 1
+      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 4:
       corte1 = 1;
@@ -7638,7 +7852,9 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 6:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
+        mes - 1
+      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 7:
       corte = 1;
@@ -7650,7 +7866,9 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 9:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
+        mes - 1
+      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     case 10:
       corte = 1;
@@ -7662,7 +7880,9 @@ async function Desendentes(pin, stados, pasado) {
       break;
     case 12:
       corte = 3;
-      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${mes - 1}, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
+      rangofchs = `AND MONTH(l.fechar) IN(${mes - 2}, ${
+        mes - 1
+      }, ${mes}) AND YEAR(l.fechar) = YEAR(CURDATE())`;
       break;
     default:
       return false;
@@ -7679,6 +7899,7 @@ async function Desendentes(pin, stados, pasado) {
         OR (l.tres IS NULL AND s.descp = 'TERCERA LINEA') 
         AND s.descp != 'SEPARACION'`);
   //console.log(pin);
+
   const asesor = await pool.query(
     `SELECT p.*, u.*, r.*, u1.nrango papa, u2.nrango abue, u3.nrango bisab     
         FROM pines p INNER JOIN users u ON p.acreedor = u.id             
@@ -8114,8 +8335,7 @@ async function Desendentes(pin, stados, pasado) {
           }
 
           pool.query(
-            `INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, 
-                        porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`,
+            `INSERT INTO solicitudes (fech, monto, concepto, stado, descp, asesor, porciento, total, lt, retefuente, reteica, pagar, orden) VALUES ?`,
             [f]
           );
           pool.query(`UPDATE productosd SET ? WHERE id = ?`, [Lote, a.lote]);
@@ -8235,7 +8455,13 @@ async function Desendentes(pin, stados, pasado) {
       rangoabajo: await Math.max(...rangoniveles),
       cortep: cortp
     };
-    corte === 1 ? (v.corte1 = cort) : corte === 2 ? (v.corte2 = cort) : corte === 3 ? (v.corte3 = cort) : '';
+    corte === 1
+      ? (v.corte1 = cort)
+      : corte === 2
+      ? (v.corte2 = cort)
+      : corte === 3
+      ? (v.corte3 = cort)
+      : '';
 
     await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]);
     return true;
@@ -8294,7 +8520,12 @@ function Moneda(valor) {
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
   let cel = 0;
   movil
-    ? (cel = movil.indexOf('-') > 0 ? '57' + movil.replace(/-/g, '') : movil.indexOf(' ') > 0 ? movil : '57' + movil)
+    ? (cel =
+        movil.indexOf('-') > 0
+          ? '57' + movil.replace(/-/g, '')
+          : movil.indexOf(' ') > 0
+          ? movil
+          : '57' + movil)
     : '';
 
   let options = {
@@ -8316,7 +8547,12 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
 async function EnvWTSAP_FILE(movil, body, filename, caption) {
   let cel = 0;
   movil
-    ? (cel = movil.indexOf('-') > 0 ? '57' + movil.replace(/-/g, '') : movil.indexOf(' ') > 0 ? movil : '57' + movil)
+    ? (cel =
+        movil.indexOf('-') > 0
+          ? '57' + movil.replace(/-/g, '')
+          : movil.indexOf(' ') > 0
+          ? movil
+          : '57' + movil)
     : '';
 
   let options = {
