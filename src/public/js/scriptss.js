@@ -3316,7 +3316,6 @@ if (window.location.pathname === `/links/reportes`) {
       filas.each(function (g, i) {
         AdminSuper = rol.subadmin;
         resOrden = rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
-        //<a class="flex-sm-fill text-sm-center nav-link" href="#" data-toggle="modal" data-target="#Anulacion"><i class="fas fa-ban"></i> Anular</a>
 
         $(rows)
           .eq(i)
@@ -12284,7 +12283,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
       } else if (
         (rol.contador && accion === 'Enviar') ||
-        (accion === 'Aprobar' && rol.id == '15')
+        (accion === 'Aprobar' && rol.id == '15') ||
+        (rol.contador && accion === 'Aprobar' && rol.externo)
       ) {
         if (!rol.externo && !idExtracto && accion === 'Aprobar' && rol.id !== '15') {
           alert('Debe asociar un extrato al pago que desea aprobar');
