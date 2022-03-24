@@ -2002,6 +2002,12 @@ router.get('/prueba2', async (req, res) => {
 router.post('/callback', async (req, res) => {
   console.log(req.body);
 });
+router.get('/whatsapp', async (req, res) => {
+  const ruta = path.join(__dirname, '../../screenshot.png');
+  console.log(ruta);
+  var dataurl = fs.readFileSync(ruta);
+  res.render('links/whatsapp', { img: dataurl.toString('base64') });
+});
 router.post('/prueba2', async (req, res) => {
   console.log(req.body);
 });
