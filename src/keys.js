@@ -1,73 +1,71 @@
 module.exports = {
   database0: {
     connectionLimit: 1000,
-    host: "96.43.143.58",
-    user: "admin",
-    password: "C0l0mb1@",
-    database: "pElite",
-    port: 3306,
+    host: '96.43.143.58',
+    user: 'admin',
+    password: 'C0l0mb1@',
+    database: 'pElite',
+    port: 3306
   },
   database: {
     connectionLimit: 1000,
-    host: "96.43.143.58",
-    user: "admin",
-    password: "C0l0mb1@",
-    database: "elite",
-    port: 3306,
+    host: '96.43.143.58',
+    user: 'admin',
+    password: 'C0l0mb1@',
+    database: 'elite',
+    port: 3306
   },
   database2: {
     connectionLimit: 1000,
-    host: "localhost",
-    user: "samir",
-    password: "Abcd1234@",
-    database: "elite",
+    host: 'localhost',
+    user: 'samir',
+    password: 'Abcd1234@',
+    database: 'elite'
   },
   registro: {
-    pin: "hola",
+    pin: 'hola'
   },
   dataSet: {},
   Google: {
-    client_id:
-      "564755414021-up2etv2h9crge2g4fcb5hpujg4b8gv81.apps.googleusercontent.com",
-    project_id: "redelite",
-    auth_uri: "https://accounts.google.com/o/oauth2/auth",
-    token_uri: "https://oauth2.googleapis.com/token",
-    auth_provider_x509_cert_url: "https://www.googleapis.com/oauth2/v1/certs",
-    client_secret: "E26Q90P5-_r2BZ89OGAMDrCa",
+    client_id: '564755414021-up2etv2h9crge2g4fcb5hpujg4b8gv81.apps.googleusercontent.com',
+    project_id: 'redelite',
+    auth_uri: 'https://accounts.google.com/o/oauth2/auth',
+    token_uri: 'https://oauth2.googleapis.com/token',
+    auth_provider_x509_cert_url: 'https://www.googleapis.com/oauth2/v1/certs',
+    client_secret: 'E26Q90P5-_r2BZ89OGAMDrCa',
     redirect_uris: [
-      "https://grupoelitefincaraiz.com/auth/google/callback",
-      "https://grupoelitefincaraiz.co/auth/google/callback",
-      "https://grupoelitefincaraiz.com.co/auth/google/callback",
-      "http://localhost:5000/auth/google/callback",
+      'https://grupoelitefincaraiz.com/auth/google/callback',
+      'https://grupoelitefincaraiz.co/auth/google/callback',
+      'https://grupoelitefincaraiz.com.co/auth/google/callback',
+      'http://localhost:5000/auth/google/callback'
     ],
     javascript_origins: [
-      "https://grupoelitefincaraiz.com",
-      "https://grupoelitefincaraiz.co",
-      "https://grupoelitefincaraiz.com.co",
-      "https://grupoelite.herokuapp.com",
-      "http://localhost:5000",
-    ],
+      'https://grupoelitefincaraiz.com',
+      'https://grupoelitefincaraiz.co',
+      'https://grupoelitefincaraiz.com.co',
+      'https://grupoelite.herokuapp.com',
+      'http://localhost:5000'
+    ]
   },
   Facebook: {
-    client_id: "2450123638566580",
-    client_secret: "458cba23923008c134dffcf01ad57e59",
+    client_id: '2450123638566580',
+    client_secret: '458cba23923008c134dffcf01ad57e59',
     redirect_uris: [
-      "https://redflixx.herokuapp.com/auth/facebook/callback",
-      "http://localhost:3000/auth/facebook/callback",
-    ],
+      'https://redflixx.herokuapp.com/auth/facebook/callback',
+      'http://localhost:3000/auth/facebook/callback'
+    ]
   },
   Soat: {
-    secret_id: "yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP",
-    client_id: "37eb1267-6c33-46b1-a76f-33a553fd812f",
-    otro: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.MTI4Mg.RO7HFV11U1YNtFNpPnCcOIaQcHU72f7tPn3HoOCMXOg",
-    v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`,
+    secret_id: 'yO0jB0tD4jI8vP2yD2sR6gI4iA1rF8cV3rK3jQ3gS7hD7aI7tP',
+    client_id: '37eb1267-6c33-46b1-a76f-33a553fd812f',
+    otro: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.MTI4Mg.RO7HFV11U1YNtFNpPnCcOIaQcHU72f7tPn3HoOCMXOg',
+    v: `sT6rX2wH4iL4jJ8qQ8eV6bL5iJ8cM2gS1eL8sY2pY0hL5vX4eM`
   },
   Contactos: {
-    client_secret: "QRAaQqm5PmIA55bw6N2-hpE2",
-    client_id:
-      "507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com",
-    redirect_uris: "http://localhost:5000/contactos",
-  },
+    client_secret: 'QRAaQqm5PmIA55bw6N2-hpE2',
+    client_id: '507038552414-0d2oul1ks021a2ajvh7p2771qmoel9ln.apps.googleusercontent.com',
+    redirect_uris: 'http://localhost:5000/contactos'
+  }
 };
 /* Configurar Analytics Ads en tu sitio web
 Para conectar Google Analytics con tu sitio web, elige el método que corresponda de entre los siguientes:

@@ -20,7 +20,6 @@ const config = require('./config.js');
 const io = require('socket.io');
 const events = require('events');
 const emitter = new events.EventEmitter();
-const botWsp = require('./chats/bot-wsp');
 const token = config.token,
   apiUrl = config.apiUrl;
 

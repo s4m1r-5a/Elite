@@ -12142,6 +12142,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         porque = '',
         fd = new FormData(),
         mensaje = false;
+      enviaRcb = false;
+
       //console.log(accion)
       //var w = Seleccion();
       fd.append('pdef', data.pdf);
@@ -12294,12 +12296,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           alert('Debe establecer una fecha al recibo antes de realizar esta accion');
           return false;
         }
+        enviaRcb =
+          accion === 'Aprobar' ? confirm('¿Desea enviar el RECIBO DE CAJA al cliente?') : true;
 
         data.pdf
           ? (mensaje = confirm(
               'Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente'
             ))
-          : (mensaje = false); // true
+          : (mensaje = enviaRcb); // true
 
         if (mensaje) {
           $.ajax({
@@ -15363,6 +15367,30 @@ if (window.location == `${window.location.origin}/links/cupones` && !rol.externo
         }
       }
     });
+  });
+}
+////////////////////////////* WHATSAPP *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/whatsapp`) {
+  $.ajax({
+    url: '/links/conection',
+    type: 'POST',
+    accepts: 'application/json',
+    beforeSend: function (xhr) {
+      $('#ModalEventos').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+      });
+    },
+    success: function (data) {
+      if (data) {
+        $('#ModalEventos').modal('hide');
+        $('#wtspQr').prop('src', data.qrBase64);
+      }
+    },
+    error: function (data) {
+      console.log(data);
+    }
   });
 }
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////

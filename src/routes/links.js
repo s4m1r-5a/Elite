@@ -30,7 +30,8 @@ const {
 } = require('../functions.js');
 const { Console } = require('console');
 //DELETE
-
+const tokenWtsp =
+  'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHBzOi8vYzE4YS0yODAwLTQ4NC1hYzgyLTFhMGMtMjk5Ni1iZGUyLTI4NWUtMzgyYS5uZ3Jvay5pby93dHNwL3dlYmhvb2siLCJpYXQiOjE2NDg4MjYxNTR9.o-aWCOLCowGoJdqnUQnKpNrtJFWYrNqZ8LpPycQH7U0';
 const transpoter = nodemailer.createTransport({
   host: 'smtpout.secureserver.net',
   port: 80,
@@ -2003,10 +2004,28 @@ router.post('/callback', async (req, res) => {
   console.log(req.body);
 });
 router.get('/whatsapp', async (req, res) => {
-  const ruta = path.join(__dirname, '../../screenshot.png');
+  /* const ruta = path.join(__dirname, '../../screenshot.png');
   console.log(ruta);
-  var dataurl = fs.readFileSync(ruta);
-  res.render('links/whatsapp', { img: dataurl.toString('base64') });
+  var dataurl = fs.readFileSync(ruta); */
+  const url = 'https://inmovili.com.co/api/wtsp/qr';
+  const headers = { 'x-access-token': tokenWtsp };
+  axios
+    .post(url, {}, { headers })
+    .then(result => {
+      console.log(result.data);
+      res.render('links/whatsapp', result.data);
+    })
+    .catch(err => console.error(err));
+});
+router.post('/conection', async (req, res) => {
+  const url = 'https://inmovili.com.co/api/wtsp/conection';
+  const url2 = 'https://inmovili.com.co/api/wtsp/qr';
+  const headers = { 'x-access-token': tokenWtsp };
+  const conect = await axios.post(url, {}, { headers, timeout: 300000 });
+  console.log(conect.data);
+  const img = await axios.post(url2, {}, { headers, timeout: 300000 });
+  console.log(img.data);
+  res.json(img.data);
 });
 router.post('/prueba2', async (req, res) => {
   console.log(req.body);
@@ -6953,7 +6972,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
   } else {
     const { ids, acumulado, ahora, idExtracto } = req.body;
 
-    const pdf = req.headers.origin + '/uploads/aprobaciones'; // + req.files[0]?.filename;
+    const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
     const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto);
     var w = { acumulado, aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
@@ -7778,9 +7797,9 @@ async function PagosAbonos(Tid, pdf, user, extr = false) {
   var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${
     S.bono
   } Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
-
-  await EnviarWTSAP(S.movil, bod);
-  await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
+  console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
+  //await EnviarWTSAP(S.movil, bod);
+  //await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {
@@ -8524,57 +8543,56 @@ function Moneda(valor) {
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
 }
+//EnviarWTSAP('57 3012673944', 'esto es una prueba de grupo elite');
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
-  let cel = 0;
-  movil
-    ? (cel =
-        movil.indexOf('-') > 0
-          ? '57' + movil.replace(/-/g, '')
-          : movil.indexOf(' ') > 0
-          ? movil
-          : '57' + movil)
-    : '';
+  const cel =
+    movil.indexOf('-') > 0
+      ? '57' + movil.replace(/-/g, '')
+      : movil.indexOf(' ') > 0
+      ? movil.replace(/ /g, '')
+      : '57' + movil;
 
   let options = {
     method: 'POST',
-    url: 'https://eu89.chat-api.com/instance107218/sendMessage?token=5jn3c5dxvcj27fm0',
+    url: 'https://inmovili.com.co/api/wtsp/sendText',
+    headers: { 'x-access-token': tokenWtsp },
     data: {
-      body
+      to: cel + '@c.us',
+      message: body
     }
   };
 
-  q ? (options.data.quotedMsgId = q) : '';
-  chatid ? (options.data.chatId = chatid) : (options.data.phone = cel);
+  /* q ? (options.data.quotedMsgId = q) : '';
+  chatid ? (options.data.chatId = chatid) : (options.data.to = cel); */
 
-  //const tt = await axios(options);
+  const tt = await axios(options);
   //smsj ? await sms(desarrollo ? "57 3012673944" : cel, smsj) : "";
-  //return tt.data;
-  return true;
+  //console.log(tt.data);
+  return tt.data;
+  //return true;
 }
 async function EnvWTSAP_FILE(movil, body, filename, caption) {
-  let cel = 0;
-  movil
-    ? (cel =
-        movil.indexOf('-') > 0
-          ? '57' + movil.replace(/-/g, '')
-          : movil.indexOf(' ') > 0
-          ? movil
-          : '57' + movil)
-    : '';
+  const cel =
+    movil.indexOf('-') > 0
+      ? '57' + movil.replace(/-/g, '')
+      : movil.indexOf(' ') > 0
+      ? movil.replace(/ /g, '')
+      : '57' + movil;
 
   let options = {
     method: 'POST',
-    url: 'https://eu89.chat-api.com/instance107218/sendFile?token=5jn3c5dxvcj27fm0',
+    url: 'https://inmovili.com.co/api/wtsp/sendFile',
+    headers: { 'x-access-token': tokenWtsp },
     data: {
-      phone: cel,
-      body, //`https://grupoelitered.com.co/uploads/0erdlw-york61mn26n46v141lap-gvk-ro.pdf`,
-      filename,
+      to: cel + '@c.us',
+      route: body,
+      name: filename,
       caption
     }
   };
-  //const tt = await axios(options);
-  //return tt.data;
-  return true;
+  const tt = await axios(options);
+  return tt.data;
+  //return true;
 }
 //s = `SELECT * FROM solicitudes s WHERE s.fech LIKE '%2021-11-03 16:%' ORDER BY ids DESC`
 module.exports = router;

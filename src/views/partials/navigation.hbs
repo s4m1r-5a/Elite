@@ -1,624 +1,729 @@
 {{#if user.externo}}
 
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/solicitudes">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/solicitudes'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="bell"></i> <span class="align-middle">Solicitudes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/cartera">
-					<i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Cartera</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-		</ul>
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 
 {{else if user.admin}}
 
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/tablero">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/tablero'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<!--<li class="sidebar-item active">
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <!--<li class="sidebar-item active">
 				<a class="sidebar-link" href="/links/social">
 					<i class="align-middle" data-feather="home"></i> <span class="align-middle">Social</span>
 					<span class="sidebar-badge badge badge-primary">New</span>
 				</a>
 			</li>-->
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/tablero">
-					<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Tablero</span>
-					<span class="sidebar-badge badge badge-primary">New</span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a href="#pages" data-toggle="collapse" class="sidebar-link collapsed">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span
-						class="align-middle">Productos</span>
-				</a>
-				<ul id="pages" class="sidebar-dropdown list-unstyled collapse " data-parent="#sidebar">
-					<li class="sidebar-item"><a class="sidebar-link" href="/links/productos">Campestres</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Urbanizados</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Rentas</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Obras <span
-								class="sidebar-badge badge badge-primary">New</span></a></li>
-				</ul>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/comisiones">
-					<i class="align-middle" data-feather="pocket"></i> <span class="align-middle">Comisiones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/pagos">
-					<i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Pagos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="bell"></i> <span class="align-middle">Solicitudes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/cupones">
-					<i class="align-middle" data-feather="tag"></i> <span class="align-middle">Cupones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/clientes">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Clientes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/red">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Red</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/cartera">
-					<i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Cartera</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a href="#pages2" data-toggle="collapse" class="sidebar-link collapsed">
-					<i class="align-middle" data-feather="settings"></i> <span class="align-middle">Configuracion</span>
-				</a>
-				<ul id="pages2" class="sidebar-dropdown list-unstyled collapse " data-parent="#sidebar">
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Roles</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Usuarios</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Apis</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Cuentas <span
-								class="sidebar-badge badge badge-primary">New</span></a></li>
-				</ul>
-			</li>
-		</ul>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/tablero'>
+            <i class='align-middle' data-feather='sliders'></i>
+            <span class='align-middle'>Tablero</span>
+            <span class='sidebar-badge badge badge-primary'>New</span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a href='#pages' data-toggle='collapse' class='sidebar-link collapsed'>
+            <i class='align-middle' data-feather='shopping-cart'></i>
+            <span class='align-middle'>Productos</span>
+          </a>
+          <ul id='pages' class='sidebar-dropdown list-unstyled collapse' data-parent='#sidebar'>
+            <li class='sidebar-item'><a
+                class='sidebar-link'
+                href='/links/productos'
+              >Campestres</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Urbanizados</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Rentas</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Obras
+                <span class='sidebar-badge badge badge-primary'>New</span></a></li>
+          </ul>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/comisiones'>
+            <i class='align-middle' data-feather='pocket'></i>
+            <span class='align-middle'>Comisiones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/pagos'>
+            <i class='align-middle' data-feather='dollar-sign'></i>
+            <span class='align-middle'>Pagos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/cupones'>
+            <i class='align-middle' data-feather='tag'></i>
+            <span class='align-middle'>Cupones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/clientes'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Clientes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/red'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Red</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a href='#pages2' data-toggle='collapse' class='sidebar-link collapsed'>
+            <i class='align-middle' data-feather='settings'></i>
+            <span class='align-middle'>Configuracion</span>
+          </a>
+          <ul id='pages2' class='sidebar-dropdown list-unstyled collapse' data-parent='#sidebar'>
+            <li class='sidebar-item'><a
+                class='sidebar-link'
+                href='/links/whatsapp'
+              >Whatsapp</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Roles</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Usuarios</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Apis</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Cuentas
+                <span class='sidebar-badge badge badge-primary'>New</span></a></li>
+          </ul>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 
-<!-- CHATS -->
-<div class="contain d-none d-sm-block">
-	<div class="center">
-		<div class="contacts">
-			<i class="fas fa-bars fa-2x"></i>
-			<h2>
-				Contacts
-			</h2>
-			<div class="contactos" id="contactos">
-				<div class="contact" style="display: none;">
-					<div class="pic rogers"
-						style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');">
-					</div>
-					<div class="badge">1</div>
-					<div class="name">Steve Rogers</div>
-					<div class="message">That is America's ass 🇺🇸🍑</div>
-				</div>
-			</div>
-		</div>
-		<div class="chat">
-			<div class="contact bar">
-				<input id="ChatActivo" type="hidden">
-				<input id="ChatActivOrg" type="hidden">
-				<input type="hidden" id="diah">
-				<div class="pic stark">
-				</div>
-				<div class="name"></div>
-				<div class="seen"></div>
-			</div>
-			<div class="messages" id="chat">
-				<div class="time"></div>
-				<div class="message parker"></div>
-				<div class="message stark"></div>
-			</div>
-			<div class="input">
-				<i class="fas fa-camera"></i><i class="far fa-laugh-beam"></i><input
-					placeholder="¡Escribe tu mensaje aquí!" type="text" id="send" /><i class="fas fa-microphone"></i>
-			</div>
-		</div>
-	</div>
-	<input type="checkbox" id="btn-mas">
-	<div class="btn-mas">
-		<label for="btn-mas" class="icon-mas2 float-right">
-			<b>+</b></label>
-	</div>
-</div>
-<!-- END CHATS -->
+  <!-- CHATS -->
+  <div class='contain d-none d-sm-block'>
+    <div class='center'>
+      <div class='contacts'>
+        <i class='fas fa-bars fa-2x'></i>
+        <h2>
+          Contacts
+        </h2>
+        <div class='contactos' id='contactos'>
+          <div class='contact' style='display: none;'>
+            <div
+              class='pic rogers'
+              style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');"
+            >
+            </div>
+            <div class='badge'>1</div>
+            <div class='name'>Steve Rogers</div>
+            <div class='message'>That is America's ass 🇺🇸🍑</div>
+          </div>
+        </div>
+      </div>
+      <div class='chat'>
+        <div class='contact bar'>
+          <input id='ChatActivo' type='hidden' />
+          <input id='ChatActivOrg' type='hidden' />
+          <input type='hidden' id='diah' />
+          <div class='pic stark'>
+          </div>
+          <div class='name'></div>
+          <div class='seen'></div>
+        </div>
+        <div class='messages' id='chat'>
+          <div class='time'></div>
+          <div class='message parker'></div>
+          <div class='message stark'></div>
+        </div>
+        <div class='input'>
+          <i class='fas fa-camera'></i><i class='far fa-laugh-beam'></i><input
+            placeholder='¡Escribe tu mensaje aquí!'
+            type='text'
+            id='send'
+          /><i class='fas fa-microphone'></i>
+        </div>
+      </div>
+    </div>
+    <input type='checkbox' id='btn-mas' />
+    <div class='btn-mas'>
+      <label for='btn-mas' class='icon-mas2 float-right'>
+        <b>+</b></label>
+    </div>
+  </div>
+  <!-- END CHATS -->
 
 {{else if user.subadmin}}
 
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/tablero">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/tablero'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/tablero">
-					<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Tablero</span>
-					<span class="sidebar-badge badge badge-primary">New</span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a href="#pages" data-toggle="collapse" class="sidebar-link collapsed">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span
-						class="align-middle">Productos</span>
-				</a>
-				<ul id="pages" class="sidebar-dropdown list-unstyled collapse " data-parent="#sidebar">
-					<li class="sidebar-item"><a class="sidebar-link" href="/links/productos">Campestres</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Urbanizados</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Rentas</a></li>
-					<li class="sidebar-item"><a class="sidebar-link" href="#">Obras <span
-								class="sidebar-badge badge badge-primary">New</span></a></li>
-				</ul>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/comisiones">
-					<i class="align-middle" data-feather="pocket"></i> <span class="align-middle">Comisiones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/pagos">
-					<i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Pagos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="bell"></i> <span class="align-middle">Solicitudes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/cupones">
-					<i class="align-middle" data-feather="tag"></i> <span class="align-middle">Cupones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/clientes">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Clientes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/red">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Red</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/cartera">
-					<i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Cartera</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-		</ul>
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/tablero'>
+            <i class='align-middle' data-feather='sliders'></i>
+            <span class='align-middle'>Tablero</span>
+            <span class='sidebar-badge badge badge-primary'>New</span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a href='#pages' data-toggle='collapse' class='sidebar-link collapsed'>
+            <i class='align-middle' data-feather='shopping-cart'></i>
+            <span class='align-middle'>Productos</span>
+          </a>
+          <ul id='pages' class='sidebar-dropdown list-unstyled collapse' data-parent='#sidebar'>
+            <li class='sidebar-item'><a
+                class='sidebar-link'
+                href='/links/productos'
+              >Campestres</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Urbanizados</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Rentas</a></li>
+            <li class='sidebar-item'><a class='sidebar-link' href='#'>Obras
+                <span class='sidebar-badge badge badge-primary'>New</span></a></li>
+          </ul>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/comisiones'>
+            <i class='align-middle' data-feather='pocket'></i>
+            <span class='align-middle'>Comisiones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/pagos'>
+            <i class='align-middle' data-feather='dollar-sign'></i>
+            <span class='align-middle'>Pagos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/cupones'>
+            <i class='align-middle' data-feather='tag'></i>
+            <span class='align-middle'>Cupones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/clientes'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Clientes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/red'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Red</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 
-<!-- CHATS -->
-<div class="contain d-none d-sm-block">
-	<div class="center">
-		<div class="contacts">
-			<i class="fas fa-bars fa-2x"></i>
-			<h2>
-				Contacts
-			</h2>
-			<div class="contactos" id="contactos">
-				<div class="contact" style="display: none;">
-					<div class="pic rogers"
-						style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');">
-					</div>
-					<div class="badge">1</div>
-					<div class="name">Steve Rogers</div>
-					<div class="message">That is America's ass 🇺🇸🍑</div>
-				</div>
-			</div>
-		</div>
-		<div class="chat">
-			<div class="contact bar">
-				<input id="ChatActivo" type="hidden">
-				<input id="ChatActivOrg" type="hidden">
-				<input type="hidden" id="diah">
-				<div class="pic stark">
-				</div>
-				<div class="name"></div>
-				<div class="seen"></div>
-			</div>
-			<div class="messages" id="chat">
-				<div class="time"></div>
-				<div class="message parker"></div>
-				<div class="message stark"></div>
-			</div>
-			<div class="input">
-				<i class="fas fa-camera"></i><i class="far fa-laugh-beam"></i><input
-					placeholder="¡Escribe tu mensaje aquí!" type="text" id="send" /><i class="fas fa-microphone"></i>
-			</div>
-		</div>
-	</div>
-	<input type="checkbox" id="btn-mas">
-	<div class="btn-mas">
-		<label for="btn-mas" class="icon-mas2 float-right">
-			<b>+</b></label>
-	</div>
-</div>
-<!-- END CHATS -->
+  <!-- CHATS -->
+  <div class='contain d-none d-sm-block'>
+    <div class='center'>
+      <div class='contacts'>
+        <i class='fas fa-bars fa-2x'></i>
+        <h2>
+          Contacts
+        </h2>
+        <div class='contactos' id='contactos'>
+          <div class='contact' style='display: none;'>
+            <div
+              class='pic rogers'
+              style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');"
+            >
+            </div>
+            <div class='badge'>1</div>
+            <div class='name'>Steve Rogers</div>
+            <div class='message'>That is America's ass 🇺🇸🍑</div>
+          </div>
+        </div>
+      </div>
+      <div class='chat'>
+        <div class='contact bar'>
+          <input id='ChatActivo' type='hidden' />
+          <input id='ChatActivOrg' type='hidden' />
+          <input type='hidden' id='diah' />
+          <div class='pic stark'>
+          </div>
+          <div class='name'></div>
+          <div class='seen'></div>
+        </div>
+        <div class='messages' id='chat'>
+          <div class='time'></div>
+          <div class='message parker'></div>
+          <div class='message stark'></div>
+        </div>
+        <div class='input'>
+          <i class='fas fa-camera'></i><i class='far fa-laugh-beam'></i><input
+            placeholder='¡Escribe tu mensaje aquí!'
+            type='text'
+            id='send'
+          /><i class='fas fa-microphone'></i>
+        </div>
+      </div>
+    </div>
+    <input type='checkbox' id='btn-mas' />
+    <div class='btn-mas'>
+      <label for='btn-mas' class='icon-mas2 float-right'>
+        <b>+</b></label>
+    </div>
+  </div>
+  <!-- END CHATS -->
 
 {{else if user.auxicontbl}}
 
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/solicitudes">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/solicitudes'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/productos">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span
-						class="align-middle">Productos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/comisiones">
-					<i class="align-middle" data-feather="pocket"></i> <span class="align-middle">Comisiones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/pagos">
-					<i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Pagos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="bell"></i> <span class="align-middle">Solicitudes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/cupones">
-					<i class="align-middle" data-feather="tag"></i> <span class="align-middle">Cupones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/clientes">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Clientes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/cartera">
-					<i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Cartera</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-		</ul>
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/productos'>
+            <i class='align-middle' data-feather='shopping-cart'></i>
+            <span class='align-middle'>Productos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/comisiones'>
+            <i class='align-middle' data-feather='pocket'></i>
+            <span class='align-middle'>Comisiones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/pagos'>
+            <i class='align-middle' data-feather='dollar-sign'></i>
+            <span class='align-middle'>Pagos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/cupones'>
+            <i class='align-middle' data-feather='tag'></i>
+            <span class='align-middle'>Cupones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/clientes'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Clientes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 
 {{else if user.asistente}}
 
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/solicitudes">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/solicitudes'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/pagos">
-					<i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Pagos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/solicitudes">
-					<i class="align-middle" data-feather="bell"></i> <span class="align-middle">Solicitudes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/cartera">
-					<i class="align-middle" data-feather="file-text"></i> <span class="align-middle">Cartera</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-		</ul>
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/pagos'>
+            <i class='align-middle' data-feather='dollar-sign'></i>
+            <span class='align-middle'>Pagos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 
-<!-- CHATS -->
-<div class="contain d-none d-sm-block">
-	<div class="center">
-		<div class="contacts">
-			<i class="fas fa-bars fa-2x"></i>
-			<h2>
-				Contacts
-			</h2>
-			<div class="contactos" id="contactos">
-				<div class="contact" style="display: none;">
-					<div class="pic rogers"
-						style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');">
-					</div>
-					<div class="badge">1</div>
-					<div class="name">Steve Rogers</div>
-					<div class="message">That is America's ass 🇺🇸🍑</div>
-				</div>
-			</div>
-		</div>
-		<div class="chat">
-			<div class="contact bar">
-				<input id="ChatActivo" type="hidden">
-				<input id="ChatActivOrg" type="hidden">
-				<input type="hidden" id="diah">
-				<div class="pic stark">
-				</div>
-				<div class="name"></div>
-				<div class="seen"></div>
-			</div>
-			<div class="messages" id="chat">
-				<div class="time"></div>
-				<div class="message parker"></div>
-				<div class="message stark"></div>
-			</div>
-			<div class="input">
-				<i class="fas fa-camera"></i><i class="far fa-laugh-beam"></i><input
-					placeholder="¡Escribe tu mensaje aquí!" type="text" id="send" /><i class="fas fa-microphone"></i>
-			</div>
-		</div>
-	</div>
-	<input type="checkbox" id="btn-mas">
-	<div class="btn-mas">
-		<label for="btn-mas" class="icon-mas2 float-right">
-			<b>+</b></label>
-	</div>
-</div>
-<!-- END CHATS -->
+  <!-- CHATS -->
+  <div class='contain d-none d-sm-block'>
+    <div class='center'>
+      <div class='contacts'>
+        <i class='fas fa-bars fa-2x'></i>
+        <h2>
+          Contacts
+        </h2>
+        <div class='contactos' id='contactos'>
+          <div class='contact' style='display: none;'>
+            <div
+              class='pic rogers'
+              style="background-image: url('https://vignette.wikia.nocookie.net/marvelcinematicuniverse/images/7/7c/Cap.America_%28We_Don%27t_Trade_Lives_Vision%29.png');"
+            >
+            </div>
+            <div class='badge'>1</div>
+            <div class='name'>Steve Rogers</div>
+            <div class='message'>That is America's ass 🇺🇸🍑</div>
+          </div>
+        </div>
+      </div>
+      <div class='chat'>
+        <div class='contact bar'>
+          <input id='ChatActivo' type='hidden' />
+          <input id='ChatActivOrg' type='hidden' />
+          <input type='hidden' id='diah' />
+          <div class='pic stark'>
+          </div>
+          <div class='name'></div>
+          <div class='seen'></div>
+        </div>
+        <div class='messages' id='chat'>
+          <div class='time'></div>
+          <div class='message parker'></div>
+          <div class='message stark'></div>
+        </div>
+        <div class='input'>
+          <i class='fas fa-camera'></i><i class='far fa-laugh-beam'></i><input
+            placeholder='¡Escribe tu mensaje aquí!'
+            type='text'
+            id='send'
+          /><i class='fas fa-microphone'></i>
+        </div>
+      </div>
+    </div>
+    <input type='checkbox' id='btn-mas' />
+    <div class='btn-mas'>
+      <label for='btn-mas' class='icon-mas2 float-right'>
+        <b>+</b></label>
+    </div>
+  </div>
+  <!-- END CHATS -->
 
 {{else if user}}
 
-<input type="hidden" id="usuarioadmin" value="{{user.admin}}">
-<input type="hidden" id="usuariofullname" value="{{user.fullname}}">
-<input type="hidden" id="cli" value="{{user.cli}}">
-<nav id="sidebar" class="sidebar">
-	<div class="sidebar-content">
-		<a class="sidebar-brand" href="/tablero">
-			<i class="align-middle" data-feather="box"></i>
-			<span class="align-middle">Grupo Elite</span>
-		</a>
+  <input type='hidden' id='usuarioadmin' value='{{user.admin}}' />
+  <input type='hidden' id='usuariofullname' value='{{user.fullname}}' />
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/tablero'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
 
-		<ul class="sidebar-nav">
-			<li class="sidebar-header">
-				Main
-			</li>
-			<!--<li class="sidebar-item active">
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <!--<li class="sidebar-item active">
 				<a class="sidebar-link" href="/links/social">
 					<i class="align-middle" data-feather="home"></i> <span class="align-middle">Social</span>
 					<span class="sidebar-badge badge badge-primary">New</span>
 				</a>
 			</li>-->
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/tablero">
-					<i class="align-middle" data-feather="sliders"></i> <span class="align-middle">Tablero</span>
-					<span class="sidebar-badge badge badge-primary">New</span>
-				</a>
-			</li>
-			<!--<li class="sidebar-item active">
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/tablero'>
+            <i class='align-middle' data-feather='sliders'></i>
+            <span class='align-middle'>Tablero</span>
+            <span class='sidebar-badge badge badge-primary'>New</span>
+          </a>
+        </li>
+        <!--<li class="sidebar-item active">
 				<a class="sidebar-link" href="/links/ventas">
 					<i class="align-middle" data-feather="shopping-cart"></i> <span class="align-middle">Ventas</span>
 					<span class="sidebar-badge badge badge-primary"></span>
 				</a>
 			</li>-->
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/productos">
-					<i class="align-middle" data-feather="shopping-cart"></i> <span
-						class="align-middle">Productos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/reportes">
-					<i class="align-middle" data-feather="layers"></i> <span class="align-middle">Reportes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item">
-				<a class="sidebar-link" href="/links/comisiones">
-					<i class="align-middle" data-feather="pocket"></i> <span class="align-middle">Comisiones</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/pagos">
-					<i class="align-middle" data-feather="dollar-sign"></i> <span class="align-middle">Pagos</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-			<li class="sidebar-item active">
-				<a class="sidebar-link" href="/links/clientes">
-					<i class="align-middle" data-feather="users"></i> <span class="align-middle">Clientes</span>
-					<span class="sidebar-badge badge badge-primary"></span>
-				</a>
-			</li>
-		</ul>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/productos'>
+            <i class='align-middle' data-feather='shopping-cart'></i>
+            <span class='align-middle'>Productos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item'>
+          <a class='sidebar-link' href='/links/comisiones'>
+            <i class='align-middle' data-feather='pocket'></i>
+            <span class='align-middle'>Comisiones</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/pagos'>
+            <i class='align-middle' data-feather='dollar-sign'></i>
+            <span class='align-middle'>Pagos</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/clientes'>
+            <i class='align-middle' data-feather='users'></i>
+            <span class='align-middle'>Clientes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
 
-		<div class="sidebar-bottom d-none d-lg-block">
-			<div class="media">
-				<img class="rounded-circle mr-3" src="/img/avatars/avatar.svg" alt="Soporte" width="40" height="40">
-				<div class="media-body">
-					<h5 class="mb-1">Contacto</h5>
-					<div>
-						<i class="fas fa-circle text-success"></i> Online
-					</div>
-				</div>
-			</div>
-		</div>
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
 
-	</div>
-</nav>
+    </div>
+  </nav>
 {{/if}}
