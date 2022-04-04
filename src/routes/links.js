@@ -7771,8 +7771,8 @@ async function PagosAbonos(Tid, pdf, user, extr = false) {
   }
 
   //await ProyeccionPagos(T);
-  //var st = await Estados(T);
-  /* try {
+  var st = await Estados(T);
+  try {
     await pool.query(
       `UPDATE solicitudes s 
         INNER JOIN productosd l ON s.lt = l.id 
@@ -7787,7 +7787,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false) {
     );
   } catch (e) {
     console.log(e);
-  } */
+  }
 
   var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${
     S.recibo
@@ -7798,8 +7798,8 @@ async function PagosAbonos(Tid, pdf, user, extr = false) {
     S.bono
   } Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
-  //await EnviarWTSAP(S.movil, bod);
-  //await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
+  await EnviarWTSAP(S.movil, bod);
+  await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {
