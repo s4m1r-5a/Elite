@@ -11538,6 +11538,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   var dateExtracto = false;
 
   $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
+    if (oSettings.nTable != document.getElementById('datatable')) return true;
+    //console.log(oSettings.nTable, 'pasa', oSettings.nTable == document.getElementById('datatable'));
     if (typeof aData._date == 'undefined') {
       aData._date = new Date(aData[4]).getTime();
       //console.log(aData._date, aData[3], aData.length);
@@ -11711,6 +11713,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     }
   }); */
   var table = $('#datatable').DataTable({
+    applyFilter: true,
     //dom: 'Bfrtip',
     /*lengthMenu: [
             [10, 25, 50, -1],
