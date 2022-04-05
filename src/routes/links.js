@@ -2000,6 +2000,103 @@ router.get('/prueba2', async (req, res) => {
             console.log(error);
         }); */
 });
+router.get('/prueba3', async (req, res) => {
+  const ruta = path.join(__dirname, '../public/uploads/extractos.xlsx');
+  //const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
+
+  /* fs.exists(ruta2, function (exists) {
+        console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
+        if (exists) {
+            fs.unlink(ruta2, function (err) {
+                if (err) console.log(err);
+                console.log('Archivo eliminado'); 
+                return 'Archivo eliminado';
+            });
+        } else {
+            console.log('El archivo no exise');
+            return 'El archivo no exise';
+        }
+    }) */
+  /* const content = await pool.query(`SELECT d.proyect, l.mz, l.n lt, c.nombre, c.documento, 
+    c.movil, s.fech fecha, s.concepto, s.descp, s.stado, s.monto, s.recibo, 
+    REPLACE(s.img, "/uploads", "https://grupoelitefincaraiz.com/uploads") img 
+    FROM solicitudes s INNER JOIN preventa p ON p.id = s.orden 
+    INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
+    INNER JOIN clientes c ON c.idc = p.cliente WHERE s.concepto IN('PAGO', 'ABONO') 
+    AND d.proyect IN('PRADOS DE PONTEVEDRA', 'COLINAS DE PONTEVEDRA') 
+    ORDER BY d.proyect, l.mz, l.n, s.fech`); */
+  //const content = await pool.query(`SELECT * FROM productos ORDER BY id`);
+  //console.log(datos)
+
+  const content = await pool.query(`SELECT e.*, s.ids FROM extrabanco e 
+  LEFT JOIN solicitudes s ON s.extrato = e.id 
+  WHERE e.otro = 'GRUPO ELITE' ORDER BY e.date ASC`);
+
+  //let content = JSON.parse(fs.readFileSync(ruta, 'utf8'));
+  //console.log(content)
+
+  let newWB = XLSX.utils.book_new();
+  let newWS = XLSX.utils.json_to_sheet(content);
+  XLSX.utils.book_append_sheet(newWB, newWS, 'Extractos');
+  XLSX.writeFile(newWB, ruta);
+  res.redirect('/uploads/extractos.xlsx');
+  /* const excel = XLSX.readFile(ruta2);
+    const hojas = excel.SheetNames;
+    const hoja = hojas[0], productos = hojas[1], proyecto = hojas[2];
+    console.log(hojas, hoja, productos, proyecto)
+    //const datos = XLSX.utils.sheet_to_json(excel.Sheets[hoja]);
+    const proyectoJson = await XLSX.utils.sheet_to_json(excel.Sheets[proyecto], {
+        cellDates: true
+    });
+    const productosJson = await XLSX.utils.sheet_to_json(excel.Sheets[productos]);
+    if (!proyectoJson[0].id) {
+        delete proyectoJson[0].id;
+        proyectoJson[0] = {
+            ...proyectoJson[0],
+            fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
+            fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
+        }
+        const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
+        const datos = await productosJson.filter(e => e.mz).map(async (e, i) => {
+            const das = await pool.query('INSERT INTO productosd SET ? ', {
+                ...e,
+                producto: proyectoAdd.insertId
+            });
+            return das.insertId;
+        });
+    }
+    res.send(true) */
+
+  /* var data = JSON.stringify({
+        "data": [
+            {
+                "commerceTransferButtonId": "h4ShG3NER1C",
+                "transferReference": "10009824679",
+                "transferAmount": 3458.33,
+                "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
+                "transferDescription": "Compra en Telovendo",
+                "confirmationURL": "https://pagos-api-dev.tigocloud.net/bancolombia/callback"
+            }
+        ]
+    });
+
+    var config = {
+        method: 'post',
+        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry?access_token=AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmuxZgRYnX5hscdkLBx4N3CWvTC6-T2nqywJ_NgBjW7PxADMSUvuuAxyGTeFLNA9IEYQMBfroZ3Yt0h9ikvOzJYMOqPmk-1hHCnADOqhUzvGKWx30QAksyFchSUv7eUbFOsZzWxmz_-WgDuOkNkfQ_GH6hNZC9Cye10TmjB3CWqPY',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        data: data
+    };
+
+    axios(config)
+        .then(function (response) {
+            console.log(JSON.stringify(response.data));
+        })
+        .catch(function (error) {
+            console.log(error);
+        }); */
+});
 router.post('/callback', async (req, res) => {
   console.log(req.body);
 });

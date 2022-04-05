@@ -12302,11 +12302,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         enviaRcb =
           accion === 'Aprobar' ? confirm('¿Desea enviar el RECIBO DE CAJA al cliente?') : true;
 
-        data.pdf
-          ? (mensaje = confirm(
-              'Esta solicitud ya contiene un recibo ¿Desea generar un nuevo RECIBO DE CAJA?. Si preciona NO se enviara el mismo que ya se le habia generado anteriormente'
-            ))
-          : (mensaje = enviaRcb); // true
+        if (data.pdf) mensaje = confirm('Este pago tiene un Rcibo ¿Generar nuevo RECIBO DE CAJA?.');
+        else if (accion === 'Enviar') mensaje = true;
+        else mensaje = enviaRcb;
 
         if (mensaje) {
           $.ajax({
