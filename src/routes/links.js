@@ -6680,7 +6680,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
         Lote.directa = asesor;
       }
 
-      if (a.papa && !a.sp && !a.uno && estdStatus) {
+      /* if (a.papa && !a.sp && !a.uno && estdStatus) {
         f.push([
           hoy,
           montoP,
@@ -6756,7 +6756,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
           montoC - (retefuenteC + reteicaC),
           a.ordn
         ]);
-      }
+      } */
 
       if (a.external && !a.comiempresa) {
         var montoGE = val * a.maxcomis;
