@@ -8234,7 +8234,7 @@ async function Desendentes(pin, stados, pasado) {
       j.acreedor
     );
 
-    const bajolineas1 = await pool.query(
+    /* const bajolineas1 = await pool.query(
       `SELECT MONTH(fechar) AS mes, 
             p.id ordn, p.*, l.*, o.*, u.*, r.*, c.* FROM pines p0
             LEFT JOIN pines p1 ON p1.usuario = p0.acreedor    
@@ -8283,7 +8283,7 @@ async function Desendentes(pin, stados, pasado) {
             AND p.tipobsevacion IS NULL AND p.status IN(2, 3) ${pasado ? '' : rangofchs}
             ORDER BY p.id`,
       j.acreedor
-    );
+    ); */
 
     //console.log(bajolineas1.length, bajolineas2.length, bajolineas3.length, directas.length)
     var repor1 = [0];
@@ -8337,7 +8337,7 @@ async function Desendentes(pin, stados, pasado) {
               a.ordn
             ]
           ];
-          a.papa && !a.sp && j.papa < 6
+          /* a.papa && !a.sp && j.papa < 6
             ? f.push([
                 hoy,
                 montoP,
@@ -8408,7 +8408,7 @@ async function Desendentes(pin, stados, pasado) {
               montoC - (retefuenteC + reteicaC),
               a.ordn
             ]);
-          }
+          } */
 
           if (a.external && !a.comiempresa) {
             var montoGE = val * a.maxcomis;
@@ -8469,7 +8469,7 @@ async function Desendentes(pin, stados, pasado) {
         }
       });
     }
-    if (bajolineas1.length > 0 && j.nrango !== 6) {
+    /* if (bajolineas1.length > 0 && j.nrango !== 6) {
       await bajolineas1.map(async (a, x) => {
         var val = a.valor - a.ahorro;
         venta += val;
@@ -8587,7 +8587,7 @@ async function Desendentes(pin, stados, pasado) {
       ? (v.corte3 = cort)
       : '';
 
-    await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]);
+    await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]); */
     return true;
   }
   /////////////////////////* PREMIOS *///////////////////////////////////
