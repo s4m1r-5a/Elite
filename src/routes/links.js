@@ -7056,7 +7056,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
     await EnviarWTSAP(movil, bod);
     await EnvWTSAP_FILE(movil, pdf, 'RECIBO DE CAJA ' + ids, 'PAGO EXITOSO');
-    res.send(true);
+    const r = { std: true, msg: `Solicitud procesada correctamente` };
+    res.send(r);
   } else if (id === 'Asociar') {
     const { ids, idExtracto } = req.body;
     await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ extrato: idExtracto }, ids]);
