@@ -19,6 +19,7 @@ const multer = require('multer');
 const config = require('./config.js');
 const io = require('socket.io');
 const events = require('events');
+const cloudinary = require('./cloudinary');
 const emitter = new events.EventEmitter();
 const token = config.token,
   apiUrl = config.apiUrl;
@@ -35,6 +36,8 @@ const transpoter = nodemailer.createTransport({
     rejectUnauthorized: false
   }
 });
+
+cloudinary.init();
 
 // Intializations
 const app = express();

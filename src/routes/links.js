@@ -21,6 +21,7 @@ const mysqldump = require('mysqldump');
 const XLSX = require('xlsx-js-style');
 const PdfPrinter = require('pdfmake');
 const Roboto = require('../public/fonts/Roboto');
+const imageDownloader = require('../download').download;
 const {
   tasaUsura,
   FacturaDeCobro,
@@ -1898,6 +1899,77 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 
   //res.send(datos);
 });
+router.get('/download-imgs-solicitudes', async (req, res) => {
+  const resi = await pool.query(
+    `SELECT pdf, img  FROM solicitudes WHERE img IS NOT NULL ORDER BY fech`
+  );
+  const urls = [];
+  const u = 'https://grupoelitefincaraiz.com';
+  const u2 = new RegExp(
+    'https://grupoelitefincaraiz.com.co|https://grupoelitefincaraiz.com|https://grupoelitefincaraiz.co'
+  );
+  const uL = 'http://localhost:5000';
+
+  if (resi.length) {
+    resi.map(e => {
+      const noPdf = !e.pdf ? true : e.pdf.indexOf(uL) > -1 ? true : false;
+
+      if (e.img.indexOf(',')) {
+        const imgs = e.img.split(',');
+        imgs.map(e => {
+          if (!e) return;
+          //console.log(url, name);
+          if (e !== '/img/payu.png') urls.push({ imageUrl: u + e, filename: `./public${e}` });
+        });
+      } else {
+        if (!e.img) return;
+        //console.log(url, name);
+        if (e.img !== '/img/payu.png')
+          urls.push({ imageUrl: u + e.img, filename: `./public${e.img}` });
+      }
+
+      if (noPdf) return;
+      const url = u2.test(e.pdf) ? e.pdf : u + e.pdf;
+      const name = u2.test(e.pdf) ? e.pdf.replace(u2, './public') : `./public${e.pdf}`;
+      //console.log(url, name, u2.test(e.pdf));
+      if (e.pdf) urls.push({ imageUrl: url, filename: name });
+    });
+    console.log(urls.length);
+    for (i = 0; i < urls.length; i++) {
+      const e = urls[i];
+      //if (i === 3) { continue; }
+
+      // Función para descargar las imágenes
+      await imageDownloader(e.imageUrl, e.filename, dat =>
+        console.log(`${e.imageUrl} image download!!`, dat)
+      );
+    }
+  }
+});
+router.get('/download-imgs-cuentas-de-cobro', async (req, res) => {
+  const pdfs = await pool.query(`SELECT cuentacobro, rcbs  FROM pagos`);
+  const urls = [];
+  const url = 'https://grupoelitefincaraiz.com';
+
+  if (pdfs.length) {
+    pdfs.map(e => {
+      if (e.cuentacobro)
+        urls.push({ imageUrl: url + e.cuentacobro, filename: `./public${e.cuentacobro}` });
+
+      if (e.rcbs) urls.push({ imageUrl: url + e.rcbs, filename: `./public${e.rcbs}` });
+    });
+    console.log(urls.length);
+    for (i = 0; i < urls.length; i++) {
+      const e = urls[i];
+      //if (i === 3) { continue; }
+
+      // Función para descargar las imágenes
+      await imageDownloader(e.imageUrl, e.filename, dat =>
+        console.log(`${e.imageUrl} image download!!`, dat)
+      );
+    }
+  }
+});
 router.get('/prueba2', async (req, res) => {
   const ruta = path.join(__dirname, '../public/uploads/libroej.json');
   const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
@@ -2002,100 +2074,15 @@ router.get('/prueba2', async (req, res) => {
 });
 router.get('/prueba3', async (req, res) => {
   const ruta = path.join(__dirname, '../public/uploads/extractos.xlsx');
-  //const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
-
-  /* fs.exists(ruta2, function (exists) {
-        console.log('Archivo ' + exists, ' ruta ' + ruta, ' html ' + req.headers.origin);
-        if (exists) {
-            fs.unlink(ruta2, function (err) {
-                if (err) console.log(err);
-                console.log('Archivo eliminado'); 
-                return 'Archivo eliminado';
-            });
-        } else {
-            console.log('El archivo no exise');
-            return 'El archivo no exise';
-        }
-    }) */
-  /* const content = await pool.query(`SELECT d.proyect, l.mz, l.n lt, c.nombre, c.documento, 
-    c.movil, s.fech fecha, s.concepto, s.descp, s.stado, s.monto, s.recibo, 
-    REPLACE(s.img, "/uploads", "https://grupoelitefincaraiz.com/uploads") img 
-    FROM solicitudes s INNER JOIN preventa p ON p.id = s.orden 
-    INNER JOIN productosd l ON l.id = p.lote INNER JOIN productos d ON d.id = l.producto 
-    INNER JOIN clientes c ON c.idc = p.cliente WHERE s.concepto IN('PAGO', 'ABONO') 
-    AND d.proyect IN('PRADOS DE PONTEVEDRA', 'COLINAS DE PONTEVEDRA') 
-    ORDER BY d.proyect, l.mz, l.n, s.fech`); */
-  //const content = await pool.query(`SELECT * FROM productos ORDER BY id`);
-  //console.log(datos)
 
   const content = await pool.query(`SELECT e.*, s.ids FROM extrabanco e 
   LEFT JOIN solicitudes s ON s.extrato = e.id 
   WHERE e.otro = 'GRUPO ELITE' ORDER BY e.date ASC`);
-
-  //let content = JSON.parse(fs.readFileSync(ruta, 'utf8'));
-  //console.log(content)
-
   let newWB = XLSX.utils.book_new();
   let newWS = XLSX.utils.json_to_sheet(content);
   XLSX.utils.book_append_sheet(newWB, newWS, 'Extractos');
   XLSX.writeFile(newWB, ruta);
   res.redirect('/uploads/extractos.xlsx');
-  /* const excel = XLSX.readFile(ruta2);
-    const hojas = excel.SheetNames;
-    const hoja = hojas[0], productos = hojas[1], proyecto = hojas[2];
-    console.log(hojas, hoja, productos, proyecto)
-    //const datos = XLSX.utils.sheet_to_json(excel.Sheets[hoja]);
-    const proyectoJson = await XLSX.utils.sheet_to_json(excel.Sheets[proyecto], {
-        cellDates: true
-    });
-    const productosJson = await XLSX.utils.sheet_to_json(excel.Sheets[productos]);
-    if (!proyectoJson[0].id) {
-        delete proyectoJson[0].id;
-        proyectoJson[0] = {
-            ...proyectoJson[0],
-            fechaini: new Date((proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000),
-            fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
-        }
-        const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
-        const datos = await productosJson.filter(e => e.mz).map(async (e, i) => {
-            const das = await pool.query('INSERT INTO productosd SET ? ', {
-                ...e,
-                producto: proyectoAdd.insertId
-            });
-            return das.insertId;
-        });
-    }
-    res.send(true) */
-
-  /* var data = JSON.stringify({
-        "data": [
-            {
-                "commerceTransferButtonId": "h4ShG3NER1C",
-                "transferReference": "10009824679",
-                "transferAmount": 3458.33,
-                "commerceUrl": "https://gateway.com/payment/route?commerce=Telovendo",
-                "transferDescription": "Compra en Telovendo",
-                "confirmationURL": "https://pagos-api-dev.tigocloud.net/bancolombia/callback"
-            }
-        ]
-    });
-
-    var config = {
-        method: 'post',
-        url: 'https://sbapi.bancolombia.com/v2/operations/cross-product/payments/payment-order/transfer/action/registry?access_token=AAIkMzdlYjEyNjctNmMzMy00NmIxLWE3NmYtMzNhNTUzZmQ4MTJmuxZgRYnX5hscdkLBx4N3CWvTC6-T2nqywJ_NgBjW7PxADMSUvuuAxyGTeFLNA9IEYQMBfroZ3Yt0h9ikvOzJYMOqPmk-1hHCnADOqhUzvGKWx30QAksyFchSUv7eUbFOsZzWxmz_-WgDuOkNkfQ_GH6hNZC9Cye10TmjB3CWqPY',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        data: data
-    };
-
-    axios(config)
-        .then(function (response) {
-            console.log(JSON.stringify(response.data));
-        })
-        .catch(function (error) {
-            console.log(error);
-        }); */
 });
 router.post('/callback', async (req, res) => {
   console.log(req.body);
