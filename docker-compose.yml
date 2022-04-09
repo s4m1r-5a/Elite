@@ -9,6 +9,7 @@ services:
     volumes:
       - .:/app
     environment:
+      - PORT=3000
       - BD_HOST=96.43.143.58
       - BD_USER=admin
       - BD_PASSWORD=C0l0mb1@
