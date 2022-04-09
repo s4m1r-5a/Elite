@@ -1,0 +1,17 @@
+version: "3.9"
+services:
+  servidor:
+    container_name: servidor
+    restart: always
+    build: .
+    ports:
+      - "5000:5000"
+    volumes:
+      - .:/usr/src/app
+    environment:
+      - PORT=5000
+      - BD_HOST=143.198.129.87
+      - BD_USER=root
+      - BD_PASSWORD=C0l0mb1@
+      - DATABASE=demiles
+      - BD_PORT=3306
