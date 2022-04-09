@@ -23,9 +23,9 @@ const PdfPrinter = require('pdfmake');
 const Roboto = require('../public/fonts/Roboto');
 const imageDownloader = require('../download').download;
 const {
-  tasaUsura,
+  //tasaUsura,
   FacturaDeCobro,
-  consultarDocumentos,
+  //consultarDocumentos,
   EstadoDeCuenta,
   informes
 } = require('../functions.js');
@@ -485,13 +485,13 @@ cron.schedule('0 2 * * *', async () => {
   const finmes = moment().endOf('month').format('DD');
   const dia = moment().format('DD');
   const fecha = moment().format('YYYY-MM-DD');
-  if (dia === '01') {
+  /* if (dia === '01') {
     const tasa = await tasaUsura();
     const newTasa = { teano: tasa / 100, fecha };
     await pool.query(`INSERT INTO intereses SET ? `, newTasa);
     var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
     await EnviarWTSAP('57 3004880579', bod);
-  }
+  } */
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
   // 5076 filas afectadas.
@@ -6564,9 +6564,9 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
   }
 });
 router.get('/cedula/:id', isLoggedIn, async (req, res) => {
-  const { id } = req.params;
+  /* const { id } = req.params;
   const datos = await consultarDocumentos('1', id);
-  res.json(datos);
+  res.json(datos); */
 });
 router.post('/desendentes', noExterno, async (req, res) => {
   const { id, asesor } = req.body;

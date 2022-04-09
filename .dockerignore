@@ -1,8 +1,6 @@
-# Node
-node_modules
-
-# Build
-build
-
-# environment variables
-.env
+**/nginx-proxy-manager
+**/node_modules
+**/uploads
+**/mysql
+**/elite.sql
+**/*.env

@@ -1,15 +1,13 @@
 FROM node:16.11
 
- RUN mkdir -p /usr/src/app
+ RUN mkdir -p /app
 
- WORKDIR /usr/src/app
+ WORKDIR /app
 
  COPY package*.json ./
 
  RUN npm install
 
  COPY . .
- 
- EXPOSE 5000
 
- CMD [ "npm", "run", "dev" ]
+ CMD [ "npm", "start" ]

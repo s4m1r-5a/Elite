@@ -7,7 +7,7 @@ const PdfPrinter = require('pdfmake');
 const Roboto = require('./public/fonts/Roboto');
 const moment = require('moment');
 const e = require('connect-flash');
-const puppeteer = require('puppeteer');
+//const puppeteer = require('puppeteer');
 
 moment.locale('es');
 const transpoter = nodemailer.createTransport({
@@ -3204,77 +3204,6 @@ async function apiChatApi(method, params) {
   //console.log(apiResponse.data)
   return apiResponse.data;
 }
-async function tasaUsura() {
-  //const slow3G = puppeteer.networkConditions['Slow 3G'];
-  const Tex =
-    '#vue-container > div.InternaIndicadores > div > div.flex-grow-1.wrapContentBody > div > div > div.grid-container > div > div > div.d-flex.CardDetailIndicator.multiple > div > div:nth-child(1) > div.priceIndicator > div > div.flex-grow-1 > span.price';
-  const browser = await puppeteer.launch({ timeout: 1000000, headless: false }); //{ headless: false }
-  const page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(1000000);
-  //await page.emulateNetworkConditions(slow3G);
-  await page.goto('https://www.larepublica.co/indicadores-economicos/bancos/tasa-de-usura');
-  await page.waitForSelector(Tex);
-  const tasa = await page.evaluate(Tex => {
-    return parseFloat(document.querySelector(Tex).innerText.slice(0, -2).replace(/,/, '.'));
-  }, Tex);
-  //console.log('Tasa:', tasa);
-
-  await browser.close();
-  return tasa;
-}
-async function consultarDocumentos(tipo, docu) {
-  const pregResp = [
-    { pre: '¿ Cuanto es 4 + 3 ?', res: '7' },
-    { pre: '¿ Cuanto es 2 X 3 ?', res: '6' },
-    { pre: '¿ Cual es la Capital del Vallle del Cauca?', res: 'Cali' },
-    { pre: '¿ Cual es la Capital de Antioquia (sin tilde)?', res: 'Medellin' },
-    { pre: '¿ Cual es la Capital del Atlantico?', res: 'Barranquilla' },
-    { pre: '¿ Cuanto es 9 - 2 ?', res: '7' },
-    { pre: '¿ Cuanto es 5 + 3 ?', res: '8' },
-    { pre: '¿ Cual es la Capital de Colombia (sin tilde)?', res: 'Bogota' },
-    { pre: '¿ Cuanto es 3 X 3 ?', res: '9' },
-    {
-      pre: '¿Escriba los dos ultimos digitos del documento a consultar?',
-      res: docu.slice(-2)
-    },
-    {
-      pre: '¿Escriba los tres primeros digitos del documento a consultar?',
-      res: docu.slice(0, 3)
-    }
-  ];
-  //const slow3G = puppeteer.networkConditions['Slow 3G'];
-  const tipoDoc = '#ddlTipoID';
-  const cc = '#ddlTipoID > option:nth-child(2)';
-  const browser = await puppeteer.launch(); //{ headless: false }
-  const page = await browser.newPage();
-  await page.setDefaultNavigationTimeout(1000000);
-  //await page.emulateNetworkConditions(slow3G);
-  await page.goto('https://apps.procuraduria.gov.co/webcert/inicio.aspx?tpo=1');
-  await page.waitForSelector(tipoDoc);
-  await page.select(tipoDoc, tipo);
-  await page.type('#txtNumID', docu);
-  const Query = await page.$eval('#lblPregunta', e => e.innerText);
-  let res = pregResp.filter(e => e.pre === Query);
-  //console.log(Query, res[0]?.res);
-
-  while (!res[0]?.res) {
-    await page.click('#ImageButton1', { delay: 500 });
-    await page.waitForSelector('#lblPregunta');
-    const Query = await page.$eval('#lblPregunta', e => e.innerText);
-    res = pregResp.filter(e => e.pre === Query);
-    //console.log(Query, res[0]?.res, !!res[0]?.res);
-  }
-  await page.type('#txtRespuestaPregunta', res[0]?.res);
-  await page.click('#btnConsultar');
-  await page.waitForTimeout(3000);
-  const Nombres = await page.$$eval('#divSec > div > span', e => e.map(r => r.innerText));
-  const Antecedentes = await page.$eval('#divSec > h2', e => e.innerText);
-  console.log(Nombres, Antecedentes);
-  //document.querySelector('#lblPregunta').children[1].selected = true
-
-  await browser.close();
-  return { Nombres, Antecedentes };
-} //consultarDocumentos('1', '3817359')
 
 module.exports = {
   NumeroALetras,
@@ -3283,8 +3212,6 @@ module.exports = {
   QuienEs,
   EnviarEmail,
   RecibosCaja,
-  tasaUsura,
-  consultarDocumentos,
   EstadoDeCuenta,
   FacturaDeCobro,
   informes
