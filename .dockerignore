@@ -2,5 +2,4 @@
 **/node_modules
 **/uploads
 **/mysql
-**/elite.sql
 **/*.env
