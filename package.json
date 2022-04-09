@@ -25,7 +25,7 @@
     "express-session": "^1.15.6",
     "express-validator": "^5.3.0",
     "googleapis": "^52.1.0",
-    "jspdf": "^1.5.3",
+    "jspdf": "^2.3.1",
     "jspdf-autotable": "^3.5.3",
     "moment": "^2.24.0",
     "morgan": "^1.9.1",
