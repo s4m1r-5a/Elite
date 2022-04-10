@@ -3,6 +3,7 @@ services:
     mysql:
         container_name: mysql
         image: mysql
+        restart: always
         ports:
             - "3306:3306"
         command: --default-authentication-plugin=mysql_native_password
@@ -16,9 +17,12 @@ services:
             - ./db:/var/lib/mysql
         networks:
             - default
+        logging:
+            driver: none
     phpmyadmin:
         container_name: phpmyadmin
         image: phpmyadmin/phpmyadmin
+        restart: always
         links:
             - mysql
         ports:
@@ -30,5 +34,7 @@ services:
             MYSQL_USER: root
             MYSQL_PASSWORD: C0l0mb1@
             MYSQL_ROOT_PASSWORD: C0l0mb1@
-volumes:
-    persistent:
+        logging:
+            driver: none
+        networks:
+            - default
