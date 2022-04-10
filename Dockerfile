@@ -10,4 +10,4 @@ FROM node:16.11
 
  COPY . .
 
- CMD [ "npm", "rin", "dev" ]
+ CMD [ "npm", "run", "dev" ]

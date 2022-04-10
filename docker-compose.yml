@@ -10,8 +10,8 @@ services:
       - .:/app
     environment:
       - PORT=3000
-      - BD_HOST=96.43.143.58
-      - BD_USER=admin
+      - BD_HOST=144.126.212.222
+      - BD_USER=root
       - BD_PASSWORD=C0l0mb1@
       - DATABASE=demiles
       - BD_PORT=3306
