@@ -12,9 +12,16 @@ router.get('/signup', (req, res) => {
 });
 router.post('/signup', async (req, res, next) => {
   const { document, username, pin } = req.body;
-  const rows = await pool.query(`SELECT * FROM users WHERE document = ? OR username = ?`, [document, username]);
+  const rows = await pool.query(`SELECT * FROM users WHERE document = ? OR username = ?`, [
+    document,
+    username
+  ]);
   if (rows.length > 0) {
-    req.flash('error', 'Usted ya se encuentra registrado en nuestro sitio, inicie sesion con su usuario ' + rows[0].username);
+    req.flash(
+      'error',
+      'Usted ya se encuentra registrado en nuestro sitio, inicie sesion con su usuario ' +
+        rows[0].username
+    );
     res.redirect('/signin');
   } else {
     const row = await pool.query(`SELECT * FROM pines WHERE id = ? AND acreedor IS NULL`, pin);
@@ -29,7 +36,7 @@ router.post('/signup', async (req, res, next) => {
       res.redirect('/signup');
     }
   }
-})
+});
 // SINGIN
 router.get('/signin', (req, res) => {
   res.render('auth/signin');
@@ -48,25 +55,31 @@ router.post('/signin', (req, res, next) => {
     failureFlash: true
   })(req, res, next);
 });
-router.get('/auth/facebook',
+router.get(
+  '/auth/facebook',
   passport.authenticate('facebook', {
     scope: ['profile', 'email']
   })
 );
-router.get('/auth/facebook/callback',
+router.get(
+  '/auth/facebook/callback',
   passport.authenticate('facebook', {
     successRedirect: '/tablero',
     failureRedirect: '/signup',
     failureFlash: true
-  }));
-router.get('/auth/google',
+  })
+);
+router.get(
+  '/auth/google',
   passport.authenticate('google', {
     scope: [' profile ', 'email'],
     ancho: 240,
     altura: 50,
     theme: 'oscuro'
-  }));
-router.get('/auth/google/callback',
+  })
+);
+router.get(
+  '/auth/google/callback',
   passport.authenticate('google', {
     successRedirect: '/tablero',
     failureRedirect: '/signup',
@@ -74,8 +87,8 @@ router.get('/auth/google/callback',
   })
 );
 router.get('/auth/soat/callback', (req, res) => {
-  console.log(req.params)
-  console.log('fghghshsdf')
+  console.log(req.params);
+  console.log('fghghshsdf');
   res.send('respuesta');
 });
 router.get('/logout', (req, res) => {
@@ -86,7 +99,6 @@ router.get('/profile', isLoggedIn, (req, res) => {
   res.render('profile');
 });
 router.get('/tablero', isLoggedIn, async (req, res) => {
-
   /*const links = await pool.query(`SELECT MONTH(v.fechadecompra) Mes, COUNT(*) CantMes, SUM(p.precio) venta, SUM(p.utilidad) utilidad, 
   ((p.utilidad*r.comision/100)*100/p.utilidad) Porcentag, SUM((p.utilidad*r.comision/100)) Comision, ROUND(COUNT(*)/30) promediov
   FROM ventas v 
@@ -113,11 +125,12 @@ router.get('/tablero', isLoggedIn, async (req, res) => {
   console.log(links);
   //console.log(ambos);
   res.render('tablero', { links });*/
-  res.render('tablero')
+  res.render('tablero');
 });
 router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   const { a } = req.params;
-  let linea = '', lDesc = '';
+  let linea = '',
+    lDesc = '';
   var d = req.user.id === '15' ? '' : 'AND p.asesor =  ' + req.user.id; //console.log(req.user.id)
   //var d = 'AND p.asesor =  ' + req.user.id;
   let indircet1;
@@ -133,12 +146,15 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   FROM preventa p INNER JOIN productosd l ON p.lote = l.id WHERE MONTH(p.fecha)
   BETWEEN 1 and 12 AND YEAR(p.fecha) = YEAR(CURDATE()) ${d} GROUP BY MONTH(p.fecha)
   ORDER BY 1;`);
-  
-  const lineaUno = await pool.query(`SELECT * FROM pines WHERE usuario = ? AND  acreedor IS NOT NULL AND usuario IS NOT NULL`, req.user.id);
+
+  const lineaUno = await pool.query(
+    `SELECT * FROM pines WHERE usuario = ? AND  acreedor IS NOT NULL AND usuario IS NOT NULL`,
+    req.user.id
+  );
   if (lineaUno.length > 0) {
     await lineaUno.map((p, x) => {
       lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
-      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`;
     });
     indircet1 = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
     COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
@@ -152,12 +168,14 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1;`);
   }
 
-  const lineaDos = linea ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`) : '';
-  lDesc = '', linea = '';
+  const lineaDos = linea
+    ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`)
+    : '';
+  (lDesc = ''), (linea = '');
   if (lineaDos.length > 0) {
     await lineaDos.map((p, x) => {
       lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
-      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`
+      linea += x === 0 ? `usuario = ${p.acreedor}` : ` OR usuario = ${p.acreedor}`;
     });
     indircet2 = await pool.query(`SELECT MONTH(p.fecha) mes, SUM(l.valor) total, 
     COUNT(*) ventas, SUM(if(MONTH(p.fecha) = MONTH(CURDATE()), l.valor, 0)) mesactual,
@@ -171,8 +189,10 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1;`);
   }
 
-  const lineaTres = linea ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`) : '';
-  lDesc = '', linea = '';
+  const lineaTres = linea
+    ? await pool.query(`SELECT * FROM pines WHERE acreedor IS NOT NULL AND ${linea}`)
+    : '';
+  (lDesc = ''), (linea = '');
   if (lineaTres.length > 0) {
     await lineaTres.map((p, x) => {
       lDesc += x === 0 ? `p.asesor = ${p.acreedor}` : ` OR p.asesor = ${p.acreedor}`;
@@ -189,7 +209,7 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
     ORDER BY 1;`);
   }
 
-  `SELECT c.*, DATEDIFF(CURDATE(), c.fechs) diferencia  FROM cuotas c WHERE  c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = 46`
+  `SELECT c.*, DATEDIFF(CURDATE(), c.fechs) diferencia  FROM cuotas c WHERE  c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = 46`;
 
   ////// 5 MEJORES ASESORES DEL AÑO Y DEL MES //////////////
   asesoresA = await pool.query(`SELECT COUNT(DISTINCT p.id) ventas, u.fullname, u.imagen, r.rango, 
@@ -204,8 +224,6 @@ router.post('/tablero/:a', isLoggedIn, async (req, res) => {
   //console.log({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM }, d)
 
   res.send({ d: dircet, one: indircet1, two: indircet2, thre: indircet3, asesoresA, asesoresM });
-
-
 
   /*if (a == 'table5') {
 

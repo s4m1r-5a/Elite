@@ -48,7 +48,7 @@ app.set('port', process.env.PORT || 80);
 app.set('views', path.join(__dirname, 'views'));
 app.engine(
   '.hbs',
-  exphbs.engine({
+  exphbs({
     defaultLayout: 'main',
     layoutsDir: path.join(app.get('views'), 'layouts'),
     partialsDir: path.join(app.get('views'), 'partials'),
@@ -120,7 +120,7 @@ app.use(
 app.use(flash());
 app.use(passport.initialize());
 app.use(passport.session());
-app.use(validator.body());
+app.use(validator());
 
 // Global variables
 app.use((req, res, next) => {
@@ -134,7 +134,7 @@ app.use((req, res, next) => {
   next();
 });
 
-// Routes
+// Routes...
 app.use(require('./routes/index'));
 app.use(require('./routes/authentication'));
 app.use('/links', require('./routes/links'));

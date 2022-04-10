@@ -5,9 +5,11 @@ services:
     restart: always
     build: ./backend
     ports:
-      - "4000:3000"
+      - "5000:3000"
     volumes:
-      - ./backend:/app
+      - ./backend/src:/usr/src/app/src:rw
+      - ./backend/tokens:/usr/src/app/tokens
+      - ./backend/credentials.json:/usr/src/app/credentials.json
     environment:
       - PORT=3000
       - BD_HOST=144.126.212.222
