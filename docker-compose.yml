@@ -8,10 +8,10 @@ services:
       - "4000:3000"
     volumes:
       - ./backend:/app
-    #environment:
-    #  - PORT=3000
-    #  - BD_HOST=144.126.212.222
-    #  - BD_USER=root
-    #  - BD_PASSWORD=C0l0mb1@
-    #  - DATABASE=demiles
-    #  - BD_PORT=3306
+    environment:
+      - PORT=3000
+      - BD_HOST=144.126.212.222
+      - BD_USER=root
+      - BD_PASSWORD=C0l0mb1@
+      - DATABASE=demiles
+      - BD_PORT=3306
