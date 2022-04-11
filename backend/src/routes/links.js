@@ -3410,20 +3410,14 @@ router.post('/red', noExterno, async (req, res) => {
   /*SELECT p.acreedor , p.usuario, p1.acreedor, p1.usuario, p2.acreedor, p2.usuario 
     FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor;*/
 
-  const red = await pool.query(`SELECT u.fullname,
-    u.nrango, u.admin, u1.fullname nombre1, u1.nrango rango1, 
-    u1.admin admin1, u2.fullname nombre2, u2.nrango rango2, 
-    u2.admin admin2, u3.fullname nombre3, u3.nrango rango3, 
-    u3.admin admin3 FROM pines p
-    LEFT JOIN users u ON u.pin = p.id
-    LEFT JOIN pines p1 ON p1.usuario = u.id
-    LEFT JOIN users u1 ON u1.pin = p1.id 
-    LEFT JOIN pines p2 ON p2.usuario = u1.id
-    LEFT JOIN users u2 ON u2.pin = p2.id 
-    LEFT JOIN pines p3 ON p3.usuario = u2.id
-    LEFT JOIN users u3 ON u3.pin = p3.id 
-    ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : 'WHERE u.id is NOT NULL'}
-    ORDER BY u.fullname, nombre1, nombre2, nombre3`);
+  const red = await pool.query(`SELECT u.fullname, u.nrango, u1.fullname nombre1, 
+  u1.nrango rango1, u2.fullname nombre2, u2.nrango rango2, u3.fullname nombre3, 
+  u3.nrango rango3 FROM pines p LEFT JOIN users u ON u.pin = p.id 
+  LEFT JOIN pines p1 ON p1.usuario = u.id LEFT JOIN users u1 ON u1.pin = p1.id 
+  LEFT JOIN pines p2 ON p2.usuario = u1.id LEFT JOIN users u2 ON u2.pin = p2.id 
+  LEFT JOIN pines p3 ON p3.usuario = u2.id LEFT JOIN users u3 ON u3.pin = p3.id 
+  ${req.user.admin != 1 ? 'WHERE u.id = ' + req.user.id : 'WHERE u.id is NOT NULL'} 
+  ORDER BY u.fullname, nombre1, nombre2, nombre3`);
   respuesta = { data: red };
   res.send(respuesta);
 });
