@@ -1899,6 +1899,38 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 
   //res.send(datos);
 });
+router.get('/download-imgs-documents', async (req, res) => {
+  const resi = await pool.query(`SELECT imags  FROM clientes WHERE imags IS NOT NULL`);
+  const urls = [];
+  const u = 'https://grupoelitefincaraiz.com';
+  const u2 = new RegExp(
+    'https://grupoelitefincaraiz.com.co|https://grupoelitefincaraiz.com|https://grupoelitefincaraiz.co'
+  );
+  const uL = 'http://localhost:5000';
+
+  if (resi.length) {
+    resi.map(e => {
+      if (e.imags.indexOf(',')) {
+        const imgs = e.imags.split(',');
+        imgs.map(e => {
+          if (!e) return;
+          //console.log(url, name);
+          urls.push({ imageUrl: u + e, filename: `./public${e}` });
+        });
+      } else urls.push({ imageUrl: u + e.imags, filename: `./public${e.imags}` });
+    });
+    console.log(urls.length);
+    for (i = 0; i < urls.length; i++) {
+      const e = urls[i];
+      //if (i === 3) { continue; }
+
+      // Función para descargar las imágenes
+      await imageDownloader(e.imageUrl, e.filename, dat =>
+        console.log(`${e.imageUrl} image download!!`, dat)
+      );
+    }
+  }
+});
 router.get('/download-imgs-solicitudes', async (req, res) => {
   const resi = await pool.query(
     `SELECT pdf, img  FROM solicitudes WHERE img IS NOT NULL ORDER BY fech`
