@@ -4,5 +4,5 @@ elite.sql
 db
 data
 letsencrypt
-docker-compose.yml
+.yml
 .env
