@@ -9808,8 +9808,7 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
     //var data = $('#datatable').DataTable().row(this).data();
     var ya = moment(Date()).format('YYYY-MM-DD HH:mm');
     if (
-      data.estado === 9 ||
-      data.estado === 14 ||
+      (data.estado === 9 || data.estado === 14) &&
       !/grupoelitefincaraiz/.test(window.location.origin)
     ) {
       $('#ModalEventos').modal({
