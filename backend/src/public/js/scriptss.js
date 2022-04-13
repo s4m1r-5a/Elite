@@ -9807,7 +9807,11 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
     var data = $('#datatable').DataTable().row(fila).data();
     //var data = $('#datatable').DataTable().row(this).data();
     var ya = moment(Date()).format('YYYY-MM-DD HH:mm');
-    if (data.estado === 9 || data.estado === 14) {
+    if (
+      data.estado === 9 ||
+      data.estado === 14 ||
+      !/grupoelitefincaraiz/.test(window.location.origin)
+    ) {
       $('#ModalEventos').modal({
         toggle: true,
         backdrop: 'static',
@@ -9818,6 +9822,10 @@ if (window.location == `${window.location.origin}/links/productos` && !rol.exter
       $('#idproyecto').val();
       var url = `/links/orden?id=${data.id}&h=${ya}`;
       $(location).attr('href', url);
+    } else if (/grupoelitefincaraiz/.test(window.location.origin)) {
+      alert(
+        'en este sitio no puedes realizar esta separacion ve a https://demilesgroup.com y realiza tu separacion'
+      );
     } else {
       SMSj('info', 'Este Producto no se encuentra disponible');
     }

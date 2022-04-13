@@ -434,7 +434,46 @@ router.post('/desarrollo', async (req, res) => {
 
   res.send(true);
 });
-var co = 0;
+const Enviodecartasclientes = async () => {
+  console.log('entro a la funcion');
+  const sql = `SELECT l.mz, l.n, d.proyect, c.nombre, c.movil, c.email    
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
+    INNER JOIN productos d ON l.producto = d.id 
+    INNER JOIN clientes c ON p.cliente = c.idc 
+    WHERE p.tipobsevacion IS NULL AND d.proyect 
+    IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE')`;
+  const yt = await pool.query(sql);
+
+  for (i = 0; i < yt.length; i++) {
+    let data = yt[i]; //'57 3012673944', data.movil
+    let body = `_Estimado *${data.nombre}* es un placer para nosotros saludarlo, y a la vez recordarle el pago de sus cuotas mensules por el lote *${data.n}* adquirido en el condominio *${data.proyect}* la nueva cuenta creada por reestructuración empresarial a nombre de *RED ELITE S.A.S 08522647013*  cuenta Bancolombia de *ahorros* con Nit : 901.394.949 . Gracias por su comprensión  Att: *Grupo elite finca raiz.*_`;
+    const tt = await EnviarWTSAP(data.movil, body);
+    const document = `https://grupoelitefincaraiz.co/uploads/${data.proyect}.pdf`;
+    await EnvWTSAP_FILE(data.movil, document, `CARTA ${data.proyect}`, 'Carta reestructuración');
+  }
+};
+console.log(moment().format('YYYY-MM-DD'));
+
+var co = 0; // 12,15,27,30,31
+/* cron.schedule('* * * * *', async () => {
+  console.log('se ejecuto cron ', Date);
+  //pruebe()
+}); */
+cron.schedule('0 10 13,15,27,30,31 * *', async () => {
+  const sql = `SELECT l.mz, l.n, d.proyect, c.nombre, c.movil, c.email    
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
+    INNER JOIN productos d ON l.producto = d.id 
+    INNER JOIN clientes c ON p.cliente = c.idc 
+    WHERE p.tipobsevacion IS NULL AND d.proyect 
+    IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE')`;
+  const yt = await pool.query(sql);
+
+  for (i = 0; i < yt.length; i++) {
+    let data = yt[i]; //'57 3012673944',
+    let body = `_Estimado *${data.nombre}* es un placer para nosotros saludarlo, y a la vez recordarle el pago de sus cuotas mensules por el lote *${data.n}* adquirido en el condominio *${data.proyect}* la nueva cuenta creada por reestructuración empresarial a nombre de *RED ELITE S.A.S 08522647013*  cuenta Bancolombia de *ahorros* con Nit : 901.394.949 . Gracias por su comprensión  Att: *Grupo elite finca raiz.*`;
+    const tt = await EnviarWTSAP(data.movil, body);
+  }
+});
 cron.schedule('0 10 13,28 * *', async () => {
   const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
@@ -1902,11 +1941,7 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 router.get('/download-imgs-documents', async (req, res) => {
   const resi = await pool.query(`SELECT imags  FROM clientes WHERE imags IS NOT NULL`);
   const urls = [];
-  const u = 'https://grupoelitefincaraiz.com';
-  const u2 = new RegExp(
-    'https://grupoelitefincaraiz.com.co|https://grupoelitefincaraiz.com|https://grupoelitefincaraiz.co'
-  );
-  const uL = 'http://localhost:5000';
+  const u = 'http://96.43.143.58:5000';
 
   if (resi.length) {
     resi.map(e => {
@@ -1936,7 +1971,7 @@ router.get('/download-imgs-solicitudes', async (req, res) => {
     `SELECT pdf, img  FROM solicitudes WHERE img IS NOT NULL ORDER BY fech`
   );
   const urls = [];
-  const u = 'https://grupoelitefincaraiz.com';
+  const u = 'http://96.43.143.58:5000';
   const u2 = new RegExp(
     'https://grupoelitefincaraiz.com.co|https://grupoelitefincaraiz.com|https://grupoelitefincaraiz.co'
   );
@@ -1961,7 +1996,7 @@ router.get('/download-imgs-solicitudes', async (req, res) => {
       }
 
       if (noPdf) return;
-      const url = u2.test(e.pdf) ? e.pdf : u + e.pdf;
+      const url = u2.test(e.pdf) ? e.pdf.replace(u2, u) : u + e.pdf;
       const name = u2.test(e.pdf) ? e.pdf.replace(u2, './public') : `./public${e.pdf}`;
       //console.log(url, name, u2.test(e.pdf));
       if (e.pdf) urls.push({ imageUrl: url, filename: name });
@@ -1981,7 +2016,7 @@ router.get('/download-imgs-solicitudes', async (req, res) => {
 router.get('/download-imgs-cuentas-de-cobro', async (req, res) => {
   const pdfs = await pool.query(`SELECT cuentacobro, rcbs  FROM pagos`);
   const urls = [];
-  const url = 'https://grupoelitefincaraiz.com';
+  const url = 'http://96.43.143.58:5000';
 
   if (pdfs.length) {
     pdfs.map(e => {
