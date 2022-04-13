@@ -11984,13 +11984,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       imagenes.map(e => {
         if (e) {
           $('#descargaimg').append(
-            `<a class="imag mr-2" href="https://grupoelitefincaraiz.com${e}" target="_blank"><span class="badge badge-dark">Img</span></a>`
+            `<a class="imag mr-2" href="${
+              window.location.origin + e
+            }" target="_blank"><span class="badge badge-dark">Img</span></a>`
           );
           $('#Modalimg .fotos').append(
             `<div class="foto" style="
                         width: ${marg}%;
                         padding-top: calc(100% / (16/9));
-                        background-image: url('https://grupoelitefincaraiz.com${e}');
+                        background-image: url('${window.location.origin + e}');
                         background-size: 100%;
                         background-position: center;
                         background-repeat: no-repeat;float: left;">
@@ -12003,13 +12005,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       $('#Modalimg .foto').remove();
       $('#descargaimg .imag').remove();
       $('#descargaimg').html(
-        `<a class="imag" href="https://grupoelitefincaraiz.com${data.img}" target="_blank"><span class="badge badge-dark">Img</span></a>`
+        `<a class="imag" href="${
+          window.location.origin + data.img
+        }" target="_blank"><span class="badge badge-dark">Img</span></a>`
       );
       $('#Modalimg .fotos').append(
         `<div class="foto" style="
                     width: 100%;
                     padding-top: calc(100% / (16/9));
-                    background-image: url('https://grupoelitefincaraiz.com${data.img}');
+                    background-image: url('${window.location.origin + data.img}');
                     background-size: 100%;
                     background-position: center;
                     background-repeat: no-repeat;float: left;">
