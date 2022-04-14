@@ -7116,7 +7116,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     await pool.query('UPDATE solicitudes SET extrato = NULL WHERE ids = ?', ids);
     res.send(true);
   } else {
-    const { ids, acumulado, ahora, idExtracto } = req.body;
+    const { ids, acumulado, ahora, idExtracto, enviaRcb } = req.body;
 
     const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
     const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto);
@@ -7858,7 +7858,7 @@ async function ProyeccionPagos(S) {
   //////////////////////////* ENVIAR PDF *///////////////////////////
   //await EstadoDeCuenta(S)
 }
-async function PagosAbonos(Tid, pdf, user, extr = false) {
+async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
   //u. obsevacion pr
   const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
     pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
@@ -7944,8 +7944,8 @@ async function PagosAbonos(Tid, pdf, user, extr = false) {
     S.bono
   } Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
-  await EnviarWTSAP(S.movil, bod);
-  await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
+  enviaRcb && (await EnviarWTSAP(S.movil, bod));
+  enviaRcb && (await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO'));
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {

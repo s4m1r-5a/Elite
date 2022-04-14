@@ -12316,8 +12316,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         if (data.pdf) mensaje = confirm('Este pago tiene un Rcibo ¿Generar nuevo RECIBO DE CAJA?.');
         else if (accion === 'Enviar') mensaje = true;
         else mensaje = enviaRcb;
+        fd.append('enviaRcb', enviaRcb);
 
-        if (mensaje) {
+        if (mensaje || !data.pdf) {
           $.ajax({
             type: 'POST',
             url: '/links/solicitudes/saldo',
