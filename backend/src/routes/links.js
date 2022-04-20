@@ -520,17 +520,37 @@ cron.schedule('0 10 13,28 * *', async () => {
     )}* y una *deuda total* de *$${Moneda(deuda)}*_`
   );
 });
+const usuras = async fecha => {
+  const options = {
+    method: 'POST',
+    url: 'https://inmovili.com.co/api/query/usury',
+    headers: { 'x-access-token': tokenWtsp },
+    data: { date: fecha }
+  };
+
+  if (!fecha) return console.log((await axios(options)).data);
+
+  const {
+    data: { id, annualRate, date }
+  } = await axios(options);
+
+  if (annualRate) {
+    const newTasa = { id, teano: annualRate, fecha: date };
+    const tabla = await pool.query(`INSERT IGNORE intereses SET ? `, newTasa);
+    if (tabla.insertId) {
+      var bod = `_Se establecio la tasa de usura de este mes en *${annualRate}%*_`;
+      await EnviarWTSAP('57 3012673944', bod);
+    }
+  }
+  const tasa = { id, annualRate, date };
+  return tasa;
+};
+
 cron.schedule('0 2 * * *', async () => {
   const finmes = moment().endOf('month').format('DD');
   const dia = moment().format('DD');
   const fecha = moment().format('YYYY-MM-DD');
-  /* if (dia === '01') {
-    const tasa = await tasaUsura();
-    const newTasa = { teano: tasa / 100, fecha };
-    await pool.query(`INSERT INTO intereses SET ? `, newTasa);
-    var bod = `_Se establecio la tasa de usura de este mes en *${tasa}%*_`;
-    await EnviarWTSAP('57 3004880579', bod);
-  } */
+  const tasa = await usuras(fecha);
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
   // 5076 filas afectadas.
@@ -561,10 +581,10 @@ cron.schedule('0 2 * * *', async () => {
 
   const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
     (l.valor - p.ahorro) * d.cobrosistema Inicial, ( SELECT SUM(monto) 
-    FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
+    FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND stado = 4 AND orden = p.id ) as abonos 
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND d.cobrosistema > 0 GROUP BY p.id 
-    HAVING abonos >= Inicial ORDER BY p.id`);
+    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND d.cobrosistema > 0 AND p.status > 1 
+    GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
 
   if (comi.length) {
     let ids = null;

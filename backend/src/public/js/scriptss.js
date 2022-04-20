@@ -1309,7 +1309,7 @@ if (window.location.pathname == `/links/pagos`) {
                   PAYU = false,
                   WOMPI = false;
                 data.cuentas.map(r => {
-                  if (r.tipo === 'CTA-CTE' && r.stado === 7) {
+                  if ((r.tipo === 'CTA-CTE' || r.tipo === 'CTA-AHO') && r.stado === 7) {
                     $('#RCB').show();
                     $('#formapRCB').val(`${r.tipo}-${r.code1}`);
                     RCB = true;
