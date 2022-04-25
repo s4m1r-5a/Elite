@@ -1,898 +1,1304 @@
-<table id="my-table"></table>
+<table id='my-table'></table>
 <!--<main class="content p-1" style="background-image: url('/img/fondo2.png');
   -webkit-background-size: 100% 100%;           
      -moz-background-size: 100% 100%;         
        -o-background-size: 100% 100%;          
           background-size: 100% 100%">-->
 
-<div class="accordion" id="accordion">
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">REPORTES</strong><br>
-            <small class="text-muted">Conoce los reportes de todas tus separaciones</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <!-- collapse show -->
-            <div class="card-body">
-                <a><span class="badge badge-pill" style="background-color: green;">Al dia</span></a>
-                <a><span class="badge badge-pill" style="background-color: blue;">>= 1 mes de retraso</span></a>
-                <a><span class="badge badge-pill" style="background-color: purple;">>= 3 meses de retraso</span></a>
-                <a><span class="badge badge-pill" style="background-color: navy;">>= 5 meses de retraso</span></a>
-                <a><span class="badge badge-pill" style="background-color: red;">>= 10 meses de retraso</span></a>
-                <hr>
-                <nav>
-                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#menu1"
-                            role="button" aria-expanded="false" aria-controls="menu">Ver</a>
-                        <a class="nav-item nav-link" data-toggle="collapse" href="#menu2" role="button"
-                            aria-expanded="false" aria-controls="menu2">
-                            <i class="align-middle" data-feather="sliders"></i>
-                        </a>
-
-                        <a class="nav-item nav-link ">
-                            <input id="min" type="text" class="edi text-center"
-                                style="width: 30px; padding: 1px; border: 0;" placeholder="MZ">
-                        </a>
-                        <a class="nav-item nav-link">
-                            <input id="max" type="text" class="edi text-center"
-                                style="width: 30px; padding: 1px; border: 0;" placeholder="LT">
-                        </a>
-                        <a class="nav-item nav-link d-none d-sm-block">
-                            <input id="busq" type="text" class="edi text-center"
-                                style="width: 200px; padding: 1px; border: 0;" placeholder="Buscar...">
-                        </a>
-
-                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#menu3" role="button"
-                            aria-expanded="false" aria-controls="menu3">Buscar</a>
-                    </div>
-                </nav>
-                <div class="accordion" id="menu">
-                    <nav class="nav flex-column flex-sm-row collapse" id="menu1" aria-labelledby="headingOne"
-                        data-parent="#menu">
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#datatable2', -1)"><i class="fas fa-tasks"></i> Todas</a>
-                    </nav>
-                    <nav class="nav nav-fill collapse" id="menu2" aria-labelledby="headingOne" data-parent="#menu">
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"><i
-                                class="fas fa-cart-arrow-down"></i> Pendiente</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"><i
-                                class="fas fa-handshake"></i> Apartado</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"><i
-                                class="fas fa-shopping-bag"></i> Separado</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"><i
-                                class="fas fa-trophy"></i> Vendido</a>
-                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"><i
-                                class="far fa-thumbs-down"></i> Anulada</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 13" href="javascript:void 0"><i
-                                class="fas fa-gift"></i> Cartera</a>
-                    </nav>
-                    <div class="collapse" id="menu3" aria-labelledby="headingOne" data-parent="#menu">
-                        <div class="card card-body">
-                            <select class="select2 productos"></select>
-                        </div>
-                    </div>
-                </div>
-                <!-- TABLAS -->
-                <table id="datatable2" class="table table-sm table-striped display nowrap w-100">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Id</th>
-                            <th>Proyecto</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th>R</th>
-                            <th>Estado</th>
-                            <th>Cliente</th>
-                            <th>Documento</th>
-                            <th>Fecha</th>
-                            <th>Asesor</th>
-                            <th class="texto">+</th>
-                            <th>Doc</th>
-                            <th></th>
-                            <th></th>
-                            <th>Ult.Abono</th>
-                            <th>Retraso</th>
-                            <th>Valor</th>
-                            <th>Separacion</th>
-                            <th>Ahorro</th>
-                            <th>Total</th>
-                            <th>Abonado</th>
-                            <th>Deuda</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
+<div class='accordion' id='accordion'>
+  <div class='card'>
+    <div
+      class='card-header'
+      type='button'
+      data-toggle='collapse'
+      data-target='#collapse'
+      aria-expanded='true'
+      aria-controls='collapse'
+    >
+      <strong class='text-muted'>REPORTES</strong><br />
+      <small class='text-muted'>Conoce los reportes de todas tus separaciones</small>
+      <i class='fas fa-angle-down float-right'></i>
     </div>
+    <div id='collapse' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+      <!-- collapse show -->
+      <div class='card-body'>
+        <a><span class='badge badge-pill' style='background-color: green;'>Al dia</span></a>
+        <a><span class='badge badge-pill' style='background-color: blue;'>>= 1 mes de retraso</span></a>
+        <a><span class='badge badge-pill' style='background-color: purple;'>>= 3 meses de retraso</span></a>
+        <a><span class='badge badge-pill' style='background-color: navy;'>>= 5 meses de retraso</span></a>
+        <a><span class='badge badge-pill' style='background-color: red;'>>= 10 meses de retraso</span></a>
+        <hr />
+        <nav>
+          <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+            <a
+              class='nav-item nav-link d-none d-sm-block'
+              data-toggle='collapse'
+              href='#menu1'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu'
+            >Ver</a>
+            <a
+              class='nav-item nav-link'
+              data-toggle='collapse'
+              href='#menu2'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu2'
+            >
+              <i class='align-middle' data-feather='sliders'></i>
+            </a>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse2" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">DETALLADO E.C</strong><br>
-            <small class="text-muted">Obten al detalle el estdo de cuente de tus clientes</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse2" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body responsive">
-                <!-- TABLAS -->
-                <table id="estadoscuentas2" class="table table-sm table-striped display nowrap w-100 table-responsive">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>MZ</th>
-                            <th>LT</th>
-                            <th>PROYECTO</th>
-                            <th>PRECIO</th>
-                            <th>%</th>
-                            <th>CUPON</th>
-                            <th>DESCUENTO</th>
-                            <th>TOTAL</th>
-                            <th>FECHA</th>
-                            <th>CLIENTE</th>
-                            <th>FECHAS</th>
-                            <th>RECIBO</th>
-                            <th>FORMA</th>
-                            <th>DSCPCION</th>
-                            <th>MONTO</th>
-                            <th>BONO</th>
-                            <th>MONTO</th>
-                            <th>TOTAL</th>
-                            <th>FECHAS</th>
-                            <th>RECIBOS</th>
-                            <th>FORMADPAGOS</th>
-                            <th>IDRCB</th>
-                            <th>MONTO</th>
-                            <th>CONCEPTO</th>
-                            <th>BONO</th>
-                            <th></th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
+            <a class='nav-item nav-link'>
+              <input
+                id='min'
+                type='text'
+                class='edi text-center'
+                style='width: 30px; padding: 1px; border: 0;'
+                placeholder='MZ'
+              />
+            </a>
+            <a class='nav-item nav-link'>
+              <input
+                id='max'
+                type='text'
+                class='edi text-center'
+                style='width: 30px; padding: 1px; border: 0;'
+                placeholder='LT'
+              />
+            </a>
+            <a class='nav-item nav-link d-none d-sm-block'>
+              <input
+                id='busq'
+                type='text'
+                class='edi text-center'
+                style='width: 200px; padding: 1px; border: 0;'
+                placeholder='Buscar...'
+              />
+            </a>
 
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse3" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">RESUMEN E.C</strong><br>
-            <small class="text-muted">Aqui encontraras el resumen del estado de cuentas de tus
-                clientes</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse3" class="collapse" aria-labelledby="headingOne" data-parent="#accordion">
-            <div class="card-body responsive">
-                <!-- TABLAS -->
-                <table id="estadoscuentas" class="table table-sm w-100 table-responsive">
-                    <thead>
-                        <tr>
-                            <th style="width:1%;">MZ</th>
-                            <th style="width:3%;">LT</th>
-                            <th style="width:2%;">AREA</th>
-                            <th style="width:2%;">VRM2</th>
-                            <th style="width:2%;" data-priority="1">CLIENTE</th>
-                            <th style="width:1%;">FECHA</th>
-                            <th style="width:1%;">PRECIO</th>
-                            <th style="width:3%;">%</th>
-                            <th style="width:3%;">DESCUENTO</th>
-                            <th style="width:2%;">TOTAL</th>
-                            <th style="width:1%;">ABONOS</th>
-                            <th style="width:1%;" data-priority="2">SALDO</th>
-                            <th style="width:1%;" data-priority="2">PROYECTO</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+            <a
+              class='nav-item nav-link d-none'
+              data-toggle='collapse'
+              href='#menu3'
+              role='button'
+              aria-expanded='false'
+              aria-controls='menu3'
+            >Buscar</a>
+          </div>
+        </nav>
+        <div class='accordion' id='menu'>
+          <nav
+            class='nav flex-column flex-sm-row collapse'
+            id='menu1'
+            aria-labelledby='headingOne'
+            data-parent='#menu'
+          >
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', 10)"
+            ><i class='fas fa-tasks'></i> 10 Filas</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', 20)"
+            ><i class='fas fa-tasks'></i> 20 Filas</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', 30)"
+            ><i class='fas fa-tasks'></i> 30 Filas</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', 50)"
+            ><i class='fas fa-tasks'></i> 50 Filas</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', 100)"
+            ><i class='fas fa-tasks'></i> 100 Filas</a>
+            <a
+              class='flex-sm-fill text-sm-center nav-link'
+              href='javascript:void 0'
+              onclick="VER('#datatable2', -1)"
+            ><i class='fas fa-tasks'></i> Todas</a>
+          </nav>
+          <nav
+            class='nav nav-fill collapse'
+            id='menu2'
+            aria-labelledby='headingOne'
+            data-parent='#menu'
+          >
+            <a class='flex-sm-fill text-sm-center nav-link 6' href='javascript:void 0'><i
+                class='fas fa-cart-arrow-down'
+              ></i>
+              Pendiente</a>
+            <a class='flex-sm-fill text-sm-center nav-link 6' href='javascript:void 0'><i
+                class='fas fa-handshake'
+              ></i>
+              Apartado</a>
+            <a class='flex-sm-fill text-sm-center nav-link 6' href='javascript:void 0'><i
+                class='fas fa-shopping-bag'
+              ></i>
+              Separado</a>
+            <a class='flex-sm-fill text-sm-center nav-link 6' href='javascript:void 0'><i
+                class='fas fa-trophy'
+              ></i>
+              Vendido</a>
+            <a class='flex-sm-fill text-sm-center nav-link -1' href='javascript:void 0'><i
+                class='far fa-thumbs-down'
+              ></i>
+              Anulada</a>
+            <a class='flex-sm-fill text-sm-center nav-link 13' href='javascript:void 0'><i
+                class='fas fa-gift'
+              ></i>
+              Cartera</a>
+          </nav>
+          <div class='collapse' id='menu3' aria-labelledby='headingOne' data-parent='#menu'>
+            <div class='card card-body'>
+              <select class='select2 productos'></select>
             </div>
+          </div>
         </div>
+        <!-- TABLAS -->
+        <table id='datatable2' class='table table-sm table-striped display nowrap w-100'>
+          <thead>
+            <tr>
+              <th></th>
+              <th>Id</th>
+              <th>Proyecto</th>
+              <th>Mz</th>
+              <th>Lt</th>
+              <th>R</th>
+              <th>Estado</th>
+              <th>Cliente</th>
+              <th>Documento</th>
+              <th>Fecha</th>
+              <th>Asesor</th>
+              <th class='texto'>+</th>
+              <th>Doc</th>
+              <th></th>
+              <th></th>
+              <th>Ult.Abono</th>
+              <th>Retraso</th>
+              <th>Valor</th>
+              <th>Separacion</th>
+              <th>Ahorro</th>
+              <th>Total</th>
+              <th>Abonado</th>
+              <th>Deuda</th>
+              <th>PagoCuotaIni</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
     </div>
+  </div>
+
+  <div class='card'>
+    <div
+      class='card-header'
+      type='button'
+      data-toggle='collapse'
+      data-target='#collapse2'
+      aria-expanded='true'
+      aria-controls='collapse'
+    >
+      <strong class='text-muted'>DETALLADO E.C</strong><br />
+      <small class='text-muted'>Obten al detalle el estdo de cuente de tus clientes</small>
+      <i class='fas fa-angle-down float-right'></i>
+    </div>
+    <div id='collapse2' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+      <div class='card-body responsive'>
+        <!-- TABLAS -->
+        <table
+          id='estadoscuentas2'
+          class='table table-sm table-striped display nowrap w-100 table-responsive'
+        >
+          <thead>
+            <tr>
+              <th></th>
+              <th>MZ</th>
+              <th>LT</th>
+              <th>PROYECTO</th>
+              <th>PRECIO</th>
+              <th>%</th>
+              <th>CUPON</th>
+              <th>DESCUENTO</th>
+              <th>TOTAL</th>
+              <th>FECHA</th>
+              <th>CLIENTE</th>
+              <th>FECHAS</th>
+              <th>RECIBO</th>
+              <th>FORMA</th>
+              <th>DSCPCION</th>
+              <th>MONTO</th>
+              <th>BONO</th>
+              <th>MONTO</th>
+              <th>TOTAL</th>
+              <th>FECHAS</th>
+              <th>RECIBOS</th>
+              <th>FORMADPAGOS</th>
+              <th>IDRCB</th>
+              <th>MONTO</th>
+              <th>CONCEPTO</th>
+              <th>BONO</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class='card'>
+    <div
+      class='card-header'
+      type='button'
+      data-toggle='collapse'
+      data-target='#collapse3'
+      aria-expanded='true'
+      aria-controls='collapse'
+    >
+      <strong class='text-muted'>RESUMEN E.C</strong><br />
+      <small class='text-muted'>Aqui encontraras el resumen del estado de cuentas de tus clientes</small>
+      <i class='fas fa-angle-down float-right'></i>
+    </div>
+    <div id='collapse3' class='collapse' aria-labelledby='headingOne' data-parent='#accordion'>
+      <div class='card-body responsive'>
+        <!-- TABLAS -->
+        <table id='estadoscuentas' class='table table-sm w-100 table-responsive'>
+          <thead>
+            <tr>
+              <th style='width:1%;'>MZ</th>
+              <th style='width:3%;'>LT</th>
+              <th style='width:2%;'>AREA</th>
+              <th style='width:2%;'>VRM2</th>
+              <th style='width:2%;' data-priority='1'>CLIENTE</th>
+              <th style='width:1%;'>FECHA</th>
+              <th style='width:1%;'>PRECIO</th>
+              <th style='width:3%;'>%</th>
+              <th style='width:3%;'>DESCUENTO</th>
+              <th style='width:2%;'>TOTAL</th>
+              <th style='width:1%;'>ABONOS</th>
+              <th style='width:1%;' data-priority='2'>SALDO</th>
+              <th style='width:1%;' data-priority='2'>PROYECTO</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
 </div>
 
 <!-- BEGIN primary modal -->
-<div class="modal fade" id="Anulacion" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-md" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <i class="feather-lg text-danger" data-feather="alert-circle"></i>
-                <h1 class="modal-title ml-1">Anulacion</h1>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<div class='modal fade' id='Anulacion' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-md' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <i class='feather-lg text-danger' data-feather='alert-circle'></i>
+        <h1 class='modal-title ml-1'>Anulacion</h1>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body m-3'>
+        <form id='enanul' action='/links/anular' method='POST'>
+          <div class='row'>
+            <div class='col-sm-12'>
+              <div class='mb-1 float-right'>
+                <select
+                  id='causa'
+                  data-toggle='tooltip'
+                  data-placement='top'
+                  data-container='body'
+                  title='Seleccione un motivo para la anulacion'
+                  name='causa'
+                  style='text-align-last:center;padding:1px;'
+                  required
+                >
+                  <option value=''>Motivo de la anulacion ?</option>
+                  <option value='CAMBIO'>Cambio de Producto</option>
+                  <option value='ERROR'>Error al crear la orden</option>
+                  <option value='DESISTIMIENTO'>Cliene desiste del Producto</option>
+                </select>
+              </div>
             </div>
-            <div class="modal-body m-3">
-                <form id="enanul" action="/links/anular" method="POST">
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <div class="mb-1 float-right">
-                                <select id="causa" data-toggle="tooltip" data-placement="top" data-container="body"
-                                    title="Seleccione un motivo para la anulacion" name="causa"
-                                    style="text-align-last:center;padding:1px;" required>
-                                    <option value="">Motivo de la anulacion ?</option>
-                                    <option value="CAMBIO">Cambio de Producto</option>
-                                    <option value="ERROR">Error al crear la orden</option>
-                                    <option value="DESISTIMIENTO">Cliene desiste del Producto</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="col-sm-12">
-                            <!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
+            <div class='col-sm-12'>
+              <!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
 							data-mask="99999" autocomplete="off" style="width: 50%;">-->
-                            <div class="mb-1 mt-2">
-                                <i class="feather-md text-primary mr-0" data-feather="align-left"
-                                    style="margin-top: -10.5%;"></i>
-                                <textarea class="form-control-no-border edi" name="motivo" id="motivo"
-                                    placeholder="Deja en claro el motivo de esta anulacion" cols="50" rows="2"
-                                    autocomplete="off" data-toggle="tooltip" data-placement="top" data-container="body"
-                                    title="Deje en claro el motivo de la anulacion" style="width: 90%;" maxlength="300"
-                                    required></textarea>
-                                <div class="progress progress-sm shadow-sm mb-0 reditarh" style="display: none;">
-                                    <div class="progress-bar bg-primary" role="progressbar"
-                                        style="height: 20%; width: 100%"></div>
-                                </div>
-                            </div>
-                            <hr>
-                            <p>
-                                Ahora bien despues de haber dejado claro el motivo, debes decidir que hacer con el
-                                dinero que esta persona a dado, en el caso de que lo halla echo que deseas hacer con el.
-                            </p>
-                        </div>
-                        <div class="col-sm-6 text-center">
-                            <select data-toggle="tooltip" data-placement="top" data-container="body" name="qhacer"
-                                required title="Seleccione un motivo para la anulacion" id="qhacer"
-                                style="text-align-last:center;padding:1px;">
-                                <option value="">Seleciona una opcion</option>
-                                <option value="BONO">Generar bono</option>
-                                <option value="DEVOLUCION">Generar devolucion</option>
-                            </select>
-                            <div class="float-right" style="border-left:1px solid darkblue;height: 100px;"></div>
-                        </div>
-                        <div class="col-sm-6 text-center">
-                            <p>
-                                Recuerda que las opciones que escojas estan sujetas a terminos y condiciones
-                                establecidas
-                                por Grupo Elite
-                            </p>
-                        </div>
-                    </div>
-                    <button type="submit" id="Anula" class="btn btn-sm btn-outline-danger float-right">Anular</button>
-                </form>
+              <div class='mb-1 mt-2'>
+                <i
+                  class='feather-md text-primary mr-0'
+                  data-feather='align-left'
+                  style='margin-top: -10.5%;'
+                ></i>
+                <textarea
+                  class='form-control-no-border edi'
+                  name='motivo'
+                  id='motivo'
+                  placeholder='Deja en claro el motivo de esta anulacion'
+                  cols='50'
+                  rows='2'
+                  autocomplete='off'
+                  data-toggle='tooltip'
+                  data-placement='top'
+                  data-container='body'
+                  title='Deje en claro el motivo de la anulacion'
+                  style='width: 90%;'
+                  maxlength='300'
+                  required
+                ></textarea>
+                <div class='progress progress-sm shadow-sm mb-0 reditarh' style='display: none;'>
+                  <div
+                    class='progress-bar bg-primary'
+                    role='progressbar'
+                    style='height: 20%; width: 100%'
+                  ></div>
+                </div>
+              </div>
+              <hr />
+              <p>
+                Ahora bien despues de haber dejado claro el motivo, debes decidir que hacer con el
+                dinero que esta persona a dado, en el caso de que lo halla echo que deseas hacer con
+                el.
+              </p>
             </div>
-        </div>
+            <div class='col-sm-6 text-center'>
+              <select
+                data-toggle='tooltip'
+                data-placement='top'
+                data-container='body'
+                name='qhacer'
+                required
+                title='Seleccione un motivo para la anulacion'
+                id='qhacer'
+                style='text-align-last:center;padding:1px;'
+              >
+                <option value=''>Seleciona una opcion</option>
+                <option value='BONO'>Generar bono</option>
+                <option value='DEVOLUCION'>Generar devolucion</option>
+              </select>
+              <div class='float-right' style='border-left:1px solid darkblue;height: 100px;'></div>
+            </div>
+            <div class='col-sm-6 text-center'>
+              <p>
+                Recuerda que las opciones que escojas estan sujetas a terminos y condiciones
+                establecidas por Grupo Elite
+              </p>
+            </div>
+          </div>
+          <button
+            type='submit'
+            id='Anula'
+            class='btn btn-sm btn-outline-danger float-right'
+          >Anular</button>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 <!-- END primary modal -->
 
 <!-- BEGIN primary modal -->
-<div class="modal fade" id="PagO" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Adjuntar Documento</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<div class='modal fade' id='PagO' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Adjuntar Documento</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <table class='table table-sm my-2'>
+          <tbody>
+            <tr>
+              <th>
+                <span id='pryec'></span>
+              </th>
+              <td>
+                <span id='mzlt'></span>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <span id='clnt'></span>
+              </th>
+              <td>
+                <span id='docu'></span>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <span id='asesor'></span>
+              </th>
+              <td>
+                <span class='badge badge-dark'>Asesor comercial</span>
+              </td>
+            </tr>
+            <tr>
+              <th>
+                <span>Valor a pagar</span>
+              </th>
+              <td>
+                <span id='totl'></span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <table
+          id='cartra'
+          class='table table-sm table-striped table-hover display nowrap select'
+          style='width:100%'
+        >
+          <thead>
+            <tr>
+              <th></th>
+              <th>Tipo</th>
+              <th>#C</th>
+              <th>Venc</th>
+              <th>Cuota</th>
+              <th>Mora</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <table class='table table-sm my-2' id='recibosss'>
+          <form enctype='multipart/form-data' id='recbo' action='/links/recibo' method='POST'>
+            <input type='hidden' id='Total' name='total' />
+            <input type='hidden' id='factrs' name='factrs' />
+            <input type='hidden' id='idC' name='id' />
+            <input type='hidden' id='concpto' name='concpto' />
+            <input type='hidden' id='lt' name='lt' />
+            <input id='ahora' type='hidden' name='ahora' />
+            <input type='hidden' class='bonus' name='bono' value='0' />
+            <input id='g' type='hidden' name='g' />
+            <tbody>
+              <tr>
+                <th>
+                  <label class='custom-control custom-radio'>
+                    <input
+                      name='formap'
+                      type='radio'
+                      class='custom-control-input forma'
+                      value='CTA-CTE-50900011438'
+                      required
+                    />
+                    <span class='custom-control-label badge badge-primary'>
+                      CTA CTE 50900011438</span>
+                  </label>
+                </th>
+                <td>
+                  <label class='custom-control custom-radio'>
+                    <input
+                      name='formap'
+                      type='radio'
+                      class='custom-control-input forma'
+                      value='CHEQUE'
+                      required
+                    />
+                    <span class='custom-control-label badge badge-primary'>
+                      CHEQUE</span>
+                  </label>
+                </td>
+              </tr>
+              <tr>
+                <th>
+                  <label class='custom-control custom-radio'>
+                    <input
+                      name='formap'
+                      type='radio'
+                      class='custom-control-input forma'
+                      value='EFECTIVO'
+                      required
+                    />
+                    <span class='custom-control-label badge badge-primary'>
+                      EFECTIVO</span>
+                  </label>
+                </th>
+                <td>
+                  <label class='custom-control custom-radio'>
+                    <input
+                      name='formap'
+                      type='radio'
+                      class='custom-control-input forma'
+                      value='OTRO'
+                      required
+                    />
+                    <span class='custom-control-label badge badge-primary'>
+                      OTRO</span>
+                  </label>
+                </td>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <i class='feather-md' data-feather='file-plus'></i>
+                  <input
+                    class='form-control-no-border edi'
+                    type='file'
+                    name='image'
+                    data-toggle='tooltip'
+                    data-placement='top'
+                    data-container='body'
+                    title='Selecciones las imagenes de recibos'
+                    autocomplete='off'
+                    data-toggle='dropdown'
+                    aria-haspopup='true'
+                    aria-expanded='false'
+                    id='file2'
+                    multiple
+                    style='width: 50%;'
+                    onchange='preview(this);'
+                    required
+                  />
+                  <span class='montorecibos badge badge-dark'></span>
+                  <input type='hidden' name='montorcb' id='montorecibos' />
+                  <input type='hidden' name='recibos' id='nrbc' />
+                </th>
+              </tr>
+              <tr id='trarchivos'>
+                <th colspan='2' class='image-wrap' id='recibos1' width='100%' height='200'></th>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <button type='submit' class='btn btn-primary btn-sm float-right'>Enviar</button>
+                </th>
+              </tr>
+            </tbody>
+          </form>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='BANK' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Datos Bancarios</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <p>Ingrese los datos de la cuenta bancaria donde recibira los pagos de RED ELITE. Recuerde
+          que la cuenta debe pertenecer a quien solicita la comicion</p>
+        <table class='table table-sm my-2'>
+          <form action='/links/reportes/bank' method='POST' id='bank'>
+            <tbody>
+              <tr>
+                <th>
+                  <select
+                    class='form-control-no-border edi'
+                    name='banco'
+                    style='padding: 1px; width: 80%; background-color: transparent;'
+                    required=''
+                  >
+                    <option value='nada'>SELECCIONE UN BANCO</option>
+                    <option value='Banco Agrario de Colombia'>Banco Agrario de Colombia
+                    </option>
+                    <option value='Banco AV Villas'>Banco AV Villas</option>
+                    <option value='Banco Caja Social'>Banco Caja Social</option>
+                    <option value='Banco de Occidente'>Banco de Occidente</option>
+                    <option value='Banco Popular'>Banco Popular</option>
+                    <option value='Banco Falabella'>Banco Falabella</option>
+                    <option value='Banco Finandina'>Banco Finandina</option>
+                    <option value='Banco Itaú Corpbanca'>Banco Itaú Corpbanca
+                    </option>
+                    <option value='Banco Santander'>Banco Santander</option>
+                    <option value='Banco de Occidente'>Banco de Occidente</option>
+                    <option value='Bancóldex'>Bancóldex</option>
+                    <option value='Bancolombia'>Bancolombia</option>
+                    <option value='BBVA Colombia'>BBVA Colombia</option>
+                    <option value='Banco de Bogotá'>Banco de Bogotá</option>
+                    <option value='Citi Colombia'>Citi Colombia</option>
+                    <option value='Citibank'>Citibank</option>
+                    <option value='Colpatria'>Colpatria</option>
+                    <option value='Davivienda'>Davivienda</option>
+                    <option value='GNB Sudameris'>GNB Sudameris</option>
+                    <option value='Nequi'>Nequi</option>
+                    <option value='Multibank S.A.'>Multibank S.A.</option>
+                    <option value='Mundo mujer'>Mundo mujer</option>
+                    <option value='Red Multibanca Colpatria'>Red Multibanca Colpatria
+                    </option>
+                  </select>
+                </th>
+                <td>
+                  <select
+                    class='form-control-no-border edi'
+                    name='cta'
+                    style='padding: 1px; width: 80%; background-color: transparent;'
+                    required=''
+                  >
+                    <option value='nada'>TIPO CTA.</option>
+                    <option value='CTE'>CTE</option>
+                    <option value='AHO'>AHO</option>
+                  </select>
+                </td>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <input id='idbank' type='hidden' name='idbank' />
+                  <input
+                    class=''
+                    type='text'
+                    name='numero'
+                    data-toggle='tooltip'
+                    data-placement='top'
+                    data-container='body'
+                    title='Ingresa el numero de la cuenta bancaria'
+                    autocomplete='off'
+                    data-toggle='dropdown'
+                    aria-haspopup='true'
+                    aria-expanded='false'
+                    style='width: 100%;'
+                    required
+                  />
+                </th>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <button type='submit' class='btn btn-primary btn-sm float-right'>Enviar</button>
+                </th>
+              </tr>
+            </tbody>
+          </form>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='ModalEstadoDetalles' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-lg' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <div class=''>
+          <h4 class='card-title m-0' id='datosProducto'></h4>
+          <h6 class='card-subtitle m-0 text-muted' id='datos2Producto'></h6>
+        </div>
+        <div class='d-inline-block mt-1 mr-3 mb-0 float-right'>
+          <a class='reditar' data-dismiss='modal' aria-label='Close'>
+            <i class='feather mr-0' data-feather='x'></i></a>
+        </div>
+      </div>
+      <div class='modal-body p-2'>
+        <div class='accordion' id='estadoDetalles'>
+          <div class='card mb-1'>
+            <div
+              class='card-header'
+              type='button'
+              data-toggle='collapse'
+              data-target='#detallado'
+              aria-expanded='true'
+              aria-controls='collapse'
+            >
+              <strong class='text-muted' id='nombreCliente'></strong><br />
+              <small class='text-muted' id='emailCliente'></small>
+              <i class='fas fa-angle-up float-right'></i>
             </div>
-            <div class="modal-body">
-                <table class="table table-sm my-2">
-                    <tbody>
-                        <tr>
-                            <th>
-                                <span id="pryec"></span>
-                            </th>
-                            <td>
-                                <span id="mzlt"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <span id="clnt"></span>
-                            </th>
-                            <td>
-                                <span id="docu"></span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <span id="asesor"></span>
-                            </th>
-                            <td>
-                                <span class="badge badge-dark">Asesor comercial</span>
-                            </td>
-                        </tr>
-                        <tr>
-                            <th>
-                                <span>Valor a pagar</span>
-                            </th>
-                            <td>
-                                <span id="totl"></span>
-                            </td>
-                        </tr>
-                    </tbody>
-                </table>
-                <table id="cartra" class="table table-sm table-striped table-hover display nowrap select"
-                    style="width:100%">
+            <div
+              id='detallado'
+              class='collapse show'
+              aria-labelledby='headingOne'
+              data-parent='#estadoDetalles'
+            >
+              <div class='card-body p-0'>
+                <div class='card-group'>
+                  <div class='card'>
+                    <ul class='list-group list-group-flush'>
+                      <li class='list-group-item py-1' id='Area'></li>
+                      <li class='list-group-item py-1' id='Separacion'></li>
+                      <li class='list-group-item py-1' id='PinKupon'></li>
+                      <li class='list-group-item py-1' id='Descuento'></li>
+                      <li class='list-group-item py-1' id='Mora'></li>
+                      <li class='list-group-item py-1' id='Abono'></li>
+                    </ul>
+                  </div>
+                  <div class='card'>
+                    <ul class='list-group list-group-flush'>
+                      <li class='list-group-item py-1' id='ValorArea'></li>
+                      <li class='list-group-item py-1' id='Valor'></li>
+                      <li class='list-group-item py-1' id='Porcentage'></li>
+                      <li class='list-group-item py-1' id='TotalPrecio'></li>
+                      <li class='list-group-item py-1' id='Deuda'></li>
+                      <li class='list-group-item py-1' id='Saldo'></li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        {{#if user.externo}}{{else if user.auxicontbl}}
+          <div class='accordion' id='tablaComi'>
+            <div class='card mb-1'>
+              <div
+                class='card-header'
+                type='button'
+                data-toggle='collapse'
+                data-target='#tebleComi'
+                aria-expanded='true'
+                aria-controls='collapse'
+              >
+                <strong class='text-muted'>COMISIONES</strong><br />
+                <small class='text-muted' id='totalComi'></small>
+                <i class='fas fa-angle-down float-right'></i>
+              </div>
+              <div
+                id='tebleComi'
+                class='collapse'
+                aria-labelledby='headingOne'
+                data-parent='#tablaComi'
+              >
+                <div class='card-body text-center p-0'>
+                  <table id='comi' class='table table-sm' style='width:100%;font-size:9px;'>
                     <thead>
-                        <tr>
-                            <th></th>
-                            <th>Tipo</th>
-                            <th>#C</th>
-                            <th>Venc</th>
-                            <th>Cuota</th>
-                            <th>Mora</th>
-                        </tr>
+                      <tr>
+                        <th>Id</th>
+                        <th>Asesor</th>
+                        <th>FechaCreo</th>
+                        <th>Monto</th>
+                        <th>%</th>
+                        <th>Total</th>
+                        <th>Concepto</th>
+                        <th>Descp</th>
+                        <th>Estado</th>
+                      </tr>
                     </thead>
                     <tbody></tbody>
-                </table>
-                <table class="table table-sm my-2" id="recibosss">
-                    <form enctype="multipart/form-data" id="recbo" action="/links/recibo" method="POST">
-                        <input type="hidden" id="Total" name="total">
-                        <input type="hidden" id="factrs" name="factrs">
-                        <input type="hidden" id="idC" name="id">
-                        <input type="hidden" id="concpto" name="concpto">
-                        <input type="hidden" id="lt" name="lt">
-                        <input id="ahora" type="hidden" name="ahora">
-                        <input type="hidden" class="bonus" name="bono" value="0">
-                        <input id="g" type="hidden" name="g">
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <label class="custom-control custom-radio">
-                                        <input name="formap" type="radio" class="custom-control-input forma"
-                                            value="CTA-CTE-50900011438" required>
-                                        <span class="custom-control-label badge badge-primary">
-                                            CTA CTE 50900011438</span>
-                                    </label>
-                                </th>
-                                <td>
-                                    <label class="custom-control custom-radio">
-                                        <input name="formap" type="radio" class="custom-control-input forma"
-                                            value="CHEQUE" required>
-                                        <span class="custom-control-label badge badge-primary">
-                                            CHEQUE</span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th>
-                                    <label class="custom-control custom-radio">
-                                        <input name="formap" type="radio" class="custom-control-input forma"
-                                            value="EFECTIVO" required>
-                                        <span class="custom-control-label badge badge-primary">
-                                            EFECTIVO</span>
-                                    </label>
-                                </th>
-                                <td>
-                                    <label class="custom-control custom-radio">
-                                        <input name="formap" type="radio" class="custom-control-input forma"
-                                            value="OTRO" required>
-                                        <span class="custom-control-label badge badge-primary">
-                                            OTRO</span>
-                                    </label>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <i class="feather-md" data-feather="file-plus"></i>
-                                    <input class="form-control-no-border edi" type="file" name="image"
-                                        data-toggle="tooltip" data-placement="top" data-container="body"
-                                        title="Selecciones las imagenes de recibos" autocomplete="off"
-                                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false" id="file2"
-                                        multiple style="width: 50%;" onchange="preview(this);" required>
-                                    <span class="montorecibos badge badge-dark"></span>
-                                    <input type="hidden" name="montorcb" id="montorecibos">
-                                    <input type="hidden" name="recibos" id="nrbc">
-                                </th>
-                            </tr>
-                            <tr id="trarchivos">
-                                <th colspan="2" class="image-wrap" id="recibos1" width="100%" height="200"></th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <button type="submit" class="btn btn-primary btn-sm float-right">Enviar</button>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </form>
-                </table>
+                  </table>
+                </div>
+              </div>
             </div>
+          </div>
+        {{/if}}
+        <div class='accordion' id='tablaRcb'>
+          <div class='card mb-1'>
+            <div
+              class='card-header'
+              type='button'
+              data-toggle='collapse'
+              data-target='#tableRcb'
+              aria-expanded='true'
+              aria-controls='collapse'
+            >
+              <strong class='text-muted'>RECIBOS</strong><br />
+              <small class='text-muted' id='totalRcb'>Se muestran los recibos de este lote</small>
+              <i class='fas fa-angle-down float-right'></i>
+            </div>
+            <div
+              id='tableRcb'
+              class='collapse'
+              aria-labelledby='headingOne'
+              data-parent='#tablaRcb'
+            >
+              <div class='card-body text-center p-0'>
+                <table id='Rcbs' class='table table-sm' style='width:100%;font-size:9px;'>
+                  <thead>
+                    <tr>
+                      <th data-priority='1'>Id</th>
+                      <th>FechaP</th>
+                      <th>FechaRcb</th>
+                      <th data-priority='3'>Descp</th>
+                      <th data-priority='2'>Monto</th>
+                      <th data-priority='5'>Recibo</th>
+                      <th data-priority='1'>Estado</th>
+                      <th data-priority='1'>Rcb</th>
+                      <th>QuienAprueba</th>
+                    </tr>
+                  </thead>
+                  <tbody></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
         </div>
+      </div>
     </div>
+  </div>
 </div>
 
 <!-- BEGIN primary modal -->
-<div class="modal fade" id="BANK" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Datos Bancarios</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
+<div class='modal fade' id='DctoMora' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Decuento sobre moras</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <form class='row gx-3 gy-2 align-items-center' id='formularioDcto'>
+          <input name='producto' type='hidden' id='prodmora' />
+          <div class='col-sm-3 mb-3'>
+            <label class='visually-hidden' for='dcto'>Descuento</label>
+            <input
+              type='text'
+              class='form-control text-center'
+              id='dcto'
+              placeholder='Dcto'
+              name='dcto'
+            />
+          </div>
+          <div class='col-sm-5 mb-3'>
+            <label class='visually-hidden' for='dctoMonto'>Monto</label>
+            <input
+              type='text'
+              class='form-control text-center'
+              id='dctoMonto'
+              placeholder='Monto'
+              name='monto'
+            />
+          </div>
+          <div class='col-sm-4 mb-3'>
+            <label class='visually-hidden' for='dctoMonto'>Limite</label>
+            <input
+              type='text'
+              class='form-control'
+              id='FechaLimite'
+              placeholder='Fecha Limite'
+              name='limite'
+            />
+          </div>
+          <div class='col-sm-4 mb-3'>
+            <select class='form-select' id='typo' name='tipo'>
+              <option value=' ' selected>Tipo</option>
+              <option value='DCTO'>DCTO</option>
+              <option value='CONVENIO'>CONVENIO</option>
+            </select>
+          </div>
+          <div class='col-5 mb-3'>
+            <div class='form-check'>
+              <input class='form-check-input' type='checkbox' id='stopMora' name='stop' />
+              <label class='form-check-label' for='stopMora'>
+                Detener Mora?
+              </label>
             </div>
-            <div class="modal-body">
-                <p>Ingrese los datos de la cuenta bancaria donde recibira los pagos de RED ELITE. Recuerde que la cuenta
-                    debe pertenecer a quien solicita la comicion</p>
-                <table class="table table-sm my-2">
-                    <form action="/links/reportes/bank" method="POST" id="bank">
-                        <tbody>
-                            <tr>
-                                <th>
-                                    <select class="form-control-no-border edi" name="banco"
-                                        style="padding: 1px; width: 80%; background-color: transparent;" required="">
-                                        <option value="nada">SELECCIONE UN BANCO</option>
-                                        <option value="Banco Agrario de Colombia">Banco Agrario de
-                                            Colombia
-                                        </option>
-                                        <option value="Banco AV Villas">Banco AV Villas</option>
-                                        <option value="Banco Caja Social">Banco Caja Social</option>
-                                        <option value="Banco de Occidente">Banco de Occidente</option>
-                                        <option value="Banco Popular">Banco Popular</option>
-                                        <option value="Banco Falabella">Banco Falabella</option>
-                                        <option value="Banco Finandina">Banco Finandina</option>
-                                        <option value="Banco Itaú Corpbanca">Banco Itaú Corpbanca
-                                        </option>
-                                        <option value="Banco Santander">Banco Santander</option>
-                                        <option value="Banco de Occidente">Banco de Occidente</option>
-                                        <option value="Bancóldex">Bancóldex</option>
-                                        <option value="Bancolombia">Bancolombia</option>
-                                        <option value="BBVA Colombia">BBVA Colombia</option>
-                                        <option value="Banco de Bogotá">Banco de Bogotá</option>
-                                        <option value="Citi Colombia">Citi Colombia</option>
-                                        <option value="Citibank">Citibank</option>
-                                        <option value="Colpatria">Colpatria</option>
-                                        <option value="Davivienda">Davivienda</option>
-                                        <option value="GNB Sudameris">GNB Sudameris</option>
-                                        <option value="Nequi">Nequi</option>
-                                        <option value="Multibank S.A.">Multibank S.A.</option>
-                                        <option value="Mundo mujer">Mundo mujer</option>
-                                        <option value="Red Multibanca Colpatria">Red Multibanca
-                                            Colpatria
-                                        </option>
-                                    </select>
-                                </th>
-                                <td>
-                                    <select class="form-control-no-border edi" name="cta"
-                                        style="padding: 1px; width: 80%; background-color: transparent;" required="">
-                                        <option value="nada">TIPO CTA.</option>
-                                        <option value="CTE">CTE</option>
-                                        <option value="AHO">AHO</option>
-                                    </select>
-                                </td>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <input id="idbank" type="hidden" name="idbank">
-                                    <input class="" type="text" name="numero" data-toggle="tooltip" data-placement="top"
-                                        data-container="body" title="Ingresa el numero de la cuenta bancaria"
-                                        autocomplete="off" data-toggle="dropdown" aria-haspopup="true"
-                                        aria-expanded="false" style="width: 100%;" required>
-                                </th>
-                            </tr>
-                            <tr>
-                                <th colspan="2">
-                                    <button type="submit" class="btn btn-primary btn-sm float-right">Enviar</button>
-                                </th>
-                            </tr>
-                        </tbody>
-                    </form>
-                </table>
-            </div>
-        </div>
+          </div>
+          <div class='col-auto mb-3'>
+            <button type='submit' class='btn btn-primary float-right'>Aplicar</button>
+          </div>
+        </form>
+      </div>
     </div>
+  </div>
 </div>
 
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="ModalEstadoDetalles" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-lg" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="">
-                    <h4 class="card-title m-0" id="datosProducto"></h4>
-                    <h6 class="card-subtitle m-0 text-muted" id="datos2Producto"></h6>
-                </div>
-                <div class="d-inline-block mt-1 mr-3 mb-0 float-right">
-                    <a class="reditar" data-dismiss="modal" aria-label="Close">
-                        <i class="feather mr-0" data-feather="x"></i></a>
-                </div>
-            </div>
-            <div class="modal-body p-2">
-                <div class="accordion" id="estadoDetalles">
-                    <div class="card mb-1">
-                        <div class="card-header" type="button" data-toggle="collapse" data-target="#detallado"
-                            aria-expanded="true" aria-controls="collapse">
-                            <strong class="text-muted" id="nombreCliente"></strong><br>
-                            <small class="text-muted" id="emailCliente"></small>
-                            <i class="fas fa-angle-up float-right"></i>
-                        </div>
-                        <div id="detallado" class="collapse show" aria-labelledby="headingOne"
-                            data-parent="#estadoDetalles">
-                            <div class="card-body p-0">
-                                <div class="card-group">
-                                    <div class="card">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item py-1" id="Area"></li>
-                                            <li class="list-group-item py-1" id="Separacion"></li>
-                                            <li class="list-group-item py-1" id="PinKupon"></li>
-                                            <li class="list-group-item py-1" id="Descuento"></li>
-                                            <li class="list-group-item py-1" id="Mora"></li>
-                                            <li class="list-group-item py-1" id="Abono"></li>
-                                        </ul>
-                                    </div>
-                                    <div class="card">
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item py-1" id="ValorArea"></li>
-                                            <li class="list-group-item py-1" id="Valor"></li>
-                                            <li class="list-group-item py-1" id="Porcentage"></li>
-                                            <li class="list-group-item py-1" id="TotalPrecio"></li>
-                                            <li class="list-group-item py-1" id="Deuda"></li>
-                                            <li class="list-group-item py-1" id="Saldo"></li>
-                                        </ul>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{#if user.externo}}
+{{#if user.externo}}{{else if user.auxicontbl}}
 
-                {{else if user.auxicontbl}}
-                <div class="accordion" id="tablaComi">
-                    <div class="card mb-1">
-                        <div class="card-header" type="button" data-toggle="collapse" data-target="#tebleComi"
-                            aria-expanded="true" aria-controls="collapse">
-                            <strong class="text-muted">COMISIONES</strong><br>
-                            <small class="text-muted" id="totalComi"></small>
-                            <i class="fas fa-angle-down float-right"></i>
-                        </div>
-                        <div id="tebleComi" class="collapse" aria-labelledby="headingOne" data-parent="#tablaComi">
-                            <div class="card-body text-center p-0">
-                                <table id="comi" class="table table-sm" style="width:100%;font-size:9px;">
-                                    <thead>
-                                        <tr>
-                                            <th>Id</th>
-                                            <th>Asesor</th>
-                                            <th>FechaCreo</th>
-                                            <th>Monto</th>
-                                            <th>%</th>
-                                            <th>Total</th>
-                                            <th>Concepto</th>
-                                            <th>Descp</th>
-                                            <th>Estado</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                {{/if}}
-                <div class="accordion" id="tablaRcb">
-                    <div class="card mb-1">
-                        <div class="card-header" type="button" data-toggle="collapse" data-target="#tableRcb"
-                            aria-expanded="true" aria-controls="collapse">
-                            <strong class="text-muted">RECIBOS</strong><br>
-                            <small class="text-muted" id="totalRcb">Se muestran los recibos de este lote</small>
-                            <i class="fas fa-angle-down float-right"></i>
-                        </div>
-                        <div id="tableRcb" class="collapse" aria-labelledby="headingOne" data-parent="#tablaRcb">
-                            <div class="card-body text-center p-0">
-                                <table id="Rcbs" class="table table-sm" style="width:100%;font-size:9px;">
-                                    <thead>
-                                        <tr>
-                                            <th data-priority="1">Id</th>
-                                            <th>FechaP</th>
-                                            <th>FechaRcb</th>
-                                            <th data-priority="3">Descp</th>
-                                            <th data-priority="2">Monto</th>
-                                            <th data-priority="5">Recibo</th>
-                                            <th data-priority="1">Estado</th>
-                                            <th data-priority="1">Rcb</th>
-                                            <th>QuienAprueba</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody></tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  <div class='accordion' id='accordion2'>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse4'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>COMISIONES</strong><br />
+        <small class='text-muted'>Conoce al detalle el estdo de tus comisiones</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse4' class='collapse' aria-labelledby='headingOne' data-parent='#accordion2'>
+        <div class='card-body text-center responsive'>
+          <nav>
+            <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+              <a
+                class='nav-item nav-link d-none d-sm-block'
+                data-toggle='collapse'
+                href='#men1'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men'
+              >Ver</a>
+
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='#men2'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men2'
+              >
+                <i class='align-middle' data-feather='sliders'></i>
+              </a>
+
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='javascript:void 0'
+                onclick='CuentaCobro()'
+              >
+                <i class='align-middle' data-feather='slack'></i>
+              </a>
+
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='javascript:void 0'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men2'
+              >
+                <input
+                  id='busq2'
+                  type='text'
+                  class='edi text-center'
+                  style='width: 150px; padding: 1px; border: 0;'
+                  placeholder='Buscar...'
+                />
+              </a>
+
+              <a
+                class='nav-item nav-link d-none'
+                data-toggle='collapse'
+                href='#men3'
+                role='button'
+                aria-expanded='false'
+                aria-controls='menu3'
+              >Buscar</a>
             </div>
+          </nav>
+          <div class='accordion' id='men'>
+            <nav
+              class='nav flex-column flex-sm-row collapse'
+              id='men1'
+              aria-labelledby='headingOne'
+              data-parent='#men'
+            >
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 10)"
+              ><i class='fas fa-tasks'></i> 10 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 20)"
+              ><i class='fas fa-tasks'></i> 20 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 30)"
+              ><i class='fas fa-tasks'></i> 30 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 50)"
+              ><i class='fas fa-tasks'></i> 50 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 100)"
+              ><i class='fas fa-tasks'></i> 100 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', -1)"
+              ><i class='fas fa-tasks'></i> Todas</a>
+            </nav>
+            <nav
+              class='nav nav-fill collapse'
+              id='men2'
+              aria-labelledby='headingOne'
+              data-parent='#men'
+            >
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Disponible')"
+              ><i class='fas fa-donate'></i>
+                Disponibles</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Pendiente')"
+              ><i class='fas fa-hand-holding-usd'></i>
+                Pendientes</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Declinada')"
+              ><i class='fas fa-comments-dollar'></i>
+                Declinadas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Inactiva')"
+              ><i class='fas fa-landmark'></i>
+                Inactivas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Auditando')"
+              ><i class='fas fa-landmark'></i>
+                Auditando</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link -1'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Pagada')"
+              ><i class='fas fa-coins'></i>
+                Pagadas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link -1'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', '', '')"
+              ><i class='fas fa-chart-pie'></i>
+                Todas</a>
+            </nav>
+            <div class='collapse' id='men3' aria-labelledby='headingOne' data-parent='#men'>
+              <div class='card card-body'>
+                <select class='select2 productos'></select>
+              </div>
+            </div>
+          </div>
+          <table
+            id='comisiones'
+            class='table table-sm table-striped table-hover display nowrap w-100'
+          >
+            <thead>
+              <tr>
+                <th></th>
+                <th>Id</th>
+                <th>Asesor</th>
+                <th>Fecha</th>
+                <th>Benefactor</th>
+                <th>Cliente</th>
+                <th>Venta</th>
+                <th>Monto</th>
+                <th>%</th>
+                <th>Retefuente</th>
+                <th>Reteica</th>
+                <th>Total</th>
+                <th>Concepto</th>
+                <th>Descp</th>
+                <th>Proyct</th>
+                <th>Mz</th>
+                <th>Lt</th>
+                <th>Estado</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
+      </div>
     </div>
-</div>
-
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="DctoMora" tabindex="-1" role="dialog" aria-hidden="true">
-    <div class="modal-dialog modal-sm" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title">Decuento sobre moras</h5>
-                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                </button>
-            </div>
-            <div class="modal-body">
-                <form class="row gx-3 gy-2 align-items-center" id="formularioDcto">
-                    <input name="producto" type="hidden" id="prodmora">
-                    <div class="col-sm-3 mb-3">
-                        <label class="visually-hidden" for="dcto">Descuento</label>
-                        <input type="text" class="form-control text-center" id="dcto" placeholder="Dcto" name="dcto">
-                    </div>
-                    <div class="col-sm-5 mb-3">
-                        <label class="visually-hidden" for="dctoMonto">Monto</label>
-                        <input type="text" class="form-control text-center" id="dctoMonto" placeholder="Monto" name="monto">
-                    </div>
-                    <div class="col-sm-4 mb-3">
-                        <label class="visually-hidden" for="dctoMonto">Limite</label>
-                        <input type="text" class="form-control" id="FechaLimite" placeholder="Fecha Limite" name="limite">
-                    </div>
-                    <div class="col-sm-4 mb-3">
-                        <select class="form-select" id="typo" name="tipo">
-                            <option value=" " selected>Tipo</option>
-                            <option value="DCTO">DCTO</option>
-                            <option value="CONVENIO">CONVENIO</option>
-                        </select>
-                    </div>
-                    <div class="col-5 mb-3">
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="stopMora" name="stop">
-                            <label class="form-check-label" for="stopMora">
-                                Detener Mora?
-                            </label>
-                        </div>
-                    </div>
-                    <div class="col-auto mb-3">
-                        <button type="submit" class="btn btn-primary float-right">Aplicar</button>
-                    </div>
-                </form>
-            </div>
-        </div>
-    </div>
-</div>
-
-{{#if user.externo}}
-
-{{else if user.auxicontbl}}
-
-<div class="accordion" id="accordion2">
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">COMISIONES</strong><br>
-            <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion2">
-            <div class="card-body text-center responsive">
-                <nav>
-                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#men1" role="button"
-                            aria-expanded="false" aria-controls="men">Ver</a>
-
-                        <a class="nav-item nav-link" data-toggle="collapse" href="#men2" role="button"
-                            aria-expanded="false" aria-controls="men2">
-                            <i class="align-middle" data-feather="sliders"></i>
-                        </a>
-
-                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0"
-                            onclick="CuentaCobro()">
-                            <i class="align-middle" data-feather="slack"></i>
-                        </a>
-
-                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0" role="button"
-                            aria-expanded="false" aria-controls="men2">
-                            <input id="busq2" type="text" class="edi text-center"
-                                style="width: 150px; padding: 1px; border: 0;" placeholder="Buscar...">
-                        </a>
-
-                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#men3" role="button"
-                            aria-expanded="false" aria-controls="menu3">Buscar</a>
-                    </div>
-                </nav>
-                <div class="accordion" id="men">
-                    <nav class="nav flex-column flex-sm-row collapse" id="men1" aria-labelledby="headingOne"
-                        data-parent="#men">
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', -1)"><i class="fas fa-tasks"></i> Todas</a>
-                    </nav>
-                    <nav class="nav nav-fill collapse" id="men2" aria-labelledby="headingOne" data-parent="#men">
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Disponible')"><i class="fas fa-donate"></i>
-                            Disponibles</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
-                            Pendientes</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Declinada')"><i class="fas fa-comments-dollar"></i>
-                            Declinadas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Inactiva')"><i class="fas fa-landmark"></i>
-                            Inactivas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Auditando')"><i class="fas fa-landmark"></i>
-                            Auditando</a>
-                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pagada')"><i class="fas fa-coins"></i>
-                            Pagadas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', '', '')"><i class="fas fa-chart-pie"></i>
-                            Todas</a>
-                    </nav>
-                    <div class="collapse" id="men3" aria-labelledby="headingOne" data-parent="#men">
-                        <div class="card card-body">
-                            <select class="select2 productos"></select>
-                        </div>
-                    </div>
-                </div>
-                <table id="comisiones" class="table table-sm table-striped table-hover display nowrap w-100">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Id</th>
-                            <th>Asesor</th>
-                            <th>Fecha</th>
-                            <th>Benefactor</th>
-                            <th>Cliente</th>
-                            <th>Venta</th>
-                            <th>Monto</th>
-                            <th>%</th>
-                            <th>Retefuente</th>
-                            <th>Reteica</th>
-                            <th>Total</th>
-                            <th>Concepto</th>
-                            <th>Descp</th>
-                            <th>Proyct</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th>Estado</th>
-                            <th>Accion</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-</div>
+  </div>
 
 {{else}}
 
+  <div class='accordion' id='accordion2'>
+    <div class='card'>
+      <div
+        class='card-header'
+        type='button'
+        data-toggle='collapse'
+        data-target='#collapse4'
+        aria-expanded='true'
+        aria-controls='collapse'
+      >
+        <strong class='text-muted'>COMISIONES</strong><br />
+        <small class='text-muted'>Conoce al detalle el estdo de tus comisiones</small>
+        <i class='fas fa-angle-down float-right'></i>
+      </div>
+      <div id='collapse4' class='collapse' aria-labelledby='headingOne' data-parent='#accordion2'>
+        <div class='card-body text-center responsive'>
+          <nav>
+            <div class='nav nav-tabs' id='nav-tab' role='tablist'>
+              <a
+                class='nav-item nav-link d-none d-sm-block'
+                data-toggle='collapse'
+                href='#men1'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men'
+              >Ver</a>
 
-<div class="accordion" id="accordion2">
-    <div class="card">
-        <div class="card-header" type="button" data-toggle="collapse" data-target="#collapse4" aria-expanded="true"
-            aria-controls="collapse">
-            <strong class="text-muted">COMISIONES</strong><br>
-            <small class="text-muted">Conoce al detalle el estdo de tus comisiones</small>
-            <i class="fas fa-angle-down float-right"></i>
-        </div>
-        <div id="collapse4" class="collapse" aria-labelledby="headingOne" data-parent="#accordion2">
-            <div class="card-body text-center responsive">
-                <nav>
-                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
-                        <a class="nav-item nav-link d-none d-sm-block" data-toggle="collapse" href="#men1" role="button"
-                            aria-expanded="false" aria-controls="men">Ver</a>
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='#men2'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men2'
+              >
+                <i class='align-middle' data-feather='sliders'></i>
+              </a>
 
-                        <a class="nav-item nav-link" data-toggle="collapse" href="#men2" role="button"
-                            aria-expanded="false" aria-controls="men2">
-                            <i class="align-middle" data-feather="sliders"></i>
-                        </a>
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='javascript:void 0'
+                onclick='CuentaCobro()'
+              >
+                <i class='align-middle' data-feather='slack'></i>
+              </a>
 
-                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0"
-                            onclick="CuentaCobro()">
-                            <i class="align-middle" data-feather="slack"></i>
-                        </a>
+              <a
+                class='nav-item nav-link'
+                data-toggle='collapse'
+                href='javascript:void 0'
+                role='button'
+                aria-expanded='false'
+                aria-controls='men2'
+              >
+                <input
+                  id='busq2'
+                  type='text'
+                  class='edi text-center'
+                  style='width: 150px; padding: 1px; border: 0;'
+                  placeholder='Buscar...'
+                />
+              </a>
 
-                        <a class="nav-item nav-link" data-toggle="collapse" href="javascript:void 0" role="button"
-                            aria-expanded="false" aria-controls="men2">
-                            <input id="busq2" type="text" class="edi text-center"
-                                style="width: 150px; padding: 1px; border: 0;" placeholder="Buscar...">
-                        </a>
-
-                        <a class="nav-item nav-link d-none" data-toggle="collapse" href="#men3" role="button"
-                            aria-expanded="false" aria-controls="menu3">Buscar</a>
-                    </div>
-                </nav>
-                <div class="accordion" id="men">
-                    <nav class="nav flex-column flex-sm-row collapse" id="men1" aria-labelledby="headingOne"
-                        data-parent="#men">
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 10)"><i class="fas fa-tasks"></i> 10 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 20)"><i class="fas fa-tasks"></i> 20 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 30)"><i class="fas fa-tasks"></i> 30 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 50)"><i class="fas fa-tasks"></i> 50 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', 100)"><i class="fas fa-tasks"></i> 100 Filas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="javascript:void 0"
-                            onclick="VER('#comisiones', -1)"><i class="fas fa-tasks"></i> Todas</a>
-                    </nav>
-                    <nav class="nav nav-fill collapse" id="men2" aria-labelledby="headingOne" data-parent="#men">
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Disponible')"><i class="fas fa-donate"></i>
-                            Disponibles</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pendiente')"><i class="fas fa-hand-holding-usd"></i>
-                            Pendientes</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Declinada')"><i class="fas fa-comments-dollar"></i>
-                            Declinadas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Inactiva')"><i class="fas fa-landmark"></i>
-                            Inactivas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link 6" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Auditando')"><i class="fas fa-landmark"></i>
-                            Auditando</a>
-                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', 17, 'Pagada')"><i class="fas fa-coins"></i>
-                            Pagadas</a>
-                        <a class="flex-sm-fill text-sm-center nav-link -1" href="javascript:void 0"
-                            onclick="STAD('#comisiones', '', '')"><i class="fas fa-chart-pie"></i>
-                            Todas</a>
-                    </nav>
-                    <div class="collapse" id="men3" aria-labelledby="headingOne" data-parent="#men">
-                        <div class="card card-body">
-                            <select class="select2 productos"></select>
-                        </div>
-                    </div>
-                </div>
-                <table id="comisiones" class="table table-sm table-striped table-hover display nowrap w-100">
-                    <thead>
-                        <tr>
-                            <th></th>
-                            <th>Id</th>
-                            <th>Asesor</th>
-                            <th>Fecha</th>
-                            <th>Benefactor</th>
-                            <th>Cliente</th>
-                            <th>Venta</th>
-                            <th>Monto</th>
-                            <th>%</th>
-                            <th>Retefuente</th>
-                            <th>Reteica</th>
-                            <th>Total</th>
-                            <th>Concepto</th>
-                            <th>Descp</th>
-                            <th>Proyct</th>
-                            <th>Mz</th>
-                            <th>Lt</th>
-                            <th>Estado</th>
-                            <th>Accion</th>
-                        </tr>
-                    </thead>
-                    <tbody></tbody>
-                </table>
+              <a
+                class='nav-item nav-link d-none'
+                data-toggle='collapse'
+                href='#men3'
+                role='button'
+                aria-expanded='false'
+                aria-controls='menu3'
+              >Buscar</a>
             </div>
+          </nav>
+          <div class='accordion' id='men'>
+            <nav
+              class='nav flex-column flex-sm-row collapse'
+              id='men1'
+              aria-labelledby='headingOne'
+              data-parent='#men'
+            >
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 10)"
+              ><i class='fas fa-tasks'></i> 10 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 20)"
+              ><i class='fas fa-tasks'></i> 20 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 30)"
+              ><i class='fas fa-tasks'></i> 30 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 50)"
+              ><i class='fas fa-tasks'></i> 50 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', 100)"
+              ><i class='fas fa-tasks'></i> 100 Filas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link'
+                href='javascript:void 0'
+                onclick="VER('#comisiones', -1)"
+              ><i class='fas fa-tasks'></i> Todas</a>
+            </nav>
+            <nav
+              class='nav nav-fill collapse'
+              id='men2'
+              aria-labelledby='headingOne'
+              data-parent='#men'
+            >
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Disponible')"
+              ><i class='fas fa-donate'></i>
+                Disponibles</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Pendiente')"
+              ><i class='fas fa-hand-holding-usd'></i>
+                Pendientes</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Declinada')"
+              ><i class='fas fa-comments-dollar'></i>
+                Declinadas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Inactiva')"
+              ><i class='fas fa-landmark'></i>
+                Inactivas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link 6'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Auditando')"
+              ><i class='fas fa-landmark'></i>
+                Auditando</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link -1'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', 17, 'Pagada')"
+              ><i class='fas fa-coins'></i>
+                Pagadas</a>
+              <a
+                class='flex-sm-fill text-sm-center nav-link -1'
+                href='javascript:void 0'
+                onclick="STAD('#comisiones', '', '')"
+              ><i class='fas fa-chart-pie'></i>
+                Todas</a>
+            </nav>
+            <div class='collapse' id='men3' aria-labelledby='headingOne' data-parent='#men'>
+              <div class='card card-body'>
+                <select class='select2 productos'></select>
+              </div>
+            </div>
+          </div>
+          <table
+            id='comisiones'
+            class='table table-sm table-striped table-hover display nowrap w-100'
+          >
+            <thead>
+              <tr>
+                <th></th>
+                <th>Id</th>
+                <th>Asesor</th>
+                <th>Fecha</th>
+                <th>Benefactor</th>
+                <th>Cliente</th>
+                <th>Venta</th>
+                <th>Monto</th>
+                <th>%</th>
+                <th>Retefuente</th>
+                <th>Reteica</th>
+                <th>Total</th>
+                <th>Concepto</th>
+                <th>Descp</th>
+                <th>Proyct</th>
+                <th>Mz</th>
+                <th>Lt</th>
+                <th>Estado</th>
+                <th>Accion</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
         </div>
+      </div>
     </div>
-</div>
+  </div>
 
 {{/if}}

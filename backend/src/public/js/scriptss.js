@@ -3305,6 +3305,13 @@ if (window.location.pathname === `/links/reportes`) {
         data: 'deuda',
         className: 'te',
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
+      },
+      {
+        data: 'fechapagoini',
+        className: 'te',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : 'Sin registro'; //pone la fecha en un formato entendible
+        }
       }
     ],
     drawCallback: function (settings) {
@@ -6382,6 +6389,12 @@ if (window.location.pathname === `/links/reportes`) {
         }
       ],
       rowCallback: function (row, data, index) {
+        $(row).attr({
+          'data-toggle': 'popover',
+          title: `Pago de cuota inical en:\n${
+            data['fecharcb'] ? data['fecharcb'] : 'No registrada'
+          }`
+        });
         if (data['stado'] == 3) {
           $(row).css('background-color', '#00FFFF');
         } else if (data['stado'] == 4) {
@@ -6402,7 +6415,7 @@ if (window.location.pathname === `/links/reportes`) {
       var data = comisiones.row(fila).data(); //console.log(data)
       if (!aasesor && data.stado === 9) {
         aasesor = data.nam;
-        console.log(data.bank);
+        //console.log(data.bank);
         iid = data.ids;
         fila.toggleClass('selected');
       } else if (iid === data.ids) {
@@ -11945,7 +11958,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       { data: 'ordenanu' },
-      { data: 'aprobado' }
+      { data: 'aprobado' },
+      { data: 'observaciones' }
     ],
     rowCallback: function (row, data, index) {
       if (data['stado'] == 6) {
@@ -12086,23 +12100,37 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           //BancoExt.columns(0).search('').draw();
           BuscarFechaRcb(data.fecharcb);
           $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
-                                            <a class="dropdown-item">Enviar</a>`);
+            <a class="dropdown-item">Enviar</a>`);
         }
+
+        if (rol.id == '9')
+          $('#apde').next().append(`<a class="dropdown-item">Anular</a>
+          <a class="dropdown-item">Eliminar</a>`);
         break;
       case 6:
         $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
+        if (rol.id == '9')
+          $('#apde').next().html(`<a class="dropdown-item">Eliminar</a>
+            <a class="dropdown-item">Desanular</a>`);
         break;
       case 3:
         $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
         //BancoExt.columns(0).search('').draw();
         !rol.externo && BuscarFechaRcb(data.fecharcb);
         $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
-                                        <a class="dropdown-item">Declinar</a>`);
+          <a class="dropdown-item">Declinar</a>`);
+        if (rol.id == '9')
+          $('#apde').next().append(`<a class="dropdown-item">Anular</a>
+            <a class="dropdown-item">Eliminar</a>`);
         break;
       default:
         $('#Modalimg .estado').html(
           `<span class="badge badge-pill badge-secondary">sin formato</span>`
         );
+        if (rol.id == '9')
+          $('#apde').next().append(`<a class="dropdown-item">Anular</a>
+          <a class="dropdown-item">Eliminar</a>
+          <a class="dropdown-item">Desanular</a>`);
     }
     var zoom = 200;
     $('.foto').on({
@@ -12139,6 +12167,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         this.style.backgroundPosition = 'center';
       }
     });
+
+    if (data.observaciones)
+      $('#Modalimg .obv-text').html(data.observaciones).parents('.obv').show();
+    else $('#Modalimg .obv-text').html('').parents('.obv').hide();
+
     if (rol.contador) {
       $('.dropdown-item').show();
       $('#nove').show();
@@ -12216,6 +12249,65 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
           });
         }
+      } else if (accion === 'Anular' && rol.id == '9') {
+        /////////////////////////////////////////////////////////////////////
+        observacion = prompt('Deje en claro el motivo de la Anulacion', '');
+        if (observacion)
+          $.ajax({
+            type: 'PUT',
+            url: '/links/solicitudes/' + accion,
+            data: { ids: data.ids, observacion, orden: data.cparacion, std: data.stado },
+            beforeSend: function (xhr) {
+              $('#Modalimg').modal('hide');
+              $('#ModalEventos').modal({ backdrop: 'static', keyboard: true, toggle: true });
+            },
+            success: function (data) {
+              SMSj(data.type, data.msg);
+              if (data.type === 'success') table.ajax.reload(null, false);
+              $('#ModalEventos').modal('hide');
+            },
+            error: function (data) {
+              console.log(data);
+            }
+          });
+        else SMSj('error', `Solicitud no pudo ser procesada, debes de dar un motivo`);
+        /////////////////////////////////////////////////////////////////////////////////
+      } else if (accion === 'Desanular' && rol.id == '9') {
+        $.ajax({
+          type: 'PUT',
+          url: '/links/solicitudes/' + accion,
+          data: { ids: data.ids, orden: data.cparacion, pdf: data.pdf },
+          beforeSend: function (xhr) {
+            $('#Modalimg').modal('hide');
+            $('#ModalEventos').modal({ backdrop: 'static', keyboard: true, toggle: true });
+          },
+          success: function (data) {
+            SMSj(data.type, data.msg);
+            if (data.type === 'success') table.ajax.reload(null, false);
+            $('#ModalEventos').modal('hide');
+          },
+          error: function (data) {
+            console.log(data);
+          }
+        });
+      } else if (accion === 'Eliminar' && rol.id == '9') {
+        $.ajax({
+          type: 'PUT',
+          url: '/links/solicitudes/' + accion,
+          data: { ids: data.ids, orden: data.cparacion, std: data.stado },
+          beforeSend: function (xhr) {
+            $('#Modalimg').modal('hide');
+            $('#ModalEventos').modal({ backdrop: 'static', keyboard: true, toggle: true });
+          },
+          success: function (data) {
+            SMSj(data.type, data.msg);
+            if (data.type === 'success') table.ajax.reload(null, false);
+            $('#ModalEventos').modal('hide');
+          },
+          error: function (data) {
+            console.log(data);
+          }
+        });
       } else if (accion === 'Asociar' && rol.contador && !rol.externo) {
         if (!idExtracto) {
           alert('Debe seleccionar un extrato antes de intentar asociar al pago');
@@ -12258,7 +12350,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             console.log(data);
           }
         });
-      } else if (accion === 'Desasociar' && rol.id == '15' && !rol.externo) {
+      } else if (accion === 'Desasociar' && (rol.id == '15' || rol.id == '9') && !rol.externo) {
         if (!data.extr) {
           alert(
             'Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción'
@@ -12299,10 +12391,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
       } else if (
         (rol.contador && accion === 'Enviar') ||
-        (accion === 'Aprobar' && rol.id == '15') ||
+        (accion === 'Aprobar' && (rol.id == '15' || rol.id == '9')) ||
         (rol.contador && accion === 'Aprobar' && rol.externo)
       ) {
-        if (!rol.externo && !idExtracto && accion === 'Aprobar' && rol.id !== '15') {
+        if (!rol.externo && !idExtracto && accion === 'Aprobar' && rol.id != '9') {
           alert('Debe asociar un extrato al pago que desea aprobar');
           return false;
         }

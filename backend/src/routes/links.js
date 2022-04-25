@@ -60,6 +60,15 @@ moment.locale('es');
 var desarrollo = false;
 var url = 'https://bin.chat-api.com/1bd03zz1'; // •	v2HD9b0f^K
 
+//////////////////////////////////////BUSCAR COMISIONES REPETIDAS ////////////////////////////////////
+`SELECT s.ids, s.concepto, s.descp, s.orden, (SELECT COUNT(*) FROM solicitudes s2 
+WHERE s2.concepto = s.concepto AND s2.descp = s.descp AND s2.orden = s.orden) repit
+FROM solicitudes s 
+WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONO EXTRA')
+GROUP BY s.ids
+HAVING repit > 1
+ORDER BY s.orden;`;
+
 //////////////////////////////////////////////////////////// REPLACE INTO cuotas SELECT * FROM elite.cuotas; /////////////////////////////////////
 
 // REPORTE DE ESTADO ACTUAL DE LA EMPRESA
@@ -4035,11 +4044,6 @@ router.post('/recibo', async (req, res) => {
     descp: concpto,
     formap
   };
-  const acuerdo = await pool.query(
-    'SELECT id FROM acuerdos WHERE producto = ? AND estado = 9',
-    orden
-  );
-  acuerdo.length && (pago.acuerdo = acuerdo);
 
   var reci = 'INSERT INTO recibos (registro, date, formapg, rcb, monto, baucher, excdnt) VALUES ';
   if (Array.isArray(nrecibo)) {
@@ -4061,11 +4065,23 @@ router.post('/recibo', async (req, res) => {
       mora != 0 ? (pago.moras = mora) : '';
       concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
+      const acuerdo = await pool.query(
+        'SELECT id FROM acuerdos WHERE producto = ? AND estado != 6 AND pago > 0 AND limite >= ?',
+        [orden, pago.fecharcb]
+      );
+      acuerdo.length && (pago.acuerdo = acuerdo[0].id);
+
       let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
       reci += `(${pgo.insertId}, '${feh[i]}', '${formap}', '${nrecibo[i]}', ${montos[i].replace(
         /\./g,
         ''
       )}, '/uploads/${req.files[i].filename}', ${nrecibo[i] === rcbexcdnt ? excedente : 0}),`;
+
+      await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+      SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
+      AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
+      WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
+      WHERE a.pago > 0`);
     }
   } else {
     var recib = parseFloat(montos.replace(/\./g, ''));
@@ -4083,11 +4099,23 @@ router.post('/recibo', async (req, res) => {
     mora ? (pago.moras = mora) : '';
     concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
+    const acuerdo = await pool.query(
+      'SELECT id FROM acuerdos WHERE producto = ? AND estado != 6 AND pago > 0 AND limite >= ?',
+      [orden, pago.fecharcb]
+    );
+    acuerdo.length && (pago.acuerdo = acuerdo[0].id);
+
     let pgo = await pool.query('INSERT INTO solicitudes SET ? ', pago);
     reci += `(${pgo.insertId}, '${feh}', '${formap}', '${nrecibo}', ${montos.replace(
       /\./g,
       ''
     )}, '/uploads/${req.files[0].filename}', ${excedente}),`;
+
+    await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+      SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
+      AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
+      WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
+      WHERE a.pago > 0`);
   }
   //console.log(reci.slice(0, -1))
   await pool.query(reci.slice(0, -1));
@@ -5486,6 +5514,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     sql = `SELECT p.id, l.id lote, d.proyect proyecto, l.mz, l.n, c.imags, p.promesa, p.status, p.asesor, c.email,
         p.tipobsevacion, l.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
         p.obsevacion, l.valor, p.separar, p.ahorro, l.valor - p.ahorro Total, e.pin, e.descuento, l.mtr, l.mtr2,
+        p.fechapagoini,
 
         (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as deuda, 
         (SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as meses,
@@ -5790,7 +5819,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   } else if (id === 'comision' && !req.user.externo) {
     const solicitudes =
-      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i,
+      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i, s.fecharcb,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -6950,7 +6979,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     }
     let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
     const so =
-      await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar, e.otro,
+      await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar, e.otro, s.observaciones,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb,
         pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
@@ -7168,9 +7197,161 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     res.send(true);
   } else if (id === 'Desasociar') {
     const { ids } = req.body;
-    console.log(req.body);
     await pool.query('UPDATE solicitudes SET extrato = NULL WHERE ids = ?', ids);
     res.send(true);
+  } else if (id === 'Anular') {
+    const { ids, observacion, orden, std } = req.body;
+
+    const comisiones = await pool.query(
+      `SELECT p.id, ROUND(p.vrmt2 * l.mtr2) valor, p.iniciar, p.ahorro, p.dto, 
+      SUM(IF((s.concepto LIKE '%COMISION%' OR s.concepto LIKE '%GESTION%') AND 
+      s.descp != 'SEPARACION', 1, 0)) comis, SUM(IF(s.concepto IN('ABONO', 'PAGO') 
+      AND s.stado = 4, s.monto, 0)) abonos, SUM(IF(s.ids = ?, s.monto, 0)) pago 
+      FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN solicitudes s 
+      ON s.orden = p.id WHERE p.id = ? GROUP BY p.id`,
+      [ids, orden]
+    );
+    const comi = comisiones[0];
+    if (comi.comis && std == 4) {
+      const inicial =
+        comi.dto === 'INICIAL'
+          ? Math.round((comi.valor * comi.iniciar) / 100 - comi.ahorro)
+          : comi.dto === 'FINANCIACION'
+          ? Math.round((comi.valor * comi.iniciar) / 100)
+          : Math.round(((comi.valor - comi.ahorro) * comi.iniciar) / 100);
+      const abonos = Math.round(comi.abonos - comi.pago);
+
+      if (abonos >= inicial) {
+        await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
+          {
+            stado: 6,
+            aprueba: req.user.fullname,
+            observaciones: observacion
+          },
+          ids
+        ]);
+        const r = await Estados(orden);
+        const estado = r.pendients ? 8 : r.std;
+        await pool.query(
+          `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+          [{ 'l.estado': estado }, orden]
+        );
+        ProyeccionPagos(orden);
+        return res.json({
+          type: 'success',
+          msg: `Solicitud procesada exitosamente, el pago fue anulado`
+        });
+      } else
+        return res.json({
+          type: 'error',
+          msg: `Solicitud no pudo ser procesada, el pago de la orden que intenta anular 
+          tiene ${comi.comis} comisiones generada(s), elimine estas he intentelo nuevamente`
+        });
+    }
+
+    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
+      {
+        stado: 6,
+        aprueba: req.user.fullname,
+        observaciones: observacion
+      },
+      ids
+    ]);
+    if (std == 4) {
+      const r = await Estados(orden);
+      const estado = r.pendients ? 8 : r.std;
+      await pool.query(
+        `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+        [{ 'l.estado': estado }, orden]
+      );
+      ProyeccionPagos(orden);
+    }
+    return res.json({
+      type: 'success',
+      msg: `Solicitud procesada exitosamente, el pago fue anulado`
+    });
+  } else if (id === 'Eliminar') {
+    const { ids, orden, std } = req.body;
+
+    const comisiones = await pool.query(
+      `SELECT p.id, ROUND(p.vrmt2 * l.mtr2) valor, p.iniciar, p.ahorro, p.dto, 
+      SUM(IF((s.concepto LIKE '%COMISION%' OR s.concepto LIKE '%GESTION%') AND 
+      s.descp != 'SEPARACION', 1, 0)) comis, SUM(IF(s.concepto IN('ABONO', 'PAGO') 
+      AND s.stado = 4, s.monto, 0)) abonos, SUM(IF(s.ids = ?, s.monto, 0)) pago 
+      FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN solicitudes s 
+      ON s.orden = p.id WHERE p.id = ? GROUP BY p.id`,
+      [ids, orden]
+    );
+    const comi = comisiones[0];
+
+    if (comi.comis > 0 && std == 4) {
+      const inicial =
+        comi.dto === 'INICIAL'
+          ? Math.round((comi.valor * comi.iniciar) / 100 - comi.ahorro)
+          : comi.dto === 'FINANCIACION'
+          ? Math.round((comi.valor * comi.iniciar) / 100)
+          : Math.round(((comi.valor - comi.ahorro) * comi.iniciar) / 100);
+      const abonos = Math.round(comi.abonos - comi.pago);
+
+      if (abonos >= inicial) {
+        await pool.query('DELETE FROM solicitudes WHERE ids = ?', ids);
+        const r = await Estados(orden);
+        const estado = r.pendients ? 8 : r.std;
+        await pool.query(
+          `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+          [{ 'l.estado': estado }, orden]
+        );
+        ProyeccionPagos(orden);
+        return res.json({
+          type: 'success',
+          msg: `Solicitud procesada exitosamente, el pago fue eliminado`
+        });
+      } else
+        return res.json({
+          type: 'error',
+          msg: `Solicitud no pudo ser procesada, el pago de la orden que intenta eliminar 
+          tiene ${comi.comis} comisiones generada(s), elimine estas he intentelo nuevamente`
+        });
+    }
+    await pool.query('DELETE FROM solicitudes WHERE ids = ?', ids);
+
+    if (std == 4) {
+      const r = await Estados(orden);
+      const estado = r.pendients ? 8 : r.std;
+      await pool.query(
+        `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+        [{ 'l.estado': estado }, orden]
+      );
+      ProyeccionPagos(orden);
+    }
+    return res.json({
+      type: 'success',
+      msg: `Solicitud procesada exitosamente, el pago fue eliminado`
+    });
+  } else if (id === 'Desanular') {
+    const { ids, orden, pdf } = req.body;
+
+    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [
+      {
+        stado: pdf ? 4 : 3,
+        aprueba: req.user.fullname,
+        observaciones: 'Desanulado'
+      },
+      ids
+    ]);
+    if (pdf) {
+      const r = await Estados(orden);
+      const estado = r.pendients ? 8 : r.std;
+      await pool.query(
+        `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id SET ? WHERE p.id = ?`,
+        [{ 'l.estado': estado }, orden]
+      );
+      ProyeccionPagos(orden);
+    }
+    return res.json({
+      type: 'success',
+      msg: `Solicitud procesada exitosamente, el pago fue restablecido`
+    });
   } else {
     const { ids, acumulado, ahora, idExtracto, enviaRcb } = req.body;
 
@@ -7600,7 +7781,7 @@ async function QuitarCupon(S) {
     return r.affectedRows;
   }
 }
-async function ProyeccionPagos(S) {
+async function ProyeccionPagos(S, fechaOn, fechaOff) {
   let W = await pool.query(
     `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, e.descuento,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
@@ -7713,6 +7894,12 @@ async function ProyeccionPagos(S) {
     ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC`,
     S
   );
+
+  const acuerdos = await pool.query(
+    `SELECT * FROM acuerdos a WHERE a.producto = ? AND a.estado = 7`,
+    S
+  );
+
   const Moras = await pool.query(`SELECT * FROM intereses`);
 
   let cuotas = Cuotas.map(e => {
@@ -7726,17 +7913,62 @@ async function ProyeccionPagos(S) {
     };
   });
 
-  const fechaLimite = moment('2021-08-31').format('YYYY-MM-DD'); // fecha desde la que el sistema empesara a cobrar mora
   let Relacion = []; //                                             aqui estara la relacion entre pagos y cuotas
   let idCuota = false;
+  let montoparainicial = 0; // monto para calcular la fecha de la cuota inicial
+  let fechapagoini = false; // fecha en la que se termino de pagar la cuota inicial
+  let acuerdoNum = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
+  let acuerdo = acuerdos.length ? acuerdos[acuerdoNum] : false; // se declara el primer acuerdo del array acuerdos para los descuentos en las moras
+  let numAcuerdos = acuerdos.length; // se determina el numero de acuerdo que el cliente a echo con la empresa a lo largo del tiempo
+  let fechaLimite = fechaOn // fecha desde la que el sistema empesara a cobrar mora
+    ? moment(fechaOn).format('YYYY-MM-DD')
+    : acuerdo && acuerdo?.type === 'REMOVE'
+    ? moment(acuerdo?.limite).format('YYYY-MM-DD')
+    : moment('2019-08-31').format('YYYY-MM-DD');
+  let fechaStop = fechaOff
+    ? moment(fechaOff).format('YYYY-MM-DD')
+    : acuerdo?.type === 'STOP'
+    ? moment(acuerdo?.limite).format('YYYY-MM-DD')
+    : null;
+  let dcto = acuerdo?.dcto || 1;
 
   for (i = 0; i < Abonos.length; i++) {
-    const a = Abonos[i]; //                          array de abonos que el cliente a realizado
+    const a = Abonos[i]; //                         array de abonos que el cliente a realizado
+
     const fechaLMT = a.fecharcb //                   fecha del recibo de pago
       ? moment(a.fecharcb).format('YYYY-MM-DD') //   si la fecha del recibo no existe toma la fecha en que se subio el pago
       : moment(a.fech).format('YYYY-MM-DD'); //      fecha en que se subio el pago al sistema
+    if (!fechaStop) fechaStop = fechaLMT;
+    if (fechaLMT > acuerdo.limite) {
+      acuerdoNum++;
+      if (numAcuerdos && numAcuerdos >= acuerdoNum) {
+        acuerdo = acuerdos[acuerdoNum];
+        fechaLimite = fechaOn // fecha desde la que el sistema empesara a cobrar mora
+          ? moment(fechaOn).format('YYYY-MM-DD')
+          : acuerdo && acuerdo?.type === 'REMOVE'
+          ? moment(acuerdo?.limite).format('YYYY-MM-DD')
+          : moment('2019-08-31').format('YYYY-MM-DD');
+        fechaStop = fechaOff
+          ? moment(fechaOff).format('YYYY-MM-DD')
+          : acuerdo?.type === 'STOP'
+          ? moment(acuerdo?.limite).format('YYYY-MM-DD')
+          : fechaLMT;
+        dcto = acuerdo?.dcto || 1;
+      } else {
+        acuerdo = false;
+        fechaLimite = fechaOn // fecha desde la que el sistema empesara a cobrar mora
+          ? moment(fechaOn).format('YYYY-MM-DD')
+          : moment('2019-08-31').format('YYYY-MM-DD');
+        fechaStop = fechaOff ? moment(fechaOff).format('YYYY-MM-DD') : fechaLMT;
+        dcto = 1;
+      }
+    }
 
-    const cobro = fechaLMT >= fechaLimite && a.estado != 6 && mOra ? true : false; // determinara si debe cobrar mora en la cuota siguiente a analizar
+    montoparainicial += a.monto; // monto para establecer cuando se pago la cuota inicial
+    if (montoparainicial >= initials && !fechapagoini) fechapagoini = fechaLMT; // estableciendo la fecha de la cuota inicial
+
+    const cobro = fechaLMT >= fechaLimite && mOra ? true : false; // determinara si debe cobrar mora en la cuota siguiente a analizar
+
     let Monto = a.monto; //                                               valor del pago aboonado del cual se ira descontando el valor de la cuota
 
     for (o = 0; o < cuotas.length; o++) {
@@ -7744,8 +7976,8 @@ async function ProyeccionPagos(S) {
       const q = cuotas[o]; //                                             array de cuotas
       const FechaCuota =
         idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
-      const diffdays = moment(fechaLMT).diff(FechaCuota, 'days'); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
-      const daysDiff = fechaLMT > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
+      const diffdays = moment(fechaStop).diff(FechaCuota, 'days'); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
+      const daysDiff = fechaStop > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
       const Tas =
         cobro && daysDiff
           ? Moras.filter(
@@ -7760,7 +7992,7 @@ async function ProyeccionPagos(S) {
       const Tasa = Tas.length ? Math.min(...Tas) : 0; //                    selecciona la tasa mas baja dentro del periodo de la mora
       const saldAnt = idCuota?.id === q.id ? idCuota.saldomora : 0;
       const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; //     valor de la mora
-      const dctoMoratorio = Tasa ? moratoria - moratoria * a.dcto : 0; //    descuento de la mora si existe algun acuerdo
+      const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; //    descuento de la mora si existe algun acuerdo
       const diasmoratorios = Tasa ? daysDiff : 0; //                         dias total de mora
       cuotas[o].tasa = Tasa;
       cuotas[o].moratoria = moratoria;
@@ -7876,6 +8108,9 @@ async function ProyeccionPagos(S) {
     );
   }
 
+  fechapagoini &&
+    (await pool.query(`UPDATE preventa SET fechapagoini = '${fechapagoini}' WHERE id = ?`, S));
+
   ////////////////////////////////* END *///////////////////////////////////////
 
   ///////////////////////////////* MORAS */////////////////////////////////////////////
@@ -7911,6 +8146,10 @@ async function ProyeccionPagos(S) {
       S
     );
   }
+
+  await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
+    SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
+    LIKE '%GESTION%') AND s.descp != 'SEPARACION' AND p.fechapagoini IS NOT NULL`);
   //////////////////////////* ENVIAR PDF *///////////////////////////
   //await EstadoDeCuenta(S)
 }
@@ -7920,7 +8159,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
     pr.iniciar, s.facturasvenc, pd.estado, p.incentivo, pr.asesor, u.sucursal, pr.lote, cl.idc, 
     cl.movil, cl.nombre, s.recibo, p.proyect, pd.mz, r.incntivo, pd.n, s.stado, s.formap, 
     s.concepto, pr.obsevacion, s.ids, s.descp, pr.id cparacion, s.pago, a.dcto, a.monto montoacuerdo, 
-    s.extrato, a.tipo tipoacuerdo FROM solicitudes s
+    s.extrato, a.type tipoacuerdo FROM solicitudes s
     INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users u ON pr.asesor = u.id 
     INNER JOIN rangos r ON u.nrango = r.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
@@ -7971,6 +8210,12 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
     };
   }
 
+  await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+      SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
+      AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
+      WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
+      WHERE a.pago > 0`);
+
   await ProyeccionPagos(T);
   var st = await Estados(T);
   try {
@@ -7980,7 +8225,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
         SET ? WHERE s.ids = ?`,
       [
         {
-          //'l.estado': st.std,
+          'l.estado': st.std,
           's.pdf': pdf
         },
         Tid
@@ -8319,6 +8564,11 @@ async function Desendentes(pin, stados, pasado) {
         }
       });
     }
+
+    await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
+    SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
+    LIKE '%GESTION%') AND s.descp != 'SEPARACION' AND p.fechapagoini IS NOT NULL`);
+
     return true;
   } else {
     const directas = await pool.query(
@@ -8572,6 +8822,11 @@ async function Desendentes(pin, stados, pasado) {
         }
       });
     }
+
+    await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
+    SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
+    LIKE '%GESTION%') AND s.descp != 'SEPARACION' AND p.fechapagoini IS NOT NULL`);
+
     /* if (bajolineas1.length > 0 && j.nrango !== 6) {
       await bajolineas1.map(async (a, x) => {
         var val = a.valor - a.ahorro;
@@ -8691,8 +8946,10 @@ async function Desendentes(pin, stados, pasado) {
       : '';
 
     await pool.query(`UPDATE users SET ? WHERE id = ? AND nrango != 7`, [v, pin]); */
+
     return true;
   }
+
   /////////////////////////* PREMIOS *///////////////////////////////////
   /*var rango = j.nrango;
     var tot = venta + personal
