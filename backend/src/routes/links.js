@@ -7929,7 +7929,7 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
     ? moment(fechaOff).format('YYYY-MM-DD')
     : acuerdo?.type === 'STOP'
     ? moment(acuerdo?.limite).format('YYYY-MM-DD')
-    : null;
+    : false;
   let dcto = acuerdo?.dcto || 1;
 
   for (i = 0; i < Abonos.length; i++) {
@@ -7976,7 +7976,7 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
       const q = cuotas[o]; //                                             array de cuotas
       const FechaCuota =
         idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
-      const diffdays = moment(fechaStop).diff(FechaCuota, 'days'); //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
+      const diffdays = moment(fechaStop).diff(FechaCuota, 'days') || 0; //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
       const daysDiff = fechaStop > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
       const Tas =
         cobro && daysDiff
@@ -7993,7 +7993,8 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
       const saldAnt = idCuota?.id === q.id ? idCuota.saldomora : 0;
       const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; //     valor de la mora
       const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; //    descuento de la mora si existe algun acuerdo
-      const diasmoratorios = Tasa ? daysDiff : 0; //                         dias total de mora
+      const diasmoratorios = Tasa ? daysDiff : 0; //                        dias total de mora
+
       cuotas[o].tasa = Tasa;
       cuotas[o].moratoria = moratoria;
       cuotas[o].dctoMoratorio = dctoMoratorio;
@@ -8026,8 +8027,18 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
         const saldomora = q.monto >= cuot ? 0 : cuot - q.monto;
         const totalmora = q.dctoMoratorio + saldAnt;
         const morapaga = Monto >= totalmora ? totalmora : Monto;
-        const diaspagados = !q.tasa ? 0 : morapaga / (q.dctoMoratorio / q.diasmoratorios);
+        const diaspagados = !q.tasa ? 0 : morapaga / (q.dctoMoratorio / q.diasmoratorios) || 0;
         const saldocuota = Monto > totalmora ? q.monto - (Monto - totalmora) : q.monto;
+        console.log(
+          diaspagados,
+          q.tasa,
+          morapaga,
+          q.dctoMoratorio,
+          q.diasmoratorios,
+          dctoMoratorio,
+          moratoria,
+          dcto
+        );
         //const diaspagados = !q.tasa ? 0 : dpg >= q.diasmoratorios ? q.diasmoratorios : dpg;
         //const morapaga = dpg >= q.diasmoratorios ? q.dctoMoratorio : Monto;
 
