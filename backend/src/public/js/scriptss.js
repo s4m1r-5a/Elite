@@ -3332,11 +3332,10 @@ if (window.location.pathname === `/links/reportes`) {
                         <nav class="nav flex-sm-row collapse" id="Ord${
                           g.id
                         }" aria-labelledby="headingOne" data-parent="#datatable2">
-
                         ${
                           AdminSuper && !resOrden
                             ? `
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Pdfs(${g.id})"><i class="fas fa-file-alt"></i> Pdf</a>
+                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Pdfs(${g.id})"><i class="fas fa-file-alt"></i> Est-Cta</a>
                         <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
                         <a class="flex-sm-fill text-sm-center nav-link anular" href="#"><i class="fas fa-ban"></i> Anular</a>                                
                         <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
@@ -7116,7 +7115,7 @@ if (
 
   function Totales(valor, descuento, tipoDto) {
     var precio = valor;
-    console.log(valor, descuento, tipoDto);
+    //console.log(valor, descuento, tipoDto);
     var ahorr = 0;
     var Xdto = parseFloat($(`#xcntag`).val());
     inicial = (precio * Xdto) / 100;
@@ -7217,23 +7216,23 @@ if (
           },
           success: function (data) {
             if (data) {
-              if (data.valor >= valor) {
-                $('#otro').val('1');
-                var porg = (data.inicial * 100) / data.valor;
-                $('#mtr2').val(data.mtr2);
-                $('#vmtr2').val(Moneda(Math.round(data.mtr))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-                $('#inicial').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-                $('#total').val(Moneda(Math.round(data.valor))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-                $(`#xcntag option[value='${porg}']`).attr('selected', true);
-                $('#ini').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-                $('#fnc').val(Moneda(Math.round(data.valor - data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-                if (pin) {
-                  /* var precio = data.valor;
+              //if (data.valor >= valor) {
+              $('#otro').val('1');
+              var porg = (data.inicial * 100) / data.valor;
+              $('#mtr2').val(data.mtr2);
+              $('#vmtr2').val(Moneda(Math.round(data.mtr))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              $('#inicial').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              $('#total').val(Moneda(Math.round(data.valor))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              $(`#xcntag option[value='${porg}']`).attr('selected', true);
+              $('#ini').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              $('#fnc').val(Moneda(Math.round(data.valor - data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              if (pin) {
+                /* var precio = data.valor;
                   var ahorr = Math.round((data.valor * descuento) / 100); */
-                  $('#idbono').val(kupon);
-                  $('#cupon').val(pin);
-                  Totales(data.valor, descuento, dto);
-                  /* $("#ahorro").val(Moneda(ahorr));
+                $('#idbono').val(kupon);
+                $('#cupon').val(pin);
+                Totales(data.valor, descuento, dto);
+                /* $("#ahorro").val(Moneda(ahorr));
                   precio = precio - ahorr;
                   inicial = (precio * iniciar) / 100;
                   $("#cuponx100to").val(descuento + "%");
@@ -7241,19 +7240,19 @@ if (
                   $("#destotal").val(Moneda(Math.round(precio)));
                   $("#ini").val(Moneda(Math.round(inicial)));
                   $("#fnc").val(Moneda(Math.round(precio - inicial))); */
-                } else {
-                  $('#idbono').val('');
-                  $('#cupon').val('');
-                  $('#ahorro').val('');
-                  $('#cuponx100to').val('');
-                  $('#desinicial').val('');
-                  $('#destotal').val('');
-                }
-                FINANCIAR(1, '', $('#Separar').val().replace(/\./g, ''));
               } else {
+                $('#idbono').val('');
+                $('#cupon').val('');
+                $('#ahorro').val('');
+                $('#cuponx100to').val('');
+                $('#desinicial').val('');
+                $('#destotal').val('');
+              }
+              FINANCIAR(1, '', $('#Separar').val().replace(/\./g, ''));
+              /* } else {
                 SMSj('error', 'No es posible cambiar el producto por uno de menor valor');
                 proyectos.val(prodct).trigger('change');
-              }
+              } */
             }
           }
         });
