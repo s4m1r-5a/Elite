@@ -549,9 +549,9 @@ $(document).ready(function () {
   }
   if (rol.admin) {
     $('#nivel').html('Administrador');
-    $('#afiliacion').removeClass('d-none');
   } else if (rol.subadmin) {
     $('#nivel').html('Sub Administrador');
+    $('#afiliacion').removeClass('d-none');
   } else if (rol.contador) {
     $('#nivel').html('Contador');
   } else if (rol.financiero) {
@@ -11976,7 +11976,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   $('#datatable_filter').hide();
   $('#min, #max').on('keyup', function () {
     var col = $(this).attr('id') === 'min' ? 6 : 7;
-    table.columns(col).search(this.value).draw();
+    table.columns(col).search(`^${this.value}$`, true, false).draw();
   });
   table.on('click', 'td:not(.t)', function () {
     var fila = $(this).parents('tr');
@@ -13915,7 +13915,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     var acum = 0,
       acu = 0,
       U = false;
-    console.log(data, monto, stad);
+    //console.log(data, monto, stad);
 
     if ($(this).hasClass('selected')) {
       BancoExt.$('tr.selected').removeClass('selected');
