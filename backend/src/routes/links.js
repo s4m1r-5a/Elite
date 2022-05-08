@@ -5555,20 +5555,39 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       prd = prcd.map(e => e.producto);
     }
     let d = prd
-      ? `AND pt.id IN (${prd})`
+      ? `WHERE d.id IN (${prd})`
       : req.user.asistente
       ? ''
-      : 'AND p.asesor = ' + req.user.id;
+      : 'WHERE p.asesor = ' + req.user.id;
 
-    sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect,
-        SUM(s.monto) + SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) 
-        AS montos, p.ahorro, pd.mz, pd.n, pd.mtr2, pd.valor, pd.inicial, p.vrmt2, p.fecha,
-        cu.descuento, c.nombre FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
-        INNER JOIN productos pt ON pd.producto = pt.id LEFT JOIN cupones cu ON cu.id = p.cupon 
-        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-        INNER JOIN solicitudes s ON pd.id = s.lt LEFT JOIN cupones cp ON s.bono = cp.id
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}
-        GROUP BY p.id`;
+    `SELECT d.proyect, l.mz, l.n, if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
+    if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
+    q.descuento, p.ahorro, SUM(c.proyeccion) total, SUM(s.monto) montos, SUM(r.totalmora) mora, 
+    SUM(r.morapaga) morapaga, SUM(r.totalmora) - SUM(r.morapaga) saldomora, 
+    SUM(c.proyeccion) + (SUM(r.totalmora) - SUM(r.morapaga)) saldo      
+    FROM productos d INNER JOIN productosd l ON d.id = l.producto INNER JOIN estados e ON l.estado = e.id 
+    LEFT JOIN preventa p ON p.lote = l.id AND p.tipobsevacion IS NULL 
+    LEFT JOIN cuotas c ON p.id = c.separacion LEFT JOIN cupones q ON q.id = p.cupon 
+    LEFT JOIN clientes u ON p.cliente = u.idc LEFT JOIN relacioncuotas r ON c.id = r.cuota 
+    LEFT JOIN solicitudes s ON r.pago = s.ids
+    ${d} GROUP BY d.proyect, l.id, p.id 
+    ORDER BY d.proyect, l.mz, l.n`;
+
+    sql = `SELECT d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
+    if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
+    if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
+    q.descuento, p.ahorro, SUM(c.proyeccion) total,
+    (SELECT SUM(s.monto) FROM solicitudes s WHERE s.orden = p.id AND s.stado = 4 
+    AND s.concepto IN('PAGO', 'ABONO')) montos,
+    (SELECT SUM(r.totalmora) FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
+    WHERE c.separacion = p.id) mora,
+    (SELECT SUM(r.morapaga) FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
+    WHERE c.separacion = p.id) morapaga     
+    FROM productos d INNER JOIN productosd l ON l.producto = d.id 
+    INNER JOIN estados e ON l.estado = e.id LEFT JOIN preventa p ON p.lote = l.id 
+    AND p.tipobsevacion IS NULL LEFT JOIN cuotas c ON c.separacion = p.id 
+    LEFT JOIN cupones q ON q.id = p.cupon LEFT JOIN clientes u ON p.cliente = u.idc 
+    ${d} GROUP BY l.id, p.id ORDER BY d.proyect, l.mz, l.n;`;
 
     const solicitudes = await pool.query(sql);
     respuesta = { data: solicitudes };

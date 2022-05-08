@@ -1481,6 +1481,42 @@ async function EstadoDeCuenta(Orden) {
       e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
       IdCuotas.push(e.idcuota);
     });
+
+    const PagosPendientes = await pool.query(
+      `SELECT s.fecharcb, s.fech, s.monto, s.stado, s.ids, s.formap, s.descp 
+      FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id        
+      WHERE p.id = ? AND s.stado = 3 ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC;`,
+      Orden
+    );
+
+    if (PagosPendientes.length) {
+      PagosPendientes.map((e, i) =>
+        bodi.push([
+          e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
+          `RC${e.ids}`,
+          {
+            text: e.stado === 4 ? 'Aprobado' : 'Pendiente',
+            color: e.stado === 4 ? 'green' : 'blue'
+          },
+          e.formap,
+          e.descp,
+          {
+            text: '$' + Moneda(e.monto),
+            color: e.stado === 4 ? 'green' : 'blue',
+            decoration: e.stado !== 4 && 'lineThrough',
+            decorationStyle: e.stado !== 4 && 'double'
+          }
+        ])
+      );
+
+      bodi.sort((a, b) => {
+        return new Date(a[0]).getTime() - new Date(b[0]).getTime();
+      });
+
+      const indx = bodi.findIndex(e => e[1] == 'RCnull');
+      if (indx > -1) bodi.splice(indx, 1);
+    }
+
     //console.log(cuerpo);
     bodi.push(
       [
@@ -1941,6 +1977,7 @@ async function EstadoDeCuenta(Orden) {
   }
 }
 async function informes(data) {
+  // arreglar esto
   const { datos, maxDateFilter, minDateFilter } = data;
   const ids = datos.replace(/\[|\]/g, '');
   const pagos = await pool.query(
