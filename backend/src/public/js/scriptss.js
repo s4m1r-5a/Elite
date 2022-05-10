@@ -4782,15 +4782,18 @@ if (window.location.pathname === `/links/reportes`) {
     autowidth: true,
     columnDefs: [
       {
-        targets: [0, 1, 2, 3, 4, 5, 6],
+        targets: [0, 1, 2, 3, 4, 5, 6, 7],
         visible: false
         //searchable: true
       }
     ],
-    /* order: [
-      [1, 'asc'],
-      [2, 'asc']
-    ], */
+    order: [
+      [4, 'asc'],
+      [2, 'asc'],
+      [3, 'asc'],
+      [1, 'desc'],
+      [8, 'asc']
+    ],
     ajax: {
       method: 'POST',
       url: '/links/reportes/estadosc2',
@@ -4801,6 +4804,7 @@ if (window.location.pathname === `/links/reportes`) {
         className: 'control',
         data: 'id'
       },
+      { data: 'rid' },
       {
         data: 'mz',
         render: function (data, method, row) {
@@ -4866,10 +4870,13 @@ if (window.location.pathname === `/links/reportes`) {
       var rows = api.rows({ order: 'applied', search: 'applied' }).nodes();
       var last = null;
       var totaloteanterior = 0;
+      var monto = 0;
+      var mora = 0;
       var datos = api.rows({ order: 'applied', search: 'applied' }).data();
       var filas = api.column(0, { order: 'applied', search: 'applied' }).data();
       filas.each(function (group, i) {
-        var monto = parseFloat(datos[i].monto);
+        monto += parseFloat(datos[i].monto);
+        mora += parseFloat(datos[i].mora);
 
         if (last !== group) {
           if (last != null) {
@@ -4877,24 +4884,23 @@ if (window.location.pathname === `/links/reportes`) {
               .eq(i - 1)
               .after(
                 `<tr class="total" style="background: #40E0D0; color: #FFFFCC;">                           
-                                <td colspan="6">
-                                    <nav class="nav nav-justified">
-                                        <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
-                                        <a class="nav-item nav-link py-0">$${monto}</a>
-                                    </nav>
-                                </td>
-                            </tr>
-                            <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                          
-                                <td colspan="6">
-                                    <nav class="nav nav-justified">
-                                        <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                        <a class="nav-item nav-link py-0">$${
-                                          totaloteanterior - monto
-                                        }</a>
-                                    </nav>
-                                </td>
-                            </tr>
-                            <tr></tr>`
+                  <td colspan="6">
+                    <nav class="nav nav-justified">
+                      <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
+                      <a class="nav-item nav-link py-0">$${monto}</a>
+                    </nav>
+                  </td>
+                </tr>
+                <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                          
+                  <td colspan="6">
+                    <nav class="nav nav-justified">
+                      <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
+                      <a class="nav-item nav-link py-0">$${Moneda(
+                        parseFloat(datos[i].total) + mora - monto
+                      )}</a>
+                    </nav>
+                  </td>
+                </tr>`
               );
             monto = 0;
           }
@@ -4902,45 +4908,41 @@ if (window.location.pathname === `/links/reportes`) {
             .eq(i)
             .before(
               `<tr class="group" style="background: #FFFFCC; color: #7f8c8d;;">
-                            <td colspan="6">
-                                <nav class="nav flex-column flex-sm-row">
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].nombre}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].proyect}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${datos[i].mz} - LT: ${datos[i].n}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${datos[i].total}</a>
-                                </nav>
-                            </td>
-                        </tr>`
+                <td colspan="6">
+                  <nav class="nav flex-column flex-sm-row">
+                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].nombre}</a>
+                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].proyect}</a>
+                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${datos[i].mz} - LT: ${datos[i].n}</a>
+                    <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${datos[i].total}</a>
+                  </nav>
+                </td>
+              </tr>`
             );
-
-          monto += monto;
           last = group;
         }
-        monto += monto;
 
         if (i == filas.length - 1) {
           $(rows)
             .eq(i)
             .after(
               `<tr class="total" style="background: #40E0D0; color: #FFFFCC;">                          
-                            <td colspan="6">
-                                <nav class="nav nav-justified">
-                                    <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
-                                    <a class="nav-item nav-link py-0">$${monto}</a>
-                                </nav>
-                            </td>
-                        </tr>
-                        <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                           
-                            <td colspan="6">
-                                <nav class="nav nav-justified">
-                                    <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                    <a class="nav-item nav-link py-0">$${parseFloat(
-                                      datos[i].total - monto
-                                    )}</a>
-                                </nav>
-                            </td>
-                        </tr>
-                        <tr></tr>`
+                <td colspan="6">
+                  <nav class="nav nav-justified">
+                    <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
+                    <a class="nav-item nav-link py-0">$${monto}</a>
+                  </nav>
+                </td>
+              </tr>
+              <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                           
+                <td colspan="6">
+                  <nav class="nav nav-justified">
+                    <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
+                    <a class="nav-item nav-link py-0">$${
+                      monto ? Moneda(parseFloat(datos[i].total) + mora - monto) : 0
+                    }</a>
+                  </nav>
+                </td>
+              </tr>`
             );
         }
         totaloteanterior = parseFloat(datos[i].total);
@@ -5073,7 +5075,7 @@ if (window.location.pathname === `/links/reportes`) {
     }
   });
   $('.mins, .maxs').on('keyup', function () {
-    var col = $(this).hasClass('mins') ? 1 : 2;
+    var col = $(this).hasClass('mins') ? 2 : 3;
     var buscar = this.value ? '^' + this.value + '$' : '';
     estadoscuentas2.columns(col).search(buscar, true, false, true).draw();
   });

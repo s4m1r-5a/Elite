@@ -5630,24 +5630,14 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       ? ''
       : 'AND p.asesor = ' + req.user.id;
 
-    `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
-      p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
-      s.monto, s.img, cu.descuento, c.nombre, cp.monto mtb, r.id, r.date, r.formapg, r.rcb, 
-      r.monto mounto, r.observacion, r.baucher, r.bono bonus FROM solicitudes s 
-      LEFT JOIN recibos r ON s.ids = r.registro INNER JOIN productosd pd ON s.lt = pd.id 
-      INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
-      LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
-      INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-      WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`;
-
     sql = `SELECT COUNT(c.proyeccion) cuotas, MAX(c.ncuota) ncuota, MAX(c.tipo) descp, d.proyect, 
-      l.mz, l.n, u.nombre, p.fecha, s.fecharcb, s.ids, s.formap, s.monto, s.concepto, s.img, 
-      SUM(r.mora) mora, (SELECT SUM(proyeccion) FROM cuotas WHERE separacion = p.id) total, p.id 
-      FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON 
+      l.mz, l.n, MAX(r.id) rid, u.nombre, p.fecha, s.fecharcb, s.ids, s.formap, s.monto, s.concepto, 
+      s.img, SUM(r.mora) mora, (SELECT SUM(proyeccion) FROM cuotas WHERE separacion = p.id) total, 
+      p.id FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON 
       l.producto = d.id INNER JOIN relacioncuotas r ON r.orden = p.id INNER JOIN cuotas c 
       ON r.cuota = c.id LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN clientes u ON 
-      p.cliente = u.idc WHERE p.tipobsevacion IS NULL ${d} GROUP BY s.ids, d.id, l.id, p.id ORDER 
-      BY TIMESTAMP(s.fecharcb), d.proyect, l.mz, l.n`;
+      p.cliente = u.idc WHERE p.tipobsevacion IS NULL ${d} GROUP BY s.ids, d.id, l.id, p.id 
+      ORDER BY d.proyect, l.mz, l.n, rid DESC, ncuota, TIMESTAMP(s.fecharcb)`;
 
     const solicitudes = await pool.query(sql, req.user.id);
     respuesta = { data: solicitudes };
