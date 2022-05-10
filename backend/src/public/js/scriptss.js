@@ -1198,6 +1198,624 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
     ]
   });
 }
+//////////////////////////////////* PAY *////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/pay`) {
+  $(document).ready(() => $('#cedula').focus());
+  //$('nav').hide()
+  const producto = info => {
+    $('#RCB').hide();
+    $('#BOTON').hide();
+    $('#PAYU').hide();
+    $('#WOMPI').hide();
+    console.log(info);
+    $('.Cliente').html(info.nombre);
+    $('.Cliente').val(info.nombre);
+    $('#Movil').val(info.movil);
+    $('#Email').val(info.email);
+
+    const code = info.idc + '-' + info.id + '-' + ID(3);
+    $('#Code').val(code);
+    $('#transferReference').val(code);
+
+    info.cuentas.map(r => {
+      if ((r.tipo === 'CTA-CTE' || r.tipo === 'CTA-AHO') && r.stado === 7) {
+        $('#RCB').show();
+      } else if (r.tipo === 'BOTON' && r.stado === 7) {
+        $('#BOTON').show();
+      } else if (r.entidad === 'PAYU' && r.stado === 7) {
+        $('#PAYU').show();
+      } else if (r.entidad === 'WOMPI' && r.stado === 7) {
+        $('#WOMPI').show();
+      }
+    });
+
+    $('#orden').val(info.id);
+    $('#lt').val(info.lt);
+    $('.pyt').val(info.pyt);
+    Description = info.proyect + ' Mz ' + info.mz + ' Lote: ' + info.n;
+
+    $('.concepto').val('ABONO').html('ABONO');
+    $('.cuotasvencidas').html(info.cuotasvencidas);
+    $('.deuda').html(Moneda(info.deuda));
+    const mora = info.mora + info.moravieja - info.morapagada;
+    $('.mora').html(Moneda(mora));
+    $('.total').html(Moneda(info.deuda + mora));
+    $('#Description, #transferDescription').val('ABONO ' + Description);
+    $('#idC').val(info.idc);
+  };
+
+  $('.card-header').on('click', function () {
+    if ($(this).find('i').hasClass('fa-angle-down')) {
+      $(this).find('i').removeClass('fa-angle-down');
+      $(this).find('i').addClass('fa-angle-up');
+    } else {
+      $(this).find('i').removeClass('fa-angle-up');
+      $(this).find('i').addClass('fa-angle-down');
+    }
+  });
+  $('#smartwizard')
+    .smartWizard({
+      /*showStepURLhash: false,
+        useURLhash: false,*/
+      selected: 0, // Paso inicial seleccionado, 0 - primer paso
+      theme: 'dots', //'arrows''default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+      justified: true, // Justificación del menú Nav.
+      darkMode: false, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+      autoAdjustHeight: false, // Ajustar automáticamente la altura del contenido
+      cycleSteps: false, // Permite recorrer los pasos
+      backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
+      enableURLhash: false, // Habilitar la selección del paso basado en el hash url
+      transition: {
+        animation: 'slide-swing', // Efecto en la navegación, /none/fade/slide-horizontal/slide-vertical/slide-swing
+        speed: '400', // Velocidad de animación Transion
+        easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
+      },
+      toolbarSettings: {
+        toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos - none, top, bottom, both
+        toolbarButtonPosition: 'center', // izquierda, derecha, centro - left, right, center
+        showNextButton: true, // show/hide a Next button
+        showPreviousButton: false // show/hide a Previous button
+        //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
+      },
+      anchorSettings: {
+        anchorClickable: true, // Activar/Desactivar la navegación del ancla
+        enableAllAnchors: false, // Activa todos los anclajes en los que se puede hacer clic todas las veces
+        markDoneStep: true, // Añadir estado hecho en la navegación
+        markAllPreviousStepsAsDone: true, // Cuando un paso seleccionado por url hash, todos los pasos anteriores se marcan hecho
+        removeDoneStepOnNavigateBack: false, // Mientras navega hacia atrás paso después de paso activo se borrará
+        enableAnchorOnDoneStep: true // Habilitar/Deshabilitar los pasos de navegación
+      },
+      keyboardSettings: {
+        keyNavigation: true, // Activar/Desactivar la navegación del teclado (las teclas izquierda y derecha se utilizan si está habilitada)
+        keyLeft: [37], // Código de tecla izquierdo
+        keyRight: [39] // Código de tecla derecha
+      },
+      lang: {
+        //   Variables de idioma para el botón
+        next: 'Siguiente',
+        previous: 'Anterior'
+      },
+      disabledSteps: [], // Pasos de matriz desactivados
+      errorSteps: [], // Paso de resaltado con errores
+      hiddenSteps: [] // Pasos ocultos
+    })
+    .on('leaveStep', (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
+      let skdt = false;
+      if (currentStepNumber === 0) {
+        $.ajax({
+          url: '/links/pay/' + $('#cedula').val(),
+          type: 'POST',
+          async: false,
+          success: function (data) {
+            if (data.status) {
+              const datos = data.datos;
+
+              datos.map(r => {
+                $('#proyectos').append(
+                  `<option value="${r.pyt}">${r.proyect}${r.mz != 'no' ? ' Mz. ' + r.mz : ''} Lt. ${
+                    r.n
+                  }</option>`
+                );
+              });
+
+              producto(datos.find(e => e.pyt == $('#proyectos').val()));
+
+              $('#proyectos').change(function () {
+                producto(datos.find(e => e.pyt == $(this).val()));
+              });
+
+              skdt = true;
+            } else {
+              $('.alert').show();
+              $('.alert-message').html('<strong>Error!</strong> ' + data.paquete);
+              setTimeout(function () {
+                $('.alert').fadeOut(3000);
+              }, 2000);
+              skdt = false;
+            }
+          }
+        });
+
+        $('.Total2 input').focus();
+        $('.Total2').change(function () {
+          var totl2 = parseFloat($(this).cleanVal());
+          var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''));
+          var totl = parseFloat($('.Total').html().replace(/\./g, ''));
+          //if (totl2 === totalf || totl2 > totl) {
+          $('.Total3').html(Moneda(totl2));
+          $('#Total, #Total2, #transferAmount').val(totl2);
+          if (totl2 < totl) {
+            $('#idC').val(idC);
+          }
+        });
+      } else if (currentStepNumber === 1) {
+        var T = $('.Total').html();
+        var T2 = $('.Total2').val();
+        if (bono) {
+          $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+          var fd = $('#recbo').serialize();
+          $.ajax({
+            url: '/links/bonus',
+            data: fd,
+            type: 'POST',
+            beforeSend: function (xhr) {
+              $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: true,
+                toggle: true
+              });
+            },
+            success: function (data) {
+              if (data) {
+                $('#ModalEventos').modal('hide');
+                if (T2) {
+                  SMSj(
+                    'success',
+                    `El bono fue redimido exitosamente, continue con el resto del pago`
+                  );
+                  bono = 0;
+                  skdt = true;
+                  $('#smartwizard').smartWizard('next');
+                  $('.sw-btn-next').hide();
+                } else {
+                  SMSj('success', `El bono fue redimido exitosamente`);
+                  skdt = false;
+                  $('#smartwizard').smartWizard('reset');
+                }
+              } else {
+                $('#ModalEventos').modal('hide');
+                SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
+              }
+            }
+          });
+        } else if (T != 0 || T2) {
+          skdt = true;
+          $('.sw-btn-next').hide();
+        } else {
+          skdt = false;
+          SMSj(
+            'error',
+            `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`
+          );
+        }
+      } else if (currentStepNumber === 2) {
+        //alert(currentStepNumber);
+        skdt = true;
+      }
+      return skdt;
+    });
+  var cn = 0;
+  var Pay = forma => {
+    var t2 = $('.Total2').val(),
+      T2 = $('.Total2').cleanVal(),
+      t = $('.Total').html(),
+      T = $('.Total').html().replace(/\./g, '');
+
+    if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
+      //var l = parseFloat($('#Total').val())
+      //var cal = Math.round((l * 2.79 / 100) + 800)
+      //$('#rcb').prop('checked', false)
+      /*$('.transaccion').html(Moneda(cal))
+            $('.Total3').html(Moneda(l + cal));
+            $('#Total, #Total2').val(l + cal);*/
+      $('#recibo').val('');
+      $('#file').val('');
+      var fd = $('form').serialize();
+      $.ajax({
+        url: '/links/pagos',
+        data: fd,
+        type: 'POST',
+        async: true,
+        success: function (data) {
+          $('#signature').val(data.sig);
+          $('#extra').val(data.ext);
+          $('#merchantId').val(data.merchantId);
+          $('#accountId').val(data.accountId);
+        }
+      });
+      RCB(false);
+    } else if (forma === 'recbo') {
+      RCB(true);
+      //$('#pys').prop('checked', false);
+      $('#signature').val('');
+      $('.transaccion').html('0');
+      $('.Total3').html(t2 ? t2 : t);
+      $('#Total, #Total2').val(T2 ? T2 : T);
+    } else if (forma === 'boton') {
+      RCB(true);
+      $('#recibo').val('');
+      $('#file').val('');
+      $('#signature').val('');
+      $('.transaccion').html('0');
+      $('.Total3').html(t2 ? t2 : t);
+      $('#Total, #Total2, #c').val(T2 ? T2 : T);
+    }
+    $('#subirR').click(function () {
+      $('#file2').click();
+    });
+    $('#BTN-BOTON').on('click', function () {
+      $('#boton').submit();
+    });
+    $('#BTN-PAYU').on('click', function () {
+      $('#payu').submit();
+    });
+    $('#BTN-RCB').on('click', function () {
+      $('#recbo').validate();
+      $('#recbo').submit();
+    });
+  };
+  var RCB = n => {
+    if (n) {
+      $('#trecibo').show('slow');
+      $('#trecib').show('slow');
+      $('#recibos1').show('slow');
+      //$('#trsubida').show('slow');
+      $('#trarchivos').show('slow');
+    } else {
+      $('.montorecibos').text(null);
+      $('#trecibo').hide('slow');
+      $('#trecib').hide('slow');
+      $('#recibos1').hide('slow');
+      $('#trsubida').hide('slow');
+      $('#trarchivos').hide('slow');
+      $('#recibos1').html('');
+      $('#montorecibos').val('').hide('slow');
+      $('#file2').val('');
+      $('.op').remove();
+    }
+  };
+  window.preview = function (input) {
+    if (input.files && input.files[0]) {
+      var marg = 100 / $('#file2')[0].files.length;
+      $('#recibos1').html('');
+      $('.op').remove();
+      $('#montorecibos').val('').hide('slow');
+      $(input.files).each(function () {
+        var reader = new FileReader();
+        reader.readAsDataURL(this);
+        reader.onload = function (e) {
+          $('#recibos1').append(
+            `<div class="card p-1 my-1 rounded" style="background: rgba(255,99,71,0.2); width: ${marg}%; min-width: 50%;float: left;">
+                            <label class="custom-control custom-radio bg-transparent rcbxcdnt" style="display: none;">
+                                <input name="custom-radio" type="radio" class="custom-control-input rcbexcdnt" name="rcbexcd" disabled>
+                                <span class="custom-control-label text-muted">Recibo con excedente</span>
+                            </label>
+                            <div class="image" style="width: 100%; padding-top: calc(100% / (16/9)); background-image: url('${e.target.result}'); 
+                             background-size: 100%; background-position: center; background-repeat: no-repeat;"></div>
+                            <table class="table table-sm">
+                                <tbody>
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <input type="text" class="recis text-center form-control-sm rounded-pill form-control-no-border" 
+                                                 name="nrecibo" placeholder="Recibo" autocomplete="off" required>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <input class="montos text-center form-control-sm rounded-pill form-control-no-border" type="text" 
+                                                 placeholder="Monto" autocomplete="off" name="montos" required>
+                                            </div>
+                                        </th>
+                                    </tr>
+                                    <tr>
+                                        <td>
+                                            <div class="text-center">
+                                                <input class="fech text-center form-control-sm rounded-pill form-control-no-border" type="text" 
+                                                 name="feh" title="Establece la fecha del recibo" autocomplete="off" required>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>`
+            /*
+                                    <tr>
+                                        <th>
+                                            <div class="text-center">
+                                                <select name="formap" class="form-control-no-border forma form-control-sm rounded-pill" style="text-align:center;" required>
+                                                    <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                                                    <option value="CHEQUE">CHEQUE</option><option value="EFECTIVO">EFECTIVO</option>
+                                                    <option value="OTRO">OTRO</option>
+                                                </select>
+                                            </div>
+                                        </th>
+                                    </tr>*/
+          );
+          $('.fech').daterangepicker({
+            locale: {
+              format: 'YYYY-MM-DD',
+              separator: ' - ',
+              applyLabel: 'Aplicar',
+              cancelLabel: 'Cancelar',
+              fromLabel: 'De',
+              toLabel: '-',
+              customRangeLabel: 'Personalizado',
+              weekLabel: 'S',
+              daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+              monthNames: [
+                'Enero',
+                'Febrero',
+                'Marzo',
+                'Abril',
+                'Mayo',
+                'Junio',
+                'Julio',
+                'Agosto',
+                'Septiembre',
+                'Octubre',
+                'Noviembre',
+                'Diciembre'
+              ],
+              firstDay: 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10)
+          });
+          $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+          $('.montos').on('change', function () {
+            var avl = 0,
+              TO = parseFloat($('#Total').val());
+            $('#montorecibos').show('slow');
+            $('.montos').map(function () {
+              s = parseFloat($(this).cleanVal()) || 0;
+              avl = avl + s;
+            });
+            $('.montorecibos').html(Moneda(avl));
+            $('#montorecibos').val(avl);
+            if (avl > TO) {
+              $('.rcbexcdnt').prop({ disabled: false, required: true });
+              $('.rcbxcdnt').show('slow');
+            } else {
+              $('.rcbexcdnt').prop({ disabled: true, checked: false });
+              $('#rcbexcdnt').val('');
+              $('.rcbxcdnt').hide('slow');
+            }
+          });
+          $('.rcbexcdnt').on('change', function () {
+            $('#rcbexcdnt').val($(this).val());
+          });
+          $('.recis').on('change', function () {
+            $(this).parents('.card').find('.rcbexcdnt').val($(this).val());
+            $(this).parents('.card').find('.rcbexcdnt').is(':checked')
+              ? $('#rcbexcdnt').val($(this).val())
+              : '';
+            var avl = '';
+            $('.recis').map(function () {
+              s = $(this).val() ? '~' + $(this).val().replace(/^0+/, '') + '~,' : '';
+              avl += s;
+            });
+            $('#nrbc').val(avl.slice(0, -1));
+          });
+          var zom = 200;
+          $('.image').on({
+            mousedown: function () {
+              zom += 50;
+              $(this).css('background-size', zom + '%');
+            },
+            mouseup: function () {},
+            mousewheel: function (e) {
+              //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+              if (e.deltaY > 0) {
+                zom += 50;
+              } else {
+                zom < 150 ? (zom = 100) : (zom -= 50);
+              }
+              $(this).css('background-size', zom + '%');
+            },
+            mousemove: function (e) {
+              let width = this.offsetWidth;
+              let height = this.offsetHeight;
+              let mouseX = e.offsetX;
+              let mouseY = e.offsetY;
+
+              let bgPosX = (mouseX / width) * 100;
+              let bgPosY = (mouseY / height) * 100;
+
+              this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+            },
+            mouseenter: function (e) {
+              $(this).css('background-size', zom + '%');
+            },
+            mouseleave: function () {
+              $(this).css('background-size', '100%');
+              this.style.backgroundPosition = 'center';
+            }
+          });
+        };
+      });
+    }
+  };
+  $('#bono').change(function () {
+    if ($(this).val() !== bono && $(this).val()) {
+      $.ajax({
+        url: '/links/bono/' + $(this).val(),
+        type: 'GET',
+        async: false,
+        success: function (data) {
+          if (data.length) {
+            var dat = data[0];
+            var fecha = moment(dat.fecha).add(1, 'year').endOf('days');
+            if (dat.tip != 'BONO') {
+              SMSj(
+                'error',
+                'Este codigo de serie no pertenece a ningun bono. Para mas informacion comuniquese con el asesor encargado'
+              );
+              DT();
+            } else if (dat.clients != cliente) {
+              SMSj(
+                'error',
+                'Este bono no pertenece a este cliente. Para mas informacion comuniquese con el asesor encargado'
+              );
+              DT();
+            } else if (dat.producto != null) {
+              SMSj(
+                'error',
+                'Este bono ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado'
+              );
+              DT();
+            } else if (fecha < new Date()) {
+              SMSj(
+                'error',
+                'Este bono de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado'
+              );
+              DT();
+            } else if (dat.estado != 9) {
+              SMSj(
+                'error',
+                'Este bono aun no ha sido autorizado por administración. espere la autorizacion del area encargada'
+              );
+              DT();
+            } else {
+              var hfv = tsinbono - dat.monto;
+              var vr = hfv < 0 ? 0 : hfv;
+              $('.Total, .Total3').html(Moneda(vr));
+              $('#Total, #Total2').val(vr);
+              $('#TotalBono').html('-' + Moneda(dat.monto));
+              $('.TotalBono').val(dat.monto);
+              $('.bonus').val(dat.pin);
+              $('.bonu').val(dat.id);
+              bono = dat.pin;
+              $('#Code').val(vx + '-' + bono);
+            }
+          } else {
+            DT();
+            SMSj(
+              'error',
+              'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado'
+            );
+          }
+        }
+      });
+    } else {
+      DT();
+      SMSj(
+        'error',
+        'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
+      );
+    }
+  });
+  $('#payu').submit(function (e) {
+    //e.preventDefault()
+    $('input').prop('disabled', false);
+    $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+    if (!$('#signature').val()) {
+      e.preventDefault();
+    } else {
+      $('#ModalEventos').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+      });
+    }
+  });
+  $('#recbo').submit(function (e) {
+    e.preventDefault();
+    $('input:not(.rcbexcdnt)').prop('disabled', false);
+    $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
+    if (
+      !$('#montorecibos').val() ||
+      !$('#file2').val() ||
+      !$('#nrbc').val() ||
+      (!$('.rcbexcdnt').is(':disabled') && !$('.rcbexcdnt').is(':checked'))
+    ) {
+      SMSj('error', 'Debe rellenar todos los campos solicitados');
+    } else if (parseFloat($('#montorecibos').val()) < parseFloat($('#Total2').val())) {
+      SMSj('error', 'el monto de los recibos ingresados no corresponde al monto total a pagar');
+    } else {
+      var formData = new FormData($('#recbo')[0]);
+      var df = $('#recibos1 input').serializeArray();
+      df.map((x, i) => {
+        formData.append(x.name, x.value);
+      });
+      $.ajax({
+        type: 'POST',
+        url: '/links/recibo',
+        data: formData,
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            backdrop: 'static',
+            keyboard: true,
+            toggle: true
+          });
+        },
+        async: false,
+        success: function (data) {
+          if (data.std) {
+            SMSj('success', data.msj);
+            setTimeout(function () {
+              window.location.href = '/links/pagos';
+            }, 2000);
+          } else {
+            SMSj('error', data.msj);
+            $('#ModalEventos').hide();
+          }
+        }
+      });
+    }
+  });
+  $('#boton').submit(function (e) {
+    e.preventDefault();
+    var formData = $(this).serialize();
+    $.ajax({
+      type: 'POST',
+      url: '/links/boton',
+      data: $(this).serialize(),
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      },
+      //async: false,
+      success: function (data) {
+        if (data.std) {
+          SMSj('success', data.msj);
+          setTimeout(function () {
+            window.location.href = data.href;
+          }, 2000);
+        } else {
+          SMSj(
+            'error',
+            'Existe un error. No es posible continuar, intenta con un metodo de pago diferente'
+          );
+          $('#ModalEventos').hide();
+          setTimeout(function () {
+            $('#ModalEventos').modal('hide');
+          }, 2000);
+        }
+      }
+    });
+  });
+}
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pagos`) {
   $(document).ready(function () {
@@ -3678,7 +4296,7 @@ if (window.location.pathname === `/links/reportes`) {
     }
   });
   //////////////////////* TABLA DE RECIBOS DE MODAL *///////////////////////////
-  var Recibos = $('#Rcbs').DataTable({
+  /* var Recibos = $('#Rcbs').DataTable({
     //dom: 'Bfrtip',
     lengthChange: false,
     deferRender: true,
@@ -3781,8 +4399,8 @@ if (window.location.pathname === `/links/reportes`) {
       $('#totalRcb').html('Total de recibos ingresados ' + total);
       return pre;
     }
-  });
-  Recibos.on('mouseenter', '.Reci', function () {
+  }); */
+  /* Recibos.on('mouseenter', '.Reci', function () {
     $('.recivos').popover({
       trigger: 'hover',
       delay: { show: 500, hide: 100 },
@@ -3791,7 +4409,7 @@ if (window.location.pathname === `/links/reportes`) {
       //title: 'Recibo',
       //content: `<img src='https://grupoelitefincaraiz.com/${$(this).prop('id')}' alt='...' class='img-thumbnail'>`,
     });
-  });
+  }); */
   //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////
   var estadoscuentas = $('#estadoscuentas').DataTable({
     processing: true,
@@ -3865,7 +4483,9 @@ if (window.location.pathname === `/links/reportes`) {
       {
         data: 'total',
         className: 'te',
-        render: $.fn.dataTable.render.number('.', '.', 0, '$')
+        render: function (data, method, row) {
+          return data ? Moneda(data) : Moneda(row.valor);
+        }
       },
       {
         data: 'montos',
@@ -3875,7 +4495,9 @@ if (window.location.pathname === `/links/reportes`) {
       {
         data: 'mora',
         className: 'te',
-        render: $.fn.dataTable.render.number('.', '.', 0, '$')
+        render: function (data, method, row) {
+          return row.total ? '$' + Moneda(data + row.morafutura) : '$0';
+        }
       },
       {
         data: 'morapaga',
@@ -3883,17 +4505,12 @@ if (window.location.pathname === `/links/reportes`) {
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       {
-        data: 'mora',
-        className: 'te',
-        render: function (data, method, row) {
-          return '$' + Moneda(data - row.morapaga);
-        }
-      },
-      {
         className: 't',
         data: 'montos',
         render: function (data, method, row) {
-          return '$' + Moneda(row.total - data + row.morapaga);
+          return row.total
+            ? '$' + Moneda(row.total + row.morafutura + row.mora - data)
+            : '$' + Moneda(row.valor);
         }
       },
       {
@@ -3973,14 +4590,15 @@ if (window.location.pathname === `/links/reportes`) {
             orientation: 'landscape',
             footer: true,
             exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
               //modifier: true
             },
             customize: function (win) {
               $(win.document.body)
-                .css('font-size', '7pt')
+                .css('font-size', '8pt')
                 .prepend(
                   `<div class="card border-primary">
+                  <span class="float-right">${moment().format('YYYY-MM-DD')}</span>
                     <div class="row justify-content-center align-items-center">
                       <div class="col-3">
                         <img src="${log}" class="img-fluid mx-auto d-block" style='max-height: 120px;'>
@@ -4115,25 +4733,25 @@ if (window.location.pathname === `/links/reportes`) {
         .reduce(function (a, b) {
           return intVal(a) + intVal(b);
         }, 0);
-      total = api
-        .column(10, { order: 'applied', search: 'applied' })
-        .data()
-        .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
-        }, 0);
       abonos = api
         .column(11, { order: 'applied', search: 'applied' })
         .data()
         .reduce(function (a, b) {
           return intVal(a) + intVal(b);
         }, 0);
-      const mora = api
-        .column(13, { order: 'applied', search: 'applied' })
+      total = 0;
+      api
+        .rows({ order: 'applied', search: 'applied' })
         .data()
         .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
+          total += b.total ? intVal(b.total) : intVal(b.valor);
         }, 0);
-      salds = total - abonos + mora;
+      let mora = 0;
+      api
+        .rows({ order: 'applied', search: 'applied' })
+        .data()
+        .reduce((a, b) => (mora += b.cuotas > 0 ? intVal(b.mora) + intVal(b.morafutura) : 0), 0);
+      salds = total + mora - abonos;
       const rows = api.rows({ order: 'applied', search: 'applied' }).data();
       const img = rows.filter(e => e).map(e => e.imagenes)[0] || 0;
       log = !img
@@ -4164,15 +4782,15 @@ if (window.location.pathname === `/links/reportes`) {
     autowidth: true,
     columnDefs: [
       {
-        targets: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18],
+        targets: [0, 1, 2, 3, 4, 5, 6],
         visible: false
         //searchable: true
       }
     ],
-    order: [
+    /* order: [
       [1, 'asc'],
       [2, 'asc']
-    ],
+    ], */
     ajax: {
       method: 'POST',
       url: '/links/reportes/estadosc2',
@@ -4181,8 +4799,7 @@ if (window.location.pathname === `/links/reportes`) {
     columns: [
       {
         className: 'control',
-        data: null,
-        defaultContent: ''
+        data: 'id'
       },
       {
         data: 'mz',
@@ -4192,27 +4809,6 @@ if (window.location.pathname === `/links/reportes`) {
       },
       { data: 'n' },
       { data: 'proyect' },
-      {
-        data: 'valor',
-        className: 'te',
-        render: $.fn.dataTable.render.number('.', '.', 2, '$')
-      },
-      {
-        data: 'descuento',
-        className: 'te',
-        render: function (data, method, row) {
-          return data + '%';
-        }
-      },
-      {
-        data: 'cupon',
-        className: 'te'
-      },
-      {
-        data: 'ahorro',
-        className: 'te',
-        render: $.fn.dataTable.render.number('.', '.', 2, '$')
-      },
       {
         data: 'total',
         className: 'te',
@@ -4230,10 +4826,10 @@ if (window.location.pathname === `/links/reportes`) {
         className: 'te'
       },
       {
-        data: 'fech',
+        data: 'fecharcb',
         className: 'te',
         render: function (data, method, row) {
-          return moment(data).format('YYYY-MM-DD');
+          return data ? moment(data).format('YYYY-MM-DD') : '--/--/----';
         }
       },
       {
@@ -4244,596 +4840,108 @@ if (window.location.pathname === `/links/reportes`) {
         }
       },
       {
-        data: 'formap',
+        data: 'descp',
         className: 'te',
         render: function (data, method, row) {
-          return data ? data : 'INDEFINIDO';
+          return `${row.concepto}-${data}`;
         }
       },
       {
-        data: 'descp',
+        data: 'formap',
         className: 'te'
+      },
+      {
+        data: 'mora',
+        className: 'te',
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       {
         data: 'monto',
         className: 'te',
-        render: function (data, method, row) {
-          return row.formap === 'BONO' ? '$0' : '$' + Moneda(data);
-        }
-      },
-      {
-        data: 'bono',
-        className: 'te',
-        render: function (data, method, row) {
-          return data ? data : 'NO APLICA';
-        }
-      },
-      {
-        data: 'mtb',
-        className: 'te',
-        render: function (data, method, row) {
-          return data ? '$' + Moneda(data) : '$0';
-        }
-      },
-      {
-        data: 'mtb',
-        className: 'te',
-        render: function (data, method, row) {
-          return row.formap === 'BONO'
-            ? '$' + Moneda(data)
-            : data
-            ? '$' + Moneda(parseFloat(row.monto) + parseFloat(data))
-            : '$' + Moneda(row.monto);
-        }
-      },
-      {
-        data: 'date',
-        className: 'f',
-        render: function (data, method, row) {
-          return data ? moment(data).format('YYYY-MM-DD') : 'INDEFINIDA';
-        }
-      },
-      {
-        data: 'rcb',
-        className: 'te'
-      },
-      {
-        data: 'formapg',
-        className: 'te',
-        render: function (data, method, row) {
-          return data === 'CTA-CTE-50900011438' ? 'CTA-CTE-1438' : data;
-        }
-      },
-      {
-        data: 'id',
-        className: 'te'
-      },
-      {
-        data: 'mounto',
-        className: 'te',
-        render: function (data, method, row) {
-          return data ? '$' + Moneda(data) : '$0';
-        }
-      },
-      {
-        data: 'observacion',
-        className: 'te'
-      },
-      {
-        data: 'bonus',
-        className: 'te'
-      },
-      {
-        orderable: false,
-        data: null,
-        defaultContent: `<a class="no float-right"><i class="align-middle mr-2 fas fa-fw fa-trash"></i></i></a>`
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
       }
     ],
     drawCallback: function (settings) {
       var api = this.api();
-      var rows = api.rows({ page: 'current' }).nodes();
-      var last = null,
-        lote = null,
-        pago = null;
-      var total = 0,
-        vlr = 0,
-        totaloteanterior = 0;
-      var datos = api.column({ page: 'current' }).data();
-      var filas = api.column(10, { page: 'current' }).data();
-      body = [];
-
+      var rows = api.rows({ order: 'applied', search: 'applied' }).nodes();
+      var last = null;
+      var totaloteanterior = 0;
+      var datos = api.rows({ order: 'applied', search: 'applied' }).data();
+      var filas = api.column(0, { order: 'applied', search: 'applied' }).data();
       filas.each(function (group, i) {
-        var gt = moment(datos[i].fecha).format('YYYY/M/D');
-        var gt2 = moment(datos[i].fech).format('YYYY/M/D');
-        var valr =
-          datos[i].formap === 'BONO'
-            ? parseFloat(datos[i].mtb)
-            : datos[i].mtb
-            ? parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
-            : parseFloat(datos[i].monto);
+        var monto = parseFloat(datos[i].monto);
 
-        if (last !== group || lote !== datos[i].n) {
+        if (last !== group) {
           if (last != null) {
             $(rows)
               .eq(i - 1)
               .after(
-                `<tr class="total" style="background: #F08080; color: #FFFFCC;">                           
-                                <td colspan="15">
+                `<tr class="total" style="background: #40E0D0; color: #FFFFCC;">                           
+                                <td colspan="6">
                                     <nav class="nav nav-justified">
                                         <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
-                                        <a class="nav-item nav-link py-0">$${Moneda(vlr)}</a>
+                                        <a class="nav-item nav-link py-0">$${monto}</a>
                                     </nav>
                                 </td>
                             </tr>
-                            <tr class="total" style="background: #F08080; color: #FFFFCC;">                          
-                                <td colspan="15">
+                            <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                          
+                                <td colspan="6">
                                     <nav class="nav nav-justified">
                                         <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                        <a class="nav-item nav-link py-0">$${Moneda(
-                                          totaloteanterior - vlr
-                                        )}</a>
+                                        <a class="nav-item nav-link py-0">$${
+                                          totaloteanterior - monto
+                                        }</a>
                                     </nav>
                                 </td>
                             </tr>
                             <tr></tr>`
               );
-            body.push(
-              {
-                id: {
-                  content: 'TOTAL ABONADO',
-                  colSpan: 4,
-                  styles: {
-                    halign: 'right',
-                    cellWidth: 'wrap',
-                    textColor: '#FFFFCC',
-                    fontStyle: 'bolditalic',
-                    fontSize: 7,
-                    fillColor: '#7f8c8d'
-                  }
-                },
-                id5: {
-                  content: '$' + Moneda(vlr),
-                  colSpan: 4,
-                  styles: {
-                    halign: 'right',
-                    cellWidth: 'wrap',
-                    textColor: '#FFFFCC',
-                    fontStyle: 'bolditalic',
-                    fontSize: 7,
-                    fillColor: '#7f8c8d'
-                  }
-                }
-              },
-              {
-                id: {
-                  content: 'SALDO A LA FECHA',
-                  colSpan: 4,
-                  styles: {
-                    halign: 'right',
-                    cellWidth: 'wrap',
-                    textColor: '#FFFFCC',
-                    fontStyle: 'bolditalic',
-                    fontSize: 7,
-                    fillColor: '#7f8c8d'
-                  }
-                },
-                id5: {
-                  content: '$' + Moneda(totaloteanterior - vlr),
-                  colSpan: 4,
-                  styles: {
-                    halign: 'right',
-                    cellWidth: 'wrap',
-                    textColor: '#FFFFCC',
-                    fontStyle: 'bolditalic',
-                    fontSize: 7,
-                    fillColor: '#7f8c8d'
-                  }
-                }
-              }
-            );
-            vlr = 0;
+            monto = 0;
           }
           $(rows)
             .eq(i)
             .before(
-              `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td colspan="15">
+              `<tr class="group" style="background: #FFFFCC; color: #7f8c8d;;">
+                            <td colspan="6">
                                 <nav class="nav flex-column flex-sm-row">
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${group}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${
-                                      datos[i].proyect
-                                    }</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${
-                                      datos[i].mz
-                                    } - LT: ${datos[i].n}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${Moneda(
-                                      datos[i].valor
-                                    )}</a>
-                                </nav>
-                            </td>
-                        </tr>
-                        <tr class="group" style="background: #FFFFCC; color: #7f8c8d;">
-                            <td colspan="15">
-                                <nav class="nav flex-column flex-sm-row">
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">SEPARADO: ${gt}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">DSTO: ${
-                                      datos[i].descuento
-                                    }%</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">CUPON: ${
-                                      datos[i].cupon
-                                    }</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">AHORRO: $${Moneda(
-                                      datos[i].ahorro
-                                    )}</a>
-                                    <a class="flex-sm-fill text-sm-center nav-link py-0">TOTAL: $${Moneda(
-                                      datos[i].total
-                                    )}</a>
-                                </nav>
-                            </td>
-                        </tr>
-                        <tr class="pago" style="background: #40E0D0;" onclick="Pago(${
-                          datos[i].ids
-                        }, '${datos[i].img}', '${datos[i].id}')">
-                            <td colspan="15">
-                                <nav class="nav nav-justified">
-                                    <a class="nav-item nav-link py-0">${gt2}</a>
-                                    <a class="nav-item nav-link py-0">RC-${datos[i].ids}</a>
-                                    <a class="nav-item nav-link py-0">${datos[i].descp}</a>
-                                    <a class="nav-item nav-link py-0">$${
-                                      datos[i].formap === 'BONO'
-                                        ? Moneda(datos[i].mtb)
-                                        : datos[i].mtb
-                                        ? Moneda(
-                                            parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
-                                          )
-                                        : Moneda(datos[i].monto)
-                                    }</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].nombre}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">${datos[i].proyect}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">MZ: ${datos[i].mz} - LT: ${datos[i].n}</a>
+                                    <a class="flex-sm-fill text-sm-center nav-link py-0">PRECIO: $${datos[i].total}</a>
                                 </nav>
                             </td>
                         </tr>`
             );
 
-          vlr += valr;
+          monto += monto;
           last = group;
-          lote = datos[i].n;
-          pago = datos[i].ids;
-          body.push(
-            {
-              id: {
-                content: group,
-                colSpan: 3,
-                styles: {
-                  halign: 'left',
-                  cellWidth: 'wrap',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 10,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id4: {
-                content: datos[i].proyect,
-                colSpan: 2,
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 9,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id6: {
-                content: 'MZ: ' + datos[i].mz + ' - LT: ' + datos[i].n,
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id7: {
-                content: '$' + Moneda(datos[i].valor),
-                colSpan: 2,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              }
-            },
-            {
-              id: {
-                content: 'Sp. ' + gt,
-                styles: {
-                  halign: 'left',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id2: {
-                content: 'Dto. ' + datos[i].descuento + '%',
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id3: {
-                content: 'Cupon: ' + datos[i].cupon,
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id4: {
-                content: 'Ahorro: $' + Moneda(datos[i].ahorro),
-                colSpan: 2,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              },
-              id6: {
-                content: 'Total: $' + Moneda(datos[i].total),
-                colSpan: 3,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'auto',
-                  textColor: '#7f8c8d',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#FFFFCC'
-                }
-              }
-            },
-            {
-              id: {
-                content: gt2,
-                styles: {
-                  halign: 'left',
-                  cellWidth: 'auto',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#40E0D0'
-                }
-              },
-              id2: {
-                content: 'RC-' + datos[i].ids,
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#40E0D0'
-                }
-              },
-              id3: {
-                content: datos[i].descp,
-                styles: {
-                  halign: 'center',
-                  cellWidth: 'auto',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#40E0D0'
-                }
-              },
-              id4: {
-                content:
-                  datos[i].formap === 'BONO'
-                    ? Moneda(datos[i].mtb)
-                    : datos[i].mtb
-                    ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
-                    : Moneda(datos[i].monto),
-                colSpan: 5,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'auto',
-                  fontStyle: 'bolditalic',
-                  fontSize: 8,
-                  fillColor: '#40E0D0'
-                }
-              }
-            }
-          );
-        } else if (pago !== datos[i].ids) {
-          //("background-color", "#40E0D0");
-          $(rows)
-            .eq(i - 1)
-            .after(
-              `<tr class="pago" style="background: #40E0D0;" onclick="Pago(${datos[i].ids}, '${
-                datos[i].img
-              }', '${datos[i].id}')">
-                            <td colspan="15">
-                                <nav class="nav nav-justified">
-                                    <a class="nav-item nav-link py-0">${gt2}</a>
-                                    <a class="nav-item nav-link py-0">RC-${datos[i].ids}</a>
-                                    <a class="nav-item nav-link py-0">${datos[i].descp}</a>
-                                    <a class="nav-item nav-link py-0">$${
-                                      datos[i].formap === 'BONO'
-                                        ? Moneda(datos[i].mtb)
-                                        : datos[i].mtb
-                                        ? Moneda(
-                                            parseFloat(datos[i].monto) + parseFloat(datos[i].mtb)
-                                          )
-                                        : Moneda(datos[i].monto)
-                                    }</a>
-                                </nav>
-                            </td>
-                        </tr>`
-            );
-          body.push({
-            id: {
-              content: gt2,
-              styles: {
-                halign: 'left',
-                cellWidth: 'auto',
-                fontStyle: 'bolditalic',
-                fontSize: 8,
-                fillColor: '#40E0D0'
-              }
-            },
-            id2: {
-              content: 'RC-' + datos[i].ids,
-              styles: {
-                halign: 'center',
-                cellWidth: 'auto',
-                fontStyle: 'bolditalic',
-                fontSize: 8,
-                fillColor: '#40E0D0'
-              }
-            },
-            id3: {
-              content: datos[i].descp,
-              styles: {
-                halign: 'center',
-                cellWidth: 'auto',
-                fontStyle: 'bolditalic',
-                fontSize: 8,
-                fillColor: '#40E0D0'
-              }
-            },
-            id4: {
-              content:
-                datos[i].formap === 'BONO'
-                  ? Moneda(datos[i].mtb)
-                  : datos[i].mtb
-                  ? Moneda(parseFloat(datos[i].monto) + parseFloat(datos[i].mtb))
-                  : Moneda(datos[i].monto),
-              colSpan: 5,
-              styles: {
-                halign: 'right',
-                cellWidth: 'auto',
-                fontStyle: 'bolditalic',
-                fontSize: 8,
-                fillColor: '#40E0D0'
-              }
-            }
-          });
-          pago = datos[i].ids;
-          vlr += valr;
         }
-        body.push({
-          id: {
-            content: datos[i].date ? datos[i].date : 'Indefinido',
-            styles: { fontSize: 7, fontStyle: 'bold' }
-          },
-          id2: {
-            content: datos[i].rcb ? datos[i].rcb : 'Indefinido',
-            styles: { fontSize: 7, fontStyle: 'bold' }
-          },
-          id3: {
-            content: datos[i].formapg ? datos[i].formapg : 'Indefinido',
-            styles: { fontSize: 7, fontStyle: 'bold' }
-          },
-          id4: {
-            content: datos[i].id ? datos[i].id : 'Indefinido',
-            styles: { fontSize: 7, fontStyle: 'bold' }
-          },
-          id5: {
-            content: datos[i].mounto ? '$' + Moneda(datos[i].mounto) : '$0',
-            styles: { fontSize: 7, fontStyle: 'bold' }
-          }
-        });
-        //console.log(pago, datos[i].ids)
+        monto += monto;
 
         if (i == filas.length - 1) {
           $(rows)
             .eq(i)
             .after(
-              `<tr class="total" style="background: #F08080; color: #FFFFCC;">                          
-                            <td colspan="15">
+              `<tr class="total" style="background: #40E0D0; color: #FFFFCC;">                          
+                            <td colspan="6">
                                 <nav class="nav nav-justified">
                                     <a class="nav-item nav-link py-0">TOTAL ABONADO</a>
-                                    <a class="nav-item nav-link py-0">$${Moneda(vlr)}</a>
+                                    <a class="nav-item nav-link py-0">$${monto}</a>
                                 </nav>
                             </td>
                         </tr>
-                        <tr class="total" style="background: #F08080; color: #FFFFCC;">                           
-                            <td colspan="15">
+                        <tr class="total" style="background: #40E0D0; color: #FFFFCC;">                           
+                            <td colspan="6">
                                 <nav class="nav nav-justified">
                                     <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                                    <a class="nav-item nav-link py-0">$${Moneda(
-                                      parseFloat(datos[i].total) - vlr
+                                    <a class="nav-item nav-link py-0">$${parseFloat(
+                                      datos[i].total - monto
                                     )}</a>
                                 </nav>
                             </td>
                         </tr>
                         <tr></tr>`
             );
-          body.push(
-            {
-              id: {
-                content: 'TOTAL ABONADO',
-                colSpan: 4,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'wrap',
-                  textColor: '#FFFFCC',
-                  fontStyle: 'bolditalic',
-                  fontSize: 7,
-                  fillColor: '#7f8c8d'
-                }
-              },
-              id5: {
-                content: '$' + Moneda(vlr),
-                colSpan: 4,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'wrap',
-                  textColor: '#FFFFCC',
-                  fontStyle: 'bolditalic',
-                  fontSize: 7,
-                  fillColor: '#7f8c8d'
-                }
-              }
-            },
-            {
-              id: {
-                content: 'SALDO A LA FECHA',
-                colSpan: 4,
-                styles: {
-                  hhalign: 'right',
-                  cellWidth: 'wrap',
-                  textColor: '#FFFFCC',
-                  fontStyle: 'bolditalic',
-                  fontSize: 7,
-                  fillColor: '#7f8c8d'
-                }
-              },
-              id5: {
-                content: '$' + Moneda(parseFloat(datos[i].total) - vlr),
-                colSpan: 4,
-                styles: {
-                  halign: 'right',
-                  cellWidth: 'wrap',
-                  textColor: '#FFFFCC',
-                  fontStyle: 'bolditalic',
-                  fontSize: 7,
-                  fillColor: '#7f8c8d'
-                }
-              }
-            }
-          );
         }
         totaloteanterior = parseFloat(datos[i].total);
       });
@@ -4850,8 +4958,8 @@ if (window.location.pathname === `/links/reportes`) {
           title: 'Fecha',
           id: 'facturar'
         },
-        className: 'btn btn-secondary',
-        action: function () {
+        className: 'btn btn-secondary'
+        /* action: function () {
           var doc = new jsPDF('p', 'mm', [612, 792]);
           var img = new Image();
           img.src = '/img/avatars/avatar.png';
@@ -4874,16 +4982,6 @@ if (window.location.pathname === `/links/reportes`) {
             //showHead: false,
             includeHiddenHtml: false,
             theme: 'plain',
-            /*columnStyles: {
-                        //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                        //FECHAS: { textColor: 0, fontStyle: 'bold' },                        
-                        0: { cellWidth: '10', textColor: 0, fontStyle: 'italic', fontSize: 7 },
-                        1: { cellWidth: '50', textColor: 0, fontStyle: 'normal', fontSize: 7 },
-                        2: { cellWidth: 'wrap', textColor: 0, fontStyle: 'normal', fontSize: 7 },
-                        3: { cellWidth: 'wrap', textColor: 0, fontStyle: 'normal', fontSize: 7 },
-                        4: { cellWidth: 'auto', textColor: 0, fontStyle: 'normal', fontSize: 7 },
-                        7: { cellWidth: 'auto', textColor: 0, fontStyle: 'bold', fontSize: 9 },
-                    },*/
             didDrawPage: function (data) {
               // Header
               doc.setTextColor(0);
@@ -4903,7 +5001,7 @@ if (window.location.pathname === `/links/reportes`) {
               // jsPDF 1.4+ uses getWidth, <1.4 uses .width
               //var pageSize = doc.internal.pageSize
               //var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight()
-              //doc.text(/*str*/ `https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
+              //doc.text(`https://grupoelitered.com.co/links/pagos`, data.settings.margin.left, pageHeight - 10)
             },
             margin: { top: 13 }
           });
@@ -4913,7 +5011,7 @@ if (window.location.pathname === `/links/reportes`) {
           //}
           doc.output('dataurlnewwindow');
           //var blob = doc.output('blob')
-        }
+        } */
       },
       {
         extend: 'pageLength',
@@ -4939,7 +5037,7 @@ if (window.location.pathname === `/links/reportes`) {
         className: 'btn btn-secondary'
       }
     ],
-    ordering: true,
+    //ordering: true,
     language: languag,
     deferRender: true,
     paging: true,
@@ -4947,7 +5045,11 @@ if (window.location.pathname === `/links/reportes`) {
       regex: true,
       caseInsensitive: true
     },
-    responsive: true,
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
     initComplete: function (settings, json) {
       /*$(".f").daterangepicker({
                 locale: {

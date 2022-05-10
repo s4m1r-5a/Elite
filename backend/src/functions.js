@@ -1341,7 +1341,7 @@ async function EstadoDeCuenta(Orden) {
 
   if (Proyeccion.length) {
     const cuerpo = [];
-    const bodi = [];
+    const bodi = [['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto']];
     let totalAbonado = 0;
     let totalMora = 0;
     let moraAdeudada = 0;
@@ -1354,7 +1354,7 @@ async function EstadoDeCuenta(Orden) {
     Proyeccion.map((e, i) => {
       const IDs2 = IDs.some(s => s === e.ids);
       const idCqt = IdCuotas.some(s => s === e.idcuota);
-      totalAbonado += IDs2 ? 0 : e.monto ? e.monto : 0;
+      //totalAbonado += IDs2 ? 0 : e.monto ? e.monto : 0;
       moraAdeudada += e.estado === 3 && !idCqt ? e.mora : 0;
       totalMora += e.totalmora + (e.estado === 3 && !idCqt ? e.mora : 0) - e.saldomora;
       totalSaldo += e.estado === 3 && !idCqt ? e.cuota : 0;
@@ -1401,7 +1401,7 @@ async function EstadoDeCuenta(Orden) {
           ]
         );
 
-        bodi.push(
+        /* bodi.push(
           ['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto'],
           [
             e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
@@ -1419,7 +1419,7 @@ async function EstadoDeCuenta(Orden) {
               decorationStyle: e.stado !== 4 && 'double'
             }
           ]
-        );
+        ); */
       } else {
         !e.monto &&
           p &&
@@ -1457,7 +1457,7 @@ async function EstadoDeCuenta(Orden) {
           '$' + Moneda(e.saldomora)
         ]);
 
-        if (e.monto && !IDs2) {
+        /* if (e.monto && !IDs2) {
           bodi.push([
             e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
             `RC${e.ids}`,
@@ -1474,7 +1474,7 @@ async function EstadoDeCuenta(Orden) {
               decorationStyle: e.stado !== 4 && 'double'
             }
           ]);
-        }
+        } */
       }
       e.ids && IDs.push(e.ids);
       p = e.monto && e.saldocuota ? e : false;
@@ -1485,12 +1485,14 @@ async function EstadoDeCuenta(Orden) {
     const PagosPendientes = await pool.query(
       `SELECT s.fecharcb, s.fech, s.monto, s.stado, s.ids, s.formap, s.descp 
       FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id        
-      WHERE p.id = ? AND s.stado = 3 ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC;`,
+      WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND p.id = ? 
+      AND s.stado IN(3, 4) ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC;`,
       Orden
     );
 
     if (PagosPendientes.length) {
-      PagosPendientes.map((e, i) =>
+      PagosPendientes.map((e, i) => {
+        totalAbonado += e.stado != 4 ? 0 : e.monto;
         bodi.push([
           e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
           `RC${e.ids}`,
@@ -1506,15 +1508,16 @@ async function EstadoDeCuenta(Orden) {
             decoration: e.stado !== 4 && 'lineThrough',
             decorationStyle: e.stado !== 4 && 'double'
           }
-        ])
-      );
+        ]);
+      });
 
       bodi.sort((a, b) => {
         return new Date(a[0]).getTime() - new Date(b[0]).getTime();
       });
+      totalDeuda = Proyeccion[0].valor + totalMora - totalAbonado;
 
-      const indx = bodi.findIndex(e => e[1] == 'RCnull');
-      if (indx > -1) bodi.splice(indx, 1);
+      /* const indx = bodi.findIndex(e => e[1] == 'RCnull');
+      if (indx > -1) bodi.splice(indx, 1); */
     }
 
     //console.log(cuerpo);

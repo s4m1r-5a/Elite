@@ -564,7 +564,7 @@ cron.schedule('0 2 * * *', async () => {
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
   // 5076 filas afectadas.
-  const intr = await pool.query(`SELECT c.id, c.separacion, c.fechs,
+  /* const intr = await pool.query(`SELECT c.id, c.separacion, c.fechs,
     (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
     FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
     INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
@@ -581,7 +581,7 @@ cron.schedule('0 2 * * *', async () => {
 
     await pool.query(`UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
         c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL`);
-  }
+  } */
   ////////////////* RESTABLECER LOS ID DE LAS RELACIONES DE CUOTAS ELIMINADOS *///////////////////
   await pool.query(`SET  @num := 0`);
   await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`);
@@ -3835,8 +3835,45 @@ router.post('/bonos/:id', isLoggedIn, (req, res) => {
   res.send(true);
 });
 //////////////* PAGOS *//////////////////////////////////
+router.get('/pay', async (req, res) => {
+  res.render('links/pay');
+});
 router.get('/pagos', async (req, res) => {
   res.render('links/pagos');
+});
+router.post('/pay/:id', async (req, res) => {
+  const datos = await pool.query(
+    `SELECT p.id orden, c.idc, c.nombre, c.movil, c.email, l.id lt, l.mz, l.n, d.id pyt, d.proyect, 
+    SUM(q.cuota) deuda, SUM(IF(q.cuota = q.proyeccion, q.mora, 0)) mora,COUNT(q.id) cuotasvencidas,
+    (SELECT SUM(r.totalmora) FROM relacioncuotas r WHERE r.orden = p.id) moravieja,
+    (SELECT SUM(r.morapaga) FROM relacioncuotas r WHERE r.orden = p.id) morapagada
+    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d 
+    ON l.producto = d.id LEFT JOIN cuotas q ON q.separacion = p.id AND q.estado = 3 
+    AND q.fechs <= CURDATE() INNER JOIN clientes c ON c.idc IN(p.cliente, p.cliente2, 
+      p.cliente3, p.cliente4) WHERE p.tipobsevacion IS NULL AND c.documento = ?
+    GROUP BY p.id, c.idc ORDER BY p.fecha; ;`,
+    req.params.id
+  );
+
+  if (datos.length) {
+    var recaudos = '';
+    datos.map((e, i) => (recaudos += !i ? `${e.pyt}` : `, ${e.pyt}`));
+    const cuentas = await pool.query(
+      `SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
+       ON p.recaudador = r.id WHERE p.producto IN(${recaudos}) ORDER BY r.id`
+    );
+    datos.map((e, i) => {
+      const qntas = cuentas.filter(a => a.producto == e.pyt);
+      if (qntas.length) datos[i].cuentas = qntas;
+    });
+
+    res.send({ datos, status: true });
+  } else {
+    res.send({
+      paquete: 'No existe ninguna orden relacionada con este documeto, comuniiquece con un asesor',
+      status: false
+    });
+  }
 });
 router.get('/pagos/:id', async (req, res) => {
   const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id);
@@ -5560,29 +5597,15 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       ? ''
       : 'WHERE p.asesor = ' + req.user.id;
 
-    `SELECT d.proyect, l.mz, l.n, if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
-    if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
-    q.descuento, p.ahorro, SUM(c.proyeccion) total, SUM(s.monto) montos, SUM(r.totalmora) mora, 
-    SUM(r.morapaga) morapaga, SUM(r.totalmora) - SUM(r.morapaga) saldomora, 
-    SUM(c.proyeccion) + (SUM(r.totalmora) - SUM(r.morapaga)) saldo      
-    FROM productos d INNER JOIN productosd l ON d.id = l.producto INNER JOIN estados e ON l.estado = e.id 
-    LEFT JOIN preventa p ON p.lote = l.id AND p.tipobsevacion IS NULL 
-    LEFT JOIN cuotas c ON p.id = c.separacion LEFT JOIN cupones q ON q.id = p.cupon 
-    LEFT JOIN clientes u ON p.cliente = u.idc LEFT JOIN relacioncuotas r ON c.id = r.cuota 
-    LEFT JOIN solicitudes s ON r.pago = s.ids
-    ${d} GROUP BY d.proyect, l.id, p.id 
-    ORDER BY d.proyect, l.mz, l.n`;
-
     sql = `SELECT d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
     if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
     if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
     q.descuento, p.ahorro, SUM(c.proyeccion) total,
     (SELECT SUM(s.monto) FROM solicitudes s WHERE s.orden = p.id AND s.stado = 4 
-    AND s.concepto IN('PAGO', 'ABONO')) montos,
-    (SELECT SUM(r.totalmora) FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
-    WHERE c.separacion = p.id) mora,
-    (SELECT SUM(r.morapaga) FROM cuotas c INNER JOIN relacioncuotas r ON c.id = r.cuota 
-    WHERE c.separacion = p.id) morapaga     
+    AND s.concepto IN('PAGO', 'ABONO', 'BONO')) montos,
+    (SELECT SUM(r.totalmora) - SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) mora,
+    (SELECT SUM(r.morapaga) + SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) morapaga,
+    SUM(IF(c.cuota = c.proyeccion AND c.diaspagados < 1, c.mora, 0)) morafutura     
     FROM productos d INNER JOIN productosd l ON l.producto = d.id 
     INNER JOIN estados e ON l.estado = e.id LEFT JOIN preventa p ON p.lote = l.id 
     AND p.tipobsevacion IS NULL LEFT JOIN cuotas c ON c.separacion = p.id 
@@ -5607,15 +5630,25 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       ? ''
       : 'AND p.asesor = ' + req.user.id;
 
-    sql = `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
-        p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
-        s.monto, s.img, cu.descuento, c.nombre, cp.monto mtb, r.id, r.date, r.formapg, r.rcb, 
-        r.monto mounto, r.observacion, r.baucher, r.bono bonus FROM solicitudes s 
-        LEFT JOIN recibos r ON s.ids = r.registro INNER JOIN productosd pd ON s.lt = pd.id 
-        INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
-        LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
-        INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
-        WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`;
+    `SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, 
+      p.ahorro, pd.mz, pd.n, pd.valor, p.vrmt2, p.fecha, s.fech, s.ids, s.formap, s.descp, 
+      s.monto, s.img, cu.descuento, c.nombre, cp.monto mtb, r.id, r.date, r.formapg, r.rcb, 
+      r.monto mounto, r.observacion, r.baucher, r.bono bonus FROM solicitudes s 
+      LEFT JOIN recibos r ON s.ids = r.registro INNER JOIN productosd pd ON s.lt = pd.id 
+      INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN preventa p ON pd.id = p.lote 
+      LEFT JOIN cupones cu ON cu.id = p.cupon LEFT JOIN cupones cp ON s.bono = cp.id
+      INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id 
+      WHERE s.stado = 4 AND s.concepto IN('PAGO', 'ABONO') AND p.tipobsevacion IS NULL ${d}`;
+
+    sql = `SELECT COUNT(c.proyeccion) cuotas, MAX(c.ncuota) ncuota, MAX(c.tipo) descp, d.proyect, 
+      l.mz, l.n, u.nombre, p.fecha, s.fecharcb, s.ids, s.formap, s.monto, s.concepto, s.img, 
+      SUM(r.mora) mora, (SELECT SUM(proyeccion) FROM cuotas WHERE separacion = p.id) total, p.id 
+      FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON 
+      l.producto = d.id INNER JOIN relacioncuotas r ON r.orden = p.id INNER JOIN cuotas c 
+      ON r.cuota = c.id LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN clientes u ON 
+      p.cliente = u.idc WHERE p.tipobsevacion IS NULL ${d} GROUP BY s.ids, d.id, l.id, p.id ORDER 
+      BY TIMESTAMP(s.fecharcb), d.proyect, l.mz, l.n`;
+
     const solicitudes = await pool.query(sql, req.user.id);
     respuesta = { data: solicitudes };
 
@@ -7800,7 +7833,7 @@ async function QuitarCupon(S) {
     return r.affectedRows;
   }
 }
-async function ProyeccionPagos(S, fechaOn, fechaOff) {
+async function ProyeccionPagos(S, fechaOn = '2019-10-01', fechaOff) {
   let W = await pool.query(
     `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, e.descuento,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
@@ -7932,7 +7965,7 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
     };
   });
 
-  let Relacion = []; //                                             aqui estara la relacion entre pagos y cuotas
+  let Relacion = []; // aqui estara la relacion entre pagos y cuotas
   let idCuota = false;
   let montoparainicial = 0; // monto para calcular la fecha de la cuota inicial
   let fechapagoini = false; // fecha en la que se termino de pagar la cuota inicial
@@ -7949,15 +7982,14 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
     : acuerdo?.type === 'STOP'
     ? moment(acuerdo?.limite).format('YYYY-MM-DD')
     : false;
-  let dcto = acuerdo?.dcto || 1;
+  let dcto = acuerdo?.dcto || 0;
 
   for (i = 0; i < Abonos.length; i++) {
-    const a = Abonos[i]; //                         array de abonos que el cliente a realizado
-
+    const a = Abonos[i]; //                          array de abonos que el cliente a realizado
     const fechaLMT = a.fecharcb //                   fecha del recibo de pago
       ? moment(a.fecharcb).format('YYYY-MM-DD') //   si la fecha del recibo no existe toma la fecha en que se subio el pago
       : moment(a.fech).format('YYYY-MM-DD'); //      fecha en que se subio el pago al sistema
-    if (!fechaStop) fechaStop = fechaLMT;
+    fechaStop = fechaOff > fechaLMT ? fechaOff : fechaLMT;
     if (fechaLMT > acuerdo.limite) {
       acuerdoNum++;
       if (numAcuerdos && numAcuerdos >= acuerdoNum) {
@@ -7972,14 +8004,14 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
           : acuerdo?.type === 'STOP'
           ? moment(acuerdo?.limite).format('YYYY-MM-DD')
           : fechaLMT;
-        dcto = acuerdo?.dcto || 1;
+        dcto = acuerdo?.dcto || 0;
       } else {
         acuerdo = false;
         fechaLimite = fechaOn // fecha desde la que el sistema empesara a cobrar mora
           ? moment(fechaOn).format('YYYY-MM-DD')
           : moment('2019-08-31').format('YYYY-MM-DD');
         fechaStop = fechaOff ? moment(fechaOff).format('YYYY-MM-DD') : fechaLMT;
-        dcto = 1;
+        dcto = 0;
       }
     }
 
@@ -7988,31 +8020,31 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
 
     const cobro = fechaLMT >= fechaLimite && mOra ? true : false; // determinara si debe cobrar mora en la cuota siguiente a analizar
 
-    let Monto = a.monto; //                                               valor del pago aboonado del cual se ira descontando el valor de la cuota
+    let Monto = a.monto; // valor del pago aboonado del cual se ira descontando el valor de la cuota
 
     for (o = 0; o < cuotas.length; o++) {
       if (!Monto) continue;
-      const q = cuotas[o]; //                                             array de cuotas
+      const q = cuotas[o]; // array de cuotas
       const FechaCuota =
         idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
-      const diffdays = moment(fechaStop).diff(FechaCuota, 'days') || 0; //      diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
-      const daysDiff = fechaStop > FechaCuota ? diffdays : 0; //           si la diferencia de dias es mayor a cero
-      const Tas =
+      const daysDiff = fechaStop > FechaCuota ? moment(fechaStop).diff(FechaCuota, 'days') : 0; // diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
+      const Tasa =
         cobro && daysDiff
-          ? Moras.filter(
-              x =>
-                moment(x.fecha).format('YYYY-MM-DD') >=
-                  moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
-                moment(x.fecha).format('YYYY-MM-DD') <=
-                  moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
-            ).map(x => x.teano)
-          : []; //                                                         calculo de interes por mora
+          ? Math.min(
+              ...Moras.filter(
+                x =>
+                  moment(x.fecha).format('YYYY-MM-DD') >=
+                    moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
+                  moment(x.fecha).format('YYYY-MM-DD') <=
+                    moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
+              ).map(x => x.teano)
+            )
+          : 0; // selecciona la tasa mas baja dentro del periodo de la mora
 
-      const Tasa = Tas.length ? Math.min(...Tas) : 0; //                    selecciona la tasa mas baja dentro del periodo de la mora
       const saldAnt = idCuota?.id === q.id ? idCuota.saldomora : 0;
-      const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; //     valor de la mora
-      const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; //    descuento de la mora si existe algun acuerdo
-      const diasmoratorios = Tasa ? daysDiff : 0; //                        dias total de mora
+      const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; // valor de la mora
+      const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; // descuento de la mora si existe algun acuerdo
+      const diasmoratorios = Tasa ? daysDiff : 0; // dias total de mora
 
       cuotas[o].tasa = Tasa;
       cuotas[o].moratoria = moratoria;
@@ -8035,7 +8067,8 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
           13,
           q.tasa,
           FechaCuota,
-          0
+          0,
+          S
         ]);
         Monto = Math.sign(Monto - q.total) > 0 ? Monto - q.total : 0;
         cuotas[o].monto = 0;
@@ -8048,16 +8081,6 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
         const morapaga = Monto >= totalmora ? totalmora : Monto;
         const diaspagados = !q.tasa ? 0 : morapaga / (q.dctoMoratorio / q.diasmoratorios) || 0;
         const saldocuota = Monto > totalmora ? q.monto - (Monto - totalmora) : q.monto;
-        console.log(
-          diaspagados,
-          q.tasa,
-          morapaga,
-          q.dctoMoratorio,
-          q.diasmoratorios,
-          dctoMoratorio,
-          moratoria,
-          dcto
-        );
         //const diaspagados = !q.tasa ? 0 : dpg >= q.diasmoratorios ? q.diasmoratorios : dpg;
         //const morapaga = dpg >= q.diasmoratorios ? q.dctoMoratorio : Monto;
 
@@ -8081,7 +8104,8 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
           3,
           q.tasa,
           FechaCuota,
-          saldomora
+          saldomora,
+          S
         ]);
         Monto = Math.sign(Monto - q.total) > 0 ? Monto - cuot : 0;
         cuotas[o].monto = saldocuota;
@@ -8114,7 +8138,7 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
   Relacion.length &&
     (await pool.query(
       `INSERT INTO relacioncuotas 
-        (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa, fechaLMT, saldomora) 
+        (pago, cuota, mora, dias, dcto, diaspagados, totalmora, morapaga, montocuota, saldocuota, stdcuota, tasa, fechaLMT, saldomora, orden) 
         VALUES ?`,
       [Relacion]
     ));
@@ -8152,7 +8176,7 @@ async function ProyeccionPagos(S, fechaOn, fechaOff) {
     AND d.moras = 1 AND c.separacion = ? GROUP BY c.id HAVING tasa IS NOT NULL`,
     S
   );
-  //console.log('id de cuota sam ', idCuota?.id);
+
   if (intr.length) {
     let moraVr = `CASE`;
     let moraTs = `CASE`;
