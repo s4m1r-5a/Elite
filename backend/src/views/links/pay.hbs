@@ -104,7 +104,7 @@
                       <div class='col-12'>
                         <span>TOTAL A PAGAR:</span>
                         <div class='d-inline-block float-right'>
-                          <span class='total'></span>
+                          <span class='totalpagar'></span>
                         </div>
                       </div>
                       <div class='col-12'>
@@ -154,7 +154,7 @@
                     >
                       <div class='card-body text-center'>
                         <strong class=''>VALOR A PAGAR</strong>
-                        <h1 class='text-success Total3'></h1>
+                        <h1 class='text-success total'></h1>
                       </div>
                     </div>
                   </div>
@@ -181,14 +181,12 @@
                       data-parent='#accordionExample'
                     >
                       <div class='card-body'>
-                        <!--https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu-->
                         <form
                           id='payu'
                           method='post'
                           action='https://checkout.payulatam.com/ppp-web-gateway-payu'
                         >
-                          <input name='pyt' class='pyt' type='hidden' />
-                          <input name='mora' class='mora' type='hidden' />
+                          <input name='proyecto' class='proyecto' type='hidden' />
                           <table class='table table-sm'>
                             <tbody>
                               <tr>
@@ -241,7 +239,7 @@
                                     type='text'
                                     name='description'
                                     class='form-control'
-                                    id='Description'
+                                    id='description'
                                     value=''
                                     disabled
                                   />
@@ -249,10 +247,10 @@
                               </tr>
                             </tbody>
                           </table>
-                          <input type='hidden' name='amount' id='Total' />
+                          <input type='hidden' name='amount' class='total' />
                           <input name='merchantId' id='merchantId' type='hidden' />
                           <input name='accountId' id='accountId' type='hidden' />
-                          <input name='referenceCode' type='hidden' id='Code' />
+                          <input name='referenceCode' type='hidden' id='code' />
                           <input name='tax' type='hidden' value='0' />
                           <input name='taxReturnBase' type='hidden' value='0' />
                           <input name='currency' type='hidden' value='COP' />
@@ -261,22 +259,21 @@
                           <input type='hidden' name='extra2' id='extra' />
                           <input
                             name='responseUrl'
+                            id='responseUrl'
                             type='hidden'
                             value='https://grupoelitefincaraiz.com/planes'
                           />
                           <input
                             name='confirmationUrl'
+                            id='confirmationUrl'
                             type='hidden'
                             value='https://grupoelitefincaraiz.com/confir'
                           />
-                          <!--<input name="responseUrl" type="hidden" value="http://localhost:5000/planes">
-                                                        <input name="confirmationUrl" type="hidden" value="https://endarh7fdp1a476.m.pipedream.net">-->
                           <div class='mt-auto pgpayu' style='display: none;'>
                             <input
                               name='Submit'
                               type='submit'
                               class='btn btn-lg btn-outline-danger'
-                              value='Pagar'
                             />
                           </div>
                         </form>
@@ -292,7 +289,7 @@
                   <div class='card-body'>
                     <div class='accordion' id='accordion2'>
 
-                      <div class='card' id='BOTON'>
+                      <div class='card' id='BONO'>
                         <div
                           class='card-header'
                           type='button'
@@ -304,8 +301,8 @@
                         >
                           <div class='row'>
                             <div class='col-12 col-md-9 col-lg-9'>
-                              <strong class='text-muted'>Botón Bancolombia</strong><br />
-                              <small class='text-muted'>Transfiere con tu cuenta Bancolombia</small>
+                              <strong class='text-muted'>Bono</strong><br />
+                              <small class='text-muted'>Redime aqui tu bono</small>
                             </div>
                             <div class='col-12 col-md-3 col-lg-3 text-center'>
                               <a class='float-center'><img
@@ -338,8 +335,7 @@
                               action='/links/recibo'
                               method='POST'
                             >
-                              <input name='pyt' class='pyt' type='hidden' />
-                              <input name='mora' class='mora' type='hidden' />
+                              <input name='proyecto' class='proyecto' type='hidden' />
                               <input type='hidden' id='transferAmount' name='transferAmount' />
                               <input
                                 type='hidden'
@@ -455,22 +451,15 @@
                                 action='/links/recibo'
                                 method='POST'
                               >
-                                <input type='hidden' id='Total2' name='total' />
-                                <input type='hidden' id='factrs' name='factrs' />
-                                <input type='hidden' id='idC' name='id' />
+                                <input type='hidden' class='total' name='total' />
+                                <input type='hidden' id='cliente' name='id' />
                                 <input type='hidden' id='concpto' name='concpto' />
                                 <input type='hidden' id='orden' name='orden' />
                                 <input type='hidden' id='lt' name='lt' />
-                                <input type='hidden' class='bonus' name='bono' />
-                                <input type='hidden' class='bonu' name='pin' />
                                 <input id='ahora' type='hidden' name='ahora' />
-                                <input id='mora' type='hidden' name='mora' />
                                 <input id='rcbexcdnt' type='hidden' name='rcbexcdnt' />
-                                <input type='hidden' class='TotalBono' name='bonomonto' />
                                 <input type='hidden' name='montorcb' id='montorecibos' />
                                 <input type='hidden' name='recibos' id='nrbc' />
-                                <input type='hidden' name='formap' id='formapRCB' />
-                                <input type='hidden' name='g' value='1' />
                                 <tbody>
                                   <tr style='display: none;' id='trsubida'>
                                     <th colspan='2'>

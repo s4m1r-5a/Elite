@@ -3914,24 +3914,17 @@ router.get('/pagos/:id', async (req, res) => {
   }
 });
 router.post('/pagos', async (req, res) => {
-  const { merchantId, amount, referenceCode, total, factrs, id, concpto, lt, bono, pin, pyt } =
-    req.body;
-  const codes = await pool.query(`SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
-    ON p.recaudador = r.id WHERE p.producto = '${pyt}' AND r.entidad = 'PAYU'`);
+  const { merchantId, amount, referenceCode, proyecto } = req.body;
+  const codes = await pool.query(`SELECT key FROM prodrecauds p INNER JOIN recaudadores r 
+    ON p.recaudador = r.id WHERE p.producto = '${proyecto}' AND r.entidad = 'PAYU'`);
   if (codes.length > 0) {
-    var key = codes[0].code3 + '~' + codes[0].code1 + '~' + referenceCode + '~' + amount + '~COP';
+    const code = codes[0];
+    var key = code.key + '~' + merchantId + '~' + referenceCode + '~' + amount + '~COP';
     var hash = crypto.createHash('md5').update(key).digest('hex');
-    var ext = `${total}~${factrs}~${concpto}~${lt}~${bono ? bono : 0}~${pin ? pin : 0}~${
-      id ? id : 0
-    }`;
-    var smg = {
-      sig: hash,
-      ext,
-      merchantId: codes[0].code1,
-      accountId: codes[0].code2
-    };
+    var ext = `${referenceCode}~${new Date().getTime()}`;
+    res.send({ sig: hash, ext });
   }
-  res.send(smg);
+  res.send(false);
 });
 router.post('/boton', async (req, res) => {
   const { pyt, mora, transferAmount, transferReference, transferDescription } = req.body;
@@ -8019,15 +8012,11 @@ async function ProyeccionPagos(S, fechaOn = '2019-10-01', fechaOff) {
         idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
       const daysDiff = fechaStop > FechaCuota ? moment(fechaStop).diff(FechaCuota, 'days') : 0; // diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
       const Tasa =
-        cobro && daysDiff
+        cobro && daysDiff && fechaLMT > q.fechs
           ? Math.min(
-              ...Moras.filter(
-                x =>
-                  moment(x.fecha).format('YYYY-MM-DD') >=
-                    moment(q.fechs).startOf('month').format('YYYY-MM-DD') &&
-                  moment(x.fecha).format('YYYY-MM-DD') <=
-                    moment(fechaLMT).startOf('month').format('YYYY-MM-DD')
-              ).map(x => x.teano)
+              ...Moras.filter(x => moment(x.fecha).isBetween(q.fechs, fechaLMT, 'month', '[]')).map(
+                x => x.teano
+              )
             )
           : 0; // selecciona la tasa mas baja dentro del periodo de la mora
 
@@ -8035,7 +8024,6 @@ async function ProyeccionPagos(S, fechaOn = '2019-10-01', fechaOff) {
       const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; // valor de la mora
       const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; // descuento de la mora si existe algun acuerdo
       const diasmoratorios = Tasa ? daysDiff : 0; // dias total de mora
-
       cuotas[o].tasa = Tasa;
       cuotas[o].moratoria = moratoria;
       cuotas[o].dctoMoratorio = dctoMoratorio;
@@ -8079,7 +8067,6 @@ async function ProyeccionPagos(S, fechaOn = '2019-10-01', fechaOff) {
           idCuota.nwFecha = fechaLMT;
           idCuota.saldomora = saldomora;
         }
-
         Relacion.push([
           a.ids,
           q.id,

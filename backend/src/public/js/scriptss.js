@@ -1202,46 +1202,66 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
 if (window.location.pathname == `/links/pay`) {
   $(document).ready(() => $('#cedula').focus());
   //$('nav').hide()
-  const producto = info => {
+  var producut = '';
+  let skdt = false;
+  const producto = (info, newmout = null) => {
+    const code = info.id + '-' + info.idc + '-' + ID(3);
+    const description = info.proyect + ' Mz ' + info.mz + ' Lote: ' + info.n;
+    const mora = info.mora + info.moravieja - info.morapagada;
+    const monto = newmout ? newmout : info.deuda + mora;
+
     $('#RCB').hide();
-    $('#BOTON').hide();
+    $('#BONO').hide();
     $('#PAYU').hide();
     $('#WOMPI').hide();
+
     console.log(info);
+
+    info.cuentas.map(r => {
+      if (r.entidad === 'RCB' && r.stado === 7) $('#RCB').show();
+      else if (r.entidad === 'PAYU' && r.stado === 7) {
+        const payData = r?.code4 ? JSON.parse(r.code4) : null;
+        if (payData) {
+          $('#merchantId').val(payData.merchantId);
+          $('#accountId').val(payData.accountId);
+          $('#responseUrl').val(payData.responseUrl);
+          $('#confirmationUrl').val(payData.confirmationUrl);
+          $('#PAYU').show();
+          $.ajax({
+            url: '/links/pagos',
+            data: $('form').serialize(),
+            type: 'POST',
+            async: true,
+            success: function (data) {
+              $('#signature').val(data.sig);
+              $('#extra').val(data.ext);
+            }
+          });
+        }
+      } else if (r.entidad === 'WOMPI' && r.stado === 7) $('#WOMPI').show();
+    });
+
     $('.Cliente').html(info.nombre);
     $('.Cliente').val(info.nombre);
     $('#Movil').val(info.movil);
     $('#Email').val(info.email);
-
-    const code = info.idc + '-' + info.id + '-' + ID(3);
-    $('#Code').val(code);
-    $('#transferReference').val(code);
-
-    info.cuentas.map(r => {
-      if ((r.tipo === 'CTA-CTE' || r.tipo === 'CTA-AHO') && r.stado === 7) {
-        $('#RCB').show();
-      } else if (r.tipo === 'BOTON' && r.stado === 7) {
-        $('#BOTON').show();
-      } else if (r.entidad === 'PAYU' && r.stado === 7) {
-        $('#PAYU').show();
-      } else if (r.entidad === 'WOMPI' && r.stado === 7) {
-        $('#WOMPI').show();
-      }
-    });
-
+    $('#code').val(code);
     $('#orden').val(info.id);
     $('#lt').val(info.lt);
-    $('.pyt').val(info.pyt);
-    Description = info.proyect + ' Mz ' + info.mz + ' Lote: ' + info.n;
-
+    $('.proyecto').val(info.pyt);
     $('.concepto').val('ABONO').html('ABONO');
     $('.cuotasvencidas').html(info.cuotasvencidas);
     $('.deuda').html(Moneda(info.deuda));
-    const mora = info.mora + info.moravieja - info.morapagada;
     $('.mora').html(Moneda(mora));
-    $('.total').html(Moneda(info.deuda + mora));
-    $('#Description, #transferDescription').val('ABONO ' + Description);
-    $('#idC').val(info.idc);
+    $('.totalpagar').html(Moneda(info.deuda + mora));
+    $('.total').html(Moneda(monto)).val(monto);
+    $('#description').val('ABONO ' + description);
+    $('#cliente').val(info.idc);
+    producut = info;
+    if (!monto && $('.newtotal').is(':visible')) {
+      skdt = false;
+      SMSj('error', `El monto a pagar debe ser mayor a cero`);
+    } else skdt = true;
   };
 
   $('.card-header').on('click', function () {
@@ -1300,7 +1320,6 @@ if (window.location.pathname == `/links/pay`) {
       hiddenSteps: [] // Pasos ocultos
     })
     .on('leaveStep', (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
-      let skdt = false;
       if (currentStepNumber === 0) {
         $.ajax({
           url: '/links/pay/' + $('#cedula').val(),
@@ -1323,117 +1342,25 @@ if (window.location.pathname == `/links/pay`) {
               $('#proyectos').change(function () {
                 producto(datos.find(e => e.pyt == $(this).val()));
               });
-
-              skdt = true;
             } else {
+              skdt = false;
               $('.alert').show();
               $('.alert-message').html('<strong>Error!</strong> ' + data.paquete);
               setTimeout(function () {
                 $('.alert').fadeOut(3000);
               }, 2000);
-              skdt = false;
             }
-          }
-        });
-
-        $('.Total2 input').focus();
-        $('.Total2').change(function () {
-          var totl2 = parseFloat($(this).cleanVal());
-          var totalf = parseFloat($('.Totalf').html().replace(/\./g, ''));
-          var totl = parseFloat($('.Total').html().replace(/\./g, ''));
-          //if (totl2 === totalf || totl2 > totl) {
-          $('.Total3').html(Moneda(totl2));
-          $('#Total, #Total2, #transferAmount').val(totl2);
-          if (totl2 < totl) {
-            $('#idC').val(idC);
           }
         });
       } else if (currentStepNumber === 1) {
-        var T = $('.Total').html();
-        var T2 = $('.Total2').val();
-        if (bono) {
-          $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-          var fd = $('#recbo').serialize();
-          $.ajax({
-            url: '/links/bonus',
-            data: fd,
-            type: 'POST',
-            beforeSend: function (xhr) {
-              $('#ModalEventos').modal({
-                backdrop: 'static',
-                keyboard: true,
-                toggle: true
-              });
-            },
-            success: function (data) {
-              if (data) {
-                $('#ModalEventos').modal('hide');
-                if (T2) {
-                  SMSj(
-                    'success',
-                    `El bono fue redimido exitosamente, continue con el resto del pago`
-                  );
-                  bono = 0;
-                  skdt = true;
-                  $('#smartwizard').smartWizard('next');
-                  $('.sw-btn-next').hide();
-                } else {
-                  SMSj('success', `El bono fue redimido exitosamente`);
-                  skdt = false;
-                  $('#smartwizard').smartWizard('reset');
-                }
-              } else {
-                $('#ModalEventos').modal('hide');
-                SMSj('error', `El bono fue rechazado, pongase en contacto con GRUPO ELITE`);
-              }
-            }
-          });
-        } else if (T != 0 || T2) {
-          skdt = true;
-          $('.sw-btn-next').hide();
-        } else {
-          skdt = false;
-          SMSj(
-            'error',
-            `El valor a pagar debe ser diferente a cero, para mas informacion comuniquese con GRUPO ELITE`
-          );
-        }
-      } else if (currentStepNumber === 2) {
-        //alert(currentStepNumber);
-        skdt = true;
-      }
+        $('.newtotal input').focus();
+        $('.newtotal').change(() => producto(prodct, $(this).cleanVal()));
+      } else if (currentStepNumber === 2) skdt = true;
       return skdt;
     });
-  var cn = 0;
-  var Pay = forma => {
-    var t2 = $('.Total2').val(),
-      T2 = $('.Total2').cleanVal(),
-      t = $('.Total').html(),
-      T = $('.Total').html().replace(/\./g, '');
 
+  var Pay = forma => {
     if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
-      //var l = parseFloat($('#Total').val())
-      //var cal = Math.round((l * 2.79 / 100) + 800)
-      //$('#rcb').prop('checked', false)
-      /*$('.transaccion').html(Moneda(cal))
-            $('.Total3').html(Moneda(l + cal));
-            $('#Total, #Total2').val(l + cal);*/
-      $('#recibo').val('');
-      $('#file').val('');
-      var fd = $('form').serialize();
-      $.ajax({
-        url: '/links/pagos',
-        data: fd,
-        type: 'POST',
-        async: true,
-        success: function (data) {
-          $('#signature').val(data.sig);
-          $('#extra').val(data.ext);
-          $('#merchantId').val(data.merchantId);
-          $('#accountId').val(data.accountId);
-        }
-      });
-      RCB(false);
     } else if (forma === 'recbo') {
       RCB(true);
       //$('#pys').prop('checked', false);
