@@ -13943,7 +13943,9 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         data: 'monto',
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
-      { data: 'otro' }
+      { data: 'otro' },
+      { data: 'concpt2' },
+      { data: 'cuenta' }
     ]
   });
   $('#BancoExt_filter').hide();
