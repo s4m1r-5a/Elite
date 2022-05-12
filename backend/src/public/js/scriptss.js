@@ -2652,7 +2652,7 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
         className: 't',
         data: 'ids',
         render: function (data, method, row) {
-          return rol.admin
+          return rol.admin && !rol.externo
             ? `
                     <a class="dropdown-toggle" data-toggle="dropdown" href="#" role="button" aria-haspopup="true" aria-expanded="false">Accion</a>
                     <div class="dropdown-menu">
@@ -7097,10 +7097,7 @@ if (window.location.pathname === `/links/reportes`) {
   });
 }
 /////////////////////////////////* EDITAR REPORTES */////////////////////////////////////////////////////////////
-if (
-  window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}` &&
-  !rol.externo
-) {
+if (window.location.pathname == `/links/editordn/${window.location.pathname.split('/')[3]}`) {
   minDateFilter = '';
   maxDateFilter = '';
   $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
@@ -8107,7 +8104,7 @@ if (
   $('footer').hide();
   $('nav').hide();
   let col = 8;
-  if (rol.auxicontbl) $('#botonesI').removeClass('d-none');
+  //if (rol.auxicontbl) $('#botonesI').removeClass('d-none');
 
   var table = $('#datatable').DataTable({
     paging: false,
@@ -9324,7 +9321,7 @@ if (window.location.pathname == `/links/cartera`) {
 }
 
 //////////////////////////////////* PRODUCTOS */////////////////////////////////////////////////////////////
-if (window.location == `${window.location.origin}/links/productos` && !rol.externo) {
+if (window.location == `${window.location.origin}/links/productos`) {
   $('.sidebar-item').removeClass('active');
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
   let recargada = true,
@@ -15316,7 +15313,7 @@ if (window.location == `${window.location.origin}/links/clientes` && !rol.extern
   });
 }
 /////////////////////////////* CUPONES */////////////////////////////////////////////////////////////////////
-if (window.location == `${window.location.origin}/links/cupones` && !rol.externo) {
+if (window.location == `${window.location.origin}/links/cupones`) {
   $('.sidebar-item').removeClass('active');
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 

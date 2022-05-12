@@ -1,63 +1,4 @@
-{{#if user.externo}}
-
-  <input type='hidden' id='cli' value='{{user.cli}}' />
-  <nav id='sidebar' class='sidebar'>
-    <div class='sidebar-content'>
-      <a class='sidebar-brand' href='/solicitudes'>
-        <i class='align-middle' data-feather='box'></i>
-        <span class='align-middle'>Grupo Elite</span>
-      </a>
-
-      <ul class='sidebar-nav'>
-        <li class='sidebar-header'>
-          Main
-        </li>
-        <li class='sidebar-item active'>
-          <a class='sidebar-link' href='/links/reportes'>
-            <i class='align-middle' data-feather='layers'></i>
-            <span class='align-middle'>Reportes</span>
-            <span class='sidebar-badge badge badge-primary'></span>
-          </a>
-        </li>
-        <li class='sidebar-item active'>
-          <a class='sidebar-link' href='/links/solicitudes'>
-            <i class='align-middle' data-feather='bell'></i>
-            <span class='align-middle'>Solicitudes</span>
-            <span class='sidebar-badge badge badge-primary'></span>
-          </a>
-        </li>
-        <li class='sidebar-item active'>
-          <a class='sidebar-link' href='/links/cartera'>
-            <i class='align-middle' data-feather='file-text'></i>
-            <span class='align-middle'>Cartera</span>
-            <span class='sidebar-badge badge badge-primary'></span>
-          </a>
-        </li>
-      </ul>
-
-      <div class='sidebar-bottom d-none d-lg-block'>
-        <div class='media'>
-          <img
-            class='rounded-circle mr-3'
-            src='/img/avatars/avatar.svg'
-            alt='Soporte'
-            width='40'
-            height='40'
-          />
-          <div class='media-body'>
-            <h5 class='mb-1'>Contacto</h5>
-            <div>
-              <i class='fas fa-circle text-success'></i>
-              Online
-            </div>
-          </div>
-        </div>
-      </div>
-
-    </div>
-  </nav>
-
-{{else if user.admin}}
+{{#if user.admin}}
 
   <input type='hidden' id='cli' value='{{user.cli}}' />
   <nav id='sidebar' class='sidebar'>
@@ -256,6 +197,65 @@
     </div>
   </div>
   <!-- END CHATS -->
+
+{{else if user.externo}}
+
+  <input type='hidden' id='cli' value='{{user.cli}}' />
+  <nav id='sidebar' class='sidebar'>
+    <div class='sidebar-content'>
+      <a class='sidebar-brand' href='/solicitudes'>
+        <i class='align-middle' data-feather='box'></i>
+        <span class='align-middle'>Grupo Elite</span>
+      </a>
+
+      <ul class='sidebar-nav'>
+        <li class='sidebar-header'>
+          Main
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/reportes'>
+            <i class='align-middle' data-feather='layers'></i>
+            <span class='align-middle'>Reportes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/solicitudes'>
+            <i class='align-middle' data-feather='bell'></i>
+            <span class='align-middle'>Solicitudes</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+        <li class='sidebar-item active'>
+          <a class='sidebar-link' href='/links/cartera'>
+            <i class='align-middle' data-feather='file-text'></i>
+            <span class='align-middle'>Cartera</span>
+            <span class='sidebar-badge badge badge-primary'></span>
+          </a>
+        </li>
+      </ul>
+
+      <div class='sidebar-bottom d-none d-lg-block'>
+        <div class='media'>
+          <img
+            class='rounded-circle mr-3'
+            src='/img/avatars/avatar.svg'
+            alt='Soporte'
+            width='40'
+            height='40'
+          />
+          <div class='media-body'>
+            <h5 class='mb-1'>Contacto</h5>
+            <div>
+              <i class='fas fa-circle text-success'></i>
+              Online
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </nav>
 
 {{else if user.subadmin}}
 
