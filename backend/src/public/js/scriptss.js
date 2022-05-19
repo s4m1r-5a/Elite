@@ -2659,6 +2659,9 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
                         <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
                         <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
                         <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 1, ${row.stado})">Auditar</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 6, ${row.stado})">Anular</a>
+                        <a class="dropdown-item" onclick="EstadoCC(${data}, 0, ${row.stado})">Eliminar</a>
                     </div>`
             : '';
         }
@@ -2702,10 +2705,20 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
   });
   var EstadoCC = (id, std, actualstd) => {
     if ((actualstd === 4 && rol.admin) || actualstd !== 4) {
+      const query = { ids: id, std, blck: null, observacion: null };
+      const observacion = std === 6 ? prompt('MOTIVO DE LA ANULACION?', '') : false;
+      if (observacion) query.observacion = observacion;
+      else if (std === 6) return SMSj('error', `La solicitud no fue procesada, motivo invalido`);
+      const confir = !std ? confirm('¿Confirma que desea eliminar esta comision?') : true;
+      if (!confir) return SMSj('error', `La solicitud no fue procesada`);
+      if (/0|6/.test(std)) {
+        const blockComi = confirm('¿Desea no generar comisiones futuras para este lote?');
+        if (blockComi) query.blck = 1;
+      }
       $.ajax({
         type: 'POST',
         url: '/links/reportes/std',
-        data: { ids: id, std },
+        data: query,
         beforeSend: function (xhr) {
           $('#Modalimg').modal('hide');
           $('#ModalEventos').modal({
@@ -6424,6 +6437,9 @@ if (window.location.pathname === `/links/reportes`) {
                             <a class="dropdown-item" onclick="EstadoCC(${data}, 9, ${row.stado})">Habilitar</a>
                             <a class="dropdown-item" onclick="EstadoCC(${data}, 15, ${row.stado})">Inhabilitar</a>
                             <a class="dropdown-item" onclick="EstadoCC(${data}, 4, ${row.stado})">Cancelada</a>
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 1, ${row.stado})">Auditar</a>
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 6, ${row.stado})">Anular</a>
+                            <a class="dropdown-item" onclick="EstadoCC(${data}, 0, ${row.stado})">Eliminar</a>
                         </div>`
               : '';
           }
@@ -6473,10 +6489,20 @@ if (window.location.pathname === `/links/reportes`) {
     });
     var EstadoCC = (id, std, actualstd) => {
       if ((actualstd === 4 && rol.admin) || actualstd !== 4) {
+        const query = { ids: id, std, blck: null, observacion: null };
+        const observacion = std === 6 ? prompt('MOTIVO DE LA ANULACION?', '') : false;
+        if (observacion) query.observacion = observacion;
+        else if (std === 6) return SMSj('error', `La solicitud no fue procesada, motivo invalido`);
+        const confir = !std ? confirm('¿Confirma que desea eliminar esta comision?') : true;
+        if (!confir) return SMSj('error', `La solicitud no fue procesada`);
+        if (/0|6/.test(std)) {
+          const blockComi = confirm('¿Desea no generar comisiones futuras para este lote?');
+          if (blockComi) query.blck = 1;
+        }
         $.ajax({
           type: 'POST',
           url: '/links/reportes/std',
-          data: { ids: id, std },
+          data: query,
           beforeSend: function (xhr) {
             $('#Modalimg').modal('hide');
             $('#ModalEventos').modal({

@@ -4836,17 +4836,14 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
 router.get('/editordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
-  const comi = await pool.query(
-    `SELECT * FROM solicitudes WHERE concepto IN('COMISION INDIRECTA', 'COMISION DIRECTA') AND descp != 'SEPARACION' AND orden = ? AND stado IN(3, 4)`,
-    id
-  );
-  //console.log(iD, id.indexOf('*') < 0, id.indexOf('*'));
+
+  const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto REGEXP 'COMISION|GESTION' 
+  AND descp != 'SEPARACION' AND orden = ${id} AND stado != 6`);
+
   if (comi.length > 0 && id.indexOf('*') < 0) {
     req.flash(
       'error',
-      'Esta Orden no es posible editarla ya que tiene ' +
-        comi.length +
-        ' comision(es) pendiente(s) o paga(s)'
+      'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) generadas'
     );
     res.redirect('/links/reportes');
   } else {
@@ -5857,13 +5854,27 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     ]);
     res.send({ banco, cta, idbank, numero });
   } else if (id === 'std') {
-    const { ids, std } = req.body;
-    console.log(ids, std);
-    await pool.query(`UPDATE solicitudes SET ? WHERE ids = ?`, [{ stado: std }, ids]);
+    const { ids, blck, observacion } = req.body;
+    const std = parseFloat(req.body.std);
+    let sql = `SET s.aprueba = '${req.user.fullname}'`;
+
+    if (!!blck || !std)
+      sql += `, l.uno = IF(s.descp = 'PRIMERA LINEA', ${!std ? null : 1}, l.uno), 
+      l.dos = IF(s.descp = 'SEGUNDA LINEA', ${!std ? null : 1}, l.dos), 
+      l.tres = IF(s.descp = 'TERCERA LINEA', ${!std ? null : 1}, l.tres), 
+      l.directa = IF(s.descp = 'VENTA DIRECTA', ${!std ? null : 1}, l.directa),
+      l.comiempresa = IF(s.descp = 'VENTA INDIRECTA', ${!std ? 0 : 1}, l.comiempresa),
+      l.comisistema = IF(s.descp = 'ADMIN PROYECTOS', ${!std ? 0 : 1}, l.comisistema)`;
+    sql += !!observacion ? `, s.observaciones = '${observacion}'` : '';
+    sql += std ? `, s.stado = ${std}` : '';
+
+    await pool.query(`UPDATE solicitudes s INNER JOIN productosd l 
+     ON s.lt = l.id ${sql} WHERE ids = ${ids}`);
+    if (!std) await pool.query(`DELETE FROM solicitudes WHERE ids = ?`, ids);
     res.send(true);
   } else if (id === 'registrarcb' && !req.user.externo) {
     const { img, id, nrecibo, montos, feh, formap, observacion, j } = req.body;
-    console.log(req.body, j);
+    //console.log(req.body, j);
     if (j) {
       const rcb = {
         date: feh,
