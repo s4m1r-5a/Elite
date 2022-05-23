@@ -1,0 +1,80 @@
+<div class='row'>
+  <div class='col-12'>
+    <div class='card'>
+      <div class='card-header'>
+        <h5 class='card-title'>ASESORES</h5>
+        <h6 class='card-subtitle text-muted'>Establece las comisiones de los asesores como el plan
+          de pagos</h6>
+        <div class=''>
+          <input
+            type='text'
+            class='form-control-no-border reditar'
+            id='Date_search'
+            data-toggle='tooltip'
+            data-placement='top'
+            data-container='body'
+            title='Haz click para editar fecha'
+            style='width: 300px; padding: 1px;'
+          />
+        </div>
+      </div>
+      <div class='card-body'>
+        <table
+          id='asesores'
+          class='table table-sm table-striped table-hover display nowrap'
+          style='width:100%'
+        >
+          <thead>
+            <tr>
+              <th></th>
+              <th>Nombre</th>
+              <th>Documento</th>
+              <th>Movil</th>
+              <th>Email</th>
+              <th>Registro</th>
+              <th>Comi</th>
+              <th>Id</th>
+              <th>Pin</th>
+              <th>Usuario</th>
+              <th>Password</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+        <input type='hidden' id='tu' value='{{user.id}}' />
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class='modal fade' id='modalAsignarComisiones' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <div class='d-inline-block mt-1 mr-3 mb-0 float-right'>
+          <a class='reditar' data-dismiss='modal' aria-label='Close'>
+            <i class='feather mr-0' data-feather='x'></i></a>
+        </div>
+      </div>
+      <div class='modal-body'>
+        <input type='hidden' id='user' />
+        <h4 id='asesor'></h4>
+        <table
+          id='comiproductos'
+          class='table table-sm table-striped table-hover display nowrap w-100 small'
+        >
+          <thead>
+            <tr>
+              <th>id</th>
+              <th>proyecto</th>
+              <th>maxcomi</th>
+              <th>comision</th>
+              <th>fecha</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

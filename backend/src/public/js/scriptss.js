@@ -6328,7 +6328,7 @@ if (window.location.pathname === `/links/reportes`) {
       },
       columnDefs: [
         { className: 'control', orderable: true, targets: 0 },
-        { responsivePriority: 1, targets: [8, 11, 15, 16, 17] },
+        { responsivePriority: 1, targets: [7, 8, 15, 16, 17] },
         { responsivePriority: 2, targets: [13, -1] }
       ],
       order: [[1, 'desc']],
@@ -6496,8 +6496,8 @@ if (window.location.pathname === `/links/reportes`) {
         const confir = !std ? confirm('¿Confirma que desea eliminar esta comision?') : true;
         if (!confir) return SMSj('error', `La solicitud no fue procesada`);
         if (/0|6/.test(std)) {
-          const blockComi = confirm('¿Desea no generar comisiones futuras para este lote?');
-          if (blockComi) query.blck = 1;
+          const blockComi = confirm('¿Desea volver a generar esta comisiones mas adelante?');
+          if (!blockComi) query.blck = 1;
         }
         $.ajax({
           type: 'POST',
@@ -14911,6 +14911,402 @@ if (window.location == `${window.location.origin}/links/red` && !rol.externo) {
           $(rows).eq(i).hide();
         }
       });
+  });
+  // Daterangepicker
+  /*var start = moment().subtract(29, "days").startOf("hour");
+    var end = moment().startOf("hour").add(32, "hour");*/
+  $('.fech').daterangepicker(
+    {
+      locale: {
+        format: 'YYYY-MM-DD HH:mm',
+        separator: ' a ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'De',
+        toLabel: 'A',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        monthNames: [
+          'Enero',
+          'Febrero',
+          'Marzo',
+          'Abril',
+          'Mayo',
+          'Junio',
+          'Julio',
+          'Agosto',
+          'Septiembre',
+          'Octubre',
+          'Noviembre',
+          'Diciembre'
+        ],
+        firstDay: 1
+      },
+      opens: 'center',
+      timePicker: true,
+      timePicker24Hour: true,
+      timePickerIncrement: 15,
+      opens: 'right',
+      alwaysShowCalendars: false,
+      //autoApply: false,
+      startDate: moment().subtract(29, 'days'),
+      endDate: moment(),
+      ranges: {
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
+        'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
+        'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
+        'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+        Hoy: [moment().startOf('days'), moment().endOf('days')],
+        Mañana: [moment().add(1, 'days').startOf('days'), moment().add(1, 'days').endOf('days')],
+        'Proximos 30 Días': [moment().startOf('days'), moment().add(29, 'days').endOf('days')],
+        'Próximo Mes': [
+          moment().add(1, 'month').startOf('month'),
+          moment().add(1, 'month').endOf('month')
+        ]
+      }
+    },
+    function (start, end, label) {
+      maxDateFilter = end;
+      minDateFilter = start;
+      table.draw();
+      $('#Date_search').val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    }
+  );
+}
+/////////////////////////////* ASESORES */////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/asesores` && !rol.externo) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  minDateFilter = '';
+  maxDateFilter = '';
+  $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
+    if (typeof aData._date == 'undefined') {
+      aData._date = new Date(aData[3]).getTime();
+    }
+    if (minDateFilter && !isNaN(minDateFilter)) {
+      if (aData._date < minDateFilter) {
+        return false;
+      }
+    }
+    if (maxDateFilter && !isNaN(maxDateFilter)) {
+      if (aData._date > maxDateFilter) {
+        return false;
+      }
+    }
+    return true;
+  });
+  $(document).ready(function () {
+    $('#Date_search').html('');
+    $('a.toggle-vis').on('click', function (e) {
+      e.preventDefault();
+      // Get the column API object
+      var column = table.column($(this).attr('data-column'));
+      // Toggle the visibility
+      column.visible(!column.visible());
+    });
+  });
+  const asesores = $('#asesores').DataTable({
+    processing: true,
+    autowidth: true,
+    columnDefs: [
+      { responsivePriority: 2, targets: [5, 3] },
+      { responsivePriority: 1, targets: [1, 2, 4, 6] }
+    ],
+    order: [1, 'asc'],
+    ajax: {
+      method: 'POST',
+      url: '/links/asesores',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        className: 'control',
+        orderable: true,
+        data: null,
+        defaultContent: ''
+      },
+      {
+        data: 'fullname',
+        render: (data, method, row) => `<span>${data}</span>
+        <input type="text" class="text-center d-none w-100" value="${data}" 
+        title="${data}" onClick="this.select();" autocomplete="off" name="fullname">`
+      },
+      {
+        data: 'document',
+        render: (data, method, row) => `<span>${data}</span>
+        <input type="text" class="text-center d-none" value="${data}" 
+        title="${data}" onClick="this.select();" autocomplete="off" name="document">`
+      },
+      {
+        data: 'cel',
+        render: (data, method, row) => `<span title="se registro ${row.celular}">${data}</span>
+        <input type="text" class="text-center d-none" value="${data}" 
+        title="${data}" onClick="this.select();" autocomplete="off" name="cel">`
+      },
+      {
+        data: 'username',
+        render: (data, method, row) => `<span>${data}</span>
+        <input type="text" class="text-center d-none w-100" value="${data}" 
+        title="${data}" onClick="this.select();" autocomplete="off" name="username">`
+      },
+      {
+        data: 'fecha',
+        render: (data, method, row) =>
+          `<a title="fecha en que se evio el pin ${row.fechactivacion}">${
+            data ? moment(data).format('YYYY/MM/DD') : ''
+          }</a>`
+      },
+      {
+        className: 'comision',
+        orderable: true,
+        data: null,
+        defaultContent: `<button type="button" class="btn btn-outline-info btn-sm" style="height: 20px;">comisiones</button>`
+      },
+      {
+        data: 'id',
+        render: (data, method, row) => `<a title="Cliente asociado ${row.cli}">${data}</a>`
+      },
+      { data: 'pin' },
+      {
+        data: 'admin',
+        render: (data, method, row) => `
+        <form class="form-inline">
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="a-${row.pin}" class="form-check-input acceso" 
+            value="1" name="admin" ${data && 'checked'}>
+            <label class="text-muted form-check-label" for="a-${row.pin}">
+            <small>Admin</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="b-${row.id}" class="form-check-input acceso" 
+            value="1" name="subadmin" ${row.subadmin && 'checked'}>
+            <label class="text-muted form-check-label" for="b-${row.id}">
+            <small>Subadmin</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="c-${row.id}" class="form-check-input acceso" 
+            value="1" name="contador" ${row.contador && 'checked'}>
+            <label class="text-muted form-check-label" for="c-${row.id}">
+            <small>Contador</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="d-${row.id}" class="form-check-input acceso" 
+            value="1" name="financiero" ${row.financiero && 'checked'}>
+            <label class="text-muted form-check-label" for="d-${row.id}">
+            <small>Financiero</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="e-${row.id}" class="form-check-input acceso" 
+            value="1" name="auxicontbl" ${row.auxicontbl && 'checked'}>
+            <label class="text-muted form-check-label" for="e-${row.id}">
+            <small>Auxicontbl</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="f-${row.id}" class="form-check-input acceso" 
+            value="1" name="asistente" ${row.asistente && 'checked'}>
+            <label class="text-muted form-check-label" for="f-${row.id}">
+            <small>Asistente</small></label>
+          </div>
+          <div class="form-check p-0 ml-3"> 
+            <input type="checkbox" id="g-${row.id}" class="form-check-input acceso" 
+            value="1" name="externo" ${row.externo && 'checked'}>
+            <label class="text-muted form-check-label" for="g-${row.id}">
+              <small>Externo</small></label>
+          </div>
+        </div>`
+      },
+      {
+        data: 'password',
+        render: (data, method, row) => `<input type="password" class="text-center w-100" 
+          onClick="this.select();" autocomplete="off" name="newpass" value="${data}">`
+      }
+    ],
+    dom: 'Bfrtip',
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        extend: 'pageLength',
+        text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+        orientation: 'landscape'
+      }
+    ],
+    ordering: true,
+    language: languag,
+    deferRender: true,
+    paging: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    //searching: false,
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    initComplete: function (settings, json) {
+      //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+    },
+    rowCallback: function (row, data, index) {
+      //$(row).find(`.papa`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+      /*if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            }*/
+    }
+  });
+  asesores.on('change', 'tr input', function () {
+    const fila = $(this).parents('tr');
+    let data = asesores.row(fila).data();
+    if (data === undefined) data = asesores.row(fila.prev()).data();
+    const dato = $(this).val();
+    const accseo = $(this).hasClass('acceso');
+    const item = $(this).attr('name');
+    const check = $(this).is(':checked');
+    if (rol.externo || !rol.subadmin || (accseo && !rol.admin)) return;
+    if (data.subadmin && !rol.admin) return;
+    console.log(item, dato, accseo, check, $(this));
+    const datos = data;
+    accseo ? (datos[item] = check ? 1 : 0) : (datos[item] = dato);
+    $.ajax({
+      type: 'POST',
+      url: '/links/asesores/actualizaruser',
+      data: datos,
+      success: function (dat) {
+        if (dat) asesores.ajax.reload(null, false);
+      },
+      error: function (data) {
+        console.log(data);
+      }
+    });
+  });
+  asesores.on('click', 'tr button', function () {
+    if (rol.externo || !rol.subadmin) return;
+    const fila = $(this).parents('tr');
+    let data = asesores.row(fila).data();
+    if (data === undefined) data = asesores.row(fila.prev()).data();
+    comiproductos.ajax.url(`/links/asignarcomiproductos/${data.id}`).load();
+    $('#user').val(data.id);
+    $('#asesor').html(data.fullname);
+    $('#modalAsignarComisiones').modal({
+      toggle: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+  });
+  asesores.on('dblclick', 'tr span:not(.dtr-title, .dtr-data)', function () {
+    if (rol.externo || !rol.subadmin) return;
+    const span = $(this);
+    const input = $(this).siblings('input');
+    span.hide();
+    input.removeClass('d-none');
+    setTimeout(() => {
+      input.addClass('d-none');
+      span.fadeToggle(2000);
+    }, 9000);
+  });
+  const comiproductos = $('#comiproductos').DataTable({
+    lengthChange: false,
+    //info: false,
+    processing: true,
+    autowidth: true,
+    order: [0, 'desc'],
+    ajax: {
+      method: 'POST',
+      url: '/links/asignarcomiproductos/0',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: 'producto' },
+      { data: 'proyect' },
+      { data: 'maxcomis', render: (data, method, row) => (data * 100).toFixed(1) + '%' },
+      {
+        data: 'comision',
+        render: (data, method, row) =>
+          data
+            ? `<span>${(data * 100).toFixed(1)}%</span>
+              <input type="text" class="text-center d-none w-50" onClick="this.select();"
+              value="${(data * 100).toFixed(1)}" autocomplete="off">`
+            : `<input type="text" class="text-center w-50" autocomplete="off">`
+      },
+      {
+        data: 'date',
+        render: (data, method, row) => (data ? moment(data).format('l') : moment().format('l'))
+      }
+    ],
+    ordering: true,
+    language: languag,
+    deferRender: true,
+    paging: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    //searching: false,
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    initComplete: function (settings, json) {
+      //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
+    },
+    rowCallback: function (row, data, index) {
+      //$(row).find(`.papa`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
+      /*if (data["estado"] == 9) {
+                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
+            }*/
+    }
+  });
+  $('#comiproductos_filter').hide();
+
+  comiproductos.on('dblclick', 'tr span:not(.dtr-title, .dtr-data)', function () {
+    if (rol.externo || !rol.subadmin) return;
+    const span = $(this);
+    const input = $(this).siblings('input');
+    span.hide();
+    input.removeClass('d-none');
+    setTimeout(() => {
+      input.addClass('d-none');
+      span.fadeToggle(2000);
+    }, 5000);
+  });
+  comiproductos.on('change', 'tr input', function () {
+    if (rol.externo || !rol.subadmin) return;
+    const fila = $(this).parents('tr');
+    let data = comiproductos.row(fila).data();
+    const dato = $(this).val();
+    const user = $('#user').val();
+    const datos = { id: data.id, user, producto: data.producto, comi: dato };
+    $.ajax({
+      type: 'POST',
+      url: '/links/asesores/generarcomision',
+      data: datos,
+      //beforeSend: function (xhr) {},
+      success: function (dat) {
+        if (dat) comiproductos.ajax.reload(null, false);
+      },
+      error: function (data) {
+        console.log(data);
+      }
+    });
   });
   // Daterangepicker
   /*var start = moment().subtract(29, "days").startOf("hour");
