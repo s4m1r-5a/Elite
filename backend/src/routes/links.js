@@ -5670,7 +5670,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     AND s.concepto IN('PAGO', 'ABONO', 'BONO')) montos,
     (SELECT SUM(r.totalmora) - SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) mora,
     (SELECT SUM(r.morapaga) + SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) morapaga,
-    SUM(IF(c.cuota = c.proyeccion AND c.diaspagados < 1, c.mora, 0)) morafutura     
+    SUM(IF(c.cuota = c.proyeccion AND c.diaspagados < 1, c.mora, 0)) morafutura, 
+    SUM(IF(c.fechs < CURDATE(), c.proyeccion, 0)) recaudoproyectado     
     FROM productos d INNER JOIN productosd l ON l.producto = d.id 
     INNER JOIN estados e ON l.estado = e.id LEFT JOIN preventa p ON p.lote = l.id 
     AND p.tipobsevacion IS NULL LEFT JOIN cuotas c ON c.separacion = p.id 

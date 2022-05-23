@@ -4202,11 +4202,17 @@ if (window.location.pathname === `/links/reportes`) {
     productos,
     descuentos,
     total,
+    mora,
     abonos,
     salds,
     Fehsi = 'Origenes',
     Fehsf = 'Actualidad',
     proyct = 'TODOS LOS PROYECTOS',
+    proyectado,
+    totalventa = 0,
+    venta = 0,
+    ventaporcentual = 0,
+    ventauniporcentual = 0,
     log;
   var f = [
     {
@@ -4428,6 +4434,13 @@ if (window.location.pathname === `/links/reportes`) {
         }
       },
       {
+        data: 'recaudoproyectado',
+        className: 'te',
+        render: function (data, method, row) {
+          return data ? `${(((row.montos - row.morapaga) * 100) / data).toFixed(1)}%` : '';
+        }
+      },
+      {
         data: 'montos',
         className: 'te',
         render: $.fn.dataTable.render.number('.', '.', 0, '$')
@@ -4530,7 +4543,7 @@ if (window.location.pathname === `/links/reportes`) {
             orientation: 'landscape',
             footer: true,
             exportOptions: {
-              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14]
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
               //modifier: true
             },
             customize: function (win) {
@@ -4553,31 +4566,61 @@ if (window.location.pathname === `/links/reportes`) {
                             <span class="align-middle card-text">${productos} LOTES</span>
                           </div>
                           <div class="mb-0">
-                            <span class="align-middle text-dark">AREA</span>
+                            <span class="align-middle text-dark">AREA TOTAL</span>
                             <span class="align-middle card-text">${Math.round(area)} MTR2</span>
                           </div>
                           <div class="mb-0">
-                            <span class="align-middle text-dark">RECAUDO AL</span>
+                            <span class="align-middle text-dark">PRODUCTOS VENDIDOS</span>
+                            <span class="align-middle card-text">${Math.round(
+                              ventauniporcentual
+                            )}%</span>
+                          </div>
+                          <div class="mb-0">
+                            <span class="align-middle text-dark">PORCENTAJE EN VENTAS</span>
+                            <span class="align-middle card-text">${Math.round(
+                              ventaporcentual
+                            )}%</span>
+                          </div>
+                          <div class="mb-0">
+                            <span class="align-middle text-dark">RECAUDO TOTAL AL</span>
                             <span class="align-middle text-success">
                               ${Math.round((abonos * 100) / total)}%
                             </span>
-                          </div>                                            
+                          </div>  
+                          <div class="mb-0">
+                            <span class="align-middle text-dark">RECAUDO PROYECTADO</span>
+                            <span class="align-middle text-success">
+                              ${Math.round(((abonos - mora) * 100) / proyectado)}%
+                            </span>
+                          </div>                                          
                         </div>
                       </div> 
                       <div class="col-4">
                         <div class="card-body text-primary h4">
+                          <div class="mb-0">
+                            <span class="align-middle text-dark">TOTALES</span>
+                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                          </div>
                           <div class="mb-0">                                          
                             <span class="align-middle text-dark">DESCUENTOS</span>
                             <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
                           </div>
                           <div class="mb-0">
-                            <span class="align-middle text-dark">TOTALES</span>
-                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                            <span class="align-middle text-dark">PRODUCTOS VENDIDOS</span>
+                            <span class="align-middle text-success">${venta}</span>
                           </div>
                           <div class="mb-0">
+                            <span class="align-middle text-dark">VENTA</span>
+                            <span class="align-middle text-success">$${Moneda(totalventa)}</span>
+                          </div>
+                          <div class="mb-0"> 
                             <span class="align-middle text-dark">ABONOS</span>
                             <span class="align-middle text-success">$${Moneda(abonos)}</span>
                           </div>
+                          <div class="mb-0">
+                            <span class="align-middle text-dark">PROYECTADO</span>
+                            <span class="align-middle text-warning">$${Moneda(proyectado)}</span>
+                          </div> 
                           <div class="mb-0">
                             <span class="align-middle text-dark">SALDOS</span>
                             <span class="align-middle text-warning">$${Moneda(salds)}</span>
@@ -4673,25 +4716,34 @@ if (window.location.pathname === `/links/reportes`) {
         .reduce(function (a, b) {
           return intVal(a) + intVal(b);
         }, 0);
-      abonos = api
+      proyectado = api
         .column(11, { order: 'applied', search: 'applied' })
         .data()
         .reduce(function (a, b) {
           return intVal(a) + intVal(b);
         }, 0);
+      abonos = api
+        .column(12, { order: 'applied', search: 'applied' })
+        .data()
+        .reduce(function (a, b) {
+          return intVal(a) + intVal(b);
+        }, 0);
       total = 0;
+      mora = 0;
+      totalventa = 0;
+      venta = 0;
       api
         .rows({ order: 'applied', search: 'applied' })
         .data()
         .reduce(function (a, b) {
           total += b.total ? intVal(b.total) : intVal(b.valor);
+          mora += b.cuotas > 0 ? intVal(b.mora) + intVal(b.morafutura) : 0;
+          totalventa += b.total ? intVal(b.total) : 0;
+          venta += b.total ? 1 : 0;
         }, 0);
-      let mora = 0;
-      api
-        .rows({ order: 'applied', search: 'applied' })
-        .data()
-        .reduce((a, b) => (mora += b.cuotas > 0 ? intVal(b.mora) + intVal(b.morafutura) : 0), 0);
       salds = total + mora - abonos;
+      ventaporcentual = (totalventa * 100) / total;
+      ventauniporcentual = (venta * 100) / productos;
       const rows = api.rows({ order: 'applied', search: 'applied' }).data();
       const img = rows.filter(e => e).map(e => e.imagenes)[0] || 0;
       log = !img
