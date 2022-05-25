@@ -2720,8 +2720,8 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
       const confir = !std ? confirm('¿Confirma que desea eliminar esta comision?') : true;
       if (!confir) return SMSj('error', `La solicitud no fue procesada`);
       if (/0|6/.test(std)) {
-        const blockComi = confirm('¿Desea no generar comisiones futuras para este lote?');
-        if (blockComi) query.blck = 1;
+        const blockComi = confirm('¿Desea volver a generar esta comisiones mas adelante?');
+        if (!blockComi) query.blck = 1;
       }
       $.ajax({
         type: 'POST',
