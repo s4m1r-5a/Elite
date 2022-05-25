@@ -5010,7 +5010,7 @@ router.get('/editordn/:id', isLoggedIn, async (req, res) => {
   const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
 
   const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto REGEXP 'COMISION|GESTION' 
-  AND descp != 'SEPARACION' AND orden = ${id} AND stado != 6`);
+  AND descp != 'SEPARACION' AND orden = ${iD} AND stado != 6`);
 
   if (comi.length > 0 && id.indexOf('*') < 0) {
     req.flash(
@@ -5433,13 +5433,13 @@ router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
 });
 ////////////////////* COMISIONES *//////////////////////////////////
 router.get('/comisiones', isLoggedIn, async (req, res) => {
-  const comis =
+  /* const comis =
     await pool.query(`SELECT p.id ordn, p.lote, d.external, l.comisistema, l.comiempresa,
     l.valor - p.ahorro Total, (l.valor - p.ahorro) * p.iniciar / 100 Inicial, d.maxcomis, d.sistema,
     ( SELECT SUM(monto) FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') AND orden = p.id ) as abonos 
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    WHERE p.tipobsevacion IS NULL AND d.external IS NOT NULL AND l.comiempresa = 0 AND l.comisistema = 0 
-    GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
+    WHERE p.tipobsevacion IS NULL AND p.status IN(2, 3) AND d.external IS NOT NULL AND l.comiempresa = 0 
+    AND l.comisistema = 0 GROUP BY p.id HAVING abonos >= Inicial ORDER BY p.id`);
   const hoy = moment().format('YYYY-MM-DD HH:mm'); //console.log(comis)
   var f = [];
   var sql = `UPDATE productosd SET comiempresa = CASE id`;
@@ -5501,7 +5501,7 @@ router.get('/comisiones', isLoggedIn, async (req, res) => {
       [f]
     );
     await pool.query(`${sql}${sq ? sql2 : ''}`);
-  }
+  } */
 
   const comi = await pool.query(`SELECT p.id ordn, l.valor - p.ahorro Total, 
     (l.valor - p.ahorro) * d.cobrosistema Inicial, ( SELECT SUM(monto) 
