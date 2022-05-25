@@ -7304,7 +7304,8 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         $('#vmtr2').val(Moneda(Math.round(vrmt2)));
         $('#inicial').val(Moneda(Math.round(ini)));
         $('#total').val(Moneda(Math.round(valor)));
-        $(`#xcntag option[value='${iniciar}']`).attr('selected', true);
+        $('#xcntag').val(iniciar);
+        //$(`#xcntag option[value='${iniciar}']`).attr('selected', true);
         $(`#promesa option[value='${status}']`).prop('selected', true);
         $('#ini').val(Moneda(Math.round(ini)));
         $('#fnc').val(Moneda(Math.round(valor - ini)));
@@ -7348,7 +7349,8 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
               $('#vmtr2').val(Moneda(Math.round(data.mtr))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
               $('#inicial').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
               $('#total').val(Moneda(Math.round(data.valor))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-              $(`#xcntag option[value='${porg}']`).attr('selected', true);
+              $('#xcntag').val(porg);
+              //$(`#xcntag option[value='${porg}']`).attr('selected', true);
               $('#ini').val(Moneda(Math.round(data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
               $('#fnc').val(Moneda(Math.round(data.valor - data.inicial))); //.mask('#.##$', { reverse: true, selectOnFocus: true });
               if (pin) {
