@@ -4641,6 +4641,42 @@ router.get('/orden', isLoggedIn, async (req, res) => {
     res.render('links/orden', { proyecto, id, mensaje: '' });
   }
 });
+router.get('/orden2/:lote', isLoggedIn, async (req, res) => {
+  moment.locale('es');
+  const { lote } = req.params;
+  const h = moment().format('YYYY-MM-DD HH:mm');
+  const ahora = moment().subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
+  const hora2 = moment().subtract(2, 'hours').format('YYYY-MM-DD HH:mm');
+  const usr = req.user.fullname;
+  const usrs = req.user.id;
+  const proyecto = await pool.query(
+    `SELECT * FROM  productosd l INNER JOIN productos o ON l.producto = o.id WHERE l.id = ?`,
+    lote
+  );
+  const time = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
+  const hora = time.indexOf('*') > 0 ? time.split('*')[1] : hora2;
+  if (ahora > hora) {
+    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: `${usr}*${h}` }, lote]);
+    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs });
+  } else if (usr !== time.split('*')[0]) {
+    var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
+      time.split('*')[0]
+    } EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`;
+    res.render('links/orden2', { proyecto, lote, mensaje, usrs });
+  } else {
+    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs });
+  }
+});
+router.post('/orden/:accion', isLoggedIn, async (req, res) => {
+  const { accion } = req.params;
+  const productos = await pool.query(`SELECT o.*, l.* FROM productos o 
+  INNER JOIN productosd l ON l.producto = o.id WHERE l.estado IN('9') 
+  ORDER BY o.proyect DESC, l.n ASC, l.mz ASC`);
+  const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
+  const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+  //console.log(productos);
+  res.send({ productos, asesores, clientes });
+});
 router.post('/orden', isLoggedIn, async (req, res) => {
   const {
     numerocuotaspryecto,
@@ -4930,6 +4966,45 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     res.render('links/ordn', { orden, id });
   }
 });
+router.get('/editordn2/:id', isLoggedIn, async (req, res) => {
+  const { id } = req.params;
+  const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
+
+  const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto REGEXP 'COMISION|GESTION' 
+  AND descp != 'SEPARACION' AND orden = ${id} AND stado != 6`);
+
+  if (comi.length > 0 && id.indexOf('*') < 0) {
+    req.flash(
+      'error',
+      'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) generadas'
+    );
+    res.redirect('/links/reportes');
+  } else {
+    sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto, p.asesor,
+            p.extraordinariameses, p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, 
+            p.cupon, p.ahorro, p.fecha, p.obsevacion, p.cuot, pd.mz, pd.n, pd.mtr2, pd.inicial, pd.valor, pt.proyect, 
+            c.nombre, c2.nombre n2, c3.nombre n3, c4.nombre n4, u.fullname, cu.pin, cu.descuento, pd.uno, pd.dos, 
+            COUNT(if(s.concepto = 'PAGO' OR s.concepto = 'ABONO', s.ids, NULL)) AS t, pd.tres, pd.directa, p.dto,
+            pt.valmtr2, pt.porcentage, COALESCE(SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cu.monto + s.monto, 
+            if((s.concepto = 'PAGO' OR s.concepto = 'ABONO') AND s.stado = 4, s.monto, 0))), 0) AS Montos, p.status 
+            FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
+            INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN clientes c2 ON p.cliente2 = c2.idc  
+            LEFT JOIN clientes c3 ON p.cliente3 = c3.idc LEFT JOIN clientes c4 ON p.cliente4 = c4.idc 
+            INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id 
+            LEFT JOIN solicitudes s ON p.lote = s.lt WHERE p.tipobsevacion IS NULL AND p.id = ?
+            GROUP BY p.id`;
+
+    sql2 = `SELECT SUM(IF(c.tipo = 'SEPARACION', 1, '')) AS SEPARACION,
+            SUM(IF(c.tipo = 'INICIAL', 1, '')) AS INICIAL,
+            SUM(IF(c.tipo = 'FINANCIACION', 1, '')) AS FINANCIACION
+            FROM preventa p INNER JOIN cuotas c ON c.separacion = p.id 
+            WHERE p.tipobsevacion IS NULL AND p.id = ?`;
+
+    const orden = await pool.query(sql, iD);
+    const cuotas = await pool.query(sql2, iD); //console.log(cuotas)
+    res.render('links/editordn2', { iD, orden, cuotas });
+  }
+});
 router.get('/editordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
@@ -4973,7 +5048,6 @@ router.post('/ordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`;
   const orden = await pool.query(sql, id);
-  console.log(orden);
   body = { data: orden };
   res.send(body);
 });

@@ -1,0 +1,391 @@
+<div class='container-fluid p-1'>
+  <div class='card'>
+    <div class='card-header'>
+      <h3>ORDEN DE SEPARACION</h3>
+      <input type='hidden' id='agente' value='{{usrs}}' />
+      <input type='hidden' id='lt' value='{{lote}}' />
+    </div>
+    <div class='card-body' id='cuadro2'>
+      <div class='row'>
+        <div class='col-12 col-lg-6'>
+          <div class='input-group mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>PRODUCTO</label>
+            </div>
+            <select
+              id='lote'
+              class='custom-select select2'
+              name='lote'
+              style='width: 100%;'
+              required
+            >
+            </select>
+          </div>
+        </div>
+        <div class='col-12 col-lg-6'>
+          <div class='input-group mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>ASESOR</label>
+            </div>
+            <select
+              id='asesor'
+              class='custom-select select2'
+              name='asesor'
+              style='width: 100%;'
+              required
+            >
+            </select>
+          </div>
+        </div>
+        <div class='col-12 col-lg-12'>
+          <div class='input-group mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CLIENTES</label>
+            </div>
+            <select
+              id='clientes'
+              class='custom-select select2'
+              name='clientes'
+              multiple
+              style='width: 100%;'
+              required
+            >
+            </select>
+          </div>
+        </div>
+        <div class='col-12 col-lg-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>MTR²</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='mtr2'
+              aria-label='Total de mtr²'
+              autocomplete='off'
+              id='mtr2'
+              placeholder='Total de mtr²'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>VMTR²</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='vmtr2'
+              id='vmtr2'
+              autocomplete='off'
+              aria-label='precio del mtr²'
+              placeholder='Precio del mtr²'
+              style='background-color: #FFFFCC;'
+              data-mask='000.000.000'
+              data-mask-reverse='true'
+              data-mask-selectonfocus='true'
+              required
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>INICIAL</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='porcentage'
+              name='porcentage'
+              required
+            >
+              <option value='15'>15%</option>
+              <option value='20'>20%</option>
+              <option value='25'>25%</option>
+              <option value='30'>30%</option>
+              <option value='35'>35%</option>
+              <option value='40'>40%</option>
+              <option value='45'>45%</option>
+              <option value='50'>50%</option>
+              <option value='55'>55%</option>
+              <option value='60'>60%</option>
+              <option value='65'>65%</option>
+              <option value='70'>70%</option>
+              <option value='75'>75%</option>
+              <option value='80'>80%</option>
+              <option value='85'>85%</option>
+              <option value='90'>90%</option>
+              <option value='95'>95%</option>
+            </select>
+            <input
+              type='text'
+              aria-label='inicial'
+              class='form-control text-center w-25'
+              name='inicial'
+              autocomplete='off'
+              placeholder='Inicial'
+              style='background-color: #FFFFCC;'
+              id='inicial'
+              data-mask='000.000.000'
+              data-mask-reverse='true'
+              data-mask-selectonfocus='true'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>VALOR</label>
+            </div>
+            <input
+              class='form-control text-center'
+              name='valor'
+              autocomplete='off'
+              type='text'
+              id='valor'
+              aria-label='Total de lote'
+              placeholder='Total'
+              style='background-color: #FFFFCC;'
+              data-mask='000.000.000'
+              data-mask-reverse='true'
+              data-mask-selectonfocus='true'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-8'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUPON</label>
+            </div>
+            <input
+              class='form-control text-center text-uppercase'
+              type='text'
+              name='cupon'
+              aria-label='Cupon'
+              autocomplete='off'
+              id='cupon'
+              placeholder='Cupon'
+              style='background-color: #FFFFCC;'
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>DTO</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='cuponx100'
+              id='cuponx100to'
+              autocomplete='off'
+              aria-label='descuento'
+              placeholder='Descuento'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>AHORRO</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='ahorro'
+              id='ahorro'
+              autocomplete='off'
+              aria-label='ahorro'
+              placeholder='ahorro'
+              style='background-color: #FFFFCC;'
+              data-mask='000.000.000'
+              data-mask-reverse='true'
+              data-mask-selectonfocus='true'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>PROMESA</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='promesa'
+              name='promesa'
+              required
+            >
+              <option value=''>SIN PROMESA</option>
+              <option value='1'>PROMESA GENERADA</option>
+              <option value='2'>PROMESA AUTENTICADA POR CLIENTE</option>
+              <option value='3'>PROMESA AUTENTICADA POR AMBOS</option>
+            </select>
+          </div>
+        </div>
+        <div class='col-12 col-lg-3'>
+          <div class='input-group input-group-sm mb-2'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>TIPO DTO.</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='tipoDto'
+              name='tipoDto'
+              required
+            >
+              <option value='TODO'>TODO</option>
+              {{! <option value="SEPARACION">SEPARACION</option> }}
+              <option value='INICIAL'>INICIAL</option>
+              <option value='FINANCIACION'>FINANCIACION</option>
+              <option value='NINGUNO'>NINGUNO</option>
+            </select>
+          </div>
+        </div>
+        <div class='col-12 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUOTA MIN</label>
+            </div>
+            <input
+              class='form-control text-center'
+              name='cuotamin'
+              autocomplete='off'
+              type='text'
+              id='cuotamin'
+              placeholder='CUOTA'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUOTAS EN INI</label>
+              <button class='btn btn-secondary' id='ini-min' type='button'>-</button>
+            </div>
+            <input
+              class='form-control text-center'
+              name='inicialcuotas'
+              autocomplete='off'
+              type='text'
+              id='num-ini'
+              placeholder='INI'
+              style='background-color: #FFFFCC;'
+            />
+            <span class='input-group-append'>
+              <button class='btn btn-secondary' id='inicialcuotas-btn' type='button'>+</button>
+            </span>
+          </div>
+        </div>
+        <div class='col-12 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUOTAS EN FNC</label>
+              <button class='btn btn-secondary' id='fnc-min' type='button'>-</button>
+            </div>
+            <input
+              class='form-control text-center'
+              name='financiacion'
+              autocomplete='off'
+              type='text'
+              id='num-fnc'
+              placeholder='FNC'
+              style='background-color: #FFFFCC;'
+            />
+            <span class='input-group-append'>
+              <button class='btn btn-secondary' id='financiacion-btn' type='button'>+</button>
+            </span>
+          </div>
+        </div>
+        <div class='col-12 col-lg-12'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>INI</label>
+            </div>
+            <input
+              class='form-control text-centere'
+              type='text'
+              name='tini'
+              aria-label='Cupon'
+              autocomplete='off'
+              id='ini'
+              placeholder='TOTAL INI'
+              style='background-color: #FFFFCC;'
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>FNC</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='tfnc'
+              id='fnc'
+              autocomplete='off'
+              aria-label='fnc'
+              placeholder='TOTAL FNC'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>TOTAL</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='total'
+              id='total'
+              autocomplete='off'
+              aria-label='total'
+              placeholder='TOTAL'
+              style='background-color: #FFFFCC;'
+              data-mask='000.000.000'
+              data-mask-reverse='true'
+              value='1.000.000.000'
+              data-mask-selectonfocus='true'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-lg-12'>
+          <button type='button' class='btn btn-primary btn-sm float-right guardar'>Guardar Cambios</button>
+          <button
+            type='button'
+            class='btn btn-primary btn-sm float-right quitar mr-2'
+            style='display: none;'
+          >
+            Quitar Bono</button>
+        </div>
+        <div class='col-12 col-lg-12'>
+          <table
+            id='proyeccion'
+            class='table table-striped table-sm table-hover text-small display responsive nowrap'
+            style='width:100%'
+          >
+            <thead>
+              <tr>
+                <th>CUOTA</th>
+                <th>FECHA</th>
+                <th>TIPO</th>
+                <th>MONTO</th>
+                <th>CUOTA</th>
+                <th>FECHA</th>
+                <th>MONTO</th>
+              </tr>
+            </thead>
+            <tbody class='tabl w-100'></tbody>
+            {{! <tfoot>
+          <tr>
+            <th colspan='7' class='text-center'>
+              <button type='button' class='btn btn-primary btn-sm float-right guardar'>Guardar
+                Cambios</button>
+            </th>
+          </tr>
+        </tfoot> }}
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

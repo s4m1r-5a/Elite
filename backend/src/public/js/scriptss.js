@@ -15,6 +15,14 @@ $.jMaskGlobals = {
     S: { pattern: /[a-zA-Z]/ }
   }
 };
+const Cifra = valor => {
+  const punto = /\.$/.test(valor);
+  const num = /,|[a-z A-Z]|\#|\?|\"| /g.test(valor)
+    ? parseFloat(valor.replace(/,|[a-z A-Z]|\#|\?|\"| /g, ''))
+    : parseFloat(valor);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return punto ? num.toLocaleString('en-US') + '.' : num.toLocaleString('en-US');
+};
 function Moneda(valor) {
   valor = valor
     .toString()
@@ -8170,6 +8178,785 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
     crearcartera.rows.add(dat).draw(false).columns.adjust().responsive.recalc();
     separ ? $('#Separar').val(Moneda(separ)) : '';
     CONT();
+  };
+}
+
+/////////////////////////////////* CREAR ORDENES */////////////////////////////////////////////////////////////
+if (window.location.pathname == `/links/orden2/${window.location.pathname.split('/')[3]}`) {
+  const lt = $('#lt').val();
+  const agente = $('#agente').val();
+  const clients = [];
+  const hoy = moment().format('YYYY/MM/DD');
+  const cuota = 1000000;
+  const row = [
+    { fechs: hoy, ncuota: 1, tipo: 'SEPARACION', cuota, fechs2: null, ncuota2: null, cuota2: null }
+  ];
+  var lote = $('#lote');
+  var asesor = $('#asesor');
+  var clientes = $('#clientes');
+  var maxCuotasFinanciamiento;
+  var productos;
+  var producto;
+  var historialCuota = 0;
+
+  $(document).ready(function () {
+    var bono = 0;
+    $('.select2').each(function () {
+      var texto =
+        $(this).attr('id') === 'clientes' ? '...SELECCIONE LOS CLIENTES' : 'SELECCIONE UN PRODUCTO';
+      $(this)
+        .wrap('<div class="position-relative w-75"></div>')
+        .select2({
+          placeholder: texto,
+          dropdownParent: $(this).parent(),
+          maximumSelectionLength: 4,
+          allowClear: true
+        });
+    });
+    $('#lote').change(function () {
+      maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
+      console.log(maxCuotasFinanciamiento, producto, ' cambio el proyecto');
+
+      $('#mtr2').val(producto.mtr2);
+      $('#vmtr2').val(Moneda(Math.round(producto.mtr)));
+      $(`#porcentage option[value='${producto.porcentage}']`).attr('selected', true);
+      $('#inicial').val(Moneda(Math.round(producto.inicial)));
+      $('#valor').val(Moneda(Math.round(producto.valor)));
+      producto?.status && $(`#promesa option[value='${producto.status}']`).prop('selected', true);
+      $('#cuotamin').val(Moneda(Math.round(producto.cuotamin)));
+      $('#ini').val(Moneda(Math.round(producto.inicial)));
+      $('#fnc').val(Moneda(Math.round(producto.valor - producto.inicial)));
+      $('#total').val(Moneda(Math.round(producto.valor)));
+      //FINANCIAR();
+      /* if (pin) {
+        $('.quitar').show('slow');
+        $('#idbono').val(kupon);
+        $('#cupon').val(pin);
+        Totales(valor, descuento, dto);
+      } */
+      $('#ModalEventos').modal('hide');
+    });
+    $('#num-fnc').change(function () {
+      FINANCIAR('FINANCIACION');
+    });
+    $('#financiacion-btn').click(function () {
+      SMSj(
+        'info',
+        'No es posible agregar cuotas ya que la separacion cubre el coste del producto, edite primero la separacion para poder realizar cambios en esta accion'
+      );
+      //$('#financiacion').val(c);
+      FINANCIAR('FINANCIACION');
+    });
+    $('#num-ini').change(function () {
+      FINANCIAR('INICIAL');
+    });
+    $('#inicialcuotas-btn').click(function () {
+      //$('#inicialcuotas').val(c);
+      FINANCIAR('INICIAL');
+    });
+    $('#tipoDto').change(function () {
+      dto = $(this).val();
+      var total = $('#total').val().replace(/\./g, '');
+      Totales(total, kuponDto, dto);
+    });
+    $('#cupon').change(function () {
+      var total = $('#total').val().replace(/\./g, '');
+      if ($(this).val() !== bono && $(this).val()) {
+        $.ajax({
+          url: '/links/bono/' + $(this).val(),
+          type: 'GET',
+          async: false,
+          success: function (data) {
+            if (data.length) {
+              var fecha = moment(data[0].fecha).add(59, 'days').endOf('days');
+              if (data[0].producto != null) {
+                SMSj(
+                  'error',
+                  'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado'
+                );
+                $(this).val('');
+                Totales(total, false, dto);
+              } else if (fecha < new Date()) {
+                SMSj(
+                  'error',
+                  'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado'
+                );
+                $(this).val('');
+                Totales(total, false, dto);
+              } else if (data[0].estado != 9) {
+                SMSj(
+                  'error',
+                  'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada'
+                );
+                $(this).val(''); //L0X66
+                Totales(total, false, dto);
+              } else {
+                if (dto === 'NINGUNO') {
+                  $(`#tipoDto option[value='TODO']`).prop('selected', true);
+                  dto = 'TODO';
+                }
+                kuponDto = data[0].descuento;
+                Totales(total, kuponDto, dto);
+                $('#idbono').val(data[0].id);
+                CONT();
+              }
+              bono = data[0].pin;
+            } else {
+              SMSj(
+                'error',
+                'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado'
+              );
+              kuponDto = false;
+            }
+          }
+        });
+      } else {
+        SMSj(
+          'error',
+          'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
+        );
+
+        bono !== 0 ? $(this).val(bono) : '';
+        Totales(total, kuponDto, dto);
+      }
+    });
+  });
+
+  $.ajax({
+    type: 'POST',
+    url: '/links/orden/lote',
+    beforeSend: xhr =>
+      $('#ModalEventos').modal({
+        toggle: true,
+        backdrop: 'static',
+        keyboard: true
+      }),
+    success: data => {
+      $('#ModalEventos').modal('hide');
+      var proyecto = null;
+      productos = data.productos;
+      productos.map(x => {
+        if (x.proyect !== proyecto) {
+          parent = document.createElement('optgroup');
+          parent.setAttribute('label', x.proyect);
+          lote.append(parent);
+          proyecto = x.proyect;
+        }
+        const Lt = lt == x.id ? true : false;
+        const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
+        parent.append(option);
+        if (lt == x.id) producto = x;
+      });
+      lote.val(lt).trigger('change');
+
+      data.asesores.map((x, v) => {
+        var user = agente == x.id ? true : false;
+        asesor.append(new Option(x.fullname, x.id, user, user));
+      });
+      asesor.val(agente).trigger('change');
+
+      data.clientes.map((x, v) => {
+        var client = clients.some(e => e == x.idc);
+        clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, client, client));
+      });
+      clientes.val(clients).trigger('change');
+    }
+  }).then(data => console.log('paso por aqui'));
+
+  var FINANCIAR = async tipo => {
+    const rows = [];
+    proyeccion
+      .rows()
+      .data()
+      .filter(e => rows.push(e));
+    const ini = parseFloat($('#ini').val().replace(/\./g, ''));
+    const fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+    const numIni = parseFloat($('#num-ini').val());
+    const numFnc = parseFloat($('#num-fnc').val());
+    const typI = tipo === 'INICIAL';
+    const typF = tipo === 'FINANCIACION';
+
+    if (tipo) {
+      const num = rows.filter(e => e.tipo === tipo).length;
+      const cuota = typI ? ini / numIni : fnc / numFnc;
+      const newRows = typI ? Math.round(numIni / 2) - num : Math.round(numFnc / 2) - num;
+      const deleteIndex = [];
+      let n = 2;
+      rows
+        .filter(e => e.tipo === tipo)
+        .map((e, i) => {
+          const nu1 = n - 1;
+          const nu2 = n;
+          if ((typI && nu1 > numIni) || (typF && nu1 > numFnc)) {
+            const index = rows.findIndex(e => e.tipo === tipo && e.ncuota == nu1);
+            deleteIndex.push(index);
+          }
+          const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
+          n += 2;
+          e.ncuota = nu1;
+          e.cuota = cuota;
+          e.fechs2 = rType ? hoy : null;
+          e.ncuota2 = rType ? nu2 : null;
+          e.cuota2 = rType ? cuota : null;
+        });
+
+      if (deleteIndex.length) rows.splice(deleteIndex[0], deleteIndex.length);
+      const ndx = typI ? rows.findIndex(e => e.tipo === 'FINANCIACION') - 1 : rows.length - 1;
+      const index = ndx < 0 ? rows.length - 1 : ndx;
+      n = 2;
+      for (var i = 0; i < newRows; i++) {
+        const nu1 = num * 2 + n - 1;
+        const nu2 = num * 2 + n;
+        const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
+        n += 2;
+        rows.splice(index + i, 0, {
+          fechs: hoy,
+          ncuota: nu1,
+          tipo: tipo,
+          cuota: cuota,
+          fechs2: rType ? hoy : null,
+          ncuota2: rType ? nu2 : null,
+          cuota2: rType ? cuota : null
+        });
+      }
+    }
+    //console.log(rows);
+    proyeccion.clear().draw(false);
+    rows.sort((a, b) => {
+      if (a.tipo < b.tipo) return 1;
+      if (a.tipo > b.tipo) return -1;
+      return 0;
+    });
+    proyeccion.rows.add(rows).draw(false); //.columns.adjust().responsive.recalc();
+  };
+
+  var proyeccion = $('#proyeccion').DataTable({
+    searching: false,
+    language: languag2,
+    lengthMenu: [-1],
+    //deferRender: true,
+    info: false,
+    autoWidth: true,
+    paging: false,
+    order: [
+      [2, 'desc'],
+      [0, 'asc']
+    ],
+    responsive: {
+      details: {
+        display: $.fn.dataTable.Responsive.display.childRowImmediate,
+        type: 'none'
+        //target: ''
+      }
+      /* breakpoints: [
+        { name: 'fechs2', width: Infinity },
+        { name: 'ncuota2', width: 1480 },
+        { name: 'cuota2', width: 1280 }
+      ] */
+    },
+    columnDefs: [
+      { visible: false, targets: 2 },
+      { responsivePriority: 1, width: '25%', targets: [0, 1, 3] }
+    ],
+    data: row,
+    columns: [
+      { data: 'ncuota' },
+      {
+        data: 'fechs',
+        render: (data, method, row) => (data ? moment(data).format('YYYY/MM/DD') : '')
+      },
+      { data: 'tipo' },
+      {
+        data: 'cuota',
+        render: (data, method, row) => {
+          return data
+            ? `<input class="text-center cuota" type="text" value="${Cifra(data)}" required>`
+            : '';
+        }
+      },
+      { data: 'ncuota2', className: 'min-tablet-p not-mobile-l' },
+      {
+        data: 'fechs2',
+        className: 'min-tablet-p not-mobile-l',
+        render: (data, method, row) => (data ? moment(data).format('YYYY/MM/DD') : '')
+      },
+      {
+        data: 'cuota2',
+        className: 'min-tablet-p not-mobile-l',
+        render: (data, method, row) => {
+          return data
+            ? `<input class="text-center cuota" type="text" value="${Cifra(data)}" required>`
+            : '';
+        }
+      }
+    ],
+    drawCallback: function (settings) {
+      var api = this.api();
+      var rows = api.rows({ page: 'current' }).nodes();
+      var last = null;
+      /* var child = api.rows().every(function () {
+        this.child();
+      });
+      child[0].hide();
+      console.log(child); */
+
+      api
+        .column(2, { page: 'current' })
+        .data()
+        .each(function (group, i) {
+          if (last !== group) {
+            $(rows)
+              .eq(i)
+              .before(
+                `<tr class="group font-weight-bold text-primary" style='background-color: #FFFFCC;'>
+                <td colspan="7">${group}</td></tr>`
+              );
+            last = group;
+          }
+        });
+    },
+    initComplete: function (settings, json) {
+      $('#agrmz').find('input').val('no');
+    },
+    createdRow: function (row, data, dataIndex) {
+      /*console.log(data, row)
+            if (!data[2]) {
+                $(row).find('td').attr('colspan', '8');
+            }*/
+    }
+  });
+  proyeccion.on('click', 'tr a', function () {
+    var fila = $(this).parents('tr');
+    var tipo = fila.find(`.tipo`).val();
+    var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
+    var Fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+    var ni = parseFloat($('#inicialcuotas').val());
+    var nf = parseFloat($('#financiacion').val());
+
+    if (tipo === 'INICIAL') {
+      ni = Math.sign(ni - 1) < 1 ? 0 : ni - 1;
+      $('#inicialcuotas').val(ni);
+    } else if (tipo === 'FINANCIACION') {
+      nf = Math.sign(nf - 1) < 1 ? 0 : nf - 1;
+      $('#financiacion').val(nf);
+    }
+
+    if (!nf && !ni) {
+      $('#Separar').val(Moneda(Ini + Fnc));
+    } else if (!ni) {
+      $('#Separar').val(Moneda(Ini));
+    } else if (!nf) {
+      $('#financiacion').val(1);
+      SMSj('info', 'No es posible eliminar toda la finaciacion sin antes eliminar toda la inicial');
+      return;
+    }
+    proyeccion.row(fila).remove().draw(false);
+    CONT();
+  });
+  proyeccion.on('click', '.guardar', function () {
+    $('#proyeccion')
+      .find('#ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial')
+      .prop('disabled', false);
+    var datos = $('#proyeccion thead').find(`input, select`).serialize();
+    datos += '&' + proyeccion.$('input').serialize();
+    proyeccion.$('#ini, #fnc, #total, #inicial').prop('disabled', true);
+    //console.log(datos)
+    $.ajax({
+      type: 'POST',
+      url: '/links/ordne',
+      data: datos,
+      async: true,
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          toggle: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      success: function (data) {
+        if (data) {
+          SMSj('success', 'Datos actualizados correctamente');
+          $('#ModalEventos').modal('hide');
+          eliminar = '';
+          window.location.href = '/links/reportes';
+        }
+      }
+    });
+  });
+  proyeccion.on('keyup', '.tabl .cuota', function () {
+    $(this).val(Cifra($(this).val()));
+    //$(this).mask('#,##$', { reverse: true, selectOnFocus: true });
+  });
+  proyeccion.on('change', '.tabl .cuota', function () {
+    var fila = $(this).parents('tr');
+    var tipo = fila.find(`.tipo`).val();
+    var total = 0,
+      valor = 0,
+      num = 0;
+
+    var TotalIni = parseFloat($('#ini').val().replace(/\./g, ''));
+    var TotalFnc = parseFloat($('#fnc').val().replace(/\./g, ''));
+    var TotalSprc = parseFloat($('#Separar').val().replace(/\./g, ''));
+    var excedente = TotalSprc > TotalIni ? TotalSprc - TotalIni : 0;
+    var nu = $('#inicialcuotas').val();
+    var nf = $('#financiacion').val();
+    //realcuotai = Math.round((TotalIni - TotalSprc) / nu);
+    //realcuotaf = Math.round((TotalFnc - excedente) / nf);
+
+    if (tipo === 'SEPARACION') {
+      if (TotalSprc === TotalIni + TotalFnc) {
+        $('#proyeccion .tabl tr')
+          .filter((c, i) => {
+            return $(i).find(`.tipo`).val() !== 'SEPARACION';
+          })
+          .map((c, i) => {
+            proyeccion.row(i).remove().draw(false);
+          });
+        nu = $('#inicialcuotas').val(0);
+        nf = $('#financiacion').val(0);
+      } else if (TotalSprc > TotalIni + TotalFnc) {
+        SMSj(
+          'info',
+          'No es posible agregar un valor mayor al del total del producto, se restableceran los valores predeterminados del producto'
+        );
+        TotalSprc = parseFloat($('#Separar').val('1.000.000').replace(/\./g, ''));
+        if (nu == 0) {
+          nu = $('#inicialcuotas').val(1);
+          FINANCIAR('INICIAL', 1, parseFloat(TotalSprc));
+        }
+        if (nf == 0) {
+          nf = $('#financiacion').val(1);
+          FINANCIAR('FINANCIACION', 1, parseFloat(TotalSprc));
+        }
+        if (nu != 0 && nf != 0) {
+          CONT();
+        }
+      } else if (TotalSprc > TotalIni) {
+        $('#proyeccion .tabl tr')
+          .filter((c, i) => {
+            return $(i).find(`.tipo`).val() === 'INICIAL';
+          })
+          .map((c, i) => {
+            proyeccion.row(i).remove().draw(false);
+          });
+        nu = $('#inicialcuotas').val(0);
+        nf < 1 ? FINANCIAR('FINANCIACION', 1, TotalSprc) : CONT();
+      } else {
+        if (nu == 0) {
+          nu = $('#inicialcuotas').val(1);
+          FINANCIAR('INICIAL', 1, TotalSprc);
+        }
+        if (nf == 0) {
+          nf = $('#financiacion').val(1);
+          FINANCIAR('FINANCIACION', 1, TotalSprc);
+        } else {
+          CONT();
+        }
+      }
+    } else if (tipo === 'INICIAL') {
+      $('#proyeccion .tabl tr')
+        .filter((c, i) => {
+          var e =
+            $(i).find(`.cuota`).val() === undefined
+              ? 0
+              : $(i).find(`.cuota`).val().length > 3
+              ? $(i).find(`.cuota`).val().replace(/\./g, '')
+              : $(i).find(`.cuota`).val();
+          return (
+            $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai && realcuotai > 0
+          );
+        })
+        .map((c, i) => {
+          num = c + 1;
+          var e =
+            $(i).find(`.cuota`).val() === undefined
+              ? 0
+              : $(i).find(`.cuota`).val().length > 3
+              ? $(i).find(`.cuota`).val().replace(/\./g, '')
+              : $(i).find(`.cuota`).val();
+          valor += parseFloat(e);
+        });
+      var n = nu - num;
+      console.log(valor, TotalIni - TotalSprc, n);
+
+      if (valor === TotalIni - TotalSprc && n !== 0) {
+        var u = 1;
+        $('#proyeccion .tabl tr')
+          .filter((c, i) => {
+            var e =
+              $(i).find(`.cuota`).val() === undefined
+                ? 0
+                : $(i).find(`.cuota`).val().length > 3
+                ? $(i).find(`.cuota`).val().replace(/\./g, '')
+                : $(i).find(`.cuota`).val();
+            return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) === realcuotai;
+          })
+          .map((c, i) => {
+            proyeccion.row(i).remove().draw(false);
+          });
+        $('#proyeccion .tabl tr').each((e, i) => {
+          if ($(i).find(`.tipo`).val() === 'INICIAL') {
+            $(i)
+              .find(`.n`)
+              .val(u++);
+          }
+        });
+        realcuotai = (TotalIni - TotalSprc) / nu;
+      } else if (valor > TotalIni - TotalSprc) {
+        SMSj(
+          'info',
+          'No es posible agregar un valor mayor al de la cuota inicial, se restableceran los valores de la cuota inicial'
+        );
+        realcuotai = (TotalIni - TotalSprc) / nu;
+        var u = 1;
+        $('#proyeccion .tabl tr').each((e, i) => {
+          var tpo = $(i).find(`.tipo`).val();
+          if (tpo === 'INICIAL') {
+            $(i)
+              .find(`.n`)
+              .val(u++);
+            $(i).find(`.cuota`).val(Moneda(realcuotai));
+          }
+        });
+      } else {
+        total = TotalIni - TotalSprc - valor;
+        cuota = Math.round(total / n);
+        if (n > 0) {
+          var u = 1;
+          $('#proyeccion .tabl tr').each((e, i) => {
+            var tpo = $(i).find(`.tipo`).val();
+            if (tpo === 'INICIAL') {
+              var c =
+                $(i).find(`.cuota`).val() === undefined
+                  ? ''
+                  : $(i).find(`.cuota`).val().length > 3
+                  ? $(i).find(`.cuota`).val().replace(/\./g, '')
+                  : $(i).find(`.cuota`).val();
+              $(i)
+                .find(`.n`)
+                .val(u++);
+              if (parseFloat(c) === realcuotai) {
+                $(i).find(`.cuota`).val(Moneda(cuota)); //.mask('#.##$', { reverse: true, selectOnFocus: true });
+              }
+            }
+          });
+        }
+        realcuotai = cuota;
+      }
+    } else if (tipo === 'FINANCIACION') {
+      $('#proyeccion .tabl tr')
+        .filter((c, i) => {
+          var e =
+            $(i).find(`.cuota`).val() === undefined
+              ? ''
+              : $(i).find(`.cuota`).val().length > 3
+              ? $(i).find(`.cuota`).val().replace(/\./g, '')
+              : $(i).find(`.cuota`).val();
+          return (
+            $(i).find(`.tipo`).val() === 'FINANCIACION' &&
+            parseFloat(e) !== realcuotaf &&
+            realcuotaf > 0
+          );
+        })
+        .map((c, i) => {
+          num = c + 1;
+          var e =
+            $(i).find(`.cuota`).val() === undefined
+              ? ''
+              : $(i).find(`.cuota`).val().length > 3
+              ? $(i).find(`.cuota`).val().replace(/\./g, '')
+              : $(i).find(`.cuota`).val();
+          valor += parseFloat(e);
+        });
+      var n = nf - num;
+
+      if (valor === TotalFnc - excedente && n !== 0) {
+        var u = 1;
+        $('#proyeccion .tabl tr')
+          .filter((c, i) => {
+            var e =
+              $(i).find(`.cuota`).val() === undefined
+                ? 0
+                : $(i).find(`.cuota`).val().length > 3
+                ? $(i).find(`.cuota`).val().replace(/\./g, '')
+                : $(i).find(`.cuota`).val();
+            return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) === realcuotaf;
+          })
+          .map((c, i) => {
+            proyeccion.row(i).remove().draw(false);
+          });
+        $('#proyeccion .tabl tr').each((e, i) => {
+          if ($(i).find(`.tipo`).val() === 'FINANCIACION') {
+            $(i)
+              .find(`.n`)
+              .val(u++);
+          }
+        });
+        realcuotaf = valor / num;
+      } else if (valor > TotalFnc - excedente) {
+        SMSj(
+          'info',
+          'No es posible agregar un valor mayor al de la financiacion del producto, se restableceran los valores de la financiacion'
+        );
+        realcuotaf = (TotalFnc - excedente) / nf;
+        var u = 1;
+        $('#proyeccion .tabl tr').each((e, i) => {
+          var tpo = $(i).find(`.tipo`).val();
+          if (tpo === 'FINANCIACION') {
+            $(i)
+              .find(`.n`)
+              .val(u++);
+            $(i).find(`.cuota`).val(Moneda(realcuotaf));
+          }
+        });
+      } else {
+        total = TotalFnc - excedente - valor;
+        cuota = Math.round(total / n);
+        if (n > 0) {
+          var u = 1;
+          $('#proyeccion .tabl tr').each((e, i) => {
+            var tpo = $(i).find(`.tipo`).val();
+            if (tpo === 'FINANCIACION') {
+              var c =
+                $(i).find(`.cuota`).val() === undefined
+                  ? ''
+                  : $(i).find(`.cuota`).val().length > 3
+                  ? $(i).find(`.cuota`).val().replace(/\./g, '')
+                  : $(i).find(`.cuota`).val();
+              $(i)
+                .find(`.n`)
+                .val(u++);
+              if (parseFloat(c) === realcuotaf) {
+                $(i).find(`.cuota`).val(Moneda(cuota));
+              }
+            }
+          });
+        }
+        realcuotaf = cuota;
+      }
+    }
+    $('#cuot').val(TotalSprc >= TotalIni + TotalFnc ? TotalSprc : realcuotaf);
+  });
+  proyeccion.on('change', '.tabl .fecha', function () {
+    var t = moment().format('YYYY-MM-DD');
+    var fech = $(this).val() ? $(this).val() : t;
+    var f = null,
+      n = 0;
+    $('#proyeccion .tabl tr').map((c, i) => {
+      var e = $(i).find(`.fecha`).val() ? $(i).find(`.fecha`).val() : 12;
+      if ($(i).find(`.fecha`).val() !== undefined && e === fech) {
+        f = true;
+      } else if ($(i).find(`.fecha`).val() !== undefined && f) {
+        n++;
+        s = moment(fech).add(n, 'month').format('YYYY-MM-DD');
+        $(i).find(`.fecha`).val(s);
+      }
+    });
+  });
+  var CONT = () => {
+    var Separacion = parseFloat($('#Separar').val().replace(/\./g, ''));
+    var totalCuotaInicial = parseFloat($('#ini').val().replace(/\./g, '')); // Total de la cuota inicial sin la separacion
+    var ini = Math.sign(totalCuotaInicial - Separacion) > 0 ? totalCuotaInicial - Separacion : 0;
+    var fnc = parseFloat($('#fnc').val().replace(/\./g, '')); // Total de la finaciacion del producto
+    var ic = parseFloat($('#inicialcuotas').val());
+    var fc = parseFloat($('#financiacion').val());
+    var excedente = 0;
+
+    var cuotai = parseFloat(ini) / ic;
+    var cuotaf = parseFloat(fnc) / fc;
+    var fecha = $('#proyeccion .tabl tr').find(`.fecha`)[0].value;
+    var n = 1,
+      s,
+      l = 1,
+      k = 1;
+
+    if (Separacion >= totalCuotaInicial + fnc) {
+      ic = parseFloat($('#inicialcuotas').val(0));
+      fc = parseFloat($('#financiacion').val(0));
+      cuotai = 0;
+      cuotaf = 0;
+    } else if (Separacion === totalCuotaInicial) {
+      ic = parseFloat($('#inicialcuotas').val(0));
+      cuotai = 0;
+    } else if (Separacion > totalCuotaInicial) {
+      excedente = Separacion - totalCuotaInicial;
+      ic = parseFloat($('#inicialcuotas').val(0));
+      if (fc < 1) {
+        fc = 1;
+        parseFloat($('#financiacion').val(fc));
+      }
+      cuotaf = (fnc - excedente) / fc;
+      cuotai = 0;
+    }
+
+    $('#cuot').val(cuotaf ? cuotaf : Separacion);
+
+    $('#proyeccion .tabl tr').each((e, i) => {
+      var fe = $(i).find(`.fecha`).val();
+      var tpo = $(i).find(`.tipo`).val();
+      if (tpo === 'INICIAL' && cuotai) {
+        $(i)
+          .find(`.n`)
+          .val(l++);
+        $(i)
+          .find(`.cuota`)
+          .val(Moneda(Math.round(cuotai)));
+        $(i)
+          .find(`.rcuota`)
+          .val(Moneda(Math.round(cuotai)));
+      }
+      if (tpo === 'FINANCIACION' && cuotaf) {
+        $(i)
+          .find(`.n`)
+          .val(k++);
+        $(i)
+          .find(`.cuota`)
+          .val(Moneda(Math.round(cuotaf)));
+        $(i)
+          .find(`.rcuota`)
+          .val(Moneda(Math.round(cuotaf)));
+      }
+      if (fe !== undefined && fe !== fecha) {
+        s = moment(fecha)
+          .add(n++, 'month')
+          .format('YYYY-MM-DD');
+        $(i).find(`.fecha`).val(s);
+      }
+    });
+    realcuotai = Math.round(cuotai);
+    realcuotaf = Math.round(cuotaf);
+    $('.fecha').daterangepicker({
+      locale: {
+        format: 'YYYY-MM-DD',
+        separator: ' - ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'De',
+        toLabel: '-',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        monthNames: [
+          'Enero',
+          'Febrero',
+          'Marzo',
+          'Abril',
+          'Mayo',
+          'Junio',
+          'Julio',
+          'Agosto',
+          'Septiembre',
+          'Octubre',
+          'Noviembre',
+          'Diciembre'
+        ],
+        firstDay: 1
+      },
+      singleDatePicker: true,
+      showDropdowns: true,
+      minYear: 2017,
+      maxYear: parseInt(moment().format('YYYY'), 10) + 5
+    });
   };
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
