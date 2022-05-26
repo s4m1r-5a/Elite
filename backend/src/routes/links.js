@@ -7407,11 +7407,11 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
       msg: `Solicitud procesada exitosamente, el pago fue restablecido`
     });
   } else {
-    const { ids, acumulado, ahora, idExtracto, enviaRcb } = req.body;
+    const { ids, ahora, idExtracto, enviaRcb } = req.body;
 
     const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
     const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto);
-    var w = { acumulado, aprobado: ahora };
+    var w = { aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
       await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [w, ids]);

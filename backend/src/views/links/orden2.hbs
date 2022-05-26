@@ -5,8 +5,8 @@
       <input type='hidden' id='agente' value='{{usrs}}' />
       <input type='hidden' id='lt' value='{{lote}}' />
     </div>
-    <div class='card-body' id='cuadro2'>
-      <div class='row'>
+    <div class='card-body p-1' id='cuadro2'>
+      <div class='row d-flex justify-content-center'>
         <div class='col-12 col-lg-6'>
           <div class='input-group mb-3'>
             <div class='input-group-prepend'>
@@ -33,6 +33,7 @@
               name='asesor'
               style='width: 100%;'
               required
+              disabled
             >
             </select>
           </div>
@@ -53,7 +54,7 @@
             </select>
           </div>
         </div>
-        <div class='col-12 col-lg-4'>
+        <div class='col-12 col-md-6 col-lg-4'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>MTR²</label>
@@ -68,6 +69,7 @@
               placeholder='Total de mtr²'
               style='background-color: #FFFFCC;'
               disabled
+              required
             />
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>VMTR²</label>
@@ -85,39 +87,28 @@
               data-mask-reverse='true'
               data-mask-selectonfocus='true'
               required
+              disabled
             />
           </div>
         </div>
-        <div class='col-12 col-lg-4'>
+        <div class='col-12 col-md-6 col-lg-4'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>INICIAL</label>
             </div>
-            <select
-              class='form-control'
+            <input
+              type='text'
+              aria-label='porcentage'
+              class='form-control text-center'
+              name='porcentage'
+              autocomplete='off'
+              placeholder='0%'
               style='background-color: #FFFFCC;'
               id='porcentage'
-              name='porcentage'
+              {{! data-mask='$$*%' }}
+              disabled
               required
-            >
-              <option value='15'>15%</option>
-              <option value='20'>20%</option>
-              <option value='25'>25%</option>
-              <option value='30'>30%</option>
-              <option value='35'>35%</option>
-              <option value='40'>40%</option>
-              <option value='45'>45%</option>
-              <option value='50'>50%</option>
-              <option value='55'>55%</option>
-              <option value='60'>60%</option>
-              <option value='65'>65%</option>
-              <option value='70'>70%</option>
-              <option value='75'>75%</option>
-              <option value='80'>80%</option>
-              <option value='85'>85%</option>
-              <option value='90'>90%</option>
-              <option value='95'>95%</option>
-            </select>
+            />
             <input
               type='text'
               aria-label='inicial'
@@ -134,7 +125,7 @@
             />
           </div>
         </div>
-        <div class='col-12 col-lg-3'>
+        <div class='col-12 col-md-5 col-lg-3'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>VALOR</label>
@@ -155,10 +146,10 @@
             />
           </div>
         </div>
-        <div class='col-12 col-lg-8'>
+        <div class='col-12 col-md-10 col-lg-8'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>CUPON</label>
+              <label class='input-group-text px-1' for='proyectos'>CUPON</label>
             </div>
             <input
               class='form-control text-center text-uppercase'
@@ -171,7 +162,7 @@
               style='background-color: #FFFFCC;'
             />
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>DTO</label>
+              <label class='input-group-text px-1' for='proyectos'>DTO</label>
             </div>
             <input
               class='form-control text-center'
@@ -185,7 +176,7 @@
               disabled
             />
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>AHORRO</label>
+              <label class='input-group-text px-1' for='proyectos'>AHO</label>
             </div>
             <input
               class='form-control text-center'
@@ -203,7 +194,7 @@
             />
           </div>
         </div>
-        <div class='col-12 col-lg-4'>
+        <div class='col-12 col-md-4'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>PROMESA</label>
@@ -214,6 +205,7 @@
               id='promesa'
               name='promesa'
               required
+              disabled
             >
               <option value=''>SIN PROMESA</option>
               <option value='1'>PROMESA GENERADA</option>
@@ -222,10 +214,10 @@
             </select>
           </div>
         </div>
-        <div class='col-12 col-lg-3'>
+        <div class='col-6 col-md-4 col-lg-3'>
           <div class='input-group input-group-sm mb-2'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>TIPO DTO.</label>
+              <label class='input-group-text' for='proyectos'>TIPO DTO</label>
             </div>
             <select
               class='form-control'
@@ -233,6 +225,7 @@
               id='tipoDto'
               name='tipoDto'
               required
+              disabled
             >
               <option value='TODO'>TODO</option>
               {{! <option value="SEPARACION">SEPARACION</option> }}
@@ -242,10 +235,10 @@
             </select>
           </div>
         </div>
-        <div class='col-12 col-lg-3'>
+        <div class='col-6 col-md-4 col-lg-3'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>CUOTA MIN</label>
+              <label class='input-group-text' for='proyectos'>QOTA MIN</label>
             </div>
             <input
               class='form-control text-center'
@@ -256,13 +249,14 @@
               placeholder='CUOTA'
               style='background-color: #FFFFCC;'
               disabled
+              required
             />
           </div>
         </div>
-        <div class='col-12 col-lg-3'>
+        <div class='col-10 col-md-4 col-lg-3'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>CUOTAS EN INI</label>
+              <label class='input-group-text' for='proyectos'>CUOTAS EN INIC</label>
               <button class='btn btn-secondary' id='ini-min' type='button'>-</button>
             </div>
             <input
@@ -273,13 +267,15 @@
               id='num-ini'
               placeholder='INI'
               style='background-color: #FFFFCC;'
+              value='1'
+              required
             />
             <span class='input-group-append'>
               <button class='btn btn-secondary' id='inicialcuotas-btn' type='button'>+</button>
             </span>
           </div>
         </div>
-        <div class='col-12 col-lg-3'>
+        <div class='col-10 col-md-4 col-lg-3'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>CUOTAS EN FNC</label>
@@ -293,6 +289,8 @@
               id='num-fnc'
               placeholder='FNC'
               style='background-color: #FFFFCC;'
+              value='1'
+              required
             />
             <span class='input-group-append'>
               <button class='btn btn-secondary' id='financiacion-btn' type='button'>+</button>
@@ -302,7 +300,7 @@
         <div class='col-12 col-lg-12'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>INI</label>
+              <label class='input-group-text px-1' for='proyectos'>INI</label>
             </div>
             <input
               class='form-control text-centere'
@@ -313,9 +311,10 @@
               id='ini'
               placeholder='TOTAL INI'
               style='background-color: #FFFFCC;'
+              disabled
             />
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>FNC</label>
+              <label class='input-group-text px-1' for='proyectos'>FNC</label>
             </div>
             <input
               class='form-control text-center'
@@ -329,7 +328,7 @@
               disabled
             />
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>TOTAL</label>
+              <label class='input-group-text px-1' for='proyectos'>TOTAL</label>
             </div>
             <input
               class='form-control text-center'
@@ -340,10 +339,6 @@
               aria-label='total'
               placeholder='TOTAL'
               style='background-color: #FFFFCC;'
-              data-mask='000.000.000'
-              data-mask-reverse='true'
-              value='1.000.000.000'
-              data-mask-selectonfocus='true'
               disabled
             />
           </div>

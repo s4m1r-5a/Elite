@@ -15,7 +15,16 @@ $.jMaskGlobals = {
     S: { pattern: /[a-zA-Z]/ }
   }
 };
+const noCifra = valor => {
+  if (!valor) return 0;
+  const num = /,|[a-z A-Z]|\#|\?|\"| /g.test(valor)
+    ? parseFloat(valor.replace(/,|[a-z A-Z]|\#|\?|\"| /g, ''))
+    : parseFloat(valor);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return num;
+};
 const Cifra = valor => {
+  if (!valor) return valor;
   const punto = /\.$/.test(valor);
   const num = /,|[a-z A-Z]|\#|\?|\"| /g.test(valor)
     ? parseFloat(valor.replace(/,|[a-z A-Z]|\#|\?|\"| /g, ''))
@@ -8189,9 +8198,10 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   const agente = $('#agente').val();
   const clients = [];
   const hoy = moment().format('YYYY/MM/DD');
-  const cuota = 1000000;
+  const histryQuota = { INICIAL: 0, FINANCIACION: 0 };
+  const ts = 'SEPARACION';
   const row = [
-    { fechs: hoy, ncuota: 1, tipo: 'SEPARACION', cuota, fechs2: null, ncuota2: null, cuota2: null }
+    { fechs: hoy, ncuota: 1, tipo: ts, cuota: 1, fechs2: null, ncuota2: null, cuota2: null }
   ];
   var lote = $('#lote');
   var asesor = $('#asesor');
@@ -8199,7 +8209,27 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   var maxCuotasFinanciamiento;
   var productos;
   var producto;
-  var historialCuota = 0;
+
+  const UpdateData = async producto => {
+    maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
+    $('#mtr2').val(producto.mtr2);
+    $('#vmtr2').val(Cifra(producto.mtr));
+    $(`#porcentage`).val(producto.porcentage).mask('$$$%', { reverse: true, selectOnFocus: true });
+    $('#inicial').val(Cifra(producto.inicial));
+    $('#valor').val(Cifra(producto.valor));
+    producto?.status && $(`#promesa option[value='${producto.status}']`).prop('selected', true);
+    $('#cuotamin').val(Cifra(producto.cuotamin));
+    $('#ini').val(Cifra(producto.inicial));
+    $('#fnc').val(Cifra(producto.valor - producto.inicial));
+    $('#total').val(Cifra(producto.valor));
+    $('input:disabled').css('background-color', '#DCE2F4');
+    //histryQuota.INICIAL = 0
+    //histryQuota.FINANCIACION = 0  $('.document').mask('AAAAAAAAAAA');
+    //$('.movil').mask('57 ***-***-****');
+
+    await UpdateTable('INICIAL');
+    await UpdateTable('FINANCIACION');
+  };
 
   $(document).ready(function () {
     var bono = 0;
@@ -8215,46 +8245,49 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
           allowClear: true
         });
     });
-    $('#lote').change(function () {
-      maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
-      console.log(maxCuotasFinanciamiento, producto, ' cambio el proyecto');
-
-      $('#mtr2').val(producto.mtr2);
-      $('#vmtr2').val(Moneda(Math.round(producto.mtr)));
-      $(`#porcentage option[value='${producto.porcentage}']`).attr('selected', true);
-      $('#inicial').val(Moneda(Math.round(producto.inicial)));
-      $('#valor').val(Moneda(Math.round(producto.valor)));
-      producto?.status && $(`#promesa option[value='${producto.status}']`).prop('selected', true);
-      $('#cuotamin').val(Moneda(Math.round(producto.cuotamin)));
-      $('#ini').val(Moneda(Math.round(producto.inicial)));
-      $('#fnc').val(Moneda(Math.round(producto.valor - producto.inicial)));
-      $('#total').val(Moneda(Math.round(producto.valor)));
-      //FINANCIAR();
-      /* if (pin) {
-        $('.quitar').show('slow');
-        $('#idbono').val(kupon);
-        $('#cupon').val(pin);
-        Totales(valor, descuento, dto);
-      } */
+    $('#lote').change(async function () {
+      const productLt = noCifra($(this).val());
+      if (typeof productos === 'object') {
+        producto = productos.find(e => e.id == productLt);
+        console.log(producto);
+        UpdateData(producto);
+      }
       $('#ModalEventos').modal('hide');
     });
     $('#num-fnc').change(function () {
-      FINANCIAR('FINANCIACION');
+      const num = noCifra($(this).val());
+      if (!num) $(this).val(1);
+      UpdateTable('FINANCIACION');
+    });
+    $('#fnc-min').click(function () {
+      const num = noCifra($('#num-fnc').val());
+      if (num < 2) $('#num-fnc').val(1);
+      else $('#num-fnc').val(num - 1);
+      UpdateTable('FINANCIACION');
     });
     $('#financiacion-btn').click(function () {
-      SMSj(
-        'info',
-        'No es posible agregar cuotas ya que la separacion cubre el coste del producto, edite primero la separacion para poder realizar cambios en esta accion'
-      );
-      //$('#financiacion').val(c);
-      FINANCIAR('FINANCIACION');
+      const num = noCifra($('#num-fnc').val());
+      if (num > maxCuotasFinanciamiento) $('#num-fnc').val(maxCuotasFinanciamiento);
+      else $('#num-fnc').val(num + 1);
+      UpdateTable('FINANCIACION');
     });
     $('#num-ini').change(function () {
-      FINANCIAR('INICIAL');
+      const num = noCifra($(this).val());
+      if (!num) $(this).val(1);
+      UpdateTable('INICIAL');
+    });
+    $('#ini-min').click(function () {
+      const num = noCifra($('#num-ini').val());
+      if (num < 2) $('#num-ini').val(1);
+      else $('#num-ini').val(num - 1);
+      UpdateTable('FINANCIACION');
     });
     $('#inicialcuotas-btn').click(function () {
-      //$('#inicialcuotas').val(c);
-      FINANCIAR('INICIAL');
+      const num = noCifra($('#num-ini').val());
+      if (num > maxCuotasFinanciamiento) $('#num-ini').val(maxCuotasFinanciamiento);
+      else $('#num-ini').val(num + 1);
+      console.log(num, maxCuotasFinanciamiento);
+      UpdateTable('INICIAL');
     });
     $('#tipoDto').change(function () {
       dto = $(this).val();
@@ -8262,65 +8295,12 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       Totales(total, kuponDto, dto);
     });
     $('#cupon').change(function () {
-      var total = $('#total').val().replace(/\./g, '');
-      if ($(this).val() !== bono && $(this).val()) {
-        $.ajax({
-          url: '/links/bono/' + $(this).val(),
-          type: 'GET',
-          async: false,
-          success: function (data) {
-            if (data.length) {
-              var fecha = moment(data[0].fecha).add(59, 'days').endOf('days');
-              if (data[0].producto != null) {
-                SMSj(
-                  'error',
-                  'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado'
-                );
-                $(this).val('');
-                Totales(total, false, dto);
-              } else if (fecha < new Date()) {
-                SMSj(
-                  'error',
-                  'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado'
-                );
-                $(this).val('');
-                Totales(total, false, dto);
-              } else if (data[0].estado != 9) {
-                SMSj(
-                  'error',
-                  'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada'
-                );
-                $(this).val(''); //L0X66
-                Totales(total, false, dto);
-              } else {
-                if (dto === 'NINGUNO') {
-                  $(`#tipoDto option[value='TODO']`).prop('selected', true);
-                  dto = 'TODO';
-                }
-                kuponDto = data[0].descuento;
-                Totales(total, kuponDto, dto);
-                $('#idbono').val(data[0].id);
-                CONT();
-              }
-              bono = data[0].pin;
-            } else {
-              SMSj(
-                'error',
-                'Debe digitar un N° de bono valido. Comuniquese con uno de nuestros asesores encargado'
-              );
-              kuponDto = false;
-            }
-          }
-        });
-      } else {
-        SMSj(
-          'error',
-          'Cupon de decuento invalido. Comuniquese con uno de nuestros asesores encargado'
-        );
-
-        bono !== 0 ? $(this).val(bono) : '';
-        Totales(total, kuponDto, dto);
-      }
+      $.ajax({
+        url: '/links/bono/' + $(this).val(),
+        type: 'GET',
+        async: false,
+        success: function (data) {}
+      });
     });
   });
 
@@ -8347,7 +8327,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         const Lt = lt == x.id ? true : false;
         const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
         parent.append(option);
-        if (lt == x.id) producto = x;
+        //if (lt == x.id) producto = x;
       });
       lote.val(lt).trigger('change');
 
@@ -8365,71 +8345,123 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     }
   }).then(data => console.log('paso por aqui'));
 
-  var FINANCIAR = async tipo => {
+  const UpdateTable = tipo => {
     const rows = [];
     proyeccion
       .rows()
       .data()
       .filter(e => rows.push(e));
-    const ini = parseFloat($('#ini').val().replace(/\./g, ''));
-    const fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
-    const numIni = parseFloat($('#num-ini').val());
-    const numFnc = parseFloat($('#num-fnc').val());
+    const sep = rows.find(e => e.tipo === 'SEPARACION');
+    if (sep.cuota === 1) {
+      sep.cuota = producto.separaciones;
+      const indx = rows.findIndex(e => e.tipo === 'SEPARACION');
+      rows.splice(indx, 1, sep);
+    }
+    const separacion = sep.cuota;
+    const inicial = noCifra($('#ini').val());
+    const financiacion = noCifra($('#fnc').val());
+    const total = noCifra($('#total').val());
+    const ini = separacion >= inicial ? 0 : inicial - separacion;
+    const fnc = separacion >= total ? 0 : separacion > inicial ? total - separacion : financiacion;
+    const ni = noCifra($('#num-ini').val());
+    const nf = noCifra($('#num-fnc').val());
+    const numIni = ini && !ni ? 1 : ini && ni ? ni : 0;
+    const numFnc = fnc && !nf ? 1 : fnc && nf ? nf : 0;
     const typI = tipo === 'INICIAL';
     const typF = tipo === 'FINANCIACION';
+    let mountsUpdate = 0;
+    let nCutasUpdate = 0;
+    $('#num-ini').val(numIni);
+    $('#num-fnc').val(numFnc);
 
-    if (tipo) {
-      const num = rows.filter(e => e.tipo === tipo).length;
-      const cuota = typI ? ini / numIni : fnc / numFnc;
-      const newRows = typI ? Math.round(numIni / 2) - num : Math.round(numFnc / 2) - num;
-      const deleteIndex = [];
-      let n = 2;
+    const num = rows.filter(e => e.tipo === tipo).length;
+    rows
+      .filter(e => e.tipo === tipo && histryQuota[tipo] > 0)
+      .map(e => {
+        if (e.cuota && e.cuota !== histryQuota[tipo]) {
+          mountsUpdate += e.cuota;
+          nCutasUpdate++;
+          console.log(nCutasUpdate, ' uno');
+        }
+        if (e.cuota2 && e.cuota2 !== histryQuota[tipo]) {
+          mountsUpdate += e.cuota2;
+          nCutasUpdate++;
+          console.log(nCutasUpdate, ' dos');
+        }
+      });
+    const quotaIni = (ini - mountsUpdate) / (numIni - nCutasUpdate);
+    const quotaFnc = (fnc - mountsUpdate) / (numFnc - nCutasUpdate);
+    const cuota = typI && ini ? quotaIni : typF && fnc ? quotaFnc : 0;
+    const newRows = typI ? Math.round(numIni / 2) - num : typF ? Math.round(numFnc / 2) - num : 0;
+    const deleteIndex = [];
+    let n = 2;
+    if (!histryQuota[tipo]) histryQuota[tipo] = cuota;
+    console.log(
+      ini - mountsUpdate,
+      numIni,
+      typI,
+      numIni - nCutasUpdate,
+      typI && ini ? quotaIni : 'nada',
+      histryQuota[tipo],
+      cuota,
+      mountsUpdate,
+      nCutasUpdate,
+      separacion,
+      inicial,
+      financiacion,
+      tipo,
+      ini,
+      fnc,
       rows
-        .filter(e => e.tipo === tipo)
-        .map((e, i) => {
-          const nu1 = n - 1;
-          const nu2 = n;
-          if ((typI && nu1 > numIni) || (typF && nu1 > numFnc)) {
-            const index = rows.findIndex(e => e.tipo === tipo && e.ncuota == nu1);
-            deleteIndex.push(index);
-          }
-          const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
-          n += 2;
-          e.ncuota = nu1;
-          e.cuota = cuota;
-          e.fechs2 = rType ? hoy : null;
-          e.ncuota2 = rType ? nu2 : null;
-          e.cuota2 = rType ? cuota : null;
-        });
-
-      if (deleteIndex.length) rows.splice(deleteIndex[0], deleteIndex.length);
-      const ndx = typI ? rows.findIndex(e => e.tipo === 'FINANCIACION') - 1 : rows.length - 1;
-      const index = ndx < 0 ? rows.length - 1 : ndx;
-      n = 2;
-      for (var i = 0; i < newRows; i++) {
-        const nu1 = num * 2 + n - 1;
-        const nu2 = num * 2 + n;
+    );
+    rows
+      .filter(e => e.tipo === tipo)
+      .map((e, i) => {
+        const nu1 = n - 1;
+        const nu2 = n;
+        if ((typI && nu1 > numIni) || (typF && nu1 > numFnc)) {
+          const index = rows.findIndex(e => e.tipo === tipo && e.ncuota == nu1);
+          deleteIndex.push(index);
+        }
         const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
         n += 2;
-        rows.splice(index + i, 0, {
-          fechs: hoy,
-          ncuota: nu1,
-          tipo: tipo,
-          cuota: cuota,
-          fechs2: rType ? hoy : null,
-          ncuota2: rType ? nu2 : null,
-          cuota2: rType ? cuota : null
-        });
-      }
+        e.ncuota = nu1;
+        e.cuota = e.cuota == histryQuota[tipo] ? cuota : e.cuota;
+        e.fechs2 = rType ? hoy : null;
+        e.ncuota2 = rType ? nu2 : null;
+        e.cuota2 =
+          (e.cuota2 == histryQuota[tipo] || !e.cuota2) && rType ? cuota : rType ? e.cuota2 : null;
+      });
+    histryQuota[tipo] = cuota;
+
+    if (deleteIndex.length) rows.splice(deleteIndex[0], deleteIndex.length);
+    const ndx = typI ? rows.findIndex(e => e.tipo === 'FINANCIACION') - 1 : rows.length - 1;
+    const index = ndx < 0 ? rows.length - 1 : ndx;
+    n = 2;
+    for (var i = 0; i < newRows; i++) {
+      const nu1 = num * 2 + n - 1;
+      const nu2 = num * 2 + n;
+      const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
+      n += 2;
+      rows.splice(index + i, 0, {
+        fechs: hoy,
+        ncuota: nu1,
+        tipo: tipo,
+        cuota: cuota,
+        fechs2: rType ? hoy : null,
+        ncuota2: rType ? nu2 : null,
+        cuota2: rType ? cuota : null
+      });
     }
-    //console.log(rows);
+
     proyeccion.clear().draw(false);
     rows.sort((a, b) => {
       if (a.tipo < b.tipo) return 1;
       if (a.tipo > b.tipo) return -1;
       return 0;
     });
-    proyeccion.rows.add(rows).draw(false); //.columns.adjust().responsive.recalc();
+    proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
+    return rows;
   };
 
   var proyeccion = $('#proyeccion').DataTable({
@@ -8446,7 +8478,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     ],
     responsive: {
       details: {
-        display: $.fn.dataTable.Responsive.display.childRowImmediate,
+        //display: $.fn.dataTable.Responsive.display.childRowImmediate,
         type: 'none'
         //target: ''
       }
@@ -8487,7 +8519,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         className: 'min-tablet-p not-mobile-l',
         render: (data, method, row) => {
           return data
-            ? `<input class="text-center cuota" type="text" value="${Cifra(data)}" required>`
+            ? `<input class="text-center cuota dos" type="text" value="${Cifra(data)}" required>`
             : '';
         }
       }
@@ -8526,6 +8558,42 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
                 $(row).find('td').attr('colspan', '8');
             }*/
     }
+  });
+  proyeccion.on('change', '.tabl .cuota', async function () {
+    const fila = $(this).parents('tr');
+    const data = proyeccion.row(fila).data();
+    const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
+    const monto = noCifra($(this).val());
+    const rowQuota = $(this).hasClass('dos') ? 'cuota2' : 'cuota';
+
+    if (producto.cuotamin > monto) {
+      //  && !rol.admin
+      SMSj('error', 'La cuota minima permitida es $' + Cifra(producto.cuotamin));
+      $(this).val(Cifra(row[rowQuota]));
+    } else {
+      row[rowQuota] = monto;
+      if (row.tipo === 'SEPARACION') {
+        await UpdateTable('INICIAL');
+        await UpdateTable('FINANCIACION');
+      } else UpdateTable(row.tipo);
+    }
+
+    /* const rows = proyeccion.rows().data();
+    const num = rows.filter(e => e.tipo === row.tipo).length;
+    let nCutasUpdate = rows
+      .filter(e => e.tipo === tipo && e.cuota != histryQuota)
+      .map(e => (mountsUpdate += e.cuota)).length;
+
+    if (histryQuota !== row.cuota && monto !== histryQuota) {
+      mountsUpdate -= row.cuota;
+      mountsUpdate += monto;
+    } else if (histryQuota !== row.cuota && monto === histryQuota) {
+      mountsUpdate -= row.cuota;
+      mountsUpdate += monto;
+    }
+    const cuota = typI
+      ? (ini - mountsUpdate) / (numIni - nCutasUpdate)
+      : (fnc - mountsUpdate) / (numFnc - nCutasUpdate); */
   });
   proyeccion.on('click', 'tr a', function () {
     var fila = $(this).parents('tr');
@@ -8588,256 +8656,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   proyeccion.on('keyup', '.tabl .cuota', function () {
     $(this).val(Cifra($(this).val()));
     //$(this).mask('#,##$', { reverse: true, selectOnFocus: true });
-  });
-  proyeccion.on('change', '.tabl .cuota', function () {
-    var fila = $(this).parents('tr');
-    var tipo = fila.find(`.tipo`).val();
-    var total = 0,
-      valor = 0,
-      num = 0;
-
-    var TotalIni = parseFloat($('#ini').val().replace(/\./g, ''));
-    var TotalFnc = parseFloat($('#fnc').val().replace(/\./g, ''));
-    var TotalSprc = parseFloat($('#Separar').val().replace(/\./g, ''));
-    var excedente = TotalSprc > TotalIni ? TotalSprc - TotalIni : 0;
-    var nu = $('#inicialcuotas').val();
-    var nf = $('#financiacion').val();
-    //realcuotai = Math.round((TotalIni - TotalSprc) / nu);
-    //realcuotaf = Math.round((TotalFnc - excedente) / nf);
-
-    if (tipo === 'SEPARACION') {
-      if (TotalSprc === TotalIni + TotalFnc) {
-        $('#proyeccion .tabl tr')
-          .filter((c, i) => {
-            return $(i).find(`.tipo`).val() !== 'SEPARACION';
-          })
-          .map((c, i) => {
-            proyeccion.row(i).remove().draw(false);
-          });
-        nu = $('#inicialcuotas').val(0);
-        nf = $('#financiacion').val(0);
-      } else if (TotalSprc > TotalIni + TotalFnc) {
-        SMSj(
-          'info',
-          'No es posible agregar un valor mayor al del total del producto, se restableceran los valores predeterminados del producto'
-        );
-        TotalSprc = parseFloat($('#Separar').val('1.000.000').replace(/\./g, ''));
-        if (nu == 0) {
-          nu = $('#inicialcuotas').val(1);
-          FINANCIAR('INICIAL', 1, parseFloat(TotalSprc));
-        }
-        if (nf == 0) {
-          nf = $('#financiacion').val(1);
-          FINANCIAR('FINANCIACION', 1, parseFloat(TotalSprc));
-        }
-        if (nu != 0 && nf != 0) {
-          CONT();
-        }
-      } else if (TotalSprc > TotalIni) {
-        $('#proyeccion .tabl tr')
-          .filter((c, i) => {
-            return $(i).find(`.tipo`).val() === 'INICIAL';
-          })
-          .map((c, i) => {
-            proyeccion.row(i).remove().draw(false);
-          });
-        nu = $('#inicialcuotas').val(0);
-        nf < 1 ? FINANCIAR('FINANCIACION', 1, TotalSprc) : CONT();
-      } else {
-        if (nu == 0) {
-          nu = $('#inicialcuotas').val(1);
-          FINANCIAR('INICIAL', 1, TotalSprc);
-        }
-        if (nf == 0) {
-          nf = $('#financiacion').val(1);
-          FINANCIAR('FINANCIACION', 1, TotalSprc);
-        } else {
-          CONT();
-        }
-      }
-    } else if (tipo === 'INICIAL') {
-      $('#proyeccion .tabl tr')
-        .filter((c, i) => {
-          var e =
-            $(i).find(`.cuota`).val() === undefined
-              ? 0
-              : $(i).find(`.cuota`).val().length > 3
-              ? $(i).find(`.cuota`).val().replace(/\./g, '')
-              : $(i).find(`.cuota`).val();
-          return (
-            $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) !== realcuotai && realcuotai > 0
-          );
-        })
-        .map((c, i) => {
-          num = c + 1;
-          var e =
-            $(i).find(`.cuota`).val() === undefined
-              ? 0
-              : $(i).find(`.cuota`).val().length > 3
-              ? $(i).find(`.cuota`).val().replace(/\./g, '')
-              : $(i).find(`.cuota`).val();
-          valor += parseFloat(e);
-        });
-      var n = nu - num;
-      console.log(valor, TotalIni - TotalSprc, n);
-
-      if (valor === TotalIni - TotalSprc && n !== 0) {
-        var u = 1;
-        $('#proyeccion .tabl tr')
-          .filter((c, i) => {
-            var e =
-              $(i).find(`.cuota`).val() === undefined
-                ? 0
-                : $(i).find(`.cuota`).val().length > 3
-                ? $(i).find(`.cuota`).val().replace(/\./g, '')
-                : $(i).find(`.cuota`).val();
-            return $(i).find(`.tipo`).val() === 'INICIAL' && parseFloat(e) === realcuotai;
-          })
-          .map((c, i) => {
-            proyeccion.row(i).remove().draw(false);
-          });
-        $('#proyeccion .tabl tr').each((e, i) => {
-          if ($(i).find(`.tipo`).val() === 'INICIAL') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
-          }
-        });
-        realcuotai = (TotalIni - TotalSprc) / nu;
-      } else if (valor > TotalIni - TotalSprc) {
-        SMSj(
-          'info',
-          'No es posible agregar un valor mayor al de la cuota inicial, se restableceran los valores de la cuota inicial'
-        );
-        realcuotai = (TotalIni - TotalSprc) / nu;
-        var u = 1;
-        $('#proyeccion .tabl tr').each((e, i) => {
-          var tpo = $(i).find(`.tipo`).val();
-          if (tpo === 'INICIAL') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
-            $(i).find(`.cuota`).val(Moneda(realcuotai));
-          }
-        });
-      } else {
-        total = TotalIni - TotalSprc - valor;
-        cuota = Math.round(total / n);
-        if (n > 0) {
-          var u = 1;
-          $('#proyeccion .tabl tr').each((e, i) => {
-            var tpo = $(i).find(`.tipo`).val();
-            if (tpo === 'INICIAL') {
-              var c =
-                $(i).find(`.cuota`).val() === undefined
-                  ? ''
-                  : $(i).find(`.cuota`).val().length > 3
-                  ? $(i).find(`.cuota`).val().replace(/\./g, '')
-                  : $(i).find(`.cuota`).val();
-              $(i)
-                .find(`.n`)
-                .val(u++);
-              if (parseFloat(c) === realcuotai) {
-                $(i).find(`.cuota`).val(Moneda(cuota)); //.mask('#.##$', { reverse: true, selectOnFocus: true });
-              }
-            }
-          });
-        }
-        realcuotai = cuota;
-      }
-    } else if (tipo === 'FINANCIACION') {
-      $('#proyeccion .tabl tr')
-        .filter((c, i) => {
-          var e =
-            $(i).find(`.cuota`).val() === undefined
-              ? ''
-              : $(i).find(`.cuota`).val().length > 3
-              ? $(i).find(`.cuota`).val().replace(/\./g, '')
-              : $(i).find(`.cuota`).val();
-          return (
-            $(i).find(`.tipo`).val() === 'FINANCIACION' &&
-            parseFloat(e) !== realcuotaf &&
-            realcuotaf > 0
-          );
-        })
-        .map((c, i) => {
-          num = c + 1;
-          var e =
-            $(i).find(`.cuota`).val() === undefined
-              ? ''
-              : $(i).find(`.cuota`).val().length > 3
-              ? $(i).find(`.cuota`).val().replace(/\./g, '')
-              : $(i).find(`.cuota`).val();
-          valor += parseFloat(e);
-        });
-      var n = nf - num;
-
-      if (valor === TotalFnc - excedente && n !== 0) {
-        var u = 1;
-        $('#proyeccion .tabl tr')
-          .filter((c, i) => {
-            var e =
-              $(i).find(`.cuota`).val() === undefined
-                ? 0
-                : $(i).find(`.cuota`).val().length > 3
-                ? $(i).find(`.cuota`).val().replace(/\./g, '')
-                : $(i).find(`.cuota`).val();
-            return $(i).find(`.tipo`).val() === 'FINANCIACION' && parseFloat(e) === realcuotaf;
-          })
-          .map((c, i) => {
-            proyeccion.row(i).remove().draw(false);
-          });
-        $('#proyeccion .tabl tr').each((e, i) => {
-          if ($(i).find(`.tipo`).val() === 'FINANCIACION') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
-          }
-        });
-        realcuotaf = valor / num;
-      } else if (valor > TotalFnc - excedente) {
-        SMSj(
-          'info',
-          'No es posible agregar un valor mayor al de la financiacion del producto, se restableceran los valores de la financiacion'
-        );
-        realcuotaf = (TotalFnc - excedente) / nf;
-        var u = 1;
-        $('#proyeccion .tabl tr').each((e, i) => {
-          var tpo = $(i).find(`.tipo`).val();
-          if (tpo === 'FINANCIACION') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
-            $(i).find(`.cuota`).val(Moneda(realcuotaf));
-          }
-        });
-      } else {
-        total = TotalFnc - excedente - valor;
-        cuota = Math.round(total / n);
-        if (n > 0) {
-          var u = 1;
-          $('#proyeccion .tabl tr').each((e, i) => {
-            var tpo = $(i).find(`.tipo`).val();
-            if (tpo === 'FINANCIACION') {
-              var c =
-                $(i).find(`.cuota`).val() === undefined
-                  ? ''
-                  : $(i).find(`.cuota`).val().length > 3
-                  ? $(i).find(`.cuota`).val().replace(/\./g, '')
-                  : $(i).find(`.cuota`).val();
-              $(i)
-                .find(`.n`)
-                .val(u++);
-              if (parseFloat(c) === realcuotaf) {
-                $(i).find(`.cuota`).val(Moneda(cuota));
-              }
-            }
-          });
-        }
-        realcuotaf = cuota;
-      }
-    }
-    $('#cuot').val(TotalSprc >= TotalIni + TotalFnc ? TotalSprc : realcuotaf);
   });
   proyeccion.on('change', '.tabl .fecha', function () {
     var t = moment().format('YYYY-MM-DD');
@@ -13316,15 +13134,146 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         fd.append('enviaRcb', enviaRcb);
 
         if (mensaje || !data.pdf) {
-          $.ajax({
-            type: 'POST',
-            url: '/links/solicitudes/saldo',
-            data: {
-              solicitud: data.ids,
-              lote: data.lote,
-              fecha: data.fech
+          /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+
+          var doc = new jsPDF('l', 'mm', 'a5');
+          var totall = data.valor - data.ahorro;
+          var fech = data.fech;
+          var bon = data.mount === null ? 0 : data.mount;
+          var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon;
+          var img2 = new Image();
+          var img = new Image();
+          img.src = '/img/avatars/avatar.png';
+          img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`;
+          var totalPagesExp = '{total_pages_count_string}';
+          //doc.addPage("a3");
+          doc.autoTable({
+            head: [
+              {
+                id: 'ID',
+                name: 'Name',
+                email: 'Email',
+                city: 'City',
+                expenses: 'Sum'
+              }
+            ],
+            body: [
+              {
+                id: '',
+                name: '',
+                email: '',
+                city: 'RECIBO DE CAJA',
+                expenses: data.ids
+              },
+              {
+                id: 'CLIENTE',
+                name: data.nombre + ' ' + data.email,
+                email: 'CC: ' + data.documento,
+                city: data.movil,
+                expenses: ''
+              },
+              {
+                id: 'PRODUCTO',
+                name: data.proyect,
+                email: 'MZ. ' + data.mz,
+                city: 'LT. ' + data.n,
+                expenses: ''
+              },
+              {
+                id: 'CONCEPTO',
+                name: 'PAGO',
+                email: data.descp,
+                city: 'CUOTA #',
+                expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
+              },
+              {
+                id: 'F PAGO',
+                name: data.formap,
+                email: 'R ' + data.recibo,
+                city: 'MONTO',
+                expenses: '$' + Moneda(data.monto)
+              },
+              {
+                id: 'BONO',
+                name: data.bono === null ? 'NO APLICA' : data.bono,
+                email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
+                city: 'MONTO',
+                expenses: '$' + Moneda(bon)
+              },
+              {
+                id: 'TOTAL',
+                name: `${NumeroALetras(totl)} MCT********`,
+                email: '',
+                city: '',
+                expenses: '$' + Moneda(totl)
+              }
+            ],
+            //html: '#tablarecibo',
+            showHead: false,
+            columnStyles: {
+              //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
+              id: { textColor: 0, fontStyle: 'bold' },
+              0: { cellWidth: '50' },
+              1: { cellWidth: 'auto' },
+              2: { cellWidth: 'wrap' },
+              3: { cellWidth: 'wrap' }
             },
-            async: true,
+            didDrawPage: function (data) {
+              // Header
+              doc.setTextColor(0);
+              doc.setFontStyle('normal');
+              if (img) {
+                doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20);
+                doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20);
+              }
+              doc.setFontSize(15);
+              doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15);
+              doc.setFontSize(7);
+              doc.text(fech, data.settings.margin.left + 165, 8);
+              doc.setFontSize(10);
+              doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20);
+              doc.setFontSize(10);
+              doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25);
+              doc.setFontSize(8);
+              doc.text(
+                `Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`,
+                data.settings.margin.left + 18,
+                30
+              );
+
+              // Footer
+              var str = 'Page ' + doc.internal.getNumberOfPages();
+              // Total page number plugin only available in jspdf v1.0+
+              if (typeof doc.putTotalPages === 'function') {
+                str = str + ' of ' + totalPagesExp;
+              }
+              doc.setFontSize(8);
+
+              // jsPDF 1.4+ uses getWidth, <1.4 uses .width
+              var pageSize = doc.internal.pageSize;
+              var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
+              doc.text(
+                /*str*/ `https://grupoelitered.com.co/links/pagos`,
+                data.settings.margin.left,
+                pageHeight - 10
+              );
+            },
+            margin: { top: 34 }
+          });
+          // Total page number plugin only available in jspdf v1.0+
+          if (typeof doc.putTotalPages === 'function') {
+            doc.putTotalPages(totalPagesExp);
+          }
+          var blob = doc.output('blob');
+          /////////////////////////////////////////* PDF *//////////////////////////////////////////////
+          fd.append('pdf', blob);
+          $.ajax({
+            type: 'PUT',
+            url: '/links/solicitudes/' + accion,
+            data: fd,
+            processData: false,
+            contentType: false,
+            //async: true,
             beforeSend: function (xhr) {
               $('#Modalimg').modal('hide');
               $('#ModalEventos').modal({
@@ -13333,184 +13282,14 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 toggle: true
               });
             },
-            success: function (dat) {
-              /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-              if (dat) {
-                var acumulad = dat.d === 'NO' ? 0 : dat.d;
-                var doc = new jsPDF('l', 'mm', 'a5');
-                var totall = data.valor - data.ahorro;
-                var fech = data.fech;
-                var saldo = totall - acumulad;
-                var bon = data.mount === null ? 0 : data.mount;
-                var totl =
-                  data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon;
-                var img2 = new Image();
-                var img = new Image();
-                img.src = '/img/avatars/avatar.png';
-                img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`;
-                var totalPagesExp = '{total_pages_count_string}';
-                //doc.addPage("a3");
-                doc.autoTable({
-                  head: [
-                    {
-                      id: 'ID',
-                      name: 'Name',
-                      email: 'Email',
-                      city: 'City',
-                      expenses: 'Sum'
-                    }
-                  ],
-                  body: [
-                    {
-                      id: '',
-                      name: '',
-                      email: '',
-                      city: 'RECIBO DE CAJA',
-                      expenses: data.ids
-                    },
-                    {
-                      id: 'CLIENTE',
-                      name: data.nombre + ' ' + data.email,
-                      email: 'CC: ' + data.documento,
-                      city: data.movil,
-                      expenses: ''
-                    },
-                    {
-                      id: 'PRODUCTO',
-                      name: data.proyect,
-                      email: 'MZ. ' + data.mz,
-                      city: 'LT. ' + data.n,
-                      expenses: ''
-                    },
-                    {
-                      id: 'CONCEPTO',
-                      name: 'PAGO',
-                      email: data.descp,
-                      city: 'CUOTA #',
-                      expenses: data.ncuota === null ? 'NO APLICA' : data.ncuota
-                    },
-                    {
-                      id: 'F PAGO',
-                      name: data.formap,
-                      email: 'R ' + data.recibo,
-                      city: 'MONTO',
-                      expenses: '$' + Moneda(data.monto)
-                    },
-                    {
-                      id: 'BONO',
-                      name: data.bono === null ? 'NO APLICA' : data.bono,
-                      email: data.producto === null ? 'R5 0' : 'R5 ' + data.producto,
-                      city: 'MONTO',
-                      expenses: '$' + Moneda(bon)
-                    },
-                    {
-                      id: 'TOTAL',
-                      name: `${NumeroALetras(totl)} MCT********`,
-                      email: '',
-                      city: '',
-                      expenses: '$' + Moneda(totl)
-                    } /* ,
-                                    {
-                                        id: 'SLD FECHA',
-                                        name: `${NumeroALetras(saldo)} MCT********`,
-                                        email: '',
-                                        city: '',
-                                        expenses: '$' + Moneda(saldo)
-                                    },
-                                    {
-                                        id: 'TOTAL SLD',
-                                        name: `${NumeroALetras(saldo - totl)} MCT********`,
-                                        email: '',
-                                        city: '',
-                                        expenses: '$' + Moneda(saldo - totl)
-                                    } */
-                  ],
-                  //html: '#tablarecibo',
-                  showHead: false,
-                  columnStyles: {
-                    //id: { fillColor: 120, textColor: 255, fontStyle: 'bold' },
-                    id: { textColor: 0, fontStyle: 'bold' },
-                    0: { cellWidth: '50' },
-                    1: { cellWidth: 'auto' },
-                    2: { cellWidth: 'wrap' },
-                    3: { cellWidth: 'wrap' }
-                  },
-                  didDrawPage: function (data) {
-                    // Header
-                    doc.setTextColor(0);
-                    doc.setFontStyle('normal');
-                    if (img) {
-                      doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20);
-                      doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20);
-                    }
-                    doc.setFontSize(15);
-                    doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15);
-                    doc.setFontSize(7);
-                    doc.text(fech, data.settings.margin.left + 165, 8);
-                    doc.setFontSize(10);
-                    doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20);
-                    doc.setFontSize(10);
-                    doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25);
-                    doc.setFontSize(8);
-                    doc.text(
-                      `Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`,
-                      data.settings.margin.left + 18,
-                      30
-                    );
-
-                    // Footer
-                    var str = 'Page ' + doc.internal.getNumberOfPages();
-                    // Total page number plugin only available in jspdf v1.0+
-                    if (typeof doc.putTotalPages === 'function') {
-                      str = str + ' of ' + totalPagesExp;
-                    }
-                    doc.setFontSize(8);
-
-                    // jsPDF 1.4+ uses getWidth, <1.4 uses .width
-                    var pageSize = doc.internal.pageSize;
-                    var pageHeight = pageSize.height ? pageSize.height : pageSize.getHeight();
-                    doc.text(
-                      /*str*/ `https://grupoelitered.com.co/links/pagos`,
-                      data.settings.margin.left,
-                      pageHeight - 10
-                    );
-                  },
-                  margin: { top: 34 }
-                });
-                // Total page number plugin only available in jspdf v1.0+
-                if (typeof doc.putTotalPages === 'function') {
-                  doc.putTotalPages(totalPagesExp);
-                }
-                var blob = doc.output('blob');
-                /////////////////////////////////////////* PDF *//////////////////////////////////////////////
-                fd.append('pdf', blob);
-                fd.append('acumulado', acumulad);
-                $.ajax({
-                  type: 'PUT',
-                  url: '/links/solicitudes/' + accion,
-                  data: fd,
-                  processData: false,
-                  contentType: false,
-                  success: function (data) {
-                    if (data.std) {
-                      SMSj('success', data.msg);
-                      BancoExt.ajax.reload(null, false);
-                      table.ajax.reload(null, false);
-                      $('#ModalEventos').modal('hide');
-                    } else {
-                      SMSj('error', data.msg);
-                      $('#ModalEventos').modal('hide');
-                    }
-                  },
-                  error: function (data) {
-                    console.log(data);
-                  }
-                });
+            success: function (data) {
+              if (data.std) {
+                SMSj('success', data.msg);
+                BancoExt.ajax.reload(null, false);
+                table.ajax.reload(null, false);
+                $('#ModalEventos').modal('hide');
               } else {
-                SMSj(
-                  'error',
-                  'Este producto tiene otras solicitudes antriores a esta aun pendiente por aprobar'
-                );
+                SMSj('error', data.msg);
                 $('#ModalEventos').modal('hide');
               }
             },
