@@ -1,4 +1,4 @@
-/////////////////////* FUNCIONES GLOBALES *///////////////////////
+////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
   maskElements: 'input,td,span,div',
   dataMaskAttr: '*[data-mask]',
@@ -8194,11 +8194,13 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
 
 /////////////////////////////////* CREAR ORDENES */////////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/orden2/${window.location.pathname.split('/')[3]}`) {
+  moment.locale('es-mx');
   const lt = $('#lt').val();
   const agente = $('#agente').val();
   const clients = [];
-  const hoy = moment().format('YYYY/MM/DD');
-  const histryQuota = { INICIAL: 0, FINANCIACION: 0 };
+  const hoy = new Date();
+  const historyQuota = { INICIAL: 0, FINANCIACION: 0, SEPARACION: 0 };
+  const historyDate = { SEPARACION: hoy, INICIAL: null, FINANCIACION: null };
   const ts = 'SEPARACION';
   const row = [
     { fechs: hoy, ncuota: 1, tipo: ts, cuota: 1, fechs2: null, ncuota2: null, cuota2: null }
@@ -8222,13 +8224,25 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     $('#ini').val(Cifra(producto.inicial));
     $('#fnc').val(Cifra(producto.valor - producto.inicial));
     $('#total').val(Cifra(producto.valor));
-    $('input:disabled').css('background-color', '#DCE2F4');
-    //histryQuota.INICIAL = 0
-    //histryQuota.FINANCIACION = 0  $('.document').mask('AAAAAAAAAAA');
+    $(':disabled').css('background-color', '#DCE2F4');
+    //historyQuota.INICIAL = 0
+    //historyQuota.FINANCIACION = 0  $('.document').mask('AAAAAAAAAAA');
     //$('.movil').mask('57 ***-***-****');
 
     await UpdateTable('INICIAL');
     await UpdateTable('FINANCIACION');
+  };
+  const coutQuotas = tipo => {
+    let number = 0;
+    proyeccion
+      .rows()
+      .data()
+      .filter(e => e.tipo === tipo)
+      .map((e, i) => {
+        if (e.cuota) number++;
+        if (e.cuota2) number++;
+      });
+    return number;
   };
 
   $(document).ready(function () {
@@ -8249,14 +8263,21 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       const productLt = noCifra($(this).val());
       if (typeof productos === 'object') {
         producto = productos.find(e => e.id == productLt);
-        console.log(producto);
+        //console.log(producto);
         UpdateData(producto);
       }
       $('#ModalEventos').modal('hide');
     });
-    $('#num-fnc').change(function () {
+    $('#num-fnc').change(async function () {
       const num = noCifra($(this).val());
       if (!num) $(this).val(1);
+      if (num > maxCuotasFinanciamiento) $(this).val(maxCuotasFinanciamiento);
+
+      const consult = await ErrQuotas('FINANCIACION');
+      if (consult) {
+        $(this).val(coutQuotas('FINANCIACION'));
+        return SMSj('error', consult);
+      }
       UpdateTable('FINANCIACION');
     });
     $('#fnc-min').click(function () {
@@ -8265,28 +8286,46 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       else $('#num-fnc').val(num - 1);
       UpdateTable('FINANCIACION');
     });
-    $('#financiacion-btn').click(function () {
+    $('#financiacion-btn').click(async function () {
       const num = noCifra($('#num-fnc').val());
-      if (num > maxCuotasFinanciamiento) $('#num-fnc').val(maxCuotasFinanciamiento);
+      if (num >= maxCuotasFinanciamiento) $('#num-fnc').val(maxCuotasFinanciamiento);
       else $('#num-fnc').val(num + 1);
+
+      const consult = await ErrQuotas('FINANCIACION');
+      if (consult) {
+        $('#num-fnc').val(num);
+        return SMSj('error', consult);
+      }
       UpdateTable('FINANCIACION');
     });
-    $('#num-ini').change(function () {
+    $('#num-ini').change(async function () {
       const num = noCifra($(this).val());
       if (!num) $(this).val(1);
+      if (num > producto.maxini) $(this).val(producto.maxini);
+
+      const consult = await ErrQuotas('INICIAL');
+      if (consult) {
+        $(this).val(coutQuotas('INICIAL'));
+        return SMSj('error', consult);
+      }
       UpdateTable('INICIAL');
     });
     $('#ini-min').click(function () {
       const num = noCifra($('#num-ini').val());
       if (num < 2) $('#num-ini').val(1);
       else $('#num-ini').val(num - 1);
-      UpdateTable('FINANCIACION');
+      UpdateTable('INICIAL');
     });
-    $('#inicialcuotas-btn').click(function () {
+    $('#inicialcuotas-btn').click(async function () {
       const num = noCifra($('#num-ini').val());
-      if (num > maxCuotasFinanciamiento) $('#num-ini').val(maxCuotasFinanciamiento);
+      if (num >= producto.maxini) $('#num-ini').val(producto.maxini);
       else $('#num-ini').val(num + 1);
-      console.log(num, maxCuotasFinanciamiento);
+
+      const consult = await ErrQuotas('INICIAL');
+      if (consult) {
+        $('#num-ini').val(num);
+        return SMSj('error', consult);
+      }
       UpdateTable('INICIAL');
     });
     $('#tipoDto').change(function () {
@@ -8345,6 +8384,61 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     }
   }).then(data => console.log('paso por aqui'));
 
+  const ErrQuotas = (tipo, newmonto = 0) => {
+    let mounts = 0;
+    let nCutas = 0;
+
+    const typS = tipo === 'SEPARACION';
+    const typI = tipo === 'INICIAL';
+    const typF = tipo === 'FINANCIACION';
+    const rows = proyeccion.rows().data();
+    const sep = typS ? newmonto : rows.filter(e => e.tipo === 'SEPARACION')[0].cuota;
+    const inicial = producto.inicial;
+    const financiacion = producto.valor - producto.inicial;
+    const total = producto.valor;
+    const ini = sep >= inicial ? 0 : inicial - sep;
+    const fnc = sep >= total ? 0 : sep > inicial ? total - sep : financiacion;
+    const nIni = noCifra($('#num-ini').val());
+    const nFnc = noCifra($('#num-fnc').val());
+    const num = typI ? nIni : typF ? nFnc : 1;
+    const mount = typI ? ini : typF ? fnc : sep;
+    if (typS) {
+      const cuotaI = ini / nIni;
+      const cuotaF = fnc / nFnc;
+      if (sep > producto.valor) return 'El monto modificado excede al valor total del lote';
+      if (ini && cuotaI < producto.cuotamin)
+        return 'El cambio que intenta realizar generaria una cuota inferior a la cuota minima INI';
+      if (fnc && cuotaF < producto.cuotamin)
+        return 'El cambio que intenta realizar generaria una cuota inferior a la cuota minima FNC';
+      return false;
+    }
+
+    rows
+      .filter(e => e.tipo === tipo && historyQuota[tipo] > 0)
+      .map(e => {
+        if (e.cuota && e.cuota !== historyQuota[tipo]) {
+          mounts += e.cuota;
+          nCutas++;
+        }
+        if (e.cuota2 && e.cuota2 !== historyQuota[tipo]) {
+          mounts += e.cuota2;
+          nCutas++;
+        }
+      });
+    nCutas = !nCutas && !mounts && newmonto ? 1 : nCutas;
+    mounts += newmonto;
+    if (num === 1) return 'No es posible editar el monto a una cuota si solo existe una en ' + tipo;
+    const cuota = (mount - mounts) / (num - nCutas);
+
+    if (typI && mounts > mount)
+      return 'El monto modificado en la inicial excederia al valor de la misma';
+    if (typF && mounts > mount)
+      return 'El monto modificado en la financiacion excederia al valor de la misma';
+    if (cuota < producto.cuotamin)
+      return 'El cambio que intenta realizar generaria una cuota inferior a la cuota minima';
+    return false;
+  };
+
   const UpdateTable = tipo => {
     const rows = [];
     proyeccion
@@ -8358,9 +8452,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       rows.splice(indx, 1, sep);
     }
     const separacion = sep.cuota;
-    const inicial = noCifra($('#ini').val());
-    const financiacion = noCifra($('#fnc').val());
-    const total = noCifra($('#total').val());
+    const inicial = producto.inicial;
+    const financiacion = producto.valor - producto.inicial;
+    const total = producto.valor;
     const ini = separacion >= inicial ? 0 : inicial - separacion;
     const fnc = separacion >= total ? 0 : separacion > inicial ? total - separacion : financiacion;
     const ni = noCifra($('#num-ini').val());
@@ -8376,17 +8470,15 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
 
     const num = rows.filter(e => e.tipo === tipo).length;
     rows
-      .filter(e => e.tipo === tipo && histryQuota[tipo] > 0)
+      .filter(e => e.tipo === tipo && historyQuota[tipo] > 0)
       .map(e => {
-        if (e.cuota && e.cuota !== histryQuota[tipo]) {
+        if (e.cuota && e.cuota !== historyQuota[tipo]) {
           mountsUpdate += e.cuota;
           nCutasUpdate++;
-          console.log(nCutasUpdate, ' uno');
         }
-        if (e.cuota2 && e.cuota2 !== histryQuota[tipo]) {
+        if (e.cuota2 && e.cuota2 !== historyQuota[tipo]) {
           mountsUpdate += e.cuota2;
           nCutasUpdate++;
-          console.log(nCutasUpdate, ' dos');
         }
       });
     const quotaIni = (ini - mountsUpdate) / (numIni - nCutasUpdate);
@@ -8395,44 +8487,51 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     const newRows = typI ? Math.round(numIni / 2) - num : typF ? Math.round(numFnc / 2) - num : 0;
     const deleteIndex = [];
     let n = 2;
-    if (!histryQuota[tipo]) histryQuota[tipo] = cuota;
-    console.log(
-      ini - mountsUpdate,
-      numIni,
-      typI,
-      numIni - nCutasUpdate,
-      typI && ini ? quotaIni : 'nada',
-      histryQuota[tipo],
-      cuota,
-      mountsUpdate,
-      nCutasUpdate,
-      separacion,
-      inicial,
-      financiacion,
-      tipo,
-      ini,
-      fnc,
-      rows
-    );
+    if (!historyQuota[tipo]) historyQuota[tipo] = cuota;
+    var fecha = null;
     rows
       .filter(e => e.tipo === tipo)
       .map((e, i) => {
         const nu1 = n - 1;
         const nu2 = n;
+
+        if (!i & typI) {
+          if (!e.fechs || moment(e.fechs).diff(historyDate.SEPARACION, 'months') < 1)
+            fecha = historyDate.SEPARACION;
+          else fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
+        }
+        if (!i & typF) {
+          if (!e.fechs || moment(e.fechs).diff(historyDate.INICIAL, 'months') < 1)
+            fecha = historyDate.INICIAL;
+          else fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
+        }
+
         if ((typI && nu1 > numIni) || (typF && nu1 > numFnc)) {
           const index = rows.findIndex(e => e.tipo === tipo && e.ncuota == nu1);
           deleteIndex.push(index);
         }
         const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
+
+        if (!e.fechs || moment(e.fechs).diff(fecha, 'months') < 1)
+          fh1 = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+        else fh1 = e.fechs;
+
+        if (!e.fechs2 || moment(e.fechs2).diff(fh1, 'months') < 1)
+          fh2 = moment(fh1).add(1, 'month').format('YYYY-MM-DD');
+        else fh2 = e.fechs2;
+
         n += 2;
         e.ncuota = nu1;
-        e.cuota = e.cuota == histryQuota[tipo] ? cuota : e.cuota;
-        e.fechs2 = rType ? hoy : null;
+        e.fechs = fh1;
+        e.cuota = e.cuota == historyQuota[tipo] ? cuota : e.cuota;
         e.ncuota2 = rType ? nu2 : null;
+        e.fechs2 = rType ? fh2 : null;
         e.cuota2 =
-          (e.cuota2 == histryQuota[tipo] || !e.cuota2) && rType ? cuota : rType ? e.cuota2 : null;
+          (e.cuota2 == historyQuota[tipo] || !e.cuota2) && rType ? cuota : rType ? e.cuota2 : null;
+        historyDate[tipo] = rType ? fh2 : fh1;
+        fecha = historyDate[tipo];
       });
-    histryQuota[tipo] = cuota;
+    historyQuota[tipo] = cuota;
 
     if (deleteIndex.length) rows.splice(deleteIndex[0], deleteIndex.length);
     const ndx = typI ? rows.findIndex(e => e.tipo === 'FINANCIACION') - 1 : rows.length - 1;
@@ -8442,16 +8541,22 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       const nu1 = num * 2 + n - 1;
       const nu2 = num * 2 + n;
       const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
+      if (!i && typI && !historyDate[tipo]) historyDate[tipo] = historyDate.SEPARACION;
+      if (!i && typF && !historyDate[tipo]) historyDate[tipo] = historyDate.INICIAL;
+
+      const fh1 = moment(historyDate[tipo]).add(1, 'month').format('YYYY-MM-DD');
+      const fh2 = moment(fh1).add(1, 'month').format('YYYY-MM-DD');
       n += 2;
       rows.splice(index + i, 0, {
-        fechs: hoy,
+        fechs: fh1,
         ncuota: nu1,
         tipo: tipo,
         cuota: cuota,
-        fechs2: rType ? hoy : null,
+        fechs2: rType ? fh2 : null,
         ncuota2: rType ? nu2 : null,
         cuota2: rType ? cuota : null
       });
+      historyDate[tipo] = rType ? fh2 : fh1;
     }
 
     proyeccion.clear().draw(false);
@@ -8461,6 +8566,46 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       return 0;
     });
     proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
+    $('.fi').datepicker();
+    $('.fecha').daterangepicker(
+      {
+        locale: {
+          format: 'YYYY-MM-DD',
+          separator: ' - ',
+          applyLabel: 'Aplicar',
+          cancelLabel: 'Cancelar',
+          fromLabel: 'De',
+          toLabel: '-',
+          customRangeLabel: 'Personalizado',
+          weekLabel: 'S',
+          daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+          monthNames: [
+            'Enero',
+            'Febrero',
+            'Marzo',
+            'Abril',
+            'Mayo',
+            'Junio',
+            'Julio',
+            'Agosto',
+            'Septiembre',
+            'Octubre',
+            'Noviembre',
+            'Diciembre'
+          ],
+          firstDay: 1
+        },
+        singleDatePicker: true,
+        showDropdowns: true,
+        minYear: 2017,
+        maxYear: parseInt(moment().format('YYYY'), 10)
+      },
+      function (start, end, label) {
+        var fila = this.element.parent();
+        var data = proyeccion.row(fila).data();
+        console.log(fila, data);
+      }
+    );
     return rows;
   };
 
@@ -8478,7 +8623,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     ],
     responsive: {
       details: {
-        //display: $.fn.dataTable.Responsive.display.childRowImmediate,
+        display: $.fn.dataTable.Responsive.display.childRowImmediate,
         type: 'none'
         //target: ''
       }
@@ -8497,7 +8642,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       { data: 'ncuota' },
       {
         data: 'fechs',
-        render: (data, method, row) => (data ? moment(data).format('YYYY/MM/DD') : '')
+        className: 'fi',
+        render: (data, method, row) =>
+          data ? `<a class="fecha">${moment(data).format('YYYY-MM-DD')}</a>` : ''
       },
       { data: 'tipo' },
       {
@@ -8511,8 +8658,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       { data: 'ncuota2', className: 'min-tablet-p not-mobile-l' },
       {
         data: 'fechs2',
-        className: 'min-tablet-p not-mobile-l',
-        render: (data, method, row) => (data ? moment(data).format('YYYY/MM/DD') : '')
+        className: 'min-tablet-p not-mobile-l fi',
+        render: (data, method, row) =>
+          data ? `<a class="fi">${moment(data).format('YYYY-MM-DD')}</a>` : ''
       },
       {
         data: 'cuota2',
@@ -8525,6 +8673,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       }
     ],
     drawCallback: function (settings) {
+      $('.fi').datepicker();
       var api = this.api();
       var rows = api.rows({ page: 'current' }).nodes();
       var last = null;
@@ -8550,234 +8699,61 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         });
     },
     initComplete: function (settings, json) {
+      $('.fi').datepicker();
       $('#agrmz').find('input').val('no');
     },
     createdRow: function (row, data, dataIndex) {
+      $('.fi').datepicker();
       /*console.log(data, row)
             if (!data[2]) {
                 $(row).find('td').attr('colspan', '8');
             }*/
     }
   });
+
   proyeccion.on('change', '.tabl .cuota', async function () {
     const fila = $(this).parents('tr');
     const data = proyeccion.row(fila).data();
     const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
     const monto = noCifra($(this).val());
     const rowQuota = $(this).hasClass('dos') ? 'cuota2' : 'cuota';
+    const typS = row.tipo === 'SEPARACION';
+    const cuota = historyQuota[row.tipo];
+    const oldQta = row[rowQuota];
 
     if (producto.cuotamin > monto) {
-      //  && !rol.admin
-      SMSj('error', 'La cuota minima permitida es $' + Cifra(producto.cuotamin));
-      $(this).val(Cifra(row[rowQuota]));
-    } else {
-      row[rowQuota] = monto;
-      if (row.tipo === 'SEPARACION') {
-        await UpdateTable('INICIAL');
-        await UpdateTable('FINANCIACION');
-      } else UpdateTable(row.tipo);
+      $(this).val(Cifra(oldQta));
+      return SMSj('error', 'La cuota minima permitida es $' + Cifra(producto.cuotamin));
     }
-
-    /* const rows = proyeccion.rows().data();
-    const num = rows.filter(e => e.tipo === row.tipo).length;
-    let nCutasUpdate = rows
-      .filter(e => e.tipo === tipo && e.cuota != histryQuota)
-      .map(e => (mountsUpdate += e.cuota)).length;
-
-    if (histryQuota !== row.cuota && monto !== histryQuota) {
-      mountsUpdate -= row.cuota;
-      mountsUpdate += monto;
-    } else if (histryQuota !== row.cuota && monto === histryQuota) {
-      mountsUpdate -= row.cuota;
-      mountsUpdate += monto;
+    const newMonto = !typS && cuota && cuota != oldQta ? monto - oldQta : monto;
+    const consult = await ErrQuotas(row.tipo, newMonto);
+    if (consult) {
+      $(this).val(Cifra(oldQta));
+      return SMSj('error', consult);
     }
-    const cuota = typI
-      ? (ini - mountsUpdate) / (numIni - nCutasUpdate)
-      : (fnc - mountsUpdate) / (numFnc - nCutasUpdate); */
+    row[rowQuota] = monto;
+    if (typS) {
+      await UpdateTable('INICIAL');
+      await UpdateTable('FINANCIACION');
+    } else UpdateTable(row.tipo);
   });
-  proyeccion.on('click', 'tr a', function () {
-    var fila = $(this).parents('tr');
-    var tipo = fila.find(`.tipo`).val();
-    var Ini = parseFloat($('#ini').val().replace(/\./g, ''));
-    var Fnc = parseFloat($('#fnc').val().replace(/\./g, ''));
-    var ni = parseFloat($('#inicialcuotas').val());
-    var nf = parseFloat($('#financiacion').val());
-
-    if (tipo === 'INICIAL') {
-      ni = Math.sign(ni - 1) < 1 ? 0 : ni - 1;
-      $('#inicialcuotas').val(ni);
-    } else if (tipo === 'FINANCIACION') {
-      nf = Math.sign(nf - 1) < 1 ? 0 : nf - 1;
-      $('#financiacion').val(nf);
-    }
-
-    if (!nf && !ni) {
-      $('#Separar').val(Moneda(Ini + Fnc));
-    } else if (!ni) {
-      $('#Separar').val(Moneda(Ini));
-    } else if (!nf) {
-      $('#financiacion').val(1);
-      SMSj('info', 'No es posible eliminar toda la finaciacion sin antes eliminar toda la inicial');
-      return;
-    }
-    proyeccion.row(fila).remove().draw(false);
-    CONT();
-  });
-  proyeccion.on('click', '.guardar', function () {
-    $('#proyeccion')
-      .find('#ahorro, #inicialcuotas, #financiacion, #ini, #fnc, #total, #inicial')
-      .prop('disabled', false);
-    var datos = $('#proyeccion thead').find(`input, select`).serialize();
-    datos += '&' + proyeccion.$('input').serialize();
-    proyeccion.$('#ini, #fnc, #total, #inicial').prop('disabled', true);
-    //console.log(datos)
-    $.ajax({
-      type: 'POST',
-      url: '/links/ordne',
-      data: datos,
-      async: true,
-      beforeSend: function (xhr) {
-        $('#ModalEventos').modal({
-          toggle: true,
-          backdrop: 'static',
-          keyboard: true
-        });
-      },
-      success: function (data) {
-        if (data) {
-          SMSj('success', 'Datos actualizados correctamente');
-          $('#ModalEventos').modal('hide');
-          eliminar = '';
-          window.location.href = '/links/reportes';
-        }
-      }
-    });
+  proyeccion.on('click', '.tabl .cuota', function () {
+    $(this).select();
   });
   proyeccion.on('keyup', '.tabl .cuota', function () {
     $(this).val(Cifra($(this).val()));
-    //$(this).mask('#,##$', { reverse: true, selectOnFocus: true });
   });
-  proyeccion.on('change', '.tabl .fecha', function () {
-    var t = moment().format('YYYY-MM-DD');
-    var fech = $(this).val() ? $(this).val() : t;
-    var f = null,
-      n = 0;
-    $('#proyeccion .tabl tr').map((c, i) => {
-      var e = $(i).find(`.fecha`).val() ? $(i).find(`.fecha`).val() : 12;
-      if ($(i).find(`.fecha`).val() !== undefined && e === fech) {
-        f = true;
-      } else if ($(i).find(`.fecha`).val() !== undefined && f) {
-        n++;
-        s = moment(fech).add(n, 'month').format('YYYY-MM-DD');
-        $(i).find(`.fecha`).val(s);
-      }
-    });
+  proyeccion.on('click', '.tabl .fecha', function () {
+    $('.fi').datepicker();
+    const fila = $(this).parents('tr');
+    const data = proyeccion.row(fila).data();
+    const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
+
+    const rowQuota = $(this).hasClass('dos') ? 'cuota2' : 'cuota';
+    const typS = row.tipo === 'SEPARACION';
+
+    console.log('si reconoce la clase');
   });
-  var CONT = () => {
-    var Separacion = parseFloat($('#Separar').val().replace(/\./g, ''));
-    var totalCuotaInicial = parseFloat($('#ini').val().replace(/\./g, '')); // Total de la cuota inicial sin la separacion
-    var ini = Math.sign(totalCuotaInicial - Separacion) > 0 ? totalCuotaInicial - Separacion : 0;
-    var fnc = parseFloat($('#fnc').val().replace(/\./g, '')); // Total de la finaciacion del producto
-    var ic = parseFloat($('#inicialcuotas').val());
-    var fc = parseFloat($('#financiacion').val());
-    var excedente = 0;
-
-    var cuotai = parseFloat(ini) / ic;
-    var cuotaf = parseFloat(fnc) / fc;
-    var fecha = $('#proyeccion .tabl tr').find(`.fecha`)[0].value;
-    var n = 1,
-      s,
-      l = 1,
-      k = 1;
-
-    if (Separacion >= totalCuotaInicial + fnc) {
-      ic = parseFloat($('#inicialcuotas').val(0));
-      fc = parseFloat($('#financiacion').val(0));
-      cuotai = 0;
-      cuotaf = 0;
-    } else if (Separacion === totalCuotaInicial) {
-      ic = parseFloat($('#inicialcuotas').val(0));
-      cuotai = 0;
-    } else if (Separacion > totalCuotaInicial) {
-      excedente = Separacion - totalCuotaInicial;
-      ic = parseFloat($('#inicialcuotas').val(0));
-      if (fc < 1) {
-        fc = 1;
-        parseFloat($('#financiacion').val(fc));
-      }
-      cuotaf = (fnc - excedente) / fc;
-      cuotai = 0;
-    }
-
-    $('#cuot').val(cuotaf ? cuotaf : Separacion);
-
-    $('#proyeccion .tabl tr').each((e, i) => {
-      var fe = $(i).find(`.fecha`).val();
-      var tpo = $(i).find(`.tipo`).val();
-      if (tpo === 'INICIAL' && cuotai) {
-        $(i)
-          .find(`.n`)
-          .val(l++);
-        $(i)
-          .find(`.cuota`)
-          .val(Moneda(Math.round(cuotai)));
-        $(i)
-          .find(`.rcuota`)
-          .val(Moneda(Math.round(cuotai)));
-      }
-      if (tpo === 'FINANCIACION' && cuotaf) {
-        $(i)
-          .find(`.n`)
-          .val(k++);
-        $(i)
-          .find(`.cuota`)
-          .val(Moneda(Math.round(cuotaf)));
-        $(i)
-          .find(`.rcuota`)
-          .val(Moneda(Math.round(cuotaf)));
-      }
-      if (fe !== undefined && fe !== fecha) {
-        s = moment(fecha)
-          .add(n++, 'month')
-          .format('YYYY-MM-DD');
-        $(i).find(`.fecha`).val(s);
-      }
-    });
-    realcuotai = Math.round(cuotai);
-    realcuotaf = Math.round(cuotaf);
-    $('.fecha').daterangepicker({
-      locale: {
-        format: 'YYYY-MM-DD',
-        separator: ' - ',
-        applyLabel: 'Aplicar',
-        cancelLabel: 'Cancelar',
-        fromLabel: 'De',
-        toLabel: '-',
-        customRangeLabel: 'Personalizado',
-        weekLabel: 'S',
-        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-        monthNames: [
-          'Enero',
-          'Febrero',
-          'Marzo',
-          'Abril',
-          'Mayo',
-          'Junio',
-          'Julio',
-          'Agosto',
-          'Septiembre',
-          'Octubre',
-          'Noviembre',
-          'Diciembre'
-        ],
-        firstDay: 1
-      },
-      singleDatePicker: true,
-      showDropdowns: true,
-      minYear: 2017,
-      maxYear: parseInt(moment().format('YYYY'), 10) + 5
-    });
-  };
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////
 if (
@@ -10270,7 +10246,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
     $('#reportrange').daterangepicker(
       {
         locale: {
-          format: 'YYYY/MM/DD',
+          format: 'YYYY-MM-DD',
           separator: ' - ',
           applyLabel: 'Aplicar',
           cancelLabel: 'Cancelar',
@@ -11340,7 +11316,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
             $('#rangofechas').daterangepicker(
               {
                 locale: {
-                  format: 'YYYY/MM/DD',
+                  format: 'YYYY-MM-DD',
                   separator: ' - ',
                   applyLabel: 'Aplicar',
                   cancelLabel: 'Cancelar',
@@ -15681,7 +15657,7 @@ if (window.location == `${window.location.origin}/links/asesores` && !rol.extern
         data: 'fecha',
         render: (data, method, row) =>
           `<a title="fecha en que se evio el pin ${row.fechactivacion}">${
-            data ? moment(data).format('YYYY/MM/DD') : ''
+            data ? moment(data).format('YYYY-MM-DD') : ''
           }</a>`
       },
       {

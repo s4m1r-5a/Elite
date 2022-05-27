@@ -24,7 +24,8 @@
   <link rel='stylesheet' href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.9.0/css/all.min.css'>
   <link href="https://cdn.jsdelivr.net/npm/smartwizard@5/dist/css/smart_wizard_all.min.css" rel="stylesheet"
     type="text/css" />
-
+    <link rel="stylesheet" href="/bootstrap-datepicker-1.9.0-dist/css/bootstrap-datepicker.standalone.css">
+   
   <style type="text/css">
     table {
       width: 100%;
@@ -591,6 +592,9 @@
   <script type="text/javascript" src="https://www.gstatic.com/charts/loader.js"></script>
   <script src="/socket.io/socket.io.js"></script>
   <script src="/js/app.js"></script>
+  <!--Obligatorio que la libreria datepicker este en el footer justo despues de los js de bootstrap para no causar conflicto-->
+  <script src="/bootstrap-datepicker-1.9.0-dist/js/bootstrap-datepicker.min.js"></script>
+  <script src="/bootstrap-datepicker-1.9.0-dist/locales/bootstrap-datepicker.es.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/smartwizard@5/dist/js/jquery.smartWizard.min.js"
     type="text/javascript"></script>
   <script src="/js/moment-locales.min.js"></script>
