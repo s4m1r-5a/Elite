@@ -77,7 +77,7 @@
               <label class='input-group-text' for='proyectos'>VMTR²</label>
             </div>
             <input
-              class='form-control text-center'
+              class='form-control text-center cifra'
               type='text'
               name='vmtr2'
               id='vmtr2'
@@ -85,9 +85,6 @@
               aria-label='precio del mtr²'
               placeholder='Precio del mtr²'
               style='background-color: #FFFFCC;'
-              data-mask='000.000.000'
-              data-mask-reverse='true'
-              data-mask-selectonfocus='true'
               required
               disabled
             />
@@ -107,7 +104,6 @@
               placeholder='0%'
               style='background-color: #FFFFCC;'
               id='porcentage'
-              {{! data-mask='$$*%' }}
               disabled
               required
             />
@@ -120,9 +116,6 @@
               placeholder='Inicial'
               style='background-color: #FFFFCC;'
               id='inicial'
-              data-mask='000.000.000'
-              data-mask-reverse='true'
-              data-mask-selectonfocus='true'
               disabled
             />
           </div>
@@ -141,39 +134,24 @@
               aria-label='Total de lote'
               placeholder='Total'
               style='background-color: #FFFFCC;'
-              data-mask='000.000.000'
-              data-mask-reverse='true'
-              data-mask-selectonfocus='true'
               disabled
             />
           </div>
         </div>
         <div class='col-12 col-md-10 col-lg-8'>
           <div class='input-group input-group-sm mb-3'>
-            <div class='input-group-prepend'>
-              <label class='input-group-text px-1' for='proyectos'>CUPON</label>
-            </div>
-            <input
-              class='form-control text-center text-uppercase'
-              type='text'
-              name='cupon'
-              aria-label='Cupon'
-              autocomplete='off'
-              id='cupon'
-              placeholder='Cupon'
-              style='background-color: #FFFFCC;'
-            />
+            <input type='hidden' name='cupon' id='cupon' />
             <div class='input-group-prepend'>
               <label class='input-group-text px-1' for='proyectos'>DTO</label>
             </div>
             <input
               class='form-control text-center'
               type='text'
-              name='cuponx100'
-              id='cuponx100to'
+              name='dto'
+              id='dto'
               autocomplete='off'
               aria-label='descuento'
-              placeholder='Descuento'
+              placeholder='DESCUENTO'
               style='background-color: #FFFFCC;'
               disabled
             />
@@ -181,23 +159,45 @@
               <label class='input-group-text px-1' for='proyectos'>AHO</label>
             </div>
             <input
-              class='form-control text-center'
+              class='form-control text-center w-25'
               type='text'
               name='ahorro'
               id='ahorro'
               autocomplete='off'
               aria-label='ahorro'
-              placeholder='ahorro'
+              placeholder='AHORRO'
               style='background-color: #FFFFCC;'
-              data-mask='000.000.000'
-              data-mask-reverse='true'
-              data-mask-selectonfocus='true'
               disabled
             />
+            <div class='input-group-prepend'>
+              <button class='btn btn-secondary' data-toggle='modal' data-target='#qpon'>
+                SOLICITAR CUPON
+              </button>
+            </div>
           </div>
         </div>
         <div class='col-12 col-md-4'>
           <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>APLICAR DTO EN</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='aplyDto'
+              name='tipoDto'
+              required
+            >
+              {{! <option value='SEPARACION'>SEPARACION</option>
+              <option value='INICIAL'>INICIAL</option>
+              <option value='FINANCIACION'>FINANCIACION</option>
+              <option value='TOTAL' selected>TOTAL</option> 
+              <option value='NINGUNO'>NINGUNO</option> }}
+            </select>
+          </div>
+        </div>
+        <div class='col-6 col-md-4 col-lg-3'>
+          <div class='input-group input-group-sm mb-2'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>PROMESA</label>
             </div>
@@ -217,33 +217,12 @@
           </div>
         </div>
         <div class='col-6 col-md-4 col-lg-3'>
-          <div class='input-group input-group-sm mb-2'>
-            <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>TIPO DTO</label>
-            </div>
-            <select
-              class='form-control'
-              style='background-color: #FFFFCC;'
-              id='tipoDto'
-              name='tipoDto'
-              required
-              disabled
-            >
-              <option value='TODO'>TODO</option>
-              {{! <option value="SEPARACION">SEPARACION</option> }}
-              <option value='INICIAL'>INICIAL</option>
-              <option value='FINANCIACION'>FINANCIACION</option>
-              <option value='NINGUNO'>NINGUNO</option>
-            </select>
-          </div>
-        </div>
-        <div class='col-6 col-md-4 col-lg-3'>
           <div class='input-group input-group-sm mb-3'>
             <div class='input-group-prepend'>
               <label class='input-group-text' for='proyectos'>QOTA MIN</label>
             </div>
             <input
-              class='form-control text-center'
+              class='form-control text-center cifra'
               name='cuotamin'
               autocomplete='off'
               type='text'
@@ -386,3 +365,132 @@
     </div>
   </div>
 </div>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='qpon' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <span><i class='feather-lg text-danger' data-feather='tag'></i> Cupon de descuento</span>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body m-3 mb-1'>
+        <div class='row'>
+          <div class='col-sm-9'>
+            <p>Seleciona el descuento que quieres generar para el cupon, si se aprueba reciviras un
+              WhatsApp con el cupon</p>
+          </div>
+          <div class='col-sm-3 text-center mb-2'>
+            {{!-- {{#if user.admin}}
+              <input
+                type='text'
+                id='porcntgd'
+                class='form-control form-control-lg'
+                data-mask='00'
+                style='text-align:center'
+              />
+            {{else}}
+              <select id='porcntgd' style='text-align-last:center;'>
+                <option value='3'>3%</option>
+                <option value='5' selected>5%</option>
+                <option value='7'>7%</option>
+                <option value='10'>10%</option>
+              </select>
+            {{/if}} --}}
+            <select id='dto-modal'></select>
+          </div>
+          <div class='col-12 d-flex justify-content-end'>
+            <button id='gQpon' class='btn btn-sm btn-outline-dark my-2' data-dismiss='modal'>
+              Generar cupon
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class='modal-footer'>
+        <div class='accordion w-100' id='accordionExample'>
+          <div class='card'>
+            <div class='card-header' id='headingOne'>
+              <small
+                class='mb-0'
+                data-toggle='collapse'
+                data-target='#collapseOne'
+                aria-expanded='true'
+                aria-controls='collapseOne'
+                style='cursor: pointer;'
+              >
+                Collapsible Group Item #1
+              </small>
+            </div>
+
+            <div
+              id='collapseOne'
+              class='collapse show'
+              aria-labelledby='headingOne'
+              data-parent='#accordionExample'
+            >
+              <div class='card-body'>
+                Some placeholder content for the first accordion panel. This panel is shown by
+                default, thanks to the
+                <code>.show</code>
+                class.
+              </div>
+            </div>
+          </div>
+          <div class='card'>
+            <div class='card-header' id='headingTwo'>
+              <small
+                class='mb-0 collapsed'
+                data-toggle='collapse'
+                data-target='#collapseTwo'
+                aria-expanded='false'
+                aria-controls='collapseTwo'
+                style='cursor: pointer;'
+              >
+                Collapsible Group Item #2
+              </small>
+            </div>
+            <div
+              id='collapseTwo'
+              class='collapse'
+              aria-labelledby='headingTwo'
+              data-parent='#accordionExample'
+            >
+              <div class='card-body'>
+                Some placeholder content for the second accordion panel. This panel is hidden by
+                default.
+              </div>
+            </div>
+          </div>
+          <div class='card'>
+            <div class='card-header' id='headingThree'>
+              <small
+                class='mb-0 collapsed'
+                data-toggle='collapse'
+                data-target='#collapseThree'
+                aria-expanded='false'
+                aria-controls='collapseThree'
+                style='cursor: pointer;'
+              >
+                Collapsible Group Item #3
+              </small>
+            </div>
+            <div
+              id='collapseThree'
+              class='collapse'
+              aria-labelledby='headingThree'
+              data-parent='#accordionExample'
+            >
+              <div class='card-body'>
+                And lastly, the placeholder content for the third and final accordion panel. This
+                panel is hidden by default.
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!-- END primary modal -->

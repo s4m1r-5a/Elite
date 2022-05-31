@@ -8205,6 +8205,8 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   const row = [
     { fechs: hoy, ncuota: 1, tipo: ts, cuota: 1, fechs2: null, ncuota2: null, cuota2: null }
   ];
+  const kupon = { dto: 0, ahorro: 0, cupon: 0 };
+  let Dto = [{ id: null, pagar: 0, maxcuotas: 0, categoria: 'TOTAL', maxdto: 0, producto: 0 }];
   var lote = $('#lote');
   var asesor = $('#asesor');
   var clientes = $('#clientes');
@@ -8216,22 +8218,61 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
     $('#mtr2').val(producto.mtr2);
     $('#vmtr2').val(Cifra(producto.mtr));
-    $(`#porcentage`).val(producto.porcentage).mask('$$$%', { reverse: true, selectOnFocus: true });
+    $(`#porcentage`)
+      .val(producto.porcentage + '%')
+      .mask('$$$%', { reverse: true, selectOnFocus: true });
+    const valor = producto.mtr2 * producto.mtr;
+    const inicial = (valor * producto.porcentage) / 100;
+    const financiacion = (valor * (100 - producto.porcentage)) / 100;
+    producto.inicial = inicial;
+    producto.valor = valor;
+
     $('#inicial').val(Cifra(producto.inicial));
     $('#valor').val(Cifra(producto.valor));
     producto?.status && $(`#promesa option[value='${producto.status}']`).prop('selected', true);
     $('#cuotamin').val(Cifra(producto.cuotamin));
-    $('#ini').val(Cifra(producto.inicial));
-    $('#fnc').val(Cifra(producto.valor - producto.inicial));
-    $('#total').val(Cifra(producto.valor));
+
+    let total = producto.valor;
+    let Ini = (total * producto.porcentage) / 100;
+    let fnc = (total * (100 - producto.porcentage)) / 100;
+
+    const ktgoria = $('#aplyDto').val();
+    switch (ktgoria) {
+      case 'INICIAL':
+        kupon.ahorro = (inicial * kupon.dto) / 100;
+        Ini = (total * producto.porcentage) / 100 - kupon.ahorro;
+        total = producto.valor - kupon.ahorro;
+        break;
+      case 'FINANCIACION':
+        kupon.ahorro = (financiacion * kupon.dto) / 100;
+        fnc = (total * (100 - producto.porcentage)) / 100 - kupon.ahorro;
+        total = producto.valor - kupon.ahorro;
+        break;
+      case 'TOTAL':
+        kupon.ahorro = (valor * kupon.dto) / 100;
+        total = producto.valor - kupon.ahorro;
+        Ini = (total * producto.porcentage) / 100;
+        fnc = (total * (100 - producto.porcentage)) / 100;
+        break;
+      default:
+    }
+
+    if (kupon.dto) {
+      $('#dto').val(kupon.dto + '%');
+      $('#ahorro').val(Cifra(kupon.ahorro));
+    }
+
+    $('#ini').val(Cifra(Ini));
+    $('#fnc').val(Cifra(fnc));
+    $('#total').val(Cifra(total));
+    //producto.total = total;
+    if (rol.admin) $('#vmtr2, #porcentage, #promesa, #cuotamin, #tipoDto').prop('disabled', false);
     $(':disabled').css('background-color', '#DCE2F4');
-    //historyQuota.INICIAL = 0
-    //historyQuota.FINANCIACION = 0  $('.document').mask('AAAAAAAAAAA');
-    //$('.movil').mask('57 ***-***-****');
 
     await UpdateTable('INICIAL');
     await UpdateTable('FINANCIACION');
   };
+
   const coutQuotas = tipo => {
     let number = 0;
     proyeccion
@@ -8245,144 +8286,57 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     return number;
   };
 
-  $(document).ready(function () {
-    var bono = 0;
-    $('.select2').each(function () {
-      var texto =
-        $(this).attr('id') === 'clientes' ? '...SELECCIONE LOS CLIENTES' : 'SELECCIONE UN PRODUCTO';
-      $(this)
-        .wrap('<div class="position-relative w-75"></div>')
-        .select2({
-          placeholder: texto,
-          dropdownParent: $(this).parent(),
-          maximumSelectionLength: 4,
-          allowClear: true
+  const genQpons = () => {
+    const ktgoria = $('#aplyDto').val();
+    const ktgory = [];
+    $('#aplyDto, #dto-modal').html(null);
+    Dto.map(e => {
+      let monto = 0;
+      let count = 1;
+      const valor = (producto.valor * e.pagar) / 100 - kupon.ahorro;
+      e.aplicar = 0;
+      proyeccion
+        .rows()
+        .data()
+        .map(a => {
+          if (count <= e.maxcuotas) monto += a.cuota;
+          count += a.cuota2 ? 1 : 0;
+          if (a.cuota2 && count <= e.maxcuotas) monto += a.cuota2;
+          count++;
         });
-    });
-    $('#lote').change(async function () {
-      const productLt = noCifra($(this).val());
-      if (typeof productos === 'object') {
-        producto = productos.find(e => e.id == productLt);
-        //console.log(producto);
-        UpdateData(producto);
-      }
-      $('#ModalEventos').modal('hide');
-    });
-    $('#num-fnc').change(async function () {
-      const num = noCifra($(this).val());
-      if (!num) $(this).val(1);
-      if (num > maxCuotasFinanciamiento) $(this).val(maxCuotasFinanciamiento);
-
-      const consult = await ErrQuotas('FINANCIACION');
-      if (consult) {
-        $(this).val(coutQuotas('FINANCIACION'));
-        return SMSj('error', consult);
-      }
-      UpdateTable('FINANCIACION');
-    });
-    $('#fnc-min').click(function () {
-      const num = noCifra($('#num-fnc').val());
-      if (num < 2) $('#num-fnc').val(1);
-      else $('#num-fnc').val(num - 1);
-      UpdateTable('FINANCIACION');
-    });
-    $('#financiacion-btn').click(async function () {
-      const num = noCifra($('#num-fnc').val());
-      if (num >= maxCuotasFinanciamiento) $('#num-fnc').val(maxCuotasFinanciamiento);
-      else $('#num-fnc').val(num + 1);
-
-      const consult = await ErrQuotas('FINANCIACION');
-      if (consult) {
-        $('#num-fnc').val(num);
-        return SMSj('error', consult);
-      }
-      UpdateTable('FINANCIACION');
-    });
-    $('#num-ini').change(async function () {
-      const num = noCifra($(this).val());
-      if (!num) $(this).val(1);
-      if (num > producto.maxini) $(this).val(producto.maxini);
-
-      const consult = await ErrQuotas('INICIAL');
-      if (consult) {
-        $(this).val(coutQuotas('INICIAL'));
-        return SMSj('error', consult);
-      }
-      UpdateTable('INICIAL');
-    });
-    $('#ini-min').click(function () {
-      const num = noCifra($('#num-ini').val());
-      if (num < 2) $('#num-ini').val(1);
-      else $('#num-ini').val(num - 1);
-      UpdateTable('INICIAL');
-    });
-    $('#inicialcuotas-btn').click(async function () {
-      const num = noCifra($('#num-ini').val());
-      if (num >= producto.maxini) $('#num-ini').val(producto.maxini);
-      else $('#num-ini').val(num + 1);
-
-      const consult = await ErrQuotas('INICIAL');
-      if (consult) {
-        $('#num-ini').val(num);
-        return SMSj('error', consult);
-      }
-      UpdateTable('INICIAL');
-    });
-    $('#tipoDto').change(function () {
-      dto = $(this).val();
-      var total = $('#total').val().replace(/\./g, '');
-      Totales(total, kuponDto, dto);
-    });
-    $('#cupon').change(function () {
-      $.ajax({
-        url: '/links/bono/' + $(this).val(),
-        type: 'GET',
-        async: false,
-        success: function (data) {}
-      });
-    });
-  });
-
-  $.ajax({
-    type: 'POST',
-    url: '/links/orden/lote',
-    beforeSend: xhr =>
-      $('#ModalEventos').modal({
-        toggle: true,
-        backdrop: 'static',
-        keyboard: true
-      }),
-    success: data => {
-      $('#ModalEventos').modal('hide');
-      var proyecto = null;
-      productos = data.productos;
-      productos.map(x => {
-        if (x.proyect !== proyecto) {
-          parent = document.createElement('optgroup');
-          parent.setAttribute('label', x.proyect);
-          lote.append(parent);
-          proyecto = x.proyect;
+      if (monto >= valor) {
+        e.aplicar = e.categoria;
+        if (!ktgory.some(a => a == e.categoria)) {
+          ktgory.push(e.categoria);
+          const selec = ktgoria === e.categoria;
+          $('#aplyDto').prepend(new Option(e.categoria, e.categoria, selec, selec));
         }
-        const Lt = lt == x.id ? true : false;
-        const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
-        parent.append(option);
-        //if (lt == x.id) producto = x;
+        console.log(e, ' Este si cumple con los requerimientos');
+      }
+    });
+    const num = Dto.filter(e => e.aplicar).map(e => e.maxdto);
+    if (num.length) {
+      const arr = new Array(Math.max(...num));
+      arr.fill(1, 0).map((b, i) => {
+        const q = kupon.cupon === i + 1;
+        $('#dto-modal').append(new Option(`${i + 1}%`, i + 1), q, q);
       });
-      lote.val(lt).trigger('change');
-
-      data.asesores.map((x, v) => {
-        var user = agente == x.id ? true : false;
-        asesor.append(new Option(x.fullname, x.id, user, user));
-      });
-      asesor.val(agente).trigger('change');
-
-      data.clientes.map((x, v) => {
-        var client = clients.some(e => e == x.idc);
-        clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, client, client));
-      });
-      clientes.val(clients).trigger('change');
     }
-  }).then(data => console.log('paso por aqui'));
+    const newktgoria = $('#aplyDto').val();
+    const res = Dto.sort((a, b) => b.maxdto - a.maxdto).find(
+      e => e.aplicar === newktgoria && e.maxdto >= kupon.dto
+    );
+    if (!res && kupon.dto) {
+      kupon.dto = 0;
+      kupon.ahorro = 0;
+      UpdateData(producto);
+    } else if (res && kupon.cupon && (!kupon.dto || kupon.cupon !== kupon.dto)) {
+      const q = res.maxdto >= kupon.cupon ? kupon.cupon : !kupon.dto ? res.maxdto : kupon.dto;
+      console.log(res, kupon.cupon, kupon.dto, kupon.cupon !== kupon.dto, q);
+      kupon.dto = q;
+      //UpdateData(producto);
+    }
+  };
 
   const ErrQuotas = (tipo, newmonto = 0) => {
     let mounts = 0;
@@ -8393,9 +8347,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     const typF = tipo === 'FINANCIACION';
     const rows = proyeccion.rows().data();
     const sep = typS ? newmonto : rows.filter(e => e.tipo === 'SEPARACION')[0].cuota;
-    const inicial = producto.inicial;
-    const financiacion = producto.valor - producto.inicial;
-    const total = producto.valor;
+    const inicial = noCifra($('#ini').val());
+    const financiacion = noCifra($('#fnc').val());
+    const total = noCifra($('#total').val());
     const ini = sep >= inicial ? 0 : inicial - sep;
     const fnc = sep >= total ? 0 : sep > inicial ? total - sep : financiacion;
     const nIni = noCifra($('#num-ini').val());
@@ -8439,7 +8393,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     return false;
   };
 
-  const UpdateTable = tipo => {
+  const UpdateTable = async tipo => {
     const rows = [];
     proyeccion
       .rows()
@@ -8452,9 +8406,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       rows.splice(indx, 1, sep);
     }
     const separacion = sep.cuota;
-    const inicial = producto.inicial;
-    const financiacion = producto.valor - producto.inicial;
-    const total = producto.valor;
+    const inicial = noCifra($('#ini').val());
+    const financiacion = noCifra($('#fnc').val());
+    const total = noCifra($('#total').val());
     const ini = separacion >= inicial ? 0 : inicial - separacion;
     const fnc = separacion >= total ? 0 : separacion > inicial ? total - separacion : financiacion;
     const ni = noCifra($('#num-ini').val());
@@ -8566,7 +8520,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       return 0;
     });
     proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
-    $('.fi').datepicker();
     $('.fecha').daterangepicker(
       {
         locale: {
@@ -8601,13 +8554,195 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         maxYear: parseInt(moment().format('YYYY'), 10)
       },
       function (start, end, label) {
-        var fila = this.element.parent();
-        var data = proyeccion.row(fila).data();
-        console.log(fila, data);
+        const fila = this.element.parents('tr');
+        const data = proyeccion.row(fila).data();
+        const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
+        const rowDate = $(this.element).hasClass('fechs2') ? 'fechs2' : 'fechs';
+        row[rowDate] = start.format('YYYY-MM-DD');
+        UpdateTable(row.tipo);
       }
     );
+    proyeccion.rows().every(function (a) {
+      try {
+        if (!$(this.child()).find('.fechs2').length) this.child().hide();
+      } catch (e) {
+        //console.log(e);
+      }
+    });
+    await genQpons();
     return rows;
   };
+
+  $(document).ready(function () {
+    var bono = 0;
+    $('.select2').each(function () {
+      var texto =
+        $(this).attr('id') === 'clientes' ? '...SELECCIONE LOS CLIENTES' : 'SELECCIONE UN PRODUCTO';
+      $(this)
+        .wrap('<div class="position-relative w-75"></div>')
+        .select2({
+          placeholder: texto,
+          dropdownParent: $(this).parent(),
+          maximumSelectionLength: 4,
+          allowClear: true
+        });
+    });
+    $('#lote').change(async function () {
+      const productLt = noCifra($(this).val());
+      if (typeof productos === 'object') {
+        producto = productos.find(e => e.id == productLt);
+        console.log(Dto);
+        UpdateData(producto);
+      }
+      $('#ModalEventos').modal('hide');
+    });
+    $('#mtr2').change(function () {
+      producto.mtr2 = noCifra($(this).val());
+      console.log(producto.mtr2, noCifra($(this).val()));
+      UpdateData(producto);
+    });
+    $('#vmtr2').change(function () {
+      producto.mtr = noCifra($(this).val());
+      console.log(producto.mtr, noCifra($(this).val()));
+      UpdateData(producto);
+    });
+    $('#porcentage').change(function () {
+      producto.porcentage = noCifra($(this).cleanVal());
+      UpdateData(producto);
+    });
+    $('#num-fnc').change(async function () {
+      const num = noCifra($(this).val());
+      if (!num) $(this).val(1);
+      if (num > maxCuotasFinanciamiento && !rol.admin) $(this).val(maxCuotasFinanciamiento);
+      else if (num >= maxCuotasFinanciamiento && rol.admin)
+        SMSj(
+          'info',
+          'Excediste el maximo de cuotas prestablecidas para la financiacion del proyecto'
+        );
+
+      const consult = await ErrQuotas('FINANCIACION');
+      if (consult) {
+        $(this).val(coutQuotas('FINANCIACION'));
+        return SMSj('error', consult);
+      }
+      UpdateTable('FINANCIACION');
+    });
+    $('#fnc-min').click(function () {
+      const num = noCifra($('#num-fnc').val());
+      if (num < 2) $('#num-fnc').val(1);
+      else $('#num-fnc').val(num - 1);
+      UpdateTable('FINANCIACION');
+    });
+    $('#financiacion-btn').click(async function () {
+      const num = noCifra($('#num-fnc').val());
+      if (num >= maxCuotasFinanciamiento && !rol.admin) $('#num-fnc').val(maxCuotasFinanciamiento);
+      else if (num >= maxCuotasFinanciamiento && rol.admin) {
+        $('#num-fnc').val(num + 1);
+        SMSj(
+          'info',
+          'Excediste el maximo de cuotas prestablecidas para la financiacion del proyecto'
+        );
+      } else $('#num-fnc').val(num + 1);
+
+      const consult = await ErrQuotas('FINANCIACION');
+      if (consult) {
+        $('#num-fnc').val(num);
+        return SMSj('error', consult);
+      }
+      UpdateTable('FINANCIACION');
+    });
+    $('#num-ini').change(async function () {
+      const num = noCifra($(this).val());
+      if (!num) $(this).val(1);
+      if (num > producto.maxini && !rol.admin) $(this).val(producto.maxini);
+      else if (num >= producto.maxini && rol.admin)
+        SMSj('info', 'Excediste el maximo de cuotas prestablecidas para la inicial del proyecto');
+
+      const consult = await ErrQuotas('INICIAL');
+      if (consult) {
+        $(this).val(coutQuotas('INICIAL'));
+        return SMSj('error', consult);
+      }
+      UpdateTable('INICIAL');
+    });
+    $('#ini-min').click(function () {
+      const num = noCifra($('#num-ini').val());
+      if (num < 2) $('#num-ini').val(1);
+      else $('#num-ini').val(num - 1);
+      UpdateTable('INICIAL');
+    });
+    $('#inicialcuotas-btn').click(async function () {
+      const num = noCifra($('#num-ini').val());
+      if (num >= producto.maxini && !rol.admin) $('#num-ini').val(producto.maxini);
+      else if (num >= producto.maxini && rol.admin) {
+        $('#num-ini').val(num + 1);
+        SMSj('info', 'Excediste el maximo de cuotas prestablecidas para la inicial del proyecto');
+      } else $('#num-ini').val(num + 1);
+
+      const consult = await ErrQuotas('INICIAL');
+      if (consult) {
+        $('#num-ini').val(num);
+        return SMSj('error', consult);
+      }
+      UpdateTable('INICIAL');
+    });
+    $('#dto-modal').change(function () {
+      const dto = noCifra($(this).val());
+      kupon.cupon = dto;
+      kupon.dto = dto;
+      UpdateData(producto);
+    });
+    $('#aplyDto').change(function () {
+      UpdateData(producto);
+    });
+    $('.cifra').click(function () {
+      $(this).select();
+    });
+    $('.cifra').keyup(function () {
+      $(this).val(Cifra($(this).val()));
+    });
+  });
+
+  $.ajax({
+    type: 'POST',
+    url: '/links/orden/lote',
+    beforeSend: xhr =>
+      $('#ModalEventos').modal({
+        toggle: true,
+        backdrop: 'static',
+        keyboard: true
+      }),
+    success: data => {
+      $('#ModalEventos').modal('hide');
+      var proyecto = null;
+      productos = data.productos;
+      productos.map(x => {
+        if (x.proyect !== proyecto) {
+          parent = document.createElement('optgroup');
+          parent.setAttribute('label', x.proyect);
+          lote.append(parent);
+          proyecto = x.proyect;
+        }
+        const Lt = lt == x.id ? true : false;
+        const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
+        parent.append(option);
+        if (lt == x.id) Dto = data.descuentos.filter(e => e.producto == x.proyct);
+      });
+      lote.val(lt).trigger('change');
+
+      data.asesores.map((x, v) => {
+        var user = agente == x.id ? true : false;
+        asesor.append(new Option(x.fullname, x.id, user, user));
+      });
+      asesor.val(agente).trigger('change');
+
+      data.clientes.map((x, v) => {
+        var client = clients.some(e => e == x.idc);
+        clientes.append(new Option(`${x.nombre}  CC ${x.documento}`, x.idc, client, client));
+      });
+      clientes.val(clients).trigger('change');
+    }
+  }).then(data => console.log('paso por aqui'));
 
   var proyeccion = $('#proyeccion').DataTable({
     searching: false,
@@ -8624,8 +8759,8 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     responsive: {
       details: {
         display: $.fn.dataTable.Responsive.display.childRowImmediate,
-        type: 'none'
-        //target: ''
+        type: 'none',
+        target: ''
       }
       /* breakpoints: [
         { name: 'fechs2', width: Infinity },
@@ -8642,9 +8777,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       { data: 'ncuota' },
       {
         data: 'fechs',
-        className: 'fi',
+        //className: '',
         render: (data, method, row) =>
-          data ? `<a class="fecha">${moment(data).format('YYYY-MM-DD')}</a>` : ''
+          data ? `<a class="fecha fechs">${moment(data).format('YYYY-MM-DD')}</a>` : ''
       },
       { data: 'tipo' },
       {
@@ -8658,9 +8793,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       { data: 'ncuota2', className: 'min-tablet-p not-mobile-l' },
       {
         data: 'fechs2',
-        className: 'min-tablet-p not-mobile-l fi',
+        className: 'min-tablet-p not-mobile-l',
         render: (data, method, row) =>
-          data ? `<a class="fi">${moment(data).format('YYYY-MM-DD')}</a>` : ''
+          data ? `<a class="fecha fechs2">${moment(data).format('YYYY-MM-DD')}</a>` : ''
       },
       {
         data: 'cuota2',
@@ -8673,7 +8808,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       }
     ],
     drawCallback: function (settings) {
-      $('.fi').datepicker();
       var api = this.api();
       var rows = api.rows({ page: 'current' }).nodes();
       var last = null;
@@ -8699,11 +8833,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         });
     },
     initComplete: function (settings, json) {
-      $('.fi').datepicker();
       $('#agrmz').find('input').val('no');
     },
     createdRow: function (row, data, dataIndex) {
-      $('.fi').datepicker();
       /*console.log(data, row)
             if (!data[2]) {
                 $(row).find('td').attr('colspan', '8');
@@ -8742,17 +8874,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   });
   proyeccion.on('keyup', '.tabl .cuota', function () {
     $(this).val(Cifra($(this).val()));
-  });
-  proyeccion.on('click', '.tabl .fecha', function () {
-    $('.fi').datepicker();
-    const fila = $(this).parents('tr');
-    const data = proyeccion.row(fila).data();
-    const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
-
-    const rowQuota = $(this).hasClass('dos') ? 'cuota2' : 'cuota';
-    const typS = row.tipo === 'SEPARACION';
-
-    console.log('si reconoce la clase');
   });
 }
 //////////////////////////////////* IMPRIMIR */////////////////////////////////////////////////////////////

@@ -4669,13 +4669,14 @@ router.get('/orden2/:lote', isLoggedIn, async (req, res) => {
 });
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const { accion } = req.params;
-  const productos = await pool.query(`SELECT o.*, l.* FROM productos o 
+  const productos = await pool.query(`SELECT o.*, o.id proyct, l.* FROM productos o 
   INNER JOIN productosd l ON l.producto = o.id WHERE l.estado IN('9') 
   ORDER BY o.proyect DESC, l.n ASC, l.mz ASC`);
   const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
+  const descuentos = await pool.query(`SELECT * FROM descuentos`);
   //console.log(productos);
-  res.send({ productos, asesores, clientes });
+  res.send({ productos, asesores, clientes, descuentos });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
   const {
