@@ -8330,11 +8330,13 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       kupon.dto = 0;
       kupon.ahorro = 0;
       UpdateData(producto);
-    } else if (res && kupon.cupon && (!kupon.dto || kupon.cupon !== kupon.dto)) {
+    } else if (res && kupon.cupon) {
       const q = res.maxdto >= kupon.cupon ? kupon.cupon : !kupon.dto ? res.maxdto : kupon.dto;
-      console.log(res, kupon.cupon, kupon.dto, kupon.cupon !== kupon.dto, q);
-      kupon.dto = q;
-      //UpdateData(producto);
+      //console.log(res, kupon.cupon, kupon.dto, kupon.cupon !== kupon.dto, q);
+      if (q !== kupon.dto) {
+        kupon.dto = q;
+        UpdateData(producto);
+      }
     }
   };
 
@@ -8686,13 +8688,24 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       }
       UpdateTable('INICIAL');
     });
-    $('#dto-modal').change(function () {
-      const dto = noCifra($(this).val());
-      kupon.cupon = dto;
-      kupon.dto = dto;
+    $('#gQpon').click(function () {
+      const dto = noCifra($('#dto-modal').val());
+      const res = Dto.sort((a, b) => b.maxdto - a.maxdto).find(e => e.aplicar && e.maxdto >= dto);
+      kupon.cupon = !res ? 0 : dto;
+      kupon.dto = !res ? 0 : dto;
+      $('#aplyDto').val(!res ? null : res.aplicar);
       UpdateData(producto);
     });
     $('#aplyDto').change(function () {
+      const aplyDto = $(this).val();
+      const res = Dto.sort((a, b) => b.maxdto - a.maxdto).find(e => e.aplicar === aplyDto);
+      console.log(
+        res,
+        aplyDto,
+        kupon.dto,
+        !res ? 0 : res.maxdto >= kupon.dto ? kupon.dto : res.maxdto
+      );
+      kupon.dto = !res ? 0 : res.maxdto >= kupon.cupon ? kupon.cupon : res.maxdto;
       UpdateData(producto);
     });
     $('.cifra').click(function () {
