@@ -8211,6 +8211,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
   var asesor = $('#asesor');
   var clientes = $('#clientes');
   var maxCuotasFinanciamiento;
+  var Dtos;
   var productos;
   var producto;
 
@@ -8290,6 +8291,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     const ktgoria = $('#aplyDto').val();
     const ktgory = [];
     $('#aplyDto, #dto-modal').html(null);
+    if (!Dto.length) return;
     Dto.map(e => {
       let monto = 0;
       let count = 1;
@@ -8593,6 +8595,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       const productLt = noCifra($(this).val());
       if (typeof productos === 'object') {
         producto = productos.find(e => e.id == productLt);
+        Dto = Dtos.filter(e => e.producto == producto.proyct);
         console.log(Dto);
         UpdateData(producto);
       }
@@ -8600,12 +8603,10 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     });
     $('#mtr2').change(function () {
       producto.mtr2 = noCifra($(this).val());
-      console.log(producto.mtr2, noCifra($(this).val()));
       UpdateData(producto);
     });
     $('#vmtr2').change(function () {
       producto.mtr = noCifra($(this).val());
-      console.log(producto.mtr, noCifra($(this).val()));
       UpdateData(producto);
     });
     $('#porcentage').change(function () {
@@ -8699,12 +8700,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     $('#aplyDto').change(function () {
       const aplyDto = $(this).val();
       const res = Dto.sort((a, b) => b.maxdto - a.maxdto).find(e => e.aplicar === aplyDto);
-      console.log(
-        res,
-        aplyDto,
-        kupon.dto,
-        !res ? 0 : res.maxdto >= kupon.dto ? kupon.dto : res.maxdto
-      );
       kupon.dto = !res ? 0 : res.maxdto >= kupon.cupon ? kupon.cupon : res.maxdto;
       UpdateData(producto);
     });
@@ -8729,6 +8724,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       $('#ModalEventos').modal('hide');
       var proyecto = null;
       productos = data.productos;
+      Dtos = data.descuentos;
       productos.map(x => {
         if (x.proyect !== proyecto) {
           parent = document.createElement('optgroup');
@@ -8739,7 +8735,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
         const Lt = lt == x.id ? true : false;
         const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
         parent.append(option);
-        if (lt == x.id) Dto = data.descuentos.filter(e => e.producto == x.proyct);
+        //if (lt == x.id) Dto = Dtos.filter(e => e.producto == x.proyct);
       });
       lote.val(lt).trigger('change');
 
