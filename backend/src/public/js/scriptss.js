@@ -8311,7 +8311,7 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
           const selec = ktgoria === e.categoria;
           $('#aplyDto').prepend(new Option(e.categoria, e.categoria, selec, selec));
         }
-        console.log(e, ' Este si cumple con los requerimientos');
+        //console.log(e, ' Este si cumple con los requerimientos');
       }
     });
     const num = Dto.filter(e => e.aplicar).map(e => e.maxdto);
