@@ -13770,7 +13770,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     columnDefs: [
       //{ "visible": false, "targets": 1 }
     ],
-    order: [[1, 'desc']],
+    order: [[16, 'desc']],
     language: languag,
     ajax: {
       method: 'POST',
