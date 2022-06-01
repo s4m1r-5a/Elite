@@ -13793,20 +13793,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             $(rows)
               .eq(i - 1)
               .after(
-                `<tr class="group" style="background: #${
-                  total !== pagar ? 'F08080' : 'FFFFCC'
-                }; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">
-                                <td>
-                                    <div class="text-center">
-                                        ${cont}
-                                    </div>
-                                </td>
-                                <td colspan="16">
-                                    <div class="text-center">
-                                        $${Moneda(pagar)}
-                                    </div>
-                                </td>                            
-                            </tr>`
+                `<tr class="group" 
+                  style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; 
+                  color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">
+                  <td colspan="17" class="text-center"
+                    <small>
+                      Cuenta de cobro #${group.cuentadecobro} comisiones generadas en ella ${cont}
+                      para un total de $${Cifra(pagar)}
+                    </small>
+                  </td>
+                </tr>`
               );
             body.push({
               id: {
@@ -13843,28 +13839,19 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             .eq(i)
             .before(
               `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                            <td>
-                                <div class="text-center">
-                                    ${group.cuentadecobro}
-                                </div>
+                            <td class="text-center">
+                              ${group.cuentadecobro}
                             </td>
-                            <td colspan="2">
-                                <div class="text-center">
-                                    ${fechg} 
-                                </div>
+                            <td colspan="2" class="text-center">
+                              ${fechg} 
                             </td>
-                            <td>
-                                <div class="text-center">
-                                    ${group.nam} 
-                                </div>
+                            <td colspan="5" class="text-center">
+                              ${group.nam} 
                             </td>
-                            <td>
-                                <div class="text-center">
-                                    $${Moneda(group.deuda)}
-                                </div>
+                            <td class="text-center">
+                              $${Moneda(group.deuda)}
                             </td>
-                            <td colspan="12">
-                                <div class="text-center">
+                            <td colspan="5" class="text-center">
                                     <div class="btn-group btn-group-sm">
                                         <button type="button" class="btn btn-secondary dropdown-toggle btnaprobar" data-toggle="dropdown"
                                          aria-haspopup="true" aria-expanded="false">Acción</button>
@@ -13886,7 +13873,6 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
               }')"><i class="fas fa-business-time"></i> Pagar</a>
                                         </div>
                                     </div>
-                                </div>
                             </td>
                         </tr>`
             );
@@ -13997,20 +13983,16 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           $(rows)
             .eq(i)
             .after(
-              `<tr class="group" style="background: #${
-                total !== pagar ? 'F08080' : 'FFFFCC'
-              }; color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">                          
-                            <td>
-                                <div class="text-center">
-                                    ${cont}
-                                </div>
-                            </td>
-                            <td colspan="16">
-                                <div class="text-center">
-                                    $${Moneda(pagar)}
-                                </div>
-                            </td>                            
-                        </tr>`
+              `<tr class="group" 
+                  style="background: #${total !== pagar ? 'F08080' : 'FFFFCC'}; 
+                  color: #${total !== pagar ? 'FFFFCC' : '7f8c8d'};">
+                  <td colspan="17" class="text-center"
+                    <small>
+                      Cuenta de cobro #${group.cuentadecobro} comisiones generadas en ella ${cont}
+                      para un total de $${Cifra(pagar)}
+                    </small>
+                  </td>
+                </tr>`
             );
           body.push(
             {
@@ -14086,23 +14068,17 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         },*/
     columns: [
       { data: 'ids' },
-      { data: 'cuentadecobro' },
       {
         data: 'fech',
         render: function (data, method, row) {
           return moment(data).format('YYYY-MM-DD'); //pone la fecha en un formato entendible
         }
       },
-      { data: 'fullname' },
-      { data: 'nombre' },
+      { data: 'proyect' },
+      { data: 'mz' },
+      { data: 'n' },
       {
         data: 'total',
-        render: function (data, method, row) {
-          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
-        }
-      },
-      {
-        data: 'monto',
         render: function (data, method, row) {
           return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
         }
@@ -14114,28 +14090,11 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         }
       },
       {
-        data: 'retefuente',
+        data: 'monto',
         render: function (data, method, row) {
           return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
         }
       },
-      {
-        data: 'reteica',
-        render: function (data, method, row) {
-          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
-        }
-      },
-      {
-        data: 'pagar',
-        render: function (data, method, row) {
-          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
-        }
-      },
-      { data: 'concepto' },
-      { data: 'descp' },
-      { data: 'proyect' },
-      { data: 'mz' },
-      { data: 'n' },
       {
         data: 'stado',
         render: function (data, method, row) {
@@ -14159,7 +14118,30 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
               return `<span class="badge badge-pill badge-primary">Sin info</span>`;
           }
         }
-      }
+      },
+      {
+        data: 'retefuente',
+        render: function (data, method, row) {
+          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
+        }
+      },
+      {
+        data: 'reteica',
+        render: function (data, method, row) {
+          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
+        }
+      },
+      {
+        data: 'pagar',
+        render: function (data, method, row) {
+          return '$' + Moneda(Math.round(data)); //replaza cualquier caracter y espacio solo deja letras y numeros
+        }
+      },
+      { data: 'concepto' },
+      { data: 'descp' },
+      { data: 'nombre' },
+      { data: 'fullname' },
+      { data: 'cuentadecobro' }
     ]
   });
   var generarInforme = () => {
