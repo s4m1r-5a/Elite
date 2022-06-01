@@ -8261,6 +8261,9 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
     if (kupon.dto) {
       $('#dto').val(kupon.dto + '%');
       $('#ahorro').val(Cifra(kupon.ahorro));
+    } else {
+      $('#dto').val(null);
+      $('#ahorro').val(null);
     }
 
     $('#ini').val(Cifra(Ini));
@@ -8334,7 +8337,6 @@ if (window.location.pathname == `/links/orden2/${window.location.pathname.split(
       UpdateData(producto);
     } else if (res && kupon.cupon) {
       const q = res.maxdto >= kupon.cupon ? kupon.cupon : !kupon.dto ? res.maxdto : kupon.dto;
-      //console.log(res, kupon.cupon, kupon.dto, kupon.cupon !== kupon.dto, q);
       if (q !== kupon.dto) {
         kupon.dto = q;
         UpdateData(producto);
