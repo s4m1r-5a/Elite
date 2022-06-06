@@ -4657,18 +4657,35 @@ router.get('/orden2/:lote', isLoggedIn, async (req, res) => {
   const hora = time.indexOf('*') > 0 ? time.split('*')[1] : hora2;
   if (ahora > hora) {
     await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: `${usr}*${h}` }, lote]);
-    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs });
+    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs, orden: null });
   } else if (usr !== time.split('*')[0]) {
     var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
       time.split('*')[0]
     } EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`;
-    res.render('links/orden2', { proyecto, lote, mensaje, usrs });
+    res.render('links/orden2', { proyecto, lote, mensaje, usrs, orden: null });
   } else {
-    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs });
+    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs, orden: null });
   }
+});
+router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
+  const { id } = req.params;
+  const usrs = req.user.id;
+  res.render('links/orden2', { lote: null, usrs, orden: id });
 });
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const { accion } = req.params;
+  let orden = [];
+  const ordnId = parseInt(accion);
+  if (!isNaN(ordnId))
+    orden = await pool.query(`SELECT c.id idq, c.tipo, c.ncuota, c.fechs, c.proyeccion cuota, 
+    p.dto, p.id o, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.asesor, p.numerocuotaspryecto, 
+    p.cuot, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, p.cupon, p.comision, p.status, 
+    p.ahorro, l.id, l.mtr, l.mtr2, l.inicial, l.valor, l.mz, l.n, o.cuotamin, o.fechafin, o.proyect, 
+    o.porcentage, o.separaciones, o.id proyct, o.maxini, o.maxfnc, q.descuento
+    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id LEFT JOIN cupones q ON p.cupon = q.id
+    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
+    WHERE c.separacion = ${ordnId} ORDER BY TIMESTAMP(c.fechs) ASC`);
+
   const productos = await pool.query(`SELECT o.*, o.id proyct, l.* FROM productos o 
   INNER JOIN productosd l ON l.producto = o.id WHERE l.estado IN('9') 
   ORDER BY o.proyect DESC, l.n ASC, l.mz ASC`);
@@ -4676,7 +4693,7 @@ router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
   const descuentos = await pool.query(`SELECT * FROM descuentos`);
   //console.log(productos);
-  res.send({ productos, asesores, clientes, descuentos });
+  res.send({ productos, asesores, clientes, descuentos, orden });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {
   const {

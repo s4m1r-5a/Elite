@@ -4,6 +4,7 @@
       <h3>ORDEN DE SEPARACION</h3>
       <input type='hidden' id='agente' value='{{usrs}}' />
       <input type='hidden' id='lt' value='{{lote}}' />
+      <input type='hidden' id='Orden' value='{{orden}}' />
     </div>
     <div class='card-body p-1' id='cuadro2'>
       <a class='fecha'>Selecciona una fecha</a>
@@ -188,6 +189,12 @@
               name='tipoDto'
               required
             >
+              {{#if user.admin}}
+                <option selected></option>
+                <option value='INICIAL'>INICIAL</option>
+                <option value='FINANCIACION'>FINANCIACION</option>
+                <option value='TOTAL'>TOTAL</option>
+              {{/if}}
               {{! <option value='SEPARACION'>SEPARACION</option>
               <option value='INICIAL'>INICIAL</option>
               <option value='FINANCIACION'>FINANCIACION</option>
@@ -324,16 +331,15 @@
             />
           </div>
         </div>
-        <div class='col-12 col-lg-12'>
-          <button type='button' class='btn btn-primary btn-sm float-right guardar'>Guardar Cambios</button>
-          <button
-            type='button'
-            class='btn btn-primary btn-sm float-right quitar mr-2'
-            style='display: none;'
-          >
-            Quitar Bono</button>
+        <div class='col-12'>
+          <div class='btn-group btn-group-sm float-left' role='group'>
+            <button type='button' class='btn btn-secondary klqIni'>Calc. ini</button>
+            <button type='button' class='btn btn-secondary klqFnc'>Calc. fnc</button>
+            <button type='button' class='btn btn-secondary quitar d-none'>Quitar cupon</button>
+          </div>
+          <button type='button' class='btn btn-secondary btn-sm float-right G'>Guardar</button>
         </div>
-        <div class='col-12 col-lg-12'>
+        <div class='col-12'>
           <table
             id='proyeccion'
             class='table table-striped table-sm table-hover text-small display responsive nowrap'
@@ -377,29 +383,29 @@
         </button>
       </div>
       <div class='modal-body m-3 mb-1'>
-        <div class='row'>
-          <div class='col-sm-9'>
-            <p>Seleciona el descuento que quieres generar para el cupon, si se aprueba reciviras un
-              WhatsApp con el cupon</p>
-          </div>
-          <div class='col-sm-3 text-center mb-2'>
-            {{!-- {{#if user.admin}}
+        <h3 id='sindto' class='text-center'>Este producto no posee ningun descuento</h3>
+        <h3 class='text-center inqdto'>
+          La proyeccion de pagos no cumple las condiciones para aplicar un descuento
+        </h3>
+        <small class='text-muted text-center inqdto'>
+          Las condiciones para obtener un descueto se describen aqui abajo
+        </small>
+        <div class='row condto x100dto'>
+          <div class='col-sm-12 text-center'>
+            {{#if user.admin}}
+              <strong class='text-center'>Digite el porcentage de descuento que prefiera</strong>
               <input
+                class='form-control text-center'
                 type='text'
-                id='porcntgd'
-                class='form-control form-control-lg'
-                data-mask='00'
-                style='text-align:center'
+                id='dto-modal'
+                autocomplete='off'
+                placeholder='DTO'
+                style='background-color: #FFFFCC;'
               />
             {{else}}
-              <select id='porcntgd' style='text-align-last:center;'>
-                <option value='3'>3%</option>
-                <option value='5' selected>5%</option>
-                <option value='7'>7%</option>
-                <option value='10'>10%</option>
-              </select>
-            {{/if}} --}}
-            <select id='dto-modal'></select>
+              <strong class='text-center'>Seleciona el porcentage de descuento que prefieras</strong>
+              <select id='dto-modal' class='mt-3'></select>
+            {{/if}}
           </div>
           <div class='col-12 d-flex justify-content-end'>
             <button id='gQpon' class='btn btn-sm btn-outline-dark my-2' data-dismiss='modal'>
@@ -408,87 +414,9 @@
           </div>
         </div>
       </div>
-      <div class='modal-footer'>
-        <div class='accordion w-100' id='accordionExample'>
-          <div class='card'>
-            <div class='card-header' id='headingOne'>
-              <small
-                class='mb-0'
-                data-toggle='collapse'
-                data-target='#collapseOne'
-                aria-expanded='true'
-                aria-controls='collapseOne'
-                style='cursor: pointer;'
-              >
-                Collapsible Group Item #1
-              </small>
-            </div>
-
-            <div
-              id='collapseOne'
-              class='collapse show'
-              aria-labelledby='headingOne'
-              data-parent='#accordionExample'
-            >
-              <div class='card-body'>
-                Some placeholder content for the first accordion panel. This panel is shown by
-                default, thanks to the
-                <code>.show</code>
-                class.
-              </div>
-            </div>
-          </div>
-          <div class='card'>
-            <div class='card-header' id='headingTwo'>
-              <small
-                class='mb-0 collapsed'
-                data-toggle='collapse'
-                data-target='#collapseTwo'
-                aria-expanded='false'
-                aria-controls='collapseTwo'
-                style='cursor: pointer;'
-              >
-                Collapsible Group Item #2
-              </small>
-            </div>
-            <div
-              id='collapseTwo'
-              class='collapse'
-              aria-labelledby='headingTwo'
-              data-parent='#accordionExample'
-            >
-              <div class='card-body'>
-                Some placeholder content for the second accordion panel. This panel is hidden by
-                default.
-              </div>
-            </div>
-          </div>
-          <div class='card'>
-            <div class='card-header' id='headingThree'>
-              <small
-                class='mb-0 collapsed'
-                data-toggle='collapse'
-                data-target='#collapseThree'
-                aria-expanded='false'
-                aria-controls='collapseThree'
-                style='cursor: pointer;'
-              >
-                Collapsible Group Item #3
-              </small>
-            </div>
-            <div
-              id='collapseThree'
-              class='collapse'
-              aria-labelledby='headingThree'
-              data-parent='#accordionExample'
-            >
-              <div class='card-body'>
-                And lastly, the placeholder content for the third and final accordion panel. This
-                panel is hidden by default.
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class='modal-footer condto'>
+        <strong>Terminos de descuentos</strong>
+        <div class='accordion w-100' id='terminosdto'></div>
       </div>
     </div>
   </div>
