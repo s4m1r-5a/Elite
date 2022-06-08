@@ -17,8 +17,8 @@ $.jMaskGlobals = {
 };
 const noCifra = valor => {
   if (!valor) return 0;
-  const num = /,|[a-z A-Z]|\#|\?|\"| /g.test(valor)
-    ? parseFloat(valor.replace(/,|[a-z A-Z]|\#|\?|\"| /g, ''))
+  const num = /[^0-9.]/g.test(valor)
+    ? parseFloat(valor.replace(/[^0-9.]/g, ''))
     : parseFloat(valor);
   if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
   return num;
@@ -26,13 +26,31 @@ const noCifra = valor => {
 const Cifra = valor => {
   if (!valor) return valor;
   const punto = /\.$/.test(valor);
-  const num = /,|[a-z A-Z]|\#|\?|\"| /g.test(valor)
-    ? parseFloat(valor.replace(/,|[a-z A-Z]|\#|\?|\"| /g, ''))
+  const num = /[^0-9.]/g.test(valor)
+    ? parseFloat(valor.replace(/[^0-9.]/g, ''))
     : parseFloat(valor);
   if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
   return punto
     ? num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '.'
     : num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+};
+const Percent = valor => {
+  if (!valor) return valor;
+  const punto = /\.$/.test(valor);
+  const num =
+    (/[^0-9.]/g.test(valor) ? parseFloat(valor.replace(/[^0-9.]/g, '')) : parseFloat(valor)) / 100;
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return punto
+    ? num.toLocaleString('en-CO', {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }) + '.'
+    : num.toLocaleString('en-CO', {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
 };
 function Moneda(valor) {
   valor = valor
@@ -8201,11 +8219,11 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
   const ordnid = parseInt($('#Orden').val());
   const agente = $('#agente').val();
   const clients = [];
-  const hoy = new Date();
+  const hoy = moment().format('YYYY-MM-DD');
   const historyQuota = { INICIAL: 0, FINANCIACION: 0, SEPARACION: 0 };
   const historyDate = { SEPARACION: hoy, INICIAL: null, FINANCIACION: null };
   const ts = 'SEPARACION';
-  const kupon = { dto: 0, ahorro: 0, cupon: 0 };
+  const kupon = { dto: 0, ahorro: 0, cupon: 0, idcupon: 1 };
   const row = [
     { fechs: hoy, ncuota: 1, tipo: ts, cuota: 1, fechs2: null, ncuota2: null, cuota2: null }
   ];
@@ -8219,44 +8237,12 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
   var productos;
   var producto;
   var Orden;
-  console.log('bien si llego', `/links/orden/${isNaN(ordnid) ? 'lote' : ordnid}`);
 
   const UpdateData = async producto => {
     maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
-    if (Orden.length) {
-      const Ord = Orden[0];
-      producto.mtr = Ord.vrmt2;
-      producto.porcentage = Ord.iniciar;
-      kupon.dto = kupon.cupon ? kupon.cupon : Ord.descuento;
-      kupon.ahorro = kupon.cupon ? kupon.ahorro : Ord.ahorro;
-      kupon.cupon = kupon.cupon ? kupon.cupon : Ord.descuento;
-      clients.push(Ord.cliente);
-      Ord.cliente2 && clients.push(Ord.cliente2);
-      Ord.cliente3 && clients.push(Ord.cliente3);
-      Ord.cliente4 && clients.push(Ord.cliente4);
-      Orden.map(e => {
-        if (!(e.ncuota % 2)) ordenRows.push(e);
-        else {
-          ordenRows
-            .filter(a => a.ncuota === e.ncuota - 1 && a.tipo === e.tipo)
-            .map(a => {
-              a.fechs2 = e.fechs;
-              a.ncuota2 = e.ncuota;
-              a.cuota2 = e.cuota;
-            });
-        }
-      });
-
-      $('#num-ini').val(Orden.filter(r => r.tipo === 'INICIAL').length);
-      $('#num-fnc').val(Orden.filter(r => r.tipo === 'FINANCIACION').length);
-      $(`#aplyDto option[value='${Ord.dto}']`).prop('selected', true);
-      clientes.val(clients).trigger('change');
-    }
     $('#mtr2').val(producto.mtr2);
     $('#vmtr2').val(Cifra(producto.mtr));
-    $(`#porcentage`)
-      .val(producto.porcentage + '%')
-      .mask('$$$%', { reverse: true, selectOnFocus: true });
+    $(`#porcentage`).val(Percent(producto.porcentage));
     const valor = producto.mtr2 * producto.mtr;
     const inicial = (valor * producto.porcentage) / 100;
     const financiacion = (valor * (100 - producto.porcentage)) / 100;
@@ -8304,7 +8290,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
     $('#ini').val(Cifra(Ini));
     $('#fnc').val(Cifra(fnc));
     $('#total').val(Cifra(total));
-    //producto.total = total;
+    producto.dto = ktgoria ? ktgoria : 'NINGUNO';
     if (rol.admin) $('#vmtr2, #porcentage, #promesa, #cuotamin, #tipoDto').prop('disabled', false);
     $(':disabled').css('background-color', '#DCE2F4');
 
@@ -8352,7 +8338,6 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
           const selec = ktgoria === e.categoria;
           $('#aplyDto').prepend(new Option(e.categoria, e.categoria, selec, selec));
         }
-        //console.log(e, ' Este si cumple con los requerimientos');
       }
     });
     const num = Dto.filter(e => e.aplicar).map(e => e.maxdto);
@@ -8442,7 +8427,6 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
     if (num === 1) {
       await recalcularQ(tipo);
       return false;
-      //return 'No es posible editar el monto a una cuota si solo existe una en ' + tipo;
     }
     const cuota = (mount - mounts) / (num - nCutas);
 
@@ -8462,7 +8446,9 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       .data()
       .filter(e => rows.push(e));
     if (!rows.some(e => e.o) && ordenRows.length) {
+      rows.length = 0;
       ordenRows.map(r => rows.push(r));
+      historyQuota.FINANCIACION = ordenRows[0].cuot;
     }
     const sep = rows.find(e => e.tipo === 'SEPARACION');
     if (sep.cuota === 1) {
@@ -8486,6 +8472,9 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
     let nCutasUpdate = 0;
     $('#num-ini').val(numIni);
     $('#num-fnc').val(numFnc);
+    producto.separar = separacion;
+    producto.inicialdiferida = numIni;
+    producto.numerocuotaspryecto = numIni + numFnc;
 
     const num = rows.filter(e => e.tipo === tipo).length;
     rows
@@ -8635,6 +8624,10 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       }
     });
     await genQpons();
+    if (!isFinite(historyQuota[tipo])) {
+      await recalcularQ(tipo);
+      await UpdateTable(tipo);
+    }
     return rows;
   };
 
@@ -8644,7 +8637,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       var texto =
         $(this).attr('id') === 'clientes' ? '...SELECCIONE LOS CLIENTES' : 'SELECCIONE UN PRODUCTO';
       $(this)
-        .wrap('<div class="position-relative w-75"></div>')
+        //.wrap('<div class="position-relative" style="width: 82%;"></div>')
         .select2({
           placeholder: texto,
           dropdownParent: $(this).parent(),
@@ -8652,31 +8645,148 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
           allowClear: true
         });
     });
-    $('#lote').change(async function () {
+    $('.Save').click(async () => {
+      const data = {
+        proyeccion: [],
+        ordenAnt: ordenRows.length,
+        producto,
+        cupon: kupon,
+        historyQuota
+      };
+      proyeccion
+        .rows()
+        .data()
+        .filter(e => data.proyeccion.push(e));
+
+      $.ajax({
+        type: 'POST',
+        url: `/links/orden/save`,
+        data: JSON.stringify(data),
+        dataType: 'json',
+        contentType: 'application/json',
+        beforeSend: xhr =>
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          }),
+        success: data => {
+          $('#ModalEventos').modal('hide');
+        }
+      });
+    });
+    lote.change(async function () {
       const productLt = noCifra($(this).val());
       if (typeof productos === 'object') {
         producto = productos.find(e => e.id == productLt);
-        console.log(Orden, producto);
-        Dto = Dtos.filter(e => e.producto == producto.proyct);
-        console.log(Dto);
+        Dto = Dtos.filter(e => e.producto == producto.producto);
+        if (Orden.length && !ordenRows.length) {
+          const Ord = Orden[0];
+          producto.mtr = Ord.vrmt2;
+          producto.porcentage = Ord.iniciar;
+          kupon.dto = Ord.descuento;
+          kupon.ahorro = Ord.ahorro;
+          kupon.cupon = Ord.descuento;
+          kupon.idcupon = Ord.cupon;
+          kupon.orden = Ord.o;
+          clients.push(Ord.cliente);
+          Ord.cliente2 && clients.push(Ord.cliente2);
+          Ord.cliente3 && clients.push(Ord.cliente3);
+          Ord.cliente4 && clients.push(Ord.cliente4);
+          Orden.map(e => {
+            if (e.ncuota % 2)
+              ordenRows.push({
+                tipo: e.tipo,
+                fechs: e.fechs,
+                ncuota: e.ncuota,
+                cuota: e.cuota > 0 ? e.cuota : e.qota,
+                id: e.idq,
+                o: e.o,
+                cuot: e.cuot,
+                id2: 1,
+                fechs2: null,
+                ncuota2: null,
+                cuota2: null
+              });
+            else {
+              ordenRows
+                .filter(a => a.ncuota === e.ncuota - 1 && a.tipo === e.tipo)
+                .map(a => {
+                  a.id2 = e.idq;
+                  a.fechs2 = e.fechs;
+                  a.ncuota2 = e.ncuota;
+                  a.cuota2 = e.cuota > 0 ? e.cuota : e.qota;
+                });
+            }
+          });
+          $('#num-ini').val(Orden.filter(r => r.tipo === 'INICIAL').length);
+          $('#num-fnc').val(Orden.filter(r => r.tipo === 'FINANCIACION').length);
+          $(`#aplyDto option[value='${Ord.dto}']`).prop('selected', true);
+          clientes.val(clients).trigger('change');
+        } else {
+          producto.asesor = asesor.val();
+          producto.cliente = clientes.val()[0] ? clientes.val()[0] : null;
+          producto.cliente2 = clientes.val()[1] ? clientes.val()[1] : null;
+          producto.cliente3 = clientes.val()[2] ? clientes.val()[2] : null;
+          producto.cliente4 = clientes.val()[3] ? clientes.val()[3] : null;
+          producto.status = $('#promesa').val() ? $('#promesa').val() : null;
+        }
+
         UpdateData(producto);
       }
       $('#ModalEventos').modal('hide');
+    });
+    asesor.change(async function () {
+      producto.asesor = $(this).val();
+    });
+    clientes.change(async function () {
+      if (producto) {
+        producto.cliente = $(this).val()[0] ? $(this).val()[0] : null;
+        producto.cliente2 = $(this).val()[1] ? $(this).val()[1] : null;
+        producto.cliente3 = $(this).val()[2] ? $(this).val()[2] : null;
+        producto.cliente4 = $(this).val()[3] ? $(this).val()[3] : null;
+      }
     });
     $('#mtr2').change(function () {
       producto.mtr2 = noCifra($(this).val());
       UpdateData(producto);
     });
     $('#vmtr2').change(function () {
+      $(this).val(Percent($(this).val()));
       producto.mtr = noCifra($(this).val());
       UpdateData(producto);
     });
+    $('#promesa').change(function () {
+      producto.status = $(this).val();
+    });
+    /* $('#porcentage').keyup(function (e) {
+      if (e.keyCode != 8) $(this).val(Percent($(this).val()));
+    }); */
     $('#porcentage').change(function () {
+      $(this).val(Percent($(this).val()));
       producto.porcentage = noCifra($(this).val());
       UpdateData(producto);
     });
     $('#cuotamin').change(function () {
-      producto.cuotamin = noCifra($(this).val());
+      const cuotaMin = noCifra($(this).val());
+      const numQ = proyeccion
+        .rows()
+        .data()
+        .filter(
+          e =>
+            e.cuota &&
+            e.cuota2 &&
+            (e.cuota < cuotaMin || e.cuota2 < cuotaMin) &&
+            e.tipo !== 'SEPARACION'
+        ).length;
+      if (numQ) {
+        $(this).val(Cifra(producto.cuotamin));
+        return SMSj(
+          'error',
+          'En la proyeccion existen cuotas inferiores a la que trata de establecer como cuota minima, edite estas cuotas antes e intentelo de nuevo'
+        );
+      }
+      producto.cuotamin = cuotaMin;
       UpdateData(producto);
     });
     $('#num-fnc').change(async function () {
@@ -8795,11 +8905,14 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       await recalcularQ('FINANCIACION');
       await UpdateTable('FINANCIACION');
     });
-    $('.cifra').click(function () {
+    $('input').click(function () {
       $(this).select();
     });
     $('.cifra').keyup(function () {
       $(this).val(Cifra($(this).val()));
+    });
+    $('#dto-modal').change(function () {
+      if (rol.admin) $(this).val(Percent($(this).val()));
     });
     $('#qpon').on('show.bs.modal', function (e) {
       const opcion = $('#aplyDto').find('option').length;
@@ -8843,7 +8956,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
         });
         $('#terminosdto').html(html);
       }
-      if (rol.admin) $('#dto-modal').mask('$$%', { reverse: true, selectOnFocus: true });
+      if (rol.admin) $('#dto-modal');
     });
   });
 
@@ -8866,7 +8979,6 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
         lt = Orden[0].id;
         productos.push(Orden[0]);
       }
-      console.log(lt);
       productos.map(x => {
         if (x.proyect !== proyecto) {
           parent = document.createElement('optgroup');
@@ -8877,7 +8989,6 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
         const Lt = lt == x.id ? true : false;
         const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
         parent.append(option);
-        //if (lt == x.id) Dto = Dtos.filter(e => e.producto == x.proyct);
       });
       lote.val(lt).trigger('change');
 
@@ -8893,7 +9004,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       });
       clientes.val(clients).trigger('change');
     }
-  }).then(data => console.log('paso por aqui'));
+  }); //.then(data => console.log('paso por aqui'));
 
   var proyeccion = $('#proyeccion').DataTable({
     searching: false,

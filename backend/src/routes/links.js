@@ -4672,6 +4672,131 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   const usrs = req.user.id;
   res.render('links/orden2', { lote: null, usrs, orden: id });
 });
+router.post('/orden/save', isLoggedIn, async (req, res) => {
+  const { proyeccion, ordenAnt, producto, cupon, historyQuota } = req.body;
+  const { id, mtr, mtr2, inicial, valor } = producto;
+  const updateQotas = await proyeccion.some(e => !e?.id || !e?.id2);
+  console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, updateQotas);
+  const p = cupon?.orden ? 'p.' : '';
+  const orden = {
+    [p + 'cuot']: historyQuota.FINANCIACION,
+    [p + 'dto']: producto.dto,
+    [p + 'lote']: id,
+    [p + 'cliente']: producto.cliente,
+    [p + 'cliente2']: producto.cliente2,
+    [p + 'cliente3']: producto.cliente3,
+    [p + 'cliente4']: producto.cliente4,
+    [p + 'asesor']: producto.asesor,
+    [p + 'numerocuotaspryecto']: producto.numerocuotaspryecto,
+    [p + 'separar']: producto.separar,
+    [p + 'vrmt2']: producto.mtr,
+    [p + 'iniciar']: producto.porcentage,
+    [p + 'inicialdiferida']: producto.inicialdiferida,
+    [p + 'cupon']: cupon.idcupon,
+    [p + 'status']: producto.status,
+    [p + 'ahorro']: cupon.ahorro
+  };
+
+  const qpon = {
+    pin: ID(5),
+    descuento: cupon.dto,
+    estado: 14,
+    producto: cupon?.orden ? cupon.orden : null,
+    responsable: req.user.fullname
+  };
+
+  if (cupon.idcupon > 1)
+    await pool.query(`UPDATE cupones SET ? WHERE id = ?`, [qpon, cupon.idcupon]);
+  else if (cupon.dto)
+    orden[p + 'cupon'] = (await pool.query('INSERT INTO cupones SET ? ', qpon)).insertId;
+
+  if (cupon?.orden) {
+    orden['l2.mtr'] = mtr;
+    orden['l2.mtr2'] = mtr2;
+    orden['l2.inicial'] = inicial;
+    orden['l2.valor'] = valor;
+
+    if (updateQotas) await pool.query('DELETE FROM cuotas WHERE separacion = ?', cupon.orden);
+
+    await pool.query(
+      `UPDATE preventa p INNER JOIN productosd l ON p.lote = l.id 
+       LEFT JOIN solicitudes s ON s.orden = p.id INNER JOIN productosd l2 ON l2.id = ? 
+       SET s.lt = l2.id, l2.estado = 1, l2.directa = l.directa, l2.comiempresa = l.comiempresa, 
+       l2.comisistema = l.comisistema, l.estado = 9, l.directa = NULL, l.comiempresa = 0, 
+       l.comisistema = 0, ? WHERE p.id = ?`,
+      [id, orden, cupon.orden]
+    );
+  } else {
+    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
+      { mtr, mtr2, inicial, valor, estado: 1 },
+      id
+    ]);
+    cupon.orden = (await pool.query(`INSERT INTO preventa SET ? `, orden)).insertId;
+    if (orden['cupon'] > 1)
+      await pool.query(`UPDATE cupones SET ? WHERE id = ?`, [
+        { producto: cupon.orden },
+        orden['cupon']
+      ]);
+  }
+
+  if (updateQotas) {
+    console.log('creo las cuootas nuevamente');
+    var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, proyeccion) VALUES ';
+    await proyeccion.map(e => {
+      cuotas += `(${cupon.orden}, '${e.tipo}', ${e.ncuota}, '${e.fechs}', ${e.cuota}, ${e.cuota}),`;
+      if (e.cuota2)
+        cuotas += `(${cupon.orden}, '${e.tipo}', ${e.ncuota2}, '${e.fechs2}', ${e.cuota2}, ${e.cuota2}),`;
+    });
+
+    await pool.query(cuotas.slice(0, -1));
+    console.log(cuotas, orden);
+  } else {
+    console.log(orden, 'no creo las cuootas');
+    let ids = null;
+    const cuotas = {
+      tipo: 'tipo = CASE id',
+      ncuota: 'ncuota = CASE id',
+      fechs: 'fechs = CASE id',
+      cuota: 'cuota = CASE id',
+      proyeccion: 'proyeccion = CASE id'
+    };
+    await proyeccion.map(e => {
+      ids += ids ? `, ${e.id}` : e.id;
+      cuotas.tipo += ` WHEN ${e.id} THEN '${e.tipo}'`;
+      cuotas.ncuota += ` WHEN ${e.id} THEN ${e.ncuota}`;
+      cuotas.fechs += ` WHEN ${e.id} THEN '${e.fechs}'`;
+      cuotas.cuota += ` WHEN ${e.id} THEN ${e.cuota}`;
+      cuotas.proyeccion += ` WHEN ${e.id} THEN ${e.cuota}`;
+      if (e.cuota2) {
+        ids += `, ${e.id2}`;
+        cuotas.tipo += ` WHEN ${e.id2} THEN '${e.tipo}'`;
+        cuotas.ncuota += ` WHEN ${e.id2} THEN ${e.ncuota2}`;
+        cuotas.fechs += ` WHEN ${e.id2} THEN '${e.fechs2}'`;
+        cuotas.cuota += ` WHEN ${e.id2} THEN ${e.cuota2}`;
+        cuotas.proyeccion += ` WHEN ${e.id2} THEN ${e.cuota2}`;
+      }
+    });
+    cuotas.tipo += ` ELSE tipo END `;
+    cuotas.ncuota += ` ELSE ncuota END `;
+    cuotas.fechs += ` ELSE fechs END `;
+    cuotas.cuota += ` ELSE cuota END `;
+    cuotas.proyeccion += ` ELSE proyeccion END `;
+    await pool.query(
+      `UPDATE cuotas SET estado = 3, 
+      ${cuotas.tipo}, 
+      ${cuotas.ncuota}, 
+      ${cuotas.fechs}, 
+      ${cuotas.cuota}, 
+      ${cuotas.proyeccion}
+        WHERE separacion = ?`,
+      cupon.orden
+    );
+    console.log(ids);
+    await pool.query(`DELETE FROM cuotas WHERE id NOT IN(${ids}) AND separacion = ?`, cupon.orden);
+  }
+  if (p) await ProyeccionPagos(cupon.orden);
+  res.send(true);
+});
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const { accion } = req.params;
   let orden = [];
@@ -4680,15 +4805,16 @@ router.post('/orden/:accion', isLoggedIn, async (req, res) => {
     orden = await pool.query(`SELECT c.id idq, c.tipo, c.ncuota, c.fechs, c.proyeccion cuota, 
     p.dto, p.id o, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.asesor, p.numerocuotaspryecto, 
     p.cuot, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, p.cupon, p.comision, p.status, 
-    p.ahorro, l.id, l.mtr, l.mtr2, l.inicial, l.valor, l.mz, l.n, o.cuotamin, o.fechafin, o.proyect, 
-    o.porcentage, o.separaciones, o.id proyct, o.maxini, o.maxfnc, q.descuento
+    p.ahorro, c.cuota qota, l.id, l.producto, l.mtr, l.mtr2, l.inicial, l.valor, l.mz, l.n, 
+    o.cuotamin, o.fechafin, o.proyect, o.porcentage, o.separaciones, o.maxini, o.maxfnc, q.descuento
     FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id LEFT JOIN cupones q ON p.cupon = q.id
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
     WHERE c.separacion = ${ordnId} ORDER BY TIMESTAMP(c.fechs) ASC`);
 
-  const productos = await pool.query(`SELECT o.*, o.id proyct, l.* FROM productos o 
-  INNER JOIN productosd l ON l.producto = o.id WHERE l.estado IN('9') 
-  ORDER BY o.proyect DESC, l.n ASC, l.mz ASC`);
+  const productos = await pool.query(`SELECT o.proyect, o.porcentage, o.fechaini, 
+  o.fechafin, o.separaciones, o.cuotamin, o.maxini, o.maxfnc, l.id, l.mz, l.n, l.mtr, l.mtr2, 
+  l.producto, l.inicial, l.valor FROM productos o INNER JOIN productosd l ON l.producto = o.id 
+  WHERE l.estado IN('9') ORDER BY o.proyect DESC, l.n ASC, l.mz ASC`);
   const asesores = await pool.query(`SELECT * FROM users ORDER BY fullname ASC`);
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
   const descuentos = await pool.query(`SELECT * FROM descuentos`);

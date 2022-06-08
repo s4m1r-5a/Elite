@@ -7,54 +7,45 @@
       <input type='hidden' id='Orden' value='{{orden}}' />
     </div>
     <div class='card-body p-1' id='cuadro2'>
-      <a class='fecha'>Selecciona una fecha</a>
-      <a class='fi'>Selecciona una fecha</a>
       <div class='row d-flex justify-content-center'>
         <div class='col-12 col-lg-6'>
           <div class='input-group mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>PRODUCTO</label>
+              <label class='input-group-text d-block d-sm-none'>PDO</label>
+              <label class='input-group-text d-none d-md-block'>PRODUCTO</label>
             </div>
-            <select
-              id='lote'
-              class='custom-select select2'
-              name='lote'
-              style='width: 100%;'
-              required
-            >
-            </select>
+            <select id='lote' class='custom-select select2' name='lote'></select>
           </div>
         </div>
         <div class='col-12 col-lg-6'>
           <div class='input-group mb-3'>
+            {{#if user.admin}}
+              <div class='input-group-prepend'>
+                <label class='input-group-text'>%</label>
+              </div>
+              <input
+                class='form-control text-center'
+                autocomplete='off'
+                type='text'
+                id='comision'
+                placeholder='0%'
+                style='max-width: 60px;'
+              />
+            {{/if}}
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>ASESOR</label>
+              <label class='input-group-text d-block d-sm-none'>ASR</label>
+              <label class='input-group-text d-none d-md-block'>ASESOR</label>
             </div>
-            <select
-              id='asesor'
-              class='custom-select select2'
-              name='asesor'
-              style='width: 100%;'
-              required
-              disabled
-            >
-            </select>
+            <select id='asesor' class='custom-select select2' name='asesor'></select>
           </div>
         </div>
         <div class='col-12 col-lg-12'>
           <div class='input-group mb-3'>
             <div class='input-group-prepend'>
-              <label class='input-group-text' for='proyectos'>CLIENTES</label>
+              <label class='input-group-text d-block d-sm-none'>CLT</label>
+              <label class='input-group-text d-none d-md-block'>CLIENTES</label>
             </div>
-            <select
-              id='clientes'
-              class='custom-select select2'
-              name='clientes'
-              multiple
-              style='width: 100%;'
-              required
-            >
-            </select>
+            <select id='clientes' class='custom-select select2' name='clientes' multiple></select>
           </div>
         </div>
         <div class='col-12 col-md-6 col-lg-4'>
@@ -216,7 +207,7 @@
               required
               disabled
             >
-              <option value=''>SIN PROMESA</option>
+              <option selected></option>
               <option value='1'>PROMESA GENERADA</option>
               <option value='2'>PROMESA AUTENTICADA POR CLIENTE</option>
               <option value='3'>PROMESA AUTENTICADA POR AMBOS</option>
@@ -337,7 +328,7 @@
             <button type='button' class='btn btn-secondary klqFnc'>Calc. fnc</button>
             <button type='button' class='btn btn-secondary quitar d-none'>Quitar cupon</button>
           </div>
-          <button type='button' class='btn btn-secondary btn-sm float-right G'>Guardar</button>
+          <button type='button' class='btn btn-secondary btn-sm float-right Save'>Guardar</button>
         </div>
         <div class='col-12'>
           <table
