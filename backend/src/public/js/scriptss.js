@@ -3828,17 +3828,8 @@ if (window.location.pathname === `/links/reportes`) {
         className: 't',
         data: 'id',
         render: function (data, method, row) {
-          if (row.tipobsevacion === 'ANULADA' && rol.admin && row.estado != 9 && row.estado != 15) {
-            return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>`;
-          } else if (rol.subadmin) {
-            return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
-                        aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
-          } else if (rol.contador) {
-            `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>
-                        <a class="flex-sm-fill text-sm-center ml-2" href="#" onclick="Excel(${data}, '${row.proyecto}', '${row.nombre}', '${row.mz}', '${row.n}')"><i class="fas fa-file-alt"></i>Ex</a>`;
-          } else {
-            return `<a class="flex-sm-fill text-sm-center" href="/links/ordendeseparacion/${data}/${row.tipobsevacion}" target="_blank"><i class="fas fa-print"></i></a>`;
-          }
+          return `<a class="flex-sm-fill text-sm-center" data-toggle="collapse" href="#Ord${data}" role="button"
+                  aria-expanded="false" aria-controls="datatable2"><i class="fas fa-angle-double-down"></i> Accion</a>`;
         }
       },
       {
@@ -3910,65 +3901,111 @@ if (window.location.pathname === `/links/reportes`) {
       }
     ],
     drawCallback: function (settings) {
-      var AdminSuper = false,
-        resOrden = false;
       var api = this.api();
       var rows = api.rows({ page: 'current' }).nodes();
       var filas = api.column(0, { page: 'current' }).data();
       filas.each(function (g, i) {
-        AdminSuper = rol.subadmin;
-        resOrden = rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
-
+        var resOrden =
+          rol.admin && g.tipobsevacion === 'ANULADA' && (g.estado == 9 || g.estado == 15);
         $(rows)
           .eq(i)
           .after(
             `<tr class="total">
-                        <th colspan=${column} class="menu">
-                        <nav class="nav flex-sm-row collapse" id="Ord${
-                          g.id
-                        }" aria-labelledby="headingOne" data-parent="#datatable2">
-                        ${
-                          AdminSuper && !resOrden
-                            ? `
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Pdfs(${g.id})"><i class="fas fa-file-alt"></i> Est-Cta</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/editordn/${g.id}"><i class="fas fa-edit"></i> Editar</a>
-                        <a class="flex-sm-fill text-sm-center nav-link anular" href="#"><i class="fas fa-ban"></i> Anular</a>                                
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Proyeccion(${g.id})"><i class="fas fa-glasses"></i> Proyeccion</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="GestComi(${g.id},'${g.asesor}')"><i class="fas fa-sitemap"></i> Comisiones</a>
-                        <div class="dropdown">
-                            <a class="flex-sm-fill text-sm-center nav-link dropdown-toggle" href="#" data-toggle="dropdown">
-                                <i class="fas fa-sitemap"></i> Mora
-                            </a>
-                            <div class="dropdown-menu dropdown-menu-right">
-                                <a class="dropdown-item" href="#">Quitar Mora</a>
+              <th colspan=${column} class="menu">
+                <nav class="nav flex-sm-row collapse" id="Ord${g.id}" aria-labelledby="headingOne" 
+                data-parent="#datatable2">
+                  <a class="flex-sm-fill text-sm-center nav-link fechaPDF">
+                    <i class="fas fa-file-alt"></i> Est-Cta</a>
+                  <a class="flex-sm-fill text-sm-center nav-link" href="/links/orden/edit/${g.id}">
+                    <i class="fas fa-edit"></i> Editar</a>                              
+                  <a class="flex-sm-fill text-sm-center nav-link" onclick="Proyeccion(${g.id})">
+                    <i class="fas fa-glasses"></i> Proyeccion</a>
+                  <a onclick="GestComi(${g.id},'${g.asesor}')" class="flex-sm-fill 
+                  text-sm-center nav-link"><i class="fas fa-sitemap"></i> Comisiones</a>                  
+                  <a href="/links/ordendeseparacion/${g.id}/${g.tipobsevacion}" target="_blank" 
+                  class="flex-sm-fill text-sm-center nav-link"><i class="fas fa-print"></i> Imprimir</a>
+                  <a class="flex-sm-fill text-sm-center nav-link" onclick="Verificar(${g.id})">
+                    <i class="fas fa-glasses"></i> Estado</a> 
+            ${
+              rol.admin && !resOrden
+                ? `<a class="flex-sm-fill text-sm-center nav-link" onclick="Excel(${g.id}, '${g.proyecto}', '${g.nombre}', '${g.mz}', '${g.n}')"><i class="fas fa-file-alt"></i>Ex</a>
+                  <a class="flex-sm-fill text-sm-center nav-link anular"><i class="fas fa-ban"></i> Anular</a> 
+                  <a class="flex-sm-fill text-sm-center nav-link" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
+                  <div class="dropdown">
+                    <a class="flex-sm-fill text-sm-center nav-link dropdown-toggle" data-toggle="dropdown">
+                      <i class="fas fa-sitemap"></i> Mora
+                    </a>
+                    <div class="dropdown-menu dropdown-menu-right">
+                      <a class="dropdown-item" href="#">Quitar Mora</a>
 					            <a class="dropdown-item" href="#">Parar Mora</a>
 					            <a class="dropdown-item" href="#">Anular Dct.</a>
-                                <a class="dropdown-item" onclick="asignarDctoMora(${g.id})" href="#">Descuento</a>
-                            </div>
-                        </div>`
-                            : ''
-                        }                              
-                        ${
-                          !resOrden
-                            ? `
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="/links/ordendeseparacion/${g.id}/${g.tipobsevacion}" target="_blank"><i class="fas fa-print"></i> Imprimir</a>
-                        <a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="Verificar(${g.id})"><i class="fas fa-glasses"></i> Estado</a>`
-                            : ''
-                        }
-                        ${
-                          g.kupn && AdminSuper && !resOrden
-                            ? `<a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="RestKupon(${g.id})"><i class="fas fa-undo"></i> Restablecer Cupon</a>`
-                            : ''
-                        }
-                        ${
-                          resOrden
-                            ? `<a class="flex-sm-fill text-sm-center nav-link" href="#" onclick="RestOrden(${g.id})"><i class="fas fa-undo"></i> Restablecer Orden</a>`
-                            : ''
-                        }
-                        </nav></td></tr>`
+                      <a class="dropdown-item" onclick="asignarDctoMora(${g.id})" href="#">Descuento</a>
+                    </div>
+                  </div>`
+                : ''
+            } 
+            ${
+              g.kupn && rol.admin && !resOrden
+                ? `<a class="flex-sm-fill text-sm-center nav-link" onclick="RestKupon(${g.id})"><i class="fas fa-undo"></i> Restablecer Cupon</a>`
+                : ''
+            }
+            ${
+              resOrden
+                ? `<a class="flex-sm-fill text-sm-center nav-link" onclick="RestOrden(${g.id})"><i class="fas fa-undo"></i> Restablecer Orden</a>`
+                : ''
+            }
+            </nav></td></tr>`
           );
       });
+      rol.admin
+        ? $('.fechaPDF').daterangepicker(
+            {
+              locale: {
+                format: 'YYYY-MM-DD',
+                separator: ' - ',
+                applyLabel: 'Aplicar',
+                cancelLabel: 'Cancelar',
+                fromLabel: 'De',
+                toLabel: '-',
+                customRangeLabel: 'Personalizado',
+                weekLabel: 'S',
+                daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+                monthNames: [
+                  'Enero',
+                  'Febrero',
+                  'Marzo',
+                  'Abril',
+                  'Mayo',
+                  'Junio',
+                  'Julio',
+                  'Agosto',
+                  'Septiembre',
+                  'Octubre',
+                  'Noviembre',
+                  'Diciembre'
+                ],
+                firstDay: 1
+              },
+              singleDatePicker: true,
+              showDropdowns: true,
+              minYear: 2017,
+              maxYear: parseInt(moment().format('YYYY'), 10)
+            },
+            function (start, end, label) {
+              const fila = this.element.parents('tr');
+              const data = api.row(fila).data();
+              const row = data === undefined ? api.row(fila.prev()).data() : data;
+              console.log(row, start.format('YYYY-MM-DD'));
+              Pdfs(row.id, start.format('YYYY-MM-DD'));
+            }
+          )
+        : $('.fechaPDF').click(function () {
+            const fila = $(this).parents('tr');
+            const data = api.row(fila).data();
+            const row = data === undefined ? api.row(fila.prev()).data() : data;
+            console.log(row);
+            Pdfs(row.id);
+          });
     },
     rowCallback: function (row, data, index) {
       if (data['tipobsevacion'] === 'ANULADA') {
@@ -5910,8 +5947,8 @@ if (window.location.pathname === `/links/reportes`) {
       });
     }
   };
-  var Pdfs = id => {
-    var D = { k: id, h: moment().format('YYYY-MM') };
+  var Pdfs = (orden, fecha = null) => {
+    var D = { orden, fecha };
     $.ajax({
       url: '/links/reportes/pdfs',
       data: D,
@@ -8212,12 +8249,12 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
   };
 }
 
-/////////////////////////////////* CREAR ORDENES */////////////////////////////////////////////////////////////
-if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
+/////////////////////////////////* CREAR ORDENES Y EDITARLAS */////////////////////////////////////////////////////////////
+if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
   moment.locale('es-mx');
   let lt = $('#lt').val();
+  let agente = $('#agente').val();
   const ordnid = parseInt($('#Orden').val());
-  const agente = $('#agente').val();
   const clients = [];
   const hoy = moment().format('YYYY-MM-DD');
   const historyQuota = { INICIAL: 0, FINANCIACION: 0, SEPARACION: 0 };
@@ -8291,7 +8328,8 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
     $('#fnc').val(Cifra(fnc));
     $('#total').val(Cifra(total));
     producto.dto = ktgoria ? ktgoria : 'NINGUNO';
-    if (rol.admin) $('#vmtr2, #porcentage, #promesa, #cuotamin, #tipoDto').prop('disabled', false);
+    if (rol.admin)
+      $('#vmtr2, #porcentage, #promesa, #cuotamin, #tipoDto, #asesor').prop('disabled', false);
     $(':disabled').css('background-color', '#DCE2F4');
 
     await UpdateTable('INICIAL');
@@ -8574,48 +8612,49 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       return 0;
     });
     proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
-    $('.fecha').daterangepicker(
-      {
-        locale: {
-          format: 'YYYY-MM-DD',
-          separator: ' - ',
-          applyLabel: 'Aplicar',
-          cancelLabel: 'Cancelar',
-          fromLabel: 'De',
-          toLabel: '-',
-          customRangeLabel: 'Personalizado',
-          weekLabel: 'S',
-          daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
-          monthNames: [
-            'Enero',
-            'Febrero',
-            'Marzo',
-            'Abril',
-            'Mayo',
-            'Junio',
-            'Julio',
-            'Agosto',
-            'Septiembre',
-            'Octubre',
-            'Noviembre',
-            'Diciembre'
-          ],
-          firstDay: 1
+    if (rol.admin)
+      $('.fecha').daterangepicker(
+        {
+          locale: {
+            format: 'YYYY-MM-DD',
+            separator: ' - ',
+            applyLabel: 'Aplicar',
+            cancelLabel: 'Cancelar',
+            fromLabel: 'De',
+            toLabel: '-',
+            customRangeLabel: 'Personalizado',
+            weekLabel: 'S',
+            daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+            monthNames: [
+              'Enero',
+              'Febrero',
+              'Marzo',
+              'Abril',
+              'Mayo',
+              'Junio',
+              'Julio',
+              'Agosto',
+              'Septiembre',
+              'Octubre',
+              'Noviembre',
+              'Diciembre'
+            ],
+            firstDay: 1
+          },
+          singleDatePicker: true,
+          showDropdowns: true,
+          minYear: 2017,
+          maxYear: parseInt(moment().format('YYYY'), 10)
         },
-        singleDatePicker: true,
-        showDropdowns: true,
-        minYear: 2017,
-        maxYear: parseInt(moment().format('YYYY'), 10)
-      },
-      function (start, end, label) {
-        const fila = this.element.parents('tr');
-        const data = proyeccion.row(fila).data();
-        const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
-        const rowDate = $(this.element).hasClass('fechs2') ? 'fechs2' : 'fechs';
-        row[rowDate] = start.format('YYYY-MM-DD');
-        UpdateTable(row.tipo);
-      }
-    );
+        function (start, end, label) {
+          const fila = this.element.parents('tr');
+          const data = proyeccion.row(fila).data();
+          const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
+          const rowDate = $(this.element).hasClass('fechs2') ? 'fechs2' : 'fechs';
+          row[rowDate] = start.format('YYYY-MM-DD');
+          UpdateTable(row.tipo);
+        }
+      );
     proyeccion.rows().every(function (a) {
       try {
         if (!$(this.child()).find('.fechs2').length) this.child().hide();
@@ -8671,7 +8710,11 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
             keyboard: true
           }),
         success: data => {
-          $('#ModalEventos').modal('hide');
+          //$('#ModalEventos').modal('hide');
+          if (data) {
+            SMSj('success', 'Separación realizada exitosamente');
+            setTimeout(() => $(location).attr('href', `/links/reportes`), 5000);
+          }
         }
       });
     });
@@ -8689,6 +8732,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
           kupon.cupon = Ord.descuento;
           kupon.idcupon = Ord.cupon;
           kupon.orden = Ord.o;
+          kupon.comision = Ord.comision;
           clients.push(Ord.cliente);
           Ord.cliente2 && clients.push(Ord.cliente2);
           Ord.cliente3 && clients.push(Ord.cliente3);
@@ -8719,6 +8763,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
                 });
             }
           });
+          $('#comision').val(Percent(kupon.comision * 100));
           $('#num-ini').val(Orden.filter(r => r.tipo === 'INICIAL').length);
           $('#num-fnc').val(Orden.filter(r => r.tipo === 'FINANCIACION').length);
           $(`#aplyDto option[value='${Ord.dto}']`).prop('selected', true);
@@ -8766,6 +8811,10 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       $(this).val(Percent($(this).val()));
       producto.porcentage = noCifra($(this).val());
       UpdateData(producto);
+    });
+    $('#comision').change(function () {
+      $(this).val(Percent($(this).val()));
+      kupon.comision = noCifra($(this).val()) / 100;
     });
     $('#cuotamin').change(function () {
       const cuotaMin = noCifra($(this).val());
@@ -8977,6 +9026,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
       Orden = data.orden;
       if (Orden.length) {
         lt = Orden[0].id;
+        agente = Orden[0].asesor;
         productos.push(Orden[0]);
       }
       productos.map(x => {
@@ -8986,6 +9036,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden2\W/.test(window.location.pathname)) {
           lote.append(parent);
           proyecto = x.proyect;
         }
+        if (!lt) lt = x.id;
         const Lt = lt == x.id ? true : false;
         const option = new Option(`${x.proyect}  MZ ${x.mz} LT ${x.n}`, x.id, Lt, Lt);
         parent.append(option);
@@ -10921,7 +10972,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
       fila.toggleClass('selected');
       $('#proyecto').val();
       $('#idproyecto').val();
-      var url = `/links/orden?id=${data.id}&h=${ya}`;
+      var url = `/links/orden?lt=${data.id}`;
       $(location).attr('href', url);
     } else if (/grupoelitefincaraiz/.test(window.location.origin)) {
       alert(
@@ -11818,824 +11869,6 @@ if (window.location == `${window.location.origin}/links/productos`) {
         };
     });
     */
-}
-/////////////////////////////* ORDEN */////////////////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/orden` && !rol.externo) {
-  var fch = new Date();
-  var Meses = extra => {
-    var fechs = new Date($('#fechs').val());
-    var months = fechs.getMonth() - fch.getMonth() + 12 * (fechs.getFullYear() - fch.getFullYear());
-    months += extra;
-    fechs = new Date(moment(fechs).add(extra, 'month'));
-
-    if (months > 102) {
-      $('#ncuotas').html(`           
-            <option value="0">Ninguna</option>
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            <option value="60">60 Cuotas</option>
-            <option value="72">72 Cuotas</option>
-            <option value="90">90 Cuotas</option>
-            <option value="102">102 Cuotas</option>
-            <option value="114">114 Cuotas</option>
-            `);
-    } else if (months > 90) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>            
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            <option value="60">60 Cuotas</option>
-            <option value="72">72 Cuotas</option>
-            <option value="90">90 Cuotas</option>
-            <option value="102">102 Cuotas</option>
-            `);
-    } else if (months > 72) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            <option value="60">60 Cuotas</option>
-            <option value="72">72 Cuotas</option>
-            <option value="90">90 Cuotas</option>
-            `);
-    } else if (months > 60) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            <option value="60">60 Cuotas</option>
-            <option value="72">72 Cuotas</option>
-            `);
-    } else if (months > 48) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            <option value="60">60 Cuotas</option>
-            `);
-    } else if (months > 42) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            <option value="48">48 Cuotas</option>
-            `);
-    } else if (months > 36) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            <option value="42">42 Cuotas</option>
-            `);
-    } else if (months > 30) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            <option value="36">36 Cuotas</option>
-            `);
-    } else if (months > 24) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            <option value="30">30 Cuotas</option>
-            `);
-    } else if (months > 18) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            <option value="24">24 Cuotas</option>
-            `);
-    } else if (months > 12) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            <option value="18">18 Cuotas</option>
-            `);
-    } else if (months > 6) {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-            <option value="12">12 Cuotas</option>
-            `);
-    } else {
-      $('#ncuotas').html(`
-            <option value="0">0 Cuota</option>             
-            <option value="1">1 Cuota</option>
-            <option value="2">2 Cuotas</option>
-            <option value="6">6 Cuotas</option>
-        `);
-    }
-  };
-  $('.val').mask('#.##$', { reverse: true });
-  const descuentos = JSON.parse($('#descuentos').val());
-  var meses = 0;
-  var groupColumn = 2;
-  var dic = 0;
-  var jun = 0;
-  var fcha = moment(fch).startOf('month').format('YYYY-MM-DD');
-  var h = 1;
-  var sprcn = parseFloat($('#separacion').val());
-  var porcentage = parseFloat($('#porcentage').val());
-  var precio = parseFloat($('#vrlote').cleanVal());
-  var cpara = sprcn.toString().length > 3 ? sprcn : (precio * sprcn) / 100;
-  var separacion = sprcn.toString().length > 3 ? sprcn : (precio * sprcn) / 100;
-  $('#abono').val(separacion).mask('#.##$', { reverse: true });
-  var inicial = parseFloat($('#cuotainicial').cleanVal());
-  var cuota = precio - inicial;
-  var cuotaextrao;
-  var cut = 0;
-  var u = parseFloat($('#diferinicial').val());
-  var mesesextra = '';
-  var D = parseFloat($('#dia').val());
-  var oficial70 = '$' + Moneda(((100 - porcentage) * precio) / 100);
-  var oficial30 = '$' + Moneda(inicial);
-  var bono = '';
-  var meses = 0;
-  var cuota30 = Moneda(Math.round((inicial - separacion) / u));
-  var tipoDto = 'NINGUNO';
-  Meses(0);
-  $(`#ncuotas option[value='6']`).prop('selected', true);
-  var N = parseFloat($('#ncuotas').val());
-  var cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
-  $('#cuota').val(cuota70.replace(/\./g, ''));
-  //console.log(cuota, cuota70, meses, u, N, N - (meses + u) || 1);
-  $.ajax({
-    url: '/links/tabla/1',
-    type: 'POST',
-    data: {
-      separacion: Moneda(separacion),
-      cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
-      cuota30: N === 1 ? 0 : cuota30,
-      oficial30,
-      oficial70,
-      N,
-      u,
-      fcha,
-      fcha2: moment(fch).format('YYYY-MM-DD'),
-      mesesextra: '',
-      extra: ''
-    },
-    async: false
-  });
-  $(document).ready(function () {
-    if ($('#mesje').text()) {
-      $('#ModalMensaje').modal({
-        backdrop: 'static',
-        keyboard: true,
-        toggle: true
-      });
-    }
-
-    $('.di').css('background-color', '#FFFFCC');
-    $(`.pais option[value='57']`).prop('selected', true);
-    $('.documento').mask('AAAAAAAAAAA');
-    $('.document').mask('AAAAAAAAAAA');
-    $('.movil').mask('57 ***-***-****');
-    $('.pais').change(function () {
-      var card = $(this).parents('div.row').attr('id');
-      $(`#${card} .movil`).val('');
-      $(`#${card} .movil`)
-        .mask(`${$(this).val()} ***-***-****`)
-        .focus();
-    });
-    $('.pai').change(function () {
-      $(`.movi`).val('');
-      $(`.movi`)
-        .mask(`${$(this).val()} ***-***-****`)
-        .focus();
-    });
-    $('.movil, .documento').on('change', function () {
-      var card = $(this).parents('div.row').attr('id');
-      if (
-        ($(this).hasClass('movil') && !$(`#${card} .documento`).val()) ||
-        $(this).hasClass('documento')
-      ) {
-        $.ajax({
-          url: '/links/cel/' + $(this).cleanVal(),
-          type: 'GET',
-          async: false,
-          success: function (data) {
-            if (data.length > 0) {
-              $(`#${card} .client`).val(data[0].idc);
-              $(`#${card} .nombres`).val(data[0].nombre);
-              $(`#${card} .movil`).val(data[0].movil).mask('**** $$$-$$$-$$$$', { reverse: true });
-              var pais = data[0].movil.split(' ');
-              data[0].movil.indexOf(' ') > 0
-                ? $(`#${card} .pais option[value='${pais[0]}']`).prop('selected', true)
-                : $(`#${card} .pais option[value='57']`).prop('selected', true);
-              $(`#${card} .email`).val(data[0].email);
-              $(`#${card} .documento`).val(data[0].documento).mask('AAAAAAAAAA');
-              $(`#${card} .movil`).mask('57 ***-***-****');
-            } else {
-              SMSj('info', 'Cliente no encontrado, proceda con el registro');
-              $('#AddCliente input').val('');
-              $('#AddCliente .document').val($(`#${card} .documento`).val());
-              $('#AddCliente .movi')
-                .val($(`#${card} .movil`).val())
-                .mask('**** $$$-$$$-$$$$', { reverse: true });
-              $('#AddCliente').modal({
-                backdrop: 'static',
-                keyboard: true,
-                toggle: true
-              });
-              $('#crearcliente').submit(function (e) {
-                e.preventDefault();
-                $('.ya').val(moment().format('YYYY-MM-DD HH:mm'));
-                //var fd = $('#crearcliente').serialize();
-                var formData = new FormData(document.getElementById('crearcliente'));
-                $.ajax({
-                  url: '/links/clientes/agregar',
-                  data: formData,
-                  type: 'PUT',
-                  processData: false,
-                  contentType: false,
-                  beforeSend: function (xhr) {
-                    $('#AddCliente').modal('hide');
-                    $('#ModalEventos').modal({
-                      toggle: true,
-                      backdrop: 'static',
-                      keyboard: true
-                    });
-                  },
-                  success: function (data) {
-                    if (data) {
-                      SMSj('success', 'Cliente registrado correctamente');
-                      $(`#${card} .client`).val(data.code);
-                      $(`#${card} .nombres`).val($('#AddCliente .nombr').val().toLocaleUpperCase());
-                      $(`#${card} .movil`)
-                        .val($('#AddCliente .movi').val())
-                        .mask('**** $$$-$$$-$$$$', { reverse: true });
-                      $(`#${card} .email`).val($('#AddCliente .mail').val());
-                      $(`#${card} .documento`)
-                        .val($('#AddCliente .document').val())
-                        .mask('AAAAAAAAAA');
-                      $('#ModalEventos').modal('hide');
-                    }
-                  }
-                });
-              });
-            }
-          }
-        });
-      }
-    });
-    var ya = moment(fch).format('YYYY-MM-DD HH:mm');
-    $('.ya').val(ya);
-
-    var Años = (inic, dia, month) => {
-      dic = 0;
-      jun = 0;
-      var t1 = new Date(moment(fch).add(inic, 'month').startOf('month')).valueOf();
-      var t2 = new Date(moment(fch).add(month, 'month').endOf('month')).valueOf();
-      var r = $('#Emeses').val() || 0;
-      var data = new Array();
-      var q = 0;
-      var t3;
-
-      while (t1 < t2) {
-        t1 = new Date(
-          moment(fch)
-            .add(inic + q, 'month')
-            .endOf('month')
-        ).valueOf();
-        t3 = new Date(
-          moment(fch)
-            .add(inic + q, 'month')
-            .startOf('month')
-        );
-        data.push(t3);
-        q++;
-      }
-
-      data
-        .filter(r => {
-          return r.getMonth() === 5 || r.getMonth() === 11;
-        })
-        .map(r => {
-          r.getMonth() === 5 ? jun++ : dic++;
-        });
-
-      /*$('#Emeses option[value="1"]').length ? $('#Emeses option[value="1"]').remove() : '';
-            $('#Emeses option[value="2"]').length ? $('#Emeses option[value="2"]').remove() : '';
-            $('#Emeses option[value="3"]').length ? $('#Emeses option[value="3"]').remove() : '';*/
-
-      if (jun > 0 && dic > 0) {
-        $('#Emeses').html(` 
-                            <option value="">Niguna</option>                       
-                            <option value="1">Junio</option>
-                            <option value="2">Diciembre</option>
-                            <option value="3">Jun & Dic</option>
-                        `);
-      } else if (jun > 0 && dic === 0) {
-        $('#Emeses').html(` 
-                            <option value="">Niguna</option>                       
-                            <option value="1">Junio</option>
-                        `);
-      } else if (jun === 0 && dic > 0) {
-        $('#Emeses').html(`
-                            <option value="">Niguna</option>
-                            <option value="2">Diciembre</option>
-                        `);
-      } else {
-        $('#Emeses').html(`<option value="">Niguna</option>`);
-      }
-      if (r) {
-        $(`#Emeses option[value='${r}']`).attr('selected', true);
-      }
-      fcha = moment(fch).format(`YYYY-MM-${dia}`);
-    };
-
-    Años(2, 1, 6);
-    $('.hoy').text(moment().format('YYYY-MM-DD'));
-    $('.totalote').val(Moneda(precio));
-    $('#p70').val(Moneda(cuota));
-
-    function Dt() {
-      bono = '';
-      $('#dto').val('0%');
-      $('#ahorro').val('$0');
-      $('#bono').val('');
-      $('#bonoid').val('');
-      $('.totalote').val($('#vrlote').val());
-      precio = parseFloat($('#vrlote').cleanVal());
-      inicial = (precio * porcentage) / 100;
-      $('#cuotainicial').val(Moneda(inicial));
-      $('#p70').val(Moneda(precio - inicial));
-      tipoDto = 'NINGUNO';
-    }
-    $('#AgregarClient').click(function () {
-      $('#cliente2').show('slow');
-      $('.cliente2 input').prop('required', true);
-    });
-    $('#AgregarClient2').click(function () {
-      $('#cliente3').show('slow');
-      $('.cliente3 input').prop('required', true);
-    });
-    $('#AgregarClient3').click(function () {
-      $('#cliente4').show('slow');
-      $('.cliente4 input').prop('required', true);
-    });
-    $('.atras').click(function () {
-      $('.cliente2').hide('slow');
-      $('.cliente2 input').val('');
-      $('.cliente2 input').prop('required', false);
-    });
-    $('.atras3').click(function () {
-      $('.cliente3').hide('slow');
-      $('.cliente3 input').val('');
-      $('.cliente3 input').prop('required', false);
-    });
-    $('.atras4').click(function () {
-      $('.cliente4').hide('slow');
-      $('.cliente4 input').val('');
-      $('.cliente4 input').prop('required', false);
-    });
-    $('.edi').on('change', function () {
-      $('#acepto').prop('checked', false);
-      u = parseFloat($('#diferinicial').val());
-      D = parseFloat($('#dia').val());
-      N = parseFloat($('#ncuotas').val());
-
-      if ($(this).attr('id') === 'ncuotas' && $(this).val() === '0') {
-        $('#abono').val(Moneda(precio));
-      }
-
-      if ($(this).attr('id') === 'abono') {
-        if (parseFloat($(this).cleanVal()) < cpara || !$('#abono').val()) {
-          $('#abono').val(Moneda(cpara));
-          SMSj(
-            'info',
-            'El abono debe ser mayor o igual a la separacion ya preestablecida por Grupo Elite'
-          );
-        } else if (parseFloat($(this).cleanVal()) > precio || !$('#abono').val()) {
-          $('#abono').val(Moneda(cpara));
-          SMSj('info', 'La separacion no ser mayor al valor del producto');
-        }
-      }
-      var abono = parseFloat($('#abono').val().replace(/\./g, ''));
-
-      if ($(`#ncuotas`).is(':disabled') && abono < precio) {
-        $(`#ncuotas option[value='1']`).prop('selected', true);
-        N = 1;
-      }
-
-      if (N > 1 && abono < inicial && $('#diferinicial').val() === '0') {
-        $(`#diferinicial option[value='1']`).prop('selected', true);
-        u = 1;
-      }
-
-      if (N < 6) {
-        $(`#Emeses option[value='0']`).attr('selected', true);
-        $('#cuotaestrao').val(null);
-      }
-
-      if (N === 2 && parseFloat($('#diferinicial').val()) > 1) {
-        $(`#diferinicial option[value='1']`).prop('selected', true);
-        u = 1;
-      }
-
-      Años(u + 1, D, N);
-
-      if (descuentos.inicial && N < 2 && bono !== '' && descuentos.todo) {
-        var Dto = parseFloat($('#dto').val().slice(0, -1));
-        precio = parseFloat($('#vrlote').cleanVal());
-        var Ahorr = Math.round((precio * Dto) / 100);
-        precio = precio - Ahorr;
-        inicial = (precio * porcentage) / 100;
-        $('#cuotainicial').val(Moneda(Math.round(inicial)));
-        $('#p70').val(Moneda(precio - inicial));
-        $('#ahorro').val(Moneda(Ahorr));
-        $('.totalote').val(Moneda(Math.round(precio)));
-        parseFloat($('#abono').val().replace(/\./g, '')) > precio
-          ? $('#abono').val(Moneda(precio))
-          : '';
-        tipoDto = 'TODO';
-      } else if (descuentos.inicial && N > 1 && bono !== '') {
-        var Dto = parseFloat($('#dto').val().slice(0, -1));
-        precio = parseFloat($('#vrlote').cleanVal());
-        inicial = (precio * porcentage) / 100;
-        var Ahorr = Math.round((inicial * Dto) / 100);
-        inicial = inicial - Ahorr;
-        $('#cuotainicial').val(Moneda(Math.round(inicial)));
-        $('#p70').val(Moneda(precio - inicial));
-        $('#ahorro').val(Moneda(Ahorr));
-        precio = precio - Ahorr;
-        $('.totalote').val(Moneda(Math.round(precio)));
-        parseFloat($('#abono').val().replace(/\./g, '')) > precio
-          ? $('#abono').val(Moneda(precio))
-          : '';
-        tipoDto = 'INICIAL';
-      }
-
-      if ($(this).attr('id') === 'bono') {
-        if ($(this).val() !== bono && $(this).val()) {
-          h = 1;
-          $.ajax({
-            url: '/links/bono/' + $(this).val(),
-            type: 'GET',
-            async: false,
-            success: function (data) {
-              if (data.length) {
-                var fecha = moment(data[0].fecha).add(59, 'days').endOf('days');
-                if (data[0].producto != null) {
-                  SMSj(
-                    'error',
-                    'Este cupon ya le fue asignado a un producto. Para mas informacion comuniquese con el asesor encargado'
-                  );
-                  Dt();
-                } else if (fecha < new Date()) {
-                  SMSj(
-                    'error',
-                    'Este cupon de descuento ya ha expirado. Para mas informacion comuniquese con el asesor encargado'
-                  );
-                  Dt();
-                } else if (data[0].estado != 9) {
-                  SMSj(
-                    'error',
-                    'Este cupon aun no ha sido autorizado por administración. espere la autorizacion del area encargada'
-                  );
-                  Dt();
-                } else {
-                  var ahorr = 0;
-                  //var ahorr = Math.round((precio * data[0].descuento) / 100);
-                  $('#bonoid').val(data[0].id);
-
-                  if (descuentos.inicial) {
-                    ahorr = Math.round((inicial * data[0].descuento) / 100);
-                    inicial = inicial - ahorr;
-                    tipoDto = 'INICIAL';
-                  } else if (descuentos.financiacion) {
-                    ahorr = Math.round(((precio - inicial) * data[0].descuento) / 100);
-                    var finan = precio - inicial - ahorr;
-                    $('#p70').val(Moneda(Math.round(finan)));
-                    tipoDto = 'FINANCIACION';
-                  } else if (descuentos.todo) {
-                    ahorr = Math.round((precio * data[0].descuento) / 100);
-                    inicial = ((precio - ahorr) * porcentage) / 100;
-                    $('#p70').val(Moneda(Math.round(precio - inicial - ahorr)));
-                    tipoDto = 'TODO';
-                  } else {
-                    Dt();
-                    SMSj('error', 'Este proyecto no posee descuentos');
-                  }
-                  $('#ahorro').val(Moneda(ahorr));
-                  precio = precio - ahorr;
-                  $('#dto').val(ahorr ? data[0].descuento + '%' : '0%');
-                  $('#cuotainicial').val(Moneda(Math.round(inicial)));
-                  $('.totalote').val(Moneda(Math.round(precio)));
-                  parseFloat($('#abono').val().replace(/\./g, '')) > precio
-                    ? $('#abono').val(Moneda(precio))
-                    : '';
-                }
-                bono = data[0].pin;
-              } else {
-                Dt();
-                SMSj(
-                  'error',
-                  'Debe digitar un N° de bono. Comuniquese con uno de nuestros asesores encargado'
-                );
-              }
-            }
-          });
-        } else {
-          Dt();
-          SMSj(
-            'error',
-            'Cupon de descuento invalido. Comuniquese con uno de nuestros asesores encargado'
-          );
-        }
-      }
-
-      if (u > 1 && h === 1) {
-        h = 2;
-        Dt();
-        $('#bono').val('').attr('disabled', true);
-        SMSj(
-          'info',
-          'Recuerde que si difiere la cuota inicial a mas de 1 no podra ser favorecido con nuestros descuentos. Para mas info comuniquese con el asesor encargado'
-        );
-      } else if (u > 1) {
-        Dt();
-        $('#bono').attr('disabled', true);
-      } else {
-        h = 1;
-        $('#bono').attr('disabled', false);
-      }
-
-      separacion = abono;
-      var Estra = () => {
-        cuotaextrao = parseFloat($('#cuotaestrao').cleanVal());
-        var co = $('#cuotaestrao').val() ? $('#Emeses').val() : '0';
-        switch (co) {
-          case '1':
-            cut = cuotaextrao * jun;
-            mesesextra = 6;
-            meses = jun;
-            break;
-          case '2':
-            cut = cuotaextrao * dic;
-            mesesextra = 12;
-            meses = dic;
-            break;
-          case '3':
-            cut = cuotaextrao * (jun + dic);
-            mesesextra = 2;
-            meses = jun + dic;
-            break;
-          default:
-            cut = 0;
-            mesesextra = 0;
-            meses = 0;
-        }
-        cuota = cuota - cut;
-        $('#extran').val(meses);
-      };
-      if (separacion === precio) {
-        Años(0, D, N);
-        cuota = 0;
-        Estra();
-        cuota30 = 0;
-        cuota70 = 0;
-        $(`#diferinicial option[value='0']`).attr('selected', true);
-        $(`#Emeses option[value='0']`).attr('selected', true);
-        $('#cuotaestrao').val(null);
-        $('#cuotaestrao').attr('disabled', true);
-        $('#diferinicial').attr('disabled', true);
-        $(`#Emeses`).attr('disabled', true);
-        $(`#ncuotas`).attr('disabled', true);
-        $(`#dia`).attr('disabled', true);
-      } else if (separacion >= inicial) {
-        Años(0, D, N);
-        resl = separacion - inicial;
-        cuota = Math.round(precio - resl - inicial);
-        Estra();
-        cuota30 = 0;
-        cuota70 = Moneda(Math.round(cuota / (N - meses)));
-        $(`#diferinicial option[value='0']`).attr('selected', true);
-        $('#diferinicial').attr('disabled', true);
-      } else {
-        cuota = Math.round(precio - inicial);
-        Estra();
-        cuota30 = Moneda(Math.round((inicial - separacion) / u));
-        cuota70 = Moneda(Math.round(cuota / (N - (meses + u) || 1)));
-        $('#diferinicial').prop('disabled', false);
-        $(`#Emeses`).prop('disabled', false);
-        $('#cuotaestrao').prop('disabled', false);
-        $(`#dia`).attr('disabled', false);
-        $(`#ncuotas`).attr('disabled', false);
-      }
-
-      recolecta = {
-        separacion: Moneda(separacion),
-        cuota70: N === 1 ? Moneda(precio - separacion) : N === 0 ? 0 : cuota70,
-        cuota30: N === 1 ? 0 : cuota30,
-        oficial30,
-        oficial70,
-        N,
-        u,
-        fcha,
-        fcha2: moment(fch).format('YYYY-MM-DD'),
-        mesesextra,
-        extra: $('#cuotaestrao').val()
-      };
-
-      cuota70 ? $('#cuota').val(cuota70.replace(/\./g, '')) : $('#cuota').val(0);
-      $.ajax({
-        url: '/links/tabla/1',
-        type: 'POST',
-        data: recolecta,
-        async: false,
-        success: function (data) {
-          tabla.ajax.reload(function (json) {
-            //SMSj('success', 'Se realizaron cambios exitosamente')
-          });
-        }
-      });
-    });
-    var tabla = $('#datatables-clients').DataTable({
-      dom: '<"toolbar">',
-      info: false,
-      /*responsive: {
-                details: {
-                    display: $.fn.dataTable.Responsive.display.childRowImmediate,
-                    type: 'none',
-                    target: ''
-                }
-            }*/
-      responsive: true,
-      ajax: {
-        method: 'POST',
-        url: '/links/tabla/2',
-        dataSrc: 'data'
-      },
-      columns: [
-        { data: 'n' },
-        {
-          data: 'fecha',
-          render: function (data, method, row) {
-            return (
-              moment.utc(data).format('YYYY-MM-DD') +
-              `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
-            );
-          }
-        },
-        { data: 'oficial' },
-        { data: 'cuota' },
-        { data: 'stado' },
-        { data: 'n2' },
-        {
-          data: 'fecha2',
-          render: function (data, method, row) {
-            return data
-              ? moment.utc(data).format('YYYY-MM-DD') +
-                  `<input value="${moment(data).format('YYYY-MM-DD')}" type="hidden" name="fecha">`
-              : '';
-          }
-        },
-        { data: 'cuota2' },
-        { data: 'stado2' }
-      ],
-      columnDefs: [
-        { visible: false, targets: groupColumn },
-        { responsivePriority: 1, targets: 0 },
-        { responsivePriority: 2, targets: 1 },
-        { responsivePriority: 3, targets: 3 },
-        { responsivePriority: 4, targets: 4 }
-      ],
-      order: [[groupColumn, 'asc']],
-      displayLength: 50,
-      initComplete: function (settings, json) {
-        //hacer algo apenas cargue la tabla
-      },
-      drawCallback: function (settings) {
-        var api = this.api();
-        var rows = api.rows({ page: 'current' }).nodes();
-        var last = null;
-
-        api
-          .column(groupColumn, { page: 'current' })
-          .data()
-          .each(function (group, i) {
-            if (last !== group) {
-              $(rows)
-                .eq(i)
-                .before('<tr class="group"><td colspan="8">' + group + '</td></tr>');
-
-              last = group;
-            }
-          });
-      }
-    });
-  });
-  var opcion = 'no';
-  $('#enviodeorden').submit(function (e) {
-    if (opcion === 'no') {
-      e.preventDefault();
-      var datos = { movil: $('#movil').cleanVal() };
-      $.ajax({
-        url: '/links/codigo',
-        type: 'POST',
-        data: datos,
-        //async: false,
-        success: function (data) {
-          console.log(data);
-          $('#codigodeverificacion').val(data);
-        }
-      });
-      $('#modalorden').modal('toggle');
-      $('#modalorden').one('shown.bs.modal', function () {
-        $('#modalorden #codeg').focus();
-      });
-    } else {
-      $('#typeDto').val(tipoDto);
-      $('#enviodeorden input').prop('disabled', false);
-    }
-  });
-  $('#enviarorden').click(function () {
-    var code1 = $('#codigodeverificacion').val();
-    var code2 = $('#codeg').val();
-    if (code1 == code2) {
-      opcion = 'si';
-      $('#modalorden').modal('toggle');
-      $('#enviodeorden').submit();
-    } else {
-      $('#modalorden').modal('toggle');
-      SMSj('error', 'Codigo de confirmación incorrecto, intentelo nuevamente');
-    }
-  });
 }
 /////////////////////////////* SOLICITUDES *//////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/solicitudes`) {

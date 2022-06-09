@@ -1,2253 +1,415 @@
-<main class="content">
-  <div class="container-fluid p-0">
-    <h1 class="mb-3">ORDEN DE SEPARACIÓN</h1>
-    <div class="row">
-      <form action="/links/orden" method="POST" id="enviodeorden">
-        <input type="hidden" id="lot" value="{{id}}" name="lote" />
-        <input type="hidden" id="typeDto" name="tipoDto" />
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">
-              <div class="card-actions float-right">
-                <div class="dropdown show">
-                  <a href="#" data-toggle="dropdown" data-display="static">
-                    <i class="align-middle" data-feather="more-horizontal"></i>
-                  </a>
-
-                  <div class="dropdown-menu dropdown-menu-right">
-                    <a class="dropdown-item" href="#">Action</a>
-                    <a class="dropdown-item" href="#">Another action</a>
-                    <a class="dropdown-item" href="#">Something else here</a>
-                  </div>
-                </div>
-              </div>
-              <h5 class="card-title mb-0">Proyecto & Cliente</h5>
-              <div class="row no-gutters">
-                <div class="col-sm-3 col-xl-12 col-xxl-3 text-center mb-1">
-                  <img
-                    src="/img/avatars/avatar.svg"
-                    width="64"
-                    height="64"
-                    class="rounded-circle mt-2"
-                  />
-                </div>
-                <div class="col-sm-9 col-xl-12 col-xxl-9 mt-2">
-                  {{#each proyecto}}
-                    <strong>{{nombre}}</strong>
-                    <span class="float-right text-muted text-sm hoy"></span><br
-                    />
-                    <strong>Mz: </strong><span class="">{{mz}}</span><br />
-                    <strong>Lote: </strong><span class="">{{n}}</span><br />
-                  {{/each}}
-                  <strong>Asesor: </strong><span
-                    class=""
-                  >{{user.fullname}}</span>
-                </div>
-              </div>
-            </div>
-            <div class="card-body">
-              <div class="row" id="cliente1">
-                <input type="hidden" class="client" value="" name="client" />
-                <input type="hidden" class="ya" value="" name="ahora" />
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="credit-card"></i>
-                          Documento
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di documento u"
-                            type="text"
-                            placeholder="Documento de identidad"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user"></i>
-                          Nombre
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border nombres u"
-                            type="text"
-                            placeholder="Nombre completo"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="mail"></i>
-                          Email
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border email u"
-                            type="email"
-                            placeholder="Correo electrónico"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="globe"></i>
-                          Pais
-                        </th>
-                        <td>
-                          <select
-                            class="form-control-no-border di pais"
-                            style="padding: 1px; width: 100%;"
-                          >
-                            <optgroup label="A" class="text-primary">
-                              <option value="1907">Alaska</option>
-                              <option value="355">Albania</option>
-                              <option value="49">Alemania</option>
-                              <option value="376">Andorra</option>
-                              <option value="244">Angola</option>
-                              <option value="966">Arabia Saudí</option>
-                              <option value="213">Argelia</option>
-                              <option value="54">Argentina</option>
-                              <option value="374">Armenia</option>
-                              <option value="61">Australia</option>
-                              <option value="43">Austria</option>
-                            </optgroup>
-                            <optgroup label="B">
-                              <option value="973">Bahreim</option>
-                              <option value="880">Bangladesh</option>
-                              <option value="32">Bélgica</option>
-                              <option value="591">Bolivia</option>
-                              <option value="387">Bosnia</option>
-                              <option value="55">Brasil</option>
-                              <option value="359">Bulgaria</option>
-                            </optgroup>
-                            <optgroup label="C">
-                              <option value="238">Cabo Verde</option>
-                              <option value="855">Camboya</option>
-                              <option value="237">Camerún</option>
-                              <option value="1">Canadá</option>
-                              <option value="236">Centroafricana, Rep.
-                              </option>
-                              <option value="420">Checa, Rep.</option>
-                              <option value="56">Chile</option>
-                              <option value="86">China</option>
-                              <option value="357">Chipre</option>
-                              <option value="57">Colombia</option>
-                              <option value="242">Congo, Rep. del</option>
-                              <option value="243">Congo, Rep. Democ.</option>
-                              <option value="850">Corea, Rep. Democ.</option>
-                              <option value="82">Corea, Rep.</option>
-                              <option value="225">Costa de Marfil</option>
-                              <option value="506">Costa Rica</option>
-                              <option value="385">Croacia</option>
-                              <option value="53">Cuba</option>
-                            </optgroup>
-                            <optgroup label="D">
-                              <option value="45">Dinamarca</option>
-                              <option value="1809">Dominicana, Rep.</option>
-                            </optgroup>
-                            <optgroup label="E">
-                              <option value="593">Ecuador</option>
-                              <option value="20">Egipto</option>
-                              <option value="503">El Salvador</option>
-                              <option value="971">Emiratos Árabes Unidos
-                              </option>
-                              <option value="421">Eslovaca, Rep.</option>
-                              <option value="386">Eslovenia</option>
-                              <option value="34">España</option>
-                              <option value="1">Estados Unidos</option>
-                              <option value="372">Estonia</option>
-                              <option value="251">Etiopía</option>
-                            </optgroup>
-                            <optgroup label="F">
-                              <option value="63">Filipinas</option>
-                              <option value="358">Finlandia</option>
-                              <option value="33">Francia</option>
-                            </optgroup>
-                            <optgroup label="G">
-                              <option value="9567">Gibraltar</option>
-                              <option value="30">Grecia</option>
-                              <option value="299">Groenlandia</option>
-                              <option value="502">Guatemala</option>
-                              <option value="240">Guinea Ecuatorial</option>
-                            </optgroup>
-                            <optgroup label="H">
-                              <option value="509">Haití</option>
-                              <option value="1808">Hawai</option>
-                              <option value="504">Honduras</option>
-                              <option value="852">Hong Kong</option>
-                              <option value="36">Hungría</option>
-                            </optgroup>
-                            <optgroup label="I">
-                              <option value="91">India</option>
-                              <option value="62">Indonesia</option>
-                              <option value="98">Irán</option>
-                              <option value="964">Irak</option>
-                              <option value="353">Irlanda</option>
-                              <option value="354">Islandia</option>
-                              <option value="972">Israel</option>
-                              <option value="39">Italia</option>
-                            </optgroup>
-                            <optgroup label="J">
-                              <option value="1876">Jamaica</option>
-                              <option value="81">Japón</option>
-                              <option value="962">Jordania</option>
-                            </optgroup>
-                            <optgroup label="K">
-                              <option value="254">Kenia</option>
-                              <option value="965">Kuwait</option>
-                            </optgroup>
-                            <optgroup label="L">
-                              <option value="856">Laos</option>
-                              <option value="371">Letonia</option>
-                              <option value="961">Líbano</option>
-                              <option value="231">Liberia</option>
-                              <option value="218">Libia</option>
-                              <option value="41">Liechtenstein</option>
-                              <option value="370">Lituania</option>
-                              <option value="352">Luxemburgo</option>
-                            </optgroup>
-                            <optgroup label="M">
-                              <option value="261">Madagascar</option>
-                              <option value="60">Malasia</option>
-                              <option value="356">Malta</option>
-                              <option value="212">Marruecos</option>
-                              <option value="596">Martinica</option>
-                              <option value="222">Mauritania</option>
-                              <option value="52">México</option>
-                              <option value="373">Moldavia</option>
-                              <option value="377">Mónaco</option>
-                              <option value="976">Mongolia</option>
-                              <option value="258">Mozambique</option>
-                            </optgroup>
-                            <optgroup label="N">
-                              <option value="264">Namibia</option>
-                              <option value="977">Nepal</option>
-                              <option value="505">Nicaragua</option>
-                              <option value="234">Nigeria</option>
-                              <option value="47">Noruega</option>
-                              <option value="64">Nueva Zelanda</option>
-                            </optgroup>
-                            <optgroup label="P">
-                              <option value="31">Países Bajos</option>
-                              <option value="92">Pakistán</option>
-                              <option value="507">Panamá</option>
-                              <option value="595">Paraguay</option>
-                              <option value="51">Perú</option>
-                              <option value="48">Polonia</option>
-                              <option value="351">Portugal</option>
-                              <option value="1787">Puerto Rico</option>
-                            </optgroup>
-                            <optgroup label="Q">
-                              <option value="974">Qatar</option>
-                            </optgroup>
-                            <optgroup label="R">
-                              <option value="44">Reino Unido</option>
-                              <option value="40">Rumania</option>
-                              <option value="7">Rusia</option>
-                            </optgroup>
-                            <optgroup label="S">
-                              <option value="378">San Marino</option>
-                              <option value="221">Senegal</option>
-                              <option value="65">Singapur</option>
-                              <option value="963">Siria</option>
-                              <option value="252">Somalia</option>
-                              <option value="94">Sri-Lanka</option>
-                              <option value="27">Sudáfrica</option>
-                              <option value="249">Sudán</option>
-                              <option value="46">Suecia</option>
-                              <option value="41">Suiza</option>
-                            </optgroup>
-                            <optgroup label="T">
-                              <option value="66">Tailandia</option>
-                              <option value="886">Taiwan</option>
-                              <option value="255">Tanzania</option>
-                              <option value="216">Túnez</option>
-                              <option value="90">Turquía</option>
-                            </optgroup>
-                            <optgroup label="U">
-                              <option value="380">Ucrania</option>
-                              <option value="256">Uganda</option>
-                              <option value="598">Uruguay</option>
-                            </optgroup>
-                            <optgroup label="V">
-                              <option value="39">Vaticano</option>
-                              <option value="58">Venezuela</option>
-                              <option value="84">Vietnam</option>
-                            </optgroup>
-                            <optgroup label="Y">
-                              <option value="967">Yemen</option>
-                              <option value="381">Yugoslavia</option>
-                            </optgroup>
-                            <optgroup label="Z">
-                              <option value="260">Zambia</option>
-                              <option value="263">Zimbawe</option>
-                            </optgroup>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="phone-call"></i>
-                          Móvil
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di movil u"
-                            type="tel"
-                            placeholder="Numero celular"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            id="movil"
-                            required
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user-plus"></i>
-                        </th>
-                        <td>
-                          <a
-                            class="btn btn-outline-dark btn-sm float-right mr-3"
-                            id="AgregarClient"
-                          ><i class="fas fa-fw fa-user-plus"></i>
-                            Agregar cliente</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <!--Cliente #2-->
-              <div class="row cliente2" id="cliente2" style="display: none;">
-                <input type="hidden" class="client" value="" name="client" />
-                <div class="col-12 col-lg-12">
-                  <div class="d-inline-block float-right">
-                    <a class="r atras"><i
-                        class="feather-lg"
-                        data-feather="x-circle"
-                      ></i></a>
-                  </div>
-                  <hr style="width: 90%;" />
-                  <div class="h4">Cliente #2</div>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="credit-card"></i>
-                          Documento
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di documento u"
-                            type="text"
-                            placeholder="Documento de identidad"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user"></i>
-                          Nombre
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border nombres u"
-                            type="text"
-                            placeholder="Nombre completo"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="mail"></i>
-                          Email
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border email u"
-                            type="email"
-                            placeholder="Correo electrónico"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="globe"></i>
-                          Pais
-                        </th>
-                        <td>
-                          <select
-                            class="form-control-no-border di pais"
-                            style="padding: 1px; width: 100%;"
-                          >
-                            <optgroup label="A" class="text-primary">
-                              <option value="1907">Alaska</option>
-                              <option value="355">Albania</option>
-                              <option value="49">Alemania</option>
-                              <option value="376">Andorra</option>
-                              <option value="244">Angola</option>
-                              <option value="966">Arabia Saudí</option>
-                              <option value="213">Argelia</option>
-                              <option value="54">Argentina</option>
-                              <option value="374">Armenia</option>
-                              <option value="61">Australia</option>
-                              <option value="43">Austria</option>
-                            </optgroup>
-                            <optgroup label="B">
-                              <option value="973">Bahreim</option>
-                              <option value="880">Bangladesh</option>
-                              <option value="32">Bélgica</option>
-                              <option value="591">Bolivia</option>
-                              <option value="387">Bosnia</option>
-                              <option value="55">Brasil</option>
-                              <option value="359">Bulgaria</option>
-                            </optgroup>
-                            <optgroup label="C">
-                              <option value="238">Cabo Verde</option>
-                              <option value="855">Camboya</option>
-                              <option value="237">Camerún</option>
-                              <option value="1">Canadá</option>
-                              <option value="236">Centroafricana, Rep.
-                              </option>
-                              <option value="420">Checa, Rep.</option>
-                              <option value="56">Chile</option>
-                              <option value="86">China</option>
-                              <option value="357">Chipre</option>
-                              <option value="57">Colombia</option>
-                              <option value="242">Congo, Rep. del</option>
-                              <option value="243">Congo, Rep. Democ.</option>
-                              <option value="850">Corea, Rep. Democ.</option>
-                              <option value="82">Corea, Rep.</option>
-                              <option value="225">Costa de Marfil</option>
-                              <option value="506">Costa Rica</option>
-                              <option value="385">Croacia</option>
-                              <option value="53">Cuba</option>
-                            </optgroup>
-                            <optgroup label="D">
-                              <option value="45">Dinamarca</option>
-                              <option value="1809">Dominicana, Rep.</option>
-                            </optgroup>
-                            <optgroup label="E">
-                              <option value="593">Ecuador</option>
-                              <option value="20">Egipto</option>
-                              <option value="503">El Salvador</option>
-                              <option value="971">Emiratos Árabes Unidos
-                              </option>
-                              <option value="421">Eslovaca, Rep.</option>
-                              <option value="386">Eslovenia</option>
-                              <option value="34">España</option>
-                              <option value="1">Estados Unidos</option>
-                              <option value="372">Estonia</option>
-                              <option value="251">Etiopía</option>
-                            </optgroup>
-                            <optgroup label="F">
-                              <option value="63">Filipinas</option>
-                              <option value="358">Finlandia</option>
-                              <option value="33">Francia</option>
-                            </optgroup>
-                            <optgroup label="G">
-                              <option value="9567">Gibraltar</option>
-                              <option value="30">Grecia</option>
-                              <option value="299">Groenlandia</option>
-                              <option value="502">Guatemala</option>
-                              <option value="240">Guinea Ecuatorial</option>
-                            </optgroup>
-                            <optgroup label="H">
-                              <option value="509">Haití</option>
-                              <option value="1808">Hawai</option>
-                              <option value="504">Honduras</option>
-                              <option value="852">Hong Kong</option>
-                              <option value="36">Hungría</option>
-                            </optgroup>
-                            <optgroup label="I">
-                              <option value="91">India</option>
-                              <option value="62">Indonesia</option>
-                              <option value="98">Irán</option>
-                              <option value="964">Irak</option>
-                              <option value="353">Irlanda</option>
-                              <option value="354">Islandia</option>
-                              <option value="972">Israel</option>
-                              <option value="39">Italia</option>
-                            </optgroup>
-                            <optgroup label="J">
-                              <option value="1876">Jamaica</option>
-                              <option value="81">Japón</option>
-                              <option value="962">Jordania</option>
-                            </optgroup>
-                            <optgroup label="K">
-                              <option value="254">Kenia</option>
-                              <option value="965">Kuwait</option>
-                            </optgroup>
-                            <optgroup label="L">
-                              <option value="856">Laos</option>
-                              <option value="371">Letonia</option>
-                              <option value="961">Líbano</option>
-                              <option value="231">Liberia</option>
-                              <option value="218">Libia</option>
-                              <option value="41">Liechtenstein</option>
-                              <option value="370">Lituania</option>
-                              <option value="352">Luxemburgo</option>
-                            </optgroup>
-                            <optgroup label="M">
-                              <option value="261">Madagascar</option>
-                              <option value="60">Malasia</option>
-                              <option value="356">Malta</option>
-                              <option value="212">Marruecos</option>
-                              <option value="596">Martinica</option>
-                              <option value="222">Mauritania</option>
-                              <option value="52">México</option>
-                              <option value="373">Moldavia</option>
-                              <option value="377">Mónaco</option>
-                              <option value="976">Mongolia</option>
-                              <option value="258">Mozambique</option>
-                            </optgroup>
-                            <optgroup label="N">
-                              <option value="264">Namibia</option>
-                              <option value="977">Nepal</option>
-                              <option value="505">Nicaragua</option>
-                              <option value="234">Nigeria</option>
-                              <option value="47">Noruega</option>
-                              <option value="64">Nueva Zelanda</option>
-                            </optgroup>
-                            <optgroup label="P">
-                              <option value="31">Países Bajos</option>
-                              <option value="92">Pakistán</option>
-                              <option value="507">Panamá</option>
-                              <option value="595">Paraguay</option>
-                              <option value="51">Perú</option>
-                              <option value="48">Polonia</option>
-                              <option value="351">Portugal</option>
-                              <option value="1787">Puerto Rico</option>
-                            </optgroup>
-                            <optgroup label="Q">
-                              <option value="974">Qatar</option>
-                            </optgroup>
-                            <optgroup label="R">
-                              <option value="44">Reino Unido</option>
-                              <option value="40">Rumania</option>
-                              <option value="7">Rusia</option>
-                            </optgroup>
-                            <optgroup label="S">
-                              <option value="378">San Marino</option>
-                              <option value="221">Senegal</option>
-                              <option value="65">Singapur</option>
-                              <option value="963">Siria</option>
-                              <option value="252">Somalia</option>
-                              <option value="94">Sri-Lanka</option>
-                              <option value="27">Sudáfrica</option>
-                              <option value="249">Sudán</option>
-                              <option value="46">Suecia</option>
-                              <option value="41">Suiza</option>
-                            </optgroup>
-                            <optgroup label="T">
-                              <option value="66">Tailandia</option>
-                              <option value="886">Taiwan</option>
-                              <option value="255">Tanzania</option>
-                              <option value="216">Túnez</option>
-                              <option value="90">Turquía</option>
-                            </optgroup>
-                            <optgroup label="U">
-                              <option value="380">Ucrania</option>
-                              <option value="256">Uganda</option>
-                              <option value="598">Uruguay</option>
-                            </optgroup>
-                            <optgroup label="V">
-                              <option value="39">Vaticano</option>
-                              <option value="58">Venezuela</option>
-                              <option value="84">Vietnam</option>
-                            </optgroup>
-                            <optgroup label="Y">
-                              <option value="967">Yemen</option>
-                              <option value="381">Yugoslavia</option>
-                            </optgroup>
-                            <optgroup label="Z">
-                              <option value="260">Zambia</option>
-                              <option value="263">Zimbawe</option>
-                            </optgroup>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="phone-call"></i>
-                          Móvil
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di movil u"
-                            type="tel"
-                            placeholder="Numero celular"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user-plus"></i>
-                        </th>
-                        <td>
-                          <a
-                            class="btn btn-outline-dark btn-sm float-right mr-3"
-                            id="AgregarClient2"
-                          ><i class="fas fa-fw fa-user-plus"></i>
-                            Agregar cliente</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <!--Cliente #3-->
-              <div class="row cliente3" id="cliente3" style="display: none;">
-                <input type="hidden" class="client" value="" name="client" />
-                <div class="col-12 col-lg-12">
-                  <div class="d-inline-block float-right">
-                    <a class="r atras3"><i
-                        class="feather-lg"
-                        data-feather="x-circle"
-                      ></i></a>
-                  </div>
-                  <hr style="width: 90%;" />
-                  <div class="h4">Cliente #3</div>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="credit-card"></i>
-                          Documento
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di documento u"
-                            type="text"
-                            placeholder="Documento de identidad"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user"></i>
-                          Nombre
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border nombres u"
-                            type="text"
-                            placeholder="Nombre completo"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="mail"></i>
-                          Email
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border email u"
-                            type="email"
-                            placeholder="Correo electrónico"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="globe"></i>
-                          Pais
-                        </th>
-                        <td>
-                          <select
-                            class="form-control-no-border di pais"
-                            style="padding: 1px; width: 100%;"
-                          >
-                            <optgroup label="A" class="text-primary">
-                              <option value="1907">Alaska</option>
-                              <option value="355">Albania</option>
-                              <option value="49">Alemania</option>
-                              <option value="376">Andorra</option>
-                              <option value="244">Angola</option>
-                              <option value="966">Arabia Saudí</option>
-                              <option value="213">Argelia</option>
-                              <option value="54">Argentina</option>
-                              <option value="374">Armenia</option>
-                              <option value="61">Australia</option>
-                              <option value="43">Austria</option>
-                            </optgroup>
-                            <optgroup label="B">
-                              <option value="973">Bahreim</option>
-                              <option value="880">Bangladesh</option>
-                              <option value="32">Bélgica</option>
-                              <option value="591">Bolivia</option>
-                              <option value="387">Bosnia</option>
-                              <option value="55">Brasil</option>
-                              <option value="359">Bulgaria</option>
-                            </optgroup>
-                            <optgroup label="C">
-                              <option value="238">Cabo Verde</option>
-                              <option value="855">Camboya</option>
-                              <option value="237">Camerún</option>
-                              <option value="1">Canadá</option>
-                              <option value="236">Centroafricana, Rep.
-                              </option>
-                              <option value="420">Checa, Rep.</option>
-                              <option value="56">Chile</option>
-                              <option value="86">China</option>
-                              <option value="357">Chipre</option>
-                              <option value="57">Colombia</option>
-                              <option value="242">Congo, Rep. del</option>
-                              <option value="243">Congo, Rep. Democ.</option>
-                              <option value="850">Corea, Rep. Democ.</option>
-                              <option value="82">Corea, Rep.</option>
-                              <option value="225">Costa de Marfil</option>
-                              <option value="506">Costa Rica</option>
-                              <option value="385">Croacia</option>
-                              <option value="53">Cuba</option>
-                            </optgroup>
-                            <optgroup label="D">
-                              <option value="45">Dinamarca</option>
-                              <option value="1809">Dominicana, Rep.</option>
-                            </optgroup>
-                            <optgroup label="E">
-                              <option value="593">Ecuador</option>
-                              <option value="20">Egipto</option>
-                              <option value="503">El Salvador</option>
-                              <option value="971">Emiratos Árabes Unidos
-                              </option>
-                              <option value="421">Eslovaca, Rep.</option>
-                              <option value="386">Eslovenia</option>
-                              <option value="34">España</option>
-                              <option value="1">Estados Unidos</option>
-                              <option value="372">Estonia</option>
-                              <option value="251">Etiopía</option>
-                            </optgroup>
-                            <optgroup label="F">
-                              <option value="63">Filipinas</option>
-                              <option value="358">Finlandia</option>
-                              <option value="33">Francia</option>
-                            </optgroup>
-                            <optgroup label="G">
-                              <option value="9567">Gibraltar</option>
-                              <option value="30">Grecia</option>
-                              <option value="299">Groenlandia</option>
-                              <option value="502">Guatemala</option>
-                              <option value="240">Guinea Ecuatorial</option>
-                            </optgroup>
-                            <optgroup label="H">
-                              <option value="509">Haití</option>
-                              <option value="1808">Hawai</option>
-                              <option value="504">Honduras</option>
-                              <option value="852">Hong Kong</option>
-                              <option value="36">Hungría</option>
-                            </optgroup>
-                            <optgroup label="I">
-                              <option value="91">India</option>
-                              <option value="62">Indonesia</option>
-                              <option value="98">Irán</option>
-                              <option value="964">Irak</option>
-                              <option value="353">Irlanda</option>
-                              <option value="354">Islandia</option>
-                              <option value="972">Israel</option>
-                              <option value="39">Italia</option>
-                            </optgroup>
-                            <optgroup label="J">
-                              <option value="1876">Jamaica</option>
-                              <option value="81">Japón</option>
-                              <option value="962">Jordania</option>
-                            </optgroup>
-                            <optgroup label="K">
-                              <option value="254">Kenia</option>
-                              <option value="965">Kuwait</option>
-                            </optgroup>
-                            <optgroup label="L">
-                              <option value="856">Laos</option>
-                              <option value="371">Letonia</option>
-                              <option value="961">Líbano</option>
-                              <option value="231">Liberia</option>
-                              <option value="218">Libia</option>
-                              <option value="41">Liechtenstein</option>
-                              <option value="370">Lituania</option>
-                              <option value="352">Luxemburgo</option>
-                            </optgroup>
-                            <optgroup label="M">
-                              <option value="261">Madagascar</option>
-                              <option value="60">Malasia</option>
-                              <option value="356">Malta</option>
-                              <option value="212">Marruecos</option>
-                              <option value="596">Martinica</option>
-                              <option value="222">Mauritania</option>
-                              <option value="52">México</option>
-                              <option value="373">Moldavia</option>
-                              <option value="377">Mónaco</option>
-                              <option value="976">Mongolia</option>
-                              <option value="258">Mozambique</option>
-                            </optgroup>
-                            <optgroup label="N">
-                              <option value="264">Namibia</option>
-                              <option value="977">Nepal</option>
-                              <option value="505">Nicaragua</option>
-                              <option value="234">Nigeria</option>
-                              <option value="47">Noruega</option>
-                              <option value="64">Nueva Zelanda</option>
-                            </optgroup>
-                            <optgroup label="P">
-                              <option value="31">Países Bajos</option>
-                              <option value="92">Pakistán</option>
-                              <option value="507">Panamá</option>
-                              <option value="595">Paraguay</option>
-                              <option value="51">Perú</option>
-                              <option value="48">Polonia</option>
-                              <option value="351">Portugal</option>
-                              <option value="1787">Puerto Rico</option>
-                            </optgroup>
-                            <optgroup label="Q">
-                              <option value="974">Qatar</option>
-                            </optgroup>
-                            <optgroup label="R">
-                              <option value="44">Reino Unido</option>
-                              <option value="40">Rumania</option>
-                              <option value="7">Rusia</option>
-                            </optgroup>
-                            <optgroup label="S">
-                              <option value="378">San Marino</option>
-                              <option value="221">Senegal</option>
-                              <option value="65">Singapur</option>
-                              <option value="963">Siria</option>
-                              <option value="252">Somalia</option>
-                              <option value="94">Sri-Lanka</option>
-                              <option value="27">Sudáfrica</option>
-                              <option value="249">Sudán</option>
-                              <option value="46">Suecia</option>
-                              <option value="41">Suiza</option>
-                            </optgroup>
-                            <optgroup label="T">
-                              <option value="66">Tailandia</option>
-                              <option value="886">Taiwan</option>
-                              <option value="255">Tanzania</option>
-                              <option value="216">Túnez</option>
-                              <option value="90">Turquía</option>
-                            </optgroup>
-                            <optgroup label="U">
-                              <option value="380">Ucrania</option>
-                              <option value="256">Uganda</option>
-                              <option value="598">Uruguay</option>
-                            </optgroup>
-                            <optgroup label="V">
-                              <option value="39">Vaticano</option>
-                              <option value="58">Venezuela</option>
-                              <option value="84">Vietnam</option>
-                            </optgroup>
-                            <optgroup label="Y">
-                              <option value="967">Yemen</option>
-                              <option value="381">Yugoslavia</option>
-                            </optgroup>
-                            <optgroup label="Z">
-                              <option value="260">Zambia</option>
-                              <option value="263">Zimbawe</option>
-                            </optgroup>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="phone-call"></i>
-                          Móvil
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di movil u"
-                            type="tel"
-                            placeholder="Numero celular"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user-plus"></i>
-                        </th>
-                        <td>
-                          <a
-                            class="btn btn-outline-dark btn-sm float-right mr-3"
-                            id="AgregarClient3"
-                          ><i class="fas fa-fw fa-user-plus"></i>
-                            Agregar cliente</a>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-              <!--Cliente #4-->
-              <div class="row cliente4" id="cliente4" style="display: none;">
-                <input type="hidden" class="client" value="" name="client" />
-                <div class="col-12 col-lg-12">
-                  <div class="d-inline-block float-right">
-                    <a class="r atras4"><i
-                        class="feather-lg"
-                        data-feather="x-circle"
-                      ></i></a>
-                  </div>
-                  <hr style="width: 90%;" />
-                  <div class="h4">Cliente #4</div>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="credit-card"></i>
-                          Documento
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di documento u"
-                            type="text"
-                            placeholder="Documento de identidad"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="user"></i>
-                          Nombre
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border nombres u"
-                            type="text"
-                            placeholder="Nombre completo"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="mail"></i>
-                          Email
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border email u"
-                            type="email"
-                            placeholder="Correo electrónico"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                            disabled
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-                <div class="col-12 col-lg-6">
-                  <table class="table table-sm my-2">
-                    <tbody>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="globe"></i>
-                          Pais
-                        </th>
-                        <td>
-                          <select
-                            class="form-control-no-border di pais"
-                            style="padding: 1px; width: 100%;"
-                          >
-                            <optgroup label="A" class="text-primary">
-                              <option value="1907">Alaska</option>
-                              <option value="355">Albania</option>
-                              <option value="49">Alemania</option>
-                              <option value="376">Andorra</option>
-                              <option value="244">Angola</option>
-                              <option value="966">Arabia Saudí</option>
-                              <option value="213">Argelia</option>
-                              <option value="54">Argentina</option>
-                              <option value="374">Armenia</option>
-                              <option value="61">Australia</option>
-                              <option value="43">Austria</option>
-                            </optgroup>
-                            <optgroup label="B">
-                              <option value="973">Bahreim</option>
-                              <option value="880">Bangladesh</option>
-                              <option value="32">Bélgica</option>
-                              <option value="591">Bolivia</option>
-                              <option value="387">Bosnia</option>
-                              <option value="55">Brasil</option>
-                              <option value="359">Bulgaria</option>
-                            </optgroup>
-                            <optgroup label="C">
-                              <option value="238">Cabo Verde</option>
-                              <option value="855">Camboya</option>
-                              <option value="237">Camerún</option>
-                              <option value="1">Canadá</option>
-                              <option value="236">Centroafricana, Rep.
-                              </option>
-                              <option value="420">Checa, Rep.</option>
-                              <option value="56">Chile</option>
-                              <option value="86">China</option>
-                              <option value="357">Chipre</option>
-                              <option value="57">Colombia</option>
-                              <option value="242">Congo, Rep. del</option>
-                              <option value="243">Congo, Rep. Democ.</option>
-                              <option value="850">Corea, Rep. Democ.</option>
-                              <option value="82">Corea, Rep.</option>
-                              <option value="225">Costa de Marfil</option>
-                              <option value="506">Costa Rica</option>
-                              <option value="385">Croacia</option>
-                              <option value="53">Cuba</option>
-                            </optgroup>
-                            <optgroup label="D">
-                              <option value="45">Dinamarca</option>
-                              <option value="1809">Dominicana, Rep.</option>
-                            </optgroup>
-                            <optgroup label="E">
-                              <option value="593">Ecuador</option>
-                              <option value="20">Egipto</option>
-                              <option value="503">El Salvador</option>
-                              <option value="971">Emiratos Árabes Unidos
-                              </option>
-                              <option value="421">Eslovaca, Rep.</option>
-                              <option value="386">Eslovenia</option>
-                              <option value="34">España</option>
-                              <option value="1">Estados Unidos</option>
-                              <option value="372">Estonia</option>
-                              <option value="251">Etiopía</option>
-                            </optgroup>
-                            <optgroup label="F">
-                              <option value="63">Filipinas</option>
-                              <option value="358">Finlandia</option>
-                              <option value="33">Francia</option>
-                            </optgroup>
-                            <optgroup label="G">
-                              <option value="9567">Gibraltar</option>
-                              <option value="30">Grecia</option>
-                              <option value="299">Groenlandia</option>
-                              <option value="502">Guatemala</option>
-                              <option value="240">Guinea Ecuatorial</option>
-                            </optgroup>
-                            <optgroup label="H">
-                              <option value="509">Haití</option>
-                              <option value="1808">Hawai</option>
-                              <option value="504">Honduras</option>
-                              <option value="852">Hong Kong</option>
-                              <option value="36">Hungría</option>
-                            </optgroup>
-                            <optgroup label="I">
-                              <option value="91">India</option>
-                              <option value="62">Indonesia</option>
-                              <option value="98">Irán</option>
-                              <option value="964">Irak</option>
-                              <option value="353">Irlanda</option>
-                              <option value="354">Islandia</option>
-                              <option value="972">Israel</option>
-                              <option value="39">Italia</option>
-                            </optgroup>
-                            <optgroup label="J">
-                              <option value="1876">Jamaica</option>
-                              <option value="81">Japón</option>
-                              <option value="962">Jordania</option>
-                            </optgroup>
-                            <optgroup label="K">
-                              <option value="254">Kenia</option>
-                              <option value="965">Kuwait</option>
-                            </optgroup>
-                            <optgroup label="L">
-                              <option value="856">Laos</option>
-                              <option value="371">Letonia</option>
-                              <option value="961">Líbano</option>
-                              <option value="231">Liberia</option>
-                              <option value="218">Libia</option>
-                              <option value="41">Liechtenstein</option>
-                              <option value="370">Lituania</option>
-                              <option value="352">Luxemburgo</option>
-                            </optgroup>
-                            <optgroup label="M">
-                              <option value="261">Madagascar</option>
-                              <option value="60">Malasia</option>
-                              <option value="356">Malta</option>
-                              <option value="212">Marruecos</option>
-                              <option value="596">Martinica</option>
-                              <option value="222">Mauritania</option>
-                              <option value="52">México</option>
-                              <option value="373">Moldavia</option>
-                              <option value="377">Mónaco</option>
-                              <option value="976">Mongolia</option>
-                              <option value="258">Mozambique</option>
-                            </optgroup>
-                            <optgroup label="N">
-                              <option value="264">Namibia</option>
-                              <option value="977">Nepal</option>
-                              <option value="505">Nicaragua</option>
-                              <option value="234">Nigeria</option>
-                              <option value="47">Noruega</option>
-                              <option value="64">Nueva Zelanda</option>
-                            </optgroup>
-                            <optgroup label="P">
-                              <option value="31">Países Bajos</option>
-                              <option value="92">Pakistán</option>
-                              <option value="507">Panamá</option>
-                              <option value="595">Paraguay</option>
-                              <option value="51">Perú</option>
-                              <option value="48">Polonia</option>
-                              <option value="351">Portugal</option>
-                              <option value="1787">Puerto Rico</option>
-                            </optgroup>
-                            <optgroup label="Q">
-                              <option value="974">Qatar</option>
-                            </optgroup>
-                            <optgroup label="R">
-                              <option value="44">Reino Unido</option>
-                              <option value="40">Rumania</option>
-                              <option value="7">Rusia</option>
-                            </optgroup>
-                            <optgroup label="S">
-                              <option value="378">San Marino</option>
-                              <option value="221">Senegal</option>
-                              <option value="65">Singapur</option>
-                              <option value="963">Siria</option>
-                              <option value="252">Somalia</option>
-                              <option value="94">Sri-Lanka</option>
-                              <option value="27">Sudáfrica</option>
-                              <option value="249">Sudán</option>
-                              <option value="46">Suecia</option>
-                              <option value="41">Suiza</option>
-                            </optgroup>
-                            <optgroup label="T">
-                              <option value="66">Tailandia</option>
-                              <option value="886">Taiwan</option>
-                              <option value="255">Tanzania</option>
-                              <option value="216">Túnez</option>
-                              <option value="90">Turquía</option>
-                            </optgroup>
-                            <optgroup label="U">
-                              <option value="380">Ucrania</option>
-                              <option value="256">Uganda</option>
-                              <option value="598">Uruguay</option>
-                            </optgroup>
-                            <optgroup label="V">
-                              <option value="39">Vaticano</option>
-                              <option value="58">Venezuela</option>
-                              <option value="84">Vietnam</option>
-                            </optgroup>
-                            <optgroup label="Y">
-                              <option value="967">Yemen</option>
-                              <option value="381">Yugoslavia</option>
-                            </optgroup>
-                            <optgroup label="Z">
-                              <option value="260">Zambia</option>
-                              <option value="263">Zimbawe</option>
-                            </optgroup>
-                          </select>
-                        </td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class="feather-md" data-feather="phone-call"></i>
-                          Móvil
-                        </th>
-                        <td>
-                          <input
-                            class="form-control-no-border di movil u"
-                            type="tel"
-                            placeholder="Numero celular"
-                            autocomplete="off"
-                            style="padding: 1px; width: 100%;"
-                          />
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="card-title mb-0">Forma de pago</h5>
-            </div>
-            <div class="card-body">
-              {{#each proyecto}}
-                <input type="hidden" id="separacion" value="{{separaciones}}" />
-                <input
-                  type="hidden"
-                  id="porcentage"
-                  name="iniciar"
-                  value="{{porcentage}}"
-                />
-                <input type="hidden" id="fechs" value="{{fechafin}}" />
-                <input type="hidden" id="descuentos" value="{{descuento}}" />
-                <input type="hidden" id="extran" name="extran" value="" />
-                <div class="row">
-                  <div class="col-12 col-lg-6">
-                    <table class="table table-sm my-2">
-                      <tbody>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="maximize"
-                            ></i>
-                            MTr²
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border edi"
-                              type="text"
-                              id="mtr"
-                              value="{{mtr2}}"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="trending-up"
-                            ></i>
-                            Vr MTr²
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border val"
-                              type="text"
-                              id="vrmtr"
-                              value="{{mtr}}"
-                              name="vrmt2"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="map-pin"
-                            ></i>
-                            Lote
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border val"
-                              type="text"
-                              id="vrlote"
-                              value="{{valor}}"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="droplet"
-                            ></i>
-                            N° Cuotas
-                          </th>
-                          <td>
-                            <select
-                              name="numerocuotaspryecto"
-                              id="ncuotas"
-                              class="form-control-no-border edi"
-                              style="padding: 1px; text-align-last:center"
-                              required
-                            >
-                            </select>
-                            <select
-                              id="dia"
-                              name="dia"
-                              class="form-control-no-border edi float-right"
-                              style="padding: 1px; text-align-last:center"
-                            >
-                              <option value="1">1</option>
-                              <option value="2">2</option>
-                              <option value="3">3</option>
-                              <option value="4">4</option>
-                              <option value="5">5</option>
-                              <option value="6">6</option>
-                              <option value="7">7</option>
-                              <option value="8">8</option>
-                              <option value="9">9</option>
-                              <option value="10">10</option>
-                              <option value="11">11</option>
-                              <option value="12">12</option>
-                              <option value="13">13</option>
-                              <option value="14">14</option>
-                              <option value="15">15</option>
-                              <option value="16">16</option>
-                              <option value="17">17</option>
-                              <option value="18">18</option>
-                              <option value="19">19</option>
-                              <option value="20">20</option>
-                              <option value="21">21</option>
-                              <option value="22">22</option>
-                              <option value="23">23</option>
-                              <option value="24">24</option>
-                              <option value="25">25</option>
-                              <option value="26">26</option>
-                              <option value="27">27</option>
-                              <option value="28">28</option>
-                              <option value="29">29</option>
-                              <option value="30">30</option>
-                              <option value="31">31</option>
-                            </select>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="calendar"
-                            ></i>
-                            Extraor
-                          </th>
-                          <td>
-                            <select
-                              id="Emeses"
-                              name="extraordinariameses"
-                              class="form-control-no-border edi float-right"
-                              style="padding: 1px; width: 100%; text-align-last:center"
-                            >
-                              <option value="">Niguna</option>
-                            </select>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="dollar-sign"
-                            ></i>
-                            Extraor vr
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border edi val"
-                              id="cuotaestrao"
-                              type="text"
-                              placeholder="Ingrese cuota extra"
-                              autocomplete="off"
-                              data-mask="000.000.000"
-                              data-mask-reverse="true"
-                              data-mask-selectonfocus="true"
-                              name="cuotaextraordinaria"
-                              style="padding: 1px; width: 100%; text-align:center"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="text-center">
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="dollar-sign"
-                            ></i>
-                            Total Lote
-                          </th>
-                          <td class="text-center">
-                            <input
-                              class="form-control-no-border text-center totalote"
-                              type="text"
-                              value="{{valor}}"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                              required
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                  <div class="col-12 col-lg-6">
-                    <table class="table table-sm my-2">
-                      <tbody>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="slack"
-                            ></i>
-                            Inicial
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border val"
-                              type="text"
-                              value="{{inicial}}"
-                              id="cuotainicial"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                              required
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="percent"
-                            ></i>
-                            Financiacion
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border"
-                              type="text"
-                              value=""
-                              id="p70"
-                              name="proyecto70x100to"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="tag"
-                            ></i>
-                            Cupon
-                          </th>
-                          <td>
-                            <input
-                              type="hidden"
-                              id="bonoid"
-                              name="cupon"
-                              value=""
-                            />
-                            <input
-                              class="form-control-no-border edi"
-                              type="text"
-                              placeholder="N° bono"
-                              id="bono"
-                              style="padding: 1px; width: 100%; text-align:center"
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="droplet"
-                            ></i>
-                            Diferir
-                          </th>
-                          <td>
-                            <select
-                              name="inicialdiferida"
-                              id="diferinicial"
-                              class="form-control-no-border edi"
-                              style="padding: 1px; width: 100%; text-align-last:center"
-                            >
-                              <option value="1">1 Cuota</option>
-                              <option value="2">2 Cuotas</option>
-                              <option value="3">3 Cuotas</option>
-                              <option value="4">4 Cuotas</option>
-                              <option value="0">Ninguna</option>
-                            </select>
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="trending-down"
-                            ></i>
-                            Dto
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border"
-                              type="text"
-                              value="0%"
-                              id="dto"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th>
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="pocket"
-                            ></i>
-                            Ahorra
-                          </th>
-                          <td>
-                            <input
-                              class="form-control-no-border float-right"
-                              type="text"
-                              value="$0"
-                              id="ahorro"
-                              name="ahorro"
-                              style="padding: 1px; width: 100%; text-align:center"
-                              disabled
-                            />
-                          </td>
-                        </tr>
-                        <tr>
-                          <th class="text-center">
-                            <i
-                              class="feather-md text-primary"
-                              data-feather="dollar-sign"
-                            ></i>
-                            Separar
-                          </th>
-                          <td class="text-center">
-                            <input
-                              class="form-control-no-border text-center edi"
-                              name="separacion"
-                              autocomplete="off"
-                              type="text"
-                              placeholder="Abono"
-                              id="abono"
-                              style="padding: 1px; width: 100%; background-color: #FFFFCC;"
-                              data-mask="000.000.000"
-                              data-mask-reverse="true"
-                              data-mask-selectonfocus="true"
-                            />
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </div>
-                </div>
-              {{/each}}
-              <input type="hidden" id="cuota" name="cuot" value="" />
-              <table
-                id="datatables-clients"
-                class="table table-sm table-striped"
-                style="width:100%"
-              >
-                <thead>
-                  <tr>
-                    <th>#</th>
-                    <th>fecha</th>
-                    <th>oficial</th>
-                    <th>Cuota</th>
-                    <th>Estado</th>
-                    <th>#</th>
-                    <th>fecha</th>
-                    <th>Cuota</th>
-                    <th>Estado</th>
-                  </tr>
-                </thead>
-                <tbody id="cuerpo"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="card-title mb-0">Obsevaciones</h5>
-            </div>
-            <div class="card-body">
-              <textarea
-                class="form-control-no-border"
-                placeholder="Ponga aqui sus obsevaciones"
-                name="obsevacion"
-                cols="120"
-                rows="3"
-                autocomplete="off"
-                style="background-color: #FFFFCC; width: 100%;"
-              ></textarea>
-            </div>
-          </div>
-        </div>
-        <div class="col-xl-12">
-          <div class="card">
-            <div class="card-header">
-              <h5 class="card-title mb-0">Aclaraciones y condiciones de
-                separación</h5>
-            </div>
-            <div class="card-body">
-              <ul class="timeline mt-2 mb-0">
-                <li class="timeline-item">
-                  <strong>#1</strong>
-                  <i
-                    class="feather-md text-primary float-right mr-3"
-                    data-feather="check-circle"
-                  ></i>
-                  <br />
-                  <span>
-                    Presentar a la administración del proyecto la documentación
-                    necesaria para la firma del contrato de promesa de
-                    compraventa y cuota de separación en un plazo máximo de 8
-                    días, pasada esta fecha, la administración del proyecto no
-                    tiene ninguna responsabilidad por la reserva del inmueble y
-                    esta queda en libertad de venderlo a otra persona.
-                  </span>
-                </li>
-                <li class="timeline-item">
-                  <strong>#2</strong>
-                  <i
-                    class="feather-md text-primary float-right mr-3"
-                    data-feather="check-circle"
-                  ></i>
-                  <br />
-                  <span>
-                    Son ARRAS: En caso de desistimiento o incumplimiento
-                    unilateral de cualquiera de las (2) partes sobre las
-                    condiciones exigidas en este documento, si es el comprador
-                    pagara la suma de $1.000.000 M/L (Un Millon De Pesos) y si
-                    es el vendedor, devolvera la totalidadde los pagos recibidos
-                    con un interés equivalente al DTF.
-                  </span>
-                </li>
-                <li class="timeline-item">
-                  <strong>#3</strong>
-                  <i
-                    class="feather-md text-primary float-right mr-3"
-                    data-feather="check-circle"
-                  ></i>
-                  <br />
-                  <span>
-                    Puede hacer sus consignaciones a las siguientes cuentas
-                    bancarias:
-                    <strong>CUENTA CORRIENTE #50900011438 BANCOLOMBIA,</strong>
-                    a nombre de
-                    <strong>GRUPO ELITE FINCA RAIZ S.A.S NIT: 901311748.</strong>
-                    Enviar soporte de pago al correo
-                  </span>
-                  <hr />
-                  <br />
-                  <label class="custom-control custom-checkbox">
-                    <input
-                      type="checkbox"
-                      class="custom-control-input"
-                      id="acepto"
-                      required
-                    />
-                    <span class="custom-control-label">Acepta nuestros terminos
-                      y condiciones</span>
-                  </label>
-                  <br />
-                  <button
-                    type="submit"
-                    class="btn btn-primary float-right"
-                  >Enviar</button>
-                  <button
-                    type="reset"
-                    class="btn btn-google float-right mr-3"
-                  >Cancelar</button>
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
-
-      </form>
+<div class='container-fluid p-1'>
+  <div class='card'>
+    <div class='card-header'>
+      <h3>ORDEN DE SEPARACION</h3>
+      <input type='hidden' id='agente' value='{{usrs}}' />
+      <input type='hidden' id='lt' value='{{lote}}' />
+      <input type='hidden' id='Orden' value='{{orden}}' />
     </div>
-  </div>
-</main>
-
-<!-- BEGIN primary modal -->
-<div
-  class="modal fade"
-  id="modalorden"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">Codigo de Autorización</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body m-3">
-        <div class="row">
-          <div class="col-sm-12 text-center mb-2">
-            <i class="feather-lg text-danger" data-feather="unlock"></i>
+    <div class='card-body p-1' id='cuadro2'>
+      <div class='row d-flex justify-content-center'>
+        <div class='col-12 col-md-6'>
+          <div class='input-group mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text d-block d-sm-none'>PDO</label>
+              <label class='input-group-text d-none d-md-block'>PRODUCTO</label>
+            </div>
+            <select id='lote' class='custom-select select2' name='lote'></select>
           </div>
-          <div class="col-sm-12 text-center">
+        </div>
+        <div class='col-12 col-md-6'>
+          <div class='input-group mb-3'>
+            {{#if user.admin}}
+              <div class='input-group-prepend'>
+                <label class='input-group-text'>
+                  <i class='feather-md' data-feather='user'></i>
+                </label>
+              </div>
+              <input
+                class='form-control text-center'
+                autocomplete='off'
+                type='text'
+                id='comision'
+                placeholder='0%'
+                style='max-width: 60px;'
+              />
+            {{/if}}
+            <div class='input-group-prepend'>
+              <label class='input-group-text d-block d-sm-none'>ASR</label>
+              <label class='input-group-text d-none d-md-block'>ASESOR</label>
+            </div>
+            <select id='asesor' class='custom-select select2' name='asesor' disabled></select>
+          </div>
+        </div>
+        <div class='col-12 col-md-12'>
+          <div class='input-group mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text d-block d-sm-none'>CLT</label>
+              <label class='input-group-text d-none d-md-block'>CLIENTES</label>
+            </div>
+            <select id='clientes' class='custom-select select2' name='clientes' multiple></select>
+          </div>
+        </div>
+        <div class='col-12 col-md-6 col-lg-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>MTR²</label>
+            </div>
             <input
-              type="text"
-              id="codeg"
-              class="text-xl-center text-uppercase"
-              placeholder="Code"
-              data-mask="99999"
-              autocomplete="off"
+              class='form-control text-center'
+              type='text'
+              name='mtr2'
+              aria-label='Total de mtr²'
+              autocomplete='off'
+              id='mtr2'
+              placeholder='Total de mtr²'
+              style='background-color: #FFFFCC;'
+              disabled
+              required
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>VMTR²</label>
+            </div>
+            <input
+              class='form-control text-center cifra'
+              type='text'
+              name='vmtr2'
+              id='vmtr2'
+              autocomplete='off'
+              aria-label='precio del mtr²'
+              placeholder='Precio del mtr²'
+              style='background-color: #FFFFCC;'
+              required
+              disabled
             />
           </div>
         </div>
-        <input type="hidden" id="codigodeverificacion" value="" />
-      </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-secondary"
-          data-dismiss="modal"
-        >Cerrar</button>
-        <button
-          type="button"
-          id="enviarorden"
-          class="btn btn-primary"
-        >Enviar</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<div
-  class="modal modal-colored modal-danger fade"
-  id="ModalMensaje"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title">LOTE EN TRAMITE</h5>
-        <button
-          type="button"
-          class="close"
-          data-dismiss="modal"
-          aria-label="Close"
-        >
-          <span aria-hidden="true">&times;</span>
-        </button>
-      </div>
-      <div class="modal-body m-3">
-        <p class="mb-0" id="mesje">{{mensaje}}</p>
-      </div>
-      <div class="modal-footer">
-        <button
-          type="button"
-          class="btn btn-dark"
-          data-dismiss="modal"
-        >OK</button>
+        <div class='col-12 col-md-6 col-lg-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>INICIAL</label>
+            </div>
+            <input
+              type='text'
+              aria-label='porcentage'
+              class='form-control text-center'
+              name='porcentage'
+              autocomplete='off'
+              placeholder='0%'
+              style='background-color: #FFFFCC;'
+              id='porcentage'
+              disabled
+              required
+            />
+            <input
+              type='text'
+              aria-label='inicial'
+              class='form-control text-center w-25'
+              name='inicial'
+              autocomplete='off'
+              placeholder='Inicial'
+              style='background-color: #FFFFCC;'
+              id='inicial'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-md-5 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>VALOR</label>
+            </div>
+            <input
+              class='form-control text-center'
+              name='valor'
+              autocomplete='off'
+              type='text'
+              id='valor'
+              aria-label='Total de lote'
+              placeholder='Total'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12 col-md-10 col-lg-8'>
+          <div class='input-group input-group-sm mb-3'>
+            <input type='hidden' name='cupon' id='cupon' />
+            <div class='input-group-prepend'>
+              <label class='input-group-text px-1' for='proyectos'>DTO</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='dto'
+              id='dto'
+              autocomplete='off'
+              aria-label='descuento'
+              placeholder='DESCUENTO'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text px-1' for='proyectos'>AHO</label>
+            </div>
+            <input
+              class='form-control text-center w-25'
+              type='text'
+              name='ahorro'
+              id='ahorro'
+              autocomplete='off'
+              aria-label='ahorro'
+              placeholder='AHORRO'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <button class='btn btn-secondary' data-toggle='modal' data-target='#qpon'>
+                SOLICITAR CUPON
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class='col-12 col-md-4'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>APLICAR DTO EN</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='aplyDto'
+              name='tipoDto'
+              required
+            >
+              {{#if user.admin}}
+                <option selected></option>
+                <option value='INICIAL'>INICIAL</option>
+                <option value='FINANCIACION'>FINANCIACION</option>
+                <option value='TOTAL'>TOTAL</option>
+              {{/if}}
+              {{! <option value='SEPARACION'>SEPARACION</option>
+              <option value='INICIAL'>INICIAL</option>
+              <option value='FINANCIACION'>FINANCIACION</option>
+              <option value='TOTAL' selected>TOTAL</option> 
+              <option value='NINGUNO'>NINGUNO</option> }}
+            </select>
+          </div>
+        </div>
+        <div class='col-6 col-md-4 col-lg-3'>
+          <div class='input-group input-group-sm mb-2'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>PROMESA</label>
+            </div>
+            <select
+              class='form-control'
+              style='background-color: #FFFFCC;'
+              id='promesa'
+              name='promesa'
+              required
+              disabled
+            >
+              <option selected></option>
+              <option value='1'>PROMESA GENERADA</option>
+              <option value='2'>PROMESA AUTENTICADA POR CLIENTE</option>
+              <option value='3'>PROMESA AUTENTICADA POR AMBOS</option>
+            </select>
+          </div>
+        </div>
+        <div class='col-6 col-md-4 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>QOTA MIN</label>
+            </div>
+            <input
+              class='form-control text-center cifra'
+              name='cuotamin'
+              autocomplete='off'
+              type='text'
+              id='cuotamin'
+              placeholder='CUOTA'
+              style='background-color: #FFFFCC;'
+              disabled
+              required
+            />
+          </div>
+        </div>
+        <div class='col-10 col-md-4 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUOTAS EN INIC</label>
+              <button class='btn btn-secondary' id='ini-min' type='button'>-</button>
+            </div>
+            <input
+              class='form-control text-center'
+              name='inicialcuotas'
+              autocomplete='off'
+              type='text'
+              id='num-ini'
+              placeholder='INI'
+              style='background-color: #FFFFCC;'
+              value='1'
+              required
+            />
+            <span class='input-group-append'>
+              <button class='btn btn-secondary' id='inicialcuotas-btn' type='button'>+</button>
+            </span>
+          </div>
+        </div>
+        <div class='col-10 col-md-4 col-lg-3'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text' for='proyectos'>CUOTAS EN FNC</label>
+              <button class='btn btn-secondary' id='fnc-min' type='button'>-</button>
+            </div>
+            <input
+              class='form-control text-center'
+              name='financiacion'
+              autocomplete='off'
+              type='text'
+              id='num-fnc'
+              placeholder='FNC'
+              style='background-color: #FFFFCC;'
+              value='1'
+              required
+            />
+            <span class='input-group-append'>
+              <button class='btn btn-secondary' id='financiacion-btn' type='button'>+</button>
+            </span>
+          </div>
+        </div>
+        <div class='col-12 col-lg-12'>
+          <div class='input-group input-group-sm mb-3'>
+            <div class='input-group-prepend'>
+              <label class='input-group-text px-1' for='proyectos'>INI</label>
+            </div>
+            <input
+              class='form-control text-centere'
+              type='text'
+              name='tini'
+              aria-label='Cupon'
+              autocomplete='off'
+              id='ini'
+              placeholder='TOTAL INI'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text px-1' for='proyectos'>FNC</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='tfnc'
+              id='fnc'
+              autocomplete='off'
+              aria-label='fnc'
+              placeholder='TOTAL FNC'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+            <div class='input-group-prepend'>
+              <label class='input-group-text px-1' for='proyectos'>TOTAL</label>
+            </div>
+            <input
+              class='form-control text-center'
+              type='text'
+              name='total'
+              id='total'
+              autocomplete='off'
+              aria-label='total'
+              placeholder='TOTAL'
+              style='background-color: #FFFFCC;'
+              disabled
+            />
+          </div>
+        </div>
+        <div class='col-12'>
+          <div class='btn-group btn-group-sm float-left' role='group'>
+            <button type='button' class='btn btn-secondary klqIni'>Calc. ini</button>
+            <button type='button' class='btn btn-secondary klqFnc'>Calc. fnc</button>
+            <button type='button' class='btn btn-secondary quitar d-none'>Quitar cupon</button>
+          </div>
+          <button type='button' class='btn btn-secondary btn-sm float-right Save'>Guardar</button>
+        </div>
+        <div class='col-12'>
+          <table
+            id='proyeccion'
+            class='table table-striped table-sm table-hover text-small display responsive nowrap'
+            style='width:100%'
+          >
+            <thead>
+              <tr>
+                <th>CUOTA</th>
+                <th>FECHA</th>
+                <th>TIPO</th>
+                <th>MONTO</th>
+                <th>CUOTA</th>
+                <th>FECHA</th>
+                <th>MONTO</th>
+              </tr>
+            </thead>
+            <tbody class='tabl w-100'></tbody>
+            {{! <tfoot>
+          <tr>
+            <th colspan='7' class='text-center'>
+              <button type='button' class='btn btn-primary btn-sm float-right guardar'>Guardar
+                Cambios</button>
+            </th>
+          </tr>
+        </tfoot> }}
+          </table>
+        </div>
       </div>
     </div>
   </div>
 </div>
 
 <!-- BEGIN primary modal -->
-<!-- <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#defaultModalPrimary">
-	Primary
-</button>-->
-<div
-  class="modal fade"
-  id="AddCliente"
-  tabindex="-1"
-  role="dialog"
-  aria-hidden="true"
->
-  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-    <div class="modal-content card">
-      <div class="modal-header">
-        <h3 class="modal-title">Actualizacion tus datos en Red Elite</h3>
-        <a
-          class="r atras close float-right"
-          data-dismiss="modal"
-          aria-label="Close"
-        ><i class="feather-lg" data-feather="x-circle"></i></a>
+<div class='modal fade' id='qpon' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <span><i class='feather-lg text-danger' data-feather='tag'></i> Cupon de descuento</span>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
       </div>
-      <div class="modal-body m-3">
-        <form id="crearcliente" enctype="multipart/form-data">
-          <div class="row">
-            <input type="hidden" class="ya" value="" name="ahora" />
-            <input type="hidden" value="1" name="asesors" />
-            <div class="col-12 col-lg-6">
-              <table class="table table-sm my-2">
-                <tbody>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="user"></i>
-                      Nombre
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi text-uppercase nombr"
-                        type="text"
-                        placeholder="Nombre completo"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="nombres"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="help-circle"></i>
-                      Tipo de documento
-                    </th>
-                    <td>
-                      <select
-                        class="form-control-no-border edi tipod u"
-                        name="tipo"
-                        style="padding: 1px; width: 100%;"
-                        required
-                      >
-                        <option value="CC-Cédula de ciudadanía">Cédula de
-                          ciudadanía
-                        </option>
-                        <option value="CE-Cédula de extranjería">Cédula de
-                          extranjería
-                        </option>
-                        <option value="TI-Tarjeta de identidad">Tarjeta de
-                          identidad
-                        </option>
-                        <option value="RC-Registro civil">Registro civil</option>
-                        <option value="PA-Pasaporte">Pasaporte</option>
-                        <option
-                          value="PEP-Permiso especial de permanencia"
-                        >Permiso especial de permanencia</option>
-                        <option value="Nit">Nit</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="credit-card"></i>
-                      Documento
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi document"
-                        type="text"
-                        placeholder="Documento de identidad"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="documento"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="map-pin"></i>
-                      Expedida
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi lugarexpedicion u"
-                        type="text"
-                        name="lugarexpedicion"
-                        placeholder="Lugar de expedición del documento"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="calendar"></i>
-                      F. Expedición
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi fechas espedida u"
-                        type="text"
-                        placeholder="Fecha de expedición"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="fechaexpedicion"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="calendar"></i>
-                      F. Nacimiento
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi fechas nacido u"
-                        type="text"
-                        placeholder="Fecha de nacimiento"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="fechanacimiento"
-                        required
-                      />
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
-            <div class="col-12 col-lg-6">
-              <table class="table table-sm my-2">
-                <tbody>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="heart"></i>
-                      Estado Civil
-                    </th>
-                    <td>
-                      <select
-                        class="form-control-no-border edi"
-                        name="estadocivil"
-                        style="padding: 1px; width: 100%;"
-                        required
-                      >
-                        <option value="">Situación sentimental?</option>
-                        <option value="Casado(a)">Casado(a)</option>
-                        <option value="Soltero(a)">Soltero(a)</option>
-                        <option value="Viudo(a)">Viudo(a)</option>
-                        <option value="Divorciado(a)">Divorciado(a)</option>
-                        <option value="Union libre">Union libre</option>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="mail"></i>
-                      Email
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi text-lowercase mail"
-                        type="email"
-                        placeholder="Correo electrónico"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="email"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="globe"></i>
-                      Pais
-                    </th>
-                    <td>
-                      <select
-                        class="form-control-no-border pai"
-                        style="background-color:#FFFFCC; padding: 1px; width: 100%;"
-                      >
-                        <optgroup label="A">
-                          <option value="1907">Alaska</option>
-                          <option value="355">Albania</option>
-                          <option value="49">Alemania</option>
-                          <option value="376">Andorra</option>
-                          <option value="244">Angola</option>
-                          <option value="966">Arabia Saudí</option>
-                          <option value="213">Argelia</option>
-                          <option value="54">Argentina</option>
-                          <option value="374">Armenia</option>
-                          <option value="61">Australia</option>
-                          <option value="43">Austria</option>
-                        </optgroup>
-                        <optgroup label="B">
-                          <option value="973">Bahreim</option>
-                          <option value="880">Bangladesh</option>
-                          <option value="32">Bélgica</option>
-                          <option value="591">Bolivia</option>
-                          <option value="387">Bosnia</option>
-                          <option value="55">Brasil</option>
-                          <option value="359">Bulgaria</option>
-                        </optgroup>
-                        <optgroup label="C">
-                          <option value="238">Cabo Verde</option>
-                          <option value="855">Camboya</option>
-                          <option value="237">Camerún</option>
-                          <option value="1">Canadá</option>
-                          <option value="236">Centroafricana, Rep.
-                          </option>
-                          <option value="420">Checa, Rep.</option>
-                          <option value="56">Chile</option>
-                          <option value="86">China</option>
-                          <option value="357">Chipre</option>
-                          <option value="57" selected>Colombia</option>
-                          <option value="242">Congo, Rep. del</option>
-                          <option value="243">Congo, Rep. Democ.</option>
-                          <option value="850">Corea, Rep. Democ.</option>
-                          <option value="82">Corea, Rep.</option>
-                          <option value="225">Costa de Marfil</option>
-                          <option value="506">Costa Rica</option>
-                          <option value="385">Croacia</option>
-                          <option value="53">Cuba</option>
-                        </optgroup>
-                        <optgroup label="D">
-                          <option value="45">Dinamarca</option>
-                          <option value="1809">Dominicana, Rep.</option>
-                        </optgroup>
-                        <optgroup label="E">
-                          <option value="593">Ecuador</option>
-                          <option value="20">Egipto</option>
-                          <option value="503">El Salvador</option>
-                          <option value="971">Emiratos Árabes Unidos
-                          </option>
-                          <option value="421">Eslovaca, Rep.</option>
-                          <option value="386">Eslovenia</option>
-                          <option value="34">España</option>
-                          <option value="1">Estados Unidos</option>
-                          <option value="372">Estonia</option>
-                          <option value="251">Etiopía</option>
-                        </optgroup>
-                        <optgroup label="F">
-                          <option value="63">Filipinas</option>
-                          <option value="358">Finlandia</option>
-                          <option value="33">Francia</option>
-                        </optgroup>
-                        <optgroup label="G">
-                          <option value="9567">Gibraltar</option>
-                          <option value="30">Grecia</option>
-                          <option value="299">Groenlandia</option>
-                          <option value="502">Guatemala</option>
-                          <option value="240">Guinea Ecuatorial</option>
-                        </optgroup>
-                        <optgroup label="H">
-                          <option value="509">Haití</option>
-                          <option value="1808">Hawai</option>
-                          <option value="504">Honduras</option>
-                          <option value="852">Hong Kong</option>
-                          <option value="36">Hungría</option>
-                        </optgroup>
-                        <optgroup label="I">
-                          <option value="91">India</option>
-                          <option value="62">Indonesia</option>
-                          <option value="98">Irán</option>
-                          <option value="964">Irak</option>
-                          <option value="353">Irlanda</option>
-                          <option value="354">Islandia</option>
-                          <option value="972">Israel</option>
-                          <option value="39">Italia</option>
-                        </optgroup>
-                        <optgroup label="J">
-                          <option value="1876">Jamaica</option>
-                          <option value="81">Japón</option>
-                          <option value="962">Jordania</option>
-                        </optgroup>
-                        <optgroup label="K">
-                          <option value="254">Kenia</option>
-                          <option value="965">Kuwait</option>
-                        </optgroup>
-                        <optgroup label="L">
-                          <option value="856">Laos</option>
-                          <option value="371">Letonia</option>
-                          <option value="961">Líbano</option>
-                          <option value="231">Liberia</option>
-                          <option value="218">Libia</option>
-                          <option value="41">Liechtenstein</option>
-                          <option value="370">Lituania</option>
-                          <option value="352">Luxemburgo</option>
-                        </optgroup>
-                        <optgroup label="M">
-                          <option value="261">Madagascar</option>
-                          <option value="60">Malasia</option>
-                          <option value="356">Malta</option>
-                          <option value="212">Marruecos</option>
-                          <option value="596">Martinica</option>
-                          <option value="222">Mauritania</option>
-                          <option value="52">México</option>
-                          <option value="373">Moldavia</option>
-                          <option value="377">Mónaco</option>
-                          <option value="976">Mongolia</option>
-                          <option value="258">Mozambique</option>
-                        </optgroup>
-                        <optgroup label="N">
-                          <option value="264">Namibia</option>
-                          <option value="977">Nepal</option>
-                          <option value="505">Nicaragua</option>
-                          <option value="234">Nigeria</option>
-                          <option value="47">Noruega</option>
-                          <option value="64">Nueva Zelanda</option>
-                        </optgroup>
-                        <optgroup label="P">
-                          <option value="31">Países Bajos</option>
-                          <option value="92">Pakistán</option>
-                          <option value="507">Panamá</option>
-                          <option value="595">Paraguay</option>
-                          <option value="51">Perú</option>
-                          <option value="48">Polonia</option>
-                          <option value="351">Portugal</option>
-                          <option value="1787">Puerto Rico</option>
-                        </optgroup>
-                        <optgroup label="Q">
-                          <option value="974">Qatar</option>
-                        </optgroup>
-                        <optgroup label="R">
-                          <option value="44">Reino Unido</option>
-                          <option value="40">Rumania</option>
-                          <option value="7">Rusia</option>
-                        </optgroup>
-                        <optgroup label="S">
-                          <option value="378">San Marino</option>
-                          <option value="221">Senegal</option>
-                          <option value="65">Singapur</option>
-                          <option value="963">Siria</option>
-                          <option value="252">Somalia</option>
-                          <option value="94">Sri-Lanka</option>
-                          <option value="27">Sudáfrica</option>
-                          <option value="249">Sudán</option>
-                          <option value="46">Suecia</option>
-                          <option value="41">Suiza</option>
-                        </optgroup>
-                        <optgroup label="T">
-                          <option value="66">Tailandia</option>
-                          <option value="886">Taiwan</option>
-                          <option value="255">Tanzania</option>
-                          <option value="216">Túnez</option>
-                          <option value="90">Turquía</option>
-                        </optgroup>
-                        <optgroup label="U">
-                          <option value="380">Ucrania</option>
-                          <option value="256">Uganda</option>
-                          <option value="598">Uruguay</option>
-                        </optgroup>
-                        <optgroup label="V">
-                          <option value="39">Vaticano</option>
-                          <option value="58">Venezuela</option>
-                          <option value="84">Vietnam</option>
-                        </optgroup>
-                        <optgroup label="Y">
-                          <option value="967">Yemen</option>
-                          <option value="381">Yugoslavia</option>
-                        </optgroup>
-                        <optgroup label="Z">
-                          <option value="260">Zambia</option>
-                          <option value="263">Zimbawe</option>
-                        </optgroup>
-                      </select>
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="phone-call"></i>
-                      Móvil
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi movi"
-                        type="tel"
-                        data-mask="000-000-0000"
-                        placeholder="Numero celular"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="movil"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="map"></i>
-                      Dirección
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi"
-                        type="text"
-                        placeholder="Dirección de residencia"
-                        autocomplete="off"
-                        style="padding: 1px; width: 100%;"
-                        name="direccion"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="credit-card"></i>
-                      Enviar ambas caras del documento
-                    </th>
-                    <td>
-                      <input
-                        class="form-control-no-border edi float-right"
-                        type="file"
-                        name="image"
-                        id="file"
-                        multiple
-                        style="width: 50%;"
-                        required
-                      />
-                    </td>
-                  </tr>
-                  <tr>
-                    <th>
-                      <i class="feather-md" data-feather="user-plus"></i>
-                    </th>
-                    <td>
-                      <button
-                        class="btn btn-outline-dark btn-sm float-right mr-3"
-                        type="submit"
-                        id="AgregarCliente"
-                      ><i class="fas fa-fw fa-user-plus"></i>
-                        Ingresar Datos</button>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
-            </div>
+      <div class='modal-body m-3 mb-1'>
+        <h3 id='sindto' class='text-center'>Este producto no posee ningun descuento</h3>
+        <h3 class='text-center inqdto'>
+          La proyeccion de pagos no cumple las condiciones para aplicar un descuento
+        </h3>
+        <small class='text-muted text-center inqdto'>
+          Las condiciones para obtener un descueto se describen aqui abajo
+        </small>
+        <div class='row condto x100dto'>
+          <div class='col-sm-12 text-center'>
+            {{#if user.admin}}
+              <strong class='text-center'>Digite el porcentage de descuento que prefiera</strong>
+              <input
+                class='form-control text-center'
+                type='text'
+                id='dto-modal'
+                autocomplete='off'
+                placeholder='DTO'
+                style='background-color: #FFFFCC;'
+              />
+            {{else}}
+              <strong class='text-center'>Seleciona el porcentage de descuento que prefieras</strong>
+              <select id='dto-modal' class='mt-3'></select>
+            {{/if}}
           </div>
-        </form>
+          <div class='col-12 d-flex justify-content-end'>
+            <button id='gQpon' class='btn btn-sm btn-outline-dark my-2' data-dismiss='modal'>
+              Generar cupon
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class='modal-footer condto'>
+        <strong>Terminos de descuentos</strong>
+        <div class='accordion w-100' id='terminosdto'></div>
       </div>
     </div>
   </div>

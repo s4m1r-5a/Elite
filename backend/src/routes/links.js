@@ -4615,68 +4615,41 @@ router.get('/bono/:id', isLoggedIn, async (req, res) => {
 ///////////////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
   moment.locale('es');
-  const { id, h } = req.query;
-  var ahora = moment(h).subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
-  var hora2 = moment(h).subtract(2, 'hours').format('YYYY-MM-DD HH:mm');
-
-  const proyecto = await pool.query(
-    `SELECT * FROM  productosd pd INNER JOIN productos p ON pd.producto = p.id WHERE pd.id = ?`,
-    id
-  );
-  var t = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
-  var p = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
-  var hora = t.indexOf('*') > 0 ? t.split('*')[1] : hora2;
-  if (ahora > hora) {
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [
-      { tramitando: req.user.fullname + '*' + h },
-      id
-    ]);
-    res.render('links/orden', { proyecto, id, mensaje: '' });
-  } else if (req.user.fullname !== t.split('*')[0]) {
-    var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
-      t.split('*')[0]
-    } EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`;
-    res.render('links/orden', { proyecto, id, mensaje });
-  } else {
-    res.render('links/orden', { proyecto, id, mensaje: '' });
-  }
-});
-router.get('/orden2/:lote', isLoggedIn, async (req, res) => {
-  moment.locale('es');
-  const { lote } = req.params;
-  const h = moment().format('YYYY-MM-DD HH:mm');
-  const ahora = moment().subtract(1, 'hours').format('YYYY-MM-DD HH:mm');
-  const hora2 = moment().subtract(2, 'hours').format('YYYY-MM-DD HH:mm');
-  const usr = req.user.fullname;
+  const { lt } = req.query;
   const usrs = req.user.id;
-  const proyecto = await pool.query(
-    `SELECT * FROM  productosd l INNER JOIN productos o ON l.producto = o.id WHERE l.id = ?`,
-    lote
-  );
-  const time = proyecto[0].tramitando ? proyecto[0].tramitando : 'nada';
-  const hora = time.indexOf('*') > 0 ? time.split('*')[1] : hora2;
-  if (ahora > hora) {
-    await pool.query('UPDATE productosd set ? WHERE id = ?', [{ tramitando: `${usr}*${h}` }, lote]);
-    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs, orden: null });
-  } else if (usr !== time.split('*')[0]) {
-    var mensaje = `ESTE LOTE ESTUVO O ESTA SIENDO TRAMITADO POR ${
-      time.split('*')[0]
-    } EN LA ULTIMA HORA. ES POSIBLE QUE TU NO LO PUEDAS TRAMITAR`;
-    res.render('links/orden2', { proyecto, lote, mensaje, usrs, orden: null });
-  } else {
-    res.render('links/orden2', { proyecto, lote, mensaje: '', usrs, orden: null });
+  const lote = lt
+    ? await pool.query(`SELECT * FROM  productosd l INNER JOIN productos o 
+      ON l.producto = o.id WHERE l.estado = 9 AND l.id = ${lt}`)
+    : [];
+
+  if (!lote.length && lt) {
+    req.flash('info', 'Este producto ya fue separado');
+    return res.redirect('/links/productos');
   }
+
+  res.render('links/orden', { lote: lt, usrs, orden: null });
 });
 router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const usrs = req.user.id;
-  res.render('links/orden2', { lote: null, usrs, orden: id });
+  const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
+  const comi = await pool.query(`SELECT * FROM solicitudes WHERE concepto REGEXP 'COMISION|GESTION' 
+  AND descp != 'SEPARACION' AND orden = ${id} AND stado != 6`);
+
+  if (comi.length > 0 && id.indexOf('*') < 0) {
+    req.flash(
+      'error',
+      'Esta Orden no es posible editarla ya que tiene ' + comi.length + ' comision(es) generadas'
+    );
+    return res.redirect('/links/reportes');
+  }
+  res.render('links/orden', { lote: null, usrs, orden: id });
 });
 router.post('/orden/save', isLoggedIn, async (req, res) => {
   const { proyeccion, ordenAnt, producto, cupon, historyQuota } = req.body;
   const { id, mtr, mtr2, inicial, valor } = producto;
   const updateQotas = await proyeccion.some(e => !e?.id || !e?.id2);
-  console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, updateQotas);
+  //console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, updateQotas);
   const p = cupon?.orden ? 'p.' : '';
   const orden = {
     [p + 'cuot']: historyQuota.FINANCIACION,
@@ -4694,7 +4667,8 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     [p + 'inicialdiferida']: producto.inicialdiferida,
     [p + 'cupon']: cupon.idcupon,
     [p + 'status']: producto.status,
-    [p + 'ahorro']: cupon.ahorro
+    [p + 'ahorro']: cupon.ahorro,
+    [p + 'comision']: cupon?.comision ? cupon.comision : 0
   };
 
   const qpon = {
@@ -4727,6 +4701,13 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
       [id, orden, cupon.orden]
     );
   } else {
+    if (!cupon?.comision)
+      orden['comision'] =
+        (
+          await pool.query(`SELECT c.comision FROM productos p INNER JOIN productosd l ON l.producto = p.id 
+        LEFT JOIN comisiones c ON c.producto = p.id AND c.asesor = ${producto.asesor} WHERE l.id = ${id}`)
+        )[0].comision || 0;
+
     await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [
       { mtr, mtr2, inicial, valor, estado: 1 },
       id
@@ -4740,7 +4721,7 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
   }
 
   if (updateQotas) {
-    console.log('creo las cuootas nuevamente');
+    //console.log('creo las cuootas nuevamente');
     var cuotas = 'INSERT INTO cuotas (separacion, tipo, ncuota, fechs, cuota, proyeccion) VALUES ';
     await proyeccion.map(e => {
       cuotas += `(${cupon.orden}, '${e.tipo}', ${e.ncuota}, '${e.fechs}', ${e.cuota}, ${e.cuota}),`;
@@ -4749,9 +4730,9 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     });
 
     await pool.query(cuotas.slice(0, -1));
-    console.log(cuotas, orden);
+    //console.log(cuotas, orden);
   } else {
-    console.log(orden, 'no creo las cuootas');
+    //console.log(orden, 'no creo las cuootas');
     let ids = null;
     const cuotas = {
       tipo: 'tipo = CASE id',
@@ -4791,10 +4772,12 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
         WHERE separacion = ?`,
       cupon.orden
     );
-    console.log(ids);
+    //console.log(ids);
     await pool.query(`DELETE FROM cuotas WHERE id NOT IN(${ids}) AND separacion = ?`, cupon.orden);
   }
   if (p) await ProyeccionPagos(cupon.orden);
+  /* req.flash('success', 'Separación realizada exitosamente');
+  res.redirect('/links/reportes'); */
   res.send(true);
 });
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
@@ -7025,9 +7008,10 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       });
     }
   } else if (id === 'pdfs') {
-    const { k, h } = req.body;
-    await EstadoDeCuenta(k);
-    res.send(`/uploads/estadodecuenta-${k}.pdf`);
+    const { orden, fecha } = req.body;
+    await ProyeccionPagos(orden, '2019-10-01', fecha);
+    await EstadoDeCuenta(orden);
+    res.send(`/uploads/estadodecuenta-${orden}.pdf`);
   }
 });
 router.post('/rcb/:id', isLoggedIn, async (req, res) => {

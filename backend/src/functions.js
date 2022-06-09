@@ -23,6 +23,44 @@ const transpoter = nodemailer.createTransport({
   }
 });
 
+const noCifra = valor => {
+  if (!valor) return 0;
+  const num = /[^0-9.]/g.test(valor)
+    ? parseFloat(valor.replace(/[^0-9.]/g, ''))
+    : parseFloat(valor);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return num;
+};
+const Cifra = valor => {
+  if (!valor) return 0;
+  const punto = /\.$/.test(valor);
+  const num = /[^0-9.]/g.test(valor)
+    ? parseFloat(valor.replace(/[^0-9.]/g, ''))
+    : parseFloat(valor);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return punto
+    ? num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '.'
+    : num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
+};
+const Percent = valor => {
+  if (!valor) return valor;
+  const punto = /\.$/.test(valor);
+  const num =
+    (/[^0-9.]/g.test(valor) ? parseFloat(valor.replace(/[^0-9.]/g, '')) : parseFloat(valor)) / 100;
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return punto
+    ? num.toLocaleString('en-CO', {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      }) + '.'
+    : num.toLocaleString('en-CO', {
+        style: 'percent',
+        minimumFractionDigits: 0,
+        maximumFractionDigits: 2
+      });
+};
+
 function ID(lon) {
   let chars = '0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z',
     code = '';
@@ -1359,10 +1397,10 @@ async function EstadoDeCuenta(Orden) {
       totalMora += e.totalmora + (e.estado === 3 && !idCqt ? e.mora : 0) - e.saldomora;
       totalSaldo += e.estado === 3 && !idCqt ? e.cuota : 0;
       totalDeuda += e.estado === 3 && !idCqt ? e.cuota + e.mora : 0;
-      const TotalDias = Math.round(e.diasmora - e.diaspagados);
+      const TotalDias = e.diasmora - e.diaspagados;
       const PrecioDiaMora = e.mora ? e.mora / TotalDias : 0;
-      const TotalMora = Math.round(PrecioDiaMora * TotalDias);
-      const TotalCuota = Math.round(e.cuota + TotalMora);
+      const TotalMora = PrecioDiaMora * TotalDias;
+      const TotalCuota = e.cuota + TotalMora;
       const Ids = IDs2 && e.monto ? false : true;
 
       if (!i) {
@@ -1384,98 +1422,60 @@ async function EstadoDeCuenta(Orden) {
           [
             e.tipo + '-' + e.ncuota,
             moment(e.fechs).format('L'),
-            '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
+            '$' + Cifra(e.montocuota ? e.montocuota : e.cuota),
             e.montocuota ? e.dias : TotalDias,
             e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
             e.montocuota ? e.dcto * 100 + '%' : '0%',
-            '$' + Moneda(e.montocuota ? e.totalmora : e.mora),
-            '$' + Moneda(e.montocuota ? e.totalcuota : e.cuota + e.mora),
+            '$' + Cifra(e.montocuota ? e.totalmora : e.mora),
+            '$' + Cifra(e.montocuota ? e.totalcuota : e.cuota + e.mora),
             e.fecharcb
               ? Ids
                 ? moment(e.fecharcb).format('L')
                 : '--/--/----'
               : e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
-            Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--',
-            '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota),
-            '$' + Moneda(e.saldomora)
+            Ids ? '$' + Cifra(e.monto || 0) : '$---,---,--',
+            '$' + Cifra(e.montocuota ? e.saldocuota : TotalCuota),
+            '$' + Cifra(e.saldomora)
           ]
         );
-
-        /* bodi.push(
-          ['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto'],
-          [
-            e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
-            `RC${e.ids}`,
-            {
-              text: e.stado === 4 ? 'Aprobado' : 'Pendiente',
-              color: e.stado === 4 ? 'green' : 'blue'
-            },
-            e.formap,
-            e.descp,
-            {
-              text: '$' + Moneda(e.monto),
-              color: e.stado === 4 ? 'green' : 'blue',
-              decoration: e.stado !== 4 && 'lineThrough',
-              decorationStyle: e.stado !== 4 && 'double'
-            }
-          ]
-        ); */
       } else {
         !e.monto &&
           p &&
           cuerpo.push([
             p.tipo + '-' + p.ncuota,
             moment(p.fechs).format('L'),
-            '$' + Moneda(p.cuota),
+            '$' + Cifra(p.cuota),
             p.s.TotalDias,
             (e.tasamora * 100).toFixed(2) + '%',
             '0%',
-            '$' + Moneda(p.s.TotalMora),
-            '$' + Moneda(p.s.TotalCuota),
+            '$' + Cifra(p.s.TotalMora),
+            '$' + Cifra(p.s.TotalCuota),
             '',
             '$0',
-            '$' + Moneda(p.s.TotalCuota),
-            '$' + Moneda(p.saldomora)
+            '$' + Cifra(p.s.TotalCuota),
+            '$' + Cifra(p.saldomora)
           ]);
 
         cuerpo.push([
           e.tipo + '-' + e.ncuota,
           moment(e.fechaLMT ? e.fechaLMT : e.fechs).format('L'),
-          '$' + Moneda(e.montocuota ? e.montocuota : e.cuota),
+          '$' + Cifra(e.montocuota ? e.montocuota : e.cuota),
           e.montocuota ? e.dias : TotalDias,
           e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
           e.montocuota ? e.dcto * 100 + '%' : '0%',
-          '$' + Moneda(e.montocuota ? e.totalmora : TotalMora),
-          '$' + Moneda(e.montocuota ? e.totalcuota : TotalCuota),
+          '$' + Cifra(e.montocuota ? e.totalmora : TotalMora),
+          '$' + Cifra(e.montocuota ? e.totalcuota : TotalCuota),
           e.fecharcb
             ? Ids
               ? moment(e.fecharcb).format('L')
               : '--/--/----'
             : e.fech && (Ids ? moment(e.fech).format('L') : '--/--/----'),
-          Ids ? '$' + Moneda(e.monto || 0) : '$---,---,--',
-          '$' + Moneda(e.montocuota ? e.saldocuota : TotalCuota),
-          '$' + Moneda(e.saldomora)
+          Ids ? '$' + Cifra(e.monto || 0) : '$---,---,--',
+          '$' + Cifra(e.montocuota ? e.saldocuota : TotalCuota),
+          '$' + Cifra(e.saldomora)
         ]);
-
-        /* if (e.monto && !IDs2) {
-          bodi.push([
-            e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
-            `RC${e.ids}`,
-            {
-              text: e.stado === 4 ? 'Aprobado' : 'Pendiente',
-              color: e.stado === 4 ? 'green' : 'blue'
-            },
-            e.formap,
-            e.descp,
-            {
-              text: '$' + Moneda(e.monto),
-              color: e.stado === 4 ? 'green' : 'blue',
-              decoration: e.stado !== 4 && 'lineThrough',
-              decorationStyle: e.stado !== 4 && 'double'
-            }
-          ]);
-        } */
       }
+      console.log(e.saldomora, p.saldomora, Cifra(e.saldomora), Cifra(p.saldomora));
       e.ids && IDs.push(e.ids);
       p = e.monto && e.saldocuota ? e : false;
       e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
@@ -1503,7 +1503,7 @@ async function EstadoDeCuenta(Orden) {
           e.formap,
           e.descp,
           {
-            text: '$' + Moneda(e.monto),
+            text: '$' + Cifra(e.monto),
             color: e.stado === 4 ? 'green' : 'blue',
             decoration: e.stado !== 4 && 'lineThrough',
             decorationStyle: e.stado !== 4 && 'double'
@@ -1533,7 +1533,7 @@ async function EstadoDeCuenta(Orden) {
         {},
         {},
         {
-          text: '$' + Moneda(totalAbonado),
+          text: '$' + Cifra(totalAbonado),
           style: 'tableHeader2',
           alignment: 'center',
           colSpan: 2
@@ -1552,7 +1552,7 @@ async function EstadoDeCuenta(Orden) {
         {},
         {},
         {
-          text: '$' + Moneda(totalDeuda),
+          text: '$' + Cifra(totalDeuda),
           style: 'tableHeader2',
           alignment: 'center',
           colSpan: 2
@@ -1711,12 +1711,12 @@ async function EstadoDeCuenta(Orden) {
                         alignment: 'center'
                       },
                       {
-                        text: `$${Moneda(Proyeccion[0].vrmt2)}`,
+                        text: `$${Cifra(Proyeccion[0].vrmt2)}`,
                         style: 'tableHeader',
                         alignment: 'center'
                       },
                       {
-                        text: `$${Moneda(Proyeccion[0].valor)}`,
+                        text: `$${Cifra(Proyeccion[0].valor)}`,
                         style: 'tableHeader',
                         alignment: 'center'
                       },
@@ -1731,12 +1731,12 @@ async function EstadoDeCuenta(Orden) {
                         alignment: 'center'
                       },
                       {
-                        text: `- $${Moneda(Proyeccion[0].ahorro)}`,
+                        text: `- $${Cifra(Proyeccion[0].ahorro)}`,
                         style: 'tableHeader',
                         alignment: 'center'
                       },
                       {
-                        text: `$${Moneda(Proyeccion[0].total)}`,
+                        text: `$${Cifra(Proyeccion[0].total)}`,
                         style: 'tableHeader',
                         alignment: 'center'
                       }
@@ -1804,7 +1804,7 @@ async function EstadoDeCuenta(Orden) {
               text: [
                 { text: 'Total Abonado: ', fontSize: 10, bold: true },
                 {
-                  text: `$${Moneda(totalAbonado)}\n`,
+                  text: `$${Cifra(totalAbonado)}\n`,
                   italics: true,
                   bold: true,
                   fontSize: 11,
@@ -1822,7 +1822,7 @@ async function EstadoDeCuenta(Orden) {
               text: [
                 { text: 'Total Mora: ', fontSize: 10, bold: true },
                 {
-                  text: `$${Moneda(totalMora)}\n`,
+                  text: `$${Cifra(totalMora)}\n`,
                   italics: true,
                   bold: true,
                   fontSize: 11,
@@ -1840,7 +1840,7 @@ async function EstadoDeCuenta(Orden) {
               text: [
                 { text: 'Mora Adeudada: ', fontSize: 10, bold: true },
                 {
-                  text: `$${Moneda(moraAdeudada)}\n`,
+                  text: `$${Cifra(moraAdeudada)}\n`,
                   italics: true,
                   bold: true,
                   fontSize: 11,
@@ -1858,7 +1858,7 @@ async function EstadoDeCuenta(Orden) {
               text: [
                 { text: 'Saldo Capital: ', fontSize: 10, bold: true },
                 {
-                  text: `$${Moneda(totalSaldo)}\n`,
+                  text: `$${Cifra(totalSaldo)}\n`,
                   italics: true,
                   bold: true,
                   fontSize: 11,
@@ -1876,7 +1876,7 @@ async function EstadoDeCuenta(Orden) {
               text: [
                 { text: 'Total Saldo: ', fontSize: 10, bold: true },
                 {
-                  text: `$${Moneda(totalDeuda)}\n`,
+                  text: `$${Cifra(totalDeuda)}\n`,
                   italics: true,
                   bold: true,
                   fontSize: 11,
