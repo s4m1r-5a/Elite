@@ -1475,7 +1475,6 @@ async function EstadoDeCuenta(Orden) {
           '$' + Cifra(e.saldomora)
         ]);
       }
-      console.log(e.saldomora, p.saldomora, Cifra(e.saldomora), Cifra(p.saldomora));
       e.ids && IDs.push(e.ids);
       p = e.monto && e.saldocuota ? e : false;
       e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });

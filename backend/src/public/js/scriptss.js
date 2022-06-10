@@ -3957,7 +3957,7 @@ if (window.location.pathname === `/links/reportes`) {
             </nav></td></tr>`
           );
       });
-      rol.admin
+      /* rol.admin
         ? $('.fechaPDF').daterangepicker(
             {
               locale: {
@@ -3999,13 +3999,15 @@ if (window.location.pathname === `/links/reportes`) {
               Pdfs(row.id, start.format('YYYY-MM-DD'));
             }
           )
-        : $('.fechaPDF').click(function () {
-            const fila = $(this).parents('tr');
-            const data = api.row(fila).data();
-            const row = data === undefined ? api.row(fila.prev()).data() : data;
-            console.log(row);
-            Pdfs(row.id);
-          });
+        :  */
+
+      $('.fechaPDF').click(function () {
+        const fila = $(this).parents('tr');
+        const data = api.row(fila).data();
+        const row = data === undefined ? api.row(fila.prev()).data() : data;
+        console.log(row);
+        Pdfs(row.id);
+      });
     },
     rowCallback: function (row, data, index) {
       if (data['tipobsevacion'] === 'ANULADA') {
@@ -5766,6 +5768,26 @@ if (window.location.pathname === `/links/reportes`) {
     });
   });
   var asignarDctoMora = id => {
+    /* $.ajax({
+      url: '/links/reportes/acuerdos',
+      data: {orden: id},
+      type: 'POST',
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      },
+      success: function (data) {
+        if (data.r) {
+          tableOrden.ajax.reload(null, false);
+          $('#ModalEventos').modal('hide');
+          SMSj('success', data.m);
+        } 
+      }
+    });
+ */
     $('#dctoMonto').mask('#.##$', { reverse: true, selectOnFocus: true });
     $('#stopMora').prop('checked', false);
     $('#dctoMonto, #dcto').prop('disabled', false).val(null);
