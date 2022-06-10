@@ -7009,7 +7009,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     }
   } else if (id === 'pdfs') {
     const { orden, fecha } = req.body;
-    await ProyeccionPagos(orden, '2019-10-01', fecha);
+    await ProyeccionPagos(orden);
     await EstadoDeCuenta(orden);
     res.send(`/uploads/estadodecuenta-${orden}.pdf`);
   }
