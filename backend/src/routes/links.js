@@ -8074,7 +8074,7 @@ async function ProyeccionPagos(S) {
   );
 
   const acuerdos = await pool.query(
-    `SELECT * FROM acuerdos a WHERE a.producto = ? AND a.estado IN(7, 3)`,
+    `SELECT * FROM acuerdos a WHERE a.orden = ? AND a.estado IN(7, 3)`,
     S
   );
 
