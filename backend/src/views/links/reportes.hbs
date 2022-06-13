@@ -840,7 +840,7 @@
               aria-expanded='true'
               aria-controls='collapse'
             >
-              <strong class='text-muted'>NUEVO DESCUENTO</strong><br />
+              <strong class='text-muted'>NUEVO ACUERDO</strong><br />
               <small class='text-muted'>Configure aqui los parametros de un nuevo descuento</small>
               <i class='fas fa-angle-up float-right'></i>
             </div>
@@ -851,88 +851,113 @@
               data-parent='#descuentos'
             >
               <div class='card-body'>
-                <div class='row d-flex justify-content-center'>
-                  <div class='col-12 col-md-4'>
-                    <div class='input-group input-group-sm mb-3'>
-                      <div class='input-group-prepend'>
-                        <label class='input-group-text'>DTO</label>
+                <form id='acuerdofilas'>
+                  <div class='row d-flex d-block'>
+                    <input type='hidden' name='orden' id='orden-mora' />
+                    <div class='col-12 col-md-4 dto'>
+                      <div class='input-group input-group-sm mb-3'>
+                        <div class='input-group-prepend'>
+                          <label class='input-group-text'>DTO</label>
+                        </div>
+                        <input
+                          class='form-control text-center dto'
+                          type='text'
+                          name='dcto'
+                          autocomplete='off'
+                          id='dto'
+                          placeholder='0%'
+                          style='background-color: #FFFFCC;'
+                        />
                       </div>
-                      <input
-                        class='form-control text-center'
-                        type='text'
-                        name='dto'
-                        autocomplete='off'
-                        id='dto'
-                        placeholder='0%'
-                        style='background-color: #FFFFCC;'
-                      />
                     </div>
-                  </div>
-                  <div class='col-12 col-md-8'>
-                    <div class='input-group input-group-sm mb-3'>
-                      <div class='input-group-prepend'>
-                        <label class='input-group-text'>MONTO</label>
+                    <div class='col-12 col-md-8'>
+                      <div class='input-group input-group-sm mb-3'>
+                        <div class='input-group-prepend'>
+                          <label class='input-group-text'>MONTO</label>
+                        </div>
+                        <input
+                          class='form-control text-center cifra'
+                          type='text'
+                          name='monto'
+                          id='monto'
+                          autocomplete='off'
+                          placeholder='MONTO'
+                          style='background-color: #FFFFCC;'
+                        />
                       </div>
-                      <input
-                        class='form-control text-center cifra'
-                        type='text'
-                        name='monto'
-                        id='monto'
-                        autocomplete='off'
-                        placeholder='MONTO'
-                        style='background-color: #FFFFCC;'
-                      />
                     </div>
-                  </div>
-                  <div class='col-12'>
-                    <div class='input-group input-group-sm mb-3'>
-                      <div class='input-group-prepend'>
-                        <label class='input-group-text'>LIMITE</label>
+                    <div class='col-12'>
+                      <div class='input-group input-group-sm mb-3'>
+                        <div class='input-group-prepend stop d-none'>
+                          <label class='input-group-text'>HIELO</label>
+                        </div>
+                        <input
+                          class='form-control text-center aqmora stop d-none'
+                          type='text'
+                          name='datestop'
+                          autocomplete='off'
+                          placeholder='CONGELAR'
+                          style='background-color: #FFFFCC;'
+                          disabled
+                        />
+                        <div class='input-group-prepend'>
+                          <label class='input-group-text'>LIMITE</label>
+                        </div>
+                        <input
+                          class='form-control text-center aqmora'
+                          type='text'
+                          name='limite'
+                          autocomplete='off'
+                          placeholder='CADUCA'
+                          style='background-color: #FFFFCC;'
+                        />
                       </div>
-                      <input
-                        class='form-control text-center cifra'
-                        type='text'
-                        name='monto'
-                        id='monto'
-                        autocomplete='off'
-                        placeholder='MONTO'
-                        style='background-color: #FFFFCC;'
-                      />
+                    </div>
+                    <div class='col-12'>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          id='tDto'
+                          value='DTO'
+                          required
+                        />
+                        <label class='form-check-label' for='tDto'>Dto</label>
+                      </div>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          id='tRemove'
+                          value='REMOVE'
+                          required
+                        />
+                        <label class='form-check-label' for='tRemove'>Quitar</label>
+                      </div>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          id='tStop'
+                          value='STOP'
+                          required
+                        />
+                        <label class='form-check-label' for='tStop'>Congelar</label>
+                      </div>
+                    </div>
+                    <div class='col-12'>
+                      <button
+                        type='submit'
+                        class='btn btn-sm btn-outline-dark mt-3 float-right'
+                      >Acordar</button>
                     </div>
                   </div>
-                  <div class='col-12'>
-                    <div class='form-check form-check-inline'>
-                      <input
-                        class='form-check-input'
-                        type='radio'
-                        name='type'
-                        id='tDto'
-                        value='DTO'
-                      />
-                      <label class='form-check-label' for='tDto'>Descuento</label>
-                    </div>
-                    <div class='form-check form-check-inline'>
-                      <input
-                        class='form-check-input'
-                        type='radio'
-                        name='type'
-                        id='tRemove'
-                        value='REMOVE'
-                      />
-                      <label class='form-check-label' for='tRemove'>Quitar</label>
-                    </div>
-                    <div class='form-check form-check-inline'>
-                      <input
-                        class='form-check-input'
-                        type='radio'
-                        name='type'
-                        id='tStop'
-                        value='REMOVE'
-                      />
-                      <label class='form-check-label' for='tStop'>Congelar</label>
-                    </div>
-                  </div>
-                </div>
+                </form>
+                <h5 class='text-center d-none' id='acuerdomsg'>Existe un acuerdo vigente, no puede
+                  generar otro</h5>
               </div>
             </div>
           </div>
@@ -942,33 +967,39 @@
               class='card-header'
               type='button'
               data-toggle='collapse'
-              data-target='#tableacuerdos'
+              data-target='#acuerdos'
               aria-expanded='true'
               aria-controls='collapse'
             >
-              <strong class='text-muted'>COMISIONES</strong><br />
-              <small class='text-muted' id='totalComi'></small>
+              <strong class='text-muted'>ACUERDOS</strong><br />
+              <small class='text-muted'>Aqui encontraras todos los acuerdos de la orden</small>
               <i class='fas fa-angle-down float-right'></i>
             </div>
             <div
-              id='tableacuerdos'
+              id='acuerdos'
               class='collapse'
               aria-labelledby='headingOne'
               data-parent='#descuentos'
             >
-              <div class='card-body text-center p-0'>
-                <table id='comi' class='table table-sm' style='width:100%;font-size:9px;'>
+              <div class='card-body p-0'>
+                <table
+                  id='acuerdosTable'
+                  class='table table-sm table-hover display responsive nowrap'
+                  style='width:100%;font-size:7px;'
+                >
                   <thead>
                     <tr>
                       <th>Id</th>
-                      <th>Asesor</th>
-                      <th>FechaCreo</th>
+                      <th>Dto</th>
                       <th>Monto</th>
-                      <th>%</th>
-                      <th>Total</th>
-                      <th>Concepto</th>
-                      <th>Descp</th>
-                      <th>Estado</th>
+                      <th>Tipo</th>
+                      <th>Limite</th>
+                      <th>Hielo</th>
+                      <th>Std</th>
+                      <th>Recaudo</th>
+                      <th>Creado</th>
+                      <th>Autorizado</th>
+                      <th></th>
                     </tr>
                   </thead>
                   <tbody></tbody>

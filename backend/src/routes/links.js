@@ -4190,7 +4190,7 @@ router.post('/recibo', async (req, res) => {
       concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
       const acuerdo = await pool.query(
-        'SELECT id FROM acuerdos WHERE producto = ? AND estado != 6 AND pago > 0 AND limite >= ?',
+        'SELECT id FROM acuerdos WHERE orden = ? AND estado != 5 AND limite >= ?',
         [orden, pago.fecharcb]
       );
       acuerdo.length && (pago.acuerdo = acuerdo[0].id);
@@ -4201,11 +4201,11 @@ router.post('/recibo', async (req, res) => {
         ''
       )}, '/uploads/${req.files[i].filename}', ${nrecibo[i] === rcbexcdnt ? excedente : 0}),`;
 
-      await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+      /* await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
       SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
       AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
       WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
-      WHERE a.pago > 0`);
+      WHERE a.pago > 0`); */
     }
   } else {
     var recib = parseFloat(montos.replace(/\./g, ''));
@@ -4224,7 +4224,7 @@ router.post('/recibo', async (req, res) => {
     concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
     const acuerdo = await pool.query(
-      'SELECT id FROM acuerdos WHERE producto = ? AND estado != 6 AND pago > 0 AND limite >= ?',
+      'SELECT id FROM acuerdos WHERE orden = ? AND estado != 5 AND limite >= ?',
       [orden, pago.fecharcb]
     );
     acuerdo.length && (pago.acuerdo = acuerdo[0].id);
@@ -4235,11 +4235,11 @@ router.post('/recibo', async (req, res) => {
       ''
     )}, '/uploads/${req.files[0].filename}', ${excedente}),`;
 
-    await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+    /* await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
       SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
       AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
       WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
-      WHERE a.pago > 0`);
+      WHERE a.pago > 0`); */
   }
   //console.log(reci.slice(0, -1))
   await pool.query(reci.slice(0, -1));
@@ -5697,6 +5697,26 @@ router.post('/comision/:item', isLoggedIn, async (req, res) => {
     res.send(r);
   }
 });
+//////////////////////* ACUERDOS *//////////////////////////////////
+router.post('/acuerdos/:orden', isLoggedIn, async (req, res) => {
+  const { orden } = req.params;
+  if (orden === 'nuevo') {
+    const data = req.body;
+    data.autoriza = req.user.fullname;
+    data.estado = 9;
+    console.log(data);
+    await pool.query('INSERT INTO acuerdos SET ? ', data);
+    res.send(true);
+  } else if (orden !== 'nada') {
+    const so = await pool.query(`SELECT a.*, SUM(IF(s.monto, s.monto, 0)) recaudo FROM acuerdos a 
+      LEFT JOIN solicitudes s ON s.acuerdo = a.id WHERE a.orden = ${orden} GROUP BY a.id`);
+    respuesta = { data: so };
+    res.send(respuesta);
+  } else {
+    respuesta = { data: [] };
+    res.send(respuesta);
+  }
+});
 //////////////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, (req, res) => {
   res.render('links/reportes');
@@ -6986,12 +7006,12 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   } else if (id === 'dctomora' && req.user.contador) {
     const { producto, dcto, monto, limite, tipo, stop } = req.body;
     const acuerdo = await pool.query(
-      'SELECT id FROM acuerdos WHERE producto = ? AND estado = 9',
+      'SELECT id FROM acuerdos WHERE orden = ? AND estado IN(7, 9)',
       producto
     );
     if (!acuerdo.length) {
       const newAcuerdo = {
-        producto,
+        orden: producto,
         limite,
         tipo,
         autoriza: req.user.fullname
@@ -8074,7 +8094,7 @@ async function ProyeccionPagos(S) {
   );
 
   const acuerdos = await pool.query(
-    `SELECT * FROM acuerdos a WHERE a.orden = ? AND a.estado IN(7, 3)`,
+    `SELECT * FROM acuerdos a WHERE a.orden = ? AND a.estado IN(7, 9)`,
     S
   );
 
@@ -8371,13 +8391,11 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
     };
   }
 
-  await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+  /* await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
       SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
       AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
       WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
-      WHERE a.pago > 0`);
-
-  await ProyeccionPagos(T);
+      WHERE a.pago > 0` )*/ await ProyeccionPagos(T);
   var st = await Estados(T);
   try {
     await pool.query(

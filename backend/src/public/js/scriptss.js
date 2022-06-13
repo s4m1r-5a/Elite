@@ -3931,17 +3931,7 @@ if (window.location.pathname === `/links/reportes`) {
                 ? `<a class="flex-sm-fill text-sm-center nav-link" onclick="Excel(${g.id}, '${g.proyecto}', '${g.nombre}', '${g.mz}', '${g.n}')"><i class="fas fa-file-alt"></i>Ex</a>
                   <a class="flex-sm-fill text-sm-center nav-link anular"><i class="fas fa-ban"></i> Anular</a> 
                   <a class="flex-sm-fill text-sm-center nav-link" onclick="Eliminar(${g.id})"><i class="fas fa-trash-alt"></i> Eliminar</a>
-                  <div class="dropdown">
-                    <a class="flex-sm-fill text-sm-center nav-link dropdown-toggle" data-toggle="dropdown">
-                      <i class="fas fa-sitemap"></i> Mora
-                    </a>
-                    <div class="dropdown-menu dropdown-menu-right">
-                      <a class="dropdown-item" href="#">Quitar Mora</a>
-					            <a class="dropdown-item" href="#">Parar Mora</a>
-					            <a class="dropdown-item" href="#">Anular Dct.</a>
-                      <a class="dropdown-item" onclick="asignarDctoMora(${g.id})" href="#">Descuento</a>
-                    </div>
-                  </div>`
+                  <a class="flex-sm-fill text-sm-center nav-link" onclick="asignarDctoMora(${g.id})"><i class="fas fa-bookmark"></i> Acuerdo</a>`
                 : ''
             } 
             ${
@@ -4317,8 +4307,138 @@ if (window.location.pathname === `/links/reportes`) {
       }
     }
   });
+  ///////////////////////* TABLA ACUERDOS DE MORA *////////////////////////////
+  var acuerdos = $('#acuerdosTable').DataTable({
+    paging: true,
+    searching: false,
+    lengthChange: false,
+    info: false,
+    autoWidth: true,
+    deferRender: true,
+    columnDefs: [{ responsivePriority: 1, targets: [6, 10] }],
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    order: [
+      [1, 'asc'],
+      [8, 'asc']
+    ], // [1, 'desc']
+    language: languag,
+    ajax: {
+      method: 'POST',
+      url: '/links/acuerdos/877',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: 'id'
+      },
+      {
+        data: 'dcto',
+        render: function (data, method, row) {
+          return Percent(data * 100);
+        }
+      },
+      {
+        data: 'monto',
+        render: $.fn.dataTable.render.number(',', ',', 0, '$')
+      },
+      { data: 'type' },
+      {
+        data: 'limite',
+        render: function (data, method, row) {
+          return moment(data).format('YYYY-MM-DD');
+        }
+      },
+      {
+        data: 'datestop',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'estado',
+        render: function (data, method, row) {
+          switch (data) {
+            case 7:
+              return `<input type="radio" checked style='accent-color: blue'>`;
+              break;
+            case 9:
+              return `<input type="radio" checked style='accent-color: #1ca24f'>`;
+              break;
+            case 5:
+              return `<input type="radio" checked style='accent-color: red'>`;
+              break;
+          }
+        }
+      },
+      {
+        data: 'recaudo',
+        render: $.fn.dataTable.render.number(',', '.', 0, '$')
+      },
+      {
+        data: 'creado',
+        render: function (data, method, row) {
+          return moment(data).format('YYYY-MM-DD');
+        }
+      },
+      { data: 'autoriza' },
+      {
+        data: 'orden',
+        render: function (data, method, row) {
+          return `<a><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" 
+          fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" 
+          class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline>
+          <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+          <line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg></a>`;
+        }
+      }
+    ]
+  });
+  $('#acuerdosTable_filter').hide();
+  $('#acuerdos').on('shown.bs.collapse', function () {
+    acuerdos.columns.adjust().responsive.recalc();
+  });
+  $('.cifra').keyup(function () {
+    $(this).val(Cifra($(this).val()));
+  });
+  $('#dto').change(function () {
+    $(this).val(Percent($(this).val()));
+  });
+  $('#acuerdofilas').submit(function (e) {
+    e.preventDefault();
+    const obj = {};
+    const data = $('#acuerdofilas')
+      .serializeArray()
+      .map(e => Object.values(e));
+    data.map(
+      e =>
+        (obj[e[0]] =
+          e[0] === 'dcto' ? noCifra(e[1]) / 100 : e[0] === 'monto' ? noCifra(e[1]) : e[1])
+    );
+    $.ajax({
+      url: '/links/acuerdos/nuevo',
+      type: 'POST',
+      data: obj,
+      //async: false,
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({ backdrop: 'static', keyboard: true, toggle: true });
+      },
+      success: function (data) {
+        if (data) {
+          acuerdos.ajax.url('/links/acuerdos/' + obj.orden).load(function () {
+            $('#acuerdofilas').removeClass('d-block').addClass('d-none');
+            $('#acuerdomsg').removeClass('d-none').addClass('d-block');
+            $('#ModalEventos').modal('hide');
+          });
+        }
+      }
+    });
+  });
   //////////////////////* TABLA DE RECIBOS DE MODAL *///////////////////////////
-  /* var Recibos = $('#Rcbs').DataTable({
+  var Recibos = $('#Rcbs').DataTable({
     //dom: 'Bfrtip',
     lengthChange: false,
     deferRender: true,
@@ -4421,8 +4541,8 @@ if (window.location.pathname === `/links/reportes`) {
       $('#totalRcb').html('Total de recibos ingresados ' + total);
       return pre;
     }
-  }); */
-  /* Recibos.on('mouseenter', '.Reci', function () {
+  });
+  Recibos.on('mouseenter', '.Reci', function () {
     $('.recivos').popover({
       trigger: 'hover',
       delay: { show: 500, hide: 100 },
@@ -4431,7 +4551,7 @@ if (window.location.pathname === `/links/reportes`) {
       //title: 'Recibo',
       //content: `<img src='https://grupoelitefincaraiz.com/${$(this).prop('id')}' alt='...' class='img-thumbnail'>`,
     });
-  }); */
+  });
   //////////////////////* ESTADOS DE CUENTA RESUMIDOS *///////////////////////
   var estadoscuentas = $('#estadoscuentas').DataTable({
     processing: true,
@@ -5788,18 +5908,8 @@ if (window.location.pathname === `/links/reportes`) {
       }
     });
  */
-    $('#dctoMonto').mask('#.##$', { reverse: true, selectOnFocus: true });
-    $('#stopMora').prop('checked', false);
-    $('#dctoMonto, #dcto').prop('disabled', false).val(null);
-    $(`#typo option[value=' ']`).prop('selected', true);
-    $('#prodmora').val(id);
-
-    $('#DctoMora').modal({
-      backdrop: 'static',
-      keyboard: true,
-      toggle: true
-    });
-    $('#FechaLimite').daterangepicker({
+    $('#orden-mora').val(id);
+    $('.aqmora').daterangepicker({
       locale: {
         format: 'YYYY-MM-DD',
         separator: ' - ',
@@ -5849,6 +5959,35 @@ if (window.location.pathname === `/links/reportes`) {
       } else {
         $('#dctoMonto, #dcto').prop('disabled', false).val(null);
       }
+    });
+    acuerdos.ajax.url('/links/acuerdos/' + id).load(function () {
+      const num = acuerdos
+        .rows()
+        .data()
+        .filter(e => e.estado == 9).length;
+      if (num) {
+        $('#acuerdofilas').removeClass('d-block').addClass('d-none');
+        $('#acuerdomsg').removeClass('d-none').addClass('d-block');
+      } else {
+        $('#acuerdofilas').removeClass('d-none').addClass('d-block');
+        $('#acuerdomsg').removeClass('d-block').addClass('d-none');
+      }
+
+      $('#DctoMora').modal({
+        backdrop: 'static',
+        keyboard: true,
+        toggle: true
+      });
+    });
+
+    $('input:radio[name=type]').change(function () {
+      if ($(this).val() === 'STOP')
+        $('.stop').prop('disabled', false).removeClass('d-none').addClass('d-block');
+      else $('.stop').prop('disabled', true).removeClass('d-block').addClass('d-none');
+
+      if ($(this).val() === 'REMOVE')
+        $('.dto').prop('disabled', true).removeClass('d-block').addClass('d-none');
+      else $('.dto').prop('disabled', false).removeClass('d-none').addClass('d-block');
     });
   };
   $('#formularioDcto').submit(function (e) {
@@ -15384,15 +15523,6 @@ if (window.location == `${window.location.origin}/links/asesores` && !rol.extern
       details: {
         type: 'column'
       }
-    },
-    initComplete: function (settings, json) {
-      //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
-    },
-    rowCallback: function (row, data, index) {
-      //$(row).find(`.papa`).css({ "background-color": "#EB0C1A", "color": "#FFFFFF" });
-      /*if (data["estado"] == 9) {
-                $(row).css({ "background-color": "#C61633", "color": "#FFFFFF" });
-            }*/
     }
   });
   asesores.on('change', 'tr input', function () {
