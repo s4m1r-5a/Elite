@@ -33,7 +33,6 @@ const noCifra = valor => {
 };
 const Cifra = valor => {
   if (!valor) return 0;
-  console.log(valor);
   const punto = /\.$/.test(valor);
   const num = /[^0-9.-]/g.test(valor)
     ? parseFloat(valor.replace(/[^0-9.]/g, ''))
@@ -1514,7 +1513,7 @@ async function EstadoDeCuenta(Orden) {
       bodi.sort((a, b) => {
         return new Date(a[0]).getTime() - new Date(b[0]).getTime();
       });
-      totalDeuda = Proyeccion[0].valor + totalMora - totalAbonado;
+      totalDeuda = Proyeccion[0].valor - Proyeccion[0].ahorro + totalMora - totalAbonado;
 
       /* const indx = bodi.findIndex(e => e[1] == 'RCnull');
       if (indx > -1) bodi.splice(indx, 1); */
