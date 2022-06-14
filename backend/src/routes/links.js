@@ -546,15 +546,15 @@ const usuras = async fecha => {
     data: { date: fecha }
   };
 
-  if (!fecha) return console.log((await axios(options)).data);
+  if (!fecha) return (await axios(options)).data;
 
   const {
     data: { id, annualRate, date }
   } = await axios(options);
 
   if (annualRate) {
-    const newTasa = { id, teano: annualRate, fecha: date };
-    const tabla = await pool.query(`INSERT IGNORE intereses SET ? `, newTasa);
+    const newT = { id, teano: annualRate, fecha: moment(date).endOf('month').format('YYYY-MM-DD') };
+    const tabla = await pool.query(`INSERT IGNORE intereses SET ? `, newT);
     if (tabla.insertId) {
       var bod = `_Se establecio la tasa de usura de este mes en *${annualRate}%*_`;
       await EnviarWTSAP('57 3012673944', bod);
@@ -571,25 +571,15 @@ cron.schedule('0 2 * * *', async () => {
   const tasa = await usuras(fecha);
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
-  // 5076 filas afectadas.
-  /* const intr = await pool.query(`SELECT c.id, c.separacion, c.fechs,
-    (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
-    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
-    INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
-    AND d.moras = 1 GROUP BY c.id`);
-  if (intr.length) {
-    let moraVr = `CASE`;
-    let moraTs = `CASE`;
-    intr.map(e => {
-      moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * (DATEDIFF(CURDATE(), c.fechs) - c.diaspagados) * ${e.tasa} / 365`;
-      moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
-    });
-    moraVr += ` ELSE c.mora END`;
-    moraTs += ` ELSE c.tasa END`;
-
-    await pool.query(`UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
-        c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL`);
-  } */
+  await pool.query(`UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id 
+    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    INNER JOIN intereses i ON i.teano > 0 LEFT JOIN acuerdos a ON a.orden = p.id 
+    AND a.limite > c.fechs AND a.type REGEXP 'STOP|DTO' AND a.estado IN(7, 9) 
+    SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ROUND(c.cuota * DATEDIFF(CURDATE(), 
+    c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2), c.tasa = i.teano, 
+    c.acuerdo = IF(a.dcto, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) 
+    WHERE c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND i.teano = (SELECT MIN(i.teano) 
+    FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE())`);
   ////////////////* RESTABLECER LOS ID DE LAS RELACIONES DE CUOTAS ELIMINADOS *///////////////////
   await pool.query(`SET  @num := 0`);
   await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`);
@@ -8186,7 +8176,7 @@ async function ProyeccionPagos(S) {
           q.id,
           q.moratoria,
           q.diasmoratorios,
-          a.dcto ? a.dcto : 0,
+          dcto ? dcto : 0,
           q.diasmoratorios,
           q.dctoMoratorio + saldAnt,
           q.dctoMoratorio,
@@ -8222,7 +8212,7 @@ async function ProyeccionPagos(S) {
           q.id,
           q.moratoria,
           q.diasmoratorios,
-          a.dcto ? a.dcto : 0,
+          dcto ? dcto : 0,
           diaspagados,
           totalmora, //q.dctoMoratorio,
           morapaga,
@@ -8295,38 +8285,15 @@ async function ProyeccionPagos(S) {
   ////////////////////////////////* END *///////////////////////////////////////
 
   ///////////////////////////////* MORAS */////////////////////////////////////////////
-  const intr = await pool.query(
-    `SELECT c.id, c.separacion, c.fechs, c.cuota,
-    (SELECT MIN(i.teano) FROM intereses i WHERE DATE_FORMAT(i.fecha, '%Y %m') >= DATE_FORMAT(c.fechs, '%Y %m')) tasa
-    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
-    INNER JOIN productos d ON l.producto = d.id WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.acuerdo IS NULL 
-    AND d.moras = 1 AND c.separacion = ? GROUP BY c.id HAVING tasa IS NOT NULL`,
-    S
-  );
-
-  if (intr.length) {
-    let moraVr = `CASE`;
-    let moraTs = `CASE`;
-    intr
-      .filter(e => {
-        e.id == idCuota?.id &&
-          (moraVr += ` WHEN c.id = ${idCuota?.id} THEN c.cuota * DATEDIFF(CURDATE(), "${idCuota?.nwFecha}") * ${e.tasa} / 365`);
-        e.id == idCuota?.id && (moraTs += ` WHEN c.id = ${idCuota?.id} THEN ${e.tasa}`);
-        return e.id != idCuota?.id;
-      })
-      .map(e => {
-        moraVr += ` WHEN c.id = ${e.id} THEN c.cuota * DATEDIFF(CURDATE(), c.fechs) * ${e.tasa} / 365`;
-        moraTs += ` WHEN c.id = ${e.id} THEN ${e.tasa}`;
-      });
-    moraVr += ` ELSE c.mora END`;
-    moraTs += ` ELSE c.tasa END`;
-
-    await pool.query(
-      `UPDATE cuotas c SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ${moraVr},
-        c.tasa = ${moraTs} WHERE c.fechs < CURDATE() AND c.estado = 3 AND c.separacion = ?`,
-      S
-    );
-  }
+  await pool.query(`UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id 
+    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+    INNER JOIN intereses i ON i.teano > 0 LEFT JOIN acuerdos a ON a.orden = p.id 
+    AND a.limite > c.fechs AND a.type REGEXP 'STOP|DTO' AND a.estado IN(7, 9) 
+    SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ROUND(c.cuota * DATEDIFF(CURDATE(), 
+    c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2), c.tasa = i.teano, 
+    c.acuerdo = IF(a.dcto, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) 
+    WHERE c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND c.separacion = ${S} 
+    AND i.teano = (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE())`);
 
   await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
     SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 

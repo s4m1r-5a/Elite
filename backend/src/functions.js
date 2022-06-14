@@ -1368,7 +1368,7 @@ async function EstadoDeCuenta(Orden) {
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
     o.proyect, k.pin AS cupon, s.stado, p.ahorro, l.mz, l.n, l.valor, p.vrmt2, l.mtr2, p.fecha, s.ids, r.saldomora, 
-    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora,
+    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora, c.dto,
     c.cuota, c.diaspagados, c.diasmora, c.tasa tasamora, c.estado FROM cuotas c LEFT JOIN relacioncuotas r ON r.cuota = c.id 
     LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN preventa p ON c.separacion = p.id 
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
@@ -1425,7 +1425,7 @@ async function EstadoDeCuenta(Orden) {
             '$' + Cifra(e.montocuota ? e.montocuota : e.cuota),
             e.montocuota ? e.dias : TotalDias,
             e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
-            e.montocuota ? e.dcto * 100 + '%' : '0%',
+            e.montocuota ? e.dcto * 100 + '%' : e.dto * 100 + '%',
             '$' + Cifra(e.montocuota ? e.totalmora : e.mora),
             '$' + Cifra(e.montocuota ? e.totalcuota : e.cuota + e.mora),
             e.fecharcb
@@ -1447,7 +1447,7 @@ async function EstadoDeCuenta(Orden) {
             '$' + Cifra(p.cuota),
             p.s.TotalDias,
             (e.tasamora * 100).toFixed(2) + '%',
-            '0%',
+            e.dto * 100 + '%',
             '$' + Cifra(p.s.TotalMora),
             '$' + Cifra(p.s.TotalCuota),
             '',
@@ -1462,7 +1462,7 @@ async function EstadoDeCuenta(Orden) {
           '$' + Cifra(e.montocuota ? e.montocuota : e.cuota),
           e.montocuota ? e.dias : TotalDias,
           e.montocuota ? (e.tasa * 100).toFixed(2) + '%' : (e.tasamora * 100).toFixed(2) + '%',
-          e.montocuota ? e.dcto * 100 + '%' : '0%',
+          e.montocuota ? e.dcto * 100 + '%' : e.dto * 100 + '%',
           '$' + Cifra(e.montocuota ? e.totalmora : TotalMora),
           '$' + Cifra(e.montocuota ? e.totalcuota : TotalCuota),
           e.fecharcb
