@@ -17,7 +17,7 @@ $.jMaskGlobals = {
 };
 const noCifra = valor => {
   if (!valor) return 0;
-  const num = /[^0-9.]/g.test(valor)
+  const num = /[^0-9.-]/g.test(valor)
     ? parseFloat(valor.replace(/[^0-9.]/g, ''))
     : parseFloat(valor);
   if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
@@ -26,7 +26,7 @@ const noCifra = valor => {
 const Cifra = valor => {
   if (!valor) return valor;
   const punto = /\.$/.test(valor);
-  const num = /[^0-9.]/g.test(valor)
+  const num = /[^0-9.-]/g.test(valor)
     ? parseFloat(valor.replace(/[^0-9.]/g, ''))
     : parseFloat(valor);
   if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
