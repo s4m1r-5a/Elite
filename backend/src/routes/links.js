@@ -572,14 +572,24 @@ cron.schedule('0 2 * * *', async () => {
 
   ////////////////////* DIAS DE MORA *//////////////////////////////////////////////// •	v2HD9b0f^K
   await pool.query(`UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id 
-    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    INNER JOIN intereses i ON i.teano > 0 LEFT JOIN acuerdos a ON a.orden = p.id 
-    AND a.limite > c.fechs AND a.type REGEXP 'STOP|DTO' AND a.estado IN(7, 9) 
-    SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ROUND(c.cuota * DATEDIFF(CURDATE(), 
-    c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2), c.tasa = i.teano, 
-    c.acuerdo = IF(a.dcto, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) 
-    WHERE c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND i.teano = (SELECT MIN(i.teano) 
-    FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE())`);
+  INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+  INNER JOIN intereses i ON i.teano SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = 
+  ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365, 2), c.tasa = i.teano WHERE 
+  c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND i.teano = 
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE());`);
+  await pool.query(`    
+  UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l 
+  ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id INNER JOIN intereses i 
+  ON i.teano INNER JOIN acuerdos a ON a.orden SET c.diasmora = CASE WHEN a.type = 'REMOVE' 
+  AND a.limite > c.fechs THEN 0 WHEN a.type = 'STOP' AND c.fechs BETWEEN a.limite 
+  AND a.datestop THEN 0 ELSE DATEDIFF(CURDATE(), c.fechs) END, c.mora = CASE WHEN a.type = 
+  'REMOVE' THEN 0 WHEN a.type = 'STOP' AND c.fechs BETWEEN a.limite AND a.datestop THEN 0 
+  ELSE ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2) 
+  END, c.tasa = i.teano, c.acuerdo = IF(a.id, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) WHERE 
+  c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND i.teano = 
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE()) AND a.id = 
+  (SELECT MIN(id) FROM acuerdos WHERE orden = p.id AND estado IN(7, 9) AND limite > c.fechs);`);
+
   ////////////////* RESTABLECER LOS ID DE LAS RELACIONES DE CUOTAS ELIMINADOS *///////////////////
   await pool.query(`SET  @num := 0`);
   await pool.query(`UPDATE relacioncuotas SET id = @num := (@num+1)`);
@@ -8286,14 +8296,23 @@ async function ProyeccionPagos(S) {
 
   ///////////////////////////////* MORAS */////////////////////////////////////////////
   await pool.query(`UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id 
-    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    INNER JOIN intereses i ON i.teano > 0 LEFT JOIN acuerdos a ON a.orden = p.id 
-    AND a.limite > c.fechs AND a.type REGEXP 'STOP|DTO' AND a.estado IN(7, 9) 
-    SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = ROUND(c.cuota * DATEDIFF(CURDATE(), 
-    c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2), c.tasa = i.teano, 
-    c.acuerdo = IF(a.dcto, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) 
-    WHERE c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND c.separacion = ${S} 
-    AND i.teano = (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE())`);
+  INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
+  INNER JOIN intereses i ON i.teano SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = 
+  ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365, 2), c.tasa = i.teano WHERE 
+  c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND c.separacion = ${S} AND i.teano = 
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE());`);
+  await pool.query(`    
+  UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l 
+  ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id INNER JOIN intereses i 
+  ON i.teano INNER JOIN acuerdos a ON a.orden SET c.diasmora = CASE WHEN a.type = 'REMOVE' 
+  AND a.limite > c.fechs THEN 0 WHEN a.type = 'STOP' AND c.fechs BETWEEN a.limite 
+  AND a.datestop THEN 0 ELSE DATEDIFF(CURDATE(), c.fechs) END, c.mora = CASE WHEN a.type = 
+  'REMOVE' THEN 0 WHEN a.type = 'STOP' AND c.fechs BETWEEN a.limite AND a.datestop THEN 0 
+  ELSE ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365 * IF(a.dcto, 1 - a.dcto, 1), 2) 
+  END, c.tasa = i.teano, c.acuerdo = IF(a.id, a.id, NULL), c.dto = IF(a.dcto, a.dcto, 0) WHERE 
+  c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND c.separacion = ${S} AND i.teano = 
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE()) AND a.id = 
+  (SELECT MIN(id) FROM acuerdos WHERE orden = p.id AND estado IN(7, 9) AND limite > c.fechs);`);
 
   await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
     SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
