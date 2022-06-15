@@ -1368,7 +1368,7 @@ async function EstadoDeCuenta(Orden) {
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
     o.proyect, k.pin AS cupon, s.stado, p.ahorro, l.mz, l.n, l.valor, p.vrmt2, l.mtr2, p.fecha, s.ids, r.saldomora, 
-    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora, c.dto,
+    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora, c.dto, o.imagenes,
     c.cuota, c.diaspagados, c.diasmora, c.tasa tasamora, c.estado FROM cuotas c LEFT JOIN relacioncuotas r ON r.cuota = c.id 
     LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN preventa p ON c.separacion = p.id 
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
@@ -1524,41 +1524,49 @@ async function EstadoDeCuenta(Orden) {
       [
         {
           text: 'TOTAL ABONADO',
-          style: 'tableHeader2',
           alignment: 'center',
-          colSpan: 4
+          colSpan: 4,
+          fontSize: 11,
+          bold: true,
+          color: 'black'
         },
         {},
         {},
         {},
         {
           text: '$' + Cifra(totalAbonado),
-          style: 'tableHeader2',
           alignment: 'center',
-          colSpan: 2
+          colSpan: 2,
+          fontSize: 11,
+          bold: true,
+          color: 'black'
         },
         {}
       ],
-      [{ text: NumeroALetras(totalAbonado), style: 'small2', colSpan: 6 }, {}, {}, {}, {}, {}],
+      [{ text: NumeroALetras(totalAbonado), style: 'smallx', colSpan: 6 }, {}, {}, {}, {}, {}],
       [
         {
           text: 'SALDO A LA FECHA',
-          style: 'tableHeader2',
           alignment: 'center',
-          colSpan: 4
+          colSpan: 4,
+          fontSize: 11,
+          bold: true,
+          color: 'black'
         },
         {},
         {},
         {},
         {
           text: '$' + Cifra(totalDeuda),
-          style: 'tableHeader2',
           alignment: 'center',
-          colSpan: 2
+          colSpan: 2,
+          fontSize: 11,
+          bold: true,
+          color: 'black'
         },
         {}
       ],
-      [{ text: NumeroALetras(totalDeuda), style: 'small2', colSpan: 6 }, {}, {}, {}, {}, {}]
+      [{ text: NumeroALetras(totalDeuda), style: 'smallx', colSpan: 6 }, {}, {}, {}, {}, {}]
     );
     ////////////////////////* CREAR PDF *//////////////////////////////
     const printer = new PdfPrinter(Roboto);
@@ -1641,7 +1649,7 @@ async function EstadoDeCuenta(Orden) {
               width: 20,
               alignment: 'right',
               margin: [10, 3, 10, 3],
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public' + Proyeccion[0].imagenes),
               fit: [20, 20]
             }
           ]
@@ -1746,7 +1754,7 @@ async function EstadoDeCuenta(Orden) {
             ],
             {
               width: 100,
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public' + Proyeccion[0].imagenes),
               fit: [100, 100]
             }
           ]
@@ -1930,6 +1938,12 @@ async function EstadoDeCuenta(Orden) {
         },
         small: {
           fontSize: 8,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        smallx: {
+          fontSize: 7,
           italics: true,
           color: 'gray',
           alignment: 'right'
