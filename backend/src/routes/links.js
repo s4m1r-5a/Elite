@@ -4224,7 +4224,7 @@ router.post('/recibo', async (req, res) => {
     concpto === 'ABONO' ? (pago.concepto = concpto) : (pago.pago = id);
 
     const acuerdo = await pool.query(
-      'SELECT id FROM acuerdos WHERE orden = ? AND estado != 5 AND limite >= ?',
+      'SELECT id FROM acuerdos WHERE orden = ? AND estado = 9 AND limite >= ?',
       [orden, pago.fecharcb]
     );
     acuerdo.length && (pago.acuerdo = acuerdo[0].id);
