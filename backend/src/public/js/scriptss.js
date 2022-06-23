@@ -4626,7 +4626,7 @@ if (window.location.pathname === `/links/reportes`) {
         data: 'total',
         className: 'te',
         render: function (data, method, row) {
-          return data ? Moneda(data) : Moneda(row.valor);
+          return data ? Cifra(data) : Cifra(row.valor);
         }
       },
       {
@@ -4645,7 +4645,7 @@ if (window.location.pathname === `/links/reportes`) {
         data: 'mora',
         className: 'te',
         render: function (data, method, row) {
-          return row.total ? '$' + Moneda(data + row.morafutura) : '$0';
+          return row.total ? '$' + Cifra(data + row.morafutura) : '$0';
         }
       },
       {
@@ -4658,8 +4658,8 @@ if (window.location.pathname === `/links/reportes`) {
         data: 'montos',
         render: function (data, method, row) {
           return row.total
-            ? '$' + Moneda(row.total + row.morafutura + row.mora - data)
-            : '$' + Moneda(row.valor);
+            ? '$' + Cifra(row.total + row.morafutura + row.mora - data)
+            : '$' + Cifra(row.valor);
         }
       },
       {
@@ -4690,7 +4690,7 @@ if (window.location.pathname === `/links/reportes`) {
               .after(
                 `<tr class="total">
                                         <td colspan=2>Total:</td>
-                                        <td colspan="10">${Moneda(total)}</td>
+                                        <td colspan="10">${Cifra(total)}</td>
                                      </tr>`
               );
             total = 0;
@@ -4711,7 +4711,7 @@ if (window.location.pathname === `/links/reportes`) {
             .after(
               `<tr class="total">
                                     <td colspan=2>Total:</td>
-                                    <td colspan="10">${Moneda(total)}</td>
+                                    <td colspan="10">${Cifra(total)}</td>
                                 </tr>`
             );
         }
@@ -4795,11 +4795,11 @@ if (window.location.pathname === `/links/reportes`) {
                         <div class="card-body text-primary h4">
                           <div class="mb-0">
                             <span class="align-middle text-dark">TOTALES</span>
-                            <span class="align-middle card-text">$${Moneda(total)}</span>
+                            <span class="align-middle card-text">$${Cifra(total)}</span>
                           </div>
                           <div class="mb-0">                                          
                             <span class="align-middle text-dark">DESCUENTOS</span>
-                            <span class="align-middle text-danger">$${Moneda(descuentos)}</span>
+                            <span class="align-middle text-danger">$${Cifra(descuentos)}</span>
                           </div>
                           <div class="mb-0">
                             <span class="align-middle text-dark">PRODUCTOS VENDIDOS</span>
@@ -4807,19 +4807,19 @@ if (window.location.pathname === `/links/reportes`) {
                           </div>
                           <div class="mb-0">
                             <span class="align-middle text-dark">VENTA</span>
-                            <span class="align-middle text-success">$${Moneda(totalventa)}</span>
+                            <span class="align-middle text-success">$${Cifra(totalventa)}</span>
                           </div>
                           <div class="mb-0"> 
                             <span class="align-middle text-dark">ABONOS</span>
-                            <span class="align-middle text-success">$${Moneda(abonos)}</span>
+                            <span class="align-middle text-success">$${Cifra(abonos)}</span>
                           </div>
                           <div class="mb-0">
                             <span class="align-middle text-dark">PROYECTADO</span>
-                            <span class="align-middle text-warning">$${Moneda(proyectado)}</span>
+                            <span class="align-middle text-warning">$${Cifra(proyectado)}</span>
                           </div> 
                           <div class="mb-0">
                             <span class="align-middle text-dark">SALDOS</span>
-                            <span class="align-middle text-warning">$${Moneda(salds)}</span>
+                            <span class="align-middle text-warning">$${Cifra(salds)}</span>
                           </div>                                            
                         </div>
                       </div>                      
@@ -5083,7 +5083,7 @@ if (window.location.pathname === `/links/reportes`) {
                   <td colspan="6">
                     <nav class="nav nav-justified">
                       <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
-                      <a class="nav-item nav-link py-0">$${Moneda(
+                      <a class="nav-item nav-link py-0">$${Cifra(
                         parseFloat(datos[i].total) + mora - monto
                       )}</a>
                     </nav>
@@ -5126,7 +5126,7 @@ if (window.location.pathname === `/links/reportes`) {
                   <nav class="nav nav-justified">
                     <a class="nav-item nav-link py-0">SALDO A LA FECHA</a>
                     <a class="nav-item nav-link py-0">$${
-                      monto ? Moneda(parseFloat(datos[i].total) + mora - monto) : 0
+                      monto ? Cifra(parseFloat(datos[i].total) + mora - monto) : 0
                     }</a>
                   </nav>
                 </td>
@@ -8929,6 +8929,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
           $('#num-fnc').val(Orden.filter(r => r.tipo === 'FINANCIACION').length);
           $(`#aplyDto option[value='${Ord.dto}']`).prop('selected', true);
           clientes.val(clients).trigger('change');
+          console.log($('#num-ini').val(), $('#num-fnc').val(), Orden);
         } else {
           producto.asesor = asesor.val();
           producto.cliente = clientes.val()[0] ? clientes.val()[0] : null;
@@ -9185,6 +9186,9 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       productos = data.productos;
       Dtos = data.descuentos;
       Orden = data.orden;
+      data.historiales.map(e =>
+        console.log(e.date, moment(e.date).locale('es-co').format('YYYY-MM-DD HH:mm'))
+      );
       if (Orden.length) {
         lt = Orden[0].id;
         agente = Orden[0].asesor;
