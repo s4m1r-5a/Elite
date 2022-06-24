@@ -63,7 +63,7 @@ var desarrollo = false;
 var url = 'https://bin.chat-api.com/1bd03zz1'; // •	v2HD9b0f^K
 
 //////////////////////////////////////BUSCAR COMISIONES DUPLICADAS ////////////////////////////////////
-`SELECT p.id, p.comision, p.idcomision, d.proyect, l.mz, l.n, l.directa, s.descp, s.porciento, 
+`SELECT p.id, p.comision, p.blockcomi, d.proyect, l.mz, l.n, l.directa, s.descp, s.porciento, 
 COUNT(s.ids) repetidas, u.sucursal, u.nrango FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
 INNER JOIN productos d ON l.producto = d.id INNER JOIN users u ON p.asesor = u.id LEFT JOIN solicitudes s 
 ON s.orden = p.id AND s.descp = 'VENTA DIRECTA' AND s.concepto = 'COMISION DIRECTA' 
@@ -4865,8 +4865,13 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     await pool.query(`DELETE FROM cuotas WHERE id NOT IN(${ids}) AND separacion = ?`, cupon.orden);
   }
   if (p) await ProyeccionPagos(cupon.orden);
-  /* req.flash('success', 'Separación realizada exitosamente');
-  res.redirect('/links/reportes'); */
+  const st = await Estados(cupon.orden);
+  try {
+    await pool.query(`UPDATE productosd SET ? WHERE id = ?`, [{ estado: st?.std }, id]);
+    if (/10|13/.test(st?.std)) await Desendentes(producto.asesor, 10);
+  } catch (e) {
+    console.log(e);
+  }
   res.send(true);
 });
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
@@ -6227,7 +6232,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   } else if (id === 'comision') {
     const solicitudes =
-      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i, s.fecharcb,
+      await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, c.idc i, s.fecharcb, pr.id orden,
         s.descp, c.bank, c.documento docu, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, 
         u.username mail, pd.mz, pd.n, s.retefuente, s.reteica, pagar, c.tipocta, us.id, us.fullname, s.lt,
         cl.nombre, c.numerocuenta, p.proyect FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
@@ -6281,7 +6286,8 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       l.directa = IF(s.descp = 'VENTA DIRECTA', NULL, l.directa),
       l.comiempresa = IF(s.descp = 'VENTA INDIRECTA', 0, l.comiempresa),
       l.comisistema = IF(s.descp = 'ADMIN PROYECTOS', 0, l.comisistema),
-      p.idcomision = IF(s.descp = 'VENTA DIRECTA', NULL, p.idcomision)`;
+      p.blockcomi = IF(s.descp = 'VENTA DIRECTA', NULL, p.blockcomi)`;
+
     sql += !!observacion ? `, s.observaciones = '${observacion}'` : '';
     sql += std ? `, s.stado = ${std}` : '';
 
@@ -7154,12 +7160,6 @@ router.get('/cedula/:id', isLoggedIn, async (req, res) => {
 router.post('/desendentes', noExterno, async (req, res) => {
   const { id, asesor } = req.body;
   const hoy = moment().format('YYYY-MM-DD');
-  await pool.query(`
-  UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id SET 
-  l.uno = IF(s.descp = 'PRIMERA LINEA', s.asesor, l.uno), l.dos = IF(s.descp = 'SEGUNDA LINEA', s.asesor, l.dos), 
-  l.tres = IF(s.descp = 'TERCERA LINEA', s.asesor, l.tres), l.directa = IF(s.descp = 'VENTA DIRECTA', s.asesor, l.directa), 
-  p.idcomision = IF(s.descp = 'VENTA DIRECTA', s.ids, p.idcomision) WHERE s.concepto IN('COMISION DIRECTA', 'COMISION INDIRECTA') 
-  AND s.descp IN('VENTA DIRECTA', 'PRIMERA LINEA', 'SEGUNDA LINEA', 'TERCERA LINEA') AND s.stado != 6;`);
 
   const sepBon = await pool.query(`SELECT * FROM solicitudes WHERE concepto NOT IN('PAGO', 'ABONO') 
     AND (concepto = 'BONO EXTRA' OR descp = 'SEPARACION') AND orden = ${id} AND stado != 6`);
@@ -7168,7 +7168,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
   const sep = sepBon.some(e => e.descp === 'SEPARACION');
 
   const comisiones = await pool.query(
-    `SELECT p.id ordn, p.asesor, p.ahorro, p.lote, p.comision, p.idcomision, p.obsevacion, 
+    `SELECT p.id ordn, p.asesor, p.ahorro, p.lote, p.comision, p.blockcomi, p.obsevacion, 
      u.bonoextra, o.incentivo, o.bextra, l.directa, l.valor, o.external, l.comiempresa, 
      o.maxcomis, l.comisistema, o.sistema, o.company, l.estado, p.status, p.separar, 
      SUM(IF(s.concepto = 'COMISION DIRECTA' AND s.descp = 'VENTA DIRECTA', s.monto, 0)) comy 
@@ -7181,7 +7181,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
 
   if (comisiones.length) {
     await comisiones.map(async a => {
-      const direct = !a.directa && !a.idcomision;
+      const direct = !a.directa && !a.blockcomi;
       var estds = /10|13/.test(a.estado) && a.status > 1;
       const valor = a.valor - a.ahorro;
       const comision = Math.min(a.comision, a.maxcomis);
@@ -7241,10 +7241,6 @@ router.post('/desendentes', noExterno, async (req, res) => {
   await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
   SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
   LIKE '%GESTION%') AND s.descp != 'SEPARACION' AND p.fechapagoini IS NOT NULL`);
-
-  await pool.query(`UPDATE preventa p INNER JOIN solicitudes s ON s.orden = p.id SET 
-  p.idcomision = s.ids WHERE s.concepto = 'COMISION DIRECTA' AND s.descp = 'VENTA DIRECTA' 
-  AND s.stado != 6;`);
 
   res.send(true);
 });
@@ -8546,15 +8542,9 @@ var normalize = (function () {
 async function Desendentes(user, stados, pasado) {
   if (stados != 10) return false;
   const hoy = moment().format('YYYY-MM-DD');
-  await pool.query(`
-  UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id SET 
-  l.uno = IF(s.descp = 'PRIMERA LINEA', s.asesor, l.uno), l.dos = IF(s.descp = 'SEGUNDA LINEA', s.asesor, l.dos), 
-  l.tres = IF(s.descp = 'TERCERA LINEA', s.asesor, l.tres), l.directa = IF(s.descp = 'VENTA DIRECTA', s.asesor, l.directa), 
-  p.idcomision = IF(s.descp = 'VENTA DIRECTA', s.ids, p.idcomision) WHERE s.concepto IN('COMISION DIRECTA', 'COMISION INDIRECTA') 
-  AND s.descp IN('VENTA DIRECTA', 'PRIMERA LINEA', 'SEGUNDA LINEA', 'TERCERA LINEA') AND s.stado != 6;`);
 
   const comisiones = await pool.query(
-    `SELECT p.id ordn, p.asesor, p.ahorro, p.lote, p.comision, p.idcomision, p.obsevacion, 
+    `SELECT p.id ordn, p.asesor, p.ahorro, p.lote, p.comision, p.blockcomi, p.obsevacion, 
      u.bonoextra, o.incentivo, o.bextra, l.directa, l.valor, o.external, l.comiempresa, 
      o.maxcomis, l.comisistema, o.sistema, o.company, l.estado, p.status, p.separar, 
      SUM(IF(s.concepto = 'COMISION DIRECTA' AND s.descp = 'VENTA DIRECTA', s.monto, 0)) comy 
@@ -8562,13 +8552,13 @@ async function Desendentes(user, stados, pasado) {
      INNER JOIN productos o ON l.producto = o.id INNER JOIN users u ON p.asesor = u.id
      INNER JOIN clientes c ON p.cliente = c.idc LEFT JOIN solicitudes s ON s.orden = p.id
      WHERE p.asesor = ? AND l.estado IN(10, 13) AND p.tipobsevacion IS NULL AND p.status IN(2, 3) 
-     AND p.idcomision IS NULL GROUP BY p.id`,
+     AND p.blockcomi IS NULL GROUP BY p.id`,
     user
   );
 
   if (comisiones.length) {
     await comisiones.map(async a => {
-      if (a.idcomision > 0) return false;
+      if (a.blockcomi > 0) return false;
       const valor = a.valor - a.ahorro;
       const comision = Math.min(a.comision, a.maxcomis);
       const monto = valor * comision;
@@ -8615,10 +8605,6 @@ async function Desendentes(user, stados, pasado) {
   await pool.query(`UPDATE solicitudes s INNER JOIN preventa p ON s.orden = p.id 
   SET s.fecharcb = p.fechapagoini WHERE (s.concepto LIKE '%COMISION%' OR s.concepto 
   LIKE '%GESTION%') AND s.descp != 'SEPARACION' AND p.fechapagoini IS NOT NULL`);
-
-  /* await pool.query(`UPDATE preventa p INNER JOIN solicitudes s ON s.orden = p.id SET 
-  p.idcomision = s.ids WHERE s.concepto = 'COMISION DIRECTA' AND s.descp = 'VENTA DIRECTA' 
-  AND s.stado != 6;`); */
 
   return true;
 }

@@ -6615,8 +6615,8 @@ if (window.location.pathname === `/links/reportes`) {
       },
       columnDefs: [
         { className: 'control', orderable: true, targets: 0 },
-        { responsivePriority: 1, targets: [7, 8, 15, 16, 17] },
-        { responsivePriority: 2, targets: [13, -1] }
+        { responsivePriority: 1, targets: [2, 8, 9, 16, 17, 18] },
+        { responsivePriority: 2, targets: [14, -1] }
       ],
       order: [[1, 'desc']],
       language: languag,
@@ -6636,6 +6636,7 @@ if (window.location.pathname === `/links/reportes`) {
           defaultContent: ''
         },
         { data: 'ids' },
+        { data: 'orden' },
         { data: 'nam' },
         {
           data: 'fech',
@@ -7391,7 +7392,7 @@ if (window.location.pathname === `/links/reportes`) {
   }
   $('#min, #max').on('keyup', function () {
     var col = $(this).attr('id') === 'min' ? 3 : 4;
-    var col2 = $(this).attr('id') === 'min' ? 15 : 16;
+    var col2 = $(this).attr('id') === 'min' ? 16 : 17;
     var buscar = this.value ? '^' + this.value + '$' : '';
     tableOrden.columns(col).search(buscar, true, false, true).draw();
     comisiones.columns(col2).search(buscar, true, false, true).draw();
