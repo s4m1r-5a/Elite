@@ -6272,21 +6272,15 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     const std = parseFloat(req.body.std);
     let sql = `SET s.aprueba = '${req.user.fullname}'`;
 
-    if (!!blck || !std)
-      sql += `, l.uno = IF(s.descp = 'PRIMERA LINEA', ${!std ? null : 1}, l.uno), 
-      l.dos = IF(s.descp = 'SEGUNDA LINEA', ${!std ? null : 1}, l.dos), 
-      l.tres = IF(s.descp = 'TERCERA LINEA', ${!std ? null : 1}, l.tres), 
-      l.directa = IF(s.descp = 'VENTA DIRECTA', ${!std ? null : 1}, l.directa),
-      l.comiempresa = IF(s.descp = 'VENTA INDIRECTA', ${!std ? 0 : 1}, l.comiempresa),
-      l.comisistema = IF(s.descp = 'ADMIN PROYECTOS', ${!std ? 0 : 1}, l.comisistema)`;
-    else if (!blck && std == 6)
+    if (/0|6/.test(std)) {
       sql += `, l.uno = IF(s.descp = 'PRIMERA LINEA', NULL, l.uno), 
       l.dos = IF(s.descp = 'SEGUNDA LINEA', NULL, l.dos), 
       l.tres = IF(s.descp = 'TERCERA LINEA', NULL, l.tres), 
       l.directa = IF(s.descp = 'VENTA DIRECTA', NULL, l.directa),
       l.comiempresa = IF(s.descp = 'VENTA INDIRECTA', 0, l.comiempresa),
       l.comisistema = IF(s.descp = 'ADMIN PROYECTOS', 0, l.comisistema),
-      p.blockcomi = IF(s.descp = 'VENTA DIRECTA', NULL, p.blockcomi)`;
+      p.blockcomi = ${blck ? 1 : NULL}`;
+    }
 
     sql += !!observacion ? `, s.observaciones = '${observacion}'` : '';
     sql += std ? `, s.stado = ${std}` : '';
