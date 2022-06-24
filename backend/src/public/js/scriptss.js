@@ -2575,10 +2575,13 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
     },
     columnDefs: [
       { className: 'control', orderable: true, targets: 0 },
-      { responsivePriority: 1, targets: [8, 11, 15, 16, 17] },
-      { responsivePriority: 2, targets: [13, -1] }
+      { responsivePriority: 1, targets: [2, 9, 12, 16, 17, 18] },
+      { responsivePriority: 2, targets: [14, -1] }
     ],
-    order: [[1, 'desc']],
+    order: [
+      [1, 'desc'],
+      [2, 'desc']
+    ],
     language: languag,
     ajax: {
       method: 'POST',
@@ -2614,6 +2617,7 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
         defaultContent: ''
       },
       { data: 'ids' },
+      { data: 'orden' },
       { data: 'nam' },
       {
         data: 'fech',

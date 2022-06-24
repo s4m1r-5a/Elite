@@ -5745,7 +5745,8 @@ router.post('/comisiones', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
   const params = pdo ? `AND p.id IN (${pdo})` : '';
 
-  const solicitudes = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, 
+  const solicitudes =
+    await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, s.stado, pr.id orden, 
     s.descp, s.porciento, s.total, u.id idu, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
     pd.n, s.retefuente, s.reteica, s.pagar, us.id, us.fullname, s.lt, cl.nombre, p.proyect 
     FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
