@@ -4635,6 +4635,16 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   const usrs = req.user.id;
 
   if (!req.user.admin) {
+    const promesa = await pool.query(`SELECT * FROM preventa WHERE id = ${id} AND status > 0`);
+
+    if (comi.length > 0) {
+      req.flash(
+        'error',
+        'Esta Orden no es posible editarla ya que posee una promesa de compra y venta.'
+      );
+      return res.redirect('/links/reportes');
+    }
+
     const comi = await pool.query(`SELECT * FROM solicitudes WHERE orden = ${id} AND stado != 6 AND 
      concepto REGEXP 'COMISION|GESTION' AND descp != 'SEPARACION'`);
 
