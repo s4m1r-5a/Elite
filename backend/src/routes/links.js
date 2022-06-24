@@ -6279,7 +6279,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       l.directa = IF(s.descp = 'VENTA DIRECTA', NULL, l.directa),
       l.comiempresa = IF(s.descp = 'VENTA INDIRECTA', 0, l.comiempresa),
       l.comisistema = IF(s.descp = 'ADMIN PROYECTOS', 0, l.comisistema),
-      p.blockcomi = ${blck ? 1 : NULL}`;
+      p.blockcomi = ${blck ? 1 : null}`;
     }
 
     sql += !!observacion ? `, s.observaciones = '${observacion}'` : '';
