@@ -186,6 +186,11 @@ INNER JOIN preventa p ON s.orden = p.id INNER JOIN productosd l ON p.lote = l.id
 INNER JOIN productos d ON l.producto = d.id INNER JOIN clientes c ON p.cliente = c.idc 
 WHERE e.date >= '2020-05-01' ORDER BY e.date` */
 
+/////////////////////* LISTA DE CLIENTES *////////////////////////////////
+`SELECT p.id, o.proyect, l.n lt, c.nombre, c.movil, c.email FROM clientes c 
+INNER JOIN preventa p ON p.cliente = c.idc INNER JOIN productosd l ON p.lote = l.id 
+INNER JOIN productos o ON l.producto = o.id WHERE o.id = 27 ORDER BY l.n`;
+
 ////////////////* COMISIONES DE GRUPO ELITE *////////////////////////////
 var lm = `SELECT p.id, d.proyect proyecto, p.fecha, l.mz, l.n lt, l.mtr2, l.mtr, l.valor, e.pin, e.descuento, p.ahorro, l.valor - p.ahorro Total, p.status, l.estado,
 
@@ -537,7 +542,6 @@ cron.schedule('0 10 13,28 * *', async () => {
     )}* y una *deuda total* de *$${Moneda(deuda)}*_`
   );
 });
-
 const usuras = async fecha => {
   const options = {
     method: 'POST',
@@ -563,7 +567,6 @@ const usuras = async fecha => {
   const tasa = { id, annualRate, date };
   return tasa;
 };
-
 cron.schedule('0 2 * * *', async () => {
   const finmes = moment().endOf('month').format('DD');
   const dia = moment().format('DD');
@@ -820,7 +823,6 @@ cron.schedule('7 10 * * *', async () => {
     //await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
   }
 });
-
 cron.schedule('0 0 * * *', async () => {
   mysqldump({
     connection: {
@@ -2625,8 +2627,8 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
       res.send(true);
     }
   } else {
-    const fila = await pool.query('SELECT * FROM productosd WHERE producto = ?', id);
-    respuesta = { data: fila };
+    const fi = await pool.query('SELECT * FROM productosd WHERE estado != 16 AND producto = ?', id);
+    respuesta = { data: fi };
     res.send(respuesta);
   }
 });
@@ -4629,7 +4631,6 @@ router.get('/orden', isLoggedIn, async (req, res) => {
 
   res.render('links/orden', { lote: lt, usrs, orden: null });
 });
-
 router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const usrs = req.user.id;
@@ -4659,7 +4660,6 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
 
   res.render('links/orden', { lote: null, usrs, orden: id });
 });
-
 router.post('/orden/save', isLoggedIn, async (req, res) => {
   const { proyeccion, ordenAnt, producto, cupon, historyQuota } = req.body;
   const { id, mtr, mtr2, inicial, valor } = producto;
@@ -5824,7 +5824,10 @@ router.post('/acuerdos/:orden', isLoggedIn, async (req, res) => {
   }
 });
 //////////////////////* REPORTES *//////////////////////////////////
-router.get('/reportes', isLoggedIn, (req, res) => {
+router.get('/reportes', isLoggedIn, async (req, res) => {
+  /* await pool.query(
+    `UPDATE users u SET u.rutas = '[{"name":"Tablero","new":false,"link":"/tablero","activo":false,"icono":"sliders"},{"name":"Productos","new":false,"link":"/links/productos","activo":false,"todo":false,"aprobar":false,"eliminar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"ctaCobro":false,"productos":[],"icono":"bell"},{"name":"Reportes","new":false,"link":"/links/reportes","activo":false,"todo":false,"editar":false,"eliminar":false,"acuerdos":false,"anular":false,"comisiones":false,"proyeccion":false,"estados":false,"excel":false,"estadodecuentas":false,"productos":[],"icono":"layers"},{"name":"Comisiones","new":false,"link":"/links/comisiones","activo":false,"todo":false,"pagar":false,"eliminar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"ctaCobro":false,"productos":[],"icono":"pocket"},{"name":"Solicitudes","new":true,"link":"/links/solicitudes","activo":false,"todo":false,"aprobar":false,"eliminar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"ctaCobro":false,"productos":[],"icono":"bell"},{"name":"Pagos","new":false,"link":"/links/pagos","activo":true,"icono":"dollar-sign"},{"name":"Cupones","new":false,"link":"/links/cupones","activo":false,"icono":"tag"},{"name":"Clientes","new":false,"link":"/links/clientes","activo":false,"todo":false,"aprobar":false,"eliminar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"ctaCobro":false,"productos":[],"icono":"users"},{"name":"Asesores","new":false,"link":"/links/asesores","activo":false,"todo":false,"aprobar":false,"eliminar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"ctaCobro":false,"productos":[],"icono":"users"},{"name":"Red","new":false,"link":"/links/red","activo":false,"icono":"users"},{"name":"Cartera","new":false,"link":"/links/cartera","activo":false,"icono":"file-text"}]'`
+  ); */
   res.render('links/reportes');
 });
 var CODE = null;

@@ -1649,7 +1649,12 @@ async function EstadoDeCuenta(Orden) {
               width: 20,
               alignment: 'right',
               margin: [10, 3, 10, 3],
-              image: path.join(__dirname, '/public' + Proyeccion[0].imagenes),
+              image: path.join(
+                __dirname,
+                Proyeccion[0].imagenes
+                  ? '/public' + Proyeccion[0].imagenes
+                  : '/public/img/avatars/avatar.png'
+              ),
               fit: [20, 20]
             }
           ]
@@ -1754,7 +1759,12 @@ async function EstadoDeCuenta(Orden) {
             ],
             {
               width: 100,
-              image: path.join(__dirname, '/public' + Proyeccion[0].imagenes),
+              image: path.join(
+                __dirname,
+                Proyeccion[0].imagenes
+                  ? '/public' + Proyeccion[0].imagenes
+                  : '/public/img/avatars/avatar.png'
+              ),
               fit: [100, 100]
             }
           ]
@@ -1987,6 +1997,7 @@ async function EstadoDeCuenta(Orden) {
             'Grupo Elite te da la bienvenida',
             [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
         ); */
+    console.log(ruta);
     return ruta; //JSON.stringify(estado);
   } else {
     return { sent: false };

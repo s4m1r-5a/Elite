@@ -18,7 +18,20 @@
 					<span class="sidebar-badge badge badge-primary">New</span>
 				</a>
 			</li>-->
-        <li class='sidebar-item'>
+        {{#each user.rutas}}
+          {{#if activo}}
+            <li class='sidebar-item'>
+              <a class='sidebar-link' href={{link}}>
+                <i class='align-middle' data-feather={{icono}}></i>
+                <span class='align-middle'>{{name}}</span>
+                {{#if new}}
+                  <span class='sidebar-badge badge badge-primary'>{{new}}</span>
+                {{/if}}
+              </a>
+            </li>
+          {{/if}}
+        {{/each}}
+        {{! <li class='sidebar-item'>
           <a class='sidebar-link' href='/tablero'>
             <i class='align-middle' data-feather='sliders'></i>
             <span class='align-middle'>Tablero</span>
@@ -110,7 +123,8 @@
             <span class='align-middle'>Cartera</span>
             <span class='sidebar-badge badge badge-primary'></span>
           </a>
-        </li>
+        </li> }}
+
         <li class='sidebar-item'>
           <a href='#pages2' data-toggle='collapse' class='sidebar-link collapsed'>
             <i class='align-middle' data-feather='settings'></i>
