@@ -8913,7 +8913,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
                 id: e.idq,
                 o: e.o,
                 cuot: e.cuot,
-                id2: 1,
+                id2: 0,
                 fechs2: null,
                 ncuota2: null,
                 cuota2: null
@@ -8934,7 +8934,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
           $('#num-fnc').val(Orden.filter(r => r.tipo === 'FINANCIACION').length);
           $(`#aplyDto option[value='${Ord.dto}']`).prop('selected', true);
           clientes.val(clients).trigger('change');
-          console.log($('#num-ini').val(), $('#num-fnc').val(), Orden);
+          //console.log($('#num-ini').val(), $('#num-fnc').val(), Orden);
         } else {
           producto.asesor = asesor.val();
           producto.cliente = clientes.val()[0] ? clientes.val()[0] : null;

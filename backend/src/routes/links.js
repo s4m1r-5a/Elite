@@ -4663,8 +4663,8 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
 router.post('/orden/save', isLoggedIn, async (req, res) => {
   const { proyeccion, ordenAnt, producto, cupon, historyQuota } = req.body;
   const { id, mtr, mtr2, inicial, valor } = producto;
-  const updateQotas = await proyeccion.some(e => !e?.id || !e?.id2);
-  //console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, updateQotas);
+  const qotas = proyeccion.reduce((i, e) => (e.cuota && e.cuota2 ? i + 2 : e.cuota ? i + 1 : i), 0);
+  //console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, qotas);
   const p = cupon?.orden ? 'p.' : '';
   const orden = {
     [p + 'cuot']: historyQuota.FINANCIACION,
@@ -4685,7 +4685,6 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     [p + 'ahorro']: cupon.ahorro,
     [p + 'comision']: cupon?.comision ? cupon.comision : 0
   };
-
   const qpon = {
     pin: ID(5),
     descuento: cupon.dto,
@@ -4704,7 +4703,8 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     p.ahorro, c.cuota qota, l.id, l.producto, l.mtr, l.mtr2, l.inicial, l.valor, q.descuento
     FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id LEFT JOIN cupones q ON p.cupon = q.id
     INNER JOIN productosd l ON p.lote = l.id WHERE c.separacion = ${cupon.orden} ORDER BY TIMESTAMP(c.fechs) ASC`);
-
+    updateQotas = Math.abs(qotas - ordenAnt.length);
+    console.log(updateQotas, qotas, ordenAnt.length);
     ordenAnt.map(e => {
       if (e.ncuota % 2)
         filas.push({
