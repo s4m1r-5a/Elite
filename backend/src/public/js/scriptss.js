@@ -11403,7 +11403,7 @@ if (window.location == `${window.location.origin}/links/productos`) {
         className: 'lista',
         data: 'id',
         render: function (data, method, row) {
-          return `<a href="javascript:LISTAS(${data}, '${row.fechaini}', '${row.fechafin}', '${row.proyect}');" title="Click aqui para descargar lista de lotes disponibles"><i class="fas fa-file-alt"></i></a>`;
+          return `<a href="javascript:LISTAS(${data}, '${row.fechaini}', '${row.fechafin}', '${row.proyect}', '${row.imagenes}');" title="Click aqui para descargar lista de lotes disponibles"><i class="fas fa-file-alt"></i></a>`;
         }
       },
       {
@@ -16513,7 +16513,7 @@ function ID(lon) {
   return code;
 }
 var LISTA = '';
-function LISTAS(n, fi, ff, p) {
+function LISTAS(n, fi, ff, p, IMG) {
   var fch = new Date();
   var FI = moment(fi).format('YYYY-MM-DD'),
     FF = moment(ff).format('YYYY-MM-DD');
@@ -16552,7 +16552,7 @@ function LISTAS(n, fi, ff, p) {
     var doc = new jsPDF('p', 'mm', 'a4');
     var img = new Image();
     var totalPagesExp = '{total_pages_count_string}';
-    img.src = '/img/avatars/avatar.png';
+    img.src = IMG == 'NULL' ? '/img/avatars/avatar.png' : IMG;
 
     doc.autoTable({
       html: '#listas',

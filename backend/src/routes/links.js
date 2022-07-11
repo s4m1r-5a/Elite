@@ -2498,7 +2498,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
         THEN (p.vrmt2 * l.mtr2) * p.iniciar / 100 WHEN d.valmtr2 > 0 THEN (d.valmtr2 * l.mtr2) * d.porcentage / 100 
         ELSE (l.mtr * l.mtr2) * d.porcentage / 100 END, l.mtr = CASE WHEN p.id IS NOT NULL THEN p.vrmt2 
         WHEN d.valmtr2 > 0 THEN d.valmtr2 ELSE l.mtr END, l.estado = CASE WHEN p.id IS NOT NULL THEN l.estado
-        WHEN l.estado NOT IN(9, 15) THEN 15 ELSE l.estado END WHERE l.producto = ${id} AND p.tipobsevacion IS NULL`);
+        WHEN l.estado NOT IN(9, 15, 16) THEN 15 ELSE l.estado END WHERE l.producto = ${id} AND p.tipobsevacion IS NULL`);
 
     await pool.query(`UPDATE productosd l INNER JOIN productos d ON l.producto  = d.id 
         INNER JOIN preventa p ON p.lote = l.id SET l.valor = CASE WHEN d.valmtr2 > 0 THEN d.valmtr2 * l.mtr2 
