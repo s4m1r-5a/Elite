@@ -16562,13 +16562,13 @@ function LISTAS(n, fi, ff, p, IMG) {
         doc.setTextColor(0);
         doc.setFontStyle('normal');
         if (img) {
-          doc.addImage(img, 'png', data.settings.margin.left, 10, 15, 20);
+          doc.addImage(img, 'png', data.settings.margin.left, 10, 20, 20);
         }
         doc.setFontSize(9);
         doc.text(moment().format('lll'), data.settings.margin.left + 157, 10);
-        doc.setFontSize(15);
-        doc.text('GRUPO ELITE FINCA RAÍZ S.A.S', 105, 15, null, null, 'center');
-        doc.setFontSize(12);
+        /* doc.setFontSize(20);
+        doc.text('INMOVILI', 105, 15, null, null, 'center'); */
+        doc.setFontSize(20);
         doc.text(p, 105, 20, null, null, 'center');
         doc.setFontSize(9);
         doc.text('LISTADO DE PRODUCTOS', 105, 25, null, null, 'center');
