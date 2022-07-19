@@ -1237,6 +1237,7 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
 }
 //////////////////////////////////* PAY *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pay`) {
+  const desarrollo = 'sandbox'; // OR produccion
   $(document).ready(() => $('#cedula').focus());
   //$('nav').hide()
   var producut = '';
@@ -1247,14 +1248,34 @@ if (window.location.pathname == `/links/pay`) {
     const mora = info.mora + info.moravieja - info.morapagada;
     const monto = newmout ? newmout : info.deuda + mora;
 
-    $('#RCB').hide();
+    /* $('#RCB').hide();
     $('#BONO').hide();
     $('#PAYU').hide();
-    $('#WOMPI').hide();
+    $('#WOMPI-BTN').hide(); */
 
-    console.log(info);
+    console.log(info, info.paymethods.wompy[desarrollo].boton);
+    if (info.paymethods.wompy[desarrollo].boton) $('#WOMPI-BTN').show();
+    if (info.paymethods.payu[desarrollo].active) {
+      $('#merchantId').val(payData.merchantId);
+      $('#accountId').val(payData.accountId);
+      $('#responseUrl').val(payData.responseUrl);
+      $('#confirmationUrl').val(payData.confirmationUrl);
+      $('#PAYU').show();
+      $.ajax({
+        url: '/links/pagos',
+        data: $('form').serialize(),
+        type: 'POST',
+        async: true,
+        success: function (data) {
+          $('#signature').val(data.sig);
+          $('#extra').val(data.ext);
+        }
+      });
+    }
+    if (info.paymethods.bancos.length) $('#RCB').show();
+    if (info.paymethods.bonos) $('#BONO').show();
 
-    info.cuentas.map(r => {
+    /* info.cuentas.map(r => {
       if (r.entidad === 'RCB' && r.stado === 7) $('#RCB').show();
       else if (r.entidad === 'PAYU' && r.stado === 7) {
         const payData = r?.code4 ? JSON.parse(r.code4) : null;
@@ -1276,7 +1297,7 @@ if (window.location.pathname == `/links/pay`) {
           });
         }
       } else if (r.entidad === 'WOMPI' && r.stado === 7) $('#WOMPI').show();
-    });
+    }); */
 
     $('.Cliente').html(info.nombre);
     $('.Cliente').val(info.nombre);
@@ -1396,6 +1417,52 @@ if (window.location.pathname == `/links/pay`) {
       return skdt;
     });
 
+  t = {
+    wompy: {
+      sandbox: {
+        active: true,
+        pubKey: 'pub_test_qBxmekSvXlKuETHUARQv5QPWq3XEEivL',
+        prvKey: 'prv_test_kNY71ZDeiaUQtcENXgOaoC3kDGbhNTAX',
+        events: 'test_events_rnHXGcTAPmzgIfFXt1RgN46u2aF5In81',
+        integrity: 'test_integrity_xkc36wM71Xg9VrlS6O7tezefF9nwgFRG',
+        url: 'https://sandbox.wompi.co/v1'
+      },
+      produccion: {
+        active: false,
+        pubKey: 'pub_prod_qBxmekSvXlKuETHUARQv5QPWq3XEEivL',
+        prvKey: 'prv_prod_kNY71ZDeiaUQtcENXgOaoC3kDGbhNTAX',
+        events: 'prod_events_rnHXGcTAPmzgIfFXt1RgN46u2aF5In81',
+        integrity: 'prod_integrity_xkc36wM71Xg9VrlS6O7tezefF9nwgFRG',
+        url: 'https://production.wompi.co/v1'
+      },
+      methods: {
+        boton: true,
+        card: false,
+        nequi: false,
+        efectivo: false
+      }
+    },
+    bancos: [{ cta: '', entidad: '', numero: '' }],
+    payu: {
+      sandbox: {
+        active: false,
+        key: 'lPAfp1kXJPETIVvqr60o6cyEIy',
+        accountId: 852515,
+        merchantId: 845014,
+        responseUrl: 'https://grupoelitefincaraiz.com/planes',
+        confirmationUrl: 'https://grupoelitefincaraiz.com/confir'
+      },
+      produccion: {
+        active: false,
+        key: 'lPAfp1kXJPETIVvqr60o6cyEIy',
+        accountId: 852515,
+        merchantId: 845014,
+        responseUrl: 'https://grupoelitefincaraiz.com/planes',
+        confirmationUrl: 'https://grupoelitefincaraiz.com/confir'
+      }
+    }
+  };
+
   var Pay = forma => {
     if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
     } else if (forma === 'recbo') {
@@ -1448,6 +1515,7 @@ if (window.location.pathname == `/links/pay`) {
       $('.op').remove();
     }
   };
+
   window.preview = function (input) {
     if (input.files && input.files[0]) {
       var marg = 100 / $('#file2')[0].files.length;

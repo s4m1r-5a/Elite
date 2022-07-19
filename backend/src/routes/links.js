@@ -3941,23 +3941,27 @@ router.post('/pay/:id', async (req, res) => {
   const datos = await pool.query(
     `SELECT p.id orden, c.idc, c.nombre, c.movil, c.email, l.id lt, l.mz, l.n, d.id pyt, d.proyect, 
     SUM(q.cuota) deuda, SUM(IF(q.cuota = q.proyeccion, q.mora, 0)) mora,COUNT(q.id) cuotasvencidas,
-    (SELECT SUM(r.totalmora) FROM relacioncuotas r WHERE r.orden = p.id) moravieja,
+    d.paymethods, (SELECT SUM(r.totalmora) FROM relacioncuotas r WHERE r.orden = p.id) moravieja,
     (SELECT SUM(r.morapaga) FROM relacioncuotas r WHERE r.orden = p.id) morapagada
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d 
     ON l.producto = d.id LEFT JOIN cuotas q ON q.separacion = p.id AND q.estado = 3 
     AND q.fechs <= CURDATE() INNER JOIN clientes c ON c.idc IN(p.cliente, p.cliente2, 
       p.cliente3, p.cliente4) WHERE p.tipobsevacion IS NULL AND c.documento = ?
-    GROUP BY p.id, c.idc ORDER BY p.fecha; ;`,
+    GROUP BY p.id, c.idc ORDER BY p.fecha;`,
     req.params.id
   );
+  datos[0].paymethods = JSON.parse(datos[0].paymethods);
 
   if (datos.length) {
     var recaudos = '';
+
     datos.map((e, i) => (recaudos += !i ? `${e.pyt}` : `, ${e.pyt}`));
+
     const cuentas = await pool.query(
       `SELECT * FROM prodrecauds p INNER JOIN recaudadores r 
        ON p.recaudador = r.id WHERE p.producto IN(${recaudos}) ORDER BY r.id`
     );
+
     datos.map((e, i) => {
       const qntas = cuentas.filter(a => a.producto == e.pyt);
       if (qntas.length) datos[i].cuentas = qntas;
@@ -4638,7 +4642,7 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   if (!req.user.admin) {
     const promesa = await pool.query(`SELECT * FROM preventa WHERE id = ${id} AND status > 0`);
 
-    if (comi.length > 0) {
+    if (promesa.length > 0) {
       req.flash(
         'error',
         'Esta Orden no es posible editarla ya que posee una promesa de compra y venta.'
@@ -7877,20 +7881,21 @@ async function Estados(S) {
          pr.asesor FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id
          LEFT JOIN cupones cp ON s.bono = cp.id WHERE s.stado = 4 AND pr.tipobsevacion IS NULL AND s.concepto IN('PAGO', 'ABONO') ${F.m}`
   );
-  const Cuotas = await pool.query(`SELECT pr.separar AS SEPARACION,
-    CASE pr.dto
-      WHEN "INICIAL" THEN ROUND((l.valor * pr.iniciar /100) - pr.ahorro)   
-      WHEN "TODO" THEN ROUND((l.valor - pr.ahorro) * pr.iniciar /100)
-      ELSE ROUND(l.valor * pr.iniciar /100)
+  const Cuotas = await pool.query(`SELECT p.separar AS SEPARACION,
+    CASE p.dto
+      WHEN "INICIAL" THEN ROUND((l.valor * p.iniciar /100) - p.ahorro)   
+      WHEN "TOTAL" THEN ROUND((l.valor - p.ahorro) * p.iniciar /100)
+      ELSE ROUND(l.valor * p.iniciar /100)
     END AS INICIAL,
-    CASE pr.dto
-      WHEN "FINANCIACION" THEN ROUND((l.valor * (100 - pr.iniciar) /100) - pr.ahorro)
-      WHEN "TODO" THEN ROUND((l.valor - pr.ahorro) * (100 - pr.iniciar) /100)
-      ELSE ROUND(l.valor * (100 - pr.iniciar) /100)
+    CASE p.dto
+      WHEN "FINANCIACION" THEN ROUND((l.valor * (100 - p.iniciar) /100) - p.ahorro)
+      WHEN "TOTAL" THEN ROUND((l.valor - p.ahorro) * (100 - p.iniciar) /100)
+      ELSE ROUND(l.valor * (100 - p.iniciar) /100)
     END AS FINANCIACION,
-    l.valor - pr.ahorro AS TOTAL FROM preventa pr INNER JOIN productosd l 
-    ON pr.lote = l.id WHERE pr.tipobsevacion IS NULL AND pr.id = ${F.r} LIMIT 1`);
+    l.valor - p.ahorro AS TOTAL FROM preventa p INNER JOIN productosd l 
+    ON p.lote = l.id WHERE p.tipobsevacion IS NULL AND p.id = ${F.r} LIMIT 1`);
 
+  console.log(Pagos, Cuotas);
   const Pendientes = await pool.query(
     `SELECT * FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id 
          INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN cupones cp ON s.bono = cp.id 

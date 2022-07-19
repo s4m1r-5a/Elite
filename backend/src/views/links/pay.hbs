@@ -290,42 +290,69 @@
                     <div class='accordion' id='accordion2'>
 
                       <div class='card' id='BONO'>
-                        <div
-                          class='card-header'
-                          type='button'
-                          data-toggle='collapse'
-                          data-target='#collapse2'
-                          aria-expanded='true'
-                          aria-controls='collapse2'
-                          onclick="Pay('boton')"
-                        >
+                        <div class='card-header'>
                           <div class='row'>
                             <div class='col-12 col-md-9 col-lg-9'>
                               <strong class='text-muted'>Bono</strong><br />
                               <small class='text-muted'>Redime aqui tu bono</small>
                             </div>
                             <div class='col-12 col-md-3 col-lg-3 text-center'>
+                              <input class='form-control form-control-lg' type='text' />
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class='card' id='WOMPI-BTN'>
+                        <div
+                          class='card-header'
+                          type='button'
+                          data-toggle='collapse'
+                          data-target='#collapse1'
+                          aria-expanded='true'
+                          aria-controls='collapse1'
+                          onclick="Pay('boton')"
+                        >
+                          <div class='row'>
+                            <div class='col-12 col-md-9 col-lg-9'>
+                              <strong class='text-muted'>Boton Bancolombia</strong><br />
+                              <small class='text-muted'>Transfiere desde tu cuenta Bancolombia</small>
+                            </div>
+                            <div class='col-12 col-md-3 col-lg-3 text-center'>
                               <a class='float-center'><img
-                                  src='/img/btn-bank.png'
-                                  width='80'
-                                  height='40'
+                                  src='/img/group.svg'
+                                  width='50'
+                                  height='50'
                                   alt='x'
                                 /></a>
                             </div>
                           </div>
                         </div>
                         <div
-                          id='collapse2'
-                          class='collapse'
+                          id='collapse1'
+                          class='collapse show'
                           aria-labelledby='headingOne'
                           data-parent='#accordion2'
                         >
                           <div class='card-body'>
-                            <small>Realiza transferencias por internet desde tu cuenta de ahorros o
-                              corriente Bancolombia</small><br />
+                            <div class='form-group form-check'>
+                              <input type='checkbox' class='form-check-input' id='exampleCheck1' />
+                              <label class='form-check-label' for='exampleCheck1'>Acepto haber leido
+                                los
+                                <a href='#' class='text-decoration-none text-primary'>terminos y
+                                  condiciones</a>
+                                <a href='#' class='text-decoration-none text-primary'>y la politica
+                                  de privacidad</a>
+                                para hacer esta compra</label>
+                            </div>
+
+                            <button type='button' class='btn btn-dark btn-sm btn-block'>
+                              <i class='align-middle mr-2' data-feather='check-square'></i>
+                              Transferir
+                            </button>
                             <a class='float-right mb-2' id='BTN-BOTON'><img
-                                src='/img/btn-bancolombia.png'
-                                width='120'
+                                src='/img/logo-bancolombia-black.svg'
+                                width='140'
                                 height='40'
                                 alt='x'
                               /></a>
@@ -369,9 +396,9 @@
                             </div>
                             <div class='col-12 col-md-3 col-lg-3 text-center'>
                               <a class='float-center'><img
-                                  src='/img/btn-payu2.png'
-                                  width='80'
-                                  height='40'
+                                  src='/img/group-2.svg'
+                                  width='50'
+                                  height='50'
                                   alt='x'
                                 /></a>
                             </div>
@@ -384,15 +411,13 @@
                           data-parent='#accordion2'
                         >
                           <div class='card-body'>
-                            <!--<img src="/img/payu/Recurso 10.png" width="200" height="95"
-                                                                alt="x" />-->
-                            <small>Pagos en linea lideres en el mercado</small><br />
-                            <a class='float-right mb-2' id='BTN-PAYU'><img
-                                src='/img/btn-payu.png'
-                                width='120'
-                                height='45'
-                                alt='x'
-                              /></a>
+                            <label class='form-check-label' for='exampleCheck2'>En PayU realizar
+                              pagos en línea con tarjetas debito, crédito y en efectivo nunca fue
+                              más fácil.</label><br />
+                            <button type='button' class='btn btn-success btn-sm btn-block'>
+                              Pagar con
+                              <img src='/img/Logo_PayU.png' width='55' height='20' />
+                            </button>
                           </div>
                         </div>
                       </div>
@@ -414,9 +439,9 @@
                             </div>
                             <div class='col-12 col-md-3 col-lg-3 text-center'>
                               <a class='float-center'><img
-                                  src='/img/logos/recibo.jpg'
-                                  width='40'
-                                  height='40'
+                                  src='/img/group-3.svg'
+                                  width='50'
+                                  height='50'
                                   alt='x'
                                 /></a>
                             </div>
@@ -429,8 +454,14 @@
                           data-parent='#accordion2'
                         >
                           <div class='card-body'>
-                            <small>Sube aqui los recibos de consignacion emitido por los bancos o
-                              sucursales</small><br />
+                            <span>Sube aqui los recibos de consignacion emitido por los bancos o
+                              sucursales</span>
+
+                            <button type='button' class='btn btn-dark btn-sm btn-block'>
+                              <i class='align-middle mr-2' data-feather='check-square'></i>
+                              Transferir
+                            </button>
+
                             <small class='montorecibos badge badge-dark'></small>
                             <button
                               class='btn btn-sm btn-outline-danger float-right mb-2'
