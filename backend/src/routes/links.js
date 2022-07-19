@@ -4737,27 +4737,27 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
     });
 
     const cambios = {
-      cuot: [ordenAnt[0].cuot, historyQuota.FINANCIACION],
-      dto: [ordenAnt[0].dto, producto.dto],
-      lote: [ordenAnt[0].lote, id],
-      cliente: [ordenAnt[0].cliente, producto.cliente],
-      cliente2: [ordenAnt[0].cliente2, producto.cliente2],
-      cliente3: [ordenAnt[0].cliente3, producto.cliente3],
-      cliente4: [ordenAnt[0].cliente4, producto.cliente4],
-      asesor: [ordenAnt[0].asesor, producto.asesor],
-      numerocuotaspryecto: [ordenAnt[0].numerocuotaspryecto, producto.numerocuotaspryecto],
-      separar: [ordenAnt[0].separar, producto.separar],
-      vrmt2: [ordenAnt[0].vrmt2, producto.mtr],
-      iniciar: [ordenAnt[0].iniciar, producto.porcentage],
-      inicialdiferida: [ordenAnt[0].inicialdiferida, producto.inicialdiferida],
-      cupon: [ordenAnt[0].cupon, cupon.idcupon],
-      status: [ordenAnt[0].status, producto.status],
-      ahorro: [ordenAnt[0].ahorro, cupon.ahorro],
-      comision: [ordenAnt[0].comision, cupon?.comision ? cupon.comision : 0],
-      mtr: [ordenAnt[0].mtr, mtr],
-      mtr2: [ordenAnt[0].mtr2, mtr2],
-      inicial: [ordenAnt[0].inicial, inicial],
-      valor: [ordenAnt[0].valor, valor],
+      cuot: [ordenAnt[0]?.cuot, historyQuota.FINANCIACION],
+      dto: [ordenAnt[0]?.dto, producto.dto],
+      lote: [ordenAnt[0]?.lote, id],
+      cliente: [ordenAnt[0]?.cliente, producto.cliente],
+      cliente2: [ordenAnt[0]?.cliente2, producto.cliente2],
+      cliente3: [ordenAnt[0]?.cliente3, producto.cliente3],
+      cliente4: [ordenAnt[0]?.cliente4, producto.cliente4],
+      asesor: [ordenAnt[0]?.asesor, producto.asesor],
+      numerocuotaspryecto: [ordenAnt[0]?.numerocuotaspryecto, producto.numerocuotaspryecto],
+      separar: [ordenAnt[0]?.separar, producto.separar],
+      vrmt2: [ordenAnt[0]?.vrmt2, producto.mtr],
+      iniciar: [ordenAnt[0]?.iniciar, producto.porcentage],
+      inicialdiferida: [ordenAnt[0]?.inicialdiferida, producto.inicialdiferida],
+      cupon: [ordenAnt[0]?.cupon, cupon.idcupon],
+      status: [ordenAnt[0]?.status, producto.status],
+      ahorro: [ordenAnt[0]?.ahorro, cupon.ahorro],
+      comision: [ordenAnt[0]?.comision, cupon?.comision ? cupon.comision : 0],
+      mtr: [ordenAnt[0]?.mtr, mtr],
+      mtr2: [ordenAnt[0]?.mtr2, mtr2],
+      inicial: [ordenAnt[0]?.inicial, inicial],
+      valor: [ordenAnt[0]?.valor, valor],
       SEPARACION: [
         filas.filter(e => e.tipo === 'SEPARACION'),
         proyeccion.filter(e => e.tipo === 'SEPARACION')
@@ -4898,9 +4898,9 @@ router.post('/orden/:accion', isLoggedIn, async (req, res) => {
     p.cuot, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida, p.cupon, p.comision, p.status, 
     p.ahorro, c.cuota qota, l.id, l.producto, l.mtr, l.mtr2, l.inicial, l.valor, l.mz, l.n, 
     o.cuotamin, o.fechafin, o.proyect, o.porcentage, o.separaciones, o.maxini, o.maxfnc, q.descuento
-    FROM cuotas c INNER JOIN preventa p ON c.separacion = p.id LEFT JOIN cupones q ON p.cupon = q.id
+    FROM preventa p LEFT JOIN cuotas c ON c.separacion = p.id LEFT JOIN cupones q ON p.cupon = q.id
     INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
-    WHERE c.separacion = ${ordnId} ORDER BY TIMESTAMP(c.fechs) ASC`);
+    WHERE p.id = ${ordnId} ORDER BY TIMESTAMP(c.fechs) ASC`);
 
   const productos = await pool.query(`SELECT o.proyect, o.porcentage, o.fechaini, 
   o.fechafin, o.separaciones, o.cuotamin, o.maxini, o.maxfnc, l.id, l.mz, l.n, l.mtr, l.mtr2, 
@@ -4910,7 +4910,7 @@ router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
   const descuentos = await pool.query(`SELECT * FROM descuentos`);
   const historiales = await pool.query(`SELECT * FROM historiales`);
-  //console.log(productos);
+  //console.log(orden, ordnId, !isNaN(ordnId));
   res.send({ productos, asesores, clientes, descuentos, orden, historiales });
 });
 router.post('/orden', isLoggedIn, async (req, res) => {

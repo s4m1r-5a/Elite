@@ -9259,9 +9259,10 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       productos = data.productos;
       Dtos = data.descuentos;
       Orden = data.orden;
+      /* console.log(Orden);
       data.historiales.map(e =>
         console.log(e.date, moment(e.date).locale('es-co').format('YYYY-MM-DD HH:mm'))
-      );
+      ); */
       if (Orden.length) {
         lt = Orden[0].id;
         agente = Orden[0].asesor;
