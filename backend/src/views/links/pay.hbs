@@ -312,6 +312,7 @@
                           aria-expanded='true'
                           aria-controls='collapse1'
                           onclick="Pay('boton')"
+                          style="background-color: '#DAF7A6';"
                         >
                           <div class='row'>
                             <div class='col-12 col-md-9 col-lg-9'>
@@ -454,27 +455,27 @@
                           data-parent='#accordion2'
                         >
                           <div class='card-body'>
-                            <span>Sube aqui los recibos de consignacion emitido por los bancos,
-                              sucursales o transferencias</span>
-
-                            <button type='button' class='btn btn-dark btn-sm btn-block'>
-                              <i class='align-middle mr-2' data-feather='check-square'></i>
-                              Transferir
-                            </button>
-
+                            <small>Sube aqui los recibos de consignacion emitido por los bancos,
+                              sucursales o transferencias</small>
                             <small class='montorecibos badge badge-dark'></small>
+
                             <button
-                              class='btn btn-sm btn-outline-danger float-right mb-2'
+                              type='button'
+                              class='btn btn-dark btn-sm btn-block'
                               data-toggle='tooltip'
                               data-placement='top'
                               id='subirR'
                               data-container='body'
                               title="Click para seleccionar recibo(s). Mantener tecla 
-                                                                'Ctrl' precionada para seleccionar varios recibos"
+                                    'Ctrl' precionada para seleccionar varios recibos"
                               data-toggle='dropdown'
                               aria-haspopup='true'
                               aria-expanded='false'
-                            >Subir RCB</button>
+                            >
+                              <i class='align-middle mr-2' data-feather='file-plus'></i>
+                              Montar recibo
+                            </button>
+
                             <table class='table table-sm' id='recibosss'>
                               <form
                                 enctype='multipart/form-data'
@@ -488,7 +489,7 @@
                                 <input type='hidden' id='orden' name='orden' />
                                 <input type='hidden' id='lt' name='lt' />
                                 <input id='ahora' type='hidden' name='ahora' />
-                                <input id='rcbexcdnt' type='hidden' name='rcbexcdnt' />
+                                <input class='cuotasvencidas' type='hidden' name='cuotasvencidas' />
                                 <input type='hidden' name='montorcb' id='montorecibos' />
                                 <input type='hidden' name='recibos' id='nrbc' />
                                 <tbody>

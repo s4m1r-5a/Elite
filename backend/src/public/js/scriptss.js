@@ -1240,20 +1240,24 @@ if (window.location.pathname == `/links/pay`) {
   const desarrollo = 'sandbox'; // OR produccion
   $(document).ready(() => $('#cedula').focus());
   //$('nav').hide()
-  var producut = '';
+
+  let cuentasdebanco = '';
+  let producut = '';
   let skdt = false;
+
   const producto = (info, newmout = null) => {
-    const code = info.id + '-' + info.idc + '-' + ID(3);
+    const code = info.orden + '-' + info.idc + '-' + ID(3);
     const description = info.proyect + ' Mz ' + info.mz + ' Lote: ' + info.n;
     const mora = info.mora + info.moravieja - info.morapagada;
     const monto = newmout ? newmout : info.deuda + mora;
+    cuentasdebanco = [];
 
     /* $('#RCB').hide();
     $('#BONO').hide();
     $('#PAYU').hide();
     $('#WOMPI-BTN').hide(); */
 
-    console.log(info, info.paymethods.wompy[desarrollo].boton);
+    console.log(info, info.paymethods.wompy[desarrollo]?.boton);
     if (info.paymethods.wompy[desarrollo].boton) $('#WOMPI-BTN').show();
     if (info.paymethods.payu[desarrollo].active) {
       $('#merchantId').val(payData.merchantId);
@@ -1272,47 +1276,26 @@ if (window.location.pathname == `/links/pay`) {
         }
       });
     }
-    if (info.paymethods.bancos.length) $('#RCB').show();
     if (info.paymethods.bonos) $('#BONO').show();
-
-    /* info.cuentas.map(r => {
-      if (r.entidad === 'RCB' && r.stado === 7) $('#RCB').show();
-      else if (r.entidad === 'PAYU' && r.stado === 7) {
-        const payData = r?.code4 ? JSON.parse(r.code4) : null;
-        if (payData) {
-          $('#merchantId').val(payData.merchantId);
-          $('#accountId').val(payData.accountId);
-          $('#responseUrl').val(payData.responseUrl);
-          $('#confirmationUrl').val(payData.confirmationUrl);
-          $('#PAYU').show();
-          $.ajax({
-            url: '/links/pagos',
-            data: $('form').serialize(),
-            type: 'POST',
-            async: true,
-            success: function (data) {
-              $('#signature').val(data.sig);
-              $('#extra').val(data.ext);
-            }
-          });
-        }
-      } else if (r.entidad === 'WOMPI' && r.stado === 7) $('#WOMPI').show();
-    }); */
+    if (info.paymethods.bancos.length) {
+      cuentasdebanco = info.paymethods.bancos;
+      $('#RCB').show();
+    }
 
     $('.Cliente').html(info.nombre);
     $('.Cliente').val(info.nombre);
     $('#Movil').val(info.movil);
     $('#Email').val(info.email);
     $('#code').val(code);
-    $('#orden').val(info.id);
+    $('#orden').val(info.orden);
     $('#lt').val(info.lt);
     $('.proyecto').val(info.pyt);
     $('.concepto').val('ABONO').html('ABONO');
     $('.cuotasvencidas').html(info.cuotasvencidas);
-    $('.deuda').html(Moneda(info.deuda));
-    $('.mora').html(Moneda(mora));
-    $('.totalpagar').html(Moneda(info.deuda + mora));
-    $('.total').html(Moneda(monto)).val(monto);
+    $('.deuda').html(Cifra(info.deuda));
+    $('.mora').html(Cifra(mora));
+    $('.totalpagar').html(Cifra(info.deuda + mora));
+    $('.total').html(Cifra(monto)).val(monto);
     $('#description').val('ABONO ' + description);
     $('#cliente').val(info.idc);
     producut = info;
@@ -1330,6 +1313,19 @@ if (window.location.pathname == `/links/pay`) {
       $(this).find('i').removeClass('fa-angle-up');
       $(this).find('i').addClass('fa-angle-down');
     }
+  });
+  $('#BTN-BOTON').on('click', function () {
+    $('#boton').submit();
+  });
+  $('#BTN-PAYU').on('click', function () {
+    $('#payu').submit();
+  });
+  $('#BTN-RCB').on('click', function () {
+    $('#recbo').validate();
+    $('#recbo').submit();
+  });
+  $('#subirR').click(function () {
+    $('#file2').click();
   });
   $('#smartwizard')
     .smartWizard({
@@ -1442,7 +1438,10 @@ if (window.location.pathname == `/links/pay`) {
         efectivo: false
       }
     },
-    bancos: [{ cta: '', entidad: '', numero: '' }],
+    bancos: [
+      { cta: 'CTA-CTE', entidad: 'BANCOLOMBIA', numero: '50900011438' },
+      { cta: 'CTA-AHO', entidad: 'DAVIVIENDA', numero: '11404149365' }
+    ],
     payu: {
       sandbox: {
         active: false,
@@ -1464,43 +1463,28 @@ if (window.location.pathname == `/links/pay`) {
   };
 
   var Pay = forma => {
-    if (forma === 'payu' && (!$('.transaccion').html() || $('.transaccion').html() == 0)) {
-    } else if (forma === 'recbo') {
-      RCB(true);
-      //$('#pys').prop('checked', false);
-      $('#signature').val('');
-      $('.transaccion').html('0');
-      $('.Total3').html(t2 ? t2 : t);
-      $('#Total, #Total2').val(T2 ? T2 : T);
-    } else if (forma === 'boton') {
-      RCB(true);
+    if (forma === 'payu') {
+      RCB(false);
       $('#recibo').val('');
       $('#file').val('');
       $('#signature').val('');
+    } else if (forma === 'recbo') {
+      RCB(true);
+      $('#signature').val('');
       $('.transaccion').html('0');
-      $('.Total3').html(t2 ? t2 : t);
-      $('#Total, #Total2, #c').val(T2 ? T2 : T);
+    } else if (forma === 'boton') {
+      RCB(false);
+      $('#recibo').val('');
+      $('#file').val('');
+      $('#signature').val('');
     }
-    $('#subirR').click(function () {
-      $('#file2').click();
-    });
-    $('#BTN-BOTON').on('click', function () {
-      $('#boton').submit();
-    });
-    $('#BTN-PAYU').on('click', function () {
-      $('#payu').submit();
-    });
-    $('#BTN-RCB').on('click', function () {
-      $('#recbo').validate();
-      $('#recbo').submit();
-    });
   };
+
   var RCB = n => {
     if (n) {
       $('#trecibo').show('slow');
       $('#trecib').show('slow');
       $('#recibos1').show('slow');
-      //$('#trsubida').show('slow');
       $('#trarchivos').show('slow');
     } else {
       $('.montorecibos').text(null);
@@ -1522,8 +1506,19 @@ if (window.location.pathname == `/links/pay`) {
       $('#recibos1').html('');
       $('.op').remove();
       $('#montorecibos').val('').hide('slow');
-      $(input.files).each(function () {
+      $(input.files).each(function (i) {
         var reader = new FileReader();
+        var namercb = this.name;
+        let formap = '';
+        cuentasdebanco.map(e => {
+          formap += `<div class="form-check">
+          <input class="form-check-input" type="radio" name="formap${i}" 
+          value="${e.cta}-${e.numero}" id="${e.numero + i}" ${
+            cuentasdebanco.length === 1 ? 'checked' : ''
+          }>
+          <label class="form-check-label" for="${e.numero + i}">
+          <small>${e.cta}-${e.numero}</small></label></div>`;
+        });
         reader.readAsDataURL(this);
         reader.onload = function (e) {
           $('#recibos1').append(
@@ -1539,6 +1534,7 @@ if (window.location.pathname == `/links/pay`) {
                                     <tr>
                                         <th>
                                             <div class="text-center">
+                                                <input type="hidden" name="namercb" value="${namercb}" required>
                                                 <input type="text" class="recis text-center form-control-sm rounded-pill form-control-no-border" 
                                                  name="nrecibo" placeholder="Recibo" autocomplete="off" required>
                                             </div>
@@ -1560,21 +1556,14 @@ if (window.location.pathname == `/links/pay`) {
                                             </div>
                                         </td>
                                     </tr>
-                                </tbody>
-                            </table>
-                        </div>`
-            /*
                                     <tr>
-                                        <th>
-                                            <div class="text-center">
-                                                <select name="formap" class="form-control-no-border forma form-control-sm rounded-pill" style="text-align:center;" required>
-                                                    <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
-                                                    <option value="CHEQUE">CHEQUE</option><option value="EFECTIVO">EFECTIVO</option>
-                                                    <option value="OTRO">OTRO</option>
-                                                </select>
-                                            </div>
-                                        </th>
-                                    </tr>*/
+                                        <td>
+                                        ${formap}
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>                            
+                        </div>`
           );
           $('.fech').daterangepicker({
             locale: {
@@ -1608,13 +1597,16 @@ if (window.location.pathname == `/links/pay`) {
             minYear: 2017,
             maxYear: parseInt(moment().format('YYYY'), 10)
           });
-          $('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+          //$('.montos').mask('#.##$', { reverse: true, selectOnFocus: true });
+          $('.montos').on('keyup', function () {
+            $(this).val(Cifra($(this).val()));
+          });
           $('.montos').on('change', function () {
             var avl = 0,
               TO = parseFloat($('#Total').val());
             $('#montorecibos').show('slow');
             $('.montos').map(function () {
-              s = parseFloat($(this).cleanVal()) || 0;
+              s = noCifra($(this).val()) || 0;
               avl = avl + s;
             });
             $('.montorecibos').html(Moneda(avl));
@@ -1767,26 +1759,20 @@ if (window.location.pathname == `/links/pay`) {
   });
   $('#recbo').submit(function (e) {
     e.preventDefault();
-    $('input:not(.rcbexcdnt)').prop('disabled', false);
     $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-    if (
-      !$('#montorecibos').val() ||
-      !$('#file2').val() ||
-      !$('#nrbc').val() ||
-      (!$('.rcbexcdnt').is(':disabled') && !$('.rcbexcdnt').is(':checked'))
-    ) {
+    if (!$('#montorecibos').val() || !$('#file2').val() || !$('#nrbc').val()) {
       SMSj('error', 'Debe rellenar todos los campos solicitados');
-    } else if (parseFloat($('#montorecibos').val()) < parseFloat($('#Total2').val())) {
+    } else if (parseFloat($('#montorecibos').val()) < parseFloat($('.total').val())) {
       SMSj('error', 'el monto de los recibos ingresados no corresponde al monto total a pagar');
     } else {
       var formData = new FormData($('#recbo')[0]);
       var df = $('#recibos1 input').serializeArray();
       df.map((x, i) => {
-        formData.append(x.name, x.value);
+        formData.append(x.name.startsWith('formap') ? 'formap' : x.name, x.value);
       });
       $.ajax({
         type: 'POST',
-        url: '/links/recibo',
+        url: '/links/rcbs',
         data: formData,
         dataType: 'json',
         processData: false,
@@ -1798,12 +1784,12 @@ if (window.location.pathname == `/links/pay`) {
             toggle: true
           });
         },
-        async: false,
+        //async: false,
         success: function (data) {
           if (data.std) {
             SMSj('success', data.msj);
             setTimeout(function () {
-              window.location.href = '/links/pagos';
+              //window.location.href = '/links/pagos';
             }, 2000);
           } else {
             SMSj('error', data.msj);
@@ -4562,10 +4548,7 @@ if (window.location.pathname === `/links/reportes`) {
         data: 'recibo',
         className: 'Reci',
         render: function (data, method, row) {
-          return `<a tabindex="0" class="recivos" data-toggle="popover" title="${data.replace(
-            /~/g,
-            ''
-          )}" data-content="<img src='https://grupoelitefincaraiz.com${
+          return `<a tabindex="0" class="recivos" data-toggle="popover" title="${data}" data-content="<img src='https://grupoelitefincaraiz.com${
             row.img
           }' alt='...' class='img-thumbnail'>">${data.replace(/~/g, '')}</a>`; //`<a class="recivos" id="${row.img}">${data.replace(/~/g, '')}</a>`//
         }
@@ -8508,6 +8491,9 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
   var productos;
   var producto;
   var Orden;
+  var dateStart = '2020-01-01';
+
+  const startDate = () => dateStart;
 
   const UpdateData = async producto => {
     maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
@@ -8642,14 +8628,32 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     const typF = tipo === 'FINANCIACION';
     const num = await coutQuotas(tipo);
     const valor = typI ? noCifra($('#ini').val()) : typF ? noCifra($('#fnc').val()) : 0;
+    let fecha = typI ? historyDate.SEPARACION : historyDate.INICIAL;
     historyQuota[tipo] = valor / num;
     proyeccion
       .rows()
       .data()
       .filter(e => e.tipo === tipo)
       .map((e, i) => {
-        if (e.cuota) e.cuota = historyQuota[tipo];
-        if (e.cuota2) e.cuota2 = historyQuota[tipo];
+        if (e.cuota) {
+          if (!i) {
+            const dateDiff = Math.ceil(moment(e.fechs).diff(fecha, 'months', true));
+            if (dateDiff === 1) fecha = e.fechs;
+            else if (dateDiff !== 1) {
+              fecha = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+              e.fechs = fecha;
+            }
+          } else {
+            fecha = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+            e.fechs = fecha;
+          }
+          e.cuota = historyQuota[tipo];
+        }
+        if (e.cuota2) {
+          e.cuota2 = historyQuota[tipo];
+          fecha = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+          e.fechs2 = fecha;
+        }
       });
   };
 
@@ -8721,6 +8725,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       rows.length = 0;
       ordenRows.map(r => rows.push(r));
       historyQuota.FINANCIACION = ordenRows[0].cuot;
+      historyDate.SEPARACION = ordenRows[0].fechs;
     }
     const sep = rows.find(e => e.tipo === 'SEPARACION');
     if (sep.cuota === 1) {
@@ -8766,25 +8771,18 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     const cuota = typI && ini ? quotaIni : typF && fnc ? quotaFnc : 0;
     const newRows = typI ? Math.round(numIni / 2) - num : typF ? Math.round(numFnc / 2) - num : 0;
     const deleteIndex = [];
-    let n = 2;
+    let n = 2,
+      menos = 0;
     if (!historyQuota[tipo]) historyQuota[tipo] = cuota;
-    var fecha = null;
+    let fecha = typI ? historyDate.SEPARACION : historyDate.INICIAL;
     rows
       .filter(e => e.tipo === tipo)
       .map((e, i) => {
         const nu1 = n - 1;
         const nu2 = n;
+        const dateDiff = Math.ceil(moment(e.fechs).diff(fecha, 'months', true));
 
-        if (!i & typI) {
-          if (!e.fechs || moment(e.fechs).diff(historyDate.SEPARACION, 'months') < 1)
-            fecha = historyDate.SEPARACION;
-          else fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
-        }
-        if (!i & typF) {
-          if (!e.fechs || moment(e.fechs).diff(historyDate.INICIAL, 'months') < 1)
-            fecha = historyDate.INICIAL;
-          else fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
-        }
+        if (!i && dateDiff > 0) fecha = e.fechs;
 
         if ((typI && nu1 > numIni) || (typF && nu1 > numFnc)) {
           const index = rows.findIndex(e => e.tipo === tipo && e.ncuota == nu1);
@@ -8792,13 +8790,14 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         }
         const rType = (typI && nu2 <= numIni) || (typF && nu2 <= numFnc);
 
-        if (!e.fechs || moment(e.fechs).diff(fecha, 'months') < 1)
-          fh1 = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+        if (!e.fechs || dateDiff < 0) fh1 = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
         else fh1 = e.fechs;
 
-        if (!e.fechs2 || moment(e.fechs2).diff(fh1, 'months') < 1)
+        if (!e.fechs2 || Math.ceil(moment(e.fechs2).diff(fh1, 'months', true)) < 1)
           fh2 = moment(fh1).add(1, 'month').format('YYYY-MM-DD');
         else fh2 = e.fechs2;
+
+        if (typI) menos += e.ncuota2 && nu2 > numIni ? 2 : nu1 > numIni ? 2 : 0;
 
         n += 2;
         e.ncuota = nu1;
@@ -8811,11 +8810,13 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         historyDate[tipo] = rType ? fh2 : fh1;
         fecha = historyDate[tipo];
       });
+
     historyQuota[tipo] = cuota;
 
     if (deleteIndex.length) rows.splice(deleteIndex[0], deleteIndex.length);
-    const ndx = typI ? rows.findIndex(e => e.tipo === 'FINANCIACION') - 1 : rows.length - 1;
-    const index = ndx < 0 ? rows.length - 1 : ndx;
+
+    const ndx = typI ? rows.findLastIndex(e => e.tipo === 'INICIAL') : rows.length;
+    const index = ndx < 0 ? rows.length : ndx + 1;
     n = 2;
     for (var i = 0; i < newRows; i++) {
       const nu1 = num * 2 + n - 1;
@@ -8827,7 +8828,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       const fh1 = moment(historyDate[tipo]).add(1, 'month').format('YYYY-MM-DD');
       const fh2 = moment(fh1).add(1, 'month').format('YYYY-MM-DD');
       n += 2;
-      rows.splice(index + i, 0, {
+      await rows.splice(index + i, 0, {
         fechs: fh1,
         ncuota: nu1,
         tipo: tipo,
@@ -8839,13 +8840,45 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       historyDate[tipo] = rType ? fh2 : fh1;
     }
 
-    proyeccion.clear().draw(false);
     rows.sort((a, b) => {
       if (a.tipo < b.tipo) return 1;
       if (a.tipo > b.tipo) return -1;
       return 0;
     });
-    proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
+
+    const lastDate = rows.findLast(e => e.tipo === tipo);
+    historyDate[tipo] = lastDate.fechs2 ? lastDate.fechs2 : lastDate.fechs;
+
+    if (typI)
+      rows
+        .filter(e => e.tipo === 'FINANCIACION')
+        .map((e, i) => {
+          const dateDiff = Math.ceil(moment(e.fechs).diff(historyDate[tipo], 'months', true));
+
+          if (!i && dateDiff >= menos)
+            fecha = moment(e.fechs).subtract(menos, 'month').format('YYYY-MM-DD');
+          else if (!i && dateDiff < 0)
+            fecha = moment(e.fechs)
+              .add(Math.abs(dateDiff) + 1, 'month')
+              .format('YYYY-MM-DD');
+          else if (!i) fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
+
+          //console.log(e.fechs, fecha, dateDiff, tipo, historyDate[tipo], menos);
+
+          fecha = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+          e.fechs = fecha;
+          historyDate.FINANCIACION = fecha;
+
+          if (e.cuota2) {
+            fecha = moment(fecha).add(1, 'month').format('YYYY-MM-DD');
+            e.fechs2 = fecha;
+            historyDate.FINANCIACION = fecha;
+          }
+        });
+
+    proyeccion.clear().draw(false);
+    await proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
+
     if (rol.admin)
       $('.fecha').daterangepicker(
         {
@@ -8875,10 +8908,13 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
             ],
             firstDay: 1
           },
+          autoUpdateInput: true,
+          startDate: moment().format('YYYY-MM-DD'),
+          //endDate: moment().add(10, 'years').format('YYYY-MM-DD'),
           singleDatePicker: true,
           showDropdowns: true,
-          minYear: 2017,
-          maxYear: parseInt(moment().format('YYYY'), 10)
+          minYear: 2019,
+          maxYear: parseInt(moment().add(10, 'years').format('YYYY'), 10)
         },
         function (start, end, label) {
           const fila = this.element.parents('tr');
@@ -8886,7 +8922,35 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
           const row = data === undefined ? proyeccion.row(fila.prev()).data() : data;
           const rowDate = $(this.element).hasClass('fechs2') ? 'fechs2' : 'fechs';
           row[rowDate] = start.format('YYYY-MM-DD');
-          UpdateTable(row.tipo);
+          let daTe = start.format('YYYY-MM-DD');
+          let fechamenor = false;
+          proyeccion
+            .rows()
+            .data()
+            .filter((a, i) => {
+              if (i < fila[0]._DT_RowIndex && (a.fechs > daTe || a.fechs2 > daTe))
+                fechamenor = true;
+              return i >= fila[0]._DT_RowIndex && !fechamenor;
+            })
+            .map((e, i) => {
+              if (!i && e.fechs2 && rowDate === 'fechs') {
+                daTe = moment(e[rowDate]).add(1, 'month').format('YYYY-MM-DD');
+                e.fechs2 = daTe;
+              } else if (i) {
+                if (e.fechs) {
+                  daTe = moment(daTe).add(1, 'month').format('YYYY-MM-DD');
+                  e.fechs = daTe;
+                }
+                if (e.fechs2) {
+                  daTe = moment(daTe).add(1, 'month').format('YYYY-MM-DD');
+                  e.fechs2 = daTe;
+                }
+              }
+            });
+
+          if (fechamenor)
+            return SMSj('error', 'No es posible establecer una fecha pasada en el futuro');
+          UpdateTable(tipo);
         }
       );
     proyeccion.rows().every(function (a) {
@@ -9131,7 +9195,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         $(this).val(coutQuotas('INICIAL'));
         return SMSj('error', consult);
       }
-      UpdateTable('INICIAL');
+      await UpdateTable('INICIAL');
     });
     $('#ini-min').click(async function () {
       const num = noCifra($('#num-ini').val());
@@ -9142,7 +9206,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         $('#ini-min').val(coutQuotas('INICIAL'));
         return SMSj('error', consult);
       }
-      UpdateTable('INICIAL');
+      await UpdateTable('INICIAL');
     });
     $('#inicialcuotas-btn').click(async function () {
       const num = noCifra($('#num-ini').val());
@@ -9157,7 +9221,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         $('#num-ini').val(num);
         return SMSj('error', consult);
       }
-      UpdateTable('INICIAL');
+      await UpdateTable('INICIAL');
     });
     $('#gQpon').click(function () {
       const dto = noCifra($('#dto-modal').val());
@@ -9427,6 +9491,10 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       await UpdateTable('INICIAL');
       await UpdateTable('FINANCIACION');
     } else UpdateTable(row.tipo);
+  });
+  proyeccion.on('mouseover', '.tabl .fecha', function () {
+    $('.fecha').data('daterangepicker').setStartDate($(this).html());
+    $('.fecha').data('daterangepicker').setEndDate($(this).html());
   });
   proyeccion.on('click', '.tabl .cuota', function () {
     $(this).select();
@@ -12437,7 +12505,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       {
         data: 'recibo',
         render: function (data, method, row) {
-          return data.replace(/~/g, '');
+          return data;
         }
       },
       {
@@ -12609,7 +12677,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
     $('#Modalimg .mz').html('MZ: ' + data.mz);
     $('#Modalimg .lote').html('LT: ' + data.n);
     $('#Modalimg .recibo')
-      .html('RCB ' + data.recibo.replace(/~/g, ' '))
+      .html('RCB ' + data.recibo)
       .parents('tr')
       .css({ 'background-color': '#162723', color: '#FFFFFF' });
     $('#Modalimg .fechaRcb').html(fechaRecibo);

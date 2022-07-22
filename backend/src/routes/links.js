@@ -22,6 +22,14 @@ const XLSX = require('xlsx-js-style');
 const PdfPrinter = require('pdfmake');
 const Roboto = require('../public/fonts/Roboto');
 const imageDownloader = require('../download').download;
+const noCifra = valor => {
+  if (!valor) return 0;
+  const num = /[^0-9.-]/g.test(valor)
+    ? parseFloat(valor.replace(/[^0-9.]/g, ''))
+    : parseFloat(valor);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+  return num;
+};
 const {
   //tasaUsura,
   FacturaDeCobro,
@@ -4067,6 +4075,61 @@ router.post('/boton', async (req, res) => {
       res.send({ std: false, msj: error, href: '/' });
     });
 });
+router.post('/rcbs', async (req, res) => {
+  const { ahora, lt, formap, g, cuotasvencidas, namercb, nrecibo, montos, feh, orden } = req.body;
+
+  console.log(req.body, req.files);
+
+  const pago = { fech: ahora, lt, orden, concepto: 'PAGO', stado: 3, descp: 'ABONO' };
+  const sql = 'SELECT * FROM acuerdos WHERE orden = ? AND estado = 9';
+  const acuerdo = (await pool.query(sql, orden))[0] || null;
+
+  if (Array.isArray(nrecibo))
+    for (i = 0; i <= nrecibo.length - 1; i++) {
+      pago.img = `/uploads/${req.files.find(e => e.originalname === namercb[i]).filename}`;
+      pago.recibo = nrecibo[i];
+      pago.monto = noCifra(montos[i]);
+      pago.fecharcb = feh[i];
+      pago.formap = formap[i];
+
+      if (acuerdo?.limite >= pago.fecharcb) pago.acuerdo = acuerdo?.id;
+
+      console.log(pago);
+      await pool.query('INSERT INTO solicitudes SET ? ', pago);
+    }
+  else {
+    pago.img = `/uploads/${req.files[0].filename}`;
+    pago.recibo = nrecibo;
+    pago.monto = noCifra(montos);
+    pago.fecharcb = feh;
+    pago.formap = formap;
+
+    if (acuerdo?.limite >= pago.fecharcb) pago.acuerdo = acuerdo?.id;
+
+    console.log(pago);
+    await pool.query('INSERT INTO solicitudes SET ? ', pago);
+
+    /* await pool.query(`UPDATE solicitudes s INNER JOIN acuerdos a ON s.acuerdo = a.id 
+      SET a.montopago = (SELECT SUM(s2.monto) FROM solicitudes s2 WHERE s2.acuerdo = a.id
+      AND s2.fecharcb <= a.limite), a.estado = IF((SELECT SUM(s2.monto) FROM solicitudes s2 
+      WHERE s2.acuerdo = a.id AND s2.stado = 4 AND s2.fecharcb <= a.limite) >= a.pago, 7, 9) 
+      WHERE a.pago > 0`); */
+  }
+
+  await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
+  req.flash('success', 'Solicitud de pago enviada correctamente');
+  return res.redirect('/links/pagos');
+
+  /* if (g) {
+    return res.send({
+      std: true,
+      msj: 'Solicitud de pago enviada correctamente'
+    });
+  } else {
+    req.flash('success', 'Solicitud de pago enviada correctamente');
+    return res.redirect('/links/pagos');
+  } */
+});
 router.post('/recibo', async (req, res) => {
   const {
     total,
@@ -4182,7 +4245,7 @@ router.post('/recibo', async (req, res) => {
       var recib = parseFloat(montos[i].replace(/\./g, ''));
       pago.img = `/uploads/${req.files[i].filename}`;
       pago.motorecibos = recib;
-      pago.recibo = `~${nrecibo[i]}~`;
+      pago.recibo = nrecibo[i];
       pago.monto = recib;
       pago.fecharcb = feh[i];
 
@@ -4217,7 +4280,7 @@ router.post('/recibo', async (req, res) => {
     var recib = parseFloat(montos.replace(/\./g, ''));
     pago.img = `/uploads/${req.files[0].filename}`;
     pago.motorecibos = recib;
-    pago.recibo = `~${nrecibo}~`;
+    pago.recibo = nrecibo;
     pago.monto = recib;
     pago.fecharcb = feh;
 
