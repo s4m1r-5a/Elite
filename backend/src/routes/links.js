@@ -8151,7 +8151,7 @@ async function ProyeccionPagos(S) {
     `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, e.descuento,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
     p.ahorro, p.fecha, p.obsevacion, p.cuot, c.separacion, c.tipo, c.ncuota, c.fechs, 
-    c.proyeccion, c.cuota, c.estado, l.mtr2, d.moras FROM preventa p 
+    c.proyeccion, c.cuota, c.estado, l.mtr2, d.moras, d.timelimit FROM preventa p 
     INNER JOIN cuotas c ON c.separacion = p.id INNER JOIN productosd l ON p.lote = l.id 
     INNER JOIN productos d ON l.producto = d.id LEFT JOIN cupones e ON p.cupon = e.id 
     WHERE p.id = ? AND p.tipobsevacion IS NULL ORDER BY TIMESTAMP(c.fechs) ASC`,
@@ -8184,8 +8184,6 @@ async function ProyeccionPagos(S) {
     x.dto === 'FINANCIACION'
       ? Math.round(total - (inicial + x.separar) - ahorro)
       : Math.round(total - (inicial + x.separar));
-
-  const mOra = x.moras; // determina si el proyecto cobra mora o no
 
   //console.log(pagos, Cartera, Proyeccion, separa, total, inicial, financiacion, x)
   if (Proyeccion > 0) {
@@ -8266,8 +8264,10 @@ async function ProyeccionPagos(S) {
   );
 
   const Moras = await pool.query(`SELECT * FROM intereses`);
-
+  let mOra = false; //false/true determina si el proyecto cobra mora o no, predeterminado en false (no cobra)
   let cuotas = Cuotas.map(e => {
+    const diffDay = moment().diff(e.fechs, 'days'); // dias vencidos de una cuota
+    if (!mOra) mOra = x.moras && diffDay > x.timelimit; // determina si el proyecto cobra mora
     return {
       id: e.id,
       cuota: e.cuota,
@@ -8279,18 +8279,16 @@ async function ProyeccionPagos(S) {
   });
 
   let Relacion = []; // aqui estara la relacion entre pagos y cuotas
-  let idCuota = false;
+  let idCuota = false; // id de cada cuota
   let montoparainicial = 0; // monto para calcular la fecha de la cuota inicial
   let fechapagoini = false; // fecha en la que se termino de pagar la cuota inicial
-  let acuerdoNum = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
-  //acuerdos[acuerdoNum] se declara el primer acuerdo del array acuerdos para los descuentos en las moras
-  let numAcuerdos = acuerdos.length - 1; // se determina el numero de acuerdo que el cliente a echo con la empresa a lo largo del tiempo
-  let limitDate = moment(acuerdos[acuerdoNum]?.limite).format('YYYY-MM-DD');
-  let limitDateStop = moment(acuerdos[acuerdoNum]?.datestop).format('YYYY-MM-DD');
-  let fechaLimite = acuerdos[acuerdoNum]?.type === 'REMOVE' ? limitDate : '2017-08-31'; // fecha desde la que el sistema empesara a cobrar mora
-  let dateStop = acuerdos[acuerdoNum]?.type === 'STOP' ? limitDateStop : null; // fecha hasta en la que el sistema dejara de cobrar mora
-  let stopLimitDate = acuerdos[acuerdoNum]?.type === 'STOP' ? limitDate : null; // fecha hasta en la que el sistema dejara de congelar la mora
-  let dcto = acuerdos[acuerdoNum]?.dcto || 0;
+
+  let acuerdoActual = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
+  let totalAcuerdos = acuerdos.length - 1; // se determina el numero de acuerdo vigentes o activos que el cliente a echo con la empresa a lo largo del tiempo
+  let startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+  let stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+  let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+  let dcto = acuerdos[acuerdoActual]?.dcto || 0;
 
   for (i = 0; i < Abonos.length; i++) {
     const a = Abonos[i]; //                          array de abonos que el cliente a realizado
@@ -8308,28 +8306,25 @@ async function ProyeccionPagos(S) {
       const q = cuotas[o]; // array de cuotas
       const DateQta = idCuota?.id === q.id ? idCuota.nwFecha : moment(q.fechs).format('YYYY-MM-DD'); // fecha en la que la cuota debe ser pagada
 
-      if (DateQta > stopLimitDate || (DateQta > limitDate && !stopLimitDate)) {
-        if (acuerdoNum < numAcuerdos) {
-          acuerdoNum++;
-          dcto = acuerdos[acuerdoNum].dcto || 0;
-          limitDate = moment(acuerdos[acuerdoNum].limite).format('YYYY-MM-DD');
-          limitDateStop = moment(acuerdos[acuerdoNum]?.datestop).format('YYYY-MM-DD');
-          fechaLimite = acuerdos[acuerdoNum]?.type === 'REMOVE' ? limitDate : null; // fecha desde la que el sistema empesara a cobrar mora
-          dateStop = acuerdos[acuerdoNum]?.type === 'STOP' ? limitDateStop : null; // fecha hasta en la que el sistema dejara de cobrar mora
-          stopLimitDate = acuerdos[acuerdoNum]?.type === 'STOP' ? limitDate : null; // fecha hasta en la que el sistema dejara de congelar la mora
-        } else {
-          dcto = 0;
-          fechaLimite = '2017-08-31'; // fecha desde la que el sistema empesara a cobrar mora
-          dateStop = null; // fecha hasta en la que el sistema dejara de cobrar mora
-          stopLimitDate = null; // fecha hasta en la que el sistema dejara de congelar la mora
-        }
+      if (DateQta > endDate && acuerdoActual < totalAcuerdos) {
+        acuerdoActual++;
+        dcto = acuerdos[acuerdoActual].dcto || 0;
+        startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+        stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+        endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+      } else if (DateQta > endDate) {
+        dcto = 0;
+        startDate = '2017-08-31'; // fecha desde la que el sistema empesara a cobrar mora
+        stopDate = null; // fecha hasta en la que el sistema dejara de cobrar mora
+        endDate = moment().format('YYYY-MM-DD');
       }
 
-      const fechaStop = fechaLMT > dateStop ? dateStop : fechaLMT;
-      const cobro = fechaStop >= fechaLimite && mOra; // determinara si debe cobrar mora en la cuota siguiente a analizar
+      const fechaStop = fechaLMT > stopDate ? stopDate : fechaLMT;
+      const cobro = DateQta > startDate && (!stopDate || stopDate > DateQta) && mOra; // determinara si debe cobrar mora en la cuota siguiente a analizar
       const daysDiff = fechaStop > DateQta ? moment(fechaStop).diff(DateQta, 'days') : 0; // diferencia de dias de la fecha de la cuota y la fecha en que se abono ala cuota
+
       const Tasa =
-        cobro && daysDiff && fechaLMT > q.fechs
+        cobro && daysDiff
           ? Math.min(
               ...Moras.filter(x => moment(x.fecha).isBetween(q.fechs, fechaLMT, 'month', '[]')).map(
                 x => x.teano

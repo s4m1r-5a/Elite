@@ -1377,6 +1377,11 @@ async function EstadoDeCuenta(Orden) {
     Orden
   );
 
+  const acuerdos = await pool.query(
+    `SELECT * FROM acuerdos a WHERE a.orden = ? AND a.estado IN(7, 9)`,
+    Orden
+  );
+
   if (Proyeccion.length) {
     const cuerpo = [];
     const bodi = [['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto']];
@@ -1389,6 +1394,13 @@ async function EstadoDeCuenta(Orden) {
     let IDs = [];
     let IdCuotas = [];
 
+    let acuerdoActual = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
+    let totalAcuerdos = acuerdos.length - 1; // se determina el numero de acuerdo vigentes o activos que el cliente a echo con la empresa a lo largo del tiempo
+    let startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+    let stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+    let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+    let desto = acuerdos[acuerdoActual]?.dcto || 0;
+
     Proyeccion.map((e, i) => {
       const IDs2 = IDs.some(s => s === e.ids);
       const idCqt = IdCuotas.some(s => s === e.idcuota);
@@ -1397,9 +1409,27 @@ async function EstadoDeCuenta(Orden) {
       totalMora += e.totalmora + (e.estado === 3 && !idCqt ? e.mora : 0) - e.saldomora;
       totalSaldo += e.estado === 3 && !idCqt ? e.cuota : 0;
       totalDeuda += e.estado === 3 && !idCqt ? e.cuota + e.mora : 0;
-      const TotalDias = e.diasmora - e.diaspagados;
-      const PrecioDiaMora = e.mora ? e.mora / TotalDias : 0;
-      const TotalMora = PrecioDiaMora * TotalDias;
+
+      if (e.fechs > endDate && acuerdoActual < totalAcuerdos) {
+        acuerdoActual++;
+        desto = acuerdos[acuerdoActual].dcto || 0;
+        startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+        stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+        endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+      } else if (e.fechs > endDate) {
+        desto = 0;
+        startDate = '2017-08-31'; // fecha desde la que el sistema empesara a cobrar mora
+        stopDate = null; // fecha hasta en la que el sistema dejara de cobrar mora
+        endDate = moment().format('YYYY-MM-DD');
+      }
+
+      const cobro = e.fechs > startDate && (!stopDate || stopDate > e.fechs) && e.mora; // determinara si debe cobrar mora en la cuota siguiente a analizar
+
+      const TotalDias = cobro
+        ? moment().diff(e.fechs > stopDate ? stopDate : e.fechs, 'days') - e.diaspagados
+        : 0;
+      const TMora = cobro ? (TotalDias * e.cuota * e.tasamora) / 365 : 0; // valor de la mora
+      const TotalMora = TMora - TMora * desto;
       const TotalCuota = e.cuota + TotalMora;
       const Ids = IDs2 && e.monto ? false : true;
 
@@ -1500,7 +1530,7 @@ async function EstadoDeCuenta(Orden) {
             color: e.stado === 4 ? 'green' : 'blue'
           },
           e.formap,
-          e.descp,
+          'ABONO',
           {
             text: '$' + Cifra(e.monto),
             color: e.stado === 4 ? 'green' : 'blue',
@@ -1579,7 +1609,7 @@ async function EstadoDeCuenta(Orden) {
         }; //, height: pageSize.height
       },
       pageSize: 'a4',
-      footer: function (currentPage, pageCount) {
+      /* footer: function (currentPage, pageCount) {
         return {
           alignment: 'center',
           margin: [40, 3, 40, 3],
@@ -1630,7 +1660,7 @@ async function EstadoDeCuenta(Orden) {
             }
           ]
         };
-      },
+      }, */
       header: function (currentPage, pageCount, pageSize) {
         // you can apply any logic and return any valid pdfmake element
         return {
