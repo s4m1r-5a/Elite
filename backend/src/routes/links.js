@@ -587,7 +587,8 @@ cron.schedule('0 2 * * *', async () => {
   INNER JOIN intereses i ON i.teano SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = 
   ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365, 2), c.tasa = i.teano WHERE 
   c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND i.teano = 
-  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE());`);
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND LAST_DAY(CURDATE()));`);
+
   await pool.query(`    
   UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l 
   ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id INNER JOIN intereses i 
@@ -8462,7 +8463,8 @@ async function ProyeccionPagos(S) {
   INNER JOIN intereses i ON i.teano SET c.diasmora = DATEDIFF(CURDATE(), c.fechs), c.mora = 
   ROUND(c.cuota * DATEDIFF(CURDATE(), c.fechs) * i.teano / 365, 2), c.tasa = i.teano WHERE 
   c.fechs < CURDATE() AND c.estado = 3 AND d.moras = 1 AND c.separacion = ${S} AND i.teano = 
-  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND CURDATE());`);
+  (SELECT MIN(i.teano) FROM intereses i WHERE i.fecha BETWEEN c.fechs AND LAST_DAY(CURDATE()));`);
+
   await pool.query(`    
   UPDATE cuotas c INNER JOIN preventa p ON c.separacion = p.id INNER JOIN productosd l 
   ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id INNER JOIN intereses i 
