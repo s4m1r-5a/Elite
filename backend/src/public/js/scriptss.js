@@ -8996,12 +8996,15 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         .filter(e => data.proyeccion.push(e));
 
       if (
-        !proyeccion.length ||
-        !producto?.id ||
-        !producto?.mtr ||
-        !producto?.mtr2 ||
-        !producto?.inicial ||
-        !producto?.valor
+        !data.proyeccion.length ||
+        !data.producto?.id ||
+        !data.producto?.mtr ||
+        !data.producto?.mtr2 ||
+        !data.producto?.inicial ||
+        !data.producto?.valor ||
+        !data.producto?.cliente ||
+        !data.producto?.asesor ||
+        !data.producto?.porcentage
       )
         return SMSj('error', 'La orden no se encuentra completa revise todos los campos');
 
@@ -9011,12 +9014,14 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         data: JSON.stringify(data),
         dataType: 'json',
         contentType: 'application/json',
-        beforeSend: xhr =>
+        beforeSend: xhr => {
+          $('.Save').attr('disabled', true);
           $('#ModalEventos').modal({
             toggle: true,
             backdrop: 'static',
-            keyboard: true
-          }),
+            keyboard: false
+          });
+        },
         success: data => {
           //$('#ModalEventos').modal('hide');
           if (data) {
