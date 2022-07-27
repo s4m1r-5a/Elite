@@ -850,69 +850,123 @@
               aria-labelledby='headingOne'
               data-parent='#descuentos'
             >
-              <div class='card-body'>
+              <div class='card-body bg-light'>
                 <form id='acuerdofilas'>
+                  <div class='shadow-lg p-3 mb-5 bg-white rounded'>
+                    <div class='shadow-none p-3 mb-5 bg-light rounded'>No shadow</div>
+                    <div class='shadow-sm p-3 mb-5 bg-white rounded'>Small shadow</div>
+                    <div class='shadow p-3 mb-5 bg-white rounded'>Regular shadow</div>
+                    <div class='shadow-lg p-3 mb-5 bg-white rounded'>Larger shadow</div>
+                  </div>
                   <div class='row d-flex d-block'>
                     <input type='hidden' name='orden' id='orden-mora' />
-                    <div class='col-12 col-md-4 dto'>
-                      <div class='input-group input-group-sm mb-3'>
-                        <div class='input-group-prepend'>
-                          <label class='input-group-text'>DTO</label>
-                        </div>
-                        <input
-                          class='form-control text-center dto'
-                          type='text'
-                          name='dcto'
-                          autocomplete='off'
-                          id='dto'
-                          placeholder='0%'
-                          style='background-color: #FFFFCC;'
-                        />
-                      </div>
+                    <div class='col-12 progress'>
+                      <div
+                        class='progress-bar bg-success'
+                        role='progressbar'
+                        style='width: 15%'
+                        aria-valuenow='15'
+                        aria-valuemin='0'
+                        aria-valuemax='100'
+                      ></div>
+                      <div
+                        class='progress-bar bg-pill'
+                        role='progressbar'
+                        style='width: 30%'
+                        aria-valuenow='30'
+                        aria-valuemin='0'
+                        aria-valuemax='100'
+                      ></div>
+                      <div
+                        class='progress-bar bg-success'
+                        role='progressbar'
+                        style='width: 20%'
+                        aria-valuenow='20'
+                        aria-valuemin='0'
+                        aria-valuemax='100'
+                      ></div>
                     </div>
-                    <div class='col-12 col-md-8'>
-                      <div class='input-group input-group-sm mb-3'>
-                        <div class='input-group-prepend'>
-                          <label class='input-group-text'>MONTO</label>
-                        </div>
-                        <input
-                          class='form-control text-center cifra'
-                          type='text'
-                          name='monto'
-                          id='monto'
-                          autocomplete='off'
-                          placeholder='MONTO'
-                          style='background-color: #FFFFCC;'
-                        />
+                    <div class='col-12 col-md-5 dto input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>DTO</label>
                       </div>
+                      <input
+                        class='form-control text-center dto'
+                        type='text'
+                        name='dcto'
+                        autocomplete='off'
+                        id='dto'
+                        placeholder='DTO'
+                        style='background-color: #FFFFCC;'
+                      />
                     </div>
-                    <div class='col-12'>
-                      <div class='input-group input-group-sm mb-3'>
-                        <div class='input-group-prepend stop d-none'>
-                          <label class='input-group-text'>HIELO</label>
-                        </div>
-                        <input
-                          class='form-control text-center aqmora stop d-none'
-                          type='text'
-                          name='datestop'
-                          autocomplete='off'
-                          placeholder='CONGELAR'
-                          style='background-color: #FFFFCC;'
-                          disabled
-                        />
-                        <div class='input-group-prepend'>
-                          <label class='input-group-text'>LIMITE</label>
-                        </div>
-                        <input
-                          class='form-control text-center aqmora'
-                          type='text'
-                          name='limite'
-                          autocomplete='off'
-                          placeholder='CADUCA'
-                          style='background-color: #FFFFCC;'
-                        />
+                    <div class='col-12 col-md-7 input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>MONTO</label>
                       </div>
+                      <input
+                        class='form-control text-center cifra'
+                        type='text'
+                        name='monto'
+                        id='monto'
+                        autocomplete='off'
+                        placeholder='MONTO'
+                        style='background-color: #FFFFCC;'
+                      />
                     </div>
+                    <div class='col-12 col-md-6 input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>LIMITE</label>
+                      </div>
+                      <input
+                        class='form-control text-center aqmora'
+                        type='text'
+                        name='limite'
+                        autocomplete='off'
+                        placeholder='CADUCA'
+                        style='background-color: #FFFFCC;'
+                      />
+                    </div>
+                    <div class='col-12 col-md-6 input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>INICIO</label>
+                      </div>
+                      <input
+                        class='form-control text-center aqmora'
+                        type='text'
+                        name='limite'
+                        autocomplete='off'
+                        placeholder='CADUCA'
+                        style='background-color: #FFFFCC;'
+                      />
+                    </div>
+                    <div class='col-12 col-md-6 input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>STOP</label>
+                      </div>
+                      <input
+                        class='form-control text-center aqmora'
+                        type='text'
+                        name='limite'
+                        autocomplete='off'
+                        placeholder='CADUCA'
+                        style='background-color: #FFFFCC;'
+                      />
+                    </div>
+                    <div class='col-12 col-md-6 input-group input-group-sm mb-3'>
+                      <div class='input-group-prepend'>
+                        <label class='input-group-text'>FIN</label>
+                      </div>
+                      <input
+                        class='form-control text-center aqmora'
+                        type='text'
+                        name='limite'
+                        autocomplete='off'
+                        placeholder='CADUCA'
+                        style='background-color: #FFFFCC;'
+                      />
+                    </div>
+
                     <div class='col-12'>
                       <div class='form-check form-check-inline'>
                         <input

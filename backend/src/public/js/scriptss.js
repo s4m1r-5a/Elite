@@ -8995,6 +8995,16 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         .data()
         .filter(e => data.proyeccion.push(e));
 
+      if (
+        !proyeccion.length ||
+        !producto?.id ||
+        !producto?.mtr ||
+        !producto?.mtr2 ||
+        !producto?.inicial ||
+        !producto?.valor
+      )
+        return SMSj('error', 'La orden no se encuentra completa revise todos los campos');
+
       $.ajax({
         type: 'POST',
         url: `/links/orden/save`,
