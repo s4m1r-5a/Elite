@@ -8847,7 +8847,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     });
 
     const lastDate = rows.findLast(e => e.tipo === tipo);
-    historyDate[tipo] = lastDate.fechs2 ? lastDate.fechs2 : lastDate.fechs;
+    historyDate[tipo] = lastDate?.fechs2 ? lastDate?.fechs2 : lastDate?.fechs;
 
     if (typI)
       rows
