@@ -8898,7 +8898,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         .nodes()
         .filter(e => e.firstChild.innerText == 1)
         .map((e, i) => {
-          if (i === 1) $(e).find('.fecha').addClass('date').css('background-color', '#FFFFCC');
+          if (i === 1) $(e).find('.fechs').addClass('date').css('background-color', '#FFFFCC');
         });
 
     $(rol.admin ? '.fecha' : '.date').each(function () {
