@@ -4734,7 +4734,7 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
   const qotas = proyeccion.reduce((i, e) => (e.cuota && e.cuota2 ? i + 2 : e.cuota ? i + 1 : i), 0);
   let updateQotas = !cupon?.orden ? 1 : 0;
   //console.log(proyeccion, ordenAnt, producto, cupon, historyQuota, qotas);
-
+  let lOte = [];
   if (!cupon?.orden) lOte = await pool.query(`SELECT * FROM productosd l WHERE l.id = ?`, id);
   if (lOte.length > 1) return res.send(false);
 

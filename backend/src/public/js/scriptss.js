@@ -8716,35 +8716,43 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
   };
 
   const UpdateTable = async tipo => {
-    const rows = [];
+    const rows = []; // array que contendra una copia actual de la tabla, esta a su ves resibira las modificaciones y luego se implantara en la tabla
     proyeccion
       .rows()
       .data()
-      .filter(e => rows.push(e));
+      .filter(e => rows.push(e)); // tranfiriendo datos de la tabla al array
+
     if (!rows.some(e => e.o) && ordenRows.length) {
+      // comprobamos si se trata de una edicion
       rows.length = 0;
       ordenRows.map(r => rows.push(r));
       historyQuota.FINANCIACION = ordenRows[0].cuot;
       historyDate.SEPARACION = ordenRows[0].fechs;
     }
-    const sep = rows.find(e => e.tipo === 'SEPARACION');
+
+    const inicial = noCifra($('#ini').val()); // valor total de la incial despues de descuento
+    const financiacion = noCifra($('#fnc').val()); // valor total de la financiacion despues de descuentos
+    const total = noCifra($('#total').val()); // total del producto despues de descuento
+
+    const sep = rows.find(e => e.tipo === 'SEPARACION'); // se busca el valor de la separacion
+
     if (sep.cuota === 1) {
+      // si el valor es igual a 1 quiere decir que es una orden nueva
       sep.cuota = producto.separaciones;
       const indx = rows.findIndex(e => e.tipo === 'SEPARACION');
       rows.splice(indx, 1, sep);
     }
-    const separacion = sep.cuota;
-    const inicial = noCifra($('#ini').val());
-    const financiacion = noCifra($('#fnc').val());
-    const total = noCifra($('#total').val());
-    const ini = separacion >= inicial ? 0 : inicial - separacion;
-    const fnc = separacion >= total ? 0 : separacion > inicial ? total - separacion : financiacion;
-    const ni = noCifra($('#num-ini').val());
-    const nf = noCifra($('#num-fnc').val());
-    const numIni = ini && !ni ? 1 : ini && ni ? ni : 0;
-    const numFnc = fnc && !nf ? 1 : fnc && nf ? nf : 0;
-    const typI = tipo === 'INICIAL';
-    const typF = tipo === 'FINANCIACION';
+    if (sep.cuota > total) rows.filter(e => e.tipo === 'SEPARACION').map(e => (e.cuota = total));
+    const separacion = sep.cuota; // si la separacion es mayor al total del producto toma el valor en la separacion del total del producto
+
+    const ini = separacion >= inicial ? 0 : inicial - separacion; // inicial menos la separacion
+    const fnc = separacion >= total ? 0 : separacion > inicial ? total - separacion : financiacion; // valor de la financiacion
+    const ni = noCifra($('#num-ini').val()); // numero de cuotas que tiene la inicial
+    const nf = noCifra($('#num-fnc').val()); // numero de cuotas que tiene la financiacion
+    const numIni = ini && !ni ? 1 : ini && ni ? ni : 0; // total de numeros de cuota en la inicial
+    const numFnc = fnc && !nf ? 1 : fnc && nf ? nf : 0; // total de numeros de cuota en la financiacion
+    const typI = tipo === 'INICIAL'; // determina si se ejectula la funcion en pro de la inicial
+    const typF = tipo === 'FINANCIACION'; // determina si se ejectula la funcion en pro de la fincanciacion
     let mountsUpdate = 0;
     let nCutasUpdate = 0;
     $('#num-ini').val(numIni);
@@ -8766,15 +8774,15 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
           nCutasUpdate++;
         }
       });
-    const quotaIni = (ini - mountsUpdate) / (numIni - nCutasUpdate);
-    const quotaFnc = (fnc - mountsUpdate) / (numFnc - nCutasUpdate);
-    const cuota = typI && ini ? quotaIni : typF && fnc ? quotaFnc : 0;
-    const newRows = typI ? Math.round(numIni / 2) - num : typF ? Math.round(numFnc / 2) - num : 0;
-    const deleteIndex = [];
+    const quotaIni = (ini - mountsUpdate) / (numIni - nCutasUpdate); // determina el valor de cada cuota en la inicial
+    const quotaFnc = (fnc - mountsUpdate) / (numFnc - nCutasUpdate); // determina el valor de cada cuota en la financiacion
+    const cuota = typI && ini ? quotaIni : typF && fnc ? quotaFnc : 0; // el valor de la cuota en esa categoria (INICIAL || FINANCIACION)
+    const newRows = typI ? Math.round(numIni / 2) - num : typF ? Math.round(numFnc / 2) - num : 0; // determina si la categoria que se esta ejecutando debe tener una nueva fila
+    const deleteIndex = []; // array de las cuotas a eliminar
     let n = 2,
       menos = 0;
-    if (!historyQuota[tipo]) historyQuota[tipo] = cuota;
-    let fecha = typI ? historyDate.SEPARACION : historyDate.INICIAL;
+    if (!historyQuota[tipo]) historyQuota[tipo] = cuota; // establece el valor historico de la categoria analizada
+    let fecha = typI ? historyDate.SEPARACION : historyDate.INICIAL; // establece la fecha de la cual debe partir para el calculo
     rows
       .filter(e => e.tipo === tipo)
       .map((e, i) => {
@@ -8846,8 +8854,13 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       return 0;
     });
 
-    const lastDate = rows.findLast(e => e.tipo === tipo);
-    historyDate[tipo] = lastDate?.fechs2 ? lastDate?.fechs2 : lastDate?.fechs;
+    const lastDate = await rows.findLast(e => e.tipo === tipo);
+    historyDate[tipo] =
+      !numIni && !numFnc
+        ? historyDate.SEPARACION
+        : lastDate?.fechs2
+        ? lastDate?.fechs2
+        : lastDate?.fechs;
 
     if (typI)
       rows
@@ -8879,8 +8892,17 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     proyeccion.clear().draw(false);
     await proyeccion.rows.add(rows).draw(false).columns.adjust().responsive.recalc();
 
-    if (rol.admin)
-      $('.fecha').daterangepicker(
+    if (!rol.admin)
+      proyeccion
+        .rows()
+        .nodes()
+        .filter(e => e.firstChild.innerText == 1)
+        .map((e, i) => {
+          if (i === 1) $(e).find('.fecha').addClass('date').css('background-color', '#FFFFCC');
+        });
+
+    $(rol.admin ? '.fecha' : '.date').each(function () {
+      $(this).daterangepicker(
         {
           locale: {
             format: 'YYYY-MM-DD',
@@ -8908,13 +8930,17 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
             ],
             firstDay: 1
           },
-          autoUpdateInput: true,
-          startDate: moment().format('YYYY-MM-DD'),
+          //autoUpdateInput: false,
+          startDate: moment($(this).html()).format('YYYY-MM-DD'),
           //endDate: moment().add(10, 'years').format('YYYY-MM-DD'),
           singleDatePicker: true,
-          showDropdowns: true,
-          minYear: 2019,
-          maxYear: parseInt(moment().add(10, 'years').format('YYYY'), 10)
+          showDropdowns: !!rol.admin,
+          minYear: !rol.admin ? parseInt(moment().format('YYYY'), 10) : 2019,
+          maxYear: !rol.admin
+            ? parseInt(moment().add(45, 'days').format('YYYY'), 10)
+            : parseInt(moment().add(10, 'years').format('YYYY'), 10),
+          minDate: !rol.admin ? moment().format('YYYY-MM-DD') : false,
+          maxDate: !rol.admin ? moment().add(45, 'days').format('YYYY-MM-DD') : false
         },
         function (start, end, label) {
           const fila = this.element.parents('tr');
@@ -8953,6 +8979,8 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
           UpdateTable(tipo);
         }
       );
+    });
+
     proyeccion.rows().every(function (a) {
       try {
         if (!$(this.child()).find('.fechs2').length) this.child().hide();
@@ -9507,10 +9535,11 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
       await UpdateTable('FINANCIACION');
     } else UpdateTable(row.tipo);
   });
-  proyeccion.on('mouseover', '.tabl .fecha', function () {
+  /* proyeccion.on('mouseover', '.tabl .fecha', function () {
+    if (!rol.admin) return;
     $('.fecha').data('daterangepicker').setStartDate($(this).html());
     $('.fecha').data('daterangepicker').setEndDate($(this).html());
-  });
+  }); */
   proyeccion.on('click', '.tabl .cuota', function () {
     $(this).select();
   });
