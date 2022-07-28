@@ -6025,7 +6025,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id == 'table2') {
     const pdo = await usuario(req.user, req.user.pin);
-    const params = pdo ? `WHERE d.id IN(${pdo})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
+    const params = pdo
+      ? `WHERE d.id IN(${pdo}) AND d.estados = 7`
+      : req.user.asistente
+      ? 'WHERE d.estados = 7'
+      : 'WHERE p.asesor = ? AND d.estados = 7';
 
     sql = `SELECT p.id, l.id lote, d.proyect proyecto, l.mz, l.n, c.imags, p.promesa, p.status, p.asesor, c.email,
         p.tipobsevacion, l.estado, c.idc, c.nombre, c.movil, c.documento, u.fullname, u.cel, p.fecha, p.autoriza, 
@@ -6063,7 +6067,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         await pool.query(sqlr);*/
   } else if (id == 'estadosc') {
     const pdo = await usuario(req.user, req.user.pin);
-    const params = pdo ? `WHERE d.id IN (${pdo})` : req.user.asistente ? '' : 'WHERE p.asesor = ?';
+    const params = pdo
+      ? `WHERE d.id IN (${pdo}) AND d.estados = 7`
+      : req.user.asistente
+      ? 'WHERE d.estados = 7'
+      : 'WHERE p.asesor = ? AND d.estados = 7';
 
     sql = `SELECT d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
     if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
@@ -6086,7 +6094,11 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   } else if (id == 'estadosc2') {
     const pdo = await usuario(req.user, req.user.pin);
-    const params = pdo ? `AND d.id IN(${pdo})` : req.user.asistente ? '' : 'AND p.asesor = ?';
+    const params = pdo
+      ? `AND d.id IN(${pdo}) AND d.estados = 7`
+      : req.user.asistente
+      ? 'AND d.estados = 7'
+      : 'AND p.asesor = ? AND d.estados = 7';
 
     sql = `SELECT COUNT(c.proyeccion) cuotas, MAX(c.ncuota) ncuota, MAX(c.tipo) descp, d.proyect, 
       l.mz, l.n, MAX(r.id) rid, u.nombre, p.fecha, s.fecharcb, s.ids, s.formap, s.monto, s.concepto, 
@@ -7351,7 +7363,11 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
       );
       prd = prcd.map(e => e.producto);
     }
-    let n = prd ? `AND p.id IN (${prd})` : req.user.asistente ? '' : 'AND u.id = ' + req.user.id;
+    let n = prd
+      ? `AND p.id IN (${prd}) AND p.estados = 7`
+      : req.user.asistente
+      ? 'AND p.estados = 7'
+      : 'AND u.id = ' + req.user.id + ' AND p.estados = 7';
     const so =
       await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar, e.otro, s.observaciones,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
