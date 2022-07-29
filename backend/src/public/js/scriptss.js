@@ -8858,6 +8858,8 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     historyDate[tipo] =
       !numIni && !numFnc
         ? historyDate.SEPARACION
+        : typI && !numIni
+        ? historyDate.SEPARACION
         : lastDate?.fechs2
         ? lastDate?.fechs2
         : lastDate?.fechs;
@@ -8868,12 +8870,13 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
         .map((e, i) => {
           const dateDiff = Math.ceil(moment(e.fechs).diff(historyDate[tipo], 'months', true));
 
-          if (!i && dateDiff >= menos)
+          if (!i && dateDiff >= menos && menos)
             fecha = moment(e.fechs).subtract(menos, 'month').format('YYYY-MM-DD');
           else if (!i && dateDiff < 0)
             fecha = moment(e.fechs)
               .add(Math.abs(dateDiff) + 1, 'month')
               .format('YYYY-MM-DD');
+          else if (!i && dateDiff === 0) fecha = moment(e.fechs).format('YYYY-MM-DD');
           else if (!i) fecha = moment(e.fechs).subtract(1, 'month').format('YYYY-MM-DD');
 
           //console.log(e.fechs, fecha, dateDiff, tipo, historyDate[tipo], menos);
