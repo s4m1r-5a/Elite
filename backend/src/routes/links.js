@@ -8285,7 +8285,7 @@ async function ProyeccionPagos(S) {
     S
   );
 
-  const Moras = await pool.query(`SELECT * FROM intereses`);
+  const Moras = await pool.query(`SELECT * FROM intereses ORDER BY fecha`);
   let mOra = false; //false/true determina si el proyecto cobra mora o no, predeterminado en false (no cobra)
   let cuotas = Cuotas.map(e => {
     const diffDay = moment().diff(e.fechs, 'days'); // dias vencidos de una cuota
@@ -8348,7 +8348,7 @@ async function ProyeccionPagos(S) {
       const Tasa =
         cobro && daysDiff
           ? Math.min(
-              ...Moras.filter(x => moment(x.fecha).isBetween(q.fechs, fechaLMT, 'month', '[]')).map(
+              ...Moras.filter(x => moment(x.fecha).isBetween(DateQta, fechaLMT, 'month', '[]')).map(
                 x => x.teano
               )
             )
