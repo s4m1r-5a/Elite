@@ -2739,7 +2739,7 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
               return `<span class="badge badge-pill badge-success">Disponible</span>`;
               break;
             default:
-              return `<span class="badge badge-pill badge-primary">Sin info</span>`;
+              return `<span class="badge badge-pill badge-primary">En espera</span>`;
           }
         }
       },
@@ -2797,6 +2797,9 @@ if (window.location.pathname === `/links/comisiones` && rol.contador) {
         ? fila.toggleClass('selected')
         : SMSj('error', 'No puede seleccionar este item ya que no se encuentra disponible');
     }
+  });
+  $('#busq2').on('keyup', function () {
+    comisiones.search(this.value).draw();
   });
   var EstadoCC = (id, std, actualstd) => {
     if ((actualstd === 4 && rol.admin) || actualstd !== 4) {

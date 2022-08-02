@@ -1099,61 +1099,91 @@ async function EstadoCuenta(movil, nombre, author) {
 }
 async function FacturaDeCobro(ids) {
   const Proyeccion = await pool.query(`SELECT s.ids, s.fech, s.monto, s.concepto, 
-    s.porciento, s.total, u.fullname nam, u.cel clu, u.username mail, pd.mz, 
-    pd.n, s.retefuente, s.pagar, s.lt, cl.nombre, p.proyect, u.document
-    FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
+    s.porciento, s.total, u.fullname nam, u.cel clu, u.username mail, pd.mz, pr.id, 
+    pd.n, s.retefuente, s.pagar, s.lt, cl.nombre, p.proyect, u.document, p.imagenes,
+    s.stado FROM solicitudes s INNER JOIN productosd pd ON s.lt = pd.id 
     INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN clientes cl ON pr.cliente = cl.idc 
     WHERE s.ids IN(${ids})`);
   let cuerpo = [];
   if (Proyeccion.length) {
     Proyeccion.map((e, i) => {
+      let std;
+      switch (e.stado) {
+        case 1:
+          std = 'Auditando';
+          break;
+        case 4:
+          std = 'Pagada';
+          break;
+        case 6:
+          std = 'Declinada';
+          break;
+        case 3:
+          std = 'Pendiente';
+          break;
+        case 15:
+          std = 'Inactiva';
+          break;
+        case 9:
+          std = 'Disponible';
+          break;
+        default:
+          std = 'En espera';
+      }
       if (!i) {
         cuerpo.push(
           [
             { text: `Id`, style: 'tableHeader', alignment: 'center' },
+            { text: `Orden`, style: 'tableHeader', alignment: 'center' },
             { text: 'Fecha', style: 'tableHeader', alignment: 'center' },
             //{ text: 'Cliente', style: 'tableHeader', alignment: 'center' },
-            { text: 'Proyecto', style: 'tableHeader', alignment: 'center' },
+            //{ text: 'Proyecto', style: 'tableHeader', alignment: 'center' },
             { text: 'Mz', style: 'tableHeader', alignment: 'center' },
             { text: 'Lt', style: 'tableHeader', alignment: 'center' },
             { text: 'Concepto', style: 'tableHeader', alignment: 'center' },
+            { text: 'Estado', style: 'tableHeader', alignment: 'center' },
             { text: 'Venta', style: 'tableHeader', alignment: 'center' },
             { text: '%', style: 'tableHeader', alignment: 'center' },
-            { text: 'Monto', style: 'tableHeader', alignment: 'center' },
-            { text: 'Iva', style: 'tableHeader', alignment: 'center' },
-            { text: 'Total', style: 'tableHeader', alignment: 'center' }
+            { text: 'Monto', style: 'tableHeader', alignment: 'center' }
+            /* { text: 'Iva', style: 'tableHeader', alignment: 'center' },
+            { text: 'Total', style: 'tableHeader', alignment: 'center' } */
           ],
           [
             e.ids,
-            moment(e.fech).format('L'),
-            e.proyect,
+            e.id,
+            { text: moment(e.fech).format('L'), alignment: 'center' },
+            //e.proyect,
             e.mz,
             e.n,
             e.concepto, //e.nombre,
-            '$' + Moneda(e.total),
+            std,
+            { text: '$' + Cifra(e.total || 0), alignment: 'center' },
             e.porciento * 100 + '%',
-            '$' + Moneda(e.monto || 0),
-            '$' + Moneda(e.retefuente),
-            '$' + Moneda(e.pagar)
+            { text: '$' + Cifra(e.monto || 0), alignment: 'right' }
+            /* '$' + Moneda(e.retefuente),
+            '$' + Moneda(e.pagar) */
           ]
         );
       } else {
         cuerpo.push([
           e.ids,
-          moment(e.fech).format('L'),
-          e.proyect,
+          e.id,
+          { text: moment(e.fech).format('L'), alignment: 'center' },
+          //e.proyect,
           e.mz,
           e.n,
           e.concepto, //, e.nombre
-          '$' + Moneda(e.total),
+          std,
+          { text: '$' + Cifra(e.total || 0), alignment: 'center' },
           e.porciento * 100 + '%',
-          '$' + Moneda(e.monto || 0),
-          '$' + Moneda(e.retefuente),
-          '$' + Moneda(e.pagar)
+          { text: '$' + Cifra(e.monto || 0), alignment: 'right' }
+          /* '$' + Moneda(e.retefuente),
+          '$' + Moneda(e.pagar) */
         ]);
       }
     });
+    console.log(Proyeccion[0].imagenes);
     ////////////////////////* CREAR PDF *//////////////////////////////
     const printer = new PdfPrinter(Roboto);
     let docDefinition = {
@@ -1165,7 +1195,7 @@ async function FacturaDeCobro(ids) {
         }; //, height: pageSize.height
       },
       pageSize: 'a4',
-      footer: function (currentPage, pageCount) {
+      /* footer: function (currentPage, pageCount) {
         return {
           alignment: 'center',
           margin: [40, 3, 40, 3],
@@ -1216,7 +1246,7 @@ async function FacturaDeCobro(ids) {
             }
           ]
         };
-      },
+      }, */
       header: function (currentPage, pageCount, pageSize) {
         // you can apply any logic and return any valid pdfmake element
         return [
@@ -1242,8 +1272,8 @@ async function FacturaDeCobro(ids) {
         {
           columns: [
             [
-              { text: Proyeccion[0].nam, style: 'header' },
-              { text: 'Estado de comisiones pendientes', style: 'subheader' }
+              { text: Proyeccion[0].proyect, style: 'header' },
+              { text: 'Estado de comisiones', style: 'subheader' }
               /* {
                                 text: `Doc. ${Proyeccion[0].document}         Movil ${Proyeccion[0].clu}        ${Proyeccion[0].mail}`,
                                 italics: true, color: 'gray', fontSize: 9
@@ -1251,7 +1281,12 @@ async function FacturaDeCobro(ids) {
             ],
             {
               width: 100,
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(
+                __dirname,
+                Proyeccion[0].imagenes
+                  ? '/public' + Proyeccion[0].imagenes
+                  : '/public/img/avatars/avatar.png'
+              ),
               fit: [100, 100]
             }
           ]
@@ -1260,19 +1295,7 @@ async function FacturaDeCobro(ids) {
           style: 'tableBody',
           color: '#444',
           table: {
-            widths: [
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto',
-              'auto'
-            ],
+            widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', '*', 'auto', '*'],
             headerRows: 1,
             // keepWithHeaderRows: 1,
             body: cuerpo
