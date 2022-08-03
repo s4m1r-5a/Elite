@@ -7576,9 +7576,9 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
       await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
     }
     //console.log(pdf)
-    var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
-    await EnviarWTSAP(movil, bod);
-    await EnvWTSAP_FILE(movil, pdf, 'RECIBO DE CAJA ' + ids, 'PAGO EXITOSO');
+    //var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
+    //await EnviarWTSAP(movil, bod);
+    await WspRcb(movil, pdf, ids);
     const r = { std: true, msg: `Solicitud procesada correctamente` };
     res.send(r);
   } else if (id === 'Asociar') {
@@ -8585,17 +8585,9 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
     console.log(e);
   }
 
-  var bod = `_*${S.nombre}*. Hemos procesado tu *${S.concepto}* de manera exitosa. Recibo *${
-    S.recibo
-  }* Monto *${Moneda(
-    monto
-  )}* Adjuntamos recibo de pago *#${Tid}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
-  var smsj = `hemos procesado tu pago de manera exitosa Recibo: ${S.recibo} Bono ${
-    S.bono
-  } Monto: ${Moneda(monto)} Concepto: ${S.proyect} MZ ${S.mz} LOTE ${S.n}`;
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
-  enviaRcb && (await EnviarWTSAP(S.movil, bod));
-  enviaRcb && (await EnvWTSAP_FILE(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO'));
+  //enviaRcb && (await EnviarWTSAP(S.movil, bod));
+  enviaRcb && (await WspRcb(S.movil, pdf, Tid));
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {
@@ -8726,6 +8718,72 @@ function Moneda(valor) {
     .replace(/(?=\d*\.?)(\d{3})/g, '$1.');
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
+}
+async function WspRcb(movil, url, filename) {
+  const cel =
+    movil.indexOf('-') > 0
+      ? '57' + movil.replace(/-/g, '')
+      : movil.indexOf(' ') > 0
+      ? movil.replace(/ /g, '')
+      : '57' + movil;
+
+  var data = JSON.stringify({
+    messaging_product: 'whatsapp',
+    to: cel,
+    type: 'template',
+    template: {
+      name: 'recibo_de_caja',
+      language: {
+        code: 'es'
+      },
+      components: [
+        {
+          type: 'header',
+          parameters: [
+            {
+              type: 'document',
+              document: {
+                link: url,
+                filename: 'RCB-' + filename
+              }
+            }
+          ]
+        },
+        {
+          type: 'body',
+          parameters: [
+            {
+              type: 'text',
+              text: filename
+            }
+          ]
+        }
+      ]
+    }
+  });
+
+  var config = {
+    method: 'post',
+    url: 'https://graph.facebook.com/v14.0/100312482788649/messages',
+    headers: {
+      Authorization:
+        'Bearer EAAIo4eIvnp4BAAP267jBdhh0ZCZBZAdfSv7NVnXF8t6b8s74PwUZCvWvzkkpPspJ9IJZAITOnbH0ltszAAFUdwYsHZCmU4ZBt3SxEf0thp40JQvYxwyzQr2udkXuaHY80RWJxbKDsUZAi9MpVpqdZCxkSlFj4LnX0ZCsrZCB7FppXbE88lUtjBabJgA',
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+
+  /* axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    }); */
+
+  const resp = await axios(config);
+  console.log(resp.data);
+  return resp.data;
 }
 //EnviarWTSAP('57 3012673944', 'esto es una prueba de grupo elite');
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
