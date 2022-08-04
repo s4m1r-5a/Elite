@@ -13059,7 +13059,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         if (data.pdf) mensaje = confirm('Este pago tiene un Rcibo ¿Generar nuevo RECIBO DE CAJA?.');
         else if (accion === 'Enviar') mensaje = true;
         else mensaje = enviaRcb;
-        fd.append('enviaRcb', enviaRcb);
+        fd.append('enviaRcb', enviaRcb ? 1 : 0);
 
         if (mensaje || !data.pdf) {
           /////////////////////////////////////////* PDF *//////////////////////////////////////////////

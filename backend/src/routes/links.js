@@ -7744,7 +7744,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { ids, ahora, idExtracto, enviaRcb } = req.body;
 
     const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
-    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto, enviaRcb);
+    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto, parseInt(enviaRcb));
     var w = { aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
@@ -8585,7 +8585,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
 
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', enviaRcb);
   //enviaRcb && (await EnviarWTSAP(S.movil, bod));
-  if (enviaRcb == false) {
+  if (enviaRcb) {
     await WspRcb(S.movil, pdf, Tid);
   }
   return { std: true, msg: `Solicitud procesada correctamente` };
