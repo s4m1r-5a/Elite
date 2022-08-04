@@ -1424,7 +1424,6 @@ if (window.location.pathname == `/links/pagos`) {
           });
       } else if (stepIndex === 2) {
         $('.toolbar-bottom').hide();
-        console.log('se debe ocultar el boton')
       }
     });
 
