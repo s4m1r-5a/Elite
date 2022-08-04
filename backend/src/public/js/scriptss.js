@@ -1256,7 +1256,7 @@ if (window.location.pathname == `/links/pagos`) {
     $('#PAYU').hide();
     $('#WOMPI-BTN').hide();
 
-    console.log(info, info.paymethods.wompy.methods?.boton);
+    console.log(info);
 
     if (info.paymethods.wompy.methods.boton) $('#WOMPI-BTN').show();
     if (info.paymethods.payu[desarrollo].active) {
@@ -1394,7 +1394,6 @@ if (window.location.pathname == `/links/pagos`) {
               });
 
               skdt = producto(datos.find(e => e.pyt == $('#proyectos').val()));
-              console.log(e, anchorObject, 'despues');
               $('#proyectos').change(function () {
                 skdt = producto(datos.find(e => e.pyt == $(this).val()));
               });
@@ -1409,7 +1408,7 @@ if (window.location.pathname == `/links/pagos`) {
           }
         });
       } else if (currentStepNumber === 1) {
-      } else if (currentStepNumber === 2) {
+        skdt = producto(producut, noCifra($('.newtotal').val()));
       }
       return skdt;
     })
@@ -1421,10 +1420,11 @@ if (window.location.pathname == `/links/pagos`) {
             $(this).val(Cifra($(this).val()));
           })
           .on('change', function () {
-            producto(producut, noCifra($(this).val()));
+            skdt = producto(producut, noCifra($(this).val()));
           });
       } else if (stepIndex === 2) {
-        $('.btn sw-btn-next').hide();
+        $('.toolbar-bottom').hide();
+        console.log('se debe ocultar el boton')
       }
     });
 
@@ -1725,6 +1725,7 @@ if (window.location.pathname == `/links/pagos`) {
   });
   $('#recbo').submit(function (e) {
     e.preventDefault();
+    $('#smartwizard').smartWizard('loader', 'show');
     $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
     if (
       !$('#montorecibos').val() ||
@@ -1748,24 +1749,27 @@ if (window.location.pathname == `/links/pagos`) {
         //dataType: 'json',
         processData: false,
         contentType: false,
-        beforeSend: function (xhr) {
+        /* beforeSend: function (xhr) {
           $('#ModalEventos').modal({
             backdrop: 'static',
-            //keyboard: true,
+            keyboard: true,
             toggle: true
           });
-        },
+        }, */
         success: function (data) {
           if (data.std) {
             SMSj('success', data.msj);
             setTimeout(function () {
+              //$('#ModalEventos').modal('hide');
               $('#smartwizard').smartWizard('reset');
-              $('#ModalEventos').hide();
-              $('#cedula').prop('selected', true);
-            }, 500);
+              $('#smartwizard').find('input').val(null);
+              $('#cedula').focus().prop('selected', true);
+              RCB(false);
+              $('#smartwizard').smartWizard('loader', 'hide');
+            }, 1000);
           } else {
             SMSj('error', data.msj);
-            $('#ModalEventos').hide();
+            $('#smartwizard').smartWizard('loader', 'hide');
           }
         }
       });
@@ -1807,7 +1811,7 @@ if (window.location.pathname == `/links/pagos`) {
   });
 }
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/pagos2`) {
+if (window.location.pathname == `/links/pago2`) {
   $(document).ready(function () {
     $('#cedula').focus();
   });
