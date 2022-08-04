@@ -482,7 +482,6 @@ const Enviodecartasclientes = async () => {
     await EnvWTSAP_FILE(data.movil, document, `CARTA ${data.proyect}`, 'Carta reestructuración');
   }
 };
-console.log(moment().format('YYYY-MM-DD'));
 
 var co = 0; // 12,15,27,30,31
 /* cron.schedule('* * * * *', async () => {
@@ -4077,7 +4076,7 @@ router.post('/boton', async (req, res) => {
     });
 });
 router.post('/rcbs', async (req, res) => {
-  const { ahora, lt, formap, g, cuotasvencidas, namercb, nrecibo, montos, feh, orden } = req.body;
+  const { ahora, lt, formap, namercb, nrecibo, montos, feh, orden } = req.body;
 
   console.log(req.body, req.files);
 
@@ -4118,8 +4117,7 @@ router.post('/rcbs', async (req, res) => {
   }
 
   await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
-  req.flash('success', 'Solicitud de pago enviada correctamente');
-  return res.redirect('/links/pagos');
+  res.json({ std: true, msj: 'Solicitud de pago enviada correctamente' });
 
   /* if (g) {
     return res.send({
@@ -8585,7 +8583,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
     console.log(e);
   }
 
-  console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO');
+  console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', enviaRcb);
   //enviaRcb && (await EnviarWTSAP(S.movil, bod));
   enviaRcb && (await WspRcb(S.movil, pdf, Tid));
   return { std: true, msg: `Solicitud procesada correctamente` };
@@ -8726,7 +8724,7 @@ async function WspRcb(movil, url, filename) {
       : movil.indexOf(' ') > 0
       ? movil.replace(/ /g, '')
       : '57' + movil;
-
+  console.log('se llamo la funcion exitosamente');
   var data = JSON.stringify({
     messaging_product: 'whatsapp',
     to: cel,
@@ -8773,17 +8771,17 @@ async function WspRcb(movil, url, filename) {
     data: data
   };
 
-  /* axios(config)
+  axios(config)
     .then(function (response) {
-      console.log(JSON.stringify(response.data));
+      console.log(response.data);
     })
     .catch(function (error) {
       console.log(error);
-    }); */
+    });
 
-  const resp = await axios(config);
-  console.log(resp.data);
-  return resp.data;
+  //const resp = await axios(config);
+  //console.log(resp.data);
+  return true;
 }
 //EnviarWTSAP('57 3012673944', 'esto es una prueba de grupo elite');
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {

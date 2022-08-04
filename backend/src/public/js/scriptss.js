@@ -1237,12 +1237,11 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
 }
 //////////////////////////////////* PAY *////////////////////////////////////////////////////////
 if (window.location.pathname == `/links/pay`) {
-  const desarrollo = 'sandbox'; // OR produccion
+  const desarrollo = 'produccion'; //'sandbox'; // OR produccion
   $(document).ready(() => $('#cedula').focus());
   //$('nav').hide()
 
   let cuentasdebanco = '';
-  let producut = '';
   let skdt = false;
 
   const producto = (info, newmout = null) => {
@@ -1252,13 +1251,14 @@ if (window.location.pathname == `/links/pay`) {
     const monto = newmout ? newmout : info.deuda + mora;
     cuentasdebanco = [];
 
-    /* $('#RCB').hide();
+    $('#RCB').hide();
     $('#BONO').hide();
     $('#PAYU').hide();
-    $('#WOMPI-BTN').hide(); */
+    $('#WOMPI-BTN').hide();
 
-    console.log(info, info.paymethods.wompy[desarrollo]?.boton);
-    if (info.paymethods.wompy[desarrollo].boton) $('#WOMPI-BTN').show();
+    console.log(info, info.paymethods.wompy.methods?.boton);
+
+    if (info.paymethods.wompy.methods.boton) $('#WOMPI-BTN').show();
     if (info.paymethods.payu[desarrollo].active) {
       $('#merchantId').val(payData.merchantId);
       $('#accountId').val(payData.accountId);
@@ -1300,9 +1300,10 @@ if (window.location.pathname == `/links/pay`) {
     $('#cliente').val(info.idc);
     producut = info;
     if (!monto && $('.newtotal').is(':visible')) {
-      skdt = false;
       SMSj('error', `El monto a pagar debe ser mayor a cero`);
-    } else skdt = true;
+      return false;
+    }
+    return true;
   };
 
   $('.card-header').on('click', function () {
@@ -1327,6 +1328,7 @@ if (window.location.pathname == `/links/pay`) {
   $('#subirR').click(function () {
     $('#file2').click();
   });
+
   $('#smartwizard')
     .smartWizard({
       /*showStepURLhash: false,
@@ -1391,10 +1393,10 @@ if (window.location.pathname == `/links/pay`) {
                 );
               });
 
-              producto(datos.find(e => e.pyt == $('#proyectos').val()));
-
+              skdt = producto(datos.find(e => e.pyt == $('#proyectos').val()));
+              console.log(e, anchorObject, 'despues');
               $('#proyectos').change(function () {
-                producto(datos.find(e => e.pyt == $(this).val()));
+                skdt = producto(datos.find(e => e.pyt == $(this).val()));
               });
             } else {
               skdt = false;
@@ -1407,60 +1409,24 @@ if (window.location.pathname == `/links/pay`) {
           }
         });
       } else if (currentStepNumber === 1) {
-        $('.newtotal input').focus();
-        $('.newtotal').change(() => producto(prodct, $(this).cleanVal()));
-      } else if (currentStepNumber === 2) skdt = true;
+      } else if (currentStepNumber === 2) {
+      }
       return skdt;
+    })
+    .on('showStep', (e, anchorObject, stepIndex, stepDirection, stepPosition) => {
+      if (stepIndex === 1) {
+        $('.newtotal')
+          .focus()
+          .on('keyup', function () {
+            $(this).val(Cifra($(this).val()));
+          })
+          .on('change', function () {
+            producto(producut, noCifra($(this).val()));
+          });
+      } else if (stepIndex === 2) {
+        $('.btn sw-btn-next').hide();
+      }
     });
-
-  t = {
-    wompy: {
-      sandbox: {
-        active: true,
-        pubKey: 'pub_test_qBxmekSvXlKuETHUARQv5QPWq3XEEivL',
-        prvKey: 'prv_test_kNY71ZDeiaUQtcENXgOaoC3kDGbhNTAX',
-        events: 'test_events_rnHXGcTAPmzgIfFXt1RgN46u2aF5In81',
-        integrity: 'test_integrity_xkc36wM71Xg9VrlS6O7tezefF9nwgFRG',
-        url: 'https://sandbox.wompi.co/v1'
-      },
-      produccion: {
-        active: false,
-        pubKey: 'pub_prod_qBxmekSvXlKuETHUARQv5QPWq3XEEivL',
-        prvKey: 'prv_prod_kNY71ZDeiaUQtcENXgOaoC3kDGbhNTAX',
-        events: 'prod_events_rnHXGcTAPmzgIfFXt1RgN46u2aF5In81',
-        integrity: 'prod_integrity_xkc36wM71Xg9VrlS6O7tezefF9nwgFRG',
-        url: 'https://production.wompi.co/v1'
-      },
-      methods: {
-        boton: true,
-        card: false,
-        nequi: false,
-        efectivo: false
-      }
-    },
-    bancos: [
-      { cta: 'CTA-CTE', entidad: 'BANCOLOMBIA', numero: '50900011438' },
-      { cta: 'CTA-AHO', entidad: 'DAVIVIENDA', numero: '11404149365' }
-    ],
-    payu: {
-      sandbox: {
-        active: false,
-        key: 'lPAfp1kXJPETIVvqr60o6cyEIy',
-        accountId: 852515,
-        merchantId: 845014,
-        responseUrl: 'https://grupoelitefincaraiz.com/planes',
-        confirmationUrl: 'https://grupoelitefincaraiz.com/confir'
-      },
-      produccion: {
-        active: false,
-        key: 'lPAfp1kXJPETIVvqr60o6cyEIy',
-        accountId: 852515,
-        merchantId: 845014,
-        responseUrl: 'https://grupoelitefincaraiz.com/planes',
-        confirmationUrl: 'https://grupoelitefincaraiz.com/confir'
-      }
-    }
-  };
 
   var Pay = forma => {
     if (forma === 'payu') {
@@ -1512,7 +1478,7 @@ if (window.location.pathname == `/links/pay`) {
         let formap = '';
         cuentasdebanco.map(e => {
           formap += `<div class="form-check">
-          <input class="form-check-input" type="radio" name="formap${i}" 
+          <input class="form-check-input formap" type="radio" name="formap${i}" 
           value="${e.cta}-${e.numero}" id="${e.numero + i}" ${
             cuentasdebanco.length === 1 ? 'checked' : ''
           }>
@@ -1760,7 +1726,12 @@ if (window.location.pathname == `/links/pay`) {
   $('#recbo').submit(function (e) {
     e.preventDefault();
     $('#ahora').val(moment().format('YYYY-MM-DD HH:mm'));
-    if (!$('#montorecibos').val() || !$('#file2').val() || !$('#nrbc').val()) {
+    if (
+      !$('#montorecibos').val() ||
+      !$('#file2').val() ||
+      !$('#nrbc').val() ||
+      !$('.formap').is(':checked')
+    ) {
       SMSj('error', 'Debe rellenar todos los campos solicitados');
     } else if (parseFloat($('#montorecibos').val()) < parseFloat($('.total').val())) {
       SMSj('error', 'el monto de los recibos ingresados no corresponde al monto total a pagar');
@@ -1774,23 +1745,24 @@ if (window.location.pathname == `/links/pay`) {
         type: 'POST',
         url: '/links/rcbs',
         data: formData,
-        dataType: 'json',
+        //dataType: 'json',
         processData: false,
         contentType: false,
         beforeSend: function (xhr) {
           $('#ModalEventos').modal({
             backdrop: 'static',
-            keyboard: true,
+            //keyboard: true,
             toggle: true
           });
         },
-        //async: false,
         success: function (data) {
           if (data.std) {
             SMSj('success', data.msj);
             setTimeout(function () {
-              //window.location.href = '/links/pagos';
-            }, 2000);
+              $('#smartwizard').smartWizard('reset');
+              $('#ModalEventos').hide();
+              $('#cedula').prop('selected', true);
+            }, 500);
           } else {
             SMSj('error', data.msj);
             $('#ModalEventos').hide();
