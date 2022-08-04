@@ -1,580 +1,545 @@
-<main
-  class='main d-flex w-100'
-  style="background-image: url('/img/payu/fondoA.png');
-  -webkit-background-size: 100% 100%;           
-     -moz-background-size: 100% 100%;         
-       -o-background-size: 100% 100%;          
-          background-size: 100% 100%"
->
-  <!--<h3 class="float-left ml-2 mt-2">Pagos</h3>-->
-  <div class='container d-flex flex-column'>
-    <div class='row h-100'>
-      <div class='col-sm-12 col-md-10 col-lg-8 mx-auto d-table h-100'>
-        <div id='smartwizard'>
-          <ul class='nav'>
-            <li>
-              <a class='nav-link' href='#step-1'>
-                Documento
-              </a>
-            </li>
-            <li>
-              <a class='nav-link' href='#step-2'>
-                Cuota
-              </a>
-            </li>
-            <li>
-              <a class='nav-link' href='#step-3'>
-                Metodo
-              </a>
-            </li>
-          </ul>
-          <div class='tab-content'>
-            <div id='step-1' class='tab-pane' role='tabpanel'>
-              <div class='m-sm-4' style='max-width: 500px;'>
-                <div
-                  class='alert alert-danger alert-dismissible form-group'
-                  role='alert'
-                  style='display: none;'
-                >
-                  <div class='alert-message'>s</div>
-                </div>
-                <div class='form-group'>
-                  <h3 class='float-left'>Documento de identidad</h3>
-                  <label>ingrese un documento que se encuentre en la orden de compra.</label>
-                  <input
-                    class='form-control form-control-lg'
-                    id='cedula'
-                    type='text'
-                    name='pin'
-                    placeholder='Ingrese numero de documento'
-                    required
-                    autocomplete='off'
-                  />
+<main class='main p-2 p-md-3'>
+  <div class='card h-100 border-dark rounded'>
+    <div class='card-header bg-light'>PAGOS</div>
+    <div class='card-body px-md-7'>
+      <div id='smartwizard'>
+        <ul class='nav'>
+          <li>
+            <a class='nav-link' href='#step-1'>
+              Documento
+            </a>
+          </li>
+          <li>
+            <a class='nav-link' href='#step-2'>
+              Cuota
+            </a>
+          </li>
+          <li>
+            <a class='nav-link' href='#step-3'>
+              Metodo
+            </a>
+          </li>
+        </ul>
+        <div class='tab-content'>
+          <div id='step-1' class='tab-pane' role='tabpanel'>
+            <div class='m-sm-4' style='max-width: 500px;'>
+              <div
+                class='alert alert-danger alert-dismissible form-group'
+                role='alert'
+                style='display: none;'
+              >
+                <div class='alert-message'>s</div>
+              </div>
+              <div class='form-group'>
+                <h3 class='float-left'>Documento de identidad</h3>
+                <label>ingrese un documento que se encuentre en la orden de compra.</label>
+                <input
+                  class='form-control form-control-lg'
+                  id='cedula'
+                  type='text'
+                  name='pin'
+                  placeholder='Ingrese numero de documento'
+                  required
+                  autocomplete='off'
+                />
+              </div>
+            </div>
+          </div>
+          <div id='step-2' class='tab-pane' role='tabpanel'>
+            <div class='row justify-content-center'>
+              <div class='col-12 card border-secondary' style='max-width: 500px;'>
+                <table class='table table-sm my-2'>
+                  <tbody>
+                    <tr>
+                      <th><i class='feather-lg' data-feather='user'></i></th>
+                      <td><span class='Cliente'></span></td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-lg' data-feather='sun'></i>
+                      </th>
+                      <td>
+                        Proyecto:
+                        <select class='form-control-no-border' id='proyectos' style='width: 90%;'>
+                        </select>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class='card bg-light'>
+                  <div class='card-header'>
+                    <strong class='text-muted'>DETALLADO</strong>
+                  </div>
+                  <div class='card-body'>
+                    <div class='row'>
+                      <div class='col-12'>
+                        <span>CONCEPTO:</span>
+                        <div class='d-inline-block float-right'>
+                          <span class='concepto'></span>
+                        </div>
+                      </div>
+                      <div class='col-12'>
+                        <span>CUOTAS VENCIDAS:</span>
+                        <div class='d-inline-block float-right'>
+                          <span class='cuotasvencidas'></span>
+                        </div>
+                      </div>
+                      <div class='col-12'>
+                        <span>DEUDA CAPITAL:</span>
+                        <div class='d-inline-block float-right'>
+                          <span class='deuda'></span>
+                        </div>
+                      </div>
+                      <div class='col-12'>
+                        <span>INTERESES X MORA:</span>
+                        <div class='d-inline-block float-right'>
+                          <span class='mora'></span>
+                        </div>
+                      </div>
+
+                      <div class='col-12'>
+                        <hr />
+                      </div>
+
+                      <div class='col-12'>
+                        <span>TOTAL A PAGAR:</span>
+                        <div class='d-inline-block float-right'>
+                          <span class='totalpagar'></span>
+                        </div>
+                      </div>
+                      <div class='col-12'>
+                        <span>OTRO VALOR:</span>
+                        <div class='d-inline-block float-right' style='max-width: 80px;'>
+                          <input
+                            class='edi d text-center newtotal'
+                            type='text'
+                            placeholder='Valor'
+                            autocomplete='off'
+                            style='padding: 1px; width: 100%;'
+                            name='otrovalor'
+                          />
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
-            <div id='step-2' class='tab-pane' role='tabpanel'>
-              <div class='row justify-content-center'>
-                <div class='col-12 card border-secondary' style='max-width: 500px;'>
-                  <table class='table table-sm my-2'>
-                    <tbody>
-                      <tr>
-                        <th><i class='feather-lg' data-feather='user'></i></th>
-                        <td><span class='Cliente'></span></td>
-                      </tr>
-                      <tr>
-                        <th>
-                          <i class='feather-lg' data-feather='sun'></i>
-                        </th>
-                        <td>
-                          Proyecto:
-                          <select class='form-control-no-border' id='proyectos' style='width: 90%;'>
-                          </select>
-                        </td>
-                      </tr>
-                    </tbody>
-                  </table>
-                  <div class='card bg-light'>
-                    <div class='card-header'>
-                      <strong class='text-muted'>DETALLADO</strong>
+          </div>
+          <div id='step-3' class='tab-pane' role='tabpanel'>
+            <div class='row justify-content-center'>
+              <div class='col-12 card border-secondary' style='max-width: 500px;'>
+
+                <div class='accordion' id='accordion'>
+                  <div class='card bg-light mt-2'>
+                    <div
+                      class='card-header'
+                      type='button'
+                      data-toggle='collapse'
+                      data-target='#collapse'
+                      aria-expanded='true'
+                      aria-controls='collapse'
+                    >
+                      <strong class='text-muted'>RESUMEN DE TRANSACCION</strong>
+                      <i class='fas fa-angle-up float-right'></i>
                     </div>
-                    <div class='card-body'>
-                      <div class='row'>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Cupon:</span>
-                          <span id='Cupon' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Proyecto:</span>
-                          <span id='Proyecto' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Dto:</span>
-                          <span class='float-right'>%</span>
-                          <span id='Dto' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Concepto:</span>
-                          <span id='Concepto' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Ahorro:</span>
-                          <span id='Ahorro' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>N°-Cuota:</span>
-                          <span id='Cuotan' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Proyecto-Dto:</span>
-                          <span id='Proyecto-Dto' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Cuota:</span>
-                          <span id='Cuota' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Facturas-Vnc:</span>
-                          <span id='Facturas' class='float-right'></span>
-                        </div>
-                        <div class='col-12 col-md-6 col-lg-6'>
-                          <span>Mora:</span>
-                          <span id='Mora' class='float-right'></span>
-                        </div>
-
-                        <div class='col-12'>
-                          <hr />
-                        </div>
-
-                        <div class='col-12 d-none'>
-                          <span>BONO:</span>
-                          <div class='d-inline-block float-right' style='max-width: 80px;'>
-                            <input
-                              class='edi d text-center text-uppercase'
-                              id='bono'
-                              type='text'
-                              placeholder='Bono'
-                              autocomplete='off'
-                              style='padding: 1px; width: 100%;'
-                              name='bono'
-                            />
-                          </div>
-                        </div>
-                        <div class='col-12'>
-                          <span>FACTURA:</span>
-                          <div class='d-inline-block float-right'>
-                            <span class='Totalf'></span>
-                          </div>
-                        </div>
-                        <div class='col-12 d-none'>
-                          <span>BONO:</span>
-                          <div class='d-inline-block float-right'>
-                            <span id='TotalBono'></span>
-                          </div>
-                        </div>
-                        <div class='col-12'>
-                          <span>PAGAR:</span>
-                          <div class='d-inline-block float-right'>
-                            <span class='Total'></span>
-                          </div>
-                        </div>
-                        <div class='col-12'>
-                          <span>OTRO VALOR:</span>
-                          <div class='d-inline-block float-right' style='max-width: 80px;'>
-                            <input
-                              class='edi d text-right Total2'
-                              type='text'
-                              placeholder='Valor'
-                              autocomplete='off'
-                              style='padding: 1px; width: 100%;'
-                              name='otrovalor'
-                              data-mask='000.000.000'
-                              data-mask-reverse='true'
-                              data-mask-selectonfocus='true'
-                            />
-                          </div>
-                        </div>
+                    <div
+                      id='collapse'
+                      class='collapse show'
+                      aria-labelledby='headingOne'
+                      data-parent='#accordion'
+                    >
+                      <div class='card-body text-center'>
+                        <strong class=''>VALOR A PAGAR</strong>
+                        <h1 class='text-success total'></h1>
                       </div>
                     </div>
                   </div>
-
                 </div>
-              </div>
-            </div>
-            <div id='step-3' class='tab-pane' role='tabpanel'>
-              <div class='row justify-content-center'>
-                <div class='col-12 card border-secondary' style='max-width: 500px;'>
 
-                  <div class='accordion' id='accordion'>
-                    <div class='card bg-light mt-2'>
-                      <div
-                        class='card-header'
-                        type='button'
-                        data-toggle='collapse'
-                        data-target='#collapse'
-                        aria-expanded='true'
-                        aria-controls='collapse'
-                      >
-                        <strong class='text-muted'>RESUMEN DE TRANSACCION</strong>
-                        <i class='fas fa-angle-up float-right'></i>
-                      </div>
-                      <div
-                        id='collapse'
-                        class='collapse show'
-                        aria-labelledby='headingOne'
-                        data-parent='#accordion'
-                      >
-                        <div class='card-body text-center'>
-                          <strong class=''>VALOR A PAGAR</strong>
-                          <h1 class='text-success Total3'></h1>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div class='accordion' id='accordionExample'>
-                    <div class='card'>
-                      <div
-                        class='card-header'
-                        id='headingOne'
-                        type='button'
-                        data-toggle='collapse'
-                        data-target='#collapseOne'
-                        aria-expanded='true'
-                        aria-controls='collapseOne'
-                      >
-                        <strong class='text-muted'>DETALLES DEL PAGO</strong>
-                        <i class='fas fa-angle-down float-right'></i>
-                      </div>
-                      <div
-                        id='collapseOne'
-                        class='collapse'
-                        aria-labelledby='headingOne'
-                        data-parent='#accordionExample'
-                      >
-                        <div class='card-body'>
-                          <!--https://sandbox.checkout.payulatam.com/ppp-web-gateway-payu-->
-                          <form
-                            id='payu'
-                            method='post'
-                            action='https://checkout.payulatam.com/ppp-web-gateway-payu'
-                          >
-                            <input name='pyt' class='pyt' type='hidden' />
-                            <input name='mora' class='mora' type='hidden' />
-                            <table class='table table-sm'>
-                              <tbody>
-                                <tr>
-                                  <th>
-                                    <i class='feather-md' data-feather='user'></i>Nombre
-                                  </th>
-                                  <td>
-                                    <input
-                                      type='text'
-                                      name='buyerFullName'
-                                      class='form-control Cliente'
-                                      disabled
-                                    />
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <th>
-                                    <i class='feather-md' data-feather='user'></i>Movil
-                                  </th>
-                                  <td>
-                                    <input
-                                      type='text'
-                                      name='telephone'
-                                      class='form-control'
-                                      id='Movil'
-                                      disabled
-                                    />
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <th>
-                                    <i class='feather-md' data-feather='user'></i>Email
-                                  </th>
-                                  <td>
-                                    <input
-                                      type='email'
-                                      name='buyerEmail'
-                                      class='form-control'
-                                      id='Email'
-                                      disabled
-                                    />
-                                  </td>
-                                </tr>
-                                <tr>
-                                  <th>
-                                    <i class='feather-md' data-feather='sun'></i>Concepto
-                                  </th>
-                                  <td>
-                                    <input
-                                      type='text'
-                                      name='description'
-                                      class='form-control'
-                                      id='Description'
-                                      value=''
-                                      disabled
-                                    />
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                            <input type='hidden' name='amount' id='Total' />
-                            <input name='merchantId' id='merchantId' type='hidden' />
-                            <input name='accountId' id='accountId' type='hidden' />
-                            <input name='referenceCode' type='hidden' id='Code' />
-                            <input name='tax' type='hidden' value='0' />
-                            <input name='taxReturnBase' type='hidden' value='0' />
-                            <input name='currency' type='hidden' value='COP' />
-                            <input name='signature' type='hidden' id='signature' />
-                            <input name='test' type='hidden' value='0' />
-                            <input type='hidden' name='extra2' id='extra' />
-                            <input
-                              name='responseUrl'
-                              type='hidden'
-                              value='https://grupoelitefincaraiz.com/planes'
-                            />
-                            <input
-                              name='confirmationUrl'
-                              type='hidden'
-                              value='https://grupoelitefincaraiz.com/confir'
-                            />
-                            <!--<input name="responseUrl" type="hidden" value="http://localhost:5000/planes">
-                                                        <input name="confirmationUrl" type="hidden" value="https://endarh7fdp1a476.m.pipedream.net">-->
-                            <div class='mt-auto pgpayu' style='display: none;'>
-                              <input
-                                name='Submit'
-                                type='submit'
-                                class='btn btn-lg btn-outline-danger'
-                                value='Pagar'
-                              />
-                            </div>
-                          </form>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
+                <div class='accordion' id='accordionExample'>
                   <div class='card'>
-                    <div class='card-header'>
-                      <strong class='text-muted'>METODOS DE PAGO</strong>
+                    <div
+                      class='card-header'
+                      id='headingOne'
+                      type='button'
+                      data-toggle='collapse'
+                      data-target='#collapseOne'
+                      aria-expanded='true'
+                      aria-controls='collapseOne'
+                    >
+                      <strong class='text-muted'>DETALLES DEL PAGO</strong>
+                      <i class='fas fa-angle-down float-right'></i>
                     </div>
-                    <div class='card-body'>
-                      <div class='accordion' id='accordion2'>
+                    <div
+                      id='collapseOne'
+                      class='collapse'
+                      aria-labelledby='headingOne'
+                      data-parent='#accordionExample'
+                    >
+                      <div class='card-body'>
+                        <form
+                          id='payu'
+                          method='post'
+                          action='https://checkout.payulatam.com/ppp-web-gateway-payu'
+                        >
+                          <input name='proyecto' class='proyecto' type='hidden' />
+                          <table class='table table-sm'>
+                            <tbody>
+                              <tr>
+                                <th>
+                                  <i class='feather-md' data-feather='user'></i>Nombre
+                                </th>
+                                <td>
+                                  <input
+                                    type='text'
+                                    name='buyerFullName'
+                                    class='form-control Cliente'
+                                    disabled
+                                  />
+                                </td>
+                              </tr>
+                              <tr>
+                                <th>
+                                  <i class='feather-md' data-feather='user'></i>Movil
+                                </th>
+                                <td>
+                                  <input
+                                    type='text'
+                                    name='telephone'
+                                    class='form-control'
+                                    id='Movil'
+                                    disabled
+                                  />
+                                </td>
+                              </tr>
+                              <tr>
+                                <th>
+                                  <i class='feather-md' data-feather='user'></i>Email
+                                </th>
+                                <td>
+                                  <input
+                                    type='email'
+                                    name='buyerEmail'
+                                    class='form-control'
+                                    id='Email'
+                                    disabled
+                                  />
+                                </td>
+                              </tr>
+                              <tr>
+                                <th>
+                                  <i class='feather-md' data-feather='sun'></i>Concepto
+                                </th>
+                                <td>
+                                  <input
+                                    type='text'
+                                    name='description'
+                                    class='form-control'
+                                    id='description'
+                                    value=''
+                                    disabled
+                                  />
+                                </td>
+                              </tr>
+                            </tbody>
+                          </table>
+                          <input type='hidden' name='amount' class='total' />
+                          <input name='merchantId' id='merchantId' type='hidden' />
+                          <input name='accountId' id='accountId' type='hidden' />
+                          <input name='referenceCode' type='hidden' id='code' />
+                          <input name='tax' type='hidden' value='0' />
+                          <input name='taxReturnBase' type='hidden' value='0' />
+                          <input name='currency' type='hidden' value='COP' />
+                          <input name='signature' type='hidden' id='signature' />
+                          <input name='test' type='hidden' value='0' />
+                          <input type='hidden' name='extra2' id='extra' />
+                          <input
+                            name='responseUrl'
+                            id='responseUrl'
+                            type='hidden'
+                            value='https://grupoelitefincaraiz.com/planes'
+                          />
+                          <input
+                            name='confirmationUrl'
+                            id='confirmationUrl'
+                            type='hidden'
+                            value='https://grupoelitefincaraiz.com/confir'
+                          />
+                          <div class='mt-auto pgpayu' style='display: none;'>
+                            <input
+                              name='Submit'
+                              type='submit'
+                              class='btn btn-lg btn-outline-danger'
+                            />
+                          </div>
+                        </form>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
-                        <div class='card' id='BOTON'>
-                          <div
-                            class='card-header'
-                            type='button'
-                            data-toggle='collapse'
-                            data-target='#collapse2'
-                            aria-expanded='true'
-                            aria-controls='collapse2'
-                            onclick="Pay('boton')"
-                          >
-                            <div class='row'>
-                              <div class='col-12 col-md-9 col-lg-9'>
-                                <strong class='text-muted'>Botón Bancolombia</strong><br />
-                                <small class='text-muted'>Transfiere con tu cuenta Bancolombia</small>
-                              </div>
-                              <div class='col-12 col-md-3 col-lg-3 text-center'>
-                                <a class='float-center'><img
-                                    src='/img/btn-bank.png'
-                                    width='80'
-                                    height='40'
-                                    alt='x'
-                                  /></a>
-                              </div>
+                <div class='card'>
+                  <div class='card-header'>
+                    <strong class='text-muted'>METODOS DE PAGO</strong>
+                  </div>
+                  <div class='card-body'>
+                    <div class='accordion' id='accordion2'>
+
+                      <div class='card' id='BONO'>
+                        <div class='card-header'>
+                          <div class='row'>
+                            <div class='col-12 col-md-9 col-lg-9'>
+                              <strong class='text-muted'>Bono</strong><br />
+                              <small class='text-muted'>Redime aqui tu bono</small>
+                            </div>
+                            <div class='col-12 col-md-3 col-lg-3 text-center'>
+                              <input class='form-control form-control-lg' type='text' />
                             </div>
                           </div>
-                          <div
-                            id='collapse2'
-                            class='collapse'
-                            aria-labelledby='headingOne'
-                            data-parent='#accordion2'
-                          >
-                            <div class='card-body'>
-                              <small>Realiza transferencias por internet desde tu cuenta de ahorros
-                                o corriente Bancolombia</small><br />
-                              <a class='float-right mb-2' id='BTN-BOTON'><img
-                                  src='/img/btn-bancolombia.png'
-                                  width='120'
-                                  height='40'
+                        </div>
+                      </div>
+
+                      <div class='card' id='WOMPI-BTN'>
+                        <div
+                          class='card-header'
+                          type='button'
+                          data-toggle='collapse'
+                          data-target='#collapse1'
+                          aria-expanded='true'
+                          aria-controls='collapse1'
+                          onclick="Pay('boton')"
+                          style="background-color: '#DAF7A6';"
+                        >
+                          <div class='row'>
+                            <div class='col-12 col-md-9 col-lg-9'>
+                              <strong class='text-muted'>Boton Bancolombia</strong><br />
+                              <small class='text-muted'>Transfiere desde tu cuenta Bancolombia</small>
+                            </div>
+                            <div class='col-12 col-md-3 col-lg-3 text-center'>
+                              <a class='float-center'><img
+                                  src='/img/group.svg'
+                                  width='50'
+                                  height='50'
                                   alt='x'
                                 /></a>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          id='collapse1'
+                          class='collapse show'
+                          aria-labelledby='headingOne'
+                          data-parent='#accordion2'
+                        >
+                          <div class='card-body'>
+                            <div class='form-group form-check'>
+                              <input type='checkbox' class='form-check-input' id='exampleCheck1' />
+                              <label class='form-check-label' for='exampleCheck1'>Acepto haber leido
+                                los
+                                <a href='#' class='text-decoration-none text-primary'>terminos y
+                                  condiciones</a>
+                                <a href='#' class='text-decoration-none text-primary'>y la politica
+                                  de privacidad</a>
+                                para hacer esta compra</label>
+                            </div>
+
+                            <button type='button' class='btn btn-dark btn-sm btn-block'>
+                              <i class='align-middle mr-2' data-feather='check-square'></i>
+                              Transferir
+                            </button>
+                            <a class='float-right mb-2' id='BTN-BOTON'><img
+                                src='/img/logo-bancolombia-black.svg'
+                                width='140'
+                                height='40'
+                                alt='x'
+                              /></a>
+                            <form
+                              enctype='multipart/form-data'
+                              id='boton'
+                              action='/links/recibo'
+                              method='POST'
+                            >
+                              <input name='proyecto' class='proyecto' type='hidden' />
+                              <input type='hidden' id='transferAmount' name='transferAmount' />
+                              <input
+                                type='hidden'
+                                id='transferReference'
+                                name='transferReference'
+                              />
+                              <input
+                                type='hidden'
+                                id='transferDescription'
+                                name='transferDescription'
+                              />
+                            </form>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class='card' id='PAYU'>
+                        <div
+                          class='card-header'
+                          type='button'
+                          data-toggle='collapse'
+                          data-target='#collapse3'
+                          aria-expanded='true'
+                          aria-controls='collapse2'
+                          onclick="Pay('payu')"
+                        >
+                          <div class='row'>
+                            <div class='col-12 col-md-9 col-lg-9'>
+                              <strong class='text-muted'>Paga con PayU</strong><br />
+                              <small class='text-muted'>Todos los medios de pago en un solo luga</small>
+                            </div>
+                            <div class='col-12 col-md-3 col-lg-3 text-center'>
+                              <a class='float-center'><img
+                                  src='/img/group-2.svg'
+                                  width='50'
+                                  height='50'
+                                  alt='x'
+                                /></a>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          id='collapse3'
+                          class='collapse'
+                          aria-labelledby='headingOne'
+                          data-parent='#accordion2'
+                        >
+                          <div class='card-body'>
+                            <label class='form-check-label' for='exampleCheck2'>En PayU realizar
+                              pagos en línea con tarjetas debito, crédito y en efectivo nunca fue
+                              más fácil.</label><br />
+                            <button type='button' class='btn btn-success btn-sm btn-block'>
+                              Pagar con
+                              <img src='/img/Logo_PayU.png' width='55' height='20' />
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div class='card' id='RCB'>
+                        <div
+                          class='card-header'
+                          type='button'
+                          data-toggle='collapse'
+                          data-target='#collapse4'
+                          aria-expanded='true'
+                          aria-controls='collapse2'
+                          onclick="Pay('recbo')"
+                        >
+                          <div class='row'>
+                            <div class='col-12 col-md-9 col-lg-9'>
+                              <strong class='text-muted'>Recibos</strong><br />
+                              <small class='text-muted'>Tengo un recibo de consignacion o capture</small>
+                            </div>
+                            <div class='col-12 col-md-3 col-lg-3 text-center'>
+                              <a class='float-center'><img
+                                  src='/img/group-3.svg'
+                                  width='50'
+                                  height='50'
+                                  alt='x'
+                                /></a>
+                            </div>
+                          </div>
+                        </div>
+                        <div
+                          id='collapse4'
+                          class='collapse'
+                          aria-labelledby='headingOne'
+                          data-parent='#accordion2'
+                        >
+                          <div class='card-body'>
+                            <small>Sube aqui los recibos de consignacion emitido por los bancos,
+                              sucursales o transferencias</small>
+                            <small class='montorecibos badge badge-dark'></small>
+
+                            <button
+                              type='button'
+                              class='btn btn-dark btn-sm btn-block'
+                              data-toggle='tooltip'
+                              data-placement='top'
+                              id='subirR'
+                              data-container='body'
+                              title="Click para seleccionar recibo(s). Mantener tecla 
+                                    'Ctrl' precionada para seleccionar varios recibos"
+                              data-toggle='dropdown'
+                              aria-haspopup='true'
+                              aria-expanded='false'
+                            >
+                              <i class='align-middle mr-2' data-feather='file-plus'></i>
+                              Montar recibo
+                            </button>
+
+                            <table class='table table-sm' id='recibosss'>
                               <form
                                 enctype='multipart/form-data'
-                                id='boton'
+                                id='recbo'
                                 action='/links/recibo'
                                 method='POST'
                               >
-                                <input name='pyt' class='pyt' type='hidden' />
-                                <input name='mora' class='mora' type='hidden' />
-                                <input type='hidden' id='transferAmount' name='transferAmount' />
-                                <input
-                                  type='hidden'
-                                  id='transferReference'
-                                  name='transferReference'
-                                />
-                                <input
-                                  type='hidden'
-                                  id='transferDescription'
-                                  name='transferDescription'
-                                />
+                                <input type='hidden' class='total' name='total' />
+                                <input type='hidden' id='cliente' name='id' />
+                                <input type='hidden' id='concpto' name='concpto' />
+                                <input type='hidden' id='orden' name='orden' />
+                                <input type='hidden' id='lt' name='lt' />
+                                <input id='ahora' type='hidden' name='ahora' />
+                                <input class='cuotasvencidas' type='hidden' name='cuotasvencidas' />
+                                <input type='hidden' name='montorcb' id='montorecibos' />
+                                <input type='hidden' name='recibos' id='nrbc' />
+                                <tbody>
+                                  <tr style='display: none;' id='trsubida'>
+                                    <th colspan='2'>
+                                      <i class='feather-md' data-feather='file-plus'></i>
+                                      <input
+                                        class='form-control-no-border edi'
+                                        type='file'
+                                        name='image'
+                                        id='file2'
+                                        multiple
+                                        style='width: 50%;'
+                                        onchange='preview(this);'
+                                        required
+                                      />
+                                    </th>
+                                  </tr>
+                                  <tr style='display: none;' id='trarchivos'>
+                                    <th
+                                      colspan='2'
+                                      class='image-wrap'
+                                      id='recibos1'
+                                      width='100%'
+                                      height='200'
+                                    >
+                                      <input
+                                        class='custom-control-input'
+                                        type='radio'
+                                        name='nrecibo'
+                                        disabled
+                                      />
+                                      <input
+                                        class='custom-control-input'
+                                        type='radio'
+                                        name='montos'
+                                        disabled
+                                      />
+                                      <input
+                                        class='custom-control-input'
+                                        type='radio'
+                                        name='fech'
+                                        disabled
+                                      />
+                                    </th>
+                                  </tr>
+                                </tbody>
                               </form>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class='card' id='PAYU'>
-                          <div
-                            class='card-header'
-                            type='button'
-                            data-toggle='collapse'
-                            data-target='#collapse3'
-                            aria-expanded='true'
-                            aria-controls='collapse2'
-                            onclick="Pay('payu')"
-                          >
-                            <div class='row'>
-                              <div class='col-12 col-md-9 col-lg-9'>
-                                <strong class='text-muted'>Paga con PayU</strong><br />
-                                <small class='text-muted'>Todos los medios de pago en un solo luga</small>
-                              </div>
-                              <div class='col-12 col-md-3 col-lg-3 text-center'>
-                                <a class='float-center'><img
-                                    src='/img/btn-payu2.png'
-                                    width='80'
-                                    height='40'
-                                    alt='x'
-                                  /></a>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            id='collapse3'
-                            class='collapse'
-                            aria-labelledby='headingOne'
-                            data-parent='#accordion2'
-                          >
-                            <div class='card-body'>
-                              <!--<img src="/img/payu/Recurso 10.png" width="200" height="95"
-                                                                alt="x" />-->
-                              <small>Pagos en linea lideres en el mercado</small><br />
-                              <a class='float-right mb-2' id='BTN-PAYU'><img
-                                  src='/img/btn-payu.png'
-                                  width='120'
-                                  height='45'
-                                  alt='x'
-                                /></a>
-                            </div>
-                          </div>
-                        </div>
-
-                        <div class='card' id='RCB'>
-                          <div
-                            class='card-header'
-                            type='button'
-                            data-toggle='collapse'
-                            data-target='#collapse4'
-                            aria-expanded='true'
-                            aria-controls='collapse2'
-                            onclick="Pay('recbo')"
-                          >
-                            <div class='row'>
-                              <div class='col-12 col-md-9 col-lg-9'>
-                                <strong class='text-muted'>Recibos</strong><br />
-                                <small class='text-muted'>Tengo un recibo emitido por el banco</small>
-                              </div>
-                              <div class='col-12 col-md-3 col-lg-3 text-center'>
-                                <a class='float-center'><img
-                                    src='/img/logos/recibo.jpg'
-                                    width='40'
-                                    height='40'
-                                    alt='x'
-                                  /></a>
-                              </div>
-                            </div>
-                          </div>
-                          <div
-                            id='collapse4'
-                            class='collapse'
-                            aria-labelledby='headingOne'
-                            data-parent='#accordion2'
-                          >
-                            <div class='card-body'>
-                              <small>Sube aqui los recibos de consignacion emitido por los bancos o
-                                sucursales</small><br />
-                              <small class='montorecibos badge badge-dark'></small>
-                              <button
-                                class='btn btn-sm btn-outline-danger float-right mb-2'
-                                data-toggle='tooltip'
-                                data-placement='top'
-                                id='subirR'
-                                data-container='body'
-                                title="Click para seleccionar recibo(s). Mantener tecla 
-                                                                'Ctrl' precionada para seleccionar varios recibos"
-                                data-toggle='dropdown'
-                                aria-haspopup='true'
-                                aria-expanded='false'
-                              >Subir RCB</button>
-                              <table class='table table-sm' id='recibosss'>
-                                <form
-                                  enctype='multipart/form-data'
-                                  id='recbo'
-                                  action='/links/recibo'
-                                  method='POST'
-                                >
-                                  <input type='hidden' id='Total2' name='total' />
-                                  <input type='hidden' id='factrs' name='factrs' />
-                                  <input type='hidden' id='idC' name='id' />
-                                  <input type='hidden' id='concpto' name='concpto' />
-                                  <input type='hidden' id='orden' name='orden' />
-                                  <input type='hidden' id='lt' name='lt' />
-                                  <input type='hidden' class='bonus' name='bono' />
-                                  <input type='hidden' class='bonu' name='pin' />
-                                  <input id='ahora' type='hidden' name='ahora' />
-                                  <input id='mora' type='hidden' name='mora' />
-                                  <input id='rcbexcdnt' type='hidden' name='rcbexcdnt' />
-                                  <input type='hidden' class='TotalBono' name='bonomonto' />
-                                  <input type='hidden' name='montorcb' id='montorecibos' />
-                                  <input type='hidden' name='recibos' id='nrbc' />
-                                  <input type='hidden' name='formap' id='formapRCB' />
-                                  <input type='hidden' name='g' value='1' />
-                                  <tbody>
-                                    <tr style='display: none;' id='trsubida'>
-                                      <th colspan='2'>
-                                        <i class='feather-md' data-feather='file-plus'></i>
-                                        <input
-                                          class='form-control-no-border edi'
-                                          type='file'
-                                          name='image'
-                                          id='file2'
-                                          multiple
-                                          style='width: 50%;'
-                                          onchange='preview(this);'
-                                          required
-                                        />
-                                      </th>
-                                    </tr>
-                                    <tr style='display: none;' id='trarchivos'>
-                                      <th
-                                        colspan='2'
-                                        class='image-wrap'
-                                        id='recibos1'
-                                        width='100%'
-                                        height='200'
-                                      >
-                                        <input
-                                          class='custom-control-input'
-                                          type='radio'
-                                          name='nrecibo'
-                                          disabled
-                                        />
-                                        <input
-                                          class='custom-control-input'
-                                          type='radio'
-                                          name='montos'
-                                          disabled
-                                        />
-                                        <input
-                                          class='custom-control-input'
-                                          type='radio'
-                                          name='fech'
-                                          disabled
-                                        />
-                                      </th>
-                                    </tr>
-                                  </tbody>
-                                </form>
-                              </table>
-                              <button
-                                class='btn btn-sm btn-outline-danger float-right mb-2'
-                                id='BTN-RCB'
-                              >Eviar</button>
-                            </div>
+                            </table>
+                            <button
+                              class='btn btn-outline-info float-right mb-2'
+                              id='BTN-RCB'
+                            >Eviar</button>
                           </div>
                         </div>
                       </div>
@@ -585,45 +550,6 @@
             </div>
           </div>
         </div>
-
-        <!--<div id="smartwizard2">
-                    <ul class="nav">
-                        <li>
-                            <a class="nav-link" href="#step-1">
-                                Step 1
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="#step-2">
-                                Step 2
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="#step-3">
-                                Step 3
-                            </a>
-                        </li>
-                        <li>
-                            <a class="nav-link" href="#step-4">
-                                Step 4
-                            </a>
-                        </li>
-                    </ul>
-                    <div class="tab-content">
-                        <div id="step-1" class="tab-pane" role="tabpanel">
-                            Step content
-                        </div>
-                        <div id="step-2" class="tab-pane" role="tabpanel">
-                            Step content
-                        </div>
-                        <div id="step-3" class="tab-pane" role="tabpanel">
-                            Step content
-                        </div>
-                        <div id="step-4" class="tab-pane" role="tabpanel">
-                            Step content
-                        </div>
-                    </div>
-                </div>-->
       </div>
     </div>
   </div>

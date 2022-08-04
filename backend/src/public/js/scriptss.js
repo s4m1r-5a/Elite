@@ -1236,7 +1236,7 @@ if (window.location.pathname == `/tablero` && !rol.externo) {
   });
 }
 //////////////////////////////////* PAY *////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/pay`) {
+if (window.location.pathname == `/links/pagos`) {
   const desarrollo = 'produccion'; //'sandbox'; // OR produccion
   $(document).ready(() => $('#cedula').focus());
   //$('nav').hide()
@@ -1807,7 +1807,7 @@ if (window.location.pathname == `/links/pay`) {
   });
 }
 //////////////////////////////////* PAGOS *////////////////////////////////////////////////////////
-if (window.location.pathname == `/links/pagos`) {
+if (window.location.pathname == `/links/pagos2`) {
   $(document).ready(function () {
     $('#cedula').focus();
   });
