@@ -5,7 +5,7 @@ const crypto = require('crypto');
 const pool = require('../database');
 const { isLoggedIn, noExterno, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
-const { registro, dataSet, Contactos } = require('../keys');
+const { wasb, registro, dataSet, Contactos } = require('../keys');
 const request = require('request');
 const cron = require('node-cron');
 const axios = require('axios');
@@ -7744,7 +7744,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { ids, ahora, idExtracto, enviaRcb } = req.body;
 
     const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
-    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto);
+    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto, enviaRcb);
     var w = { aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
@@ -8585,7 +8585,9 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
 
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', enviaRcb);
   //enviaRcb && (await EnviarWTSAP(S.movil, bod));
-  enviaRcb && (await WspRcb(S.movil, pdf, Tid));
+  if (enviaRcb == false) {
+    await WspRcb(S.movil, pdf, Tid);
+  }
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
 async function Bonos(pin, lote) {
@@ -8764,8 +8766,7 @@ async function WspRcb(movil, url, filename) {
     method: 'post',
     url: 'https://graph.facebook.com/v14.0/100312482788649/messages',
     headers: {
-      Authorization:
-        'Bearer EAAIo4eIvnp4BABTRQZAGi2ELI5ZBdEJJe8j3LapMb8uEc8zcZAw2Y6FS0S5NxcrV0EBINCbtByBAY2xUtWP3Nhfg1sxxO5ftb5Axqh00eLLzsz3Ivn8wfNk9HombABTneIk6AEpG9ZBqePnBL4KjfT1CwJoQZCSrWgyLfmbPpxdBekvnZBra1k',
+      Authorization: 'Bearer ' + wasb,
       'Content-Type': 'application/json'
     },
     data: data

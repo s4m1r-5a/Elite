@@ -1,5 +1,6 @@
 require('dotenv').config();
 module.exports = {
+  wasb: process.env.WASB,
   database: {
     connectionLimit: 1000,
     host: process.env.BD_HOST,
