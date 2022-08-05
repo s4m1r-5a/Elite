@@ -7337,6 +7337,7 @@ router.post('/desendentes', noExterno, async (req, res) => {
 });
 ////////////////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
+  console.log(req.user);
   res.render('links/solicitudes');
 });
 router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
@@ -7758,36 +7759,30 @@ router.post('/afiliado', noExterno, async (req, res) => {
   const { movil, cajero } = req.body;
   var pin = ID(13);
   var cel = movil.replace(/-/g, '');
-  var boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-    *_Registrarte_* _en:_\n*${req.headers.origin}/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*${req.headers.origin}/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`;
+  if (req.user.admin && req.user.empresa) {
+    const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
 
-  const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
-  if (h.length > 0) {
-    pin = h[0].id;
-    boidy = `*_¡ Felicidades !_* \n_ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n
-                *_Registrarte_* _en:_\n*${req.headers.origin}/signup?id=${pin}* \n\n_¡ Si ya te registraste ! y lo que quieres es iniciar sesion ingresa a_ \n*${req.headers.origin}/signin* \n\nPara mas informacion puedes escribirnos al *3007753983* \n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`;
-
-    if (h[0].acreedor !== null) {
-      boidy = `*_¡ De nuevo !_* \n_Tu registro fue satisfactorio ya eres parte de nuestro equipo_ *_ELITE_* _tu_ *ID* _es_ *_${pin}_* \n\n_¡ Inicia Sesion ! ingresando a_ \n*${req.headers.origin}/signin*\n\n*Bienvenido a* *_GRUPO ELITE FINCA RAÍZ_* _El mejor equipo de emprendimiento empresarial del país_`;
+    if (h.length) pin = h[0].id;
+    else {
+      const nuevoPin = {
+        id: pin,
+        categoria: 1,
+        usuario: req.user.id,
+        celular: cel
+      };
+      await pool.query('INSERT INTO pines SET ? ', nuevoPin);
     }
+    //WspNewUser(cel, req.user.titulo, req.headers.origin + req.user.logo, pin);
+    WspNewUser(movil, req.user.titulo, 'https://inmovili.com' + req.user.logo, pin);
+
+    req.flash(
+      'success',
+      'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre'
+    );
   } else {
-    const nuevoPin = {
-      id: pin,
-      categoria: 1,
-      usuario: req.user.id,
-      celular: cel
-    };
-    await pool.query('INSERT INTO pines SET ? ', nuevoPin);
+    req.flash('error', 'No tienes autorizacion para realizar esta accion');
   }
-  EnviarWTSAP(
-    movil,
-    boidy,
-    `Felicidades ya eres parte de nuestro equipo ELITE ingresa a https://grupoelitered.com.co/signup?id=${pin} y registrarte o canjeando este ID ${pin} de registro`
-  );
-  req.flash(
-    'success',
-    'Pin enviado satisfactoriamente, comuniquese con el afiliado para que se registre'
-  );
+
   res.redirect('/tablero');
 });
 router.post('/id', async (req, res) => {
@@ -8719,6 +8714,81 @@ function Moneda(valor) {
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
 }
+async function WspNewUser(movil, company, img, id) {
+  const cel =
+    movil.indexOf('-') > 0
+      ? '57' + movil.replace(/-/g, '')
+      : movil.indexOf(' ') > 0
+      ? movil.replace(/ /g, '')
+      : '57' + movil;
+
+  var data = JSON.stringify({
+    messaging_product: 'whatsapp',
+    to: cel,
+    type: 'template',
+    template: {
+      name: 'new_user',
+      language: {
+        code: 'es'
+      },
+      components: [
+        {
+          type: 'header',
+          parameters: [
+            {
+              type: 'image',
+              image: {
+                link: img
+              }
+            }
+          ]
+        },
+        {
+          type: 'body',
+          parameters: [
+            {
+              type: 'text',
+              text: company
+            },
+            {
+              type: 'text',
+              text: id
+            }
+          ]
+        },
+        {
+          type: 'button',
+          sub_type: 'url',
+          index: '0',
+          parameters: [
+            {
+              type: 'text',
+              text: id
+            }
+          ]
+        }
+      ]
+    }
+  });
+
+  var config = {
+    method: 'post',
+    url: 'https://graph.facebook.com/v14.0/100312482788649/messages',
+    headers: {
+      Authorization: 'Bearer ' + wasb,
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+
+  axios(config)
+    .then(function (response) {
+      console.log(JSON.stringify(response.data));
+    })
+    .catch(function (error) {
+      console.log(error);
+    });
+}
 async function WspRcb(movil, url, filename) {
   const cel =
     movil.indexOf('-') > 0
@@ -8726,7 +8796,7 @@ async function WspRcb(movil, url, filename) {
       : movil.indexOf(' ') > 0
       ? movil.replace(/ /g, '')
       : '57' + movil;
-  console.log('se llamo la funcion exitosamente');
+  c;
   var data = JSON.stringify({
     messaging_product: 'whatsapp',
     to: cel,

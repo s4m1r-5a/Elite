@@ -147,8 +147,8 @@ passport.serializeUser((user, done) => {
 passport.deserializeUser(async (id, done) => {
   const rows = await pool.query(
     `SELECT u.*, r.rango, p.admin, p.subadmin, p.contador, p.financiero, p.auxicontbl, p.asistente, 
-    p.externo FROM users u INNER JOIN rangos r ON u.nrango = r.id INNER JOIN pines p ON p.id = u.pin 
-    WHERE u.id = ?`,
+    p.externo, e.titulo, e.logo, e.nit, e.url FROM users u INNER JOIN rangos r ON u.nrango = r.id INNER JOIN pines p ON p.id = u.pin 
+    LEFT JOIN empresa e ON u.empresa = e.id WHERE u.id = ?`,
     id
   );
 
