@@ -2487,7 +2487,7 @@ router.get('/productos', isLoggedIn, async (req, res) => {
 router.post('/productos', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
   const params = pdo ? `WHERE id IN(${pdo})` : '';
-  const fila = await pool.query('SELECT * FROM productos ' + params);
+  const fila = await pool.query('SELECT * FROM productos p WHERE p.estados != 15 ' + params);
   respuesta = { data: fila };
   res.send(respuesta);
 });
@@ -5834,7 +5834,7 @@ router.post('/comisiones', isLoggedIn, async (req, res) => {
     INNER JOIN users u ON s.asesor = u.id  INNER JOIN preventa pr ON pr.lote = pd.id 
     INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
     INNER JOIN clientes cl ON pr.cliente = cl.idc WHERE s.concepto IN('GESTION ADMINISTRATIVA',
-    'GESTION VENTAS') AND pr.tipobsevacion IS NULL ${params}`);
+    'GESTION VENTAS') AND pr.tipobsevacion IS NULL ${params} AND p.estados != 15`);
 
   respuesta = { data: solicitudes };
   res.send(respuesta);
@@ -6337,7 +6337,9 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
         INNER JOIN productos p ON pd.producto = p.id INNER JOIN users us ON pr.asesor = us.id 
         INNER JOIN clientes cl ON pr.cliente = cl.idc INNER JOIN clientes c ON u.cli = c.idc 
         WHERE s.concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'BONO EXTRA')
-        AND pr.tipobsevacion IS NULL ${req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id}`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}
+        AND pr.tipobsevacion IS NULL ${
+          req.user.auxicontbl ? '' : 'AND u.id = ' + req.user.id
+        } AND p.estados != 15`); //${req.user.admin == 1 ? '' : 'AND u.id = ' + req.user.id}
 
     respuesta = { data: solicitudes };
     res.send(respuesta);
