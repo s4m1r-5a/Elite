@@ -3438,23 +3438,24 @@ router.post('/excelcrearproducto', async (req, res) => {
       fechafin: new Date((proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000)
     };
     const proyectoAdd = await pool.query('INSERT INTO productos SET ? ', proyectoJson);
-    //console.log(productosJson);
+
     subProductos = await productosJson
       .filter(e => e.n)
       .map(e => {
         const r = [
           e.mz ? e.mz : 'no',
           e.n,
-          e.mtr2,
-          e.mtr,
-          e.valor,
-          e.inicial,
+          !e.mtr2 ? 0 : e.mtr2,
+          !e.mtr ? 0 : e.mtr,
+          !e.valor ? 0 : e.valor,
+          !e.inicial ? 0 : e.inicial,
           e.estado,
           proyectoAdd.insertId,
           e.descripcion
         ];
         return r;
       });
+    console.log(subProductos);
     await pool.query(
       `INSERT INTO productosd
     (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`,
