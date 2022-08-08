@@ -2486,7 +2486,7 @@ router.get('/productos', isLoggedIn, async (req, res) => {
 });
 router.post('/productos', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
-  const params = pdo ? `WHERE id IN(${pdo})` : '';
+  const params = pdo ? `AND p.id IN(${pdo})` : '';
   const fila = await pool.query('SELECT * FROM productos p WHERE p.estados != 15 ' + params);
   respuesta = { data: fila };
   res.send(respuesta);
