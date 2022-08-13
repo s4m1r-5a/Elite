@@ -3959,12 +3959,15 @@ router.post('/pay/:id', async (req, res) => {
     GROUP BY p.id, c.idc ORDER BY p.fecha;`,
     req.params.id
   );
-  datos[0].paymethods = JSON.parse(datos[0].paymethods);
+  //datos[0].paymethods = JSON.parse(datos[0].paymethods);
 
   if (datos.length) {
     var recaudos = '';
 
-    datos.map((e, i) => (recaudos += !i ? `${e.pyt}` : `, ${e.pyt}`));
+    datos.map((e, i) => {
+      e.paymethods = JSON.parse(e.paymethods);
+      recaudos += !i ? `${e.pyt}` : `, ${e.pyt}`;
+    });
 
     const cuentas = await pool.query(
       `SELECT * FROM prodrecauds p INNER JOIN recaudadores r 

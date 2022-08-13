@@ -1243,6 +1243,7 @@ if (window.location.pathname == `/links/pagos`) {
 
   let cuentasdebanco = '';
   let skdt = false;
+  let producut;
 
   const producto = (info, newmout = null) => {
     const code = info.orden + '-' + info.idc + '-' + ID(3);
@@ -1258,8 +1259,8 @@ if (window.location.pathname == `/links/pagos`) {
 
     console.log(info);
 
-    if (info.paymethods.wompy.methods.boton) $('#WOMPI-BTN').show();
-    if (info.paymethods.payu[desarrollo].active) {
+    if (info.paymethods?.wompy?.methods?.boton) $('#WOMPI-BTN').show();
+    if (info.paymethods?.payu[desarrollo].active) {
       $('#merchantId').val(payData.merchantId);
       $('#accountId').val(payData.accountId);
       $('#responseUrl').val(payData.responseUrl);
@@ -1276,9 +1277,9 @@ if (window.location.pathname == `/links/pagos`) {
         }
       });
     }
-    if (info.paymethods.bonos) $('#BONO').show();
-    if (info.paymethods.bancos.length) {
-      cuentasdebanco = info.paymethods.bancos;
+    if (info.paymethods?.bonos) $('#BONO').show();
+    if (info.paymethods?.bancos.length) {
+      cuentasdebanco = info.paymethods?.bancos;
       $('#RCB').show();
     }
 
@@ -1289,7 +1290,7 @@ if (window.location.pathname == `/links/pagos`) {
     $('#code').val(code);
     $('#orden').val(info.orden);
     $('#lt').val(info.lt);
-    $('.proyecto').val(info.pyt);
+    $('.proyecto').val(info.lt);
     $('.concepto').val('ABONO').html('ABONO');
     $('.cuotasvencidas').html(info.cuotasvencidas);
     $('.deuda').html(Cifra(info.deuda));
@@ -1298,7 +1299,7 @@ if (window.location.pathname == `/links/pagos`) {
     $('.total').html(Cifra(monto)).val(monto);
     $('#description').val('ABONO ' + description);
     $('#cliente').val(info.idc);
-    producut = info;
+    //producut = info;
     if (!monto && $('.newtotal').is(':visible')) {
       SMSj('error', `El monto a pagar debe ser mayor a cero`);
       return false;
@@ -1387,16 +1388,18 @@ if (window.location.pathname == `/links/pagos`) {
 
               datos.map(r => {
                 $('#proyectos').append(
-                  `<option value="${r.pyt}">${r.proyect}${r.mz != 'no' ? ' Mz. ' + r.mz : ''} Lt. ${
+                  `<option value="${r.lt}">${r.proyect}${r.mz != 'no' ? ' Mz. ' + r.mz : ''} Lt. ${
                     r.n
                   }</option>`
                 );
               });
-
-              skdt = producto(datos.find(e => e.pyt == $('#proyectos').val()));
+              producut = datos.find(e => e.lt == $('#proyectos').val());
+              skdt = producto(producut);
               $('#proyectos').change(function () {
-                skdt = producto(datos.find(e => e.pyt == $(this).val()));
+                producut = datos.find(e => e.lt == $(this).val());
+                skdt = producto(producut);
               });
+              console.log(datos, producut);
             } else {
               skdt = false;
               $('.alert').show();
@@ -1408,7 +1411,8 @@ if (window.location.pathname == `/links/pagos`) {
           }
         });
       } else if (currentStepNumber === 1) {
-        skdt = producto(producut, noCifra($('.newtotal').val()));
+        //skdt = producto(producut, noCifra($('.newtotal').val()));
+        //console.log('aqui se despide');
       }
       return skdt;
     })
@@ -12210,6 +12214,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   maxDateFilter = '';
   var idExtracto = false;
   var dateExtracto = false;
+  const permiso = rol.rutas.find(e => e.name === 'Solicitudes');
+  console.log(permiso);
 
   $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
     if (oSettings.nTable != document.getElementById('datatable')) return true;
@@ -12261,6 +12267,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       elemen.addClass('i');
     }
   };
+
   /* var Recibos = $('#Recibos').DataTable({
     //lengthMenu: -1,
     deferRender: true,
@@ -12386,6 +12393,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       }
     }
   }); */
+
   var table = $('#datatable').DataTable({
     applyFilter: true,
     //dom: 'Bfrtip',
@@ -12748,43 +12756,57 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         if (data.extr && !rol.externo) {
           BuscarFechaRcb(data.fecharcb, data.extr);
           //BancoExt.columns(0,).search(data.extr).draw();
-          $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
-                                            <a class="dropdown-item">Enviar</a>`);
+          /* $('#apde').next().html(`<a class="dropdown-item">Desasociar</a>
+              <a class="dropdown-item">Enviar</a>`); */
+          if (permiso.desasociar)
+            $('#apde').next().append(`<a class="dropdown-item">Desasociar</a>`);
+          if (permiso.enviar) $('#apde').next().append(`<a class="dropdown-item">Enviar</a>`);
         } else if (!rol.externo) {
           //BancoExt.columns(0).search('').draw();
           BuscarFechaRcb(data.fecharcb);
-          $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
-            <a class="dropdown-item">Enviar</a>`);
+          /* $('#apde').next().html(`<a class="dropdown-item">Asociar</a>
+            <a class="dropdown-item">Enviar</a>`); */
+          if (permiso.asociar) $('#apde').next().append(`<a class="dropdown-item">Asociar</a>`);
+          if (permiso.enviar) $('#apde').next().append(`<a class="dropdown-item">Enviar</a>`);
         }
 
-        if (rol.id == '9')
+        /* if (rol.id == '9')
           $('#apde').next().append(`<a class="dropdown-item">Anular</a>
-          <a class="dropdown-item">Eliminar</a>`);
+          <a class="dropdown-item">Eliminar</a>`); */
+        if (permiso.anular) $('#apde').next().append(`<a class="dropdown-item">Anular</a>`);
+        if (permiso.eliminar) $('#apde').next().append(`<a class="dropdown-item">Eliminar</a>`);
         break;
       case 6:
         $('#Modalimg .estado').html(`<span class="badge badge-pill badge-danger">Declinada</span>`);
-        if (rol.id == '9')
+        /* if (rol.id == '9')
           $('#apde').next().html(`<a class="dropdown-item">Eliminar</a>
-            <a class="dropdown-item">Desanular</a>`);
+            <a class="dropdown-item">Desanular</a>`);   */
+        if (permiso.eliminar) $('#apde').next().append(`<a class="dropdown-item">Eliminar</a>`);
+        if (permiso.desanular) $('#apde').next().append(`<a class="dropdown-item">Desanular</a>`);
         break;
       case 3:
         $('#Modalimg .estado').html(`<span class="badge badge-pill badge-info">Pendiente</span>`);
-        //BancoExt.columns(0).search('').draw();
         !rol.externo && BuscarFechaRcb(data.fecharcb);
-        $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
+        /* $('#apde').next().html(`<a class="dropdown-item">Aprobar</a>
           <a class="dropdown-item">Declinar</a>`);
         if (rol.id == '9')
           $('#apde').next().append(`<a class="dropdown-item">Anular</a>
-            <a class="dropdown-item">Eliminar</a>`);
+            <a class="dropdown-item">Eliminar</a>`); */
+        if (permiso.aprobar) $('#apde').next().append(`<a class="dropdown-item">Aprobar</a>`);
+        if (permiso.anular) $('#apde').next().append(`<a class="dropdown-item">Anular</a>`);
+        if (permiso.eliminar) $('#apde').next().append(`<a class="dropdown-item">Eliminar</a>`);
         break;
       default:
         $('#Modalimg .estado').html(
           `<span class="badge badge-pill badge-secondary">sin formato</span>`
         );
-        if (rol.id == '9')
+        /* if (rol.id == '9')
           $('#apde').next().append(`<a class="dropdown-item">Anular</a>
           <a class="dropdown-item">Eliminar</a>
-          <a class="dropdown-item">Desanular</a>`);
+          <a class="dropdown-item">Desanular</a>`); */
+        if (permiso.anular) $('#apde').next().append(`<a class="dropdown-item">Anular</a>`);
+        if (permiso.eliminar) $('#apde').next().append(`<a class="dropdown-item">Eliminar</a>`);
+        if (permiso.desanular) $('#apde').next().append(`<a class="dropdown-item">Desanular</a>`);
     }
     var zoom = 200;
     $('.foto').on({
@@ -12826,12 +12848,12 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       $('#Modalimg .obv-text').html(data.observaciones).parents('.obv').show();
     else $('#Modalimg .obv-text').html('').parents('.obv').hide();
 
-    if (rol.contador) {
-      $('.dropdown-item').show();
-      $('#nove').show();
-    } else {
+    //if (rol.contador) {
+    $('.dropdown-item').show();
+    $('#nove').show();
+    /* } else {
       $('.dropdown-item').hide();
-    }
+    } */
     $('#Modalimg').modal({
       backdrop: 'static',
       keyboard: true,
@@ -12858,7 +12880,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
       idExtracto && fd.append('idExtracto', idExtracto);
       //console.log(w.length, imge, accion, totalasociados);
 
-      if (accion === 'Declinar' && rol.contador) {
+      if (accion === 'Declinar' && permiso.declinar) {
         porque = prompt(
           'Deje en claro el motivo de la declinacion, este mensaje le sera enviado al asesor a cargo para que diligencie y haga la correccion del pago',
           'Solicitud rechazada por que'
@@ -12903,7 +12925,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             }
           });
         }
-      } else if (accion === 'Anular' && rol.id == '9') {
+      } else if (accion === 'Anular' && permiso.anular) {
         /////////////////////////////////////////////////////////////////////
         observacion = prompt('Deje en claro el motivo de la Anulacion', '');
         if (observacion)
@@ -12926,7 +12948,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           });
         else SMSj('error', `Solicitud no pudo ser procesada, debes de dar un motivo`);
         /////////////////////////////////////////////////////////////////////////////////
-      } else if (accion === 'Desanular' && rol.id == '9') {
+      } else if (accion === 'Desanular' && permiso.desanular) {
         $.ajax({
           type: 'PUT',
           url: '/links/solicitudes/' + accion,
@@ -12944,7 +12966,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             console.log(data);
           }
         });
-      } else if (accion === 'Eliminar' && rol.id == '9') {
+      } else if (accion === 'Eliminar' && permiso.eliminar) {
         $.ajax({
           type: 'PUT',
           url: '/links/solicitudes/' + accion,
@@ -12962,7 +12984,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             console.log(data);
           }
         });
-      } else if (accion === 'Asociar' && rol.contador && !rol.externo) {
+      } else if (accion === 'Asociar' && permiso.asociar && !rol.externo) {
         if (!idExtracto) {
           alert('Debe seleccionar un extrato antes de intentar asociar al pago');
           return false;
@@ -13004,7 +13026,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
             console.log(data);
           }
         });
-      } else if (accion === 'Desasociar' && (rol.id == '15' || rol.id == '9') && !rol.externo) {
+      } else if (accion === 'Desasociar' && permiso.desasociar && !rol.externo) {
         if (!data.extr) {
           alert(
             'Debe tener asociado un extrato del banco con esta solicitud de pago para realizar esta acción'
@@ -13044,11 +13066,10 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           });
         }
       } else if (
-        (rol.contador && accion === 'Enviar') ||
-        (accion === 'Aprobar' && (rol.id == '15' || rol.id == '9')) ||
-        (rol.contador && accion === 'Aprobar' && rol.externo)
+        (permiso.enviar && accion === 'Enviar') ||
+        (accion === 'Aprobar' && permiso.aprobar)
       ) {
-        if (!rol.externo && !idExtracto && accion === 'Aprobar' && rol.id != '9') {
+        if (!rol.externo && !idExtracto && accion === 'Aprobar' && permiso.extracto) {
           alert('Debe asociar un extrato al pago que desea aprobar');
           return false;
         }
