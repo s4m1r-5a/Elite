@@ -8802,7 +8802,6 @@ async function WspRcb(movil, url, filename) {
       : movil.indexOf(' ') > 0
       ? movil.replace(/ /g, '')
       : '57' + movil;
-  c;
   var data = JSON.stringify({
     messaging_product: 'whatsapp',
     to: cel,
