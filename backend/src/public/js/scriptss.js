@@ -12795,6 +12795,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
         if (permiso.aprobar) $('#apde').next().append(`<a class="dropdown-item">Aprobar</a>`);
         if (permiso.anular) $('#apde').next().append(`<a class="dropdown-item">Anular</a>`);
         if (permiso.eliminar) $('#apde').next().append(`<a class="dropdown-item">Eliminar</a>`);
+        if (permiso.declinar) $('#apde').next().append(`<a class="dropdown-item">Declinar</a>`);
         break;
       default:
         $('#Modalimg .estado').html(
