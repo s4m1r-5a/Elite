@@ -9591,19 +9591,19 @@ if (
         render: function (data, method, row) {
           switch (data) {
             case 13:
-              return `<span class="badge badge-pill badge-success"> Pagada</span>`;
+              return `<span class="text-success"> Pagada</span>`;
               break;
             case 3:
-              return `<span class="badge badge-pill badge-primary"> Pendiente</span>`;
+              return `<span class="text-primary"> Pendiente</span>`;
               break;
             case 6:
-              return `<span class="badge badge-pill badge-danger"> Anulada</span> `;
+              return `<span class="text-danger"> Anulada</span> `;
               break;
             case 8:
-              return `<span class="badge badge-pill badge-secondary"> Abono</span>`;
+              return `<span class="text-secondary"> Abono</span>`;
               break;
             case 1:
-              return `<span class="badge badge-pill badge-warning"> Procesando</span>`;
+              return `<span class="text-warning"> Procesando</span>`;
               break;
           }
         }
@@ -9638,16 +9638,16 @@ if (
         render: function (data, method, row) {
           switch (data) {
             case 13:
-              return `<span class="badge badge-pill badge-success"> Pagada</span>`;
+              return `<span class="text-success"> Pagada</span>`;
               break;
             case 3:
-              return `<span class="badge badge-pill badge-primary"> Pendiente</span> `;
+              return `<span class="text-primary"> Pendiente</span> `;
               break;
             case 5:
-              return `<span class="badge badge-pill badge-danger"> Vencida</span> `;
+              return `<span class="text-danger"> Vencida</span> `;
               break;
             case 8:
-              return `<span class="badge badge-pill badge-secondary"> Abono</span> `;
+              return `<span class="text-secondary"> Abono</span> `;
               break;
             default:
               return ``;
@@ -9657,7 +9657,10 @@ if (
     ],
     initComplete: function (settings, json) {
       //tableOrden.column(2).visible(true);
-      window.addEventListener('load', window.print());
+      $('#ModalEventos').on('hidden.bs.modal', function (e) {
+        console.log('ya se cerro el modal y made a imprimir');
+        window.addEventListener('load', window.print());
+      });
     },
     columnDefs: [{ visible: false, targets: [0, 3, 5, 6, 10, 12, 13] }],
     order: [
@@ -9688,6 +9691,7 @@ if (
     var j = $('#fechaFactura').html();
     $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'));
     $('#fechaOrden').html(moment(g).format('YYYY-MM-DD'));
+    $('#fechaActual').html(moment().format('YYYY-MM-DD'));
     $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())));
     var totalp = Moneda($('.totalp').html());
     var m2 = Moneda($('.m2').html());
