@@ -16798,7 +16798,7 @@ function LISTAS(n, fi, ff, p, IMG) {
   };
   $.ajax({
     type: 'POST',
-    url: '/links/productos/' + n,
+    url: '/links/products/' + n,
     beforeSend: function (xhr) {
       $('#ModalEventos').modal({
         backdrop: 'static',
@@ -16812,7 +16812,7 @@ function LISTAS(n, fi, ff, p, IMG) {
           lengthMenu: [-1],
           ajax: {
             method: 'POST',
-            url: '/links/productos/' + n,
+            url: '/links/products/' + n,
             dataSrc: 'data'
           },
           columns: [
@@ -16857,12 +16857,12 @@ function LISTAS(n, fi, ff, p, IMG) {
             },
             {
               data: 'inicial',
-              render: $.fn.dataTable.render.number('.', '.', 0, '$')
+              render: $.fn.dataTable.render.number('.', '.', 2, '$')
             },
             {
               data: 'mtr2',
               render: function (data, method, row) {
-                return '$' + Moneda(Math.round(row.valor / data));
+                return '$' + Cifra(row.valor / data);
               }
             },
             {
@@ -16872,7 +16872,7 @@ function LISTAS(n, fi, ff, p, IMG) {
             {
               data: 'valor',
               render: function (data, method, row) {
-                return '$' + Moneda(Math.round((data - row.inicial) / (maxcuotas - 1)));
+                return '$' + Cifra((data - row.inicial) / (maxcuotas - 1));
               }
             }
           ],

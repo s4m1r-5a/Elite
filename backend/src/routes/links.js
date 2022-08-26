@@ -2491,6 +2491,12 @@ router.post('/productos', isLoggedIn, async (req, res) => {
   respuesta = { data: fila };
   res.send(respuesta);
 });
+router.post('/products/:id', isLoggedIn, async (req, res) => {
+  const { id } = req.params;
+  const fi = await pool.query('SELECT * FROM productosd WHERE estado = 9 AND producto = ?', id);
+  respuesta = { data: fi };
+  res.send(respuesta);
+});
 router.post('/productos/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id === 'eliminar') {
