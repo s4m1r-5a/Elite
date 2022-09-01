@@ -9692,24 +9692,32 @@ if (
     $('#fechaFactura').html(moment(g).format('YYYY-MM-DD'));
     $('#fechaOrden').html(moment(g).format('YYYY-MM-DD'));
     $('#fechaActual').html(moment().format('YYYY-MM-DD'));
-    $('.totales').text('$' + Moneda(parseFloat($('#vLetras').val())));
-    var totalp = Moneda($('.totalp').html());
+    $('.totales').text('$' + Cifra(parseFloat($('#vLetras').val())));
+    var totalp = parseFloat($('.totalp').html());
     var m2 = Moneda($('.m2').html());
+    var dto = $('#dto').val();
     var inini = parseFloat($('.inini').html());
-    var ahorro = Moneda($('.ahorro').html());
+    var ahorro = parseFloat($('.ahorro').html());
     var separar = Moneda($('.separar').html());
-    var total = parseFloat($('.totalp').html()) - parseFloat($('.ahorro').html());
+    var total = totalp - ahorro;
     var saldot = total - parseFloat($('#saldofecha').val());
-    var totali = Moneda((total * inini) / 100);
+    var inical = (totalp * inini) / 100;
+    var totali =
+      dto === 'INICIAL'
+        ? Cifra(inical - ahorro)
+        : dto === 'FINANCIACION'
+        ? Cifra(inical)
+        : Cifra((total * inini) / 100);
+
     var imgs = $('#imgss').val() || '/img/avatars/avatar1.svg';
     $('#imgs').prop('src', imgs);
-    $('.totalote').html('$' + Moneda(total));
-    $('.saldofecha').html('$' + Moneda(saldot));
-    $('.inini').html(inini + '%');
-    $('.totalp').html('$' + totalp);
+    $('.totalote').html('$' + Cifra(total));
+    $('.saldofecha').html('$' + Cifra(saldot));
+    $('.inini').html(inini + '% - $' + Cifra(inical));
+    $('.totalp').html('$' + Cifra(totalp));
     $('.m2').text('$' + m2);
     $('.totali').html('$' + totali);
-    $('.ahorro').html('$' + ahorro);
+    $('.ahorro').html('$' + Cifra(ahorro));
     $('.separar').html('$' + separar);
 
     $('#option1').click(function () {

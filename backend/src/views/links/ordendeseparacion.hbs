@@ -129,7 +129,7 @@
             <ul class='list-group list-group-flush'>
               <li class='list-group-item py-1'>
                 Descuento:
-                <span class='text-primary float-right'>{{descuento}}%</span>
+                <span class='text-primary float-right'>{{descuento}}% DTO EN {{dto}}</span>
               </li>
               <li class='list-group-item py-1'>
                 Cupon:
@@ -164,7 +164,7 @@
             </ul>
           </div>
         </div>
-
+        <input type='hidden' id='dto' value='{{dto}}' />
         <input type='hidden' id='imgss' value='{{imagenes}}' />
         <input type='hidden' id='inicialdiferida' value='{{inicialdiferida}}' />
         <input type='hidden' id='numerocuotaspryecto' value='{{numerocuotaspryecto}}' />
