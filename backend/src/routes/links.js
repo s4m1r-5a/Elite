@@ -549,10 +549,11 @@ cron.schedule('0 10 13,28 * *', async () => {
     )}* y una *deuda total* de *$${Moneda(deuda)}*_`
   );
 });
+
 const usuras = async fecha => {
   const options = {
     method: 'POST',
-    url: 'https://inmovili.com.co/api/query/usury',
+    url: 'https://querys.inmovili.com/api/query/usury',
     headers: { 'x-access-token': tokenWtsp },
     data: { date: fecha }
   };
@@ -8317,6 +8318,13 @@ async function ProyeccionPagos(S) {
   let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
   let dcto = acuerdos[acuerdoActual]?.dcto || 0;
 
+  const pruebas = await Math.min(
+    ...(Moras.filter(x => moment(x.fecha).isBetween('2022-08-05', '2022-08-08', 'month', '[]')).map(
+      x => x.teano
+    ) || [0])
+  );
+  console.log(pruebas);
+
   for (i = 0; i < Abonos.length; i++) {
     const a = Abonos[i]; //                          array de abonos que el cliente a realizado
     const fechaLMT = a.fecharcb //                   fecha del recibo de pago
@@ -8360,14 +8368,25 @@ async function ProyeccionPagos(S) {
           : 0; // selecciona la tasa mas baja dentro del periodo de la mora
 
       const saldAnt = idCuota?.id === q.id ? idCuota.saldomora : 0;
-      const moratoria = Tasa ? (daysDiff * q.monto * Tasa) / 365 : 0; // valor de la mora
-      const dctoMoratorio = Tasa ? moratoria - moratoria * dcto : 0; // descuento de la mora si existe algun acuerdo
-      const diasmoratorios = Tasa ? daysDiff : 0; // dias total de mora
-      cuotas[o].tasa = Tasa;
+      const moratoria = isFinite(Tasa) ? (daysDiff * q.monto * Tasa) / 365 : 0; // valor de la mora
+      const dctoMoratorio = isFinite(Tasa) ? moratoria - moratoria * dcto : 0; // descuento de la mora si existe algun acuerdo
+      const diasmoratorios = isFinite(Tasa) ? daysDiff : 0; // dias total de mora
+      cuotas[o].tasa = isFinite(Tasa) ? Tasa : 0;
       cuotas[o].moratoria = moratoria;
       cuotas[o].dctoMoratorio = dctoMoratorio;
       cuotas[o].diasmoratorios = diasmoratorios;
       cuotas[o].total = q.monto + dctoMoratorio + saldAnt;
+      console.log(
+        saldAnt,
+        dctoMoratorio,
+        isFinite(Tasa) ? Tasa : 0,
+        moratoria,
+        dcto,
+        daysDiff,
+        q.monto,
+        DateQta,
+        fechaLMT
+      );
 
       if (Monto >= q.total && q.estado === 3) {
         Relacion.push([
