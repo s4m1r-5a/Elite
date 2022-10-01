@@ -1427,11 +1427,12 @@ async function EstadoDeCuenta(Orden) {
     Proyeccion.map((e, i) => {
       const IDs2 = IDs.some(s => s === e.ids);
       const idCqt = IdCuotas.some(s => s === e.idcuota);
+      const actoAmora = e.estado === 3 && !idCqt && e.fechs > endDate;
       //totalAbonado += IDs2 ? 0 : e.monto ? e.monto : 0;
-      moraAdeudada += e.estado === 3 && !idCqt ? e.mora : 0;
-      totalMora += e.totalmora + (e.estado === 3 && !idCqt ? e.mora : 0) - e.saldomora;
+      moraAdeudada += actoAmora ? e.mora : 0;
+      totalMora += e.totalmora + (actoAmora ? e.mora : 0) - e.saldomora;
       totalSaldo += e.estado === 3 && !idCqt ? e.cuota : 0;
-      totalDeuda += e.estado === 3 && !idCqt ? e.cuota + e.mora : 0;
+      totalDeuda += actoAmora ? e.cuota + e.mora : 0;
 
       if (e.fechs > endDate && acuerdoActual < totalAcuerdos) {
         acuerdoActual++;
