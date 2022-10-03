@@ -12655,7 +12655,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   });
   table.on('click', 'td:not(.t)', function () {
     var fila = $(this).parents('tr');
-    var data = table.row(fila).data(); //console.log(data);
+    var data = table.row(fila).data();
+    //console.log(data);
     var imagenes =
       data.img === null ? '' : data.img.indexOf(',') > 0 ? data.img.split(',') : data.img;
     IDS = data.ids;
@@ -13108,7 +13109,7 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
           var totl = data.formap === 'BONO' ? parseFloat(data.monto) : parseFloat(data.monto) + bon;
           var img2 = new Image();
           var img = new Image();
-          img.src = '/img/avatars/avatar.png';
+          img.src = data.imagenes || '/img/avatars/avatar.png';
           img2.src = `https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos`;
           var totalPagesExp = '{total_pages_count_string}';
           //doc.addPage("a3");
