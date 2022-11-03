@@ -16876,12 +16876,17 @@ function LISTAS(n, fi, ff, p, IMG) {
             },
             {
               data: null,
-              defaultContent: maxcuotas
+              //defaultContent: maxcuotas
+              render: (data, method, row) => {
+                const maxQota = row.maxfnc ? parseFloat(row.maxfnc) : maxcuotas;
+                return maxQota - row.maxini;
+              }
             },
             {
               data: 'valor',
               render: function (data, method, row) {
-                return '$' + Cifra((data - row.inicial) / (maxcuotas - 1));
+                const maxQota = row.maxfnc ? parseFloat(row.maxfnc) : maxcuotas;
+                return '$' + Cifra((data - row.inicial) / (maxQota - row.maxini));
               }
             }
           ],
@@ -16933,7 +16938,7 @@ function LISTAS(n, fi, ff, p, IMG) {
           }
         });
       } else {
-        LISTA.ajax.url('/links/productos/' + n).load(function () {
+        LISTA.ajax.url('/links/products/' + n).load(function () {
           PDF();
         });
       }

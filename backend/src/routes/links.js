@@ -2494,7 +2494,10 @@ router.post('/productos', isLoggedIn, async (req, res) => {
 });
 router.post('/products/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  const fi = await pool.query('SELECT * FROM productosd WHERE estado = 9 AND producto = ?', id);
+  const fi = await pool.query(
+    'SELECT l.*, p.maxfnc, p.maxini FROM productosd l INNER JOIN productos p ON l.producto = p.id WHERE l.estado = 9 AND l.producto = ?',
+    id
+  );
   respuesta = { data: fi };
   res.send(respuesta);
 });
