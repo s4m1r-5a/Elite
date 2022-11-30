@@ -586,6 +586,7 @@ $(document).ready(function () {
   }
   if (rol.admin) {
     $('#nivel').html('Administrador');
+    $('#afiliacion').removeClass('d-none');
   } else if (rol.subadmin) {
     $('#nivel').html('Sub Administrador');
     $('#afiliacion').removeClass('d-none');
