@@ -3472,89 +3472,31 @@ router.post('/excelcrearproducto', async (req, res) => {
       [subProductos]
     );
     resp = { res: true, msg: 'El producto fue creado con exito.' };
-  } /* else {
+  } else {
     const prood = proyectoJson[0].id;
-    proyectoJson[0] = {
-      ...proyectoJson[0],
-      porcentage: proyectoJson[0].porcentage * 100,
-      fechaini: new Date(
-        (proyectoJson[0].fechaini - (25567 + 2)) * 86400 * 1000
-      ),
-      fechafin: new Date(
-        (proyectoJson[0].fechafin - (25567 + 2)) * 86400 * 1000
-      ),
-    };
-    let Mz = "l.mz = CASE ";
-    let Lt = "l.n = CASE ";
-    let Mt2 = "l.mtr2 = CASE ";
-    let Mt = "l.mtr = CASE ";
-    let Vr = "l.valor = CASE ";
-    let Ini = "l.inicial = CASE ";
-    let Std = "l.estado = CASE ";
-    let Dcp = "l.descripcion = CASE ";
-
-    await productosJson
-      .filter((e) => e.n && e.id)
-      .map(async (e) => {
-        Mz += `WHEN l.id = ${e.id} THEN '${e.mz ? e.mz : "no"}' `;
-        Lt += `WHEN l.id = ${e.id} THEN ${e.n} `;
-        Mt2 += `WHEN l.id = ${e.id} THEN ${e.mtr2} `;
-        Mt += `WHEN l.id = ${e.id} THEN ${e.mtr} `;
-        Vr += `WHEN l.id = ${e.id} THEN ${e.valor} `;
-        Ini += `WHEN l.id = ${e.id} THEN ${e.inicial} `;
-        Std += `WHEN l.id = ${e.id} THEN ${e.estado} `;
-        Dcp += `WHEN l.id = ${e.id} THEN '${e.descripcion}' `;
-      });
-
-    Mz += `ELSE l.mz END`;
-    Lt += `ELSE l.n END`;
-    Mt2 += `ELSE l.mtr2 END`;
-    Mt += `ELSE l.mtr END`;
-    Vr += `ELSE l.valor END`;
-    Ini += `ELSE l.inicial END`;
-    Std += `ELSE l.estado END`;
-    Dcp += `ELSE l.descripcion END`;
-    try {
-      await pool.query(
-        `UPDATE productosd l SET 
-            ${Mz}, ${Lt}, ${Mt2}, ${Mt}, ${Vr}, ${Ini}, ${Std}, ${Dcp} WHERE l.producto = ?`,
-        prood
-      );
-    } catch (e) {
-      console.log(e);
-    }
-
-    let Sn = await productosJson
-      .filter((e) => e.n && !e.id)
-      .map((e) => {
+    subProductos = await productosJson
+      .filter(e => e.n)
+      .map(e => {
         const r = [
-          e.mz ? e.mz : "no",
+          e.mz ? e.mz : 'no',
           e.n,
-          e.mtr2,
-          e.mtr,
-          e.valor,
-          e.inicial,
+          !e.mtr2 ? 0 : e.mtr2,
+          !e.mtr ? 0 : e.mtr,
+          !e.valor ? 0 : e.valor,
+          !e.inicial ? 0 : e.inicial,
           e.estado,
           prood,
-          e.descripcion,
+          e.descripcion
         ];
         return r;
       });
-
-    if (Sn.length > 0) {
-      try {
-        await pool.query(
-          `INSERT INTO productosd 
-                (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`,
-          [Sn]
-        );
-      } catch (e) {
-        console.log(e);
-      }
-    }
-    resp = { res: true, msg: "El producto fue creado con exito." };
-    //console.log(proyectoJson);
-  } */
+    await pool.query(
+      `INSERT INTO productosd
+    (mz, n, mtr2, mtr, valor, inicial, estado, producto, descripcion) VALUES ?`,
+      [subProductos]
+    );
+    resp = { res: true, msg: 'Los lotes del producto fueron agregados con exito.' };
+  }
   fs.exists(fil.path, function (exists) {
     if (exists) {
       fs.unlink(fil.path, function (err) {
