@@ -8117,9 +8117,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
           });
         $('#crearcartera .tabl tr').each((e, i) => {
           if ($(i).find(`.tipo`).val() === 'INICIAL') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
+            $(i).find(`.n`).val(u++);
           }
         });
         realcuotai = (TotalIni - TotalSprc) / nu;
@@ -8133,9 +8131,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         $('#crearcartera .tabl tr').each((e, i) => {
           var tpo = $(i).find(`.tipo`).val();
           if (tpo === 'INICIAL') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
+            $(i).find(`.n`).val(u++);
             $(i).find(`.cuota`).val(Moneda(realcuotai));
           }
         });
@@ -8153,9 +8149,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                   : $(i).find(`.cuota`).val().length > 3
                   ? $(i).find(`.cuota`).val().replace(/\./g, '')
                   : $(i).find(`.cuota`).val();
-              $(i)
-                .find(`.n`)
-                .val(u++);
+              $(i).find(`.n`).val(u++);
               if (parseFloat(c) === realcuotai) {
                 $(i).find(`.cuota`).val(Moneda(cuota)); //.mask('#.##$', { reverse: true, selectOnFocus: true });
               }
@@ -8208,9 +8202,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
           });
         $('#crearcartera .tabl tr').each((e, i) => {
           if ($(i).find(`.tipo`).val() === 'FINANCIACION') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
+            $(i).find(`.n`).val(u++);
           }
         });
         realcuotaf = valor / num;
@@ -8224,9 +8216,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
         $('#crearcartera .tabl tr').each((e, i) => {
           var tpo = $(i).find(`.tipo`).val();
           if (tpo === 'FINANCIACION') {
-            $(i)
-              .find(`.n`)
-              .val(u++);
+            $(i).find(`.n`).val(u++);
             $(i).find(`.cuota`).val(Moneda(realcuotaf));
           }
         });
@@ -8244,9 +8234,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
                   : $(i).find(`.cuota`).val().length > 3
                   ? $(i).find(`.cuota`).val().replace(/\./g, '')
                   : $(i).find(`.cuota`).val();
-              $(i)
-                .find(`.n`)
-                .val(u++);
+              $(i).find(`.n`).val(u++);
               if (parseFloat(c) === realcuotaf) {
                 $(i).find(`.cuota`).val(Moneda(cuota));
               }
@@ -8316,9 +8304,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
       var fe = $(i).find(`.fecha`).val();
       var tpo = $(i).find(`.tipo`).val();
       if (tpo === 'INICIAL' && cuotai) {
-        $(i)
-          .find(`.n`)
-          .val(l++);
+        $(i).find(`.n`).val(l++);
         $(i)
           .find(`.cuota`)
           .val(Moneda(Math.round(cuotai)));
@@ -8327,9 +8313,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
           .val(Moneda(Math.round(cuotai)));
       }
       if (tpo === 'FINANCIACION' && cuotaf) {
-        $(i)
-          .find(`.n`)
-          .val(k++);
+        $(i).find(`.n`).val(k++);
         $(i)
           .find(`.cuota`)
           .val(Moneda(Math.round(cuotaf)));
@@ -8338,9 +8322,7 @@ if (window.location.pathname == `/links/editordn/${window.location.pathname.spli
           .val(Moneda(Math.round(cuotaf)));
       }
       if (fe !== undefined && fe !== fecha) {
-        s = moment(fecha)
-          .add(n++, 'month')
-          .format('YYYY-MM-DD');
+        s = moment(fecha).add(n++, 'month').format('YYYY-MM-DD');
         $(i).find(`.fecha`).val(s);
       }
     });
@@ -8479,7 +8461,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
   const startDate = () => dateStart;
 
   const UpdateData = async producto => {
-    maxCuotasFinanciamiento = moment(producto.fechafin).diff(moment(), 'months');
+    maxCuotasFinanciamiento = producto.maxfnc || moment(producto.fechafin).diff(moment(), 'months');
     $('#mtr2').val(producto.mtr2);
     $('#vmtr2').val(Cifra(producto.mtr));
     $(`#porcentage`).val(Percent(producto.porcentage));
