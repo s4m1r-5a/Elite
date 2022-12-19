@@ -8268,7 +8268,6 @@ async function ProyeccionPagos(S) {
       x => x.teano
     ) || [0])
   );
-  console.log(pruebas);
 
   for (i = 0; i < Abonos.length; i++) {
     const a = Abonos[i]; //                          array de abonos que el cliente a realizado
@@ -8321,7 +8320,7 @@ async function ProyeccionPagos(S) {
       cuotas[o].dctoMoratorio = dctoMoratorio;
       cuotas[o].diasmoratorios = diasmoratorios;
       cuotas[o].total = q.monto + dctoMoratorio + saldAnt;
-      console.log(
+      /* console.log(
         saldAnt,
         dctoMoratorio,
         isFinite(Tasa) ? Tasa : 0,
@@ -8330,8 +8329,10 @@ async function ProyeccionPagos(S) {
         daysDiff,
         q.monto,
         DateQta,
-        fechaLMT
-      );
+        fechaLMT,
+        moment().min(moment().add(1, 'd')).format('YYYY-MM-DD'),
+        'fecha mayor'
+      ); */
 
       if (Monto >= q.total && q.estado === 3) {
         Relacion.push([
@@ -8365,9 +8366,14 @@ async function ProyeccionPagos(S) {
         //const diaspagados = !q.tasa ? 0 : dpg >= q.diasmoratorios ? q.diasmoratorios : dpg;
         //const morapaga = dpg >= q.diasmoratorios ? q.dctoMoratorio : Monto;
 
-        if (!idCuota) idCuota = { id: q.id, nwFecha: fechaLMT, saldomora };
+        if (!idCuota)
+          idCuota = {
+            id: q.id,
+            nwFecha: moment(fechaLMT).min(q.fechs).format('YYYY-MM-DD'), // Extrae la fecha mayor y para determinar desde donde inicia la proxima fecha de pago
+            saldomora
+          };
         else if (idCuota?.id === q.id) {
-          idCuota.nwFecha = fechaLMT;
+          idCuota.nwFecha = moment(fechaLMT).min(q.fechs).format('YYYY-MM-DD'); // Extrae la fecha mayor y para determinar desde donde inicia la proxima fecha de pago
           idCuota.saldomora = saldomora;
         }
         Relacion.push([
