@@ -1,0 +1,286 @@
+<main class='content'>
+  <div class='card'>
+    <div class='card-header' id='addProduct' style='display: none;'>
+      <form id='crearproducto' enctype='multipart/form-data'>
+        <a class='r atras' id='cerrarproducto'>
+          <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
+        </a>
+        <div class='form-row'>
+          <div class='form-group col-md-3'>
+            <label for=''>Nombre</label>
+            <input type='text' class='form-control' name='nombre' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Laboratorio</label>
+            <input type='text' class='form-control' name='laboratorio' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Invima</label>
+            <input class='form-control' type='text' name='invima' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Clase</label>
+            <select class='form-control' name='clase' required>
+              <option value='INDEFINIDA'>Indefinido</option>
+              <option value='COMERCIAL'>Comercial</option>
+              <option value='GENERICA'>Generico</option>
+            </select>
+          </div>
+        </div>
+        <button type='submit' class='btn btn-primary float-right mr-3'>
+          <i class='fas fa-fw fa-plus'></i>
+          Guardar
+        </button>
+      </form>
+    </div>
+    <div class='card-body'>
+      <table id='productos' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Invima</th>
+            <th>Stock</th>
+            <th>Creado</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class='card'>
+    <div class='card-header' id='addCompra' style='display: none;'>
+      <form id='crearcompra' enctype='multipart/form-data'>
+        <a class='r atras' id='cerrarcompra'>
+          <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
+        </a>
+        <div class='form-row'>
+          <div class='form-group col-md-5'>
+            <label for=''>Producto</label>
+            <select id='droga' class='form-control select2' name='droga' required></select>
+          </div>
+          <div class='form-group col-md-3'>
+            <label for='inputPassword4'>Codigo</label>
+            <input type='text' class='form-control' name='codigo' required />
+          </div>
+          <div class='form-group col-md-2'>
+            <label for='inputCity'>Fabricacion</label>
+            <input class='form-control fecha' type='text' name='fabricacion' required />
+          </div>
+          <div class='form-group col-md-2'>
+            <label for='inputState'>Vencimiento</label>
+            <input class='form-control fecha' type='text' name='vencimiento' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for='inputZip'>Precio de compra</label>
+            <input class='form-control valor' type='text' name='precioCompra' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for='inputZip'>Precio de venta</label>
+            <input class='form-control valor' type='text' name='precioVenta' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for='inputZip'>Cantidad</label>
+            <input class='form-control' type='text' name='cantidad' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for='inputZip'>Total</label>
+            <input class='form-control valor' type='text' name='total' required />
+          </div>
+        </div>
+        <button type='submit' class='btn btn-primary float-right mr-3'>
+          <i class='fas fa-fw fa-plus'></i>
+          Guardar
+        </button>
+      </form>
+    </div>
+    <div class='card-body'>
+      <table
+        id='compras'
+        class='table table-sm table-striped table-hover display nowrap'
+        style='width:100%'
+      >
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Codigo</th>
+            <th>Fabricacion</th>
+            <th>Vencimiento</th>
+            <th>$Compra</th>
+            <th>$Venta</th>
+            <th>Cantidad</th>
+            <th>Total</th>
+            <th>Creado</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class='card'>
+    <div class='card-header'>
+      <form id='creacliente' enctype='multipart/form-data'>
+        <div class='row' id='addcliente' style='display: none;'>
+          <div class='col-12 col-lg-12'>
+            <div class='d-inline-block float-right'>
+              <a class='r atras'><i class='feather-lg' data-feather='x-circle'></i></a>
+            </div>
+            <hr style='width: 90%;' />
+          </div>
+          <input type='hidden' class='ya' value='' name='ahora' />
+          <div class='col-12 col-lg-12'>
+            <table class='table table-sm my-2'>
+              <tbody>
+                <tr>
+                  <th>
+                    <i class='feather-md' data-feather='user'></i>
+                    Nombre
+                  </th>
+                  <td>
+                    <input
+                      class='form-control-no-border edi text-uppercase nombres u'
+                      type='text'
+                      placeholder='Nombre completo'
+                      autocomplete='off'
+                      style='padding: 1px; width: 100%;'
+                      name='nombre'
+                      required
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <i class='feather-md' data-feather='user'></i>
+                    Laboratorio
+                  </th>
+                  <td>
+                    <input
+                      class='form-control-no-border edi text-uppercase nombres u'
+                      type='text'
+                      placeholder='Laboratorio'
+                      autocomplete='off'
+                      style='padding: 1px; width: 100%;'
+                      name='laboratorio'
+                      required
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <i class='feather-md' data-feather='user'></i>
+                    Invima
+                  </th>
+                  <td>
+                    <input
+                      class='form-control-no-border edi text-uppercase nombres u'
+                      type='text'
+                      placeholder='codigo'
+                      autocomplete='off'
+                      style='padding: 1px; width: 100%;'
+                      name='invima'
+                    />
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <i class='feather-md' data-feather='help-circle'></i>
+                    Clase
+                  </th>
+                  <td>
+                    <select
+                      class='form-control-no-border edi tipod u'
+                      name='clase'
+                      style='padding: 1px; width: 100%;'
+                    >
+                      <option value='INDEFINIDA'>Indefinido</option>
+                      <option value='COMERCIAL'>Comercial</option>
+                      <option value='GENERICA'>Generico</option>
+                    </select>
+                  </td>
+                </tr>
+                <tr>
+                  <th>
+                    <i class='feather-md' data-feather='user-plus'></i>
+                  </th>
+                  <td>
+                    <button
+                      class='btn btn-outline-dark btn-sm float-right mr-3 guard'
+                      type='submit'
+                    ><i class='fas fa-fw fa-user-plus'></i>
+                      Guardar</button>
+                  </td>
+                </tr>
+                {{! <tr>
+                                                <th>
+                                                    <i class="feather-md" data-feather="user"></i>
+                                                    Codigo de barras
+                                                </th>
+                                                <td>
+                                                    <input class="form-control-no-border edi text-uppercase nombres u"
+                                                        type="text" placeholder="codigo" autocomplete="off"
+                                                        style="padding: 1px; width: 100%;" name="codigo">
+                                                </td>
+                                            </tr> }}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </form>
+    </div>
+    <div class='card-body'>
+      <table
+        id='clientes'
+        class='table table-sm table-striped table-hover display nowrap'
+        style='width:100%'
+      >
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Documento</th>
+            <th>Fecha nc</th>
+            <th>Lugar exp</th>
+            <th>Fecha exp</th>
+            <th>Estado cvl</th>
+            <th>Movil</th>
+            <th>Email</th>
+            <th>Dirección</th>
+            <th>Adjunto</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  {{! <tr>
+    <th>
+      <i class='feather-md' data-feather='credit-card'></i>
+      Enviar ambas caras del documento
+    </th>
+    <td>
+      <input
+        class='form-control-no-border edi float-right'
+        type='file'
+        name='image'
+        id='file'
+        multiple
+        style='width: 50%;'
+        required
+      />
+    </td>
+  </tr> }}
+</main>

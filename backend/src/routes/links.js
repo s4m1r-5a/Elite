@@ -3663,6 +3663,64 @@ router.put('/reds', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+///////////////////* PASTILLEROS *///////////////////////////
+router.get('/pastilleros', noExterno, (req, res) => {
+  res.render('links/pastilleros');
+});
+router.post('/medicamentos/table', noExterno, async (req, res) => {
+  const medicamentos = await pool.query(
+    `SELECT m.*, SUM(c.cantidad) stock FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id GROUP BY m.id;`
+  );
+  respuesta = { data: medicamentos };
+  res.send(respuesta);
+});
+
+router.post('/medicamentos', isLoggedIn, async (req, res) => {
+  const { nombre, laboratorio, clase, invima } = req.body;
+
+  const newProduct = await pool.query('INSERT INTO medicamentos SET ? ', {
+    nombre: nombre.toUpperCase(),
+    laboratorio: laboratorio.toUpperCase(),
+    clase,
+    invima
+  });
+  res.send({ code: newProduct.insertId });
+});
+
+router.delete('/medicamentos/:id', noExterno, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query(`DELETE FROM medicamentos WHERE id = ?`, id);
+    res.send(true);
+  } catch (e) {
+    res.send(false);
+  }
+});
+
+router.post('/compras/table', noExterno, async (req, res) => {
+  const compras = await pool.query(
+    `SELECT c.*, m.nombre, m.laboratorio, m.clase FROM compras c INNER JOIN medicamentos m ON c.droga = m.id `
+  );
+  respuesta = { data: compras };
+  res.send(respuesta);
+});
+
+router.post('/compras', isLoggedIn, async (req, res) => {
+  const compra = req.body;
+  console.log(compra);
+  const newCompra = await pool.query('INSERT INTO compras SET ? ', compra);
+  res.send({ code: newCompra.insertId });
+});
+
+router.delete('/compras/:id', noExterno, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query(`DELETE FROM compras WHERE id = ?`, id);
+    res.send(true);
+  } catch (e) {
+    res.send(false);
+  }
+});
 ///////////////////* CLIENTES *///////////////////////////
 router.get('/clientes', noExterno, (req, res) => {
   console.log(req.user);
@@ -3692,7 +3750,6 @@ router.put('/clientes/:id', isLoggedIn, async (req, res) => {
     asesors,
     id
   } = req.body;
-  console.log(req.body);
   var imagenes = '';
   req.files.map(e => {
     imagenes += `/uploads/${e.filename},`;
@@ -7329,7 +7386,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
       await pool.query(`SELECT s.fech, c.fechs, s.monto, u.pin, c.cuota, s.img, pd.valor, cpb.monto montoa, e.lugar, e.otro, s.observaciones,
         pr.ahorro, cl.email, s.facturasvenc, cp.producto, s.pdf, s.acumulado, u.fullname, s.aprueba, pr.descrip, cpb.producto ordenanu, 
         cl.documento, cl.idc, cl.movil, cl.nombre, s.recibo, c.tipo, c.ncuota, p.proyect, pd.mz, u.cel, pr.tipobsevacion, s.fecharcb, p.imagenes,
-        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado,
+        pd.n, s.stado, cp.pin bono, cp.monto mount, cp.motivo, cp.concept, s.formap, s.concepto, pd.id, pr.lote, e.id extr, e.consignado, p.business,
         e.date, e.description, s.ids, s.descp, pr.id cparacion, pd.estado, s.bonoanular, s.aprobado FROM solicitudes s LEFT JOIN cuotas c ON s.pago = c.id 
         LEFT JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id LEFT JOIN extrabanco e ON s.extrato = e.id
         INNER JOIN productos p ON pd.producto = p.id LEFT JOIN users u ON pr.asesor = u.id 

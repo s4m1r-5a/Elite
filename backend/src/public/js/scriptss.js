@@ -34,6 +34,27 @@ const Cifra = valor => {
     ? num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 }) + '.'
     : num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
+
+const currency = (value, coin = false) => {
+  if (!value) return value;
+  if (!/[0-9]/g.test(value)) return value.replace(/[^0-9.]/g, '');
+  let symbol = '';
+  const punto = /\.$/.test(value);
+  const num = /[^0-9.-]/g.test(value)
+    ? parseFloat(value.replace(/[^0-9.]/g, ''))
+    : parseFloat(value);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+
+  if (coin) symbol = num > 0 && num < 1 ? '%' : num > 0 ? '$ ' : '';
+
+  const number = num.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2
+  });
+  const amount = punto ? number + '.' : number;
+  return symbol === '%' ? amount + symbol : symbol + amount;
+};
+
 const Percent = valor => {
   if (!valor) return valor;
   const punto = /\.$/.test(valor);
@@ -12639,7 +12660,8 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
   table.on('click', 'td:not(.t)', function () {
     var fila = $(this).parents('tr');
     var data = table.row(fila).data();
-    //console.log(data);
+    const { nit, company, adress, movil } = JSON.parse(data.business);
+    //console.log(data, nit, company, adress);
     var imagenes =
       data.img === null ? '' : data.img.indexOf(',') > 0 ? data.img.split(',') : data.img;
     IDS = data.ids;
@@ -13176,19 +13198,15 @@ if (window.location == `${window.location.origin}/links/solicitudes`) {
                 doc.addImage(img2, 'png', data.settings.margin.left + 160, 10, 20, 20);
               }
               doc.setFontSize(15);
-              doc.text('GRUPO ELITE FINCA RAÍZ SAS', data.settings.margin.left + 18, 15);
+              doc.text(company, data.settings.margin.left + 18, 15);
               doc.setFontSize(7);
               doc.text(fech, data.settings.margin.left + 165, 8);
               doc.setFontSize(10);
-              doc.text('Nit: 901311748-3', data.settings.margin.left + 18, 20);
+              doc.text('Nit: ' + nit, data.settings.margin.left + 18, 20);
               doc.setFontSize(10);
-              doc.text('Tel: 300-775-3983', data.settings.margin.left + 18, 25);
+              doc.text('Tel: ' + movil, data.settings.margin.left + 18, 25);
               doc.setFontSize(8);
-              doc.text(
-                `Domicilio: Mz 'L' Lt 17 Urb. La granja Turbaco, Bolivar`,
-                data.settings.margin.left + 18,
-                30
-              );
+              doc.text(`Domicilio: ${adress}`, data.settings.margin.left + 18, 30);
 
               // Footer
               var str = 'Page ' + doc.internal.getNumberOfPages();
@@ -16501,6 +16519,451 @@ if (window.location == `${window.location.origin}/links/whatsapp`) {
       console.log(data);
     }
   });
+}
+////////////////////////////* PASTILLEROS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/pastilleros`) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  const droga = $('#droga');
+
+  $(document).ready(function () {
+    $('input').prop('autocomplete', 'off');
+
+    $('.valor').on('keyup', function () {
+      $(this).val(currency($(this).val(), '$'));
+    });
+
+    $('.fecha').daterangepicker({
+      locale: {
+        format: 'YYYY-MM-DD',
+        separator: ' - ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'De',
+        toLabel: '-',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        monthNames: [
+          'Enero',
+          'Febrero',
+          'Marzo',
+          'Abril',
+          'Mayo',
+          'Junio',
+          'Julio',
+          'Agosto',
+          'Septiembre',
+          'Octubre',
+          'Noviembre',
+          'Diciembre'
+        ],
+        firstDay: 1
+      },
+      singleDatePicker: true,
+      showDropdowns: true,
+      minYear: 2017,
+      maxYear: parseInt(moment().format('YYYY'), 10)
+    });
+
+    $('.select2').each(function () {
+      $(this).select2({
+        placeholder: {
+          id: '-1', // the value of the option
+          text: 'SELECCIONE UN ITEM',
+          selected: true
+        },
+        dropdownParent: $(this).parent(),
+        allowClear: true
+      });
+    });
+
+    $('#crearproducto').submit(function (e) {
+      e.preventDefault();
+      var formData = new FormData(document.getElementById('crearproducto'));
+
+      $.ajax({
+        url: '/links/medicamentos',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            productos.ajax.reload(null, false);
+            SMSj('success', 'Producto creado exitosamente');
+            $('#crearproducto input, select').val(null);
+            $('#ModalEventos').modal('hide');
+            $('#addProd').show('slow');
+            $('#addProduct').hide('slow');
+          }
+        }
+      });
+    });
+
+    $('#cerrarproducto').click(function () {
+      $('#addProd').show('slow');
+      $('#addProduct').hide('slow');
+    });
+
+    $('#crearcompra').submit(function (e) {
+      e.preventDefault();
+      $('.valor').each(function (i, valor) {
+        $(this).val(noCifra($(this).val()));
+      });
+
+      const formData = new FormData(document.getElementById('crearcompra'));
+      $.ajax({
+        url: '/links/compras',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            compras.ajax.reload(null, false);
+            productos.ajax.reload(null, false);
+            SMSj('success', 'Compra creada exitosamente');
+            $('#crearcompra input, select').val(null);
+            droga.val(null).trigger('change');
+            $('#ModalEventos').modal('hide');
+            $('#addComp').show('slow');
+            $('#addCompra').hide('slow');
+          }
+        }
+      });
+    });
+
+    $('#cerrarcompra').click(function () {
+      $('#addComp').show('slow');
+      $('#addCompra').hide('slow');
+    });
+  });
+
+  const productos = $('#productos').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Medicamento</span>`,
+        attr: {
+          title: 'Agregar-Medicamento',
+          id: 'addProd'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          $('#addProd').hide('slow');
+          $('#addProduct').show('slow');
+        }
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [2, 3, 4, -1] }
+    ],
+    order: [[1, 'desc']], //[0, "asc"]
+    language: languag2,
+    ajax: {
+      method: 'POST',
+      url: '/links/medicamentos/table',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: null,
+        defaultContent: ''
+      },
+      { data: 'id' },
+      { data: 'nombre' },
+      { data: 'laboratorio' },
+      { data: 'clase' },
+      { data: 'invima' },
+      {
+        data: 'stock',
+        defaultContent: '0'
+      },
+      {
+        data: 'creado',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'id',
+        render: function (data, method, row) {
+          return `<a class="eliminar" id="${data}"><i class="fas fa-trash"></i></a>`;
+        }
+      }
+    ] /* ,
+    initComplete: function (settings, json) {
+      const api = this.api();
+      api
+        .rows()
+        .data()
+        .map(row =>
+          droga.append(
+            new Option(`${row.nombre} - ${row.laboratorio} - ${row.clase}`, row.id, false, false)
+          )
+        );
+      droga.val(null).trigger('change');
+    } */
+  });
+
+  productos.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = productos.row(fila).data();
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/links/medicamentos/' + id,
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            productos.ajax.reload(null, false);
+            SMSj('success', 'Medicamento eliminado exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  const compras = $('#compras').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Compra</span>`,
+        attr: {
+          title: 'Agregar-Compra',
+          id: 'addComp'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          droga.html('');
+          productos
+            .rows()
+            .data()
+            .map(row =>
+              droga.append(
+                new Option(
+                  `${row.nombre} - ${row.laboratorio} - ${row.clase}`,
+                  row.id,
+                  false,
+                  false
+                )
+              )
+            );
+          droga.val(null).trigger('change');
+          $('#addComp').hide('slow');
+          $('#addCompra').show('slow');
+        }
+      }
+    ],
+    deferRender: true,
+    lengthChange: false,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [2, 3, 4, -1] }
+    ],
+    order: [[1, 'desc']], //[0, "asc"]
+    language: languag2,
+    ajax: {
+      method: 'POST',
+      url: '/links/compras/table',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: null,
+        defaultContent: ''
+      },
+      { data: 'id' },
+      { data: 'nombre' },
+      { data: 'laboratorio' },
+      { data: 'clase' },
+      { data: 'codigo' },
+      {
+        data: 'fabricacion',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'vencimiento',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'precioCompra',
+        render: $.fn.dataTable.render.number(',', '.', 2, '$')
+      },
+      {
+        data: 'precioVenta',
+        render: $.fn.dataTable.render.number(',', '.', 2, '$')
+      },
+      { data: 'cantidad' },
+      {
+        data: 'total',
+        render: $.fn.dataTable.render.number(',', '.', 2, '$')
+      },
+      {
+        data: 'creacion',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'id',
+        render: function (data, method, row) {
+          return `<a class="eliminar" id="${data}"><i class="fas fa-trash"></i></a>`;
+        }
+      }
+    ]
+  });
+
+  compras.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = compras.row(fila).data();
+    if (confirm('Seguro deseas eliminar esta compra?')) {
+      $.ajax({
+        url: '/links/compras/' + id,
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            compras.ajax.reload(null, false);
+            productos.ajax.reload(null, false);
+            SMSj('success', 'Compra eliminada exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar esta compra.');
+          }
+        }
+      });
+    }
+  });
+
+  function AdjuntarCC(id) {
+    $('#AdjutarDoc').modal({
+      toggle: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+
+    $('#enviarDoc').submit(function (e) {
+      e.preventDefault();
+      var formData = new FormData(document.getElementById('enviarDoc'));
+      formData.append('idc', id);
+      $.ajax({
+        url: '/links/adjuntar',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#AdjutarDoc').modal('hide');
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            clientes.ajax.reload(null, false);
+            SMSj('success', 'Documento agregado exitosamente');
+            $('#ModalEventos').modal('hide');
+          }
+        }
+      });
+    });
+  }
+  function Consul(tipo, code) {
+    var dw = Consultar(tipo, code);
+    $.ajax({
+      url: dw.url,
+      method: 'POST',
+      timeout: 0,
+      headers: {
+        Authorization: 'nci2upw280kxoy3o1dlc2q0gq28f5pfc9z58b3piryylih19',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: dw.dat,
+      //async: false,
+      success: function (dat) {
+        if (jQuery.isEmptyObject(dat.data)) {
+          $('.name').prop('disabled', false).focus();
+        } else {
+          $('.name').val(dat.data.fullName);
+        }
+      }
+    });
+  }
 }
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/prueba`) {
