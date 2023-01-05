@@ -62,7 +62,7 @@
         <div class='form-row'>
           <div class='form-group col-md-5'>
             <label for=''>Producto</label>
-            <select id='droga' class='form-control select2' name='droga' required></select>
+            <select id='droga' class='form-control select2 droga' name='droga' required></select>
           </div>
           <div class='form-group col-md-3'>
             <label for='inputPassword4'>Codigo</label>
@@ -100,11 +100,7 @@
       </form>
     </div>
     <div class='card-body'>
-      <table
-        id='compras'
-        class='table table-sm table-striped table-hover display nowrap'
-        style='width:100%'
-      >
+      <table id='compras' class='table table-sm table-striped display nowrap w-100'>
         <thead>
           <tr>
             <th></th>
@@ -129,158 +125,88 @@
   </div>
 
   <div class='card'>
-    <div class='card-header'>
-      <form id='creacliente' enctype='multipart/form-data'>
-        <div class='row' id='addcliente' style='display: none;'>
-          <div class='col-12 col-lg-12'>
-            <div class='d-inline-block float-right'>
-              <a class='r atras'><i class='feather-lg' data-feather='x-circle'></i></a>
-            </div>
-            <hr style='width: 90%;' />
+    <div class='card-header' id='addFactura' style='display: none;'>
+      <form id='generarfactura'>
+        <div class='form-row'>
+          <div class='form-group col-3'>
+            <input class='form-control fecha' type='text' name='date' required />
           </div>
-          <input type='hidden' class='ya' value='' name='ahora' />
-          <div class='col-12 col-lg-12'>
-            <table class='table table-sm my-2'>
-              <tbody>
-                <tr>
-                  <th>
-                    <i class='feather-md' data-feather='user'></i>
-                    Nombre
-                  </th>
-                  <td>
-                    <input
-                      class='form-control-no-border edi text-uppercase nombres u'
-                      type='text'
-                      placeholder='Nombre completo'
-                      autocomplete='off'
-                      style='padding: 1px; width: 100%;'
-                      name='nombre'
-                      required
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    <i class='feather-md' data-feather='user'></i>
-                    Laboratorio
-                  </th>
-                  <td>
-                    <input
-                      class='form-control-no-border edi text-uppercase nombres u'
-                      type='text'
-                      placeholder='Laboratorio'
-                      autocomplete='off'
-                      style='padding: 1px; width: 100%;'
-                      name='laboratorio'
-                      required
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    <i class='feather-md' data-feather='user'></i>
-                    Invima
-                  </th>
-                  <td>
-                    <input
-                      class='form-control-no-border edi text-uppercase nombres u'
-                      type='text'
-                      placeholder='codigo'
-                      autocomplete='off'
-                      style='padding: 1px; width: 100%;'
-                      name='invima'
-                    />
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    <i class='feather-md' data-feather='help-circle'></i>
-                    Clase
-                  </th>
-                  <td>
-                    <select
-                      class='form-control-no-border edi tipod u'
-                      name='clase'
-                      style='padding: 1px; width: 100%;'
-                    >
-                      <option value='INDEFINIDA'>Indefinido</option>
-                      <option value='COMERCIAL'>Comercial</option>
-                      <option value='GENERICA'>Generico</option>
-                    </select>
-                  </td>
-                </tr>
-                <tr>
-                  <th>
-                    <i class='feather-md' data-feather='user-plus'></i>
-                  </th>
-                  <td>
-                    <button
-                      class='btn btn-outline-dark btn-sm float-right mr-3 guard'
-                      type='submit'
-                    ><i class='fas fa-fw fa-user-plus'></i>
-                      Guardar</button>
-                  </td>
-                </tr>
-                {{! <tr>
-                                                <th>
-                                                    <i class="feather-md" data-feather="user"></i>
-                                                    Codigo de barras
-                                                </th>
-                                                <td>
-                                                    <input class="form-control-no-border edi text-uppercase nombres u"
-                                                        type="text" placeholder="codigo" autocomplete="off"
-                                                        style="padding: 1px; width: 100%;" name="codigo">
-                                                </td>
-                                            </tr> }}
-              </tbody>
-            </table>
+          <div class='form-group col-9'>
+            <a class='r atras' id='cerrarfactura'>
+              <i class='feather-lg float-right' data-feather='x-circle'></i>
+            </a>
+          </div>
+          <div class='form-group col-md-2'>
+            <label for=''>Type</label>
+            <select class='form-control' name='type' required>
+              <option value='CC'>CC</option>
+              <option value='NIT'>NIT</option>
+            </select>
+          </div>
+          <div class='form-group col-4 col-md-4'>
+            <label for=''>DocNum</label>
+            <input type='text' class='form-control' name='doc' required />
+          </div>
+          <div class='form-group col-8 col-md-6'>
+            <label for='inputZip'>Name</label>
+            <input class='form-control' type='text' name='name' required />
+          </div>
+          <div class='form-group col-md-8'>
+            <label for=''>Adreess</label>
+            <input type='text' class='form-control' name='adreess' required />
+          </div>
+          <div class='form-group col-md-4'>
+            <label for='inputZip'>Phone</label>
+            <input class='form-control' type='text' name='phone' required />
+          </div>
+        </div>
+        <button type='submit' class='hide' id='enviodatos'></button>
+      </form>
+      <hr />
+      <form id='crearfactura'>
+        <div class='form-row'>
+          <div class='form-group col-md-6'>
+            <label for=''>Producto</label>
+            <select id='produc' class='form-control select2 droga' name='droga' required></select>
+          </div>
+          <div class='form-group col-4 col-md-2'>
+            <label for=''>Cantidad</label>
+            <input type='text' class='form-control' name='cantidad' required />
+          </div>
+          <div class='form-group col-8 col-md-4'>
+            <label for='inputZip'>Precio unitario</label>
+            <input class='form-control valor' type='text' name='valor' required />
+          </div>
+          <div class='form-group col-12'>
+            <button type='submit' class='btn btn-primary float-right'>
+              <i class='fas fa-fw fa-plus'></i>
+              Agregar
+            </button>
           </div>
         </div>
       </form>
-    </div>
-    <div class='card-body'>
-      <table
-        id='clientes'
-        class='table table-sm table-striped table-hover display nowrap'
-        style='width:100%'
-      >
+      <table id='factura' class='table table-sm table-striped w-100 m-0 p-0'>
         <thead>
           <tr>
-            <th></th>
             <th>Id</th>
-            <th>Nombre</th>
-            <th>Documento</th>
-            <th>Fecha nc</th>
-            <th>Lugar exp</th>
-            <th>Fecha exp</th>
-            <th>Estado cvl</th>
-            <th>Movil</th>
-            <th>Email</th>
-            <th>Dirección</th>
-            <th>Adjunto</th>
-            <th>Accion</th>
+            <th>Product</th>
+            <th>Lot</th>
+            <th>Price</th>
+            <th>Total</th>
+            <th>Act</th>
           </tr>
         </thead>
         <tbody></tbody>
       </table>
+      <button class='btn btn-primary float-right' id='guardarFactura'>
+        <i class='fas fa-fw fa-plus'></i>
+        Guardar
+      </button>
+    </div>
+    <div class='card-body'>
+      <table id='facturas' class='table table-sm table-striped display nowrap w-100'>
+        <tbody></tbody>
+      </table>
     </div>
   </div>
-
-  {{! <tr>
-    <th>
-      <i class='feather-md' data-feather='credit-card'></i>
-      Enviar ambas caras del documento
-    </th>
-    <td>
-      <input
-        class='form-control-no-border edi float-right'
-        type='file'
-        name='image'
-        id='file'
-        multiple
-        style='width: 50%;'
-        required
-      />
-    </td>
-  </tr> }}
 </main>

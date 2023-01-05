@@ -35,7 +35,8 @@ const {
   FacturaDeCobro,
   //consultarDocumentos,
   EstadoDeCuenta,
-  informes
+  informes,
+  Facturar
 } = require('../functions.js');
 const { Console } = require('console');
 const helpers = require('../lib/helpers');
@@ -3669,7 +3670,9 @@ router.get('/pastilleros', noExterno, (req, res) => {
 });
 router.post('/medicamentos/table', noExterno, async (req, res) => {
   const medicamentos = await pool.query(
-    `SELECT m.*, SUM(c.cantidad) stock FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id GROUP BY m.id;`
+    `SELECT m.*, SUM(IF(c.cantidad, c.cantidad, 0)) - SUM(IF(v.cantidad, v.cantidad, 0)) stock 
+    FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id LEFT JOIN ventas v ON v.producto = m.id 
+    GROUP BY m.id;`
   );
   respuesta = { data: medicamentos };
   res.send(respuesta);
@@ -3721,16 +3724,56 @@ router.delete('/compras/:id', noExterno, async (req, res) => {
     res.send(false);
   }
 });
+
+router.post('/facturas/table', noExterno, async (req, res) => {
+  /* const facturas = await pool.query(`SELECT f.*, v.producto, v.name, v.cantidad, v.precio, v.total 
+  FROM facturas f INNER JOIN ventas v ON v.factura = f.id `); */
+  const facturas = await pool.query(`SELECT * FROM facturas`);
+  respuesta = { data: facturas };
+  res.send(respuesta);
+});
+
+router.delete('/facturas/:id', noExterno, async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query(`DELETE FROM facturas WHERE id = ?`, id);
+    res.send(true);
+  } catch (e) {
+    res.send(false);
+  }
+});
+
+router.post('/generarfactura', isLoggedIn, async (req, res) => {
+  const factura = req.body;
+
+  const { insertId } = await pool.query('INSERT INTO facturas SET ? ', factura);
+  const articles = JSON.parse(factura.articles).map(e => [...e, insertId]);
+  console.log(factura, insertId, articles);
+
+  pool.query(`INSERT INTO ventas (producto, name, cantidad, precio, total, factura) VALUES ?`, [
+    articles
+  ]);
+
+  const ruta = await Facturar(insertId);
+
+  res.send(ruta);
+});
 ///////////////////* CLIENTES *///////////////////////////
-router.get('/clientes', noExterno, (req, res) => {
+router.get('/clientes', isLoggedIn, (req, res) => {
   console.log(req.user);
   res.render('links/clientes');
 });
-router.post('/clientes', noExterno, async (req, res) => {
+router.post('/clientes', isLoggedIn, async (req, res) => {
   //console.log(req.user)
   const cliente = await pool.query(`SELECT * FROM clientes c 
     LEFT JOIN users u ON c.acsor = u.id     
-    ${req.user.asistente ? '' : 'WHERE c.acsor = ' + req.user.id}`);
+    ${
+      req.user.externo
+        ? 'WHERE c.acsor = ' + req.user.id
+        : req.user.asistente
+        ? ''
+        : 'WHERE c.acsor = ' + req.user.id
+    }`);
   respuesta = { data: cliente };
   res.send(respuesta);
 });
@@ -3861,7 +3904,7 @@ router.put('/clientes/:id', isLoggedIn, async (req, res) => {
     });
   }
 });
-router.put('/editclientes', noExterno, async (req, res) => {
+router.put('/editclientes', isLoggedIn, async (req, res) => {
   const { idc, name, tipod, docu, lugarex, fehex, fnaci, ecivil, email, pais, Movil, adres } =
     req.body;
 
@@ -3882,7 +3925,7 @@ router.put('/editclientes', noExterno, async (req, res) => {
   await pool.query('UPDATE clientes SET ? WHERE idc = ?', [clit, idc]);
   res.send(true);
 });
-router.post('/adjuntar', noExterno, async (req, res) => {
+router.post('/adjuntar', isLoggedIn, async (req, res) => {
   var imagenes = '';
   req.files.map(e => {
     imagenes += `/uploads/${e.filename},`;
@@ -3899,7 +3942,7 @@ router.post('/elicliente', noExterno, async (req, res) => {
     res.send(false);
   }
 });
-router.post('/movil', noExterno, async (req, res) => {
+router.post('/movil', isLoggedIn, async (req, res) => {
   const { movil } = req.body;
   const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
   res.send(cliente);

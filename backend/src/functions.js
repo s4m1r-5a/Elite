@@ -1386,6 +1386,226 @@ async function FacturaDeCobro(ids) {
     return `/uploads/facturasdecobro-${Proyeccion[0].ids}.pdf`;
   }
 }
+async function Facturar(numFactura) {
+  const [factura] = await pool.query(`SELECT * FROM facturas WHERE id = ?`, numFactura);
+
+  if (factura) {
+    const cuerpo = [
+      [
+        { text: `Id`, style: 'tableHeader', alignment: 'center' },
+        { text: 'Producto', style: 'tableHeader', alignment: 'center' },
+        { text: '#', style: 'tableHeader', alignment: 'center' },
+        { text: 'Precio', style: 'tableHeader', alignment: 'center' },
+        { text: 'Total', style: 'tableHeader', alignment: 'center' }
+      ]
+    ];
+    // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+    //let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+
+    JSON.parse(factura.articles).map((e, i) => {
+      cuerpo.push([e[0], e[1], e[2], '$' + Cifra(e[3]), '$' + Cifra(e[4])]);
+    });
+
+    cuerpo.push(
+      [
+        {
+          text: 'TOTAL',
+          alignment: 'center',
+          colSpan: 4,
+          fontSize: 11,
+          bold: true,
+          color: 'black'
+        },
+        {},
+        {},
+        {},
+        {
+          text: '$' + Cifra(factura.total),
+          alignment: 'center',
+          fontSize: 11,
+          bold: true,
+          color: 'black'
+        }
+      ],
+      [{ text: NumeroALetras(factura.total), style: 'smallx', colSpan: 5 }, {}, {}, {}, {}]
+    );
+
+    console.log(cuerpo);
+
+    ////////////////////////* CREAR PDF *//////////////////////////////
+    const printer = new PdfPrinter(Roboto);
+    let docDefinition = {
+      background: function (currentPage, pageSize) {
+        return {
+          image: path.join(__dirname, '/public/img/avatars/avatar1.png'),
+          width: pageSize.width,
+          opacity: 0.1
+        };
+      },
+      pageSize: 'a4',
+      header: function (currentPage, pageCount, pageSize) {
+        return {
+          alignment: 'right',
+          margin: [10, 3, 10, 3],
+          columns: [
+            {
+              text: moment().format('lll'),
+              alignment: 'left',
+              margin: [10, 15, 15, 0],
+              italics: true,
+              color: 'gray',
+              fontSize: 7
+            },
+            {
+              width: 20,
+              alignment: 'right',
+              margin: [10, 3, 10, 3],
+              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              fit: [20, 20]
+            }
+          ]
+        };
+      },
+      info: {
+        title: 'Factura',
+        author: 'Inmovilii',
+        subject: 'Factura de venta',
+        keywords: 'Factura de venta de medicamentos',
+        creator: 'Inmovilii',
+        producer: 'IMOVI'
+      },
+      content: [
+        {
+          columns: [
+            [
+              { text: 'FACTURA DE VENTA ' + factura.id, style: 'header' },
+              'Facturacion de venta de medicamentos',
+              { text: factura.name, style: 'subheader' },
+              {
+                text: `${factura.type} ${factura.doc}         Movil ${factura.phone}        ${factura.adreess}`,
+                italics: true,
+                color: 'gray',
+                fontSize: 9
+              },
+              {
+                fontSize: 11,
+                italics: true,
+                text: [
+                  '\nLa siguente ',
+                  { text: 'tabla ', bold: true, color: 'blue' },
+                  'muestra los detalles de cada producto a facturar'
+                ]
+              }
+            ],
+            {
+              width: 100,
+              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              fit: [100, 100]
+            }
+          ]
+        },
+        {
+          fontSize: 11,
+          italics: true,
+          text: [
+            '\nLa siguente ',
+            { text: 'tabla ', bold: true, color: 'blue' },
+            'muestra los detalles de cada producto a facturar'
+          ]
+        },
+        {
+          style: 'tableBody',
+          color: '#444',
+          table: {
+            widths: ['*', 'auto', '*', 'auto', 'auto'],
+            //headerRows: 1,
+            // keepWithHeaderRows: 1,
+            body: cuerpo
+          }
+        },
+        {
+          text: 'Factura de venta generada por Inmovilii',
+          style: 'subheader'
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 13,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        },
+        subheader: {
+          fontSize: 11,
+          bold: true,
+          margin: [0, 5, 0, 2]
+        },
+        tableBody: {
+          fontSize: 9,
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 9,
+          color: 'black'
+        },
+        small: {
+          fontSize: 8,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        smallx: {
+          fontSize: 7,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        tableBody2: {
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader2: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
+        },
+        small2: {
+          fontSize: 9,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        }
+      }
+    };
+    let ruta = path.join(__dirname, `/public/uploads/facturadeventa-${factura.id}.pdf`);
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(ruta));
+    pdfDoc.end();
+    await pool.query('UPDATE facturas SET ? WHERE id = ?', [
+      { pdf: `/uploads/facturadeventa-${factura.id}.pdf` },
+      factura.id
+    ]);
+
+    /* var dataFile = {
+            phone: '573012673944', //Proyeccion[0].movil,
+            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
+        };
+        let r = await apiChatApi('sendFile', dataFile);
+        r.msg = Proyeccion[0].cparacion;
+        await EnviarEmail(
+            's4m1r.5a@gmail.com', //Proyeccion[0].email
+            `Estado de cuenta Lt: ${Proyeccion[0].n}`,
+            Proyeccion[0].nombre,
+            false,
+            'Grupo Elite te da la bienvenida',
+            [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
+        ); */
+    console.log(ruta);
+    return ruta;
+  } else {
+    return { sent: false };
+  }
+}
 async function EstadoDeCuenta(Orden) {
   const Proyeccion = await pool.query(
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
@@ -3336,5 +3556,6 @@ module.exports = {
   RecibosCaja,
   EstadoDeCuenta,
   FacturaDeCobro,
-  informes
+  informes,
+  Facturar
 };

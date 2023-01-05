@@ -1,10 +1,10 @@
 {{#if user}}
-<nav class="navbar navbar-expand navbar-light bg-white">
-	<a class="sidebar-toggle d-flex mr-2">
-		<i class="hamburger align-self-center"></i>
-	</a>
+  <nav class='navbar navbar-expand navbar-light bg-white'>
+    <a class='sidebar-toggle d-flex mr-2'>
+      <i class='hamburger align-self-center'></i>
+    </a>
 
-	<!--<form class="form-inline d-none d-sm-inline-block" style="background-image: url('/img/fondo-baner2.png');
+    <!--<form class="form-inline d-none d-sm-inline-block" style="background-image: url('/img/fondo-baner2.png');
   -webkit-background-size: 100% 100%;           
      -moz-background-size: 100% 100%;         
        -o-background-size: 100% 100%;          
@@ -13,672 +13,792 @@
 			aria-label="Search">
 	</form>-->
 
-	<div class="navbar-collapse collapse">
-		<ul class="navbar-nav ml-auto">
-			<li class="nav-item dropdown">
-				<a class="nav-icon dropdown-toggle" href="#" id="messagesDropdown" data-toggle="dropdown">
-					<div class="position-relative">
-						<i class="align-middle" data-feather="message-circle"></i>
-						<span class="indicator">4</span>
-					</div>
-				</a>
-				<div class="dropdown-menu dropdown-menu-lg dropdown-menu-right py-0" aria-labelledby="messagesDropdown">
-					<div class="dropdown-menu-header">
-						<div class="position-relative">
-							4 New Messages
-						</div>
-					</div>
-					<div class="list-group">
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<img src="/img/avatars/avatar-5.jpg" class="avatar img-fluid rounded-circle"
-										alt="Ashley Briggs">
-								</div>
-								<div class="col-10 pl-2">
-									<div class="text-dark">Ashley Briggs</div>
-									<div class="text-muted small mt-1">Nam pretium turpis et arcu. Duis arcu tortor.
-									</div>
-									<div class="text-muted small mt-1">15m ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<img src="/img/avatars/avatar-2.jpg" class="avatar img-fluid rounded-circle"
-										alt="Carl Jenkins">
-								</div>
-								<div class="col-10 pl-2">
-									<div class="text-dark">Carl Jenkins</div>
-									<div class="text-muted small mt-1">Curabitur ligula sapien euismod vitae.</div>
-									<div class="text-muted small mt-1">2h ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<img src="/img/avatars/avatar-4.jpg" class="avatar img-fluid rounded-circle"
-										alt="Stacie Hall">
-								</div>
-								<div class="col-10 pl-2">
-									<div class="text-dark">Stacie Hall</div>
-									<div class="text-muted small mt-1">Pellentesque auctor neque nec urna.</div>
-									<div class="text-muted small mt-1">4h ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<img src="/img/avatars/avatar-3.jpg" class="avatar img-fluid rounded-circle"
-										alt="Bertha Martin">
-								</div>
-								<div class="col-10 pl-2">
-									<div class="text-dark">Bertha Martin</div>
-									<div class="text-muted small mt-1">Aenean tellus metus, bibendum sed, posuere ac,
-										mattis non.</div>
-									<div class="text-muted small mt-1">5h ago</div>
-								</div>
-							</div>
-						</a>
-					</div>
-					<div class="dropdown-menu-footer">
-						<a href="#" class="text-muted">Show all messages</a>
-					</div>
-				</div>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-icon dropdown-toggle" href="#" id="alertsDropdown" data-toggle="dropdown">
-					<div class="position-relative">
-						<i class="align-middle" data-feather="bell-off"></i>
-					</div>
-				</a>
-				<div class="dropdown-menu dropdown-menu-lg dropdown-menu-right py-0" aria-labelledby="alertsDropdown">
-					<div class="dropdown-menu-header">
-						4 New Notifications
-					</div>
-					<div class="list-group">
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<i class="text-danger" data-feather="alert-circle"></i>
-								</div>
-								<div class="col-10">
-									<div class="text-dark">Update completed</div>
-									<div class="text-muted small mt-1">Restart server 12 to complete the update.</div>
-									<div class="text-muted small mt-1">2h ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<i class="text-warning" data-feather="bell"></i>
-								</div>
-								<div class="col-10">
-									<div class="text-dark">Lorem ipsum</div>
-									<div class="text-muted small mt-1">Aliquam ex eros, imperdiet vulputate hendrerit
-										et.</div>
-									<div class="text-muted small mt-1">6h ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<i class="text-primary" data-feather="home"></i>
-								</div>
-								<div class="col-10">
-									<div class="text-dark">Login from 192.186.1.1</div>
-									<div class="text-muted small mt-1">8h ago</div>
-								</div>
-							</div>
-						</a>
-						<a href="#" class="list-group-item">
-							<div class="row no-gutters align-items-center">
-								<div class="col-2">
-									<i class="text-success" data-feather="user-plus"></i>
-								</div>
-								<div class="col-10">
-									<div class="text-dark">New connection</div>
-									<div class="text-muted small mt-1">Anna accepted your request.</div>
-									<div class="text-muted small mt-1">12h ago</div>
-								</div>
-							</div>
-						</a>
-					</div>
-					<div class="dropdown-menu-footer">
-						<a href="#" class="text-muted">Show all notifications</a>
-					</div>
-				</div>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-icon" href="#" data-toggle="modal" data-target="#Mcupon">
-					<div class="position-relative">
-						<i class="align-middle" data-feather="tag"></i>
-					</div>
-				</a>
-			</li>
-			<li class="nav-item dropdown d-none" id="afiliacion">
-				<a class="nav-icon" href="#" data-toggle="modal" data-target="#afiliar">
-					<div class="position-relative">
-						<i class="align-middle" data-feather="user-plus"></i>
-					</div>
-				</a>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="nav-icon dropdown-toggle d-inline-block d-sm-none" href="#" data-toggle="dropdown">
-					<i class="align-middle" data-feather="settings"></i>
-				</a>
+    <div class='navbar-collapse collapse'>
+      <ul class='navbar-nav ml-auto'>
+        <li class='nav-item dropdown'>
+          <a class='nav-icon dropdown-toggle' href='#' id='messagesDropdown' data-toggle='dropdown'>
+            <div class='position-relative'>
+              <i class='align-middle' data-feather='message-circle'></i>
+              <span class='indicator'>4</span>
+            </div>
+          </a>
+          <div
+            class='dropdown-menu dropdown-menu-lg dropdown-menu-right py-0'
+            aria-labelledby='messagesDropdown'
+          >
+            <div class='dropdown-menu-header'>
+              <div class='position-relative'>
+                4 New Messages
+              </div>
+            </div>
+            <div class='list-group'>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-5.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Ashley Briggs'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Ashley Briggs</div>
+                    <div class='text-muted small mt-1'>Nam pretium turpis et arcu. Duis arcu tortor.
+                    </div>
+                    <div class='text-muted small mt-1'>15m ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-2.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Carl Jenkins'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Carl Jenkins</div>
+                    <div class='text-muted small mt-1'>Curabitur ligula sapien euismod vitae.</div>
+                    <div class='text-muted small mt-1'>2h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-4.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Stacie Hall'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Stacie Hall</div>
+                    <div class='text-muted small mt-1'>Pellentesque auctor neque nec urna.</div>
+                    <div class='text-muted small mt-1'>4h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-3.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Bertha Martin'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Bertha Martin</div>
+                    <div class='text-muted small mt-1'>Aenean tellus metus, bibendum sed, posuere
+                      ac, mattis non.</div>
+                    <div class='text-muted small mt-1'>5h ago</div>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class='dropdown-menu-footer'>
+              <a href='#' class='text-muted'>Show all messages</a>
+            </div>
+          </div>
+        </li>
+        <li class='nav-item dropdown'>
+          <a class='nav-icon dropdown-toggle' href='#' id='alertsDropdown' data-toggle='dropdown'>
+            <div class='position-relative'>
+              <i class='align-middle' data-feather='bell-off'></i>
+            </div>
+          </a>
+          <div
+            class='dropdown-menu dropdown-menu-lg dropdown-menu-right py-0'
+            aria-labelledby='alertsDropdown'
+          >
+            <div class='dropdown-menu-header'>
+              4 New Notifications
+            </div>
+            <div class='list-group'>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <i class='text-danger' data-feather='alert-circle'></i>
+                  </div>
+                  <div class='col-10'>
+                    <div class='text-dark'>Update completed</div>
+                    <div class='text-muted small mt-1'>Restart server 12 to complete the update.</div>
+                    <div class='text-muted small mt-1'>2h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <i class='text-warning' data-feather='bell'></i>
+                  </div>
+                  <div class='col-10'>
+                    <div class='text-dark'>Lorem ipsum</div>
+                    <div class='text-muted small mt-1'>Aliquam ex eros, imperdiet vulputate
+                      hendrerit et.</div>
+                    <div class='text-muted small mt-1'>6h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <i class='text-primary' data-feather='home'></i>
+                  </div>
+                  <div class='col-10'>
+                    <div class='text-dark'>Login from 192.186.1.1</div>
+                    <div class='text-muted small mt-1'>8h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <i class='text-success' data-feather='user-plus'></i>
+                  </div>
+                  <div class='col-10'>
+                    <div class='text-dark'>New connection</div>
+                    <div class='text-muted small mt-1'>Anna accepted your request.</div>
+                    <div class='text-muted small mt-1'>12h ago</div>
+                  </div>
+                </div>
+              </a>
+            </div>
+            <div class='dropdown-menu-footer'>
+              <a href='#' class='text-muted'>Show all notifications</a>
+            </div>
+          </div>
+        </li>
+        <li class='nav-item dropdown'>
+          <a class='nav-icon' href='#' data-toggle='modal' data-target='#Mcupon'>
+            <div class='position-relative'>
+              <i class='align-middle' data-feather='tag'></i>
+            </div>
+          </a>
+        </li>
+        <li class='nav-item dropdown d-none' id='afiliacion'>
+          <a class='nav-icon' href='#' data-toggle='modal' data-target='#afiliar'>
+            <div class='position-relative'>
+              <i class='align-middle' data-feather='user-plus'></i>
+            </div>
+          </a>
+        </li>
+        <li class='nav-item dropdown'>
+          <a
+            class='nav-icon dropdown-toggle d-inline-block d-sm-none'
+            href='#'
+            data-toggle='dropdown'
+          >
+            <i class='align-middle' data-feather='settings'></i>
+          </a>
 
-				<a class="nav-link dropdown-toggle d-none d-sm-inline-block" href="#" data-toggle="dropdown">
-					<img src="{{user.imagen}}" class="avatar img-fluid rounded-circle mr-1" alt="{{user.fullname}}">
-					<span class="text-dark">{{user.fullname}}</span>
-				</a>
-				<div class="dropdown-menu dropdown-menu-right">
-					<a class="dropdown-item" href=""><i class="align-middle mr-1" data-feather="award"></i>
-						<span class="badge badge-pill" id="nivel">{{user.rango}}</span>
-					</a>
-					<!--<a class="dropdown-item" href="/profile"><i class="align-middle mr-1" data-feather="user"></i>
+          <a
+            class='nav-link dropdown-toggle d-none d-sm-inline-block'
+            href='#'
+            data-toggle='dropdown'
+          >
+            <img
+              src='{{user.imagen}}'
+              class='avatar img-fluid rounded-circle mr-1'
+              alt='{{user.fullname}}'
+            />
+            <span class='text-dark'>{{user.fullname}}</span>
+          </a>
+          <div class='dropdown-menu dropdown-menu-right'>
+            <a class='dropdown-item' href=''><i class='align-middle mr-1' data-feather='award'></i>
+              <span class='badge badge-pill' id='nivel'>{{user.rango}}</span>
+            </a>
+            <!--<a class="dropdown-item" href="/profile"><i class="align-middle mr-1" data-feather="user"></i>
 						Perfil</a>
 					<a class="dropdown-item" href="#"><i class="align-middle mr-1" data-feather="pie-chart"></i>
 						Análisis</a>
 					<div class="dropdown-divider"></div>
 					<a class="dropdown-item" href="pages-settings.html">Configuración</a>
 					<a class="dropdown-item" href="#">Ayuda</a>-->
-					<a class="dropdown-item" href="/logout">Cerrar sesión</a>
-				</div>
-			</li>
-		</ul>
-	</div>
-</nav>
+            <a class='dropdown-item' href='/logout'>Cerrar sesión</a>
+          </div>
+        </li>
+      </ul>
+    </div>
+  </nav>
 
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="Mcupon" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-sm" role="document">
-		<div class="modal-content">
-			<div class="modal-header">
-				<i class="feather-lg text-danger" data-feather="tag"></i>
-				<h1 class="modal-title ml-1">Cupon</h1>
-				<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-					<span aria-hidden="true">&times;</span>
-				</button>
-			</div>
-			<div class="modal-body m-3">
-				<div class="row">
-					<div class="col-sm-9">
-						<!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
+  <!-- BEGIN primary modal -->
+  <div class='modal fade' id='Mcupon' tabindex='-1' role='dialog' aria-hidden='true'>
+    <div class='modal-dialog modal-sm' role='document'>
+      <div class='modal-content'>
+        <div class='modal-header'>
+          <i class='feather-lg text-danger' data-feather='tag'></i>
+          <h1 class='modal-title ml-1'>Cupon</h1>
+          <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+            <span aria-hidden='true'>&times;</span>
+          </button>
+        </div>
+        <div class='modal-body m-3'>
+          <div class='row'>
+            <div class='col-sm-9'>
+              <!--<input type="text" id="codeg" class="text-center text-uppercase" placeholder="Code"
 							data-mask="99999" autocomplete="off" style="width: 50%;">-->
-						<p>Seleciona el descuento que quieres generar para el cupon, si se aprueba
-							reciviras un WhatsApp con el cupon</p>
-					</div>
-					<div class="col-sm-3 text-center">
-						{{#if user.admin}}
-						<input type="text" id="porcntgd" class="form-control form-control-lg" data-mask="00"
-							style="text-align:center" />
-						{{else}}
-						<select id="porcntgd" style="text-align-last:center;">
-							<option value="3">3%</option>
-							<option value="5" selected>5%</option>
-							<option value="7">7%</option>
-							<option value="10">10%</option>
-						</select>
-						{{/if}}
-					</div>
-				</div>
-				<button type="button" id="pedircupon" class="btn btn-sm btn-outline-dark float-right"
-					data-dismiss="modal">Solicitar cupon</button>
-			</div>
-		</div>
-	</div>
-</div>
-<!-- END primary modal -->
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="afiliar" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog" role="document">
-		<div class="modal-content">
-			<form action="/links/afiliado" method="POST">
-				<div class="modal-header">
-					<h5 class="modal-title">Afiliar persona a Grupo Elite</h5>
-					<button type="button" class="close" data-dismiss="modal" aria-label="Close">
-						<span aria-hidden="true">&times;</span>
-					</button>
-				</div>
-				<div class="modal-body m-3">
-					<p class="mb-0">Use Bootstrap’s JavaScript modal plugin to add dialogs to your site for lightboxes,
-						user
-						notifications, or completely custom content.</p>
-					<div class="modal-body m-3">
-						<input type="text" name="movil" class="form-control form-control-lg" data-mask="000-000-0000"
-							placeholder="Ingrese numero movil de afiliado" style="text-align:center" />
-					</div>
-				</div>
-				<div class="modal-footer">
-					<button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-					<button type="submit" class="btn btn-primary">Ingresar</button>
-				</div>
-			</form>
-		</div>
-	</div>
-</div>
-<!-- END primary modal -->
-<!-- BEGIN primary modal -->
-<div class="modal fade" id="AddClientes" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-lg" role="document">
-		<div class="modal-content card">
-			<div class="modal-header">
-				<h3 class="modal-title">Actualizacion tus datos en Red Elite</h3>
-				<a class="r atras close  float-right" data-dismiss="modal" aria-label="Close"><i class="feather-lg"
-						data-feather="x-circle"></i></a>
-			</div>
-			<div class="modal-body m-3">
-				<form id="crearclientes" enctype="multipart/form-data">
-					<div class="row">
-						<input type="hidden" class="ya" value="" name="ahora">
-						<input type="hidden" value="1" name="asesors">
-						<div class="col-12 col-lg-6">
-							<table class="table table-sm my-2">
-								<tbody>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="user"></i>
-											Nombre
-										</th>
-										<td>
-											<input class="form-control-no-border edi text-uppercase" type="text"
-												placeholder="Nombre completo" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="nombres"
-												value="{{user.fullname}}" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="help-circle"></i>
-											Tipo de documento
-										</th>
-										<td>
-											<select class="form-control-no-border edi tipod u" name="tipo"
-												style="padding: 1px; width: 100%;" required>
-												<option value="CC-Cédula de ciudadanía">Cédula de ciudadanía
-												</option>
-												<option value="CE-Cédula de extranjería">Cédula de extranjería
-												</option>
-												<option value="TI-Tarjeta de identidad">Tarjeta de identidad
-												</option>
-												<option value="RC-Registro civil">Registro civil</option>
-												<option value="PA-Pasaporte">Pasaporte</option>
-												<option value="PEP-Permiso especial de permanencia">Permiso especial de
-													permanencia</option>
-												<option value="Nit">Nit</option>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="credit-card"></i>
-											Documento
-										</th>
-										<td>
-											<input class="form-control-no-border edi docum" type="text"
-												placeholder="Documento de identidad" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="documento"
-												value="{{user.document}}" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="map-pin"></i>
-											Expedida
-										</th>
-										<td>
-											<input class="form-control-no-border edi lugarexpedicion u" type="text"
-												name="lugarexpedicion" placeholder="Lugar de expedición del documento"
-												autocomplete="off" style="padding: 1px; width: 100%;" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="calendar"></i> F.
-											Expedición
-										</th>
-										<td>
-											<input class="form-control-no-border edi fechas espedida u" type="text"
-												placeholder="Fecha de expedición" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="fechaexpedicion" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="calendar"></i> F.
-											Nacimiento
-										</th>
-										<td>
-											<input class="form-control-no-border edi fechas nacido u" type="text"
-												placeholder="Fecha de nacimiento" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="fechanacimiento" required>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-						<div class="col-12 col-lg-6">
-							<table class="table table-sm my-2">
-								<tbody>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="heart"></i>
-											Estado Civil
-										</th>
-										<td>
-											<select class="form-control-no-border edi estadocivil u" name="estadocivil"
-												style="padding: 1px; width: 100%;" required>
-												<option value="">Situación sentimental?</option>
-												<option value="Casado(a)">Casado(a)</option>
-												<option value="Soltero(a)">Soltero(a)</option>
-												<option value="Viudo(a)">Viudo(a)</option>
-												<option value="Divorciado(a)">Divorciado(a)</option>
-												<option value="Union libre">Union libre</option>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="mail"></i>
-											Email
-										</th>
-										<td>
-											<input class="form-control-no-border edi text-lowercase email u"
-												type="email" placeholder="Correo electrónico" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="email"
-												value="{{user.username}}" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="globe"></i>
-											Pais
-										</th>
-										<td>
-											<select class="form-control-no-border" id="pays"
-												style="background-color:#FFFFCC; padding: 1px; width: 100%;">
-												<optgroup label="A">
-													<option value='1907'>Alaska</option>
-													<option value='355'>Albania</option>
-													<option value='49'>Alemania</option>
-													<option value='376'>Andorra</option>
-													<option value='244'>Angola</option>
-													<option value='966'>Arabia Saudí</option>
-													<option value='213'>Argelia</option>
-													<option value='54'>Argentina</option>
-													<option value='374'>Armenia</option>
-													<option value='61'>Australia</option>
-													<option value='43'>Austria</option>
-												</optgroup>
-												<optgroup label="B">
-													<option value='973'>Bahreim</option>
-													<option value='880'>Bangladesh</option>
-													<option value='32'>Bélgica</option>
-													<option value='591'>Bolivia</option>
-													<option value='387'>Bosnia</option>
-													<option value='55'>Brasil</option>
-													<option value='359'>Bulgaria</option>
-												</optgroup>
-												<optgroup label="C">
-													<option value='238'>Cabo Verde</option>
-													<option value='855'>Camboya</option>
-													<option value='237'>Camerún</option>
-													<option value='1'>Canadá</option>
-													<option value='236'>Centroafricana, Rep.
-													</option>
-													<option value='420'>Checa, Rep.</option>
-													<option value='56'>Chile</option>
-													<option value='86'>China</option>
-													<option value='357'>Chipre</option>
-													<option value='57' selected>Colombia</option>
-													<option value='242'>Congo, Rep. del</option>
-													<option value='243'>Congo, Rep. Democ.</option>
-													<option value='850'>Corea, Rep. Democ.</option>
-													<option value='82'>Corea, Rep.</option>
-													<option value='225'>Costa de Marfil</option>
-													<option value='506'>Costa Rica</option>
-													<option value='385'>Croacia</option>
-													<option value='53'>Cuba</option>
-												</optgroup>
-												<optgroup label="D">
-													<option value='45'>Dinamarca</option>
-													<option value='1809'>Dominicana, Rep.</option>
-												</optgroup>
-												<optgroup label="E">
-													<option value='593'>Ecuador</option>
-													<option value='20'>Egipto</option>
-													<option value='503'>El Salvador</option>
-													<option value='971'>Emiratos Árabes Unidos
-													</option>
-													<option value='421'>Eslovaca, Rep.</option>
-													<option value='386'>Eslovenia</option>
-													<option value='34'>España</option>
-													<option value='1'>Estados Unidos</option>
-													<option value='372'>Estonia</option>
-													<option value='251'>Etiopía</option>
-												</optgroup>
-												<optgroup label="F">
-													<option value='63'>Filipinas</option>
-													<option value='358'>Finlandia</option>
-													<option value='33'>Francia</option>
-												</optgroup>
-												<optgroup label="G">
-													<option value='9567'>Gibraltar</option>
-													<option value='30'>Grecia</option>
-													<option value='299'>Groenlandia</option>
-													<option value='502'>Guatemala</option>
-													<option value='240'>Guinea Ecuatorial</option>
-												</optgroup>
-												<optgroup label="H">
-													<option value='509'>Haití</option>
-													<option value='1808'>Hawai</option>
-													<option value='504'>Honduras</option>
-													<option value='852'>Hong Kong</option>
-													<option value='36'>Hungría</option>
-												</optgroup>
-												<optgroup label="I">
-													<option value='91'>India</option>
-													<option value='62'>Indonesia</option>
-													<option value='98'>Irán</option>
-													<option value='964'>Irak</option>
-													<option value='353'>Irlanda</option>
-													<option value='354'>Islandia</option>
-													<option value='972'>Israel</option>
-													<option value='39'>Italia</option>
-												</optgroup>
-												<optgroup label="J">
-													<option value='1876'>Jamaica</option>
-													<option value='81'>Japón</option>
-													<option value='962'>Jordania</option>
-												</optgroup>
-												<optgroup label="K">
-													<option value='254'>Kenia</option>
-													<option value='965'>Kuwait</option>
-												</optgroup>
-												<optgroup label="L">
-													<option value='856'>Laos</option>
-													<option value='371'>Letonia</option>
-													<option value='961'>Líbano</option>
-													<option value='231'>Liberia</option>
-													<option value='218'>Libia</option>
-													<option value='41'>Liechtenstein</option>
-													<option value='370'>Lituania</option>
-													<option value='352'>Luxemburgo</option>
-												</optgroup>
-												<optgroup label="M">
-													<option value='261'>Madagascar</option>
-													<option value='60'>Malasia</option>
-													<option value='356'>Malta</option>
-													<option value='212'>Marruecos</option>
-													<option value='596'>Martinica</option>
-													<option value='222'>Mauritania</option>
-													<option value='52'>México</option>
-													<option value='373'>Moldavia</option>
-													<option value='377'>Mónaco</option>
-													<option value='976'>Mongolia</option>
-													<option value='258'>Mozambique</option>
-												</optgroup>
-												<optgroup label="N">
-													<option value='264'>Namibia</option>
-													<option value='977'>Nepal</option>
-													<option value='505'>Nicaragua</option>
-													<option value='234'>Nigeria</option>
-													<option value='47'>Noruega</option>
-													<option value='64'>Nueva Zelanda</option>
-												</optgroup>
-												<optgroup label="P">
-													<option value='31'>Países Bajos</option>
-													<option value='92'>Pakistán</option>
-													<option value='507'>Panamá</option>
-													<option value='595'>Paraguay</option>
-													<option value='51'>Perú</option>
-													<option value='48'>Polonia</option>
-													<option value='351'>Portugal</option>
-													<option value='1787'>Puerto Rico</option>
-												</optgroup>
-												<optgroup label="Q">
-													<option value='974'>Qatar</option>
-												</optgroup>
-												<optgroup label="R">
-													<option value='44'>Reino Unido</option>
-													<option value='40'>Rumania</option>
-													<option value='7'>Rusia</option>
-												</optgroup>
-												<optgroup label="S">
-													<option value='378'>San Marino</option>
-													<option value='221'>Senegal</option>
-													<option value='65'>Singapur</option>
-													<option value='963'>Siria</option>
-													<option value='252'>Somalia</option>
-													<option value='94'>Sri-Lanka</option>
-													<option value='27'>Sudáfrica</option>
-													<option value='249'>Sudán</option>
-													<option value='46'>Suecia</option>
-													<option value='41'>Suiza</option>
-												</optgroup>
-												<optgroup label="T">
-													<option value='66'>Tailandia</option>
-													<option value='886'>Taiwan</option>
-													<option value='255'>Tanzania</option>
-													<option value='216'>Túnez</option>
-													<option value='90'>Turquía</option>
-												</optgroup>
-												<optgroup label="U">
-													<option value='380'>Ucrania</option>
-													<option value='256'>Uganda</option>
-													<option value='598'>Uruguay</option>
-												</optgroup>
-												<optgroup label="V">
-													<option value='39'>Vaticano</option>
-													<option value='58'>Venezuela</option>
-													<option value='84'>Vietnam</option>
-												</optgroup>
-												<optgroup label="Y">
-													<option value='967'>Yemen</option>
-													<option value='381'>Yugoslavia</option>
-												</optgroup>
-												<optgroup label="Z">
-													<option value='260'>Zambia</option>
-													<option value='263'>Zimbawe</option>
-												</optgroup>
-											</select>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="phone-call"></i>
-											Móvil
-										</th>
-										<td>
-											<input class="form-control-no-border edi movl u" type="tel"
-												placeholder="Numero celular" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="movil" value="{{user.cel}}"
-												required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="map"></i>
-											Dirección
-										</th>
-										<td>
-											<input class="form-control-no-border edi direccion u" type="text"
-												placeholder="Dirección de residencia" autocomplete="off"
-												style="padding: 1px; width: 100%;" name="direccion" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="credit-card"></i>
-											Enviar ambas caras del documento
-										</th>
-										<td>
-											<input class="form-control-no-border edi float-right" type="file"
-												name="image" id="file" multiple style="width: 50%;" required>
-										</td>
-									</tr>
-									<tr>
-										<th>
-											<i class="feather-md" data-feather="user-plus"></i>
-										</th>
-										<td>
-											<button class="btn btn-outline-dark btn-sm float-right mr-3" type="submit"
-												id="AgregarClientes"><i class="fas fa-fw fa-user-plus"></i>
-												Actualizar Datos</button>
-										</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
-					</div>
-				</form>
-			</div>
-		</div>
-	</div>
-</div>
-<!-- END primary modal -->
+              <p>Seleciona el descuento que quieres generar para el cupon, si se aprueba reciviras
+                un WhatsApp con el cupon</p>
+            </div>
+            <div class='col-sm-3 text-center'>
+              {{#if user.admin}}
+                <input
+                  type='text'
+                  id='porcntgd'
+                  class='form-control form-control-lg'
+                  data-mask='00'
+                  style='text-align:center'
+                />
+              {{else}}
+                <select id='porcntgd' style='text-align-last:center;'>
+                  <option value='3'>3%</option>
+                  <option value='5' selected>5%</option>
+                  <option value='7'>7%</option>
+                  <option value='10'>10%</option>
+                </select>
+              {{/if}}
+            </div>
+          </div>
+          <button
+            type='button'
+            id='pedircupon'
+            class='btn btn-sm btn-outline-dark float-right'
+            data-dismiss='modal'
+          >Solicitar cupon</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END primary modal -->
+  <!-- BEGIN primary modal -->
+  <div class='modal fade' id='afiliar' tabindex='-1' role='dialog' aria-hidden='true'>
+    <div class='modal-dialog' role='document'>
+      <div class='modal-content'>
+        <form action='/links/afiliado' method='POST'>
+          <div class='modal-header'>
+            <h5 class='modal-title'>Afiliar persona a Grupo Elite</h5>
+            <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+              <span aria-hidden='true'>&times;</span>
+            </button>
+          </div>
+          <div class='modal-body m-3'>
+            <p class='mb-0'>Use Bootstrap’s JavaScript modal plugin to add dialogs to your site for
+              lightboxes, user notifications, or completely custom content.</p>
+            <div class='modal-body m-3'>
+              <input
+                type='text'
+                name='movil'
+                class='form-control form-control-lg'
+                data-mask='000-000-0000'
+                placeholder='Ingrese numero movil de afiliado'
+                style='text-align:center'
+              />
+            </div>
+          </div>
+          <div class='modal-footer'>
+            <button type='button' class='btn btn-secondary' data-dismiss='modal'>Cancelar</button>
+            <button type='submit' class='btn btn-primary'>Ingresar</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+  <!-- END primary modal -->
+  <!-- BEGIN primary modal -->
+  <div class='modal fade' id='AddClientes' tabindex='-1' role='dialog' aria-hidden='true'>
+    <div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+      <div class='modal-content card'>
+        <div class='modal-header'>
+          <h3 class='modal-title'>Actualizacion tus datos en Red Elite</h3>
+          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'><i
+              class='feather-lg'
+              data-feather='x-circle'
+            ></i></a>
+        </div>
+        <div class='modal-body m-3'>
+          <form id='crearclientes' enctype='multipart/form-data'>
+            <div class='row'>
+              <input type='hidden' class='ya' value='' name='ahora' />
+              <input type='hidden' value='1' name='asesors' />
+              <div class='col-12 col-lg-6'>
+                <table class='table table-sm my-2'>
+                  <tbody>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='user'></i>
+                        Nombre
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi text-uppercase'
+                          type='text'
+                          placeholder='Nombre completo'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='nombres'
+                          value='{{user.fullname}}'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='help-circle'></i>
+                        Tipo de documento
+                      </th>
+                      <td>
+                        <select
+                          class='form-control-no-border edi tipod u'
+                          name='tipo'
+                          style='padding: 1px; width: 100%;'
+                          required
+                        >
+                          <option value='CC-Cédula de ciudadanía'>Cédula de ciudadanía
+                          </option>
+                          <option value='CE-Cédula de extranjería'>Cédula de extranjería
+                          </option>
+                          <option value='TI-Tarjeta de identidad'>Tarjeta de identidad
+                          </option>
+                          <option value='RC-Registro civil'>Registro civil</option>
+                          <option value='PA-Pasaporte'>Pasaporte</option>
+                          <option value='PEP-Permiso especial de permanencia'>Permiso especial de
+                            permanencia</option>
+                          <option value='Nit'>Nit</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='credit-card'></i>
+                        Documento
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi docum'
+                          type='text'
+                          placeholder='Documento de identidad'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='documento'
+                          value='{{user.document}}'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='map-pin'></i>
+                        Expedida
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi lugarexpedicion u'
+                          type='text'
+                          name='lugarexpedicion'
+                          placeholder='Lugar de expedición del documento'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='calendar'></i>
+                        F. Expedición
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi fechas espedida u'
+                          type='text'
+                          placeholder='Fecha de expedición'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='fechaexpedicion'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='calendar'></i>
+                        F. Nacimiento
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi fechas nacido u'
+                          type='text'
+                          placeholder='Fecha de nacimiento'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='fechanacimiento'
+                          required
+                        />
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <div class='col-12 col-lg-6'>
+                <table class='table table-sm my-2'>
+                  <tbody>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='heart'></i>
+                        Estado Civil
+                      </th>
+                      <td>
+                        <select
+                          class='form-control-no-border edi estadocivil u'
+                          name='estadocivil'
+                          style='padding: 1px; width: 100%;'
+                          required
+                        >
+                          <option value=''>Situación sentimental?</option>
+                          <option value='Casado(a)'>Casado(a)</option>
+                          <option value='Soltero(a)'>Soltero(a)</option>
+                          <option value='Viudo(a)'>Viudo(a)</option>
+                          <option value='Divorciado(a)'>Divorciado(a)</option>
+                          <option value='Union libre'>Union libre</option>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='mail'></i>
+                        Email
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi text-lowercase email u'
+                          type='email'
+                          placeholder='Correo electrónico'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='email'
+                          value='{{user.username}}'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='globe'></i>
+                        Pais
+                      </th>
+                      <td>
+                        <select
+                          class='form-control-no-border'
+                          id='pays'
+                          style='background-color:#FFFFCC; padding: 1px; width: 100%;'
+                        >
+                          <optgroup label='A'>
+                            <option value='1907'>Alaska</option>
+                            <option value='355'>Albania</option>
+                            <option value='49'>Alemania</option>
+                            <option value='376'>Andorra</option>
+                            <option value='244'>Angola</option>
+                            <option value='966'>Arabia Saudí</option>
+                            <option value='213'>Argelia</option>
+                            <option value='54'>Argentina</option>
+                            <option value='374'>Armenia</option>
+                            <option value='61'>Australia</option>
+                            <option value='43'>Austria</option>
+                          </optgroup>
+                          <optgroup label='B'>
+                            <option value='973'>Bahreim</option>
+                            <option value='880'>Bangladesh</option>
+                            <option value='32'>Bélgica</option>
+                            <option value='591'>Bolivia</option>
+                            <option value='387'>Bosnia</option>
+                            <option value='55'>Brasil</option>
+                            <option value='359'>Bulgaria</option>
+                          </optgroup>
+                          <optgroup label='C'>
+                            <option value='238'>Cabo Verde</option>
+                            <option value='855'>Camboya</option>
+                            <option value='237'>Camerún</option>
+                            <option value='1'>Canadá</option>
+                            <option value='236'>Centroafricana, Rep.
+                            </option>
+                            <option value='420'>Checa, Rep.</option>
+                            <option value='56'>Chile</option>
+                            <option value='86'>China</option>
+                            <option value='357'>Chipre</option>
+                            <option value='57' selected>Colombia</option>
+                            <option value='242'>Congo, Rep. del</option>
+                            <option value='243'>Congo, Rep. Democ.</option>
+                            <option value='850'>Corea, Rep. Democ.</option>
+                            <option value='82'>Corea, Rep.</option>
+                            <option value='225'>Costa de Marfil</option>
+                            <option value='506'>Costa Rica</option>
+                            <option value='385'>Croacia</option>
+                            <option value='53'>Cuba</option>
+                          </optgroup>
+                          <optgroup label='D'>
+                            <option value='45'>Dinamarca</option>
+                            <option value='1809'>Dominicana, Rep.</option>
+                          </optgroup>
+                          <optgroup label='E'>
+                            <option value='593'>Ecuador</option>
+                            <option value='20'>Egipto</option>
+                            <option value='503'>El Salvador</option>
+                            <option value='971'>Emiratos Árabes Unidos
+                            </option>
+                            <option value='421'>Eslovaca, Rep.</option>
+                            <option value='386'>Eslovenia</option>
+                            <option value='34'>España</option>
+                            <option value='1'>Estados Unidos</option>
+                            <option value='372'>Estonia</option>
+                            <option value='251'>Etiopía</option>
+                          </optgroup>
+                          <optgroup label='F'>
+                            <option value='63'>Filipinas</option>
+                            <option value='358'>Finlandia</option>
+                            <option value='33'>Francia</option>
+                          </optgroup>
+                          <optgroup label='G'>
+                            <option value='9567'>Gibraltar</option>
+                            <option value='30'>Grecia</option>
+                            <option value='299'>Groenlandia</option>
+                            <option value='502'>Guatemala</option>
+                            <option value='240'>Guinea Ecuatorial</option>
+                          </optgroup>
+                          <optgroup label='H'>
+                            <option value='509'>Haití</option>
+                            <option value='1808'>Hawai</option>
+                            <option value='504'>Honduras</option>
+                            <option value='852'>Hong Kong</option>
+                            <option value='36'>Hungría</option>
+                          </optgroup>
+                          <optgroup label='I'>
+                            <option value='91'>India</option>
+                            <option value='62'>Indonesia</option>
+                            <option value='98'>Irán</option>
+                            <option value='964'>Irak</option>
+                            <option value='353'>Irlanda</option>
+                            <option value='354'>Islandia</option>
+                            <option value='972'>Israel</option>
+                            <option value='39'>Italia</option>
+                          </optgroup>
+                          <optgroup label='J'>
+                            <option value='1876'>Jamaica</option>
+                            <option value='81'>Japón</option>
+                            <option value='962'>Jordania</option>
+                          </optgroup>
+                          <optgroup label='K'>
+                            <option value='254'>Kenia</option>
+                            <option value='965'>Kuwait</option>
+                          </optgroup>
+                          <optgroup label='L'>
+                            <option value='856'>Laos</option>
+                            <option value='371'>Letonia</option>
+                            <option value='961'>Líbano</option>
+                            <option value='231'>Liberia</option>
+                            <option value='218'>Libia</option>
+                            <option value='41'>Liechtenstein</option>
+                            <option value='370'>Lituania</option>
+                            <option value='352'>Luxemburgo</option>
+                          </optgroup>
+                          <optgroup label='M'>
+                            <option value='261'>Madagascar</option>
+                            <option value='60'>Malasia</option>
+                            <option value='356'>Malta</option>
+                            <option value='212'>Marruecos</option>
+                            <option value='596'>Martinica</option>
+                            <option value='222'>Mauritania</option>
+                            <option value='52'>México</option>
+                            <option value='373'>Moldavia</option>
+                            <option value='377'>Mónaco</option>
+                            <option value='976'>Mongolia</option>
+                            <option value='258'>Mozambique</option>
+                          </optgroup>
+                          <optgroup label='N'>
+                            <option value='264'>Namibia</option>
+                            <option value='977'>Nepal</option>
+                            <option value='505'>Nicaragua</option>
+                            <option value='234'>Nigeria</option>
+                            <option value='47'>Noruega</option>
+                            <option value='64'>Nueva Zelanda</option>
+                          </optgroup>
+                          <optgroup label='P'>
+                            <option value='31'>Países Bajos</option>
+                            <option value='92'>Pakistán</option>
+                            <option value='507'>Panamá</option>
+                            <option value='595'>Paraguay</option>
+                            <option value='51'>Perú</option>
+                            <option value='48'>Polonia</option>
+                            <option value='351'>Portugal</option>
+                            <option value='1787'>Puerto Rico</option>
+                          </optgroup>
+                          <optgroup label='Q'>
+                            <option value='974'>Qatar</option>
+                          </optgroup>
+                          <optgroup label='R'>
+                            <option value='44'>Reino Unido</option>
+                            <option value='40'>Rumania</option>
+                            <option value='7'>Rusia</option>
+                          </optgroup>
+                          <optgroup label='S'>
+                            <option value='378'>San Marino</option>
+                            <option value='221'>Senegal</option>
+                            <option value='65'>Singapur</option>
+                            <option value='963'>Siria</option>
+                            <option value='252'>Somalia</option>
+                            <option value='94'>Sri-Lanka</option>
+                            <option value='27'>Sudáfrica</option>
+                            <option value='249'>Sudán</option>
+                            <option value='46'>Suecia</option>
+                            <option value='41'>Suiza</option>
+                          </optgroup>
+                          <optgroup label='T'>
+                            <option value='66'>Tailandia</option>
+                            <option value='886'>Taiwan</option>
+                            <option value='255'>Tanzania</option>
+                            <option value='216'>Túnez</option>
+                            <option value='90'>Turquía</option>
+                          </optgroup>
+                          <optgroup label='U'>
+                            <option value='380'>Ucrania</option>
+                            <option value='256'>Uganda</option>
+                            <option value='598'>Uruguay</option>
+                          </optgroup>
+                          <optgroup label='V'>
+                            <option value='39'>Vaticano</option>
+                            <option value='58'>Venezuela</option>
+                            <option value='84'>Vietnam</option>
+                          </optgroup>
+                          <optgroup label='Y'>
+                            <option value='967'>Yemen</option>
+                            <option value='381'>Yugoslavia</option>
+                          </optgroup>
+                          <optgroup label='Z'>
+                            <option value='260'>Zambia</option>
+                            <option value='263'>Zimbawe</option>
+                          </optgroup>
+                        </select>
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='phone-call'></i>
+                        Móvil
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi movl u'
+                          type='tel'
+                          placeholder='Numero celular'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='movil'
+                          value='{{user.cel}}'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='map'></i>
+                        Dirección
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi direccion u'
+                          type='text'
+                          placeholder='Dirección de residencia'
+                          autocomplete='off'
+                          style='padding: 1px; width: 100%;'
+                          name='direccion'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='credit-card'></i>
+                        Enviar ambas caras del documento
+                      </th>
+                      <td>
+                        <input
+                          class='form-control-no-border edi float-right'
+                          type='file'
+                          name='image'
+                          id='file'
+                          multiple
+                          style='width: 50%;'
+                          required
+                        />
+                      </td>
+                    </tr>
+                    <tr>
+                      <th>
+                        <i class='feather-md' data-feather='user-plus'></i>
+                      </th>
+                      <td>
+                        <button
+                          class='btn btn-outline-dark btn-sm float-right mr-3'
+                          type='submit'
+                          id='AgregarClientes'
+                        ><i class='fas fa-fw fa-user-plus'></i>
+                          Actualizar Datos</button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- END primary modal -->
 {{else}}
-<nav class="navbar navbar-expand navbar-light bg-white">
-	<!-- style="display: none;"-->
+  <nav class='navbar navbar-expand navbar-light bg-white'>
+    <!-- style="display: none;"-->
 
-	<a class="sidebar-brand d-flex mr-2" href="/">
-		<i class="align-self-center" data-feather="box"></i>
-		<span class="text-dark">Grupo Elite</span>
-	</a>
+    <a class='sidebar-brand d-flex mr-2' href='/'>
+      <i class='align-self-center' data-feather='box'></i>
+      <span class='text-dark'>Grupo Elite</span>
+    </a>
 
-	<div class="navbar-collapse collapse">
-		<ul class="navbar-nav ml-auto">
-			<li class="nav-item dropdown">
-				<a class="dropdown-item" href="/signin"><i class="align-middle mr-1" data-feather="user"></i>Iniciar
-					sesion</a>
-			</li>
-			<li class="nav-item dropdown">
-				<a class="dropdown-item" href="/signup"><i class="align-middle mr-1" data-feather="pie-chart"></i>
-					Registrate</a>
-			</li>
-		</ul>
-	</div>
-</nav>
+    <div class='navbar-collapse collapse'>
+      <ul class='navbar-nav ml-auto'>
+        <li class='nav-item dropdown'>
+          <a class='dropdown-item' href='/signin'><i
+              class='align-middle mr-1'
+              data-feather='user'
+            ></i>Iniciar sesion</a>
+        </li>
+        <li class='nav-item dropdown'>
+          <a class='dropdown-item' href='/signup'><i
+              class='align-middle mr-1'
+              data-feather='pie-chart'
+            ></i>
+            Registrate</a>
+        </li>
+      </ul>
+    </div>
+  </nav>
 {{/if}}
 
 <!-- BEGIN success modal -->
-<div class="modal fade" id="ModalEventos" tabindex="-1" role="dialog" aria-hidden="true">
-	<div class="modal-dialog modal-dialog-centered modal-sm" role="document">
-		<div class="modal-content" style="background: rgba(0,0,0,0);">
-			<div class="row">
-				<div class="col-sm-12 text-center">
-					<h1 class="modal-title text-white">Espere por favor...</h1>
-					<div class="spinner-grow text-dark" role="status">
-						<span class="sr-only"></span>
-					</div>
-				</div>
-			</div>
-		</div>
-	</div>
+<div class='modal fade' id='ModalEventos' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-sm' role='document'>
+    <div class='modal-content' style='background: rgba(0,0,0,0);'>
+      <div class='row'>
+        <div class='col-sm-12 text-center'>
+          <h1 class='modal-title text-white'>Espere por favor...</h1>
+          <div class='spinner-grow text-dark' role='status'>
+            <span class='sr-only'></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>

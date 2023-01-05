@@ -15940,7 +15940,7 @@ if (window.location == `${window.location.origin}/links/asesores` && !rol.extern
 ///// https://api.chat-api.com/instance107218/checkPhone?token=5jn3c5dxvcj27fm0&phone=14081472583 verificar si se puede enviar un whatsapp a un numero eliminar los espacios en el numero////////////
 
 /////////////////////////////* CLIENTES */////////////////////////////////////////////////////////////////////
-if (window.location == `${window.location.origin}/links/clientes` && !rol.externo) {
+if (window.location == `${window.location.origin}/links/clientes`) {
   $('.sidebar-item').removeClass('active');
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
   $(document).ready(function () {
@@ -16524,7 +16524,8 @@ if (window.location == `${window.location.origin}/links/whatsapp`) {
 if (window.location == `${window.location.origin}/links/pastilleros`) {
   $('.sidebar-item').removeClass('active');
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
-  const droga = $('#droga');
+  const droga = $('.droga');
+  const produc = $('#produc');
 
   $(document).ready(function () {
     $('input').prop('autocomplete', 'off');
@@ -16651,6 +16652,84 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     $('#cerrarcompra').click(function () {
       $('#addComp').show('slow');
       $('#addCompra').hide('slow');
+    });
+
+    $('#crearfactura').submit(function (e) {
+      e.preventDefault();
+      $('.valor').each(function (i, valor) {
+        $(this).val(noCifra($(this).val()));
+      });
+      const html = '<a class="eliminar"><i class="fas fa-trash"></i></a>';
+      let nameProduct;
+      const formData = $('#crearfactura')
+        .serializeArray()
+        .map((r, i) => {
+          if (!i) nameProduct = $(`#produc option[value='${r.value}']`).text();
+          return r.value;
+        });
+      formData.splice(1, 0, nameProduct);
+      formData.splice(4, 0, `${formData[2] * formData[3]}`, html);
+      factura.row.add(formData).draw(false);
+      $('#crearfactura input').val(null);
+      produc.val(null).trigger('change');
+    });
+
+    $('#cerrarfactura').click(function () {
+      $('#addFactu').show('slow');
+      $('#addFactura').hide('slow');
+    });
+
+    $('#generarfactura').submit(function (e) {
+      e.preventDefault();
+      $('.valor').each(function (i, valor) {
+        $(this).val(noCifra($(this).val()));
+      });
+      let total = 0;
+      const rows = [];
+      factura
+        .rows()
+        .data()
+        .each(e => {
+          total += parseFloat(e[4]);
+          rows.push(e.splice(0, 5));
+        });
+
+      if (!rows.length) {
+        SMSj('error', 'Debe ingresar productos a la factura');
+        return false;
+      }
+      const formData = new FormData(document.getElementById('generarfactura'));
+      formData.append('articles', JSON.stringify(rows));
+      formData.append('total', total);
+      $.ajax({
+        url: '/links/generarfactura',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            factura.clear().draw(false);
+            productos.ajax.reload(null, false);
+            facturas.ajax.reload(null, false);
+            SMSj('success', 'Factura creada exitosamente');
+            $('#generarfactura input:not(.fecha), #generarfactura select').val(null);
+            $('#crearfactura input').val(null);
+            produc.val(null).trigger('change');
+            $('#ModalEventos').modal('hide');
+            $('#addFactu').show('slow');
+            $('#addFactura').hide('slow');
+          }
+        }
+      });
+      //
     });
   });
 
@@ -16902,6 +16981,319 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
             SMSj('success', 'Compra eliminada exitosamente');
           } else {
             SMSj('error', 'No es posible eliminar esta compra.');
+          }
+        }
+      });
+    }
+  });
+
+  var factura = $('#factura').DataTable({
+    searching: false,
+    language: languag2,
+    lengthMenu: [-1],
+    deferRender: true,
+    info: false,
+    autoWidth: false,
+    paging: false,
+    order: [[0, 'asc']],
+    responsive: true,
+    columnDefs: [
+      //{ className: 'control', orderable: true, targets: 0 },
+      {
+        render: $.fn.dataTable.render.number(',', '.', 2, '$'),
+        targets: [3, 4]
+      }
+    ],
+    drawCallback: function (settings) {
+      /* var api = this.api();
+      var rows = api.rows({ page: 'current' }).nodes();
+      var last = null;
+
+      api
+        .column(3, { page: 'current' })
+        .data()
+        .each(function (group, i) {
+          if (last !== group) {
+            $(rows)
+              .eq(i)
+              .before(
+                '<tr class="group"><td colspan="8">' + $(group).val() || group + '</td></tr>'
+              );
+
+            last = group;
+          }
+        }); */
+    },
+    initComplete: function (settings, json) {},
+    createdRow: function (row, data, dataIndex) {}
+  });
+
+  factura.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    if (confirm('Seguro deseas eliminar esta factura?')) {
+      factura.row(fila).remove().draw();
+      SMSj('success', 'Item eliminado exitosamente');
+    }
+  });
+
+  $('#guardarFactura').on('click', function () {
+    $('#enviodatos').trigger('click');
+  });
+
+  const facturas = $('#facturas').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Factura</span>`,
+        attr: {
+          title: 'Agregar-Fatura',
+          id: 'addFactu'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          droga.html('');
+          productos
+            .rows()
+            .data()
+            .map(row =>
+              droga.append(
+                new Option(
+                  `${row.nombre} - ${row.laboratorio} - ${row.clase}`,
+                  row.id,
+                  false,
+                  false
+                )
+              )
+            );
+          droga.val(null).trigger('change');
+          $('#addFactu').hide('slow');
+          $('#addFactura').show('slow');
+        }
+      }
+    ],
+    deferRender: true,
+    lengthChange: false,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { targets: 0, orderable: true, visible: false, searchable: true },
+      { responsivePriority: 1, targets: [1, 3] }
+    ],
+    order: [[0, 'desc']], //[0, "asc"]
+    language: languag2,
+    ajax: {
+      method: 'POST',
+      url: '/links/facturas/table',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: 'id' },
+      {
+        data: 'name',
+        render: function (data, method, row) {
+          return `<div>
+          <strong>${row.id} - ${data}</strong><br>
+          <small>${row.type} ${row.doc} - CEL ${row.phone}</small><br>
+          <small class="font-italic text-muted text-lowercase">${row.adreess}</small><br>
+          <div>
+          <small class="font-italic text-muted">${moment(row.date).format('YYYY-MM-DD')}</small> - 
+          <span class="badge badge-pill ${row.status ? 'badge-success' : 'badge-primary'}">${
+            row.status ? 'Saldado' : 'Pendiente'
+          }</span> ${
+            row.pdf
+              ? `- <a href="${row.pdf}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt fa-lg"></i></a>`
+              : `- <a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`
+          }
+          </div>
+          </div>`;
+        }
+      },
+      {
+        data: 'total',
+        render: function (data, method, row) {
+          return `<div class="d-flex justify-content-around">
+          <div>
+          <strong>${currency(data, '$')}</strong><br>
+          <small class="font-italic text-muted">Total factura</small>
+          </div><div>
+          <strong> ... </strong><br>
+          <small class="font-italic text-muted"> ... </small>
+          </div><div>
+          <strong>${currency(0, '$')}</strong><br>
+          <small class="font-italic text-muted">Total abonado</small>
+          </div></div>`;
+        }
+      },
+      {
+        data: 'id',
+        render: function (data, method, row) {
+          return `
+        <div class="dropdown dropleft">
+          <a class="btn btn-light btn-sm" href="#" role="button" data-toggle="dropdown" aria-expanded="false">
+            <i class="fas fa-ellipsis-v"></i>
+          </a>
+        
+          <div class="dropdown-menu">
+            <a class="dropdown-item"><i class="fas fa-upload"></i> subir rcbs</a>
+            <a class="dropdown-item"><i class="fas fa-download"></i> sescargar rcbs</a>
+            <a class="dropdown-item"><i class="fas fa-paper-plane"></i> enviar</a>
+            <div class="dropdown-divider"></div>
+            <a class="eliminar dropdown-item"><i class="fas fa-trash"></i> eliminar</a></div>
+          </div>
+        </div>`;
+        }
+      }
+      /* {
+        
+          <div>
+          <a class="recibo"><i class="fas fa-paper-plane fa-2x"></i></a><br>
+          <a class="recibo badge badge-pill badge-info p-2"><i class="fas fa-file-alt"></i></a><br>
+          <a class="eliminar badge badge-pill badge-info p-2"><i class="fas fa-trash"></i></a></div>
+
+        data: 'articles',
+        render: function (data, method, row) {
+          let html = `
+          <table id='facturas' class='table table-sm nowrap table-hover table-borderless w-100' cellspacing="3" style='font-size:9px;'>
+            <thead>
+              <tr>
+                <th class='py-0'>Id</th>
+                <th class='py-0'>Nombre</th>
+                <th class='py-0'>#</th>
+                <th class='py-0'>Precio</th>
+                <th class='py-0'>Total</th>
+              </tr>
+            </thead>
+            <tbody>`;
+          JSON.parse(data).map(
+            e =>
+              (html += `<tr>
+          <td class='py-0'>${e[0]}</td>
+          <td class='py-0'>${e[1]}</td>
+          <td class='py-0'>${e[2]}</td>
+          <td class='py-0'>${currency(e[3], '$')}</td>
+          <td class='py-0'>${currency(e[4], '$')}</td>
+        </tr>`)
+          );
+          return (
+            html +
+            `</tbody>
+          </table>`
+          );
+        }
+      } */
+    ],
+    drawCallback: function (settings) {
+      var api = this.api();
+      var rows = api.rows({ page: 'current' }).nodes();
+      var last = null;
+
+      api
+        .rows({ page: 'current' })
+        .data()
+        .each(function (group, i) {
+          let html = '';
+          JSON.parse(group.articles).map(
+            e =>
+              (html += `<tr>
+          <td class='py-0'>${e[0]}</td>
+          <td class='py-0'>${e[1]}</td>
+          <td class='py-0'>${e[2]}</td>
+          <td class='py-0'>${currency(e[3], '$')}</td>
+          <td class='py-0'>${currency(e[4], '$')}</td>
+        </tr>`)
+          );
+
+          if (last !== group.id) {
+            $(rows)
+              .eq(i)
+              .after(
+                `<tr class="group">
+                            <td colspan="3">
+          <table class='table table-sm nowrap table-hover table-borderless w-100 table-dark table-striped' style='font-size:70%;'>
+            <thead class="thead-dark">
+              <tr>
+                <th>Id</th>
+                <th>Nombre</th>
+                <th>#</th>
+                <th>Precio</th>
+                <th>Total</th>
+              </tr>
+            </thead>
+            <tbody>${html}
+            <tr>
+          <td colspan="4">TOTAL</td>
+          <td>${currency(group.total, '$')}</td>
+        </tr>
+            </tbody>
+          </table>
+                            </td>
+                        </tr>`
+              );
+            last = group.id;
+            //$(rows).eq(i).hide();
+          } else {
+            //$('.table-sortable').find('tr:not(.' + vClass + ')').hide();
+            //$(rows).eq(i).hide();
+          }
+        });
+    }
+  });
+
+  /* facturas.on('click', 'tr', function () {
+    $(this).toggleClass('selected');
+    var rows = facturas.rows({ page: 'current' }).nodes();
+    var last = $(this).find('div').text().toLocaleLowerCase().trim();
+
+    facturas
+      .column(0, { page: 'current' })
+      .data()
+      .each(function (group, i) {
+        if (last == group.toLocaleLowerCase().trim() && $(rows).eq(i).is(':hidden')) {
+          $(rows).eq(i).show();
+        } else if (last == group.toLocaleLowerCase().trim()) {
+          $(rows).eq(i).hide();
+        }
+      });
+  }); */
+
+  facturas.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = facturas.row(fila).data();
+    if (confirm('Seguro deseas eliminar esta factura?')) {
+      $.ajax({
+        url: '/links/facturas/' + id,
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            facturas.ajax.reload(null, false);
+            productos.ajax.reload(null, false);
+            SMSj('success', 'Factura eliminada exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar esta factura.');
           }
         }
       });
