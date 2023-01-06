@@ -3547,6 +3547,56 @@ async function apiChatApi(method, params) {
   return apiResponse.data;
 }
 
+async function consultCompany(nit, method = 1) {
+  const token =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHBzOi8vYzE4YS0yODAwLTQ4NC1hYzgyLTFhMGMtMjk5Ni1iZGUyLTI4NWUtMzgyYS5uZ3Jvay5pby93dHNwL3dlYmhvb2siLCJpYXQiOjE2NDg4MjYxNTR9.o-aWCOLCowGoJdqnUQnKpNrtJFWYrNqZ8LpPycQH7U0';
+
+  var data = JSON.stringify({ nit, method });
+
+  var config = {
+    method: 'post',
+    url: 'https://querys.inmovili.com/api/query/company',
+    headers: {
+      'x-access-token':
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDAwMC93ZWJob29rIiwiaWF0IjoxNjQ4NjE3ODY5fQ.m_0kgatFJ3im8Z0SJhj5KrVWeyoTOiEoEPQ4W8n5lks',
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+  try {
+    const apiResponse = await axios(config);
+    return apiResponse.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
+async function consultDocument(docNumber, docType = 'CC') {
+  const token =
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHBzOi8vYzE4YS0yODAwLTQ4NC1hYzgyLTFhMGMtMjk5Ni1iZGUyLTI4NWUtMzgyYS5uZ3Jvay5pby93dHNwL3dlYmhvb2siLCJpYXQiOjE2NDg4MjYxNTR9.o-aWCOLCowGoJdqnUQnKpNrtJFWYrNqZ8LpPycQH7U0';
+
+  var data = JSON.stringify({ docNumber, docType });
+
+  var config = {
+    method: 'post',
+    url: 'https://querys.inmovili.com/api/query/person',
+    headers: {
+      'x-access-token':
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHA6Ly9sb2NhbGhvc3Q6NDAwMC93ZWJob29rIiwiaWF0IjoxNjQ4NjE3ODY5fQ.m_0kgatFJ3im8Z0SJhj5KrVWeyoTOiEoEPQ4W8n5lks',
+      'Content-Type': 'application/json'
+    },
+    data: data
+  };
+  try {
+    const apiResponse = await axios(config);
+    return apiResponse.data;
+  } catch (e) {
+    console.log(e);
+    return false;
+  }
+}
+
 module.exports = {
   NumeroALetras,
   EstadoCuenta,
@@ -3557,5 +3607,7 @@ module.exports = {
   EstadoDeCuenta,
   FacturaDeCobro,
   informes,
-  Facturar
+  Facturar,
+  consultCompany,
+  consultDocument
 };

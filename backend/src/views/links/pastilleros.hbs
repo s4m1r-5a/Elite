@@ -126,82 +126,100 @@
 
   <div class='card'>
     <div class='card-header' id='addFactura' style='display: none;'>
-      <form id='generarfactura'>
-        <div class='form-row'>
-          <div class='form-group col-3'>
-            <input class='form-control fecha' type='text' name='date' required />
+      <div class='card rounded-lg shadow-lg'>
+        <div class='card-header position-relative'>
+
+          <div class='position-absolute' id='carga' style='display: none; left: 40%; top: 60%;'>
+            <i class='fas fa-spinner fa-pulse fa-2x'></i>
+            <strong class='mt-2'>Cargando...</strong>
           </div>
-          <div class='form-group col-9'>
-            <a class='r atras' id='cerrarfactura'>
-              <i class='feather-lg float-right' data-feather='x-circle'></i>
-            </a>
-          </div>
-          <div class='form-group col-md-2'>
-            <label for=''>Type</label>
-            <select class='form-control' name='type' required>
-              <option value='CC'>CC</option>
-              <option value='NIT'>NIT</option>
-            </select>
-          </div>
-          <div class='form-group col-4 col-md-4'>
-            <label for=''>DocNum</label>
-            <input type='text' class='form-control' name='doc' required />
-          </div>
-          <div class='form-group col-8 col-md-6'>
-            <label for='inputZip'>Name</label>
-            <input class='form-control' type='text' name='name' required />
-          </div>
-          <div class='form-group col-md-8'>
-            <label for=''>Adreess</label>
-            <input type='text' class='form-control' name='adreess' required />
-          </div>
-          <div class='form-group col-md-4'>
-            <label for='inputZip'>Phone</label>
-            <input class='form-control' type='text' name='phone' required />
-          </div>
+
+          <form id='generarfactura'>
+            <div class='form-row'>
+              <div class='form-group col-3'>
+                <input class='form-control fecha' type='text' name='date' required />
+              </div>
+              <div class='form-group col-9'>
+                <a class='r atras' id='cerrarfactura'>
+                  <i class='feather-lg float-right' data-feather='x-circle'></i>
+                </a>
+              </div>
+              <div class='form-group col-md-2'>
+                <label for=''>Type</label>
+                <select id='typeDoc' class='form-control' name='type' required>
+                  <option value='CC'>CC</option>
+                  <option value='NIT'>NIT</option>
+                </select>
+              </div>
+              <div class='form-group col-4 col-md-4'>
+                <label for=''>DocNum</label>
+                <input type='text' id='document' class='form-control' name='doc' required />
+              </div>
+              <div class='form-group col-8 col-md-6'>
+                <label for='inputZip'>Name</label>
+                <input id='name' class='form-control' type='text' name='name' required disabled />
+              </div>
+              <div class='form-group col-md-8'>
+                <label for=''>Adreess</label>
+                <input id='dir' type='text' class='form-control' name='adreess' required disabled />
+              </div>
+              <div class='form-group col-md-4'>
+                <label for='inputZip'>Phone</label>
+                <input id='phone' class='form-control' type='text' name='phone' required disabled />
+              </div>
+            </div>
+            <input type='submit' id='enviodatos' style='display: none;' />
+          </form>
+
         </div>
-        <button type='submit' class='hide' id='enviodatos'></button>
-      </form>
-      <hr />
-      <form id='crearfactura'>
-        <div class='form-row'>
-          <div class='form-group col-md-6'>
-            <label for=''>Producto</label>
-            <select id='produc' class='form-control select2 droga' name='droga' required></select>
-          </div>
-          <div class='form-group col-4 col-md-2'>
-            <label for=''>Cantidad</label>
-            <input type='text' class='form-control' name='cantidad' required />
-          </div>
-          <div class='form-group col-8 col-md-4'>
-            <label for='inputZip'>Precio unitario</label>
-            <input class='form-control valor' type='text' name='valor' required />
-          </div>
-          <div class='form-group col-12'>
-            <button type='submit' class='btn btn-primary float-right'>
-              <i class='fas fa-fw fa-plus'></i>
-              Agregar
-            </button>
-          </div>
+        <div class='card-body bg-light'>
+          <form id='crearfactura'>
+            <div class='form-row'>
+              <div class='form-group col-md-6'>
+                <label>Producto</label>
+                <select
+                  id='produc'
+                  class='form-control select2 droga'
+                  name='droga'
+                  required
+                ></select>
+              </div>
+              <div class='form-group col-3 col-md-2'>
+                <label for=''>Cantidad</label>
+                <input type='text' id='cantidad' class='form-control' name='cantidad' required />
+              </div>
+              <div class='form-group col-9 col-md-4'>
+                <label for='inputZip'>Precio unitario</label>
+                <div class='input-group'>
+                  <input id='price' class='form-control valor' type='text' name='valor' required />
+                  <div class='input-group-append'>
+                    <button class='btn btn-outline-primary' type='submit' id='button-addon2'><i
+                        class='fas fa-fw fa-plus'
+                      ></i></button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </form>
+          <table id='factura' class='table table-sm table-striped w-100 m-0 p-0'>
+            <thead>
+              <tr>
+                <th>Id</th>
+                <th>Product</th>
+                <th>Lot</th>
+                <th>Price</th>
+                <th>Total</th>
+                <th>Act</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button class='btn btn-primary float-right' id='guardarFactura'>
+            <i class='fas fa-fw fa-plus'></i>
+            Guardar
+          </button>
         </div>
-      </form>
-      <table id='factura' class='table table-sm table-striped w-100 m-0 p-0'>
-        <thead>
-          <tr>
-            <th>Id</th>
-            <th>Product</th>
-            <th>Lot</th>
-            <th>Price</th>
-            <th>Total</th>
-            <th>Act</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-      <button class='btn btn-primary float-right' id='guardarFactura'>
-        <i class='fas fa-fw fa-plus'></i>
-        Guardar
-      </button>
+      </div>
     </div>
     <div class='card-body'>
       <table id='facturas' class='table table-sm table-striped display nowrap w-100'>
@@ -210,3 +228,52 @@
     </div>
   </div>
 </main>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='PagO' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Adjuntar Recibos</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <h3>FACTURA # <strong class='factura'></strong></h3>
+        <table class='table table-sm my-2' id='recibosss'>
+          <form enctype='multipart/form-data' id='recbo' action='/links/recibo' method='POST'>
+            <input type='hidden' class='factura' name='factura' />
+            <tbody>
+              <tr>
+                <th colspan='2'>
+                  <i class='feather-md' data-feather='file-plus'></i>
+                  <input
+                    class='form-control-no-border edi'
+                    type='file'
+                    name='image'
+                    id='file2'
+                    multiple
+                    style='width: 50%;'
+                    onchange='preview(this);'
+                    required
+                  />
+                  <span class='montorecibos badge badge-dark'></span>
+                </th>
+              </tr>
+              <tr id='trarchivos'>
+                <th colspan='2' class='image-wrap' id='recibos1' width='100%' height='200'>
+                </th>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <button type='submit' class='btn btn-primary btn-sm float-right'>Enviar</button>
+                </th>
+              </tr>
+            </tbody>
+          </form>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

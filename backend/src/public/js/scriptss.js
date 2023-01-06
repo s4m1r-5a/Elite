@@ -16524,8 +16524,37 @@ if (window.location == `${window.location.origin}/links/whatsapp`) {
 if (window.location == `${window.location.origin}/links/pastilleros`) {
   $('.sidebar-item').removeClass('active');
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  let stok = 0;
+  let valor = null;
   const droga = $('.droga');
   const produc = $('#produc');
+  const consult = (num, type) => {
+    $.ajax({
+      url: '/links/consult',
+      data: { num, type },
+      type: 'POST',
+      beforeSend: function () {
+        $('#carga').show();
+      },
+      success: function (data) {
+        valor = $('#document').val();
+        $('#name')
+          .val(data?.fullName || data?.name || null)
+          .prop('disabled', false);
+
+        $('#dir')
+          .val(data?.adreess || null)
+          .prop('disabled', false);
+
+        $('#phone')
+          .val(data?.phone || null)
+          .prop('disabled', false);
+
+        if (!data?.adreess) $('#dir').focus();
+        $('#carga').hide();
+      }
+    });
+  };
 
   $(document).ready(function () {
     $('input').prop('autocomplete', 'off');
@@ -16656,6 +16685,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
 
     $('#crearfactura').submit(function (e) {
       e.preventDefault();
+      if ($('#cantidad').is(':disabled'))
+        return SMSj('error', 'No puede facturar un producto que no tenga stoock');
       $('.valor').each(function (i, valor) {
         $(this).val(noCifra($(this).val()));
       });
@@ -16679,11 +16710,63 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       $('#addFactura').hide('slow');
     });
 
+    produc.on('change', function (e) {
+      const { precio, stock } =
+        productos
+          .rows()
+          .data()
+          .filter(e => e.id == $(this).val())[0] || {};
+      stok = stock || 0;
+
+      if (stok < 1) $('#cantidad, #price').prop('disabled', true);
+      else $('#cantidad, #price').prop('disabled', false).val(null);
+      $('#price').val(currency(precio || 0, '$'));
+      if ($('#cantidad').val() > stok) $('#cantidad').val(stok);
+    });
+
+    $('#cantidad').change(function () {
+      if ($(this).val() > stok) {
+        SMSj('error', 'No tiene el suficiente stock, se establecera el disponible');
+        $(this).val(stok);
+      }
+    });
+
+    $('#document')
+      .on('focus', function ({ target: { value } }) {
+        valor = value;
+        $('#name, #dir, #phone').prop('disabled', true);
+      })
+      .on('keydown', function ({ target: { value }, originalEvent: { keyCode } }) {
+        const typeDoc = $('#typeDoc').val();
+
+        if (value === valor && keyCode === 13)
+          return $('#name, #dir, #phone').prop('disabled', false);
+        if (!value || !typeDoc || value.length < 5 || keyCode !== 13) return;
+        consult(value, typeDoc);
+      })
+      .on('blur', function ({ target: { value } }) {
+        const typeDoc = $('#typeDoc').val();
+
+        if (value === valor) return $('#name, #dir, #phone').prop('disabled', false);
+        if (!value || !typeDoc || value.length < 5) return;
+        consult(value, typeDoc);
+      });
+
+    $('#typeDoc').change(function () {
+      if (!$(this).val() || !$('#document').val() || $('#document').val().length < 5) return;
+      consult($('#document').val(), $(this).val());
+    });
+
     $('#generarfactura').submit(function (e) {
       e.preventDefault();
+
+      if ($('#name').is(':disabled'))
+        return SMSj('error', 'Debe especificar nombre direccion y movil');
+
       $('.valor').each(function (i, valor) {
         $(this).val(noCifra($(this).val()));
       });
+
       let total = 0;
       const rows = [];
       factura
@@ -16729,7 +16812,52 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           }
         }
       });
-      //
+    });
+
+    $('#recbo').submit(function (e) {
+      e.preventDefault();
+      if (!$('#file2').val()) {
+        SMSj('error', 'Debe rellenar todos los campos solicitados');
+      } else {
+        $('#recibos1 .montos').each(function () {
+          $(this).val(noCifra($(this).val()));
+        });
+
+        const formData = new FormData(this);
+        const datos = $('#recibos1 input, #recibos1 select').serializeArray();
+        datos.map((x, i) => formData.append(x.name, x.value));
+        $.ajax({
+          type: 'POST',
+          url: '/links/recibos',
+          data: formData,
+          dataType: 'json',
+          processData: false,
+          contentType: false,
+          beforeSend: function (xhr) {
+            $('#PagO').modal('hide');
+            $('#ModalEventos').modal({
+              backdrop: 'static',
+              keyboard: true,
+              toggle: true
+            });
+          },
+          success: function (data) {
+            if (data.std) {
+              facturas.ajax.reload(null, false);
+              SMSj('success', data.msj);
+              $('#recibos1').html('');
+              $('#recbo input').val(null);
+              $('#ModalEventos').modal('hide');
+            } else {
+              SMSj('error', data.msj);
+              $('#ModalEventos').hide();
+            }
+          },
+          error: function (data) {
+            console.log(data);
+          }
+        });
+      }
     });
   });
 
@@ -16815,16 +16943,12 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       }
     ] /* ,
     initComplete: function (settings, json) {
+      arrayProducts = [];
       const api = this.api();
       api
         .rows()
         .data()
-        .map(row =>
-          droga.append(
-            new Option(`${row.nombre} - ${row.laboratorio} - ${row.clase}`, row.id, false, false)
-          )
-        );
-      droga.val(null).trigger('change');
+        .map(row => arrayProducts.push(row));
     } */
   });
 
@@ -17120,10 +17244,14 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           <small>${row.type} ${row.doc} - CEL ${row.phone}</small><br>
           <small class="font-italic text-muted text-lowercase">${row.adreess}</small><br>
           <div>
-          <small class="font-italic text-muted">${moment(row.date).format('YYYY-MM-DD')}</small> - 
-          <span class="badge badge-pill ${row.status ? 'badge-success' : 'badge-primary'}">${
-            row.status ? 'Saldado' : 'Pendiente'
-          }</span> ${
+          <small class="font-italic text-muted">${moment(row.date).format('YYYY-MM-DD')}</small>
+          ${
+            row.status && row.abono >= row.total
+              ? '- <span class="badge badge-pill badge-success">Saldado</span>'
+              : row.status
+              ? '- <span class="badge badge-pill badge-secondary">Abonado</span>'
+              : '- <span class="badge badge-pill badge-primary">Pendiente</span>'
+          } ${
             row.pdf
               ? `- <a href="${row.pdf}" target="_blank" title="Click para ver recibo"><i class="fas fa-file-alt fa-lg"></i></a>`
               : `- <a title="No posee ningun recibo"><i class="fas fa-exclamation-circle"></i></a>`
@@ -17143,7 +17271,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           <strong> ... </strong><br>
           <small class="font-italic text-muted"> ... </small>
           </div><div>
-          <strong>${currency(0, '$')}</strong><br>
+          <strong>${currency(row.abono, '$')}</strong><br>
           <small class="font-italic text-muted">Total abonado</small>
           </div></div>`;
         }
@@ -17158,8 +17286,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           </a>
         
           <div class="dropdown-menu">
-            <a class="dropdown-item"><i class="fas fa-upload"></i> subir rcbs</a>
-            <a class="dropdown-item"><i class="fas fa-download"></i> sescargar rcbs</a>
+            <a class="dropdown-item subir" data-toggle='modal' data-target='#PagO'><i class="fas fa-upload"></i> subir rcbs</a>
+            <a class="dropdown-item"><i class="fas fa-download"></i> descargar rcbs</a>
             <a class="dropdown-item"><i class="fas fa-paper-plane"></i> enviar</a>
             <div class="dropdown-divider"></div>
             <a class="eliminar dropdown-item"><i class="fas fa-trash"></i> eliminar</a></div>
@@ -17167,44 +17295,6 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
         </div>`;
         }
       }
-      /* {
-        
-          <div>
-          <a class="recibo"><i class="fas fa-paper-plane fa-2x"></i></a><br>
-          <a class="recibo badge badge-pill badge-info p-2"><i class="fas fa-file-alt"></i></a><br>
-          <a class="eliminar badge badge-pill badge-info p-2"><i class="fas fa-trash"></i></a></div>
-
-        data: 'articles',
-        render: function (data, method, row) {
-          let html = `
-          <table id='facturas' class='table table-sm nowrap table-hover table-borderless w-100' cellspacing="3" style='font-size:9px;'>
-            <thead>
-              <tr>
-                <th class='py-0'>Id</th>
-                <th class='py-0'>Nombre</th>
-                <th class='py-0'>#</th>
-                <th class='py-0'>Precio</th>
-                <th class='py-0'>Total</th>
-              </tr>
-            </thead>
-            <tbody>`;
-          JSON.parse(data).map(
-            e =>
-              (html += `<tr>
-          <td class='py-0'>${e[0]}</td>
-          <td class='py-0'>${e[1]}</td>
-          <td class='py-0'>${e[2]}</td>
-          <td class='py-0'>${currency(e[3], '$')}</td>
-          <td class='py-0'>${currency(e[4], '$')}</td>
-        </tr>`)
-          );
-          return (
-            html +
-            `</tbody>
-          </table>`
-          );
-        }
-      } */
     ],
     drawCallback: function (settings) {
       var api = this.api();
@@ -17263,6 +17353,12 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     }
   });
 
+  facturas.on('click', 'td .subir', function () {
+    const fila = $(this).parents('tr');
+    const { id } = facturas.row(fila).data();
+    $('.factura').val(id).html(id);
+  });
+
   /* facturas.on('click', 'tr', function () {
     $(this).toggleClass('selected');
     var rows = facturas.rows({ page: 'current' }).nodes();
@@ -17299,6 +17395,117 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       });
     }
   });
+
+  window.preview = function (input) {
+    if (input.files && input.files[0]) {
+      var marg = 100 / $('#file2')[0].files.length;
+      $('#recibos1').html('');
+      $('.op').remove();
+      $(input.files).each(function () {
+        const reader = new FileReader();
+        const name = this.name;
+        reader.readAsDataURL(this);
+        reader.onload = function (e) {
+          $('#recibos1').append(
+            `<div class="card p-1 my-1 rounded" style="background: rgba(255,99,71,0.2); width: ${marg}%; min-width: 50%;float: left;">
+                <label class="custom-control custom-radio bg-transparent rcbxcdnt" style="display: none;">
+                    <input name="custom-radio" type="radio" class="custom-control-input rcbexcdnt" name="rcbexcd" disabled>
+                    <span class="custom-control-label text-muted">Recibo con excedente</span>
+                </label>
+                <div class="image" style="width: 100%; padding-top: calc(100% / (16/9)); background-image: url('${e.target.result}'); background-size: 100%; background-position: center; background-repeat: no-repeat;"></div>
+
+                <input type="hidden" name="names" value="${name}" required>                
+                <input type="text" class="recis text-center form-control-sm" name="recibos" placeholder="Recibo" autocomplete="off" required>
+                <input class="montos valor text-center form-control-sm" type="text" placeholder="Monto" autocomplete="off" name="montos" required>
+                <input class="fech text-center form-control-sm" type="text" name="fechas" title="Establece la fecha del recibo" autocomplete="off" required>
+                <select name="formas" class="forma form-control-sm" style="text-align:center;" required>
+                  <option value="CTA-CTE-50900011438">CTA CTE 50900011438</option>
+                  <option value="CHEQUE">CHEQUE</option><option value="EFECTIVO">EFECTIVO</option>
+                  <option value="OTRO">OTRO</option>
+                </select>
+             </div>`
+          );
+          $('.fech').daterangepicker({
+            locale: {
+              format: 'YYYY-MM-DD',
+              separator: ' - ',
+              applyLabel: 'Aplicar',
+              cancelLabel: 'Cancelar',
+              fromLabel: 'De',
+              toLabel: '-',
+              customRangeLabel: 'Personalizado',
+              weekLabel: 'S',
+              daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+              monthNames: [
+                'Enero',
+                'Febrero',
+                'Marzo',
+                'Abril',
+                'Mayo',
+                'Junio',
+                'Julio',
+                'Agosto',
+                'Septiembre',
+                'Octubre',
+                'Noviembre',
+                'Diciembre'
+              ],
+              firstDay: 1
+            },
+            singleDatePicker: true,
+            showDropdowns: true,
+            minYear: 2017,
+            maxYear: parseInt(moment().format('YYYY'), 10)
+          });
+          $('.montos').on('keyup', function () {
+            $(this).val(currency($(this).val(), '$'));
+          });
+          $('.montos').on('change', function () {
+            var avl = 0;
+            $('.montos').map(function () {
+              avl += noCifra($(this).val()) || 0;
+            });
+            $('.montorecibos').html(Moneda(avl));
+          });
+          var zom = 200;
+          $('.image').on({
+            mousedown: function () {
+              zom += 50;
+              $(this).css('background-size', zom + '%');
+            },
+            mouseup: function () {},
+            mousewheel: function (e) {
+              //console.log(e.deltaX, e.deltaY, e.deltaFactor);
+              if (e.deltaY > 0) {
+                zom += 50;
+              } else {
+                zom < 150 ? (zom = 100) : (zom -= 50);
+              }
+              $(this).css('background-size', zom + '%');
+            },
+            mousemove: function (e) {
+              let width = this.offsetWidth;
+              let height = this.offsetHeight;
+              let mouseX = e.offsetX;
+              let mouseY = e.offsetY;
+
+              let bgPosX = (mouseX / width) * 100;
+              let bgPosY = (mouseY / height) * 100;
+
+              this.style.backgroundPosition = `${bgPosX}% ${bgPosY}%`;
+            },
+            mouseenter: function (e) {
+              $(this).css('background-size', zom + '%');
+            },
+            mouseleave: function () {
+              $(this).css('background-size', '100%');
+              this.style.backgroundPosition = 'center';
+            }
+          });
+        };
+      });
+    }
+  };
 
   function AdjuntarCC(id) {
     $('#AdjutarDoc').modal({

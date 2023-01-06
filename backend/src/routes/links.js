@@ -31,12 +31,12 @@ const noCifra = valor => {
   return num;
 };
 const {
-  //tasaUsura,
   FacturaDeCobro,
-  //consultarDocumentos,
   EstadoDeCuenta,
   informes,
-  Facturar
+  Facturar,
+  consultCompany,
+  consultDocument
 } = require('../functions.js');
 const { Console } = require('console');
 const helpers = require('../lib/helpers');
@@ -3668,9 +3668,11 @@ router.put('/reds', noExterno, async (req, res) => {
 router.get('/pastilleros', noExterno, (req, res) => {
   res.render('links/pastilleros');
 });
+
 router.post('/medicamentos/table', noExterno, async (req, res) => {
   const medicamentos = await pool.query(
-    `SELECT m.*, SUM(IF(c.cantidad, c.cantidad, 0)) - SUM(IF(v.cantidad, v.cantidad, 0)) stock 
+    `SELECT m.*, SUM(IF(c.cantidad, c.cantidad, 0)) - SUM(IF(v.cantidad, v.cantidad, 0)) stock, 
+    (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio
     FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id LEFT JOIN ventas v ON v.producto = m.id 
     GROUP BY m.id;`
   );
@@ -3710,7 +3712,6 @@ router.post('/compras/table', noExterno, async (req, res) => {
 
 router.post('/compras', isLoggedIn, async (req, res) => {
   const compra = req.body;
-  console.log(compra);
   const newCompra = await pool.query('INSERT INTO compras SET ? ', compra);
   res.send({ code: newCompra.insertId });
 });
@@ -3725,10 +3726,26 @@ router.delete('/compras/:id', noExterno, async (req, res) => {
   }
 });
 
+router.post('/consult', isLoggedIn, async (req, res) => {
+  const { type, num } = req.body;
+
+  const [data] = await pool.query(
+    `SELECT * FROM facturas WHERE type = ? AND doc = ? ORDER BY id DESC LIMIT 1`,
+    [type, num]
+  );
+
+  if (data) {
+    const { name, phone, adreess } = data;
+    return res.json({ name, phone, adreess });
+  }
+  if (type === 'CC') return res.json(await consultDocument(num));
+  return res.json(await consultCompany(num));
+});
+
 router.post('/facturas/table', noExterno, async (req, res) => {
-  /* const facturas = await pool.query(`SELECT f.*, v.producto, v.name, v.cantidad, v.precio, v.total 
-  FROM facturas f INNER JOIN ventas v ON v.factura = f.id `); */
-  const facturas = await pool.query(`SELECT * FROM facturas`);
+  const facturas = await pool.query(
+    `SELECT f.*, SUM(IF(r.id, r.monto, 0)) abono FROM facturas f LEFT JOIN recibos r ON r.factura = f.id GROUP BY f.id`
+  );
   respuesta = { data: facturas };
   res.send(respuesta);
 });
@@ -3748,7 +3765,6 @@ router.post('/generarfactura', isLoggedIn, async (req, res) => {
 
   const { insertId } = await pool.query('INSERT INTO facturas SET ? ', factura);
   const articles = JSON.parse(factura.articles).map(e => [...e, insertId]);
-  console.log(factura, insertId, articles);
 
   pool.query(`INSERT INTO ventas (producto, name, cantidad, precio, total, factura) VALUES ?`, [
     articles
@@ -4184,6 +4200,37 @@ router.post('/rcbs', async (req, res) => {
     req.flash('success', 'Solicitud de pago enviada correctamente');
     return res.redirect('/links/pagos');
   } */
+});
+router.post('/recibos', async (req, res) => {
+  const { factura, formas, names, recibos, montos, fechas } = req.body;
+  console.log(req.body, req.files);
+
+  const rcbs = { factura };
+
+  if (Array.isArray(recibos))
+    for (i = 0; i <= recibos.length - 1; i++) {
+      rcbs.imagen = `/uploads/${req.files.find(e => e.originalname === names[i]).filename}`;
+      rcbs.recibo = recibos[i];
+      rcbs.monto = montos[i];
+      rcbs.fecha = fechas[i];
+      rcbs.forma = formas[i];
+
+      console.log(rcbs);
+      await pool.query('INSERT INTO recibos SET ? ', rcbs);
+    }
+  else {
+    rcbs.imagen = `/uploads/${req.files[0].filename}`;
+    rcbs.recibo = recibos;
+    rcbs.monto = montos;
+    rcbs.fecha = fechas;
+    rcbs.forma = formas;
+
+    console.log(rcbs);
+    await pool.query('INSERT INTO recibos SET ? ', rcbs);
+  }
+
+  await pool.query('UPDATE facturas SET status = 1 WHERE id = ?', factura);
+  res.json({ std: true, msj: 'Solicitud de pago enviada correctamente' });
 });
 router.post('/recibo', async (req, res) => {
   const {
@@ -7306,6 +7353,7 @@ router.get('/cedula/:id', isLoggedIn, async (req, res) => {
   const datos = await consultarDocumentos('1', id);
   res.json(datos); */
 });
+
 router.post('/desendentes', noExterno, async (req, res) => {
   const { id, asesor } = req.body;
   const hoy = moment().format('YYYY-MM-DD');
