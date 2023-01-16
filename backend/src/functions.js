@@ -1606,6 +1606,178 @@ async function Facturar(numFactura) {
     return { sent: false };
   }
 }
+
+async function Lista() {
+  const lista =
+    await pool.query(`SELECT m.*, SUM(IF(c.cantidad, c.cantidad, 0)) - SUM(IF(v.cantidad, v.cantidad, 0)) stock, 
+  (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio
+  FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id LEFT JOIN ventas v ON v.producto = m.id GROUP BY m.id;`);
+
+  if (lista.length) {
+    const cuerpo = [
+      [
+        { text: `Id`, style: 'tableHeader', alignment: 'center' },
+        { text: 'Producto', style: 'tableHeader', alignment: 'center' },
+        { text: 'Laboratorio', style: 'tableHeader', alignment: 'center' },
+        { text: 'Clase', style: 'tableHeader', alignment: 'center' },
+        { text: 'Stock', style: 'tableHeader', alignment: 'center' },
+        { text: 'Precio', style: 'tableHeader', alignment: 'center' }
+      ]
+    ];
+
+    lista.map(e =>
+      cuerpo.push([e.id, e.nombre, e.laboratorio, e.clase, e.stock, '$' + Cifra(e.precio)])
+    );
+
+    ////////////////////////* CREAR PDF *//////////////////////////////
+    const printer = new PdfPrinter(Roboto);
+    let docDefinition = {
+      background: function (currentPage, pageSize) {
+        return {
+          image: path.join(__dirname, '/public/img/avatars/avatar1.png'),
+          width: pageSize.width,
+          opacity: 0.1
+        };
+      },
+      pageSize: 'a4',
+      header: function (currentPage, pageCount, pageSize) {
+        return {
+          alignment: 'right',
+          margin: [10, 3, 10, 3],
+          columns: [
+            {
+              text: moment().format('lll'),
+              alignment: 'left',
+              margin: [10, 15, 15, 0],
+              italics: true,
+              color: 'gray',
+              fontSize: 7
+            },
+            {
+              width: 20,
+              alignment: 'right',
+              margin: [10, 3, 10, 3],
+              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              fit: [20, 20]
+            }
+          ]
+        };
+      },
+      info: {
+        title: 'Factura',
+        author: 'Inmovilii',
+        subject: 'Factura de venta',
+        keywords: 'Factura de venta de medicamentos',
+        creator: 'Inmovilii',
+        producer: 'IMOVI'
+      },
+      content: [
+        {
+          columns: [
+            [
+              { text: 'LISTA DE PRECIOS', style: 'header' },
+              {
+                fontSize: 11,
+                italics: true,
+                text: [
+                  '\nLa siguente ',
+                  { text: 'tabla ', bold: true, color: 'blue' },
+                  'muestra los detalles de cada producto a facturar'
+                ]
+              }
+            ],
+            {
+              width: 100,
+              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              fit: [100, 100]
+            }
+          ]
+        },
+        {
+          style: 'tableBody',
+          color: '#444',
+          table: {
+            widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+            //headerRows: 1,
+            // keepWithHeaderRows: 1,
+            body: cuerpo
+          }
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 13,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        },
+        subheader: {
+          fontSize: 11,
+          bold: true,
+          margin: [0, 5, 0, 2]
+        },
+        tableBody: {
+          fontSize: 9,
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 9,
+          color: 'black'
+        },
+        small: {
+          fontSize: 8,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        smallx: {
+          fontSize: 7,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        tableBody2: {
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader2: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
+        },
+        small2: {
+          fontSize: 9,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        }
+      }
+    };
+    let ruta = path.join(__dirname, `/public/uploads/listaprecio.pdf`);
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(ruta));
+    pdfDoc.end();
+
+    /* var dataFile = {
+            phone: '573012673944', //Proyeccion[0].movil,
+            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
+        };
+        let r = await apiChatApi('sendFile', dataFile);
+        r.msg = Proyeccion[0].cparacion;
+        await EnviarEmail(
+            's4m1r.5a@gmail.com', //Proyeccion[0].email
+            `Estado de cuenta Lt: ${Proyeccion[0].n}`,
+            Proyeccion[0].nombre,
+            false,
+            'Grupo Elite te da la bienvenida',
+            [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
+        ); */
+    return ruta;
+  } else {
+    return { sent: false };
+  }
+}
+
 async function EstadoDeCuenta(Orden) {
   const Proyeccion = await pool.query(
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
@@ -3609,5 +3781,6 @@ module.exports = {
   informes,
   Facturar,
   consultCompany,
-  consultDocument
+  consultDocument,
+  Lista
 };

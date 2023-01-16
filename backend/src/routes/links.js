@@ -36,7 +36,8 @@ const {
   informes,
   Facturar,
   consultCompany,
-  consultDocument
+  consultDocument,
+  Lista
 } = require('../functions.js');
 const { Console } = require('console');
 const helpers = require('../lib/helpers');
@@ -3667,6 +3668,11 @@ router.put('/reds', noExterno, async (req, res) => {
 ///////////////////* PASTILLEROS *///////////////////////////
 router.get('/pastilleros', noExterno, (req, res) => {
   res.render('links/pastilleros');
+});
+
+router.post('/listadeprecio', noExterno, async (req, res) => {
+  await Lista();
+  res.send(`/uploads/listaprecio.pdf`);
 });
 
 router.post('/medicamentos/table', noExterno, async (req, res) => {

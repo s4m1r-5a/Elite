@@ -16526,6 +16526,9 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
   $(`a[href='${window.location.pathname}']`).parent().addClass('active');
   let stok = 0;
   let valor = null;
+  let minDateFilter = '';
+  let maxDateFilter = '';
+  let totalss = 0;
   const droga = $('.droga');
   const produc = $('#produc');
   const consult = (num, type) => {
@@ -16869,6 +16872,16 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     ],
     buttons: [
       {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          listaPrecio();
+        }
+      },
+      {
         extend: 'collection',
         text: '<i class="align-middle feather-md" data-feather="menu"></i>',
         orientation: 'landscape',
@@ -16972,6 +16985,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
   });
 
   const compras = $('#compras').DataTable({
+    applyFilter: true,
     dom: 'Bfrtip',
     lengthMenu: [
       [10, 25, 50, -1],
@@ -17015,6 +17029,12 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           $('#addComp').hide('slow');
           $('#addCompra').show('slow');
         }
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="calendar"></i>`,
+        attr: { title: 'Rango de fechas' },
+        className: 'btn btn-outline-dark rangoFecha',
+        action: function () {}
       }
     ],
     deferRender: true,
@@ -17088,7 +17108,23 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           return `<a class="eliminar" id="${data}"><i class="fas fa-trash"></i></a>`;
         }
       }
-    ]
+    ],
+    initComplete: function (settings) {
+      /* var api = this.api(); // { page: 'current' } 3, { page: 'current' }
+      api
+        .rows()
+        .data()
+        .each((e, i) => {
+          if (!i) maxDateFilter = e.creacion;
+          minDateFilter = e.creacion;
+          totalss += e.total;
+        });
+      $('#minDate').html(minDateFilter);
+      $('#maxDate').html(maxDateFilter);
+      $('#totalss').html('$' + Cifra(totalss)); */
+
+      $('#totalss').html('$' + Cifra(totalss));
+    }
   });
 
   compras.on('click', 'td .eliminar', function () {
@@ -17507,6 +17543,25 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     }
   };
 
+  var listaPrecio = () => {
+    $.ajax({
+      url: '/links/listadeprecio',
+      type: 'POST',
+      /* beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      }, */
+      success: function (data) {
+        if (data) {
+          window.open(data, '_blank');
+        }
+      }
+    });
+  };
+
   function AdjuntarCC(id) {
     $('#AdjutarDoc').modal({
       toggle: true,
@@ -17563,6 +17618,99 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       }
     });
   }
+  let numC = 0;
+  $.fn.dataTableExt.afnFiltering.push(function (oSettings, aData, iDataIndex) {
+    if (oSettings.nTable != document.getElementById('compras')) return true;
+
+    if (typeof aData.date == 'undefined') {
+      aData.date = new Date(aData[12]).getTime();
+      if (iDataIndex > numC) {
+        maxDateFilter = aData.date;
+        $('#maxDate').html(moment(maxDateFilter).format('YYYY-MM-DD'));
+        numC = iDataIndex;
+      }
+      if (!iDataIndex) {
+        minDateFilter = aData.date;
+        $('#minDate').html(moment(minDateFilter).format('YYYY-MM-DD'));
+      }
+
+      totalss += parseFloat(aData[11]);
+    } else {
+      if (minDateFilter && !isNaN(minDateFilter)) {
+        if (aData.date < minDateFilter || isNaN(aData.date)) return false;
+      }
+      if (maxDateFilter && !isNaN(maxDateFilter)) {
+        if (aData.date > maxDateFilter || isNaN(aData.date)) return false;
+      }
+
+      totalss += parseFloat(aData[11]);
+      $('#totalss').html('$' + Cifra(totalss));
+    }
+    return true;
+  });
+
+  $('.rangoFecha').daterangepicker(
+    {
+      locale: {
+        format: 'YYYY-MM-DD HH:mm',
+        separator: ' a ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'De',
+        toLabel: 'A',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        monthNames: [
+          'Enero',
+          'Febrero',
+          'Marzo',
+          'Abril',
+          'Mayo',
+          'Junio',
+          'Julio',
+          'Agosto',
+          'Septiembre',
+          'Octubre',
+          'Noviembre',
+          'Diciembre'
+        ],
+        firstDay: 1
+      },
+      opens: 'center',
+      timePicker: true,
+      timePicker24Hour: true,
+      timePickerIncrement: 15,
+      opens: 'right',
+      alwaysShowCalendars: false,
+      //autoApply: false,
+      startDate: moment().subtract(29, 'days'),
+      endDate: moment(),
+      ranges: {
+        'Mes Pasado': [
+          moment().subtract(1, 'month').startOf('month'),
+          moment().subtract(1, 'month').endOf('month')
+        ],
+        'Este Mes': [moment().startOf('month'), moment().endOf('month')],
+        'Ultimos 30 Días': [moment().subtract(29, 'days'), moment().endOf('days')],
+        'Ultimos 7 Días': [moment().subtract(6, 'days'), moment().endOf('days')],
+        Ayer: [
+          moment().subtract(1, 'days').startOf('days'),
+          moment().subtract(1, 'days').endOf('days')
+        ],
+        Hoy: [moment().startOf('days'), moment().endOf('days')]
+      }
+    },
+    function (start, end, label) {
+      totalss = 0;
+      maxDateFilter = new Date(end).getTime();
+      minDateFilter = new Date(start).getTime();
+      compras.draw();
+      $('#maxDate').html(end.format('YYYY-MM-DD'));
+      $('#minDate').html(start.format('YYYY-MM-DD'));
+      $('#Date_search').val(start.format('YYYY-MM-DD') + ' a ' + end.format('YYYY-MM-DD'));
+    }
+  );
 }
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/prueba`) {
