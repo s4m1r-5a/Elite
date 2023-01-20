@@ -2,10 +2,16 @@
   <div class='card'>
     <div class='card-header' id='addProduct' style='display: none;'>
       <form id='crearproducto' enctype='multipart/form-data'>
-        <a class='r atras' id='cerrarproducto'>
-          <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
-        </a>
         <div class='form-row'>
+          <div class='col-12'>
+            <a class='r atras' id='cerrarproducto'>
+              <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
+            </a>
+          </div>
+          <div class='form-group col-md-1'>
+            <label for='id'>Id</label>
+            <input type='text' class='form-control' name='id' readonly />
+          </div>
           <div class='form-group col-md-3'>
             <label for=''>Nombre</label>
             <input type='text' class='form-control' name='nombre' required />
@@ -18,7 +24,7 @@
             <label for=''>Invima</label>
             <input class='form-control' type='text' name='invima' required />
           </div>
-          <div class='form-group col-md-3'>
+          <div class='form-group col-md-2'>
             <label for=''>Clase</label>
             <select class='form-control' name='clase' required>
               <option value='INDEFINIDA'>Indefinido</option>
@@ -30,6 +36,10 @@
         <button type='submit' class='btn btn-primary float-right mr-3'>
           <i class='fas fa-fw fa-plus'></i>
           Guardar
+        </button>
+        <button type='reset' class='btn btn-danger float-right mr-3'>
+          <i class='fas fa-fw fa-reset'></i>
+          Cancelar
         </button>
       </form>
     </div>
@@ -56,11 +66,17 @@
   <div class='card'>
     <div class='card-header' id='addCompra' style='display: none;'>
       <form id='crearcompra' enctype='multipart/form-data'>
-        <a class='r atras' id='cerrarcompra'>
-          <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
-        </a>
         <div class='form-row'>
-          <div class='form-group col-md-5'>
+          <div class='col-12'>
+            <a class='r atras' id='cerrarcompra'>
+              <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
+            </a>
+          </div>
+          <div class='form-group col-md-1'>
+            <label for='id'>Id</label>
+            <input type='text' class='form-control' name='id' readonly />
+          </div>
+          <div class='form-group col-md-4'>
             <label for=''>Producto</label>
             <select id='droga' class='form-control select2 droga' name='droga' required></select>
           </div>
@@ -90,12 +106,16 @@
           </div>
           <div class='form-group col-md-3'>
             <label for='inputZip'>Total</label>
-            <input class='form-control valor' type='text' name='total' required />
+            <input class='form-control valor' type='text' name='total' required readonly />
           </div>
         </div>
         <button type='submit' class='btn btn-primary float-right mr-3'>
           <i class='fas fa-fw fa-plus'></i>
           Guardar
+        </button>
+        <button type='reset' class='btn btn-danger float-right mr-3'>
+          <i class='fas fa-fw fa-reset'></i>
+          Cancelar
         </button>
       </form>
     </div>

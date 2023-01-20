@@ -3687,14 +3687,20 @@ router.post('/medicamentos/table', noExterno, async (req, res) => {
 });
 
 router.post('/medicamentos', isLoggedIn, async (req, res) => {
-  const { nombre, laboratorio, clase, invima } = req.body;
-
-  const newProduct = await pool.query('INSERT INTO medicamentos SET ? ', {
+  const { id, nombre, laboratorio, clase, invima } = req.body;
+  const data = {
     nombre: nombre.toUpperCase(),
     laboratorio: laboratorio.toUpperCase(),
     clase,
     invima
-  });
+  };
+
+  if (id) {
+    await pool.query('UPDATE medicamentos SET ? WHERE id = ?', [data, id]);
+    return res.send({ code: true });
+  }
+
+  const newProduct = await pool.query('INSERT INTO medicamentos SET ? ', data);
   res.send({ code: newProduct.insertId });
 });
 
@@ -3718,6 +3724,10 @@ router.post('/compras/table', noExterno, async (req, res) => {
 
 router.post('/compras', isLoggedIn, async (req, res) => {
   const compra = req.body;
+  if (compra.id) {
+    await pool.query('UPDATE compras SET ? WHERE id = ?', [compra, compra.id]);
+    return res.send({ code: true });
+  }
   const newCompra = await pool.query('INSERT INTO compras SET ? ', compra);
   res.send({ code: newCompra.insertId });
 });

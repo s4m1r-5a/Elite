@@ -16566,6 +16566,20 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       $(this).val(currency($(this).val(), '$'));
     });
 
+    $("input[name='precioCompra']").on('change', function () {
+      const valor = noCifra(this.value);
+      const cant = $("input[name='cantidad']").val();
+      const val = valor * cant;
+      $("input[name='total']").val(currency(val, '$'));
+    });
+
+    $("input[name='cantidad']").on('change', function () {
+      const valor = noCifra($("input[name='precioCompra']").val());
+      const cant = this.value;
+      const val = valor * cant;
+      $("input[name='total']").val(currency(val, '$'));
+    });
+
     $('.fecha').daterangepicker({
       locale: {
         format: 'YYYY-MM-DD',
@@ -16644,6 +16658,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     $('#cerrarproducto').click(function () {
       $('#addProd').show('slow');
       $('#addProduct').hide('slow');
+      $('#crearproducto').trigger('reset');
     });
 
     $('#crearcompra').submit(function (e) {
@@ -16653,6 +16668,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       });
 
       const formData = new FormData(document.getElementById('crearcompra'));
+
       $.ajax({
         url: '/links/compras',
         data: formData,
@@ -16671,7 +16687,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
             compras.ajax.reload(null, false);
             productos.ajax.reload(null, false);
             SMSj('success', 'Compra creada exitosamente');
-            $('#crearcompra input, select').val(null);
+            $('#crearcompra').trigger('reset');
             droga.val(null).trigger('change');
             $('#ModalEventos').modal('hide');
             $('#addComp').show('slow');
@@ -16684,6 +16700,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     $('#cerrarcompra').click(function () {
       $('#addComp').show('slow');
       $('#addCompra').hide('slow');
+      $('#crearcompra').trigger('reset');
     });
 
     $('#crearfactura').submit(function (e) {
@@ -16902,6 +16919,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
         action: function () {
           $('#addProd').hide('slow');
           $('#addProduct').show('slow');
+          $('#cerrarcompra, #cerrarfactura').trigger('click');
         }
       }
     ],
@@ -16951,7 +16969,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       {
         data: 'id',
         render: function (data, method, row) {
-          return `<a class="eliminar" id="${data}"><i class="fas fa-trash"></i></a>`;
+          return `<a class="eliminar"><i class="fas fa-trash"></i></a>
+          <a class="editar"><i class="fas fa-edit"></i></a>`;
         }
       }
     ] /* ,
@@ -16982,6 +17001,16 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
         }
       });
     }
+  });
+
+  productos.on('click', 'td .editar', function () {
+    const fila = $(this).parents('tr');
+    const data = productos.row(fila).data();
+    const editProducto = $('#crearproducto').find('input, select');
+    $('#addProd').trigger('click');
+    editProducto.each(function (e, i, a) {
+      this.value = data[this.name];
+    });
   });
 
   const compras = $('#compras').DataTable({
@@ -17028,6 +17057,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           droga.val(null).trigger('change');
           $('#addComp').hide('slow');
           $('#addCompra').show('slow');
+          $('#cerrarproducto, #cerrarfactura').trigger('click');
         }
       },
       {
@@ -17105,7 +17135,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       {
         data: 'id',
         render: function (data, method, row) {
-          return `<a class="eliminar" id="${data}"><i class="fas fa-trash"></i></a>`;
+          return `<a class="eliminar"><i class="fas fa-trash"></i></a>
+          <a class="editar"><i class="fas fa-edit"></i></a>`;
         }
       }
     ],
@@ -17145,6 +17176,19 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
         }
       });
     }
+  });
+
+  compras.on('click', 'td .editar', function () {
+    const fila = $(this).parents('tr');
+    const data = compras.row(fila).data();
+    const editCompra = $('#crearcompra').find('input, select');
+    $('#addComp').trigger('click');
+    editCompra.each(function (e, i, a) {
+      const valor = /fabricacion|vencimiento/.test(this.name)
+        ? moment(data[this.name]).format('YYYY-MM-DD')
+        : data[this.name];
+      this.id == 'droga' ? $('#droga').val(valor).trigger('change') : (this.value = valor);
+    });
   });
 
   var factura = $('#factura').DataTable({
@@ -17243,6 +17287,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           droga.val(null).trigger('change');
           $('#addFactu').hide('slow');
           $('#addFactura').show('slow');
+          $('#cerrarproducto, #cerrarcompra').trigger('click');
         }
       }
     ],
