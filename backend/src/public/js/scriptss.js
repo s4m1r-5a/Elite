@@ -17757,6 +17757,492 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     }
   );
 }
+////////////////////////////* PASTILLEROS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/links/preventas`) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  let stok = 0;
+  let valor = null;
+  let minDateFilter = '';
+  let maxDateFilter = '';
+  let totalss = 0;
+  const droga = $('.droga');
+  const produc = $('#produc');
+  const consult = (num, type) => {
+    $.ajax({
+      url: '/links/consult',
+      data: { num, type },
+      type: 'POST',
+      beforeSend: function () {
+        $('#carga').show();
+      },
+      success: function (data) {
+        valor = $('#document').val();
+        $('#name')
+          .val(data?.fullName || data?.name || null)
+          .prop('disabled', false);
+
+        $('#dir')
+          .val(data?.adreess || null)
+          .prop('disabled', false);
+
+        $('#phone')
+          .val(data?.phone || null)
+          .prop('disabled', false);
+
+        if (!data?.adreess) $('#dir').focus();
+        $('#carga').hide();
+      }
+    });
+  };
+
+  $(document).ready(function () {
+    $('input').prop('autocomplete', 'off');
+
+    $('.fecha').daterangepicker({
+      locale: {
+        format: 'YYYY-MM-DD',
+        separator: ' - ',
+        applyLabel: 'Aplicar',
+        cancelLabel: 'Cancelar',
+        fromLabel: 'De',
+        toLabel: '-',
+        customRangeLabel: 'Personalizado',
+        weekLabel: 'S',
+        daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+        monthNames: [
+          'Enero',
+          'Febrero',
+          'Marzo',
+          'Abril',
+          'Mayo',
+          'Junio',
+          'Julio',
+          'Agosto',
+          'Septiembre',
+          'Octubre',
+          'Noviembre',
+          'Diciembre'
+        ],
+        firstDay: 1
+      },
+      singleDatePicker: true,
+      showDropdowns: true,
+      minYear: 2017,
+      maxYear: parseInt(moment().format('YYYY'), 10)
+    });
+
+    $('#cerrarfactura').click(function () {
+      $('#addFactu').show('slow');
+      $('#addFactura').hide('slow');
+      $('#generarpreventa').trigger('reset');
+      productos.rows().deselect();
+      $('#productos input').prop('checked', false);
+    });
+
+    $('#document')
+      .on('focus', function ({ target: { value } }) {
+        valor = value;
+        $('#name, #dir, #phone').prop('disabled', true);
+      })
+      .on('keydown', function ({ target: { value }, originalEvent: { keyCode } }) {
+        const typeDoc = $('#typeDoc').val();
+
+        if (value === valor && keyCode === 13)
+          return $('#name, #dir, #phone').prop('disabled', false);
+        if (!value || !typeDoc || value.length < 5 || keyCode !== 13) return;
+        consult(value, typeDoc);
+      })
+      .on('blur', function ({ target: { value } }) {
+        const typeDoc = $('#typeDoc').val();
+
+        if (value === valor) return $('#name, #dir, #phone').prop('disabled', false);
+        if (!value || !typeDoc || value.length < 5) return;
+        consult(value, typeDoc);
+      });
+
+    $('#typeDoc').change(function () {
+      if (!$(this).val() || !$('#document').val() || $('#document').val().length < 5) return;
+      consult($('#document').val(), $(this).val());
+    });
+
+    $('#generarpreventa').submit(function (e) {
+      e.preventDefault();
+
+      if ($('#name').is(':disabled'))
+        return SMSj('error', 'Debe especificar nombre direccion y movil');
+
+      const rows = [];
+      productos
+        .rows('.selected')
+        .data()
+        .map(e => rows.push(e));
+
+      if (!rows.length) {
+        SMSj('error', 'Debe seleccionar productos a la lista');
+        return false;
+      }
+      const formData = new FormData(document.getElementById('generarpreventa'));
+      formData.append('articles', JSON.stringify(rows));
+
+      $.ajax({
+        url: '/links/preventas',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function () {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            comercios.ajax.reload(null, false);
+            SMSj('success', 'Preventa creada exitosamente');
+            $('#generarpreventa').trigger('reset');
+            $('#ModalEventos').modal('hide');
+            $('#addFactu').show('slow');
+            $('#addFactura').hide('slow');
+            productos.rows().deselect();
+            $('#productos input').prop('checked', false);
+          }
+        }
+      });
+    });
+  });
+
+  var productos = $('#productos').DataTable({
+    //searching: false,
+    dom: 'Bfrtip',
+    language: languag2,
+    //lengthMenu: [-1],
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="file"></i> Pdf',
+            extend: 'pdf'
+          },
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          },
+          {
+            text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
+            extend: 'print',
+            title: `Impresion`,
+            orientation: 'landscape',
+            /* footer: true,
+            exportOptions: {
+              columns: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+              //modifier: true
+            }, */
+            autoPrint: true
+          }
+        ]
+      },
+      {
+        extend: 'pageLength',
+        text: '<i class="align-middle feather-md" data-feather="eye-off"></i>',
+        orientation: 'landscape'
+      }
+    ],
+    lengthChange: false,
+    paging: true,
+    deferRender: true,
+    info: false,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    order: [[0, 'asc']],
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    ajax: {
+      method: 'POST',
+      url: '/links/medicamentos/table2',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: 'nombre',
+        render: function (data, method, row) {
+          return `<div class="form-check">
+          <input class="form-check-input check" type="checkbox" value="${row.id}" id="${row.id}">
+          <label class="form-check-label mt-1 cursor-pointer" for="${row.id}">
+          ${data}
+          </label>
+        </div>`;
+        }
+      },
+      { data: 'laboratorio' },
+      { data: 'clase' }
+    ]
+  });
+
+  productos.on('click', 'td .check', function () {
+    const fila = $(this).parents('tr');
+    if ($(this).prop('checked')) fila.addClass('selected');
+    else fila.removeClass('selected');
+  });
+
+  $('#resetpreventa').on('click', function () {
+    $('#resetdata').trigger('click');
+    productos.rows().deselect();
+    $('#productos input').prop('checked', false);
+  });
+
+  $('#guardarPreventa').on('click', function () {
+    $('#enviodatos').trigger('click');
+  });
+
+  const comercios = $('#comercios').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Preventa</span>`,
+        attr: {
+          title: 'Agregar-Preventa',
+          id: 'addFactu'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          droga.html('');
+          productos
+            .rows()
+            .data()
+            .map(row =>
+              droga.append(
+                new Option(
+                  `${row.nombre} - ${row.laboratorio} - ${row.clase}`,
+                  row.id,
+                  false,
+                  false
+                )
+              )
+            );
+          droga.val(null).trigger('change');
+          $('#addFactu').hide('slow');
+          $('#addFactura').show('slow');
+          $('#cerrarproducto, #cerrarcompra').trigger('click');
+        }
+      }
+    ],
+    deferRender: true,
+    lengthChange: false,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { targets: 0, orderable: true, visible: true, searchable: true },
+      { responsivePriority: 1, targets: [0, 1, 2] }
+    ],
+    order: [[0, 'desc']], //[0, "asc"]
+    language: languag2,
+    ajax: {
+      method: 'POST',
+      url: '/links/comercios/table',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: 'name',
+        render: function (data, method, row) {
+          return `<div>
+          <strong>${row.id} - ${data}</strong><br>
+          <small>${row.type} ${row.doc}</small>
+          <div>`;
+        }
+      },
+      {
+        data: 'phone',
+        render: function (data, method, row) {
+          return `<div>
+          <strong>CEL ${data}</strong><br>
+          <small>${row.adreess}</small>
+          <div>`;
+        }
+      },
+      {
+        data: 'comercio',
+        render: function (data, method, row) {
+          return `<div>
+          <strong>${data}</strong><br>
+          <small>${moment(row.date).format('YYYY-MM-DD')}</small>
+          <div>`;
+        }
+      }
+    ],
+    drawCallback: function (settings) {
+      var api = this.api();
+      var rows = api.rows({ page: 'current' }).nodes();
+      var last = null;
+
+      api
+        .rows({ page: 'current' })
+        .data()
+        .each(function (group, i) {
+          let html = '';
+          JSON.parse(group.articles).map(
+            e =>
+              (html += `<tr>
+          <td class='py-0'>${e.id}</td>
+          <td class='py-0'>${e.nombre}</td>
+          <td class='py-0'>${e.laboratorio}</td>
+          <td class='py-0'>${e.clase}</td>
+        </tr>`)
+          );
+
+          if (last !== group.id) {
+            $(rows)
+              .eq(i)
+              .after(
+                `<tr class="group">
+                    <td colspan="3" class="align-center text-center">
+                      <strong class="text-center">${group.agente}</strong>
+                      <table class='table table-sm nowrap table-borderless w-100' style='font-size:70%;'>
+                        <thead>
+                          <tr>
+                            <th>Id</th>
+                            <th>Nombre</th>
+                            <th>Laboratorio</th>
+                            <th>Clase</th>
+                          </tr>
+                        </thead>
+                        <tbody>${html}</tbody>
+                      </table>
+                    </td>
+                  </tr>`
+              );
+            last = group.id;
+            //$(rows).eq(i).hide();
+          } else {
+            //$('.table-sortable').find('tr:not(.' + vClass + ')').hide();
+            //$(rows).eq(i).hide();
+          }
+        });
+    }
+  });
+
+  comercios.on('click', 'td .subir', function () {
+    const fila = $(this).parents('tr');
+    const { id } = comercios.row(fila).data();
+    $('.factura').val(id).html(id);
+  });
+
+  var listaPrecio = () => {
+    $.ajax({
+      url: '/links/listadeprecio',
+      type: 'POST',
+      /* beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      }, */
+      success: function (data) {
+        if (data) {
+          window.open(data, '_blank');
+        }
+      }
+    });
+  };
+
+  function AdjuntarCC(id) {
+    $('#AdjutarDoc').modal({
+      toggle: true,
+      backdrop: 'static',
+      keyboard: true
+    });
+
+    $('#enviarDoc').submit(function (e) {
+      e.preventDefault();
+      var formData = new FormData(document.getElementById('enviarDoc'));
+      formData.append('idc', id);
+      $.ajax({
+        url: '/links/adjuntar',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#AdjutarDoc').modal('hide');
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            clientes.ajax.reload(null, false);
+            SMSj('success', 'Documento agregado exitosamente');
+            $('#ModalEventos').modal('hide');
+          }
+        }
+      });
+    });
+  }
+  function Consul(tipo, code) {
+    var dw = Consultar(tipo, code);
+    $.ajax({
+      url: dw.url,
+      method: 'POST',
+      timeout: 0,
+      headers: {
+        Authorization: 'nci2upw280kxoy3o1dlc2q0gq28f5pfc9z58b3piryylih19',
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
+      data: dw.dat,
+      //async: false,
+      success: function (dat) {
+        if (jQuery.isEmptyObject(dat.data)) {
+          $('.name').prop('disabled', false).focus();
+        } else {
+          $('.name').val(dat.data.fullName);
+        }
+      }
+    });
+  }
+}
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/prueba`) {
 }

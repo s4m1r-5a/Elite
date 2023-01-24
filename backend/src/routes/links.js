@@ -3665,6 +3665,37 @@ router.put('/reds', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+///////////////////* PREVENTAS *///////////////////////////
+router.get('/preventas', noExterno, (req, res) => {
+  res.render('links/preventas');
+});
+
+router.post('/preventas', noExterno, async (req, res) => {
+  let { id, date, type, doc, name, adreess, phone, comercio, articles } = req.body;
+  comercio = comercio.toUpperCase();
+  const agente = req.user.fullname;
+
+  if (id) {
+    await pool.query('UPDATE preventas SET ? WHERE id = ?', [
+      { date, type, doc, name, adreess, phone, comercio, articles, agente },
+      id
+    ]);
+    return res.send({ code: true });
+  }
+
+  const newPreventa = await pool.query('INSERT INTO preventas SET ? ', [
+    { date, type, doc, name, adreess, phone, comercio, articles, agente }
+  ]);
+
+  res.send({ code: newPreventa.insertId });
+});
+
+router.post('/comercios/table', noExterno, async (req, res) => {
+  const comercios = await pool.query(`SELECT * FROM preventas`);
+  respuesta = { data: comercios };
+  res.send(respuesta);
+});
+
 ///////////////////* PASTILLEROS *///////////////////////////
 router.get('/pastilleros', noExterno, (req, res) => {
   res.render('links/pastilleros');
@@ -3673,6 +3704,12 @@ router.get('/pastilleros', noExterno, (req, res) => {
 router.post('/listadeprecio', noExterno, async (req, res) => {
   await Lista();
   res.send(`/uploads/listaprecio.pdf`);
+});
+
+router.post('/medicamentos/table2', noExterno, async (req, res) => {
+  const productos = await pool.query(`SELECT * FROM medicamentos`);
+  respuesta = { data: productos };
+  res.send(respuesta);
 });
 
 router.post('/medicamentos/table', noExterno, async (req, res) => {

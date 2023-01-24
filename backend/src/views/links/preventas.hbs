@@ -1,0 +1,135 @@
+<main class='content'>
+  <div class='card'>
+    <div class='card-header' id='addFactura' style='display: none;'>
+      <div class='card rounded-lg shadow-lg'>
+        <div class='card-header position-relative'>
+
+          <div class='position-absolute' id='carga' style='display: none; left: 40%; top: 40%;'>
+            <i class='fas fa-spinner fa-pulse fa-2x'></i>
+            <strong class='mt-2'>Cargando...</strong>
+          </div>
+
+          <form id='generarpreventa'>
+            <div class='form-row'>
+              <div class='form-group col-md-1'>
+                <input type='text' class='form-control' name='id' readonly />
+              </div>
+              <div class='form-group col-3'>
+                <input class='form-control fecha' type='text' name='date' required />
+              </div>
+              <div class='form-group col-8'>
+                <a class='r atras' id='cerrarfactura'>
+                  <i class='feather-lg float-right' data-feather='x-circle'></i>
+                </a>
+              </div>
+              <div class='form-group col-md-2'>
+                <label for=''>Type</label>
+                <select id='typeDoc' class='form-control' name='type' required>
+                  <option value='CC'>CC</option>
+                  <option value='NIT'>NIT</option>
+                </select>
+              </div>
+              <div class='form-group col-4 col-md-4'>
+                <label for=''>DocNum</label>
+                <input type='text' id='document' class='form-control' name='doc' required />
+              </div>
+              <div class='form-group col-8 col-md-6'>
+                <label for='inputZip'>Name</label>
+                <input id='name' class='form-control' type='text' name='name' required disabled />
+              </div>
+              <div class='form-group col-md-8'>
+                <label for=''>Adreess</label>
+                <input id='dir' type='text' class='form-control' name='adreess' required disabled />
+              </div>
+              <div class='form-group col-md-4'>
+                <label for='inputZip'>Phone</label>
+                <input id='phone' class='form-control' type='text' name='phone' required disabled />
+              </div>
+              <div class='form-group col-12 col-md-6'>
+                <label for=''>Comercio</label>
+                <input type='text' id='comercio' class='form-control' name='comercio' required />
+              </div>
+            </div>
+            <input type='submit' id='enviodatos' style='display: none;' />
+            <input type='reset' id='resetdata' style='display: none;' />
+          </form>
+
+        </div>
+        <div class='card-body bg-light'>
+          <table id='productos' class='table table-sm table-striped table-hover w-100 m-0 p-0'>
+            <thead>
+              <tr>
+                <th>Product</th>
+                <th>Laboratorio</th>
+                <th>Clase</th>
+              </tr>
+            </thead>
+            <tbody></tbody>
+          </table>
+          <button class='btn btn-primary float-right mt-3' id='guardarPreventa'>
+            <i class='fas fa-fw fa-plus'></i>
+            Guardar
+          </button>
+          <button class='btn btn-danger float-right mr-3 mt-3' id='resetpreventa'>
+            <i class='fas fa-fw fa-reset'></i>
+            Cancelar
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class='card-body'>
+      <table id='comercios' class='table table-sm table-striped display nowrap w-100'>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='PagO' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-sm' role='document'>
+    <div class='modal-content'>
+      <div class='modal-header'>
+        <h5 class='modal-title'>Adjuntar Recibos</h5>
+        <button type='button' class='close' data-dismiss='modal' aria-label='Close'>
+          <span aria-hidden='true'>&times;</span>
+        </button>
+      </div>
+      <div class='modal-body'>
+        <h3>FACTURA # <strong class='factura'></strong></h3>
+        <table class='table table-sm my-2' id='recibosss'>
+          <form enctype='multipart/form-data' id='recbo' action='/links/recibo' method='POST'>
+            <input type='hidden' class='factura' name='factura' />
+            <tbody>
+              <tr>
+                <th colspan='2'>
+                  <i class='feather-md' data-feather='file-plus'></i>
+                  <input
+                    class='form-control-no-border edi'
+                    type='file'
+                    name='image'
+                    id='file2'
+                    multiple
+                    style='width: 50%;'
+                    onchange='preview(this);'
+                    required
+                  />
+                  <span class='montorecibos badge badge-dark'></span>
+                </th>
+              </tr>
+              <tr id='trarchivos'>
+                <th colspan='2' class='image-wrap' id='recibos1' width='100%' height='200'>
+                </th>
+              </tr>
+              <tr>
+                <th colspan='2'>
+                  <button type='submit' class='btn btn-primary btn-sm float-right'>Enviar</button>
+                </th>
+              </tr>
+            </tbody>
+          </form>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
