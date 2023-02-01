@@ -1430,14 +1430,12 @@ async function Facturar(numFactura) {
       [{ text: NumeroALetras(factura.total), style: 'smallx', colSpan: 5 }, {}, {}, {}, {}]
     );
 
-    console.log(cuerpo);
-
     ////////////////////////* CREAR PDF *//////////////////////////////
     const printer = new PdfPrinter(Roboto);
     let docDefinition = {
       background: function (currentPage, pageSize) {
         return {
-          image: path.join(__dirname, '/public/img/avatars/avatar1.png'),
+          image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
           width: pageSize.width,
           opacity: 0.1
         };
@@ -1460,7 +1458,7 @@ async function Facturar(numFactura) {
               width: 20,
               alignment: 'right',
               margin: [10, 3, 10, 3],
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
               fit: [20, 20]
             }
           ]
@@ -1499,7 +1497,7 @@ async function Facturar(numFactura) {
             ],
             {
               width: 100,
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
               fit: [100, 100]
             }
           ]
@@ -1634,7 +1632,7 @@ async function Lista() {
     let docDefinition = {
       background: function (currentPage, pageSize) {
         return {
-          image: path.join(__dirname, '/public/img/avatars/avatar1.png'),
+          image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
           width: pageSize.width,
           opacity: 0.1
         };
@@ -1657,7 +1655,7 @@ async function Lista() {
               width: 20,
               alignment: 'right',
               margin: [10, 3, 10, 3],
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
               fit: [20, 20]
             }
           ]
@@ -1688,7 +1686,7 @@ async function Lista() {
             ],
             {
               width: 100,
-              image: path.join(__dirname, '/public/img/avatars/avatar.png'),
+              image: path.join(__dirname, '/public/img/avatars/jgelvis.png'),
               fit: [100, 100]
             }
           ]

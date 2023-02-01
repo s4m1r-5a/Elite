@@ -3761,7 +3761,11 @@ router.post('/compras/table', noExterno, async (req, res) => {
 
 router.post('/compras', isLoggedIn, async (req, res) => {
   const compra = req.body;
-  if (compra.id) {
+  const { id } = req.body;
+
+  delete compra.id;
+
+  if (id) {
     await pool.query('UPDATE compras SET ? WHERE id = ?', [compra, compra.id]);
     return res.send({ code: true });
   }
