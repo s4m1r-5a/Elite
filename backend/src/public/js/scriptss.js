@@ -17037,7 +17037,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           {
             text: '<i class="align-middle feather-md" data-feather="printer"></i> Imprimir',
             extend: 'print',
-            title: `Impresion`,
+            title: '',
             orientation: 'landscape',
             footer: true,
             exportOptions: {
@@ -17048,43 +17048,30 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
               $(win.document.body)
                 .css('font-size', '8pt')
                 .prepend(
-                  `<div class="card border-primary">
-                  <span class="float-right">${moment().format('YYYY-MM-DD')}</span>
-                    <div class="row justify-content-center align-items-center">
-                      <div class="col-3">
-                        <img src="/img/avatars/jgelvis.png" class="img-fluid mx-auto d-block" style='max-height: 120px;'>
-                      </div> 
-                      <div class="col-4">
-                        <div class="card-body text-primary h4">
+                  `
+                    <span class="float-right mt-3 mr-3">${moment().format('YYYY-MM-DD')}</span>
+                    <div class="d-flex justify-content-around align-items-center">
+                      <div class="mr-auto px-3">
+                        <img src="${
+                          window.location.origin
+                        }/img/avatars/jgelvis.png" class="img-fluid mx-auto d-block" style='max-height: 120px;'>
+                      </div>
+                      <div class="text-primary h6 px-3">
                           <div class="mb-0">
                             <span class="align-middle text-warning">REPORTE DE COMPRAS</span>
                           </div>
                           <div class="mb-0">
                             <span class="align-middle text-dark">DESDE</span>
                             <span class="align-middle card-text">${$('#minDate').html()}</span>
-                          </div>
-                          <div class="mb-0">
-                            <span class="align-middle text-dark">HASTA</span>
+                            <span class="align-middle text-dark"> / HASTA</span>
                             <span class="align-middle card-text">${$('#maxDate').html()}</span>
-                          </div>                                                                 
-                        </div>
-                      </div>                       
-                      <div class="col-4">
-                        <div class="card-body text-primary h4">
-                          <div class="mb-0">
-                            <span class="align-middle text-dark">FECHA</span>
-                            <span class="align-middle card-text">${moment().format(
-                              'YYYY-MM-DD'
-                            )}</span>
-                          </div>
+                          </div> 
                           <div class="mb-0">
                             <span class="align-middle text-dark">TOTAL COMPRA</span>
                             <span class="align-middle card-text">${$('#totalss').html()}</span>
-                          </div>                                                                 
-                        </div>
-                      </div>                      
-                    </div>                        
-                  </div>`
+                          </div>                                                                
+                      </div> 
+                    </div>`
                 );
 
               $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
