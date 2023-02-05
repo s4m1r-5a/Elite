@@ -5386,10 +5386,17 @@ router.get('/ordendeseparacion/:id/:tp', isLoggedIn, async (req, res) => {
   }
   ////////////////////* END *//////////////////////////////////////
 
-  sql = `SELECT * FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id INNER JOIN productos pt ON pd.producto = pt.id
-            INNER JOIN clientes c ON p.cliente = c.idc INNER JOIN users u ON p.asesor = u.id INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`;
+  sql = `SELECT p.*, pd.*, pt.*, c.*, u.*, cu.*, c2.nombre n2, c2.documento d2, c2.movil m2, c2.email e2, c3.nombre n3, 
+  c3.documento d3, c3.movil m3, c3.email e3, c4.nombre n4, c4.documento d4, c4.movil m4, c4.email e4
+
+   FROM preventa p INNER JOIN productosd pd ON p.lote = pd.id 
+   INNER JOIN productos pt ON pd.producto = pt.id INNER JOIN clientes c ON p.cliente = c.idc 
+   LEFT JOIN clientes c2 ON p.cliente2 = c2.idc LEFT JOIN clientes c3 ON p.cliente3 = c3.idc 
+   LEFT JOIN clientes c4 ON p.cliente4 = c4.idc INNER JOIN users u ON p.asesor = u.id 
+   INNER JOIN cupones cu ON p.cupon = cu.id WHERE p.id = ?`;
   const orden = await pool.query(sql, id);
 
+  console.log(orden);
   const r = await pool.query(
     `SELECT SUM(if (s.formap != 'BONO' AND s.bono IS NOT NULL, cp.monto, 0)) AS monto, SUM(s.monto) AS monto1
                  FROM solicitudes s INNER JOIN preventa pr ON s.orden = pr.id INNER JOIN productosd pd ON s.lt = pd.id

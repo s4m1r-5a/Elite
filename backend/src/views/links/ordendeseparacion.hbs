@@ -27,70 +27,176 @@
         </label>
       </div>
       <small class='text-muted' id='fechaActual'></small>
-      <div class='card-header d-flex justify-content-between'>
 
-        <div class='col-md-4 position-relative' height='50'>
+      <div class='card-header d-flex align-content-center flex-wrap'>
+
+        <div class='text-center'>
           <img
             src={{imagenes}}
-            width='150'
             alt='...'
-            class='img-thumbnail'
-            style='position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); -webkit-transform: translate(-50%, -50%);'
+            width='200'
+            height='200'
+            class='rounded mx-auto d-block align-middle'
           />
         </div>
+        <div class='flex-grow-1 position-relative'>
+          <ul
+            class='list-group list-group-flush'
+            style='position: absolute; top: 50%; transform: translateY(-50%);'
+          >
+            <li class='list-group-item py-1'>
+              <div class='d-flex align-content-center flex-wrap'>
+                <div>
+                  <i class='feather-lg mt-1' data-feather='user'></i>
+                </div>
+                <div class='flex-grow-1 position-relative' style='min-width: 250px;'>
+                  <span className=''>{{nombre}}
+                    <small
+                      className='text-muted'
+                      style='position: absolute; top: 16px; left: 1px;'
+                    >CC:{{documento}} - Cel: {{movil}}</small>
 
-        <ul class='list-group list-group-flush'>
-          <li class='list-group-item py-1'>
-            <i class='align-middle mr-1' data-feather='user'></i>
-            <span
-              class='text-warning d-inline-block text-truncate'
-              style='max-width: 200px;'
-            >{{nombre}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <i class='align-middle mr-1' data-feather='credit-card'></i>
-            <span class='align-middle card-text'>CC:</span>
-            <span class='text-dark'>{{documento}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <i class='align-middle mr-1' data-feather='phone-call'></i>
-            <span class='text-primary'>{{movil}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <i class='align-middle mr-1' data-feather='mail'></i>
-            <span class='text-primary'>{{email}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <i class='align-middle mr-1' data-feather='map-pin'></i>
-            <span class='text-muted text-lowercase'>{{direccion}}</span>
-          </li>
-        </ul>
+                    <small
+                      className='text-primary'
+                      style='position: absolute; top: 26px; left: 1px;'
+                    >{{email}}</small>
+                  </span>
+                </div>
+              </div>
+            </li>
+            {{#if n2}}
+              <li class='list-group-item py-1'>
+                <div class='d-flex align-content-center flex-wrap'>
+                  <div>
+                    <i class='feather-lg mt-1' data-feather='user'></i>
+                  </div>
+                  <div class='flex-grow-1 position-relative'>
+                    <span className=''>{{n2}}
+                      <small
+                        className='text-muted'
+                        style='position: absolute; top: 16px; left: 1px;'
+                      >CC:{{d2}} - Cel: {{m2}}</small>
 
-        <ul class='list-group list-group-flush' style='width: 300px;'>
-          <li class='list-group-item py-1'>
-            <span class='float-right card-title'>ORDEN {{lote}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <small class='text-muted'>Fecha orden </small>
-            <span class='float-right' id='fechaOrden'>{{fecha}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <small class='text-muted'>Ref. de pago </small>
-            <span class='float-right'>{{lote}}</span>
-          </li>
-          <li class='list-group-item py-1'>
-            <small class='text-muted'>Asesor </small>
-            <span
-              class='float-right d-inline-block text-truncate'
-              style='max-width: 200px;'
-            >{{fullname}}</span>
-          </li>
-        </ul>
+                      <small
+                        className='text-primary'
+                        style='position: absolute; top: 26px; left: 1px;'
+                      >{{e2}}</small>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            {{/if}}
+            {{#if n3}}
+              <li class='list-group-item py-1'>
+                <div class='d-flex align-content-center flex-wrap'>
+                  <div>
+                    <i class='feather-lg mt-1' data-feather='user'></i>
+                  </div>
+                  <div class='flex-grow-1 position-relative'>
+                    <span className=''>{{n3}}
+                      <small
+                        className='text-muted'
+                        style='position: absolute; top: 16px; left: 1px;'
+                      >CC:{{d3}} - Cel: {{m3}}</small>
+
+                      <small
+                        className='text-primary'
+                        style='position: absolute; top: 26px; left: 1px;'
+                      >{{e3}}</small>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            {{/if}}
+            {{#if n4}}
+              <li class='list-group-item py-1'>
+                <div class='d-flex align-content-center flex-wrap'>
+                  <div>
+                    <i class='feather-lg mt-1' data-feather='user'></i>
+                  </div>
+                  <div class='flex-grow-1 position-relative'>
+                    <span className=''>{{n4}}
+                      <small
+                        className='text-muted'
+                        style='position: absolute; top: 16px; left: 1px;'
+                      >CC:{{d4}} - Cel: {{m4}}</small>
+
+                      <small
+                        className='text-primary'
+                        style='position: absolute; top: 26px; left: 1px;'
+                      >{{e4}}</small>
+                    </span>
+                  </div>
+                </div>
+              </li>
+            {{/if}}
+          </ul>
+        </div>
+
+        <div>
+          <img
+            src='https://api.qrserver.com/v1/create-qr-code/?data=https://grupoelitered.com.co/links/pagos'
+            alt='...'
+            width='200'
+            height='200'
+            class='rounded mx-auto d-block'
+          />
+          {{!-- <ul class='list-group list-group-flush' style='width: 300px;'>
+            <li class='list-group-item py-1'>
+              <div class='d-flex flex-wrap'>
+                <div>
+                  <i class='feather-lg mt-1' data-feather='file'></i>
+                </div>
+                <div class='flex-grow-1 position-relative'>
+                  <span>ORDEN
+                    {{lote}}
+                    <small
+                      id='fechaOrden'
+                      className='text-muted'
+                      style='position: absolute; top: 16px; left: 1px;'
+                    >{{fecha}}</small>
+
+                    <small
+                      className='text-primary'
+                      style='position: absolute; top: 26px; left: 1px;'
+                    >Ref. {{lote}}</small>
+                  </span>
+                </div>
+              </div>
+            </li>
+            <li class='list-group-item py-1'>
+              <div class='d-flex flex-wrap'>
+                <div>
+                  <i class='feather-lg mt-1' data-feather='user'></i>
+                </div>
+                <div class='flex-grow-1 position-relative'>
+                  <span>{{fullname}}
+                    <small
+                      className='text-muted'
+                      style='position: absolute; top: 16px; left: 1px;'
+                    >Cel: {{cel}}</small>
+
+                    <small
+                      className='text-primary'
+                      style='position: absolute; top: 26px; left: 1px;'
+                    >{{username}}</small>
+                  </span>
+                </div>
+              </div>
+            </li>
+          </ul> --}}
+        </div>
 
       </div>
 
       <div class='card-body p-0'>
         <hr class='m-0' />
+        <div class='d-flex justify-content-around flex-wrap'>
+          <div>ORDEN-{{lote}}</div>
+          <span class='text-primary'>{{fullname}}</span>
+          <span id='fechaOrden'>{{fecha}}</span>
+        </div>
+        <hr class='m-0 mb-3' />
         <div class='card-group' id='cliente1'>
           <div class='card'>
             <ul class='list-group list-group-flush'>
