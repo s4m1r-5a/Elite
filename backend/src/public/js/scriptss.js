@@ -8534,6 +8534,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     $('#fnc').val(Cifra(fnc));
     $('#total').val(Cifra(total));
     producto.dto = ktgoria ? ktgoria : 'NINGUNO';
+
     if (rol.admin)
       $('#vmtr2, #porcentage, #promesa, #cuotamin, #tipoDto, #asesor').prop('disabled', false);
     $(':disabled').css('background-color', '#DCE2F4');
@@ -8987,6 +8988,9 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
 
   $(document).ready(function () {
     var bono = 0;
+    if (/\Wlinks\Worden\Wedit\W/.test(window.location.pathname) && !rol.admin) {
+      clientes.prop('disabled', true);
+    }
     $('.select2').each(function () {
       var texto =
         $(this).attr('id') === 'clientes' ? '...SELECCIONE LOS CLIENTES' : 'SELECCIONE UN PRODUCTO';
@@ -9115,6 +9119,7 @@ if (/\Wlinks\Worden\Wedit\W|\Wlinks\Worden/.test(window.location.pathname)) {
     asesor.change(async function () {
       producto.asesor = $(this).val();
     });
+
     clientes.change(async function () {
       if (producto) {
         producto.cliente = $(this).val()[0] ? $(this).val()[0] : null;
