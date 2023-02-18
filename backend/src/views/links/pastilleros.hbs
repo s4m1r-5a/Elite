@@ -200,7 +200,7 @@
         <div class='card-body bg-light'>
           <form id='crearfactura'>
             <div class='form-row'>
-              <div class='form-group col-md-6'>
+              <div class='form-group col-md-4'>
                 <label>Producto</label>
                 <select
                   id='produc'
@@ -209,11 +209,21 @@
                   required
                 ></select>
               </div>
+              <div class='form-group col-9 col-md-2'>
+                <label for=''>Vence</label>
+                <select
+                  type='text'
+                  id='expiry'
+                  class='form-control'
+                  name='expiry'
+                  required
+                ></select>
+              </div>
               <div class='form-group col-3 col-md-2'>
                 <label for=''>Cantidad</label>
                 <input type='text' id='cantidad' class='form-control' name='cantidad' required />
               </div>
-              <div class='form-group col-9 col-md-4'>
+              <div class='form-group col-12 col-md-4'>
                 <label for='inputZip'>Precio unitario</label>
                 <div class='input-group'>
                   <input id='price' class='form-control valor' type='text' name='valor' required />
@@ -231,6 +241,7 @@
               <tr>
                 <th>Id</th>
                 <th>Product</th>
+                <th>Expiry</th>
                 <th>Lot</th>
                 <th>Price</th>
                 <th>Total</th>

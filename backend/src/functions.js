@@ -1392,8 +1392,8 @@ async function Facturar(numFactura) {
   if (factura) {
     const cuerpo = [
       [
-        { text: `Id`, style: 'tableHeader', alignment: 'center' },
         { text: 'Producto', style: 'tableHeader', alignment: 'center' },
+        { text: `Vence`, style: 'tableHeader', alignment: 'center' },
         { text: '#', style: 'tableHeader', alignment: 'center' },
         { text: 'Precio', style: 'tableHeader', alignment: 'center' },
         { text: 'Total', style: 'tableHeader', alignment: 'center' }
@@ -1403,7 +1403,7 @@ async function Facturar(numFactura) {
     //let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
 
     JSON.parse(factura.articles).map((e, i) => {
-      cuerpo.push([e[0], e[1], e[2], '$' + Cifra(e[3]), '$' + Cifra(e[4])]);
+      cuerpo.push([e[1], e[2], e[3], '$' + Cifra(e[4]), '$' + Cifra(e[5])]);
     });
 
     cuerpo.push(
@@ -1515,7 +1515,7 @@ async function Facturar(numFactura) {
           style: 'tableBody',
           color: '#444',
           table: {
-            widths: ['*', 'auto', '*', 'auto', 'auto'],
+            widths: ['*', 'auto', 'auto', 'auto', 'auto'],
             //headerRows: 1,
             // keepWithHeaderRows: 1,
             body: cuerpo

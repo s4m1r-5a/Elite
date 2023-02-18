@@ -16720,11 +16720,12 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       const formData = $('#crearfactura')
         .serializeArray()
         .map((r, i) => {
+          console.log(r, i);
           if (!i) nameProduct = $(`#produc option[value='${r.value}']`).text();
           return r.value;
         });
       formData.splice(1, 0, nameProduct);
-      formData.splice(4, 0, `${formData[2] * formData[3]}`, html);
+      formData.splice(5, 0, `${formData[3] * formData[4]}`, html);
       factura.row.add(formData).draw(false);
       $('#crearfactura input').val(null);
       produc.val(null).trigger('change');
@@ -16736,11 +16737,21 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     });
 
     produc.on('change', function (e) {
+      compras
+        .rows()
+        .data()
+        .filter(e => e.droga == $(this).val())
+        .map(e => {
+          const fv = moment(e.vencimiento).format('YYYY-MM-DD');
+          $('#expiry').append(new Option(fv, fv, false, false));
+        });
+
       const { precio, stock } =
         productos
           .rows()
           .data()
           .filter(e => e.id == $(this).val())[0] || {};
+
       stok = stock || 0;
 
       if (stok < 1) $('#cantidad, #price').prop('disabled', true);
@@ -16798,8 +16809,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
         .rows()
         .data()
         .each(e => {
-          total += parseFloat(e[4]);
-          rows.push(e.splice(0, 5));
+          total += parseFloat(e[5]);
+          rows.push(e.splice(0, 6));
         });
 
       if (!rows.length) {
@@ -17245,7 +17256,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       //{ className: 'control', orderable: true, targets: 0 },
       {
         render: $.fn.dataTable.render.number(',', '.', 2, '$'),
-        targets: [3, 4]
+        targets: [4, 5]
       }
     ],
     drawCallback: function (settings) {
@@ -17446,11 +17457,11 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           JSON.parse(group.articles).map(
             e =>
               (html += `<tr>
-          <td class='py-0'>${e[0]}</td>
           <td class='py-0'>${e[1]}</td>
           <td class='py-0'>${e[2]}</td>
-          <td class='py-0'>${currency(e[3], '$')}</td>
+          <td class='py-0'>${e[3]}</td>
           <td class='py-0'>${currency(e[4], '$')}</td>
+          <td class='py-0'>${currency(e[5], '$')}</td>
         </tr>`)
           );
 
@@ -17463,8 +17474,8 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
           <table class='table table-sm nowrap table-hover table-borderless w-100 table-dark table-striped' style='font-size:70%;'>
             <thead class="thead-dark">
               <tr>
-                <th>Id</th>
-                <th>Nombre</th>
+                <th>Nombre</th>                
+                <th>Vence</th>
                 <th>#</th>
                 <th>Precio</th>
                 <th>Total</th>

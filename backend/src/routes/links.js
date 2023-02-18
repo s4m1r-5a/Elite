@@ -3760,13 +3760,13 @@ router.post('/compras/table', noExterno, async (req, res) => {
 });
 
 router.post('/compras', isLoggedIn, async (req, res) => {
-  const compra = req.body;
   const { id } = req.body;
+  const compra = req.body;
 
   delete compra.id;
-
+  console.log(compra, id, 'id que se actualizara');
   if (id) {
-    await pool.query('UPDATE compras SET ? WHERE id = ?', [compra, compra.id]);
+    await pool.query('UPDATE compras SET ? WHERE id = ?', [compra, id]);
     return res.send({ code: true });
   }
   const newCompra = await pool.query('INSERT INTO compras SET ? ', compra);
@@ -3823,9 +3823,10 @@ router.post('/generarfactura', isLoggedIn, async (req, res) => {
   const { insertId } = await pool.query('INSERT INTO facturas SET ? ', factura);
   const articles = JSON.parse(factura.articles).map(e => [...e, insertId]);
 
-  pool.query(`INSERT INTO ventas (producto, name, cantidad, precio, total, factura) VALUES ?`, [
-    articles
-  ]);
+  pool.query(
+    `INSERT INTO ventas (producto, name, expiry, cantidad, precio, total, factura) VALUES ?`,
+    [articles]
+  );
 
   const ruta = await Facturar(insertId);
 
