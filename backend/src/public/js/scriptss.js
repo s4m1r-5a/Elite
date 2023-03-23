@@ -16737,6 +16737,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
     });
 
     produc.on('change', function (e) {
+      $('#expiry').empty();
       compras
         .rows()
         .data()
