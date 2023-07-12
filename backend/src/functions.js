@@ -1475,24 +1475,43 @@ async function Facturar(numFactura) {
       content: [
         {
           columns: [
+            {
+              width: 100,
+              image: path.join(__dirname, '/public/img/jgelvis.qr.png'),
+              fit: [100, 100]
+            },
             [
-              { text: 'FACTURA DE VENTA ' + factura.id, style: 'header' },
-              'Facturacion de venta de medicamentos',
-              { text: factura.name, style: 'subheader' },
+              { text: 'JGELVIS', fontSize: 11, bold: true, margin: [0, 5, 0, 5] },
+              { text: 'NIT: 14317921-1', italics: true, color: 'gray', fontSize: 9 },
               {
-                text: `${factura.type} ${factura.doc}         Movil ${factura.phone}        ${factura.adreess}`,
+                text: 'TEL: 311-345-5739',
                 italics: true,
                 color: 'gray',
                 fontSize: 9
               },
               {
-                fontSize: 11,
+                text: 'EMAIL: jlombanagelvis@gmail.com',
                 italics: true,
-                text: [
-                  '\nLa siguente ',
-                  { text: 'tabla ', bold: true, color: 'blue' },
-                  'muestra los detalles de cada producto a facturar'
-                ]
+                color: 'gray',
+                fontSize: 9
+              },
+              {
+                text: 'DIRECCION: K21a1#29f-110 faroles',
+                italics: true,
+                color: 'gray',
+                fontSize: 9
+              },
+              {
+                text: 'SANTA MARTA D.T.C.H',
+                italics: true,
+                color: 'gray',
+                fontSize: 9
+              },
+              {
+                text: 'Magdalena, Colombia 470002',
+                italics: true,
+                color: 'gray',
+                fontSize: 9
               }
             ],
             {
@@ -1503,12 +1522,32 @@ async function Facturar(numFactura) {
           ]
         },
         {
-          fontSize: 11,
-          italics: true,
-          text: [
-            '\nLa siguente ',
-            { text: 'tabla ', bold: true, color: 'blue' },
-            'muestra los detalles de cada producto a facturar'
+          columns: [
+            [
+              { text: factura.name, style: 'subheader' },
+              {
+                text: `${factura.type} ${factura.doc}         Movil ${factura.phone}        ${factura.adreess}`,
+                italics: true,
+                color: 'gray',
+                fontSize: 9,
+                margin: [0, 0, 0, 10]
+              } /* ,
+              {
+                fontSize: 11,
+                italics: true,
+                text: [
+                  '\nLa siguente ',
+                  { text: 'tabla ', bold: true, color: 'blue' },
+                  'muestra los detalles de cada producto a facturar'
+                ]
+              } */
+            ],
+            {
+              text: 'FACTURA DE VENTA #' + factura.id,
+              fontSize: 13,
+              bold: true,
+              margin: [50, -15, 0, 0]
+            }
           ]
         },
         {
@@ -1520,10 +1559,6 @@ async function Facturar(numFactura) {
             // keepWithHeaderRows: 1,
             body: cuerpo
           }
-        },
-        {
-          text: 'Factura de venta generada por Inmovilii',
-          style: 'subheader'
         }
       ],
       styles: {
