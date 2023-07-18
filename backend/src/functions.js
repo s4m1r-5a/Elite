@@ -1524,9 +1524,9 @@ async function Facturar(numFactura) {
         {
           columns: [
             [
-              { text: factura.name, style: 'subheader' },
+              { text: factura.adreess, style: 'subheader' },
               {
-                text: `${factura.type} ${factura.doc}         Movil ${factura.phone}        ${factura.adreess}`,
+                text: `${factura.type} ${factura.doc}         Movil ${factura.phone}        ${factura.name}`,
                 italics: true,
                 color: 'gray',
                 fontSize: 9,
