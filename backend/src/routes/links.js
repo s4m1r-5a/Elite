@@ -3719,10 +3719,10 @@ router.post('/medicamentos/table2', noExterno, async (req, res) => {
 
 router.post('/medicamentos/table', noExterno, async (req, res) => {
   const medicamentos = await pool.query(
-    `SELECT m.*, SUM(IF(c.cantidad, c.cantidad, 0)) - SUM(IF(v.cantidad, v.cantidad, 0)) stock, 
-    (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio
-    FROM medicamentos m LEFT JOIN compras c ON c.droga = m.id LEFT JOIN ventas v ON v.producto = m.id 
-    GROUP BY m.id;`
+    `SELECT m.*, 
+    (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio,
+    (SELECT SUM(c.cantidad) FROM compras c WHERE c.droga = m.id) - (SELECT SUM(v.cantidad) FROM ventas v WHERE v.producto = m.id) stock    
+    FROM medicamentos m`
   );
   respuesta = { data: medicamentos };
   res.send(respuesta);
