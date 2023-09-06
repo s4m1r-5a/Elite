@@ -1643,7 +1643,8 @@ async function Facturar(numFactura) {
 async function Lista() {
   const lista = await pool.query(`SELECT m.*, 
     (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio,
-    (SELECT SUM(c.cantidad) FROM compras c WHERE c.droga = m.id) - (SELECT SUM(v.cantidad) FROM ventas v WHERE v.producto = m.id) stock    
+    COALESCE((SELECT SUM(c.cantidad) FROM compras c WHERE c.droga = m.id), 0) - 
+    COALESCE((SELECT SUM(v.cantidad) FROM ventas v WHERE v.producto = m.id), 0) stock   
     FROM medicamentos m`);
 
   if (lista.length) {
