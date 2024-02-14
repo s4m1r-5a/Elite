@@ -4347,7 +4347,10 @@ if (window.location.pathname === `/links/reportes`) {
       text: `TODOS`,
       action: function () {
         proyct = 'TODOS LOS PROYECTOS';
-        estadoscuentas.columns(-1).search('').draw();
+        // estadoscuentas.columns(-1).search('').draw();
+        estadoscuentas.ajax.url('/links/estadoscuentas').load(function () {
+          estadoscuentas.columns.adjust().responsive.recalc();
+        });
       }
     }
   ];
@@ -4362,7 +4365,16 @@ if (window.location.pathname === `/links/reportes`) {
             text: a.proyect,
             action: function () {
               proyct = a.proyect;
-              estadoscuentas.columns(-1).search(a.proyect).draw();
+              // estadoscuentas.columns(-1).search(a.proyect).draw();
+              $('#ModalEventos').modal({
+                backdrop: 'static',
+                keyboard: false,
+                toggle: true
+              });
+              estadoscuentas.ajax.url('/links/estadoscuentas/' + a.id).load(function () {
+                estadoscuentas.columns.adjust().responsive.recalc();
+                $('#ModalEventos').modal('hide');
+              });
             }
           });
         });
@@ -4615,21 +4627,20 @@ if (window.location.pathname === `/links/reportes`) {
   var estadoscuentas = $('#estadoscuentas').DataTable({
     processing: true,
     autowidth: true,
-    //columnDefs: [{ width: '150px', targets: [4] }],
     order: [
       [0, 'asc'],
       [1, 'asc']
     ],
     ajax: {
-      method: 'POST',
-      url: '/links/reportes/estadosc',
+      method: 'GET',
+      url: '/links/estadoscuentas',
       dataSrc: 'data'
     },
     columns: [
       {
         data: 'mz',
         render: function (data, method, row) {
-          return /[0-9]/.test(data) ? parseInt(data) : 0; //esta asi para que odener por numeros
+          return /[0-9]/.test(data) ? parseInt(data) : data; //esta asi para que odener por numeros
         }
       },
       { data: 'n' },
@@ -4684,9 +4695,7 @@ if (window.location.pathname === `/links/reportes`) {
       {
         data: 'total',
         className: 'te',
-        render: function (data, method, row) {
-          return data ? Cifra(data) : Cifra(row.valor);
-        }
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       {
         data: 'recaudoproyectado',
@@ -4703,9 +4712,7 @@ if (window.location.pathname === `/links/reportes`) {
       {
         data: 'mora',
         className: 'te',
-        render: function (data, method, row) {
-          return row.total ? '$' + Cifra(data + row.morafutura) : '$0';
-        }
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       {
         data: 'morapaga',
@@ -4714,12 +4721,8 @@ if (window.location.pathname === `/links/reportes`) {
       },
       {
         className: 't',
-        data: 'montos',
-        render: function (data, method, row) {
-          return row.total
-            ? '$' + Cifra(row.total + row.morafutura + row.mora - data)
-            : '$' + Cifra(row.valor);
-        }
+        data: 'deuda',
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
       },
       {
         data: 'proyect',
@@ -4748,9 +4751,9 @@ if (window.location.pathname === `/links/reportes`) {
               .eq(i - 1)
               .after(
                 `<tr class="total">
-                                        <td colspan=2>Total:</td>
-                                        <td colspan="10">${Cifra(total)}</td>
-                                     </tr>`
+                  <td colspan=2>Total:</td>
+                  <td colspan="10">${Cifra(total)}</td>
+                </tr>`
               );
             total = 0;
           }
@@ -4758,8 +4761,8 @@ if (window.location.pathname === `/links/reportes`) {
             .eq(i)
             .before(
               `<tr class="group" style="background: #7f8c8d; color: #FFFFCC;">
-                                    <td colspan="13" class="text-center">MANZANA ${group}</td>
-                                </tr>`
+                  <td colspan="13" class="text-center">MANZANA ${group}</td>
+              </tr>`
             );
           last = group;
         }
@@ -4769,9 +4772,9 @@ if (window.location.pathname === `/links/reportes`) {
             .eq(i)
             .after(
               `<tr class="total">
-                                    <td colspan=2>Total:</td>
-                                    <td colspan="10">${Cifra(total)}</td>
-                                </tr>`
+                  <td colspan=2>Total:</td>
+                  <td colspan="10">${Cifra(total)}</td>
+              </tr>`
             );
         }
       });
@@ -4946,43 +4949,31 @@ if (window.location.pathname === `/links/reportes`) {
       //console.log(Math.round(area, 2), productos, descuentos, total, abonos, total - abonos)
     },
     footerCallback: function (row, data, start, end, display) {
-      var api = this.api(),
-        data;
+      let api = this.api();
       // Elimine el formato para obtener datos enteros para la suma
-      var intVal = function (i) {
-        return typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
-      };
+      const intVal = i =>
+        typeof i === 'string' ? i.replace(/[\$,]/g, '') * 1 : typeof i === 'number' ? i : 0;
       // Total en todas las páginas visibles (encontradas)
       area = api
         .column(2, { order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
-        }, 0);
+        .reduce((a, b) => intVal(a) + intVal(b), 0);
       productos = api
         .column(3, { order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b, x) {
-          return x + 1;
-        }, 0);
+        .reduce((a, b, x) => x + 1, 0);
       descuentos = api
         .column(9, { order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
-        }, 0);
+        .reduce((a, b) => intVal(a) + intVal(b), 0);
       proyectado = api
         .column(11, { order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
-        }, 0);
+        .reduce((a, b) => intVal(a) + intVal(b), 0);
       abonos = api
         .column(12, { order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b) {
-          return intVal(a) + intVal(b);
-        }, 0);
+        .reduce((a, b) => intVal(a) + intVal(b), 0);
       total = 0;
       mora = 0;
       totalventa = 0;
@@ -4990,10 +4981,10 @@ if (window.location.pathname === `/links/reportes`) {
       api
         .rows({ order: 'applied', search: 'applied' })
         .data()
-        .reduce(function (a, b) {
-          total += b.total ? intVal(b.total) : intVal(b.valor);
-          mora += b.cuotas > 0 ? intVal(b.mora) + intVal(b.morafutura) : 0;
-          totalventa += b.total ? intVal(b.total) : 0;
+        .map((b) => {
+          total += intVal(b.total);
+          mora += intVal(b.mora);
+          totalventa += intVal(b.total);
           venta += b.total ? 1 : 0;
         }, 0);
       salds = total + mora - abonos;
@@ -5002,8 +4993,8 @@ if (window.location.pathname === `/links/reportes`) {
       const rows = api.rows({ order: 'applied', search: 'applied' }).data();
       const img = rows.filter(e => e).map(e => e.imagenes)[0] || 0;
       log = !img
-        ? 'https://grupoelitefincaraiz.com/img/avatars/avatar.svg'
-        : 'https://grupoelitefincaraiz.com' + img;
+        ? 'https://inmovili.com/img/avatars/avatar.svg'
+        : 'https://inmovili.com' + img;
       //console.log(rows.length, log);
     },
     rowCallback: function (row, data, index) {}

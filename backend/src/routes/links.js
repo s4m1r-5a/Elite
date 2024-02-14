@@ -37,7 +37,8 @@ const {
   Facturar,
   consultCompany,
   consultDocument,
-  Lista
+  Lista,
+  Montos
 } = require('../functions.js');
 const { Console } = require('console');
 const helpers = require('../lib/helpers');
@@ -6193,6 +6194,57 @@ router.post('/anular', noExterno, async (req, res) => {
   }
   //respuesta = { "data": ventas };
 });
+
+const reajustesReportes = async (solicitudes, id = null) => {
+  const defaul = { abonado: 0, mora: 0, adeudada: 0, saldo: 0, deuda: 0, montos: 0, morapaga: 0 };
+
+  if (!id) return solicitudes.map(e => ({ ...e, ...defaul, total: e.total || e.valor }));
+
+  const result = [];
+  for (let i = 0; i < solicitudes.length; i++) {
+    const e = solicitudes[i];
+    const data = {
+      ...e,
+      ...(e.id ? await Montos(e.id) : defaul),
+      total: e.total || e.valor
+    };
+    result.push(data);
+  }
+  return result;
+};
+
+router.get('/estadoscuentas/:id?', isLoggedIn, async (req, res) => {
+  const parm = req.params;
+
+  const pdo = await usuario(req.user, req.user.pin);
+
+  const params = parm?.id
+    ? `WHERE d.id= ${parm?.id} AND d.estados = 7`
+    : pdo
+    ? `WHERE d.id IN (${pdo}) AND d.estados = 7`
+    : req.user.asistente
+    ? 'WHERE d.estados = 7'
+    : 'WHERE p.asesor = ? AND d.estados = 7';
+
+  sql = `SELECT p.id, d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
+    if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
+    if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
+    q.descuento, p.ahorro, SUM(c.proyeccion) total,
+    SUM(IF(c.fechs < CURDATE(), c.proyeccion, 0)) recaudoproyectado     
+    FROM productos d INNER JOIN productosd l ON l.producto = d.id 
+    INNER JOIN estados e ON l.estado = e.id LEFT JOIN preventa p ON p.lote = l.id 
+    AND p.tipobsevacion IS NULL LEFT JOIN cuotas c ON c.separacion = p.id 
+    LEFT JOIN cupones q ON q.id = p.cupon LEFT JOIN clientes u ON p.cliente = u.idc 
+    ${params} GROUP BY l.id, p.id ORDER BY d.proyect, l.mz, l.n;`;
+
+  const solicitudes = await pool.query(sql, req.user.id);
+
+  const result = await reajustesReportes(solicitudes, parm?.id);
+
+  // console.log(result, 'result ');
+  return res.send({ data: result });
+});
+
 router.post('/reportes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id == 'table2') {
@@ -6245,15 +6297,20 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
       ? 'WHERE d.estados = 7'
       : 'WHERE p.asesor = ? AND d.estados = 7';
 
-    sql = `SELECT d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
+    sql = `SELECT p.id, d.imagenes, COUNT(c.proyeccion) cuotas, d.proyect, l.mz, l.n, 
     if(u.nombre IS NOT NULL, u.nombre, e.estado) nombre, l.mtr2, 
     if (p.vrmt2, p.vrmt2, l.mtr) vrmt2, if (p.vrmt2, l.mtr2 * p.vrmt2, l.valor) valor, p.fecha, 
     q.descuento, p.ahorro, SUM(c.proyeccion) total,
+
     (SELECT SUM(s.monto) FROM solicitudes s WHERE s.orden = p.id AND s.stado = 4 
     AND s.concepto IN('PAGO', 'ABONO', 'BONO')) montos,
+
     (SELECT SUM(r.totalmora) - SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) mora,
+
     (SELECT SUM(r.morapaga) + SUM(r.saldomora) FROM relacioncuotas r WHERE r.orden = p.id) morapaga,
+
     SUM(IF(c.cuota = c.proyeccion AND c.diaspagados < 1, c.mora, 0)) morafutura, 
+
     SUM(IF(c.fechs < CURDATE(), c.proyeccion, 0)) recaudoproyectado     
     FROM productos d INNER JOIN productosd l ON l.producto = d.id 
     INNER JOIN estados e ON l.estado = e.id LEFT JOIN preventa p ON p.lote = l.id 
@@ -6262,6 +6319,22 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     ${params} GROUP BY l.id, p.id ORDER BY d.proyect, l.mz, l.n;`;
 
     const solicitudes = await pool.query(sql, req.user.id);
+
+    for (let i = 0; i < solicitudes.length; i++) {
+      const e = solicitudes[i];
+      console.log(e.id, e.proyect, e.mz, e.n);
+      const result = e.id
+        ? await Montos(e.id)
+        : {
+            abonado: 0,
+            mora: 0,
+            adeudada: 0,
+            saldo: 0,
+            deuda: 0
+          };
+      console.log(result, 'result ');
+    }
+
     respuesta = { data: solicitudes };
     res.send(respuesta);
   } else if (id == 'estadosc2') {
@@ -6408,7 +6481,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     }
   } else if (id === 'proyectos') {
     /////////////* Selecciona el nombre de cada proyecto *///////////////////
-    sql = `SELECT DISTINCT pt.proyect FROM preventa p 
+    sql = `SELECT DISTINCT pt.id, pt.proyect FROM preventa p 
         INNER JOIN productosd pd ON p.lote = pd.id 
         INNER JOIN productos pt ON pd.producto = pt.id`;
     const proyectos = await pool.query(sql);

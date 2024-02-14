@@ -1812,6 +1812,110 @@ async function Lista() {
   }
 }
 
+async function Montos(Orden) {
+  const Proyeccion = await pool.query(
+    `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
+    r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
+    o.proyect, k.pin AS cupon, s.stado, p.ahorro, l.mz, l.n, l.valor, p.vrmt2, l.mtr2, p.fecha, s.ids, r.saldomora, 
+    s.formap, s.descp, k.descuento, p.id cparacion, cl.nombre, cl.documento, cl.email, cl.movil, c.mora, c.dto, o.imagenes,
+    c.cuota, c.diaspagados, c.diasmora, c.tasa tasamora, c.estado FROM cuotas c LEFT JOIN relacioncuotas r ON r.cuota = c.id 
+    LEFT JOIN solicitudes s ON r.pago = s.ids INNER JOIN preventa p ON c.separacion = p.id 
+    INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos o ON l.producto = o.id 
+    LEFT JOIN cupones k ON k.id = p.cupon INNER JOIN clientes cl ON p.cliente = cl.idc 
+    WHERE p.id = ? ORDER BY TIMESTAMP(c.fechs) ASC, TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC, r.id DESC;`,
+    Orden
+  );
+
+  const acuerdos = await pool.query(
+    `SELECT * FROM acuerdos a WHERE a.orden = ? AND a.estado IN(7, 9)`,
+    Orden
+  );
+
+  if (Proyeccion.length) {
+    let totalAbonado = 0;
+    let totalMora = 0;
+    let moraAdeudada = 0;
+    let totalDeuda = 0;
+    let totalSaldo = 0;
+    let p = false;
+    let IDs = [];
+    let IdCuotas = [];
+
+    let acuerdoActual = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
+    let totalAcuerdos = acuerdos.length - 1; // se determina el numero de acuerdo vigentes o activos que el cliente a echo con la empresa a lo largo del tiempo
+    let startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+    let stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+    let endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+    let desto = acuerdos[acuerdoActual]?.dcto || 0;
+
+    Proyeccion.map((e, i) => {
+      const IDs2 = IDs.some(s => s === e.ids);
+      const idCqt = IdCuotas.some(s => s === e.idcuota);
+      const actoAmora =
+        acuerdos[acuerdoActual]?.end === undefined
+          ? e.estado === 3 && !idCqt
+          : e.estado === 3 && !idCqt && e.fechs > endDate;
+
+      moraAdeudada += actoAmora ? e.mora : 0;
+      totalMora += e.totalmora + (actoAmora ? e.mora : 0) - e.saldomora;
+      totalSaldo += e.estado === 3 && !idCqt ? e.cuota : 0;
+      totalDeuda += actoAmora ? e.cuota + e.mora : 0;
+
+      if (e.fechs > endDate && acuerdoActual < totalAcuerdos) {
+        acuerdoActual++;
+        desto = acuerdos[acuerdoActual].dcto || 0;
+        startDate = moment(acuerdos[acuerdoActual]?.start || '2017-08-31').format('YYYY-MM-DD'); // fecha en la que entra en vigencia un acuerdo desde la que el sistema empesara a cobrar mora
+        stopDate = moment(acuerdos[acuerdoActual]?.stop).format('YYYY-MM-DD'); // fecha hasta cuando se cobrara o congelara una mora en la que el sistema dejara de cobrar mora
+        endDate = moment(acuerdos[acuerdoActual]?.end).format('YYYY-MM-DD'); // fecha fin de un acuerdo prestablecido en la que el sistema dejara de congelar la mora
+      } else if (e.fechs > endDate) {
+        desto = 0;
+        startDate = '2017-08-31'; // fecha desde la que el sistema empesara a cobrar mora
+        stopDate = null; // fecha hasta en la que el sistema dejara de cobrar mora
+        endDate = moment().format('YYYY-MM-DD');
+      }
+
+      const cobro = e.fechs > startDate && (!stopDate || stopDate > e.fechs) && e.mora; // determinara si debe cobrar mora en la cuota siguiente a analizar
+
+      const TotalDias = cobro
+        ? moment().diff(e.fechs > stopDate ? stopDate : e.fechs, 'days') - e.diaspagados
+        : 0;
+      const TMora = cobro ? (TotalDias * e.cuota * e.tasamora) / 365 : 0; // valor de la mora
+      const TotalMora = TMora - TMora * desto;
+      const TotalCuota = e.cuota + TotalMora;
+      const Ids = IDs2 && e.monto ? false : true;
+
+      e.ids && IDs.push(e.ids);
+      p = e.monto && e.saldocuota ? e : false;
+      e.monto && e.saldocuota && (p.s = { TotalDias, TotalMora, TotalCuota });
+      IdCuotas.push(e.idcuota);
+    });
+
+    const PagosPendientes = await pool.query(
+      `SELECT s.fecharcb, s.fech, s.monto, s.stado, s.ids, s.formap, s.descp 
+      FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id        
+      WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND p.id = ? 
+      AND s.stado IN(3, 4) ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC;`,
+      Orden
+    );
+
+    if (PagosPendientes.length) {
+      PagosPendientes.map((e, i) => (totalAbonado += e.stado != 4 ? 0 : e.monto));
+      totalDeuda = Proyeccion[0].valor - Proyeccion[0].ahorro + totalMora - totalAbonado;
+    }
+    return {
+      montos: totalAbonado,
+      mora: totalMora,
+      morapaga: totalMora - moraAdeudada,
+      adeudada: moraAdeudada,
+      morafutura: 0,
+      saldo: totalSaldo,
+      deuda: totalDeuda
+    };
+  } else {
+    return { sent: false };
+  }
+}
+
 async function EstadoDeCuenta(Orden) {
   const Proyeccion = await pool.query(
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
@@ -3811,6 +3915,7 @@ module.exports = {
   EnviarEmail,
   RecibosCaja,
   EstadoDeCuenta,
+  Montos,
   FacturaDeCobro,
   informes,
   Facturar,
