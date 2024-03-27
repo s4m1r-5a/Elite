@@ -1,5 +1,6 @@
 require('dotenv').config();
 module.exports = {
+  JWT_SECRET: process.env.JWT_SECRET ?? 'secret',
   wasb: process.env.WASB,
   database: {
     connectionLimit: 1000,
@@ -8,6 +9,23 @@ module.exports = {
     password: process.env.BD_PASSWORD,
     database: process.env.DATABASE,
     port: process.env.BD_PORT
+  },
+  SMTP: {
+    host: process.env.SMTP_HOST,
+    port: process.env.SMTP_PORT,
+    secure: process.env.SMTP_SECURE,
+    auth: {
+      user: process.env.SMTP_AUTH_USER,
+      pass: process.env.SMTP_AUTH_PASS
+    }
+  },
+  firebase: {
+    apiKey: 'AIzaSyAcStJNOJ-3jevCw1EduaoRzBvgeM21KSI',
+    authDomain: 'inmovilii.firebaseapp.com',
+    projectId: 'inmovilii',
+    storageBucket: 'inmovilii.appspot.com',
+    messagingSenderId: '91383063458',
+    appId: '1:91383063458:web:5953aef339c55d29f008fb'
   },
   registro: {
     pin: 'hola'

@@ -52,7 +52,7 @@ router.get('/condiciones', async (req, res) => {
 router.post('/wtsp/webhook', async function (req, res) {
   //console.log(req.body);
 });
-router.post('/webhook', async (req, res) => {
+router.post('/webhook1', async (req, res) => {
   const agent = new WebhookClient({ request: req, response: res });
   console.log('Dialogflow Request headers: ' + JSON.stringify(req.headers));
   console.log('Dialogflow Request body: ' + JSON.stringify(req.body));

@@ -21,6 +21,7 @@ const io = require('socket.io');
 const events = require('events');
 const cloudinary = require('./cloudinary');
 const emitter = new events.EventEmitter();
+// const { initBots } = require('./bots');
 const token = config.token,
   apiUrl = config.apiUrl;
 
@@ -138,14 +139,16 @@ app.use((req, res, next) => {
 app.use(require('./routes/index'));
 app.use(require('./routes/authentication'));
 app.use('/links', require('./routes/links'));
+app.use('/webhook', require('./routes/webhooks'));
 //app.use(require('../navegacion'));
 
 // Public
 app.use(express.static(path.join(__dirname, 'public')));
 
 // Starting
-const server = app.listen(app.get('port'), () => {
+const server = app.listen(app.get('port'), async () => {
   console.log('Server is in port', app.get('port'));
+  // await initBots(); // iniciando las sesiones de whatsapp
 });
 
 const socket = io(server);
