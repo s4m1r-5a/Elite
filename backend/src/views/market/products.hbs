@@ -1,0 +1,87 @@
+<main class='content'>
+  <div class='card'>
+    <div class='card-header' id='addProduct' style='display: none;'>
+      <form id='crearproducto' enctype='multipart/form-data'>
+        <div class='form-row'>
+          <div class='col-12'>
+            <a class='r atras' id='cerrarproducto'>
+              <i class='feather-lg float-right mb-3' data-feather='x-circle'></i>
+            </a>
+          </div>
+          <div class='form-group col-md-1'>
+            <label for='id'>Id</label>
+            <input type='text' class='form-control' name='id' readonly />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Nombre</label>
+            <input type='text' class='form-control' name='nombre' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Unid. Medida</label>
+            <select class='form-control measuring' name='medida' required>
+              <option>Seleccione unid medida</option>
+            </select>
+          </div>
+          <div class='form-group col-md-1'>
+            <label for=''>Cant</label>
+            <input type='text' class='form-control' name='cantidad' placeholder='###' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Tipo</label>
+            <input
+              type='text'
+              class='form-control'
+              name='tipo'
+              placeholder='caja-sobre-tableta-etc'
+              required
+            />
+          </div>
+          <div class='form-group col-md-6'>
+            <label for=''>Laboratorio</label>
+            <input type='text' class='form-control' name='laboratorio' required />
+          </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Invima</label>
+            <input class='form-control' type='text' name='invima' required />
+          </div>
+          <div class='form-group col-md-2'>
+            <label for=''>Clase</label>
+            <select class='form-control' name='clase' required>
+              <option value='INDEFINIDA'>Indefinido</option>
+              <option value='COMERCIAL'>Comercial</option>
+              <option value='GENERICA'>Generico</option>
+            </select>
+          </div>
+        </div>
+        <button type='submit' class='btn btn-primary float-right mr-3'>
+          <i class='fas fa-fw fa-plus'></i>
+          Guardar
+        </button>
+        <button type='reset' class='btn btn-danger float-right mr-3'>
+          <i class='fas fa-fw fa-reset'></i>
+          Cancelar
+        </button>
+      </form>
+    </div>
+    <div class='card-body'>
+      <table id='products' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>U/m.</th>
+            <th>Cant.</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Invima</th>
+            <th>Creado</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>

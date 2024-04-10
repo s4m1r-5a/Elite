@@ -1,3 +1,11 @@
+function initMap() {
+  // Crea un nuevo mapa de Google
+  var map = new google.maps.Map(document.getElementById('map'), {
+      center: {lat: -34.397, lng: 150.644}, // Centra el mapa en una ubicación específica
+      zoom: 8 // Establece el nivel de zoom del mapa
+  });
+}
+
 ////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
   maskElements: 'input,td,span,div',
@@ -15,6 +23,71 @@ $.jMaskGlobals = {
     S: { pattern: /[a-zA-Z]/ }
   }
 };
+
+const measuring = [
+  { tag: 'Metros', val: 'm' },
+  { tag: 'Metros cuadrados', val: 'm²' },
+  { tag: 'Metros cubicos', val: 'm³' },
+  { tag: 'Centimetros cubicos', val: 'cm³' },
+  { tag: 'Centimetros', val: 'cm' },
+  { tag: 'Milimetros', val: 'mm' },
+  { tag: 'Kilometros', val: 'km' },
+  { tag: 'Litros', val: 'l' },
+  { tag: 'Mililitros', val: 'ml' },
+  { tag: 'Gramos', val: 'g' },
+  { tag: 'Kilogramos', val: 'kg' },
+  { tag: 'Miligramos', val: 'mg' },
+  { tag: 'Libras', val: 'lb' },
+  { tag: 'Onzas', val: 'oz' },
+  { tag: 'Unidades', val: 'u' },
+  { tag: 'Pares', val: 'par' },
+  { tag: 'Cajas', val: 'c' },
+  { tag: 'Bolsas', val: 'b' },
+  { tag: 'Paquetes', val: 'p' },
+  { tag: 'Rollos', val: 'r' },
+  { tag: 'Galones', val: 'gl' },
+  { tag: 'Barriles', val: 'b' },
+  { tag: 'Toneladas', val: 't' },
+  { tag: 'Miles', val: 'mi' },
+  { tag: 'Yardas', val: 'yd' },
+  { tag: 'Pies', val: 'ft' },
+  { tag: 'Pulgadas', val: 'in' }
+];
+
+function getLocation() {
+  if (navigator.geolocation) {
+    navigator.geolocation.getCurrentPosition(showPosition);
+  } else {
+    alert('La geolocalización no es soportada por este navegador.');
+  }
+}
+
+function showPosition(position) {
+  var latitude = position.coords.latitude;
+  var longitude = position.coords.longitude;
+  alert('Latitud: ' + latitude + '\nLongitud: ' + longitude);
+  geocodeLatLng(latitude, longitude)
+}
+
+function geocodeLatLng(lat, lng) {
+  var geocoder = new google.maps.Geocoder();
+  var latlng = {lat: parseFloat(lat), lng: parseFloat(lng)};
+
+  geocoder.geocode({'location': latlng}, function(results, status) {
+    if (status === 'OK') {
+      if (results[0]) {
+        // console.log(results[0].formatted_address);
+        console.log(results);
+        // Aquí puedes hacer lo que quieras con la dirección obtenida, como mostrarla en tu página HTML
+      } else {
+        console.error('No results found');
+      }
+    } else {
+      console.error('Geocoder failed due to: ' + status);
+    }
+  });
+}
+
 const noCifra = valor => {
   if (!valor) return 0;
   const num = /[^0-9.-]/g.test(valor)
@@ -138,6 +211,7 @@ function Consultar(tipo, code) {
   return datos;
 }
 /*CONSULTAS EN DATATABLES*/
+
 var VER = (tabla, filas) => {
   $(tabla).DataTable().page.len(filas).draw();
 };
@@ -4981,7 +5055,7 @@ if (window.location.pathname === `/links/reportes`) {
       api
         .rows({ order: 'applied', search: 'applied' })
         .data()
-        .map((b) => {
+        .map(b => {
           total += intVal(b.total);
           mora += intVal(b.mora);
           totalventa += intVal(b.total);
@@ -4992,9 +5066,7 @@ if (window.location.pathname === `/links/reportes`) {
       ventauniporcentual = (venta * 100) / productos;
       const rows = api.rows({ order: 'applied', search: 'applied' }).data();
       const img = rows.filter(e => e).map(e => e.imagenes)[0] || 0;
-      log = !img
-        ? 'https://inmovili.com/img/avatars/avatar.svg'
-        : 'https://inmovili.com' + img;
+      log = !img ? 'https://inmovili.com/img/avatars/avatar.svg' : 'https://inmovili.com' + img;
       //console.log(rows.length, log);
     },
     rowCallback: function (row, data, index) {}
@@ -16947,7 +17019,7 @@ if (window.location == `${window.location.origin}/links/pastilleros`) {
       { className: 'control', orderable: true, targets: 0 },
       { responsivePriority: 1, targets: [2, 3, 4, -1] }
     ],
-    order: [[1, 'desc']], //[0, "asc"]
+    order: [[2, 'asc']], //[0, "desc"]
     language: languag2,
     ajax: {
       method: 'POST',
@@ -18321,6 +18393,1458 @@ if (window.location == `${window.location.origin}/links/preventas`) {
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/prueba`) {
 }
+////////////////////////////* MEDICAMENTOS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/market/products`) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+
+  $(document).ready(function () {
+    $('input').prop('autocomplete', 'off');
+    measuring.map(e => $('.measuring').append(new Option(e.tag, e.val, false, false)));
+
+    $('#crearproducto').submit(function (e) {
+      e.preventDefault();
+      var formData = new FormData(document.getElementById('crearproducto'));
+
+      $.ajax({
+        url: '/market/medicamentos',
+        data: formData,
+        type: 'POST',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          if (data) {
+            products.ajax.reload(null, false);
+            SMSj('success', 'Producto creado exitosamente');
+            $('#crearproducto input, select').val(null);
+            $('#ModalEventos').modal('hide');
+            $('#addProd').show('slow');
+            $('#addProduct').hide('slow');
+          }
+        }
+      });
+    });
+
+    $('#cerrarproducto').click(function () {
+      $('#addProd').show('slow');
+      $('#addProduct').hide('slow');
+      $('#crearproducto').trigger('reset');
+    });
+  });
+
+  const products = $('#products').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          listaPrecio();
+        }
+      },
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Medicamento</span>`,
+        attr: {
+          title: 'Agregar-Medicamento',
+          id: 'addProd'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          $('#addProd').hide('slow');
+          $('#addProduct').show('slow');
+          $('#cerrarcompra, #cerrarfactura').trigger('click');
+        }
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [2, 3, 4, -1] }
+    ],
+    order: [[2, 'asc']],
+    language: languag2,
+    ajax: {
+      method: 'GET',
+      url: '/market/medicamentos',
+      dataSrc: 'data'
+    },
+    columns: [
+      {
+        data: null,
+        defaultContent: ''
+      },
+      { data: 'id' },
+      { data: 'nombre' },
+      { data: 'tipo' },
+      { data: 'medida' },
+      {
+        data: 'cantidad',
+        defaultContent: '1'
+      },
+      { data: 'laboratorio' },
+      { data: 'clase' },
+      { data: 'invima' },
+      {
+        data: 'creado',
+        render: function (data, method, row) {
+          return data ? moment(data).format('YYYY-MM-DD') : '';
+        }
+      },
+      {
+        data: 'id',
+        render: function (data, method, row) {
+          return `<a class="eliminar"><i class="fas fa-trash"></i></a>
+          <a class="editar"><i class="fas fa-edit"></i></a>`;
+        }
+      }
+    ]
+  });
+
+  products.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = products.row(fila).data();
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/links/medicamentos/' + id,
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            products.ajax.reload(null, false);
+            SMSj('success', 'Medicamento eliminado exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  products.on('click', 'td .editar', function () {
+    const fila = $(this).parents('tr');
+    const data = products.row(fila).data();
+    const editProducto = $('#crearproducto').find('input, select');
+    $('#addProd').trigger('click');
+    editProducto.each(function (e, i, a) {
+      this.value = data[this.name];
+    });
+  });
+
+  var listaPrecio = () => {
+    $.ajax({
+      url: '/links/listadeprecio',
+      type: 'POST',
+      /* beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          backdrop: 'static',
+          keyboard: true,
+          toggle: true
+        });
+      }, */
+      success: function (data) {
+        if (data) {
+          window.open(data, '_blank');
+        }
+      }
+    });
+  };
+}
+////////////////////////////* PRECIOS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/market/prices`) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  const product = $('.select2');
+  let options = [];
+  let optionsCombos = [];
+  let check = null;
+  const addProduct = `
+  <hr class="mt-0 hrs_products" />
+  <div class='form-row rows_products'>
+    <div class='form-group col-9 col-md-4'>
+      <input type="hidden" name="code">
+      <select class='form-control select2' placeholder='Slec. producto' name='articulo' required>
+      </select>
+    </div>
+    <div class='form-group col-3 col-md-2'>
+      <input type='text' id='cantidad' class='form-control' name='cantidad' placeholder='Cant.' required />
+    </div>
+    <div class='form-group col-12 col-md-6'>
+      <div class='input-group'>
+        <div class='input-group-prepend' title='publicar este item'>
+          <div class='input-group-text'>
+          <input type='checkbox' class='public' onclick='publicProduct(this)' />
+          <input type='hidden' name='visible' value='0' />
+          </div>
+        </div>
+        <input id='price' class='form-control valor' type='text' name='nota' placeholder='Nota del producto' />
+        <div class='input-group-append'>
+          <button class='btn btn-outline-danger' onclick='deleteProduct(this)'>
+            <i class='fas fa-fw fa-trash'></i>
+          </button>
+          <button class='btn btn-outline-primary' onclick='setProduct(this)'>
+            <i class='fas fa-fw fa-plus'></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  $.ajax({
+    url: '/market/medicamentos',
+    type: 'GET',
+    processData: false,
+    contentType: false,
+    success: function ({ data }) {
+      if (data.length) {
+        options = data.map(e => ({
+          id: e.id,
+          text: `${e.nombre} - ${e.laboratorio} - ${e.clase}`
+        }));
+
+        $('.select2')
+          .select2({
+            allowClear: true,
+            data: options,
+            placeholder: { id: null, text: 'Slec. producto', selected: true }
+          })
+          .val(null)
+          .trigger('change');
+
+        // $('#crearcompra').trigger('reset');
+        // droga.val(null).trigger('change');
+      }
+    }
+  });
+
+  $(document).ready(function () {
+    $('#hidelecte, .public').hide();
+    $('input').prop('autocomplete', 'off');
+
+    $('#crearproducto').submit(function (e) {
+      e.preventDefault();
+
+      /* $('#recibos1 .montos').each(function () {
+        $(this).val(noCifra($(this).val()));
+      }); */
+      // document.getElementById('crearproducto')
+      var formData = new FormData(this);
+
+      $.ajax({
+        url: '/market/precios',
+        data: formData,
+        type: 'POST',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          prices.ajax.reload(function (json) {
+            prices_combo.ajax.reload(null, false);
+            SMSj('success', 'Producto creado exitosamente');
+            $('#ModalEventos').modal('hide');
+            changeOptions();
+          });
+        }
+      });
+    });
+
+    $('.form-check-input').on('change', function () {
+      setParams(this);
+    });
+
+    $('.select2').on('change', function () {
+      setOptions(this);
+    });
+
+    $('.img').click(() => $('#inputFile').click());
+
+    $('#inputFile').on('change', function (event) {
+      var file = event.target.files[0]; // Obtener el primer archivo seleccionado
+      var reader = new FileReader();
+
+      reader.onload = function (event) {
+        $('#imagen').prop('src', event.target.result);
+      };
+
+      reader.readAsDataURL(file); // Leer el contenido del archivo como una URL de datos
+    });
+
+    $('#deleteImage').on('click', function () {
+      $('#inputFile').val(null);
+      $('#imagen').prop('src', '/img/subir.png');
+    });
+
+  });
+
+  const prices = $('#prices').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          // listaPrecio();
+        }
+      },
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+        attr: {
+          'data-toggle': 'modal',
+          'data-target': '#AddProduct',
+          title: 'Combo | Producto'
+        },
+        className: 'btn btn-outline-dark'
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true
+      // caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [2, 3, 4, -1] }
+    ],
+    order: [[2, 'asc']],
+    language: languag2,
+    ajax: {
+      method: 'GET',
+      url: '/market/precios',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: null, defaultContent: '' },
+      { data: 'id' },
+      { data: 'nombre' },
+      { data: 'laboratorio' },
+      { data: 'clase' },
+      { data: 'cantidad', defaultContent: '1' },
+      { data: 'name' },
+      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
+      {
+        data: null,
+        render: () => `<a class="eliminar"><i class="fas fa-trash"></i></a>
+                       <a class="editar"><i class="fas fa-edit"></i></a>`
+      }
+    ],
+    initComplete: function (settings, { data }) {
+      changeOptions();
+      /* optionsCombos = data.map(e => ({
+        id: e.id,
+        text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
+      })); */
+    }
+  });
+
+  const prices_combo = $('#prices_combo').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          // listaPrecio();
+        }
+      },
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+        attr: {
+          'data-toggle': 'modal',
+          'data-target': '#AddProduct',
+          title: 'Combo | Producto'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          /* $('#addProd').hide('slow');
+          $('#addProduct').show('slow');
+          $('#cerrarcompra, #cerrarfactura').trigger('click'); */
+        }
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [4, -1] },
+      { visible: false, orderable: true, targets: [1, 2, 3] }
+    ],
+    fixedColumns: {
+      leftColumns: 0
+    },
+    displayLength: 25,
+    order: [[2, 'asc']],
+    language: languag2,
+    ajax: {
+      method: 'GET',
+      url: '/market/precios/1',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: null, defaultContent: '' },
+      { data: 'id' },
+      { data: 'name' },
+      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
+      {
+        data: 'nombre',
+        render: function (data, method, row) {
+          return data ?? row.nam;
+        }
+      },
+      {
+        data: 'laboratorio',
+        render: function (data, method, row) {
+          return data ?? row.laboratory;
+        }
+      },
+      {
+        data: 'clase',
+        render: function (data, method, row) {
+          return data ?? row.class;
+        }
+      },
+      { data: 'cantidad', defaultContent: '1' },
+      {
+        data: 'medida',
+        render: function (data, method, row) {
+          return measuring.find(e => e.val === data)?.tag ?? row.tipo;
+        }
+      },
+      {
+        data: 'valor',
+        defaultContent: '$0',
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
+      }
+    ],
+    drawCallback: function (settings) {
+      const api = this.api();
+      const line = api.rows({ page: 'current' }).nodes();
+      const rows = api.column(0, { page: 'current' }).data();
+      let last = null;
+
+      rows.each(function (row, i) {
+        if (last !== row.id) {
+          $(line).eq(i).before(`
+            <tr class="group">
+              <td colspan="6">
+                <div class="d-flex justify-content-between">
+                  <div class="p-2">${row.id}</div>
+                  <div class="p-2">${row.name}</div>
+                  <div class="p-2">$${Cifra(row.precio)}</div>
+                  <div class="p-2">
+                    <a class="eliminar" id="${row.id}">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                    <a class="editar mr-3" id="${row.id}">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>`);
+
+          last = row.id;
+        }
+      });
+    }
+  });
+
+  prices.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = prices.row(fila).data();
+    let delets = [];
+    let ids = [];
+    prices_combo
+      .rows()
+      .data()
+      .each((row, i) => {
+        const search = delets.findIndex(e => e?.grupo == row.id);
+        if (search < 0)
+          delets.push({ grupo: row.id, name: row.name, combos: 1, exist: row.receta == id });
+        else {
+          const exist = delets[search]?.exist;
+          delets[search].exist = exist || row.receta == id;
+          delets[search].combos += 1;
+        }
+      });
+
+    delets
+      .filter(e => e.exist)
+      .map(e => {
+        if (e?.combos < 3) {
+          ids.push(e.grupo);
+          return alert(
+            `El combo ${e.name} tambien seria eliminado, ya que contendra ${
+              e?.combos - 1
+            } solo articulo, y no esta permitido`
+          );
+        }
+        return alert(`El Articulo tambien seria eliminado del combo ${e.name}`);
+      });
+
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/market/precios/' + id,
+        type: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify(ids),
+        success: function (data) {
+          if (data) {
+            prices.ajax.reload(function (json) {
+              prices_combo.ajax.reload(null, false);
+              SMSj('success', 'Medicamento eliminado exitosamente');
+              changeOptions();
+            });
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  prices.on('click', 'td .editar', function () {
+    const fila = $(this).parents('tr');
+    const data = prices.row(fila).data();
+    const productos = $('#crearproducto').find('input, select, textarea, img');
+
+    productos.each(function (index) {
+      switch (this.type) {
+        case 'select-one':
+          return $(this).val(data[this.name]).trigger('change');
+        case 'checkbox':
+          return $(this).prop('checked', !!data[this.name]);
+        case 'radio':
+          return $(this).prop({
+            checked: this.value === data[this.name],
+            disabled: this.value !== data[this.name]
+          });
+        case undefined:
+          return $(this).prop('src', data[this.id] ?? '/img/subir.png');
+        case 'file':
+          return;
+        default:
+          return (this.value = data[this.name]);
+      }
+    });
+
+    $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  });
+
+  prices_combo.on('click', 'td .editar', function () {
+    $('#hidelecte').show();
+    const productos = $('#crearproducto').find('input, select, textarea, img');
+
+    const setRows = (productos, data) =>
+      productos.each(function (index) {
+        switch (this.type) {
+          case 'select-one':
+            return $(this).val(data[this.name]).trigger('change');
+          case 'checkbox':
+            return $(this).prop('checked', !!data.visible);
+          case 'radio':
+            return $(this).prop({
+              checked: this.value === data[this.name],
+              disabled: this.value !== data[this.name]
+            });
+          case undefined:
+            return $(this).prop('src', data[this.id] ?? '/img/subir.png');
+          case 'file':
+            return;
+          default:
+            return (this.value = data[this.name]);
+        }
+      });
+
+    prices_combo
+      .rows()
+      .data()
+      .filter(e => e.id == this.id)
+      .each((row, i) => {
+        if (!i) {
+          setParams({ value: row.type });
+          return setRows(productos, row);
+        }
+        const elements = setProduct().find('input, select, textarea');
+        setRows(elements, row);
+      });
+
+    $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  });
+
+  prices_combo.on('click', 'td .eliminar', function () {
+    console.log($(this).prop('id'));
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/market/precios/' + $(this).prop('id'),
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            prices_combo.ajax.reload(null, false);
+            SMSj('success', 'Medicamento eliminado exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  $('#AddProduct').on('hidden.bs.modal', function (e) {
+    $('#hidelecte').hide();
+    $('#imagen').prop('src', '/img/subir.png');
+    $('.rows_products, .hrs_products').remove();
+
+    $('#crearproducto')
+      .find('input, textarea')
+      .each(function () {
+        if (this.type === 'checkbox') return $(this).prop('checked', false).hide();
+        else if (this.type === 'radio')
+          return $(this).prop({ checked: this.id === 'a', disabled: false });
+
+        this.value = null;
+      });
+
+    setParams({ value: null });
+
+    $('.select2').find('option').prop('disabled', false).data('oldVal', null);
+  });
+
+  function setProduct(elem) {
+    const element = !elem ? '.form-row:last' : $(elem).parents('.form-row');
+    const newElemnt = $(addProduct).insertAfter(element);
+
+    if (elem || check) {
+      newElemnt
+        .find('.select2')
+        .prop('name', check === 'COMBO' ? 'receta' : 'articulo')
+        .select2({
+          allowClear: true,
+          data: check === 'COMBO' ? optionsCombos : options,
+          placeholder: { id: null, text: 'Slec. producto', selected: true }
+        })
+        .val(null)
+        .trigger('change');
+
+      $('.select2')
+        .not(newElemnt.find('.select2'))
+        .each(function () {
+          if (this.value)
+            newElemnt.find(`.select2 option[value="${this.value}"]`).prop('disabled', true);
+        });
+    }
+
+    if (check === 'RECETA') $('.public').show();
+    else $('.public').hide();
+
+    newElemnt.find('.select2').on('change', function () {
+      setOptions(this);
+    });
+
+    return newElemnt;
+  }
+
+  function setParams(elem) {
+    const { value } = elem;
+    check = value || null;
+    if (value === 'COMBO') {
+      $('.public').hide('slow');
+      $('.plus').prop('disabled', false);
+    } else if (value === 'RECETA') {
+      $('.public').show('slow');
+      $('.plus').prop('disabled', false);
+    } else {
+      $('.public').hide('slow');
+      $('.plus').prop('disabled', true);
+      $('.rows_products, .hrs_products').remove();
+    }
+
+    $('.select2')
+      .each(function () {
+        if (value === 'COMBO') this.name = 'receta';
+        else this.name = 'articulo';
+
+        $(this)
+          .empty()
+          .select2({
+            dropdownParent: $(this).parent(),
+            allowClear: true,
+            data: value === 'COMBO' ? optionsCombos : options,
+            placeholder: {
+              id: null,
+              text: 'SELECCIONE UN PRODUCTO',
+              selected: true
+            }
+          });
+      })
+      .val(null)
+      .trigger('change');
+  }
+
+  function setOptions(elem) {
+    const oldVal = $(elem).data('oldVal') ?? null;
+
+    if (elem.value)
+      $('.select2').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
+    if (oldVal)
+      $('.select2').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
+    else $(elem).data('oldVal', elem.value);
+  }
+
+  function changeOptions() {
+    optionsCombos = [];
+    prices
+      .rows()
+      .data()
+      .map(e =>
+        optionsCombos.push({
+          id: e.id,
+          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
+        })
+      );
+  }
+
+  function  publicProduct(elem) {
+    console.log($(elem).is(':checked'), 'si entro')
+    const element = $(elem).next('input');
+    element.val($(elem).is(':checked') ? 1 : 0);
+  }
+
+  function deleteProduct(elem) {
+    const element = $(elem).parents('.form-row');
+    element.prev('hr').remove();
+    element.remove();
+  }
+
+  /* window.preview = function (input) {
+    console.log(input, 'se ejecuto la funcion')
+    $(input.files).each(function () {
+      var reader = new FileReader();
+      reader.readAsDataURL(this);
+      reader.onload = function (e) {
+        $('#preview').prop('src', e.target.result);
+      };
+    });
+  }; */
+}
+////////////////////////////* COMERCIOS *//////////////////////////////////////////////////////////////////////
+if (window.location == `${window.location.origin}/shops`) {
+  $('.sidebar-item').removeClass('active');
+  $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+  const product = $('.select2');
+  let options = [];
+  let optionsCombos = [];
+  let check = null;
+  const addProduct = `
+  <hr class="mt-0 hrs_products" />
+  <div class='form-row rows_products'>
+    <div class='form-group col-9 col-md-4'>
+      <input type="hidden" name="code">
+      <select class='form-control select2' placeholder='Slec. producto' name='articulo' required>
+      </select>
+    </div>
+    <div class='form-group col-3 col-md-2'>
+      <input type='text' id='cantidad' class='form-control' name='cantidad' placeholder='Cant.' required />
+    </div>
+    <div class='form-group col-12 col-md-6'>
+      <div class='input-group'>
+        <div class='input-group-prepend' title='publicar este item'>
+          <div class='input-group-text'>
+          <input type='checkbox' class='public' onclick='publicProduct(this)' />
+          <input type='hidden' name='visible' value='0' />
+          </div>
+        </div>
+        <input id='price' class='form-control valor' type='text' name='nota' placeholder='Nota del producto' />
+        <div class='input-group-append'>
+          <button class='btn btn-outline-danger' onclick='deleteProduct(this)'>
+            <i class='fas fa-fw fa-trash'></i>
+          </button>
+          <button class='btn btn-outline-primary' onclick='setProduct(this)'>
+            <i class='fas fa-fw fa-plus'></i>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>`;
+
+  $.ajax({
+    url: '/market/medicamentos',
+    type: 'GET',
+    processData: false,
+    contentType: false,
+    success: function ({ data }) {
+      if (data.length) {
+        options = data.map(e => ({
+          id: e.id,
+          text: `${e.nombre} - ${e.laboratorio} - ${e.clase}`
+        }));
+
+        $('.select2')
+          .select2({
+            allowClear: true,
+            data: options,
+            placeholder: { id: null, text: 'Slec. producto', selected: true }
+          })
+          .val(null)
+          .trigger('change');
+
+        // $('#crearcompra').trigger('reset');
+        // droga.val(null).trigger('change');
+      }
+    }
+  });
+
+  $(document).ready(function () {
+    $('#hidelecte, .public').hide();
+    $('input').prop('autocomplete', 'off');
+
+    $('#crearproducto').submit(function (e) {
+      e.preventDefault();
+
+      /* $('#recibos1 .montos').each(function () {
+        $(this).val(noCifra($(this).val()));
+      }); */
+      // document.getElementById('crearproducto')
+      var formData = new FormData(this);
+
+      $.ajax({
+        url: '/market/precios',
+        data: formData,
+        type: 'POST',
+        dataType: 'json',
+        processData: false,
+        contentType: false,
+        beforeSend: function (xhr) {
+          $('#ModalEventos').modal({
+            toggle: true,
+            backdrop: 'static',
+            keyboard: true
+          });
+        },
+        success: function (data) {
+          prices.ajax.reload(function (json) {
+            prices_combo.ajax.reload(null, false);
+            SMSj('success', 'Producto creado exitosamente');
+            $('#ModalEventos').modal('hide');
+            changeOptions();
+          });
+        }
+      });
+    });
+
+    $('.form-check-input').on('change', function () {
+      setParams(this);
+    });
+
+    $('.select2').on('change', function () {
+      setOptions(this);
+    });
+
+    $('.img').click(() => $('#inputFile').click());
+
+    $('#inputFile').on('change', function (event) {
+      var file = event.target.files[0]; // Obtener el primer archivo seleccionado
+      var reader = new FileReader();
+
+      reader.onload = function (event) {
+        $('#imagen').prop('src', event.target.result);
+      };
+
+      reader.readAsDataURL(file); // Leer el contenido del archivo como una URL de datos
+    });
+
+    $('#deleteImage').on('click', function () {
+      $('#inputFile').val(null);
+      $('#imagen').prop('src', '/img/subir.png');
+    });
+
+  });
+
+  const prices = $('#prices').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          // listaPrecio();
+        }
+      },
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+        attr: {
+          'data-toggle': 'modal',
+          'data-target': '#AddProduct',
+          title: 'Combo | Producto'
+        },
+        className: 'btn btn-outline-dark'
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true
+      // caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [2, 3, 4, -1] }
+    ],
+    order: [[2, 'asc']],
+    language: languag2,
+    ajax: {
+      method: 'GET',
+      url: '/market/precios',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: null, defaultContent: '' },
+      { data: 'id' },
+      { data: 'nombre' },
+      { data: 'laboratorio' },
+      { data: 'clase' },
+      { data: 'cantidad', defaultContent: '1' },
+      { data: 'name' },
+      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
+      {
+        data: null,
+        render: () => `<a class="eliminar"><i class="fas fa-trash"></i></a>
+                       <a class="editar"><i class="fas fa-edit"></i></a>`
+      }
+    ],
+    initComplete: function (settings, { data }) {
+      changeOptions();
+      /* optionsCombos = data.map(e => ({
+        id: e.id,
+        text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
+      })); */
+    }
+  });
+
+  const prices_combo = $('#prices_combo').DataTable({
+    dom: 'Bfrtip',
+    lengthMenu: [
+      [10, 25, 50, -1],
+      ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    ],
+    buttons: [
+      {
+        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        attr: {
+          title: 'Listas de precios'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          // listaPrecio();
+        }
+      },
+      {
+        extend: 'collection',
+        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
+        orientation: 'landscape',
+        buttons: [
+          {
+            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
+            extend: 'copy'
+          }
+        ]
+      },
+      {
+        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+        attr: {
+          'data-toggle': 'modal',
+          'data-target': '#AddProduct',
+          title: 'Combo | Producto'
+        },
+        className: 'btn btn-outline-dark',
+        action: function () {
+          /* $('#addProd').hide('slow');
+          $('#addProduct').show('slow');
+          $('#cerrarcompra, #cerrarfactura').trigger('click'); */
+        }
+      }
+    ],
+    deferRender: true,
+    paging: true,
+    autoWidth: true,
+    search: {
+      regex: true,
+      caseInsensitive: true
+    },
+    responsive: {
+      details: {
+        type: 'column'
+      }
+    },
+    columnDefs: [
+      { className: 'control', orderable: true, targets: 0 },
+      { responsivePriority: 1, targets: [4, -1] },
+      { visible: false, orderable: true, targets: [1, 2, 3] }
+    ],
+    fixedColumns: {
+      leftColumns: 0
+    },
+    displayLength: 25,
+    order: [[2, 'asc']],
+    language: languag2,
+    ajax: {
+      method: 'GET',
+      url: '/market/precios/1',
+      dataSrc: 'data'
+    },
+    columns: [
+      { data: null, defaultContent: '' },
+      { data: 'id' },
+      { data: 'name' },
+      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
+      {
+        data: 'nombre',
+        render: function (data, method, row) {
+          return data ?? row.nam;
+        }
+      },
+      {
+        data: 'laboratorio',
+        render: function (data, method, row) {
+          return data ?? row.laboratory;
+        }
+      },
+      {
+        data: 'clase',
+        render: function (data, method, row) {
+          return data ?? row.class;
+        }
+      },
+      { data: 'cantidad', defaultContent: '1' },
+      {
+        data: 'medida',
+        render: function (data, method, row) {
+          return measuring.find(e => e.val === data)?.tag ?? row.tipo;
+        }
+      },
+      {
+        data: 'valor',
+        defaultContent: '$0',
+        render: $.fn.dataTable.render.number('.', '.', 0, '$')
+      }
+    ],
+    drawCallback: function (settings) {
+      const api = this.api();
+      const line = api.rows({ page: 'current' }).nodes();
+      const rows = api.column(0, { page: 'current' }).data();
+      let last = null;
+
+      rows.each(function (row, i) {
+        if (last !== row.id) {
+          $(line).eq(i).before(`
+            <tr class="group">
+              <td colspan="6">
+                <div class="d-flex justify-content-between">
+                  <div class="p-2">${row.id}</div>
+                  <div class="p-2">${row.name}</div>
+                  <div class="p-2">$${Cifra(row.precio)}</div>
+                  <div class="p-2">
+                    <a class="eliminar" id="${row.id}">
+                      <i class="fas fa-trash"></i>
+                    </a>
+                    <a class="editar mr-3" id="${row.id}">
+                      <i class="fas fa-edit"></i>
+                    </a>
+                  </div>
+                </div>
+              </td>
+            </tr>`);
+
+          last = row.id;
+        }
+      });
+    }
+  });
+
+  prices.on('click', 'td .eliminar', function () {
+    const fila = $(this).parents('tr');
+    const { id } = prices.row(fila).data();
+    let delets = [];
+    let ids = [];
+    prices_combo
+      .rows()
+      .data()
+      .each((row, i) => {
+        const search = delets.findIndex(e => e?.grupo == row.id);
+        if (search < 0)
+          delets.push({ grupo: row.id, name: row.name, combos: 1, exist: row.receta == id });
+        else {
+          const exist = delets[search]?.exist;
+          delets[search].exist = exist || row.receta == id;
+          delets[search].combos += 1;
+        }
+      });
+
+    delets
+      .filter(e => e.exist)
+      .map(e => {
+        if (e?.combos < 3) {
+          ids.push(e.grupo);
+          return alert(
+            `El combo ${e.name} tambien seria eliminado, ya que contendra ${
+              e?.combos - 1
+            } solo articulo, y no esta permitido`
+          );
+        }
+        return alert(`El Articulo tambien seria eliminado del combo ${e.name}`);
+      });
+
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/market/precios/' + id,
+        type: 'DELETE',
+        contentType: 'application/json',
+        data: JSON.stringify(ids),
+        success: function (data) {
+          if (data) {
+            prices.ajax.reload(function (json) {
+              prices_combo.ajax.reload(null, false);
+              SMSj('success', 'Medicamento eliminado exitosamente');
+              changeOptions();
+            });
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  prices.on('click', 'td .editar', function () {
+    const fila = $(this).parents('tr');
+    const data = prices.row(fila).data();
+    const productos = $('#crearproducto').find('input, select, textarea, img');
+
+    productos.each(function (index) {
+      switch (this.type) {
+        case 'select-one':
+          return $(this).val(data[this.name]).trigger('change');
+        case 'checkbox':
+          return $(this).prop('checked', !!data[this.name]);
+        case 'radio':
+          return $(this).prop({
+            checked: this.value === data[this.name],
+            disabled: this.value !== data[this.name]
+          });
+        case undefined:
+          return $(this).prop('src', data[this.id] ?? '/img/subir.png');
+        case 'file':
+          return;
+        default:
+          return (this.value = data[this.name]);
+      }
+    });
+
+    $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  });
+
+  prices_combo.on('click', 'td .editar', function () {
+    $('#hidelecte').show();
+    const productos = $('#crearproducto').find('input, select, textarea, img');
+
+    const setRows = (productos, data) =>
+      productos.each(function (index) {
+        switch (this.type) {
+          case 'select-one':
+            return $(this).val(data[this.name]).trigger('change');
+          case 'checkbox':
+            return $(this).prop('checked', !!data.visible);
+          case 'radio':
+            return $(this).prop({
+              checked: this.value === data[this.name],
+              disabled: this.value !== data[this.name]
+            });
+          case undefined:
+            return $(this).prop('src', data[this.id] ?? '/img/subir.png');
+          case 'file':
+            return;
+          default:
+            return (this.value = data[this.name]);
+        }
+      });
+
+    prices_combo
+      .rows()
+      .data()
+      .filter(e => e.id == this.id)
+      .each((row, i) => {
+        if (!i) {
+          setParams({ value: row.type });
+          return setRows(productos, row);
+        }
+        const elements = setProduct().find('input, select, textarea');
+        setRows(elements, row);
+      });
+
+    $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  });
+
+  prices_combo.on('click', 'td .eliminar', function () {
+    console.log($(this).prop('id'));
+    if (confirm('Seguro deseas eliminar este medicamento?')) {
+      $.ajax({
+        url: '/market/precios/' + $(this).prop('id'),
+        type: 'DELETE',
+        success: function (data) {
+          if (data) {
+            prices_combo.ajax.reload(null, false);
+            SMSj('success', 'Medicamento eliminado exitosamente');
+          } else {
+            SMSj('error', 'No es posible eliminar este medicamento.');
+          }
+        }
+      });
+    }
+  });
+
+  $('#AddProduct').on('hidden.bs.modal', function (e) {
+    $('#hidelecte').hide();
+    $('#imagen').prop('src', '/img/subir.png');
+    $('.rows_products, .hrs_products').remove();
+
+    $('#crearproducto')
+      .find('input, textarea')
+      .each(function () {
+        if (this.type === 'checkbox') return $(this).prop('checked', false).hide();
+        else if (this.type === 'radio')
+          return $(this).prop({ checked: this.id === 'a', disabled: false });
+
+        this.value = null;
+      });
+
+    setParams({ value: null });
+
+    $('.select2').find('option').prop('disabled', false).data('oldVal', null);
+  });
+
+  function setProduct(elem) {
+    const element = !elem ? '.form-row:last' : $(elem).parents('.form-row');
+    const newElemnt = $(addProduct).insertAfter(element);
+
+    if (elem || check) {
+      newElemnt
+        .find('.select2')
+        .prop('name', check === 'COMBO' ? 'receta' : 'articulo')
+        .select2({
+          allowClear: true,
+          data: check === 'COMBO' ? optionsCombos : options,
+          placeholder: { id: null, text: 'Slec. producto', selected: true }
+        })
+        .val(null)
+        .trigger('change');
+
+      $('.select2')
+        .not(newElemnt.find('.select2'))
+        .each(function () {
+          if (this.value)
+            newElemnt.find(`.select2 option[value="${this.value}"]`).prop('disabled', true);
+        });
+    }
+
+    if (check === 'RECETA') $('.public').show();
+    else $('.public').hide();
+
+    newElemnt.find('.select2').on('change', function () {
+      setOptions(this);
+    });
+
+    return newElemnt;
+  }
+
+  function setParams(elem) {
+    const { value } = elem;
+    check = value || null;
+    if (value === 'COMBO') {
+      $('.public').hide('slow');
+      $('.plus').prop('disabled', false);
+    } else if (value === 'RECETA') {
+      $('.public').show('slow');
+      $('.plus').prop('disabled', false);
+    } else {
+      $('.public').hide('slow');
+      $('.plus').prop('disabled', true);
+      $('.rows_products, .hrs_products').remove();
+    }
+
+    $('.select2')
+      .each(function () {
+        if (value === 'COMBO') this.name = 'receta';
+        else this.name = 'articulo';
+
+        $(this)
+          .empty()
+          .select2({
+            dropdownParent: $(this).parent(),
+            allowClear: true,
+            data: value === 'COMBO' ? optionsCombos : options,
+            placeholder: {
+              id: null,
+              text: 'SELECCIONE UN PRODUCTO',
+              selected: true
+            }
+          });
+      })
+      .val(null)
+      .trigger('change');
+  }
+
+  function setOptions(elem) {
+    const oldVal = $(elem).data('oldVal') ?? null;
+
+    if (elem.value)
+      $('.select2').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
+    if (oldVal)
+      $('.select2').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
+    else $(elem).data('oldVal', elem.value);
+  }
+
+  function changeOptions() {
+    optionsCombos = [];
+    prices
+      .rows()
+      .data()
+      .map(e =>
+        optionsCombos.push({
+          id: e.id,
+          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
+        })
+      );
+  }
+
+  function  publicProduct(elem) {
+    console.log($(elem).is(':checked'), 'si entro')
+    const element = $(elem).next('input');
+    element.val($(elem).is(':checked') ? 1 : 0);
+  }
+
+  function deleteProduct(elem) {
+    const element = $(elem).parents('.form-row');
+    element.prev('hr').remove();
+    element.remove();
+  }
+}
 function Unidades(num) {
   switch (num) {
     case 1:
@@ -18515,35 +20039,22 @@ function LISTAS(n, fi, ff, p, IMG) {
     FF = moment(ff).format('YYYY-MM-DD');
   var fechs = new Date(ff);
   var months = fechs.getMonth() - fch.getMonth() + 12 * (fechs.getFullYear() - fch.getFullYear());
-  var maxcuotas = 0;
+  let maxcuotas = 0;
 
-  if (months > 102) {
-    maxcuotas = 114;
-  } else if (months > 90) {
-    maxcuotas = 102;
-  } else if (months > 72) {
-    maxcuotas = 90;
-  } else if (months > 60) {
-    maxcuotas = 72;
-  } else if (months > 48) {
-    maxcuotas = 60;
-  } else if (months > 42) {
-    maxcuotas = 48;
-  } else if (months > 36) {
-    maxcuotas = 42;
-  } else if (months > 30) {
-    maxcuotas = 36;
-  } else if (months > 24) {
-    maxcuotas = 30;
-  } else if (months > 18) {
-    maxcuotas = 24;
-  } else if (months > 12) {
-    maxcuotas = 18;
-  } else if (months > 6) {
-    maxcuotas = 12;
-  } else {
-    maxcuotas = 6;
-  }
+  if (months > 102) maxcuotas = 114;
+  else if (months > 90) maxcuotas = 102;
+  else if (months > 72) maxcuotas = 90;
+  else if (months > 60) maxcuotas = 72;
+  else if (months > 48) maxcuotas = 60;
+  else if (months > 42) maxcuotas = 48;
+  else if (months > 36) maxcuotas = 42;
+  else if (months > 30) maxcuotas = 36;
+  else if (months > 24) maxcuotas = 30;
+  else if (months > 18) maxcuotas = 24;
+  else if (months > 12) maxcuotas = 18;
+  else if (months > 6) maxcuotas = 12;
+  else maxcuotas = 6;
+
   var PDF = () => {
     var doc = new jsPDF('p', 'mm', 'a4');
     var img = new Image();

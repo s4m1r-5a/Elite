@@ -1640,7 +1640,7 @@ async function Facturar(numFactura) {
   }
 }
 
-async function Lista() {
+async function Lista(proyect = null) {
   const lista = await pool.query(`SELECT m.*, 
     (SELECT precioVenta FROM compras k WHERE k.droga = m.id ORDER BY k.id DESC LIMIT 1) precio,
     COALESCE((SELECT SUM(c.cantidad) FROM compras c WHERE c.droga = m.id), 0) - 
@@ -1807,6 +1807,210 @@ async function Lista() {
             [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
         ); */
     return ruta;
+  } else {
+    return { sent: false };
+  }
+}
+
+async function ListaLotes(proyectId = null) {
+  const lista =
+    (await pool.query(
+      `SELECT l.*, p.maxfnc, p.maxini, p.proyect, p.imagenes, p.fechaini, p.fechafin 
+      FROM productosd l INNER JOIN productos p ON l.producto = p.id 
+      WHERE l.estado = 9 AND l.producto = ?`,
+      proyectId
+    )) || [];
+
+  const proyect = lista[0];
+
+  console.log({ lista, proyect, proyectId }, !lista);
+
+  if (!proyect) return { sent: false };
+
+  const fecha_actual = new Date();
+  const fecha_fin = new Date(proyect?.fechafin);
+
+  const FI = moment(proyect?.fechaini).format('YYYY-MM-DD');
+  const FF = moment(proyect?.fechafin).format('YYYY-MM-DD');
+
+  const months =
+    fecha_fin.getMonth() -
+    fecha_actual.getMonth() +
+    12 * (fecha_fin.getFullYear() - fecha_actual.getFullYear());
+
+  let maxcuotas = 0;
+
+  if (months > 102) maxcuotas = 114;
+  else if (months > 90) maxcuotas = 102;
+  else if (months > 72) maxcuotas = 90;
+  else if (months > 60) maxcuotas = 72;
+  else if (months > 48) maxcuotas = 60;
+  else if (months > 42) maxcuotas = 48;
+  else if (months > 36) maxcuotas = 42;
+  else if (months > 30) maxcuotas = 36;
+  else if (months > 24) maxcuotas = 30;
+  else if (months > 18) maxcuotas = 24;
+  else if (months > 12) maxcuotas = 18;
+  else if (months > 6) maxcuotas = 12;
+  else maxcuotas = 6;
+
+  if (lista.length) {
+    const cuerpo = [
+      [
+        { text: `Mz`, style: 'tableHeader', alignment: 'center' },
+        { text: 'Lote', style: 'tableHeader', alignment: 'center' },
+        { text: 'Area', style: 'tableHeader', alignment: 'center' },
+        { text: 'Estado', style: 'tableHeader', alignment: 'center' },
+        { text: 'Valor', style: 'tableHeader', alignment: 'center' },
+        { text: 'inicial', style: 'tableHeader', alignment: 'center' },
+        { text: `Valor Mt2`, style: 'tableHeader', alignment: 'center' },
+        { text: 'Cuotas Max', style: 'tableHeader', alignment: 'center' },
+        { text: 'Valor cuotas', style: 'tableHeader', alignment: 'center' }
+      ]
+    ];
+
+    lista.map(e =>
+      cuerpo.push([
+        e.mz,
+        e.n,
+        e.mtr2,
+        'Disponible',
+        '$' + Cifra(e.valor),
+        '$' + Cifra(e.inicial),
+        '$' + Cifra(e.valor / e.mtr2),
+        (e.maxfnc ? parseFloat(e.maxfnc) : maxcuotas) - e.maxini,
+        '$' +
+          Cifra((e.valor - e.inicial) / ((e.maxfnc ? parseFloat(e.maxfnc) : maxcuotas) - e.maxini))
+      ])
+    );
+
+    ////////////////////////* CREAR PDF *//////////////////////////////
+    const printer = new PdfPrinter(Roboto);
+    let docDefinition = {
+      background: function (currentPage, pageSize) {
+        return {
+          image: path.join(__dirname, '/public/' + proyect.imagenes),
+          width: pageSize.width,
+          opacity: 0.1
+        };
+      },
+      pageSize: 'a4',
+      header: function (currentPage, pageCount, pageSize) {
+        return {
+          alignment: 'right',
+          margin: [10, 3, 10, 3],
+          columns: [
+            {
+              text: moment().format('lll'),
+              alignment: 'left',
+              margin: [10, 15, 15, 0],
+              italics: true,
+              color: 'gray',
+              fontSize: 7
+            },
+            {
+              width: 20,
+              alignment: 'right',
+              margin: [10, 3, 10, 3],
+              image: path.join(__dirname, '/public/' + proyect.imagenes),
+              fit: [20, 20]
+            }
+          ]
+        };
+      },
+      info: {
+        title: 'Factura',
+        author: 'Inmovilii',
+        subject: 'Factura de venta',
+        keywords: 'Factura de venta de medicamentos',
+        creator: 'Inmovilii',
+        producer: 'IMOVI'
+      },
+      content: [
+        {
+          columns: [
+            [
+              { text: proyect.proyect + ' LISTA DE LOTES DISPONIBLES', style: 'header' },
+              {
+                fontSize: 11,
+                italics: true,
+                text: [
+                  '\nProyecto iniciado en ',
+                  { text: FI, bold: true, color: 'blue' },
+                  'y proyectado a finalizar en ',
+                  { text: FF, bold: true, color: 'blue' }
+                ]
+              }
+            ],
+            {
+              width: 100,
+              image: path.join(__dirname, '/public/' + proyect.imagenes),
+              fit: [100, 100]
+            }
+          ]
+        },
+        {
+          style: 'tableBody',
+          color: '#444',
+          table: {
+            widths: ['auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto', 'auto'],
+            body: cuerpo
+          }
+        }
+      ],
+      styles: {
+        header: {
+          fontSize: 13,
+          bold: true,
+          margin: [0, 0, 0, 10]
+        },
+        subheader: {
+          fontSize: 11,
+          bold: true,
+          margin: [0, 5, 0, 2]
+        },
+        tableBody: {
+          fontSize: 9,
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader: {
+          bold: true,
+          fontSize: 9,
+          color: 'black'
+        },
+        small: {
+          fontSize: 8,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        smallx: {
+          fontSize: 7,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        },
+        tableBody2: {
+          margin: [0, 5, 0, 5]
+        },
+        tableHeader2: {
+          bold: true,
+          fontSize: 13,
+          color: 'black'
+        },
+        small2: {
+          fontSize: 9,
+          italics: true,
+          color: 'gray',
+          alignment: 'right'
+        }
+      }
+    };
+    let ruta = path.join(__dirname, `/public/uploads/listaprecio_${proyectId}.pdf`);
+    let pdfDoc = printer.createPdfKitDocument(docDefinition);
+    pdfDoc.pipe(fs.createWriteStream(ruta));
+    pdfDoc.end();
+    return `/uploads/listaprecio_${proyectId}.pdf`;
   } else {
     return { sent: false };
   }
@@ -2591,6 +2795,7 @@ async function EstadoDeCuenta(Orden) {
     return { sent: false };
   }
 }
+
 async function informes(data) {
   // arreglar esto
   const { datos, maxDateFilter, minDateFilter } = data;
@@ -3175,6 +3380,7 @@ async function informes(data) {
 
   return ruta;
 }
+
 async function ReciboDeCaja(movil, nombre, author) {
   const estado =
     await pool.query(`SELECT pd.valor - p.ahorro AS total, pt.proyect, cu.pin AS cupon, cp.pin AS bono, s.stado, 
@@ -3532,6 +3738,7 @@ async function ReciboDeCaja(movil, nombre, author) {
     return { sent: false };
   }
 }
+
 async function Saldos(lote, fecha, solicitud) {
   console.log(lote, solicitud, fecha);
   const u = await pool.query(`SELECT * FROM solicitudes WHERE concepto IN('PAGO', 'ABONO') 
@@ -3550,6 +3757,7 @@ async function Saldos(lote, fecha, solicitud) {
 
   return acumulado;
 }
+
 async function RecibosCaja(movil, nombre, author, reci) {
   const cel = movil.slice(-10);
   let sql = `SELECT l.valor - p.ahorro AS total, d.proyect, cu.pin AS cupon, cp.pin AS bono, s.stado, p.lote, c.direccion,
@@ -3842,6 +4050,7 @@ async function RecibosCaja(movil, nombre, author, reci) {
     return false;
   }
 }
+
 async function apiChatApi(method, params) {
   const apiUrl = 'https://eu89.chat-api.com/instance107218';
   const token = '5jn3c5dxvcj27fm0';
@@ -3921,5 +4130,6 @@ module.exports = {
   Facturar,
   consultCompany,
   consultDocument,
-  Lista
+  Lista,
+  ListaLotes
 };

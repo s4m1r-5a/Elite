@@ -1,0 +1,217 @@
+<main class='content'>
+  <div class='card shadow-lg mb-5 rounded'>
+    <div class='card-header bg-dark rounded-top'>
+      <h3 class='text-white'>Tabla de precios</h3>
+    </div>
+    <div class='card-body rounded-bottom'>
+      <table id='prices' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Medicamento</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Cant.</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class='card shadow-lg mb-5 rounded'>
+    <div class='card-header bg-dark rounded-top'>
+      <h3 class='text-white'>Tabla de combos</h3>
+    </div>
+    <div class='card-body rounded-bottom'>
+      <table id='prices_combo' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Meicamento</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Cantidad</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='AddProduct' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
+    <form id='crearproducto' enctype='multipart/form-data'>
+      <div class='modal-content card'>
+        <div class='modal-header'>
+          <h3 class='modal-title'>Creacion de combos y precios</h3>
+          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
+            <i class='feather-lg' data-feather='x-circle'></i>
+          </a>
+        </div>
+        <div class='modal-body p-3 bg-light'>
+          <div class='card mb-3 rounded-top'>
+            <div class='row no-gutters'>
+              <div class='col-md-4 position-relative'>
+                <a class='r atras position-absolute' id="deleteImage" style='top: 5%; left: 5%;'>
+                  <i class='feather-md' data-feather='x-circle'></i>
+                </a>
+                <img id='imagen' type='img' src='/img/subir.png' class='img-fluid' alt='...' />
+                <button
+                  type='button'
+                  class='position-absolute btn btn-sm btn-outline-primary img'
+                  style='bottom: 5%; left: 80%;'
+                >
+                  <i class='fas fa-fw fa-upload'></i>
+                </button>
+              </div>
+              <div class='col-md-8'>
+                <div class='card-body'>
+                  <h5 class='card-title'>Datos del grupo</h5>
+                  <div class='form-row'>
+                    <div class='form-group col-md-2 col-2'>
+                      <input type='file' name='image' id='inputFile' style='display: none;' />
+                      <input type='text' class='form-control' name='id' readonly />
+                    </div>
+                    <div class='form-group col-md-6 col-10'>
+                      <input
+                        type='text'
+                        class='form-control'
+                        name='name'
+                        placeholder='Nombre'
+                        required
+                      />
+                    </div>
+                    <div class='form-group col-md-4'>
+                      <input
+                        type='text'
+                        class='form-control valor'
+                        name='precio'
+                        placeholder='Precio'
+                        required
+                      />
+                    </div>
+                    <div class='form-group col-md-12'>
+                      {{! <label for=''>Descripcion</label> }}
+                      <textarea
+                        rows='2'
+                        class='form-control'
+                        name='descripcion'
+                        placeholder='Describe tu producto de forma general'
+                        required
+                      ></textarea>
+                    </div>
+                  </div>
+                  <div class='form-row'>
+                    <div class='form-group col-md-12 text-right'>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          id='a'
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          value='UNITARIO'
+                          checked
+                          required
+                        />
+                        <label class='form-check-label' for='a'>Unitario</label>
+                      </div>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          id='b'
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          value='COMBO'
+                          required
+                        />
+                        <label class='form-check-label' for='b'>Combo</label>
+                      </div>
+                      <div class='form-check form-check-inline'>
+                        <input
+                          id='c'
+                          class='form-check-input'
+                          type='radio'
+                          name='type'
+                          value='RECETA'
+                          required
+                        />
+                        <label class='form-check-label' for='c'>Receta</label>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class='form-row'>
+            <div class='form-group col-9 col-md-4'>
+              <input type='hidden' name='code' />
+              <select class='form-control select2 droga' name='articulo' required></select>
+            </div>
+            <div class='form-group col-3 col-md-2'>
+              <input
+                type='text'
+                class='form-control'
+                name='cantidad'
+                placeholder='Cant.'
+                required
+              />
+            </div>
+            <div class='form-group col-12 col-md-6'>
+              <div class='input-group'>
+                <div class='input-group-prepend' title='publicar este item'>
+                  <div class='input-group-text'>
+                    <input type='checkbox' class='public' onclick='publicProduct(this)' />
+                    <input type='hidden' name='visible' value='0' />
+                  </div>
+                </div>
+                <input class='form-control' type='text' name='nota' placeholder='Nota producto' />
+                <div class='input-group-append'>
+                  <button
+                    class='btn btn-outline-danger'
+                    id='hidelecte'
+                    onclick='deleteProduct(this)'
+                  >
+                    <i class='fas fa-fw fa-trash'></i>
+                  </button>
+                  <button class='btn btn-outline-primary plus' onclick='setProduct(this)' disabled>
+                    <i class='fas fa-fw fa-plus'></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class='modal-footer'>
+          <button
+            type='reset'
+            class='btn btn-outline-danger'
+            data-dismiss='modal'
+            aria-label='Close'
+          >
+            <i class='fas fa-fw fa-ban'></i>
+            Cancelar
+          </button>
+          <button type='submit' class='btn btn-outline-primary'>
+            <i class='fas fa-fw fa-plus'></i>
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- END primary modal -->

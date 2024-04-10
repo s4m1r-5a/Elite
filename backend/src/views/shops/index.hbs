@@ -1,0 +1,171 @@
+<main class='content'>
+  <div class='card shadow-lg mb-5 rounded'>
+    <div class='card-header bg-dark rounded-top'>
+      <h3 class='text-white'>COMERCIOS</h3>
+    </div>
+    <div class='card-body rounded-bottom'>
+      <table id='prices' class='table table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Medicamento</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Cant.</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='AddProduct' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+    <form id='crearproducto' enctype='multipart/form-data'>
+      <div class='modal-content card'>
+        <div class='modal-header'>
+          <h3 class='modal-title'>Creacion de comercios</h3>
+          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
+            <i class='feather-lg' data-feather='x-circle'></i>
+          </a>
+        </div>
+        <div class='modal-body p-3 bg-light'>
+          <div class='row no-gutters'>
+            <div class='col-md-4 position-relative'>
+              <a class='r atras position-absolute' id='deleteImage' style='top: 5%; left: 5%;'>
+                <i class='feather-md' data-feather='x-circle'></i>
+              </a>
+              <img id='imagen' type='img' src='/img/subir.png' class='img-fluid' alt='...' />
+              <button
+                type='button'
+                class='position-absolute btn btn-sm btn-outline-primary img'
+                style='bottom: 5%; left: 80%;'
+              >
+                <i class='fas fa-fw fa-upload'></i>
+              </button>
+            </div>
+            <div class='col-md-8'>
+              <div class='card-body'>
+                <h5 class='card-title'>Datos del comercio</h5>
+                <div class='form-row'>
+                  <div class='form-group col-md-2 col-2'>
+                    <input type='file' name='image' id='inputFile' style='display: none;' />
+                    <input type='text' class='form-control edi' name='id' readonly />
+                  </div>
+                  <div class='form-group col-md-6 col-10'>
+                    <input
+                      type='text'
+                      class='form-control edi'
+                      name='nombre'
+                      placeholder='Nombre'
+                      required
+                    />
+                  </div>
+                  <div class='form-group col-md-4'>
+                    <input
+                      type='text'
+                      class='form-control valor edi'
+                      name='nit'
+                      placeholder='Nit'
+                      required
+                    />
+                  </div>
+                  <div class='form-group col-md-6'>
+                    <input
+                      type='text'
+                      class='form-control edi'
+                      name='email'
+                      placeholder='Email'
+                      required
+                    />
+                  </div>
+                  <div class='form-group col-md-6'>
+                    <div class='input-group'>
+                      <div class='input-group-prepend'>
+                        <span class='input-group-text' id='Movl'>+57</span>
+                      </div>
+                      <input
+                        type='text'
+                        class='form-control edi'
+                        placeholder='Telefono'
+                        autocomplete='off'
+                        name='movil'
+                        data-mask='000 000 0000'
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div class='form-group col-md-12'>
+                    <input
+                      type='text'
+                      class='form-control edi'
+                      name='direccion'
+                      placeholder='Direccion del comercio'
+                      required
+                    />
+                  </div>
+                  <div class='form-group col-md-6'>
+                    <div class='input-group'>
+                      <div class='input-group-prepend'>
+                        <span class='input-group-text'>Ubicacion</span>
+                      </div>
+                      <input
+                        type='text'
+                        class='form-control form-control-no-border'
+                        placeholder='Latitud'
+                        autocomplete='off'
+                        name='latitud'
+                        readonly
+                      />
+                    </div>
+                  </div>
+                  <div class='form-group col-md-6'>
+                    <div class='input-group'>
+                      <input
+                        type='text'
+                        class='form-control form-control-no-border'
+                        placeholder='Longitud'
+                        autocomplete='off'
+                        name='longitud'
+                        readonly
+                      />
+                      <div class='input-group-append'>
+                        <button class='btn btn-outline-primary' onclick='getLocation()'>
+                          <i class='feather-md' data-feather='map-pin'></i>
+                          Obtener
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div id="map"></div>
+        </div>
+        <div class='modal-footer'>
+          <button
+            type='reset'
+            class='btn btn-outline-danger'
+            data-dismiss='modal'
+            aria-label='Close'
+          >
+            <i class='fas fa-fw fa-ban'></i>
+            Cancelar
+          </button>
+          <button type='submit' class='btn btn-outline-primary'>
+            <i class='fas fa-fw fa-plus'></i>
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- END primary modal -->

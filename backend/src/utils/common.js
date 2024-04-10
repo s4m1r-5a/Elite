@@ -1,5 +1,6 @@
 const fs = require('fs');
 const path = require('path');
+const { route } = require('../routes/market');
 
 // Función para validar emails
 module.exports.validEmail = email =>
@@ -67,3 +68,22 @@ module.exports.accountingAccountNumber = string => {
 
   return account;
 };
+
+module.exports.DeleteFile = (img) => {
+  const url = img.split('/uploads/')[1] ?? 'kdk.jpg';
+
+  const route = path.join(__dirname, '../public/uploads/', url);
+  console.log(img, url, route)
+  fs.exists(route, function (exists) {
+    if (exists) {
+      fs.unlink(route, function (err) {
+        if (err) throw err;
+        console.log('Archivo eliminado');
+        return 'Archivo eliminado';
+      });
+    } else {
+      console.log('El archivo no exise');
+      return 'El archivo no exise';
+    }
+  });
+}

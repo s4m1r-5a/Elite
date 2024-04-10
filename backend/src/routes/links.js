@@ -8964,7 +8964,7 @@ async function Desendentes(user, stados, pasado) {
   return true;
 }
 async function Eli(img) {
-  //path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf')
+  path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf')
   fs.exists(img, function (exists) {
     if (exists) {
       fs.unlink(img, function (err) {

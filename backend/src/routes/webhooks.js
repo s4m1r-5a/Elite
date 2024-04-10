@@ -5,6 +5,7 @@ const { verifyToken } = require('../lib/auth');
 const { wasb, registro, dataSet, Contactos } = require('../keys');
 const axios = require('axios');
 const moment = require('moment');
+const { EstadoDeCuenta, Lista, ListaLotes } = require('../functions');
 
 router.post('/bot/:event', verifyToken, async (req, res) => {
   const { event } = req.params;
@@ -22,7 +23,7 @@ router.post('/bot/:event', verifyToken, async (req, res) => {
         'address', c.direccion,
         'birthday', c.fechanacimiento,
         'type', 'client',
-        'productos', JSON_ARRAYAGG(
+        'products', JSON_ARRAYAGG(
           JSON_OBJECT(
             'order', p.id,
             'type', 'Terreno',
@@ -53,12 +54,34 @@ router.post('/bot/:event', verifyToken, async (req, res) => {
     );
 
     if (client.length > 0) return res.json(client.map(e => JSON.parse(e.usuario)));
+  } else if (event === 'state-account') {
+    if (!data?.orden) return res.json({ type: 'error', msg: 'No se ha enviado la orden' });
+    await EstadoDeCuenta(data?.orden);
+    return res.json({ url: `https://inmovili.com/uploads/estadodecuenta-${data?.orden}.pdf` });
   }
 
   return res.json({
     type: 'error',
     msg: `Evento no encontrado: ${event}`
   });
+});
+
+router.get('/bot/state-account/:order', verifyToken, async (req, res) => {
+  const { order } = req.params;
+  if (!order) return res.json({ type: 'error', msg: 'No se ha enviado la orden' });
+  await EstadoDeCuenta(order);
+  return res.json({
+    url: `https://inmovili.com/uploads/estadodecuenta-${order}.pdf`,
+    urlDev: `https://rnzs1973-4000.use2.devtunnels.ms/uploads/estadodecuenta-${order}.pdf`
+  });
+});
+
+router.get('/bot/price-list/:proyect', verifyToken, async (req, res) => {
+  const { proyect } = req.params;
+  if (!proyect) return res.json({ type: 'error', msg: 'No se ha enviado la orden' });
+  const ruta = await ListaLotes(proyect);
+  console.log({ ruta });
+  return res.json({ url: `https://inmovili.com${ruta}`, urlDev: `https://rnzs1973-4000.use2.devtunnels.ms${ruta}` });
 });
 
 module.exports = router;
