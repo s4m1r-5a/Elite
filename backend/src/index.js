@@ -141,6 +141,7 @@ app.use(require('./routes/authentication'));
 app.use('/links', require('./routes/links'));
 app.use('/market', require('./routes/market'));
 app.use('/shops', require('./routes/shops'));
+app.use('/consults', require('./routes/consults'));
 app.use('/webhook', require('./routes/webhooks'));
 //app.use(require('../navegacion'));
 

@@ -1,8 +1,8 @@
 function initMap() {
   // Crea un nuevo mapa de Google
   var map = new google.maps.Map(document.getElementById('map'), {
-      center: {lat: -34.397, lng: 150.644}, // Centra el mapa en una ubicación específica
-      zoom: 8 // Establece el nivel de zoom del mapa
+    center: { lat: -34.397, lng: 150.644 }, // Centra el mapa en una ubicación específica
+    zoom: 8 // Establece el nivel de zoom del mapa
   });
 }
 
@@ -54,7 +54,7 @@ const measuring = [
   { tag: 'Pulgadas', val: 'in' }
 ];
 
-function getLocation() {
+/* function getLocation() {
   if (navigator.geolocation) {
     navigator.geolocation.getCurrentPosition(showPosition);
   } else {
@@ -66,7 +66,7 @@ function showPosition(position) {
   var latitude = position.coords.latitude;
   var longitude = position.coords.longitude;
   alert('Latitud: ' + latitude + '\nLongitud: ' + longitude);
-  geocodeLatLng(latitude, longitude)
+  // geocodeLatLng(latitude, longitude)
 }
 
 function geocodeLatLng(lat, lng) {
@@ -86,7 +86,7 @@ function geocodeLatLng(lat, lng) {
       console.error('Geocoder failed due to: ' + status);
     }
   });
-}
+} */
 
 const noCifra = valor => {
   if (!valor) return 0;
@@ -18652,7 +18652,7 @@ if (window.location == `${window.location.origin}/market/prices`) {
   });
 
   $(document).ready(function () {
-    $('#hidelecte, .public').hide();
+    $('#hidelecte, .public, #carga').hide();
     $('input').prop('autocomplete', 'off');
 
     $('#crearproducto').submit(function (e) {
@@ -18671,12 +18671,8 @@ if (window.location == `${window.location.origin}/market/prices`) {
         dataType: 'json',
         processData: false,
         contentType: false,
-        beforeSend: function (xhr) {
-          $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true
-          });
+        beforeSend: function () {
+          $('#carga').show('slow');
         },
         success: function (data) {
           prices.ajax.reload(function (json) {
@@ -18685,6 +18681,12 @@ if (window.location == `${window.location.origin}/market/prices`) {
             $('#ModalEventos').modal('hide');
             changeOptions();
           });
+        },
+        error: function (data) {
+          SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
+        },
+        complete: function () {
+          $('#carga').hide('slow');
         }
       });
     });
@@ -18714,7 +18716,6 @@ if (window.location == `${window.location.origin}/market/prices`) {
       $('#inputFile').val(null);
       $('#imagen').prop('src', '/img/subir.png');
     });
-
   });
 
   const prices = $('#prices').DataTable({
@@ -19197,8 +19198,8 @@ if (window.location == `${window.location.origin}/market/prices`) {
       );
   }
 
-  function  publicProduct(elem) {
-    console.log($(elem).is(':checked'), 'si entro')
+  function publicProduct(elem) {
+    console.log($(elem).is(':checked'), 'si entro');
     const element = $(elem).next('input');
     element.val($(elem).is(':checked') ? 1 : 0);
   }
@@ -19260,35 +19261,8 @@ if (window.location == `${window.location.origin}/shops`) {
     </div>
   </div>`;
 
-  $.ajax({
-    url: '/market/medicamentos',
-    type: 'GET',
-    processData: false,
-    contentType: false,
-    success: function ({ data }) {
-      if (data.length) {
-        options = data.map(e => ({
-          id: e.id,
-          text: `${e.nombre} - ${e.laboratorio} - ${e.clase}`
-        }));
-
-        $('.select2')
-          .select2({
-            allowClear: true,
-            data: options,
-            placeholder: { id: null, text: 'Slec. producto', selected: true }
-          })
-          .val(null)
-          .trigger('change');
-
-        // $('#crearcompra').trigger('reset');
-        // droga.val(null).trigger('change');
-      }
-    }
-  });
-
   $(document).ready(function () {
-    $('#hidelecte, .public').hide();
+    $('#carga, #status_off').hide();
     $('input').prop('autocomplete', 'off');
 
     $('#crearproducto').submit(function (e) {
@@ -19301,36 +19275,28 @@ if (window.location == `${window.location.origin}/shops`) {
       var formData = new FormData(this);
 
       $.ajax({
-        url: '/market/precios',
+        url: '/shops',
         data: formData,
         type: 'POST',
         dataType: 'json',
         processData: false,
         contentType: false,
-        beforeSend: function (xhr) {
-          $('#ModalEventos').modal({
-            toggle: true,
-            backdrop: 'static',
-            keyboard: true
-          });
+        beforeSend: function () {
+          $('#carga').show('slow');
         },
         success: function (data) {
-          prices.ajax.reload(function (json) {
-            prices_combo.ajax.reload(null, false);
-            SMSj('success', 'Producto creado exitosamente');
-            $('#ModalEventos').modal('hide');
-            changeOptions();
+          shops.ajax.reload(function (json) {
+            SMSj('success', 'Comercio creado exitosamente');
+            $('#AddProduct').modal('hide');
           });
+        },
+        error: function (data) {
+          SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
+        },
+        complete: function () {
+          $('#carga').hide('slow');
         }
       });
-    });
-
-    $('.form-check-input').on('change', function () {
-      setParams(this);
-    });
-
-    $('.select2').on('change', function () {
-      setOptions(this);
     });
 
     $('.img').click(() => $('#inputFile').click());
@@ -19346,14 +19312,24 @@ if (window.location == `${window.location.origin}/shops`) {
       reader.readAsDataURL(file); // Leer el contenido del archivo como una URL de datos
     });
 
+    $('#estado').on('change', function (event) {
+      let on = '#status_';
+      let off = on;
+
+      if (this.checked) on+='on', off+='off', this.value = 1;
+      else on+='off', off+='on', this.value = 0;
+
+      $(on).show('slow')
+      $(off).hide('slow')
+    });
+
     $('#deleteImage').on('click', function () {
       $('#inputFile').val(null);
       $('#imagen').prop('src', '/img/subir.png');
     });
-
   });
 
-  const prices = $('#prices').DataTable({
+  const shops = $('#shops').DataTable({
     dom: 'Bfrtip',
     lengthMenu: [
       [10, 25, 50, -1],
@@ -19361,25 +19337,23 @@ if (window.location == `${window.location.origin}/shops`) {
     ],
     buttons: [
       {
-        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
+        text: `<i class="align-middle mr-2" data-feather="home"></i>`,
         attr: {
-          title: 'Listas de precios'
+          title: 'Buscar comercios cerca'
         },
         className: 'btn btn-outline-dark',
         action: function () {
-          // listaPrecio();
+          $('#ModalEventos').modal('show');
+          $('#AddProduct').modal('hide');
+          getLocation().then(({ latitude, longitude }) => {
+            shops.ajax.url(`/shops/table/${latitude}/${longitude}`).load(function () {
+              shops.columns.adjust().responsive.recalc();
+              $('#ModalEventos').modal('hide');
+            });
+          }).catch(error => {
+            console.error('Error al obtener las coordenadas:', error);
+          });
         }
-      },
-      {
-        extend: 'collection',
-        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
-        orientation: 'landscape',
-        buttons: [
-          {
-            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-            extend: 'copy'
-          }
-        ]
       },
       {
         text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
@@ -19411,176 +19385,34 @@ if (window.location == `${window.location.origin}/shops`) {
     language: languag2,
     ajax: {
       method: 'GET',
-      url: '/market/precios',
+      url: '/shops/table',
       dataSrc: 'data'
     },
     columns: [
       { data: null, defaultContent: '' },
       { data: 'id' },
       { data: 'nombre' },
-      { data: 'laboratorio' },
-      { data: 'clase' },
-      { data: 'cantidad', defaultContent: '1' },
-      { data: 'name' },
-      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
+      { data: 'nit', defaultContent: 'Sin registro' },
+      { data: 'movil' },
+      { data: 'email', defaultContent: 'sininfo@noinfo.com' },
+      { data: 'metros', defaultContent: 'Sin calcular' },
+      { data: 'direccion' },
+      { data: 'fullName', defaultContent: 'No registra' },
+      { data: 'fullname' },
+      { data: 'creado' },
+      { data: 'estado' },
       {
         data: null,
-        render: () => `<a class="eliminar"><i class="fas fa-trash"></i></a>
-                       <a class="editar"><i class="fas fa-edit"></i></a>`
+        render: () => `<a class="eliminar"><i class="fas fa-trash"></i></a> |
+                       <a class="editar"><i class="fas fa-edit"></i></a> |
+                       <a class="compartir"><i class="fas fa-share-alt"></i></a>`
       }
-    ],
-    initComplete: function (settings, { data }) {
-      changeOptions();
-      /* optionsCombos = data.map(e => ({
-        id: e.id,
-        text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
-      })); */
-    }
+    ]
   });
 
-  const prices_combo = $('#prices_combo').DataTable({
-    dom: 'Bfrtip',
-    lengthMenu: [
-      [10, 25, 50, -1],
-      ['10 filas', '25 filas', '50 filas', 'Ver todo']
-    ],
-    buttons: [
-      {
-        text: `<i class="align-middle mr-2" data-feather="file"></i>`,
-        attr: {
-          title: 'Listas de precios'
-        },
-        className: 'btn btn-outline-dark',
-        action: function () {
-          // listaPrecio();
-        }
-      },
-      {
-        extend: 'collection',
-        text: '<i class="align-middle feather-md" data-feather="menu"></i>',
-        orientation: 'landscape',
-        buttons: [
-          {
-            text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-            extend: 'copy'
-          }
-        ]
-      },
-      {
-        text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
-        attr: {
-          'data-toggle': 'modal',
-          'data-target': '#AddProduct',
-          title: 'Combo | Producto'
-        },
-        className: 'btn btn-outline-dark',
-        action: function () {
-          /* $('#addProd').hide('slow');
-          $('#addProduct').show('slow');
-          $('#cerrarcompra, #cerrarfactura').trigger('click'); */
-        }
-      }
-    ],
-    deferRender: true,
-    paging: true,
-    autoWidth: true,
-    search: {
-      regex: true,
-      caseInsensitive: true
-    },
-    responsive: {
-      details: {
-        type: 'column'
-      }
-    },
-    columnDefs: [
-      { className: 'control', orderable: true, targets: 0 },
-      { responsivePriority: 1, targets: [4, -1] },
-      { visible: false, orderable: true, targets: [1, 2, 3] }
-    ],
-    fixedColumns: {
-      leftColumns: 0
-    },
-    displayLength: 25,
-    order: [[2, 'asc']],
-    language: languag2,
-    ajax: {
-      method: 'GET',
-      url: '/market/precios/1',
-      dataSrc: 'data'
-    },
-    columns: [
-      { data: null, defaultContent: '' },
-      { data: 'id' },
-      { data: 'name' },
-      { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
-      {
-        data: 'nombre',
-        render: function (data, method, row) {
-          return data ?? row.nam;
-        }
-      },
-      {
-        data: 'laboratorio',
-        render: function (data, method, row) {
-          return data ?? row.laboratory;
-        }
-      },
-      {
-        data: 'clase',
-        render: function (data, method, row) {
-          return data ?? row.class;
-        }
-      },
-      { data: 'cantidad', defaultContent: '1' },
-      {
-        data: 'medida',
-        render: function (data, method, row) {
-          return measuring.find(e => e.val === data)?.tag ?? row.tipo;
-        }
-      },
-      {
-        data: 'valor',
-        defaultContent: '$0',
-        render: $.fn.dataTable.render.number('.', '.', 0, '$')
-      }
-    ],
-    drawCallback: function (settings) {
-      const api = this.api();
-      const line = api.rows({ page: 'current' }).nodes();
-      const rows = api.column(0, { page: 'current' }).data();
-      let last = null;
-
-      rows.each(function (row, i) {
-        if (last !== row.id) {
-          $(line).eq(i).before(`
-            <tr class="group">
-              <td colspan="6">
-                <div class="d-flex justify-content-between">
-                  <div class="p-2">${row.id}</div>
-                  <div class="p-2">${row.name}</div>
-                  <div class="p-2">$${Cifra(row.precio)}</div>
-                  <div class="p-2">
-                    <a class="eliminar" id="${row.id}">
-                      <i class="fas fa-trash"></i>
-                    </a>
-                    <a class="editar mr-3" id="${row.id}">
-                      <i class="fas fa-edit"></i>
-                    </a>
-                  </div>
-                </div>
-              </td>
-            </tr>`);
-
-          last = row.id;
-        }
-      });
-    }
-  });
-
-  prices.on('click', 'td .eliminar', function () {
+  shops.on('click', 'td .eliminar', function () {
     const fila = $(this).parents('tr');
-    const { id } = prices.row(fila).data();
+    const { id } = shops.row(fila).data();
     let delets = [];
     let ids = [];
     prices_combo
@@ -19632,17 +19464,15 @@ if (window.location == `${window.location.origin}/shops`) {
     }
   });
 
-  prices.on('click', 'td .editar', function () {
+  shops.on('click', 'td .editar', function () {
     const fila = $(this).parents('tr');
-    const data = prices.row(fila).data();
-    const productos = $('#crearproducto').find('input, select, textarea, img');
+    const data = shops.row(fila).data();
+    const shops = $('#crearproducto').find('input, select, textarea, img');
 
-    productos.each(function (index) {
+    shops.each(function (index) {
       switch (this.type) {
-        case 'select-one':
-          return $(this).val(data[this.name]).trigger('change');
         case 'checkbox':
-          return $(this).prop('checked', !!data[this.name]);
+          return $(this).prop('checked', !!(data[this.name] * 1)).val(data[this.name]);
         case 'radio':
           return $(this).prop({
             checked: this.value === data[this.name],
@@ -19660,184 +19490,63 @@ if (window.location == `${window.location.origin}/shops`) {
     $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
   });
 
-  prices_combo.on('click', 'td .editar', function () {
-    $('#hidelecte').show();
-    const productos = $('#crearproducto').find('input, select, textarea, img');
-
-    const setRows = (productos, data) =>
-      productos.each(function (index) {
-        switch (this.type) {
-          case 'select-one':
-            return $(this).val(data[this.name]).trigger('change');
-          case 'checkbox':
-            return $(this).prop('checked', !!data.visible);
-          case 'radio':
-            return $(this).prop({
-              checked: this.value === data[this.name],
-              disabled: this.value !== data[this.name]
-            });
-          case undefined:
-            return $(this).prop('src', data[this.id] ?? '/img/subir.png');
-          case 'file':
-            return;
-          default:
-            return (this.value = data[this.name]);
-        }
-      });
-
-    prices_combo
-      .rows()
-      .data()
-      .filter(e => e.id == this.id)
-      .each((row, i) => {
-        if (!i) {
-          setParams({ value: row.type });
-          return setRows(productos, row);
-        }
-        const elements = setProduct().find('input, select, textarea');
-        setRows(elements, row);
-      });
-
-    $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
-  });
-
-  prices_combo.on('click', 'td .eliminar', function () {
-    console.log($(this).prop('id'));
-    if (confirm('Seguro deseas eliminar este medicamento?')) {
-      $.ajax({
-        url: '/market/precios/' + $(this).prop('id'),
-        type: 'DELETE',
-        success: function (data) {
-          if (data) {
-            prices_combo.ajax.reload(null, false);
-            SMSj('success', 'Medicamento eliminado exitosamente');
-          } else {
-            SMSj('error', 'No es posible eliminar este medicamento.');
-          }
-        }
-      });
-    }
-  });
-
   $('#AddProduct').on('hidden.bs.modal', function (e) {
-    $('#hidelecte').hide();
     $('#imagen').prop('src', '/img/subir.png');
-    $('.rows_products, .hrs_products').remove();
 
     $('#crearproducto')
       .find('input, textarea')
       .each(function () {
-        if (this.type === 'checkbox') return $(this).prop('checked', false).hide();
+        if (this.type === 'checkbox') return $(this).prop('checked', false);
         else if (this.type === 'radio')
           return $(this).prop({ checked: this.id === 'a', disabled: false });
 
         this.value = null;
       });
-
-    setParams({ value: null });
-
-    $('.select2').find('option').prop('disabled', false).data('oldVal', null);
   });
 
-  function setProduct(elem) {
-    const element = !elem ? '.form-row:last' : $(elem).parents('.form-row');
-    const newElemnt = $(addProduct).insertAfter(element);
-
-    if (elem || check) {
-      newElemnt
-        .find('.select2')
-        .prop('name', check === 'COMBO' ? 'receta' : 'articulo')
-        .select2({
-          allowClear: true,
-          data: check === 'COMBO' ? optionsCombos : options,
-          placeholder: { id: null, text: 'Slec. producto', selected: true }
-        })
-        .val(null)
-        .trigger('change');
-
-      $('.select2')
-        .not(newElemnt.find('.select2'))
-        .each(function () {
-          if (this.value)
-            newElemnt.find(`.select2 option[value="${this.value}"]`).prop('disabled', true);
-        });
-    }
-
-    if (check === 'RECETA') $('.public').show();
-    else $('.public').hide();
-
-    newElemnt.find('.select2').on('change', function () {
-      setOptions(this);
+  function consultarDocu() {
+    const num = $('#docNumber').val();
+    const type = $('#docType').val() ?? 'CC';
+    $.ajax({
+      url: '/consults/document/' + type + '/' + num,
+      type: 'GET',
+      beforeSend: function () {
+        $('#carga').show('slow');
+      },
+      success: function (data) {
+        $('#person').val(data?.id || null);
+        $('#fullName')
+          .prop('readonly', true)
+          .val(data?.fullName || null);
+      },
+      error: function (data) {
+        $('#person').val(null);
+        $('#fullName').prop('readonly', false).focus();
+        SMSj('error', 'No se encontro el documento');
+      },
+      complete: function () {
+        $('#carga').hide('slow');
+      }
     });
-
-    return newElemnt;
   }
 
-  function setParams(elem) {
-    const { value } = elem;
-    check = value || null;
-    if (value === 'COMBO') {
-      $('.public').hide('slow');
-      $('.plus').prop('disabled', false);
-    } else if (value === 'RECETA') {
-      $('.public').show('slow');
-      $('.plus').prop('disabled', false);
-    } else {
-      $('.public').hide('slow');
-      $('.plus').prop('disabled', true);
-      $('.rows_products, .hrs_products').remove();
-    }
-
-    $('.select2')
-      .each(function () {
-        if (value === 'COMBO') this.name = 'receta';
-        else this.name = 'articulo';
-
-        $(this)
-          .empty()
-          .select2({
-            dropdownParent: $(this).parent(),
-            allowClear: true,
-            data: value === 'COMBO' ? optionsCombos : options,
-            placeholder: {
-              id: null,
-              text: 'SELECCIONE UN PRODUCTO',
-              selected: true
-            }
-          });
-      })
-      .val(null)
-      .trigger('change');
-  }
-
-  function setOptions(elem) {
-    const oldVal = $(elem).data('oldVal') ?? null;
-
-    if (elem.value)
-      $('.select2').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
-    if (oldVal)
-      $('.select2').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
-    else $(elem).data('oldVal', elem.value);
-  }
-
-  function changeOptions() {
-    optionsCombos = [];
-    prices
-      .rows()
-      .data()
-      .map(e =>
-        optionsCombos.push({
-          id: e.id,
-          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
-        })
-      );
-  }
-
-  function  publicProduct(elem) {
-    console.log($(elem).is(':checked'), 'si entro')
-    const element = $(elem).next('input');
-    element.val($(elem).is(':checked') ? 1 : 0);
-  }
+  function getLocation() {
+    return new Promise((resolve, reject) => {
+      if (navigator.geolocation) {
+        navigator.geolocation.getCurrentPosition(position => {
+          const { latitude, longitude, ...rest } = position.coords;
+          $('#latitud').val(latitude);
+          $('#longitud').val(longitude);
+          console.log({ latitude, longitude, rest })
+          resolve({ latitude, longitude });
+        }, error => {
+          reject(error);
+        });
+      } else {
+        reject('La geolocalización no es soportada por este navegador.');
+      }
+    });
+  }  
 
   function deleteProduct(elem) {
     const element = $(elem).parents('.form-row');
