@@ -5,10 +5,8 @@
   <meta charset="utf-8">
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width, shrink-to-fit=no">
-  <!--<meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">-->
   <meta name="description" content="Bienes Raices &amp; RedElite Finca Raiz">
   <meta name="author" content="RETFLY">
-  <!--Let browser know website is optimized for mobile-->
   <title>RED ELITE</title>
   <link rel="icon" href="https://www.grupoelitefincaraiz.com/img/avatars/avatar.ico">
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
@@ -18,9 +16,6 @@
   
     <!-- Bootstrap core CSS -->
   <link href="/css/bootstrap.min.css" rel="stylesheet">
-
-  <!-- PICK ONE OF THE STYLES BELOW -->
-  <!-- <link href="css/classic.css" rel="stylesheet"> -->
   <link href="/css/corporate.css" rel="stylesheet">
   <!-- <link href="/css/modern.css" rel="stylesheet"> -->
   <!-- <script src="//site.com/playerjs.js" type="text/javascript"></script> -->
@@ -568,26 +563,6 @@
 
   {{!-- <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC0Ahtp4GSCxBlABtie3m3BTzWCg-eQ4UE&loading=async&callback=initMap" defer></script> --}}
 
-
-</head>
-
-<body>
-  {{#if user}}
-  <div class="wrapper">
-    {{>navigation}}
-    <div class="main">
-      {{>navigation2}}
-      {{{ body }}}
-      {{>footer}}
-    </div>
-  </div>
-  {{else}}
-  {{{ body }}}
-  {{/if}}
-
-  {{!--<script src="https://cdn.jsdelivr.net/npm/jquery@3.5.1/dist/jquery.slim.min.js" integrity="sha384-DfXdz2htPH0lsSSs5nCTpuj/zy4C+OGpamoFVy38MVBnE+IbbVYUew+OrCXaRkfj" crossorigin="anonymous"></script>
-   <script>window.jQuery || document.write('<script src="../assets/js/vendor/jquery.slim.min.js"><\/script>')</script><script src="../assets/dist/js/bootstrap.bundle.min.js"></script> --}}
-
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/pdfmake.min.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/pdfmake/0.1.53/vfs_fonts.js"></script>
   <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/1.5.3/jspdf.min.js"></script>
@@ -605,6 +580,21 @@
   <script src="/js/playerjs.js"> </script>
   <script src=" https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.min.js"> </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/velocity/1.2.3/velocity.ui.min.js"></script>
+</head>
+
+<body>
+  {{#if user}}
+  <div class="wrapper">
+    {{>navigation}}
+    <div class="main">
+      {{>navigation2}}
+      {{{ body }}}
+      {{>foo/footer}}
+    </div>
+  </div>
+  {{else}}
+  {{{ body }}}
+  {{/if}} 
 
   {{>message}}
 </body>

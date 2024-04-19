@@ -1,0 +1,239 @@
+<main class='content'>
+  <input type='hidden' id='idType' value='{{idType}}' />
+  <input type='hidden' id='type' value='{{type}}' />
+
+  <div class='accordion' id='accordionExample'>
+    <div class='card shadow-lg rounded'>
+      <div class='card-header bg-dark' id='headingOne'>
+        <h2 class='mb-0'>
+          <button
+            class='btn btn-link btn-block text-left'
+            type='button'
+            data-toggle='collapse'
+            data-target='#collapseOne'
+            aria-expanded='true'
+            aria-controls='collapseOne'
+          >
+            Collapsible Group Item #1
+          </button>
+        </h2>
+      </div>
+
+      <div
+        id='collapseOne'
+        class='collapse show'
+        aria-labelledby='headingOne'
+        data-parent='#accordionExample'
+      >
+        <div class='card-body'>
+          Some placeholder content for the first accordion panel. This panel is shown by default,
+          thanks to the
+          <code>.show</code>
+          class.
+        </div>
+      </div>
+    </div>
+    <div class='card shadow-lg rounded'>
+      <div class='card-header' id='headingTwo'>
+        <h2 class='mb-0'>
+          <button
+            class='btn btn-link btn-block text-left collapsed'
+            type='button'
+            data-toggle='collapse'
+            data-target='#collapseTwo'
+            aria-expanded='false'
+            aria-controls='collapseTwo'
+          >
+            Collapsible Group Item #2
+          </button>
+        </h2>
+      </div>
+      <div
+        id='collapseTwo'
+        class='collapse'
+        aria-labelledby='headingTwo'
+        data-parent='#accordionExample'
+      >
+        <div class='card-body'>
+          Some placeholder content for the second accordion panel. This panel is hidden by default.
+        </div>
+      </div>
+    </div>
+    <div class='card shadow-lg rounded'>
+      <div class='card-header' id='headingThree'>
+        <h2 class='mb-0'>
+          <button
+            class='btn btn-link btn-block text-left collapsed'
+            type='button'
+            data-toggle='collapse'
+            data-target='#collapseThree'
+            aria-expanded='false'
+            aria-controls='collapseThree'
+          >
+            Collapsible Group Item #3
+          </button>
+        </h2>
+      </div>
+      <div
+        id='collapseThree'
+        class='collapse'
+        aria-labelledby='headingThree'
+        data-parent='#accordionExample'
+      >
+        <div class='card-body'>
+          And lastly, the placeholder content for the third and final accordion panel. This panel is
+          hidden by default.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class='card shadow-lg mb-5 rounded'>
+    <div class='card-header bg-dark rounded-top'>
+      <h3 class='text-white'>Tabla de precios</h3>
+    </div>
+    <div class='card-body rounded-bottom'>
+
+      <table id='prices' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Medicamento</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Cant.</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Accion</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class='card shadow-lg mb-5 rounded'>
+    <div class='card-header bg-dark rounded-top'>
+      <h3 class='text-white'>Tabla de combos</h3>
+    </div>
+    <div class='card-body rounded-bottom'>
+      <table id='prices_combo' class='table table-sm table-striped display nowrap w-100'>
+        <thead>
+          <tr>
+            <th></th>
+            <th>Id</th>
+            <th>Nombre</th>
+            <th>Precio</th>
+            <th>Meicamento</th>
+            <th>Laboratorio</th>
+            <th>Clase</th>
+            <th>Cantidad</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+          </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='AddProduct' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-lg' role='document'>
+    <form id='crearproducto' enctype='multipart/form-data' class='w-100'>
+      <div class='modal-content card position-relative'>
+        <div
+          class='position-absolute w-100 h-100'
+          id='carga'
+          style='left: 0; top: 0; z-index: 1000; background-color: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;'
+        >
+          <div class='text-white' style='text-align: center;'>
+            <i class='fas fa-spinner fa-pulse fa-2x'></i>
+            <strong class='mt-2'>Cargando...</strong>
+          </div>
+        </div>
+        <div class='modal-header'>
+          <h3 class='modal-title'>Creacion de orden</h3>
+          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
+            <i class='feather-lg' data-feather='x-circle'></i>
+          </a>
+        </div>
+        <div class='modal-body p-3 bg-light'>
+          <div class='form-row'>
+            <div class='form-group col-9 col-md-4'>
+              <input type='hidden' name='code' />
+              <select class='form-control select2' name='producto' required></select>
+            </div>
+            <div class='form-group col-3 col-md-2'>
+              <input
+                type='text'
+                class='form-control edi'
+                name='cantidad'
+                value='1'
+                placeholder='Cant.'
+                required
+              />
+            </div>
+            <div class='form-group col-12 col-md-6'>
+              <div class='input-group'>
+                <input
+                  class='form-control edi'
+                  type='text'
+                  name='nota'
+                  placeholder='Nota producto'
+                />
+                <div class='input-group-append'>
+                  <button
+                    class='btn btn-outline-danger'
+                    id='hidelecte'
+                    onclick='deleteProduct(this)'
+                  >
+                    <i class='fas fa-fw fa-trash'></i>
+                  </button>
+                  <button
+                    class='btn btn-outline-primary plus'
+                    type='button'
+                    onclick='setProduct(this)'
+                  >
+                    <i class='fas fa-fw fa-plus'></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div id='sesion' class='btn-group btn-group-toggle' data-toggle='buttons'>
+            <label class='btn btn-outline-primary'>
+              <input type='radio' name='type' id='domicilios' value="domicilio" />
+              Domicilio
+            </label>
+            <label class='btn btn-outline-primary'>
+              <input type='radio' name='type' id='mesas' value="mesa" />
+              Mesas
+            </label>
+          </div>
+        </div>
+        <div class='modal-footer'>
+          <button
+            type='reset'
+            class='btn btn-outline-danger'
+            data-dismiss='modal'
+            aria-label='Close'
+          >
+            <i class='fas fa-fw fa-ban'></i>
+            Cancelar
+          </button>
+          <button type='submit' class='btn btn-outline-primary'>
+            <i class='fas fa-fw fa-plus'></i>
+            Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- END primary modal -->
+
+<script src='/controllers/orders.js'></script>

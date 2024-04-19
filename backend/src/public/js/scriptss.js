@@ -19554,6 +19554,8 @@ if (window.location == `${window.location.origin}/shops`) {
     element.remove();
   }
 }
+
+
 function Unidades(num) {
   switch (num) {
     case 1:
