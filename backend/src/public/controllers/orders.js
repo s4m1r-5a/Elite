@@ -1,6 +1,8 @@
 $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 const product = $('.select2');
+const type = $('#type').val() ?? null;
+const idType = $('#idType').val() ?? null;
 
 const mesas = [
   { id: 1, zona: '', name: 'mesa', numero: '1', puestos: '4', estado: 9, mesero: '', orden: '' },
@@ -72,6 +74,8 @@ $(document).ready(function () {
   $('#hidelecte, .public, #carga').hide();
   $('input').prop('autocomplete', 'off');
 
+  if (type) $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true })
+
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
 
@@ -108,10 +112,11 @@ $(document).ready(function () {
     });
   });
 
-  $('#option2').on('change', function () {
-    if (this.checked) {
+  $('#mesas').on('change', function () {
+    /* if (this.checked) {
       $('.mesa').button('toggle');
-    }
+    } */
+    const id = type === 'mesa' ? idType : null;
 
     $(
       `<div class='form-row mt-3'>` +
@@ -119,8 +124,17 @@ $(document).ready(function () {
           .map(
             e => `<div class="col-12 col-md-4 mb-2">
                   <div class="btn-group-toggle mesa" data-toggle="buttons">
-                    <label class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block">
-                      <input type="checkbox" name="mesa" value="${e.id}"> 
+                    <label 
+                     class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block"
+                     ${e.id == id ? 'active' : ''}
+                    >
+                      <input 
+                       type="checkbox" 
+                       name="mesa" 
+                       data-order=${e.orden ?? null}
+                       value="${e.id}" 
+                       ${e.id == id ? 'checked' : ''}
+                      > 
                       ${e.name} ${e.numero}
                     </label>
                   </div>
@@ -525,18 +539,16 @@ prices_combo.on('click', 'td .eliminar', function () {
 });
 
 $('#AddProduct').on('shown.bs.modal', function (e) {
-  const type = $('#type').val() ?? null;
-  const idType = $('#idType').val() ?? null;
-
   if (type === 'mesa' && idType) {
-    $('#option2').prop('checked', true);
-    $('.mesa').button('toggle');
-    $(`input[value="${idType}"]`).prop('checked', true);
-  
+    const element = $('#mesas');
+    element.prop('checked', true).parent('label').addClass('active');
+    element.trigger('change');
+  }
 });
 
 $('#AddProduct').on('hidden.bs.modal', function (e) {
   $('#hidelecte').hide();
+  $('.mesa').button('toggle');
   $('#imagen').prop('src', '/img/subir.png');
   $('.rows_products, .hrs_products').remove();
 
