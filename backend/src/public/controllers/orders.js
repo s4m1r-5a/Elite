@@ -1,34 +1,33 @@
 $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
-const product = $('.select2');
+$('#row_domicilio').hide();
+
+const product = $('.products');
 const type = $('#type').val() ?? null;
 const idType = $('#idType').val() ?? null;
 
-const mesas = [
-  { id: 1, zona: '', name: 'mesa', numero: '1', puestos: '4', estado: 9, mesero: '', orden: '' },
-  { id: 2, zona: '', name: 'mesa', numero: '2', puestos: '4', estado: 9, mesero: '', orden: '' },
-  { id: 3, zona: '', name: 'mesa', numero: '3', puestos: '4', estado: 9, mesero: '', orden: '23' },
-  { id: 4, zona: '', name: 'mesa', numero: '4', puestos: '4', estado: 9, mesero: '', orden: '' },
-  { id: 5, zona: '', name: 'mesa', numero: '5', puestos: '4', estado: 9, mesero: '', orden: '2' },
-  { id: 6, zona: '', name: 'mesa', numero: '6', puestos: '4', estado: 9, mesero: '', orden: '' }
-];
+let comercios = [];
+let products = [];
+let mesas = [];
+let comercio = [];
 let options = [];
 let optionsCombos = [];
 let check = null;
 const addProduct = `
-    <hr class="mt-0 hrs_products" />
-    <div class='form-row rows_products'>
+    <div class='form-row rows_products pedido'>
       <div class='form-group col-9 col-md-4'>
-        <input type="hidden" name="code">
-        <select class='form-control select2' placeholder='Slec. producto' name='producto' required>
+        <input class='code' type='hidden' name='code' />
+        <input type='hidden' name='unitario' />
+        <input type='hidden' name='monto' />
+        <select class='form-control products' placeholder='Slec. producto' name='producto' required>
         </select>
       </div>
       <div class='form-group col-3 col-md-2'>
-        <input type='text' id='cantidad' class='form-control' name='cantidad' placeholder='Cant.' required />
+        <input type='text' class='form-control cantidad edi' name='cantidad' placeholder='Cant.' required />
       </div>
       <div class='form-group col-12 col-md-6'>
         <div class='input-group'>
-          <input id='price' class='form-control valor' type='text' name='nota' placeholder='Nota del producto' />
+          <input class='form-control edi' type='text' name='nota' placeholder='Nota del producto' />
           <div class='input-group-append'>
             <button class='btn btn-outline-danger' type="button" onclick='deleteProduct(this)'>
               <i class='fas fa-fw fa-trash'></i>
@@ -42,23 +41,45 @@ const addProduct = `
     </div>`;
 
 $.ajax({
+  url: '/shops/table',
+  type: 'GET',
+  processData: false,
+  contentType: false,
+  success: function ({ data }) {
+    if (data.length) {
+      comercios = data;
+      comercio = comercios.map(e => ({ id: e.id, text: `${e.id} - ${e.nombre}` }));
+    }
+  }
+});
+
+$.ajax({
+  url: '/orders/mesas',
+  type: 'GET',
+  async: !type,
+  success: function ({ data }) {
+    mesas = data;
+  }
+});
+
+$.ajax({
   url: '/products/table/all',
   type: 'GET',
   processData: false,
   contentType: false,
   success: function ({ data }) {
     if (data.length) {
-      options = data
-        .filter((obj, i, self) => i === self.findIndex(e => e.id === obj.id))
-        .map(e => {
-          if (e.combo) return { id: e.id, text: `${e.name}` };
-          return {
-            id: e.id,
-            text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name} X ${e.cantidad}`
-          };
-        });
+      products = data.filter((obj, i, self) => i === self.findIndex(e => e.id === obj.id));
 
-      $('.select2')
+      options = products.map(e => {
+        if (e.combo) return { id: e.id, text: `${e.name}` };
+        return {
+          id: e.id,
+          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name} X ${e.cantidad}`
+        };
+      });
+
+      product
         .select2({
           allowClear: true,
           data: options,
@@ -66,6 +87,8 @@ $.ajax({
         })
         .val(null)
         .trigger('change');
+
+      console.log(products);
     }
   }
 });
@@ -73,20 +96,18 @@ $.ajax({
 $(document).ready(function () {
   $('#hidelecte, .public, #carga').hide();
   $('input').prop('autocomplete', 'off');
-
-  if (type) $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true })
+  if (type) $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
 
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
 
-    /* $('#recibos1 .montos').each(function () {
-          $(this).val(noCifra($(this).val()));
-        }); */
+    $('#total').val(noCifra($('#total').val()));
+
     // document.getElementById('crearproducto')
     var formData = new FormData(this);
 
     $.ajax({
-      url: '/products',
+      url: '/orders',
       data: formData,
       type: 'POST',
       dataType: 'json',
@@ -96,11 +117,15 @@ $(document).ready(function () {
         $('#carga').show('slow');
       },
       success: function (data) {
-        prices.ajax.reload(function (json) {
-          prices_combo.ajax.reload(null, false);
-          SMSj('success', 'Producto creado exitosamente');
-          $('#ModalEventos').modal('hide');
-          changeOptions();
+        ordenes.ajax.reload(function ({ data }) {
+          console.log(data);
+          SMSj('success', 'Orden creada exitosamente');
+          $('#AddProduct').modal('hide');
+          data
+            .filter((obj, i, self) => obj.mesa && i === self.findIndex(e => e.id === obj.id))
+            .forEach(e => {
+              mesas = mesas.map(m => (m.id == e.mesa ? { ...m, orden: e.id } : m));
+            });
         });
       },
       error: function (data) {
@@ -112,26 +137,73 @@ $(document).ready(function () {
     });
   });
 
+  $('#domicilio').on('change', function () {
+    $('#row_mesas').remove();
+    if ($('#row_domicilio').length) return $('#row_domicilio').show('slow');
+
+    $(`<div id='row_domicilio' class='form-row' style="display: none;">
+        <div class='form-group col-12 col-md-4'>
+          <input type='hidden' name='di' />
+          <input type='hidden' name='recibe' />
+          <select id='comercio' class='form-control' name='comercio' required></select>
+        </div>
+        <div class='form-group col-12 col-md-3'>
+          <div class='input-group'>
+            <div class='input-group-prepend'>
+              <span class='input-group-text' id='Movl'>+57</span>
+            </div>
+            <input type='text' class='form-control edi' placeholder='Telefono' name='movil' data-mask='000 000 0000' required/>
+          </div>
+        </div>
+        <div class='form-group col-12 col-md-5'>
+          <input type='text' class='form-control' name='direccion' placeholder='Direccion' required/>
+        </div>
+        <div class='form-group col-12'>
+          <input type='text' class='form-control' name='referencia' placeholder='Referencia para llegar al domicilio' required/>
+        </div>
+      </div>`)
+      .insertAfter('#sesion')
+      .show('slow');
+
+    $('#comercio')
+      .select2({
+        tags: true,
+        allowClear: true,
+        data: comercio,
+        placeholder: { id: null, text: 'Sleccione cliente', selected: true }
+      })
+      .val(null)
+      .css('width', '100%')
+      .trigger('change');
+
+    $('.select2-container').css('width', '100%', 'important');
+
+    $('#comercio').on('change', function () {
+      const text = $(this).find('option:selected').text();
+      $(this).siblings('input[name="recibe"]').val(text);
+    });
+  });
+
   $('#mesas').on('change', function () {
-    /* if (this.checked) {
-      $('.mesa').button('toggle');
-    } */
     const id = type === 'mesa' ? idType : null;
+    $('#row_domicilio').remove();
+    if ($('#row_mesas').length) return $('#row_mesas').show('slow');
 
     $(
-      `<div class='form-row mt-3'>` +
+      `<div class='form-row mt-3' id='row_mesas' style="display: none;">` +
         mesas
           .map(
-            e => `<div class="col-12 col-md-4 mb-2">
+            e => `<div class="col-6 col-md-2 mb-2">
                   <div class="btn-group-toggle mesa" data-toggle="buttons">
                     <label 
-                     class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block"
-                     ${e.id == id ? 'active' : ''}
+                     class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block 
+                     ${e.id == id ? 'active' : ''}"                     
                     >
                       <input 
-                       type="checkbox" 
+                       id="${e.id}"
+                       type="radio" 
                        name="mesa" 
-                       data-order=${e.orden ?? null}
+                       data-order="${e.orden ?? null}"
                        value="${e.id}" 
                        ${e.id == id ? 'checked' : ''}
                       > 
@@ -142,37 +214,41 @@ $(document).ready(function () {
           )
           .join('\n') +
         `</div>`
-    ).insertAfter('#sesion');
+    )
+      .insertAfter('#sesion')
+      .show('slow');
+
+    $('.mesa').on('click', function () {
+      $('.mesa').not(this).button('toggle');
+      const order = $(this).find('input').data('order') ?? null;
+      $('input.code[value!=""]').parents('.rows_products').remove();
+      $('#id').val(order);
+      calcTotal(this);
+
+      if (order) {
+        ordenes
+          .rows()
+          .data()
+          .filter(e => e.id == order)
+          .each((row, i) => {
+            const elements = setProduct(false, false, true).find('input, select');
+            setRows(elements, row);
+          });
+      }
+    });
   });
 
-  $('.form-check-input').on('change', function () {
-    setParams(this);
-  });
-
-  $('.select2').on('change', function () {
-    setOptions(this);
-  });
-
-  $('.img').click(() => $('#inputFile').click());
-
-  $('#inputFile').on('change', function (event) {
-    var file = event.target.files[0]; // Obtener el primer archivo seleccionado
-    var reader = new FileReader();
-
-    reader.onload = function (event) {
-      $('#imagen').prop('src', event.target.result);
-    };
-
-    reader.readAsDataURL(file); // Leer el contenido del archivo como una URL de datos
-  });
-
-  $('#deleteImage').on('click', function () {
-    $('#inputFile').val(null);
-    $('#imagen').prop('src', '/img/subir.png');
+  $('.products, .cantidad').on('change', function () {
+    if (this.name === 'producto') {
+      const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
+      $(this).siblings('input[name="unitario"]').val(unitario);
+      setOptions(this);
+    }
+    calcTotal(this);
   });
 });
 
-const prices = $('#prices').DataTable({
+const ordenes = $('#ordenes').DataTable({
   dom: 'Bfrtip',
   lengthMenu: [
     [10, 25, 50, -1],
@@ -201,96 +277,11 @@ const prices = $('#prices').DataTable({
       ]
     },
     {
-      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Generar Orden</span>`,
       attr: {
         'data-toggle': 'modal',
         'data-target': '#AddProduct',
-        title: 'Combo | Producto'
-      },
-      className: 'btn btn-outline-dark'
-    }
-  ],
-  deferRender: true,
-  paging: true,
-  autoWidth: true,
-  search: {
-    regex: true
-    // caseInsensitive: true
-  },
-  responsive: {
-    details: {
-      type: 'column'
-    }
-  },
-  columnDefs: [
-    { className: 'control', orderable: true, targets: 0 },
-    { responsivePriority: 1, targets: [2, 3, 4, -1] }
-  ],
-  order: [[2, 'asc']],
-  language: languag2,
-  ajax: {
-    method: 'GET',
-    url: '/products/table',
-    dataSrc: 'data'
-  },
-  columns: [
-    { data: null, defaultContent: '' },
-    { data: 'id' },
-    { data: 'nombre' },
-    { data: 'laboratorio' },
-    { data: 'clase' },
-    { data: 'cantidad', defaultContent: '1' },
-    { data: 'name' },
-    { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
-    {
-      data: null,
-      render: () => `<a class="eliminar"><i class="fas fa-trash"></i></a>
-                         <a class="editar"><i class="fas fa-edit"></i></a>`
-    }
-  ],
-  initComplete: function (settings, { data }) {
-    changeOptions();
-    /* optionsCombos = data.map(e => ({
-          id: e.id,
-          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
-        })); */
-  }
-});
-
-const prices_combo = $('#prices_combo').DataTable({
-  dom: 'Bfrtip',
-  lengthMenu: [
-    [10, 25, 50, -1],
-    ['10 filas', '25 filas', '50 filas', 'Ver todo']
-  ],
-  buttons: [
-    {
-      text: `<i class="align-middle mr-2" data-feather="file"></i>`,
-      attr: {
-        title: 'Listas de precios'
-      },
-      className: 'btn btn-outline-dark',
-      action: function () {
-        // listaPrecio();
-      }
-    },
-    {
-      extend: 'collection',
-      text: '<i class="align-middle feather-md" data-feather="menu"></i>',
-      orientation: 'landscape',
-      buttons: [
-        {
-          text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-          extend: 'copy'
-        }
-      ]
-    },
-    {
-      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
-      attr: {
-        'data-toggle': 'modal',
-        'data-target': '#AddProduct',
-        title: 'Combo | Producto'
+        title: 'Crear | Editar'
       },
       className: 'btn btn-outline-dark',
       action: function () {
@@ -314,52 +305,39 @@ const prices_combo = $('#prices_combo').DataTable({
   },
   columnDefs: [
     { className: 'control', orderable: true, targets: 0 },
-    { responsivePriority: 1, targets: [4, -1] },
-    { visible: false, orderable: true, targets: [1, 2, 3] }
+    { responsivePriority: 1, targets: [2, 4, 6] },
+    { responsivePriority: 2, targets: [5] },
+    { visible: false, orderable: true, targets: [1] }
   ],
   fixedColumns: {
     leftColumns: 0
   },
   displayLength: 25,
-  order: [[2, 'asc']],
+  order: [[1, 'desc']],
   language: languag2,
   ajax: {
     method: 'GET',
-    url: '/products/table/1',
+    url: '/orders/table',
     dataSrc: 'data'
   },
   columns: [
     { data: null, defaultContent: '' },
     { data: 'id' },
-    { data: 'name' },
-    { data: 'precio', render: $.fn.dataTable.render.number('.', '.', 0, '$') },
     {
-      data: 'nombre',
+      data: 'producto',
       render: function (data, method, row) {
-        return data ?? row.nam;
+        return products.find(e => e.id == data)?.name ?? 'sin nombre';
       }
     },
-    {
-      data: 'laboratorio',
-      render: function (data, method, row) {
-        return data ?? row.laboratory;
-      }
-    },
-    {
-      data: 'clase',
-      render: function (data, method, row) {
-        return data ?? row.class;
-      }
-    },
+    { data: 'nota', defaultContent: 'Sin nota' },
     { data: 'cantidad', defaultContent: '1' },
     {
-      data: 'medida',
-      render: function (data, method, row) {
-        return measuring.find(e => e.val === data)?.tag ?? row.tipo;
-      }
+      data: 'unitario',
+      defaultContent: '$0',
+      render: $.fn.dataTable.render.number('.', '.', 0, '$')
     },
     {
-      data: 'valor',
+      data: 'monto',
       defaultContent: '$0',
       render: $.fn.dataTable.render.number('.', '.', 0, '$')
     }
@@ -369,17 +347,63 @@ const prices_combo = $('#prices_combo').DataTable({
     const line = api.rows({ page: 'current' }).nodes();
     const rows = api.column(0, { page: 'current' }).data();
     let last = null;
-
     rows.each(function (row, i) {
-      if (last !== row.id) {
+      if (last?.id && last?.id != row.id) {
         $(line).eq(i).before(`
               <tr class="group">
-                <td colspan="6">
+                <td colspan="5">
                   <div class="d-flex justify-content-between">
-                    <div class="p-2">${row.id}</div>
-                    <div class="p-2">${row.name}</div>
-                    <div class="p-2">$${Cifra(row.precio)}</div>
-                    <div class="p-2">
+                    <div class="py-0 px-3">${
+                      last.comercio || last.recibe ? 'Domicilio' : 'Mesa ' + last.mesa
+                    }</div>
+                    <div class="py-0 px-3">TOTAL: $${Cifra(last.total)}</div>
+                  </div>
+                </td>
+              </tr>`);
+      }
+
+      if (last?.id != row.id) {
+        let estado = '';
+        switch (row.estado) {
+          case 3:
+            estado = `<span class="badge badge-pill badge-info">Pendiente</span>`;
+            break;
+          case 8:
+            estado = `<span class="badge badge-pill badge-dark">Tramitando</span>`;
+            break;
+          case 9:
+            estado = `<span class="badge badge-pill badge-success">Disponible</span>`;
+            break;
+          case 10:
+            estado = `<span class="badge badge-pill badge-primary">Separado</span>`;
+            break;
+          case 12:
+            estado = `<span class="badge badge-pill badge-secondary">Apartado</span>`;
+            break;
+          case 13:
+            estado = `<span class="badge badge-pill badge-tertiary">Vendido</span>`;
+            break;
+          case 14:
+            estado = `<span class="badge badge-pill badge-danger">Tramitando</span>`;
+            break;
+          case 15:
+            estado = `<span class="badge badge-pill badge-warning">Inactivo</span>`; //secondary
+            break;
+          default:
+            estado = `<span class="badge badge-pill badge-secondary">Inactivo</span>`;
+            break;
+        }
+
+        $(line).eq(i).before(`
+              <tr class="group">
+                <td colspan="5" style="background-color: #FCF3CF">
+                  <div class="d-flex justify-content-between">
+                    <div class="p-1">${row.id}</div>
+                    <div class="p-1">
+                      ${row.comercio ? row.nombre : row.recibe ?? row.mesa}
+                    </div>
+                    <div class="p-1">${estado}</div>
+                    <div class="p-1">
                       <a class="eliminar" id="${row.id}">
                         <i class="fas fa-trash"></i>
                       </a>
@@ -391,136 +415,31 @@ const prices_combo = $('#prices_combo').DataTable({
                 </td>
               </tr>`);
 
-        last = row.id;
+        last = row;
       }
     });
   }
 });
 
-prices.on('click', 'td .eliminar', function () {
-  const fila = $(this).parents('tr');
-  const { id } = prices.row(fila).data();
-  let delets = [];
-  let ids = [];
-  prices_combo
-    .rows()
-    .data()
-    .each((row, i) => {
-      const search = delets.findIndex(e => e?.grupo == row.id);
-      if (search < 0)
-        delets.push({ grupo: row.id, name: row.name, combos: 1, exist: row.receta == id });
-      else {
-        const exist = delets[search]?.exist;
-        delets[search].exist = exist || row.receta == id;
-        delets[search].combos += 1;
-      }
-    });
-
-  delets
-    .filter(e => e.exist)
-    .map(e => {
-      if (e?.combos < 3) {
-        ids.push(e.grupo);
-        return alert(
-          `El combo ${e.name} tambien seria eliminado, ya que contendra ${
-            e?.combos - 1
-          } solo articulo, y no esta permitido`
-        );
-      }
-      return alert(`El Articulo tambien seria eliminado del combo ${e.name}`);
-    });
-
-  if (confirm('Seguro deseas eliminar este medicamento?')) {
-    $.ajax({
-      url: '/products/' + id,
-      type: 'DELETE',
-      contentType: 'application/json',
-      data: JSON.stringify(ids),
-      success: function (data) {
-        if (data) {
-          prices.ajax.reload(function (json) {
-            prices_combo.ajax.reload(null, false);
-            SMSj('success', 'Medicamento eliminado exitosamente');
-            changeOptions();
-          });
-        } else {
-          SMSj('error', 'No es posible eliminar este medicamento.');
-        }
-      }
-    });
-  }
-});
-
-prices.on('click', 'td .editar', function () {
-  const fila = $(this).parents('tr');
-  const data = prices.row(fila).data();
-  const productos = $('#crearproducto').find('input, select, textarea, img');
-
-  productos.each(function (index) {
-    switch (this.type) {
-      case 'select-one':
-        return $(this).val(data[this.name]).trigger('change');
-      case 'checkbox':
-        return $(this).prop('checked', !!data[this.name]);
-      case 'radio':
-        return $(this).prop({
-          checked: this.value === data[this.name],
-          disabled: this.value !== data[this.name]
-        });
-      case undefined:
-        return $(this).prop('src', data[this.id] ?? '/img/subir.png');
-      case 'file':
-        return;
-      default:
-        return (this.value = data[this.name]);
-    }
-  });
-
-  $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
-});
-
-prices_combo.on('click', 'td .editar', function () {
+ordenes.on('click', 'td .editar', function () {
   $('#hidelecte').show();
-  const productos = $('#crearproducto').find('input, select, textarea, img');
-
-  const setRows = (productos, data) =>
-    productos.each(function (index) {
-      switch (this.type) {
-        case 'select-one':
-          return $(this).val(data[this.name]).trigger('change');
-        case 'checkbox':
-          return $(this).prop('checked', !!data.visible);
-        case 'radio':
-          return $(this).prop({
-            checked: this.value === data[this.name],
-            disabled: this.value !== data[this.name]
-          });
-        case undefined:
-          return $(this).prop('src', data[this.id] ?? '/img/subir.png');
-        case 'file':
-          return;
-        default:
-          return (this.value = data[this.name]);
-      }
-    });
-
-  prices_combo
+  const orders = $('#crearproducto').find('input, select');
+  ordenes
     .rows()
     .data()
     .filter(e => e.id == this.id)
     .each((row, i) => {
       if (!i) {
-        setParams({ value: row.type });
-        return setRows(productos, row);
+        return setRows(orders, row);
       }
-      const elements = setProduct().find('input, select, textarea');
+      const elements = setProduct().find('input, select');
       setRows(elements, row);
     });
 
   $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
 });
 
-prices_combo.on('click', 'td .eliminar', function () {
+ordenes.on('click', 'td .eliminar', function () {
   console.log($(this).prop('id'));
   if (confirm('Seguro deseas eliminar este medicamento?')) {
     $.ajax({
@@ -549,125 +468,120 @@ $('#AddProduct').on('shown.bs.modal', function (e) {
 $('#AddProduct').on('hidden.bs.modal', function (e) {
   $('#hidelecte').hide();
   $('.mesa').button('toggle');
-  $('#imagen').prop('src', '/img/subir.png');
-  $('.rows_products, .hrs_products').remove();
+  $('.rows_products').remove();
 
   $('#crearproducto')
     .find('input, textarea')
     .each(function () {
-      if (this.type === 'checkbox') return $(this).prop('checked', false).hide();
-      else if (this.type === 'radio')
-        return $(this).prop({ checked: this.id === 'a', disabled: false });
+      if (this.type === 'radio') return $(this).prop({ checked: this.id === 'a', disabled: false });
 
       this.value = null;
     });
 
-  setParams({ value: null });
-
-  $('.select2').find('option').prop('disabled', false).data('oldVal', null);
+  $('.products')
+    .val(null)
+    .trigger('change')
+    .find('option')
+    .prop('disabled', false)
+    .data('oldVal', null);
 });
 
-function setProduct(elem) {
-  const element = !elem ? '.form-row:last' : $(elem).parents('.form-row');
-  const newElemnt = $(addProduct).insertAfter(element);
+const setRows = (orders, data) =>
+  orders.each(function () {
+    switch (this.type) {
+      case 'select-one':
+        return $(this).val(data[this.name]).trigger('change');
+      default:
+        this.value = data[this.name];
+        if (this.name === 'cantidad') return calcTotal(this);
+        return;
+    }
+  });
 
-  if (elem || check) {
-    newElemnt
-      .find('.select2')
-      .prop('name', check === 'COMBO' ? 'receta' : 'articulo')
-      .select2({
-        allowClear: true,
-        data: check === 'COMBO' ? optionsCombos : options,
-        placeholder: { id: null, text: 'Slec. producto', selected: true }
-      })
-      .val(null)
-      .trigger('change');
+function calcTotal(elem) {
+  const element = $(elem).parents('form').serializeArray();
 
-    $('.select2')
-      .not(newElemnt.find('.select2'))
-      .each(function () {
-        if (this.value)
-          newElemnt.find(`.select2 option[value="${this.value}"]`).prop('disabled', true);
-      });
-  }
+  let result = element
+    .filter(e => /producto|cantidad/.test(e.name))
+    .map(e => ({ [e.name]: e.value }))
+    .map((e, i, obj) =>
+      e?.cantidad
+        ? { ...obj.findLast((o, n) => !!o?.producto && n < i && i - n < 2), cantidad: e.cantidad }
+        : false
+    )
+    .filter(e => e?.producto && e?.cantidad)
+    .reduce((acc, e) => {
+      const product = products.find(o => o.id == e.producto);
+      return acc + e.cantidad * product?.precio;
+    }, 0);
 
-  if (check === 'RECETA') $('.public').show();
-  else $('.public').hide();
+  // console.log(element, result, 'result');
 
-  newElemnt.find('.select2').on('change', function () {
-    setOptions(this);
+  $('#total').val(Cifra(result));
+}
+
+function setProduct(elem, after = true, read = false) {
+  const element = !elem ? '.pedido:last' : $(elem).parents('.pedido');
+  const newElemnt = after
+    ? $(addProduct).insertAfter(element)
+    : $(addProduct).insertBefore(element);
+
+  if (read)
+    newElemnt.each(function () {
+      $(this).find('input').prop('readonly', true);
+      $(this).find('button').remove(); //.prop('disabled', true);
+    });
+
+  newElemnt
+    .find('.products')
+    .select2({
+      allowClear: !read,
+      data: options,
+      placeholder: { id: null, text: 'Slec. producto', selected: true }
+    })
+    .val(null)
+    .trigger('change')
+    .on('select2:opening select2:closing', function (e) {
+      if (read) e.preventDefault();
+    });
+
+  $('.products')
+    .not(newElemnt.find('.products'))
+    .each(function () {
+      if (this.value && !read)
+        newElemnt.find(`.products option[value="${this.value}"]`).prop('disabled', true);
+    });
+
+  $('.products, .cantidad').on('change', function () {
+    if (this.name === 'producto') {
+      const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
+      $(this).siblings('input[name="unitario"]').val(unitario);
+      if (!read) setOptions(this);
+    }
+
+    calcTotal(this);
   });
 
   return newElemnt;
-}
-
-function setParams(elem) {
-  const { value } = elem;
-  check = value || null;
-  if (value === 'COMBO') {
-    $('.public').hide('slow');
-    $('.plus').prop('disabled', false);
-  } else if (value === 'RECETA') {
-    $('.public').show('slow');
-    $('.plus').prop('disabled', false);
-  } else {
-    $('.public').hide('slow');
-    $('.plus').prop('disabled', true);
-    $('.rows_products, .hrs_products').remove();
-  }
-
-  $('.select2')
-    .each(function () {
-      if (value === 'COMBO') this.name = 'receta';
-      else this.name = 'articulo';
-
-      $(this)
-        .empty()
-        .select2({
-          dropdownParent: $(this).parent(),
-          allowClear: true,
-          data: value === 'COMBO' ? optionsCombos : options,
-          placeholder: {
-            id: null,
-            text: 'SELECCIONE UN PRODUCTO',
-            selected: true
-          }
-        });
-    })
-    .val(null)
-    .trigger('change');
 }
 
 function setOptions(elem) {
   const oldVal = $(elem).data('oldVal') ?? null;
 
   if (elem.value)
-    $('.select2').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
-  if (oldVal) $('.select2').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
+    $('input.code[value=""]')
+      .siblings('.products')
+      .find(`option[value="${elem.value}"]`)
+      .prop('disabled', true);
+  // $('.products').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
+
+  if (oldVal) $('.products').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
   else $(elem).data('oldVal', elem.value);
-}
-
-function changeOptions() {
-  optionsCombos = [];
-  prices
-    .rows()
-    .data()
-    .map(e =>
-      optionsCombos.push({
-        id: e.id,
-        text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
-      })
-    );
-}
-
-function publicProduct(elem) {
-  console.log($(elem).is(':checked'), 'si entro');
-  const element = $(elem).next('input');
-  element.val($(elem).is(':checked') ? 1 : 0);
 }
 
 function deleteProduct(elem) {
   const element = $(elem).parents('.form-row');
   element.prev('hr').remove();
   element.remove();
+  calcTotal('.products');
 }

@@ -1,8 +1,8 @@
-<main class='content'>
+<main class='content px-1 px-md-4'>
   <input type='hidden' id='idType' value='{{idType}}' />
   <input type='hidden' id='type' value='{{type}}' />
 
-  <div class='accordion' id='accordionExample'>
+  <div class='accordion' id='accordionExample' hidden>
     <div class='card shadow-lg rounded'>
       <div class='card-header bg-dark' id='headingOne'>
         <h2 class='mb-0'>
@@ -90,47 +90,19 @@
 
   <div class='card shadow-lg mb-5 rounded'>
     <div class='card-header bg-dark rounded-top'>
-      <h3 class='text-white'>Tabla de precios</h3>
+      <h3 class='text-white'>Tabla de ordenes</h3>
     </div>
-    <div class='card-body rounded-bottom'>
-
-      <table id='prices' class='table table-sm table-striped display nowrap w-100'>
+    <div class='card-body rounded-bottom px-2 px-md-4'>
+      <table id='ordenes' class='table table-sm table-striped display nowrap w-100'>
         <thead>
           <tr>
             <th></th>
             <th>Id</th>
-            <th>Medicamento</th>
-            <th>Laboratorio</th>
-            <th>Clase</th>
-            <th>Cant.</th>
-            <th>Tipo</th>
+            <th>Producto</th>
+            <th>Nota</th>
+            <th>Ctd</th>
             <th>Precio</th>
-            <th>Accion</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class='card shadow-lg mb-5 rounded'>
-    <div class='card-header bg-dark rounded-top'>
-      <h3 class='text-white'>Tabla de combos</h3>
-    </div>
-    <div class='card-body rounded-bottom'>
-      <table id='prices_combo' class='table table-sm table-striped display nowrap w-100'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Id</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Meicamento</th>
-            <th>Laboratorio</th>
-            <th>Clase</th>
-            <th>Cantidad</th>
-            <th>Tipo</th>
-            <th>Precio</th>
+            <th>Total</th>
           </tr>
         </thead>
         <tbody></tbody>
@@ -155,21 +127,44 @@
           </div>
         </div>
         <div class='modal-header'>
-          <h3 class='modal-title'>Creacion de orden</h3>
+          <h3 class='modal-title'>Orden de venta</h3>
           <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
             <i class='feather-lg' data-feather='x-circle'></i>
           </a>
         </div>
         <div class='modal-body p-3 bg-light'>
           <div class='form-row'>
+            <div class='form-group col-7 col-md-9'>
+              <input type='hidden' name='tipo' value='VENTA' />
+            </div>
+            <div class='form-group col-5 col-md-3'>
+              <div class='input-group'>
+                <div class='input-group-prepend'>
+                  <span class='input-group-text'>#</span>
+                </div>
+                <input
+                  type='text'
+                  id='id'
+                  class='form-control'
+                  name='id'
+                  placeholder='Orden'
+                  readonly
+                />
+              </div>
+            </div>
+          </div>
+
+          <div class='form-row pedido'>
             <div class='form-group col-9 col-md-4'>
-              <input type='hidden' name='code' />
-              <select class='form-control select2' name='producto' required></select>
+              <input class='code' type='hidden' name='code' />
+              <input type='hidden' name='unitario' />
+              <input type='hidden' name='monto' />
+              <select class='form-control products' name='producto' required></select>
             </div>
             <div class='form-group col-3 col-md-2'>
               <input
                 type='text'
-                class='form-control edi'
+                class='form-control cantidad edi'
                 name='cantidad'
                 value='1'
                 placeholder='Cant.'
@@ -192,11 +187,7 @@
                   >
                     <i class='fas fa-fw fa-trash'></i>
                   </button>
-                  <button
-                    class='btn btn-outline-primary plus'
-                    type='button'
-                    onclick='setProduct(this)'
-                  >
+                  <button class='btn btn-outline-primary' type='button' onclick='setProduct(this)'>
                     <i class='fas fa-fw fa-plus'></i>
                   </button>
                 </div>
@@ -204,16 +195,37 @@
             </div>
           </div>
 
-          <div id='sesion' class='btn-group btn-group-toggle' data-toggle='buttons'>
-            <label class='btn btn-outline-primary'>
-              <input type='radio' name='type' id='domicilios' value="domicilio" />
-              Domicilio
-            </label>
-            <label class='btn btn-outline-primary'>
-              <input type='radio' name='type' id='mesas' value="mesa" />
-              Mesas
-            </label>
+          <div id='sesion' class='row mt-3'>
+            <div class='form-group col-6 col-md-3'>
+              <div class='input-group'>
+                <div class='input-group-prepend'>
+                  <span class='input-group-text'>$</span>
+                </div>
+                <input
+                  id='total'
+                  type='text'
+                  class='form-control'
+                  name='total'
+                  placeholder='Total orden'
+                  readonly
+                  required
+                />
+              </div>
+            </div>
+            <div class='form-group col-6 col-md-9'>
+              <div class='btn-group btn-group-toggle float-right' data-toggle='buttons'>
+                <label class='btn btn-outline-primary'>
+                  <input type='radio' name='type' id='domicilio' value='domicilio' />
+                  Domicilio
+                </label>
+                <label class='btn btn-outline-primary'>
+                  <input type='radio' name='type' id='mesas' value='mesa' />
+                  Mesas
+                </label>
+              </div>
+            </div>
           </div>
+
         </div>
         <div class='modal-footer'>
           <button
