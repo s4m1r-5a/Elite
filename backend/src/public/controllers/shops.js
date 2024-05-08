@@ -43,10 +43,6 @@ $(document).ready(function () {
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
 
-    /* $('#recibos1 .montos').each(function () {
-          $(this).val(noCifra($(this).val()));
-        }); */
-    // document.getElementById('crearproducto')
     var formData = new FormData(this);
 
     $.ajax({
@@ -77,7 +73,7 @@ $(document).ready(function () {
   $('.img').click(() => $('#inputFile').click());
 
   $('#inputFile').on('change', function (event) {
-    var file = event.target.files[0]; // Obtener el primer archivo seleccionado
+    var file = event.target.files[0]; 
     var reader = new FileReader();
 
     reader.onload = function (event) {
@@ -133,11 +129,11 @@ const shops = $('#shops').DataTable({
       }
     },
     {
-      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Combo | Producto</span>`,
+      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Comercio</span>`,
       attr: {
         'data-toggle': 'modal',
         'data-target': '#AddProduct',
-        title: 'Combo | Producto'
+        title: 'Creacion o edicion de comercios'
       },
       className: 'btn btn-outline-dark'
     }

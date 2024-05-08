@@ -95,7 +95,8 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
 
 router.delete('/:id', noExterno, async (req, res) => {
   const { id } = req.params;
-  const ids = req.body ?? [];
+  const ids = req.body || [];
+  console.log({ id, ids }, req.body)
   try {
     await pool.query(`DELETE FROM products WHERE id IN (?)`, [[...ids, id]]);
     res.send(true);

@@ -5,6 +5,7 @@ const axios = require('axios');
 const moment = require('moment');
 const { isLoggedIn, noExterno } = require('../lib/auth');
 const { DeleteFile } = require('../utils/common');
+const { nanoid } = require('nanoid');
 
 const isNum = num => !isNaN(parseFloat(num)) && isFinite(num);
 
@@ -17,7 +18,7 @@ router.get('/table', noExterno, async (req, res) => {
     LEFT JOIN domicilios AS d ON d.orden = o.id
     ORDER BY o.id DESC`
   );
-  console.log(orders);
+  // console.log(orders);
   res.json({ data: orders });
 });
 
@@ -38,15 +39,16 @@ router.post('/', isLoggedIn, async ({ user, body, headers }, res) => {
   const { id, code, tipo, total, type, mesa, ...rest } = body;
   const { di, comercio, recibe, movil, direccion, referencia, latitud, longitud, ...pedidos } =
     rest;
+  const ref = nanoid(10);
 
   let inset = null;
-  let orden = { tipo, total, user: user?.id, empresa: 1 };
+  let orden = { tipo, total, empresa: 1 };
 
   if (type === 'mesa') orden.mesa = mesa;
   else if (type === 'domicilio' && isNum(comercio)) orden.comercio = comercio;
 
   console.log(body);
-  // return res.send(true);
+  return res.send(true);
 
   if (id) {
     const data = Array.isArray(pedidos.producto) ? orden : { ...orden, ...pedidos, monto: total };
@@ -57,7 +59,9 @@ router.post('/', isLoggedIn, async ({ user, body, headers }, res) => {
     );
 
     await pool.query(`DELETE FROM pedidos WHERE orden = ? AND id NOT IN (?)`, [id, code]);
-  } else inset = (await pool.query('INSERT INTO ordenes SET ? ', orden))?.insertId;
+  } else
+    inset = (await pool.query('INSERT INTO ordenes SET ? ', { ...orden, user: user?.id }))
+      ?.insertId;
 
   if (Array.isArray(pedidos.producto)) {
     const items = pedidos.producto.map((e, i) => ({
@@ -72,10 +76,22 @@ router.post('/', isLoggedIn, async ({ user, body, headers }, res) => {
     items.forEach(async (e, i) => {
       const { code, ...data } = e;
       if (code) await pool.query(`UPDATE pedidos SET ? WHERE id = ?`, [data, code]);
-      else await pool.query('INSERT INTO pedidos SET ? ', { ...data, orden: id || inset });
+      else
+        await pool.query('INSERT INTO pedidos SET ? ', {
+          ...data,
+          agente: user?.id,
+          orden: id || inset,
+          ref
+        });
     });
   } else if (!id)
-    await pool.query('INSERT INTO pedidos SET ? ', { ...pedidos, orden: inset, monto: total });
+    await pool.query('INSERT INTO pedidos SET ? ', {
+      ...pedidos,
+      orden: inset,
+      agente: user?.id,
+      monto: total,
+      ref
+    });
 
   if (type === 'domicilio') {
     const data = {

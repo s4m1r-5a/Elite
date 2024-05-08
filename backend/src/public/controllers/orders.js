@@ -6,7 +6,12 @@ const product = $('.products');
 const type = $('#type').val() ?? null;
 const idType = $('#idType').val() ?? null;
 
+let size = getScreenSize();
+let edit = false;
+let mesa = type === 'mesa' ? idType : null;
+let domicilio = type === 'domicilio' ? idType : null;
 let comercios = [];
+let visible = false;
 let products = [];
 let mesas = [];
 let comercio = [];
@@ -14,18 +19,52 @@ let options = [];
 let optionsCombos = [];
 let check = null;
 const addProduct = `
-    <div class='form-row rows_products pedido'>
-      <div class='form-group col-9 col-md-4'>
+    <div class='form-row rows_products pedido position-relative' style="display: none;">
+      <div class='position-absolute ocu w-100' style='left: 0; top: 0; z-index: 1000; display: none;'>
+        <div class='input-group w-100'>
+          <input class='form-control nota' type='text' name='nota' placeholder='Nota producto' />
+          <div class='input-group-append'>
+            <button type='button' class='btn btn-dark extra' onclick='setNote(this, false)'>
+              <i class='fas fa-angle-up'></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <div class='form-group col-1 d-block d-sm-none'>
+        <div class='btn-group'>
+          <button
+            type='button'
+            class='btn btn-light p-1 extra'
+            data-toggle='dropdown'
+            aria-expanded='false'
+          >
+            <i class='fas fa-fw fa-ellipsis-v'></i>
+          </button>
+          <div class='dropdown-menu'>
+            <a class='dropdown-item' onclick='setNote(this)'>Nota producto</a>    
+            <div class='dropdown-divider emi' style="display: none;"></div>
+            <a class='dropdown-item emi' style="display: none;" onclick='deleteProduct(this)'>Eliminar</a>        
+          </div>
+        </div>
+      </div>
+      <div class='form-group col-7 col-md-4'>
         <input class='code' type='hidden' name='code' />
         <input type='hidden' name='unitario' />
         <input type='hidden' name='monto' />
         <select class='form-control products' placeholder='Slec. producto' name='producto' required>
         </select>
       </div>
-      <div class='form-group col-3 col-md-2'>
-        <input type='text' class='form-control cantidad edi' name='cantidad' placeholder='Cant.' required />
+      <div class='form-group col-4 col-md-2'>
+        <div class='input-group'>
+          <input type='text' class='form-control cantidad edi' name='cantidad' placeholder='Cant.' required />
+          <div class='input-group-append d-block d-sm-none'>
+            <button class='btn btn-outline-primary px-2' type="button" onclick='setProduct(this)'>
+              <i class='fas fa-fw fa-plus'></i>
+            </button>
+          </div>
+        </div>
       </div>
-      <div class='form-group col-12 col-md-6'>
+      <div class='form-group col-12 col-md-6 d-none d-md-block'>
         <div class='input-group'>
           <input class='form-control edi' type='text' name='nota' placeholder='Nota del producto' />
           <div class='input-group-append'>
@@ -94,25 +133,27 @@ $.ajax({
 });
 
 $(document).ready(function () {
-  $('#hidelecte, .public, #carga').hide();
+  $('#hidelecte, .public, #carga, #edit').hide();
   $('input').prop('autocomplete', 'off');
-  if (type) $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
+
+  $(window).resize(function (event) {
+    size = getScreenSize();
+  });
 
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
 
     $('#total').val(noCifra($('#total').val()));
 
-    // document.getElementById('crearproducto')
-    var formData = new FormData(this);
+    const formData = $(this)
+      .find(`input:visible, select:visible${size.tag === 'xs' ? ', .nota:hidden' : ''}`)
+      .serialize();
 
+    console.log(formData, 'formData');
     $.ajax({
       url: '/orders',
       data: formData,
       type: 'POST',
-      dataType: 'json',
-      processData: false,
-      contentType: false,
       beforeSend: function () {
         $('#carga').show('slow');
       },
@@ -137,12 +178,30 @@ $(document).ready(function () {
     });
   });
 
+  $('#edit').on('click', function () {
+    edit = $('#id').val();
+    const m = mesas.find(e => e.orden == edit);
+    $('.pedido').find('input').prop('readonly', false);
+    $('.pedido').find('button:not(.extra)').show('slow');
+    $('.order').not(`:has(input[value="${m?.id}"])`).hide('slow');
+    $('.products, .mesa').off('select2:opening select2:closing');
+    $('.eli, .emi').show();
+    // $('.unico')
+    //   .not(':has(select option:selected)')
+    //   .hide('slow', function () {
+    //     $(this).find('.products, .cantidad').prop('required', false);
+    //   });
+  });
+
   $('#domicilio').on('change', function () {
-    $('#row_mesas').remove();
+    if (edit) $('#row_mesas').hide();
+    else $('#row_mesas').remove();
     if ($('#row_domicilio').length) return $('#row_domicilio').show('slow');
 
     $(`<div id='row_domicilio' class='form-row' style="display: none;">
         <div class='form-group col-12 col-md-4'>
+          <input type='hidden' name='latitud' />
+          <input type='hidden' name='longitud' />
           <input type='hidden' name='di' />
           <input type='hidden' name='recibe' />
           <select id='comercio' class='form-control' name='comercio' required></select>
@@ -152,7 +211,7 @@ $(document).ready(function () {
             <div class='input-group-prepend'>
               <span class='input-group-text' id='Movl'>+57</span>
             </div>
-            <input type='text' class='form-control edi' placeholder='Telefono' name='movil' data-mask='000 000 0000' required/>
+            <input type='text' class='form-control edi movil' placeholder='Telefono' name='movil' data-mask='000 000 0000' required/>
           </div>
         </div>
         <div class='form-group col-12 col-md-5'>
@@ -177,75 +236,92 @@ $(document).ready(function () {
       .trigger('change');
 
     $('.select2-container').css('width', '100%', 'important');
+    $('.movil').mask('*** *** ****');
 
     $('#comercio').on('change', function () {
       const text = $(this).find('option:selected').text();
       $(this).siblings('input[name="recibe"]').val(text);
+      const shop = comercios.find(e => e.id == this.value);
+      setRows($('#row_domicilio').find('input'), shop);
     });
   });
 
   $('#mesas').on('change', function () {
-    const id = type === 'mesa' ? idType : null;
-    $('#row_domicilio').remove();
+    if (edit) $('#row_domicilio').hide();
+    else $('#row_domicilio').remove();
+
     if ($('#row_mesas').length) return $('#row_mesas').show('slow');
 
-    $(
-      `<div class='form-row mt-3' id='row_mesas' style="display: none;">` +
-        mesas
-          .map(
-            e => `<div class="col-6 col-md-2 mb-2">
-                  <div class="btn-group-toggle mesa" data-toggle="buttons">
-                    <label 
-                     class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block 
-                     ${e.id == id ? 'active' : ''}"                     
-                    >
-                      <input 
-                       id="${e.id}"
-                       type="radio" 
-                       name="mesa" 
-                       data-order="${e.orden ?? null}"
-                       value="${e.id}" 
-                       ${e.id == id ? 'checked' : ''}
-                      > 
-                      ${e.name} ${e.numero}
-                    </label>
-                  </div>
-                </div>`
-          )
-          .join('\n') +
-        `</div>`
-    )
+    let html = '';
+
+    if (size.tag !== 'xs') {
+      html = mesas
+        .map(
+          e => `<div class="col-6 col-md-2 mb-2 ${e.orden ? ' order' : ''}">
+            <div 
+             class="btn-group-toggle mesas ${!mesa ? '' : 'disabled'}" 
+             data-toggle="buttons"
+            >
+              <label 
+               class="btn btn-outline-${e.orden ? 'primary' : 'success'} btn-block 
+               ${!mesa || e.id == mesa ? '' : 'disabled'} 
+               ${e.id == mesa ? 'active' : ''}"                     
+              >
+                <input 
+                 class="mesa"
+                 type="radio" 
+                 name="mesa" 
+                 value="${e.id}" 
+                 ${e.id == mesa ? 'checked' : ''}
+                 ${!mesa ? '' : 'disabled'} 
+                > 
+                ${e.name} ${e.numero}
+              </label>
+            </div>
+          </div>`
+        )
+        .join('\n');
+    } else html = "<select class='form-control mesa' placeholder='Slec. producto' name='mesa' required></select>";
+
+    $(`<div class='form-row mt-3' id='row_mesas' style="display: none;">` + html + `</div>`)
       .insertAfter('#sesion')
       .show('slow');
 
-    $('.mesa').on('click', function () {
-      $('.mesa').not(this).button('toggle');
-      const order = $(this).find('input').data('order') ?? null;
-      $('input.code[value!=""]').parents('.rows_products').remove();
-      $('#id').val(order);
-      calcTotal(this);
+    $('.mesa').on('change', changeMesa);
 
-      if (order) {
-        ordenes
-          .rows()
-          .data()
-          .filter(e => e.id == order)
-          .each((row, i) => {
-            const elements = setProduct(false, false, true).find('input, select');
-            setRows(elements, row);
-          });
-      }
-    });
+    if (size.tag === 'xs') {
+      $('.mesa')
+        .select2({
+          allowClear: edit || !mesa,
+          placeholder: { id: null, text: 'Sleccione una mesa', selected: true },
+          data: mesas.map(e => ({
+            text: `${e.name} ${e.numero} ${e.orden ? ' - ocupa' : ' - dispo'}`.toUpperCase(),
+            disabled: mesa && e.orden && e.id != mesa,
+            selected: e.id == mesa,
+            id: e.id
+          }))
+        })
+        .css('width', '100%')
+        .trigger('change')
+        .on('select2:opening select2:closing', function (e) {
+          if (mesa) e.preventDefault();
+        });
+
+      $('.select2-container').css('width', '100%', 'important');
+    } else $('.mesa:checked').trigger('change');
   });
 
-  $('.products, .cantidad').on('change', function () {
-    if (this.name === 'producto') {
-      const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
-      $(this).siblings('input[name="unitario"]').val(unitario);
-      setOptions(this);
-    }
-    calcTotal(this);
-  });
+  // $('.unico .products, .unico .cantidad').on('change', function () {
+  //   if (this.name === 'producto') {
+  //     const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
+  //     $(this).siblings('input[name="unitario"]').val(unitario);
+  //     setOptions(this);
+  //   }
+
+  //   console.log(this.name, this.value, 'change2');
+
+  //   calcTotal(this);
+  // });
 });
 
 const ordenes = $('#ordenes').DataTable({
@@ -396,21 +472,14 @@ const ordenes = $('#ordenes').DataTable({
 
         $(line).eq(i).before(`
               <tr class="group">
-                <td colspan="5" style="background-color: #FCF3CF">
+                <td class="py-0" colspan="5" style="background-color: #FCF3CF">
                   <div class="d-flex justify-content-between">
                     <div class="p-1">${row.id}</div>
                     <div class="p-1">
                       ${row.comercio ? row.nombre : row.recibe ?? row.mesa}
                     </div>
                     <div class="p-1">${estado}</div>
-                    <div class="p-1">
-                      <a class="eliminar" id="${row.id}">
-                        <i class="fas fa-trash"></i>
-                      </a>
-                      <a class="editar mr-3" id="${row.id}">
-                        <i class="fas fa-edit"></i>
-                      </a>
-                    </div>
+                    <div class="p-1 editar"><i class="fas fa-file-alt"></i></div>
                   </div>
                 </td>
               </tr>`);
@@ -418,23 +487,20 @@ const ordenes = $('#ordenes').DataTable({
         last = row;
       }
     });
+  },
+  initComplete: function (settings, json) {
+    if (mesa || domicilio)
+      $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
   }
 });
 
 ordenes.on('click', 'td .editar', function () {
-  $('#hidelecte').show();
-  const orders = $('#crearproducto').find('input, select');
-  ordenes
-    .rows()
-    .data()
-    .filter(e => e.id == this.id)
-    .each((row, i) => {
-      if (!i) {
-        return setRows(orders, row);
-      }
-      const elements = setProduct().find('input, select');
-      setRows(elements, row);
-    });
+  var fila = $(this).parents('tr').next('tr').index();
+  var data = ordenes.row(fila).data();
+  console.log(data, 'data');
+
+  if (data?.mesa) mesa = data?.mesa;
+  else if (data?.comercio) domicilio = data?.comercio;
 
   $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
 });
@@ -458,7 +524,9 @@ ordenes.on('click', 'td .eliminar', function () {
 });
 
 $('#AddProduct').on('shown.bs.modal', function (e) {
-  if (type === 'mesa' && idType) {
+  setProduct();
+  if (mesa) {
+    $('#edit').show();
     const element = $('#mesas');
     element.prop('checked', true).parent('label').addClass('active');
     element.trigger('change');
@@ -466,41 +534,79 @@ $('#AddProduct').on('shown.bs.modal', function (e) {
 });
 
 $('#AddProduct').on('hidden.bs.modal', function (e) {
-  $('#hidelecte').hide();
+  edit = false;
+  $('#hidelecte, .eli, #edit').hide();
   $('.mesa').button('toggle');
-  $('.rows_products').remove();
+  $('#row_domicilio, #row_mesas, .rows_products').remove();
+  $('.unico').show(function () {
+    $(this).find('.products, .cantidad').prop('required', true);
+  });
 
   $('#crearproducto')
     .find('input, textarea')
     .each(function () {
+      console.log(this.type, this.id, this.name, this.value, 'input');
       if (this.type === 'radio') return $(this).prop({ checked: this.id === 'a', disabled: false });
-
-      this.value = null;
+      return (this.value = null);
     });
 
-  $('.products')
-    .val(null)
-    .trigger('change')
-    .find('option')
-    .prop('disabled', false)
-    .data('oldVal', null);
+  // $('.products')
+  // .val(null)
+  // .trigger('change')
+  // .find('option')
+  // .prop('disabled', false)
+  // .data('oldVal', null);
 });
 
-const setRows = (orders, data) =>
-  orders.each(function () {
+const setRows = (orders, data) => {
+  orders.not('.mesa').each(function () {
     switch (this.type) {
       case 'select-one':
         return $(this).val(data[this.name]).trigger('change');
       default:
-        this.value = data[this.name];
+        this.value = data?.[this.name] ?? '';
         if (this.name === 'cantidad') return calcTotal(this);
+        if (this.name === 'movil') return $(this).mask('### ### ####');
         return;
     }
   });
+};
+
+const setNote = (elem, rt = true) => {
+  const element = $(elem).parents('.form-row');
+  visible = rt;
+  if (rt) element.find('.ocu').show('slow');
+  else element.find('.ocu').hide('slow');
+};
+
+function changeMesa() {
+  if (size.tag !== 'xs') {
+    const pad = $(this).parents('.mesas');
+    $('.mesa').off('change');
+    $('.mesas').not(pad).button('toggle');
+    $('.mesa').on('change', changeMesa);
+  }
+
+  const value = this.value;
+  const order = !edit ? mesas.find(e => e.id == value)?.orden ?? null : null;
+  // if (!edit) $('input.code[value!=""]').parents('.rows_products').remove();
+  $('#id').val(edit || order);
+  calcTotal(this);
+
+  if (order)
+    ordenes
+      .rows()
+      .data()
+      .filter(e => e.id == order)
+      .each((row, i) => {
+        const elements = setProduct(false, false, true).find('input, select');
+        setRows(elements, row);
+      });
+}
 
 function calcTotal(elem) {
   const element = $(elem).parents('form').serializeArray();
-
+  console.log(element, elem, $(elem).parents('form').serialize(), 'element');
   let result = element
     .filter(e => /producto|cantidad/.test(e.name))
     .map(e => ({ [e.name]: e.value }))
@@ -521,16 +627,25 @@ function calcTotal(elem) {
 }
 
 function setProduct(elem, after = true, read = false) {
-  const element = !elem ? '.pedido:last' : $(elem).parents('.pedido');
+  // if (!$('.unico').is(':visible'))
+  //   return $('.unico').show('slow', function () {
+  //     $(this).find('.products, .cantidad').prop('required', true);
+  //   });
+
+  const element = elem ? $(elem).parents('.pedido') : $('.pedido').length ? '.pedido:last' : '.ini';
+
+  console.log(element, 'element');
+
   const newElemnt = after
-    ? $(addProduct).insertAfter(element)
-    : $(addProduct).insertBefore(element);
+    ? $(addProduct).insertAfter(element).show('slow')
+    : $(addProduct).insertBefore(element).show('slow');
 
   if (read)
     newElemnt.each(function () {
       $(this).find('input').prop('readonly', true);
-      $(this).find('button').remove(); //.prop('disabled', true);
+      $(this).find('button:not(.extra)').hide(); //.prop('disabled', true);
     });
+  else newElemnt.find('.emi').show();
 
   newElemnt
     .find('.products')
@@ -552,15 +667,19 @@ function setProduct(elem, after = true, read = false) {
         newElemnt.find(`.products option[value="${this.value}"]`).prop('disabled', true);
     });
 
-  $('.products, .cantidad').on('change', function () {
+  newElemnt.find('.products, .cantidad').on('change', function () {
     if (this.name === 'producto') {
       const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
       $(this).siblings('input[name="unitario"]').val(unitario);
       if (!read) setOptions(this);
     }
 
+    console.log(this.name, 'change');
+
     calcTotal(this);
   });
+
+  $('.select2-container').css('width', '100%', 'important');
 
   return newElemnt;
 }
@@ -581,7 +700,10 @@ function setOptions(elem) {
 
 function deleteProduct(elem) {
   const element = $(elem).parents('.form-row');
-  element.prev('hr').remove();
-  element.remove();
+  if (element.has('unico')) element.hide('slow');
+  else
+    element.hide('slow', function () {
+      $(this).remove();
+    });
   calcTotal('.products');
 }

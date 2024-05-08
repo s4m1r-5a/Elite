@@ -1,8 +1,6 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../database');
-const axios = require('axios');
-const moment = require('moment');
 const { isLoggedIn, noExterno } = require('../lib/auth');
 const { DeleteFile } = require('../utils/common');
 
@@ -28,35 +26,42 @@ router.get('/table/:latitud?/:longitud?', noExterno, async (req, res) => {
 });
 
 router.post('/', isLoggedIn, async ({ user, body, files, headers }, res) => {
-  const { id, docType, docNumber, fullName, ...comercio } = body;
+  try {
+    const { id, docType, docNumber, fullName, ...comercio } = body;
 
-  console.log({ id, ...comercio }, files);
-  // return res.send(true);
+    console.log({ id, ...comercio }, files);
+    // return res.send(true);
 
-  if (!comercio.person && fullName && docNumber)
-    await pool.query('INSERT INTO persons SET ?', { docType, docNumber, fullName });
+    if (!comercio.person && fullName && docNumber)
+      await pool.query('INSERT INTO persons SET ?', { docType, docNumber, fullName });
 
-  comercio.empresa = 1;
-  comercio.asesor = user?.id;
-  comercio.nombre = comercio.nombre.toUpperCase().trim();
-  if (files.length) comercio.imagen = headers.origin + '/uploads/' + files[0]?.filename;
+    comercio.empresa = 1;
+    comercio.asesor = user?.id;
+    comercio.nombre = comercio.nombre.toUpperCase().trim();
+    if (files.length) comercio.imagen = headers.origin + '/uploads/' + files[0]?.filename;
 
-  for (let key in comercio) {
-    if (!comercio[key]) delete comercio[key];
-  }
-
-  if (id) {
-    if (files.length) {
-      const [data] = (await pool.query(`SELECT imagen FROM comercios WHERE id = ?`, id)) ?? [null];
-      if (data?.imagen) {
-        DeleteFile(data?.imagen);
-      }
+    for (let key in comercio) {
+      if (!comercio[key]) delete comercio[key];
     }
 
-    await pool.query('UPDATE comercios SET ? WHERE id = ?', [comercio, id]);
-  } else await pool.query('INSERT INTO comercios SET ? ', comercio);
+    if (id) {
+      if (files.length) {
+        const [data] = (await pool.query(`SELECT imagen FROM comercios WHERE id = ?`, id)) ?? [
+          null
+        ];
+        if (data?.imagen) {
+          DeleteFile(data?.imagen);
+        }
+      }
 
-  res.send(true);
+      await pool.query('UPDATE comercios SET ? WHERE id = ?', [comercio, id]);
+    } else await pool.query('INSERT INTO comercios SET ? ', comercio);
+
+    res.send(true);
+  } catch (e) {
+    console.log(e);
+    res.send(false);
+  }
 });
 
 router.delete('/precios/:id', noExterno, async (req, res) => {

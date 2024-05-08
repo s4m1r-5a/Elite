@@ -1,3 +1,77 @@
+var $validationForm = $('#smartwizard-arrows-primary');
+$validationForm
+  .smartWizard({
+    /*showStepURLhash: false,
+          useURLhash: false,*/
+    selected: 0, // Paso inicial seleccionado, 0 - primer paso
+    theme: 'dots', //'arrows''default' // tema para el asistente, css relacionado necesita incluir para otro tema que el predeterminado
+    justified: true, // Justificación del menú Nav.
+    darkMode: false, // Activar/desactivar el Modo Oscuro si el tema es compatible.
+    autoAdjustHeight: false, // Ajustar automáticamente la altura del contenido
+    cycleSteps: false, // Permite recorrer los pasos
+    backButtonSupport: true, // Habilitar la compatibilidad con el botón Atrás
+    enableURLhash: false, // Habilitar la selección del paso basado en el hash url
+    transition: {
+      animation: 'slide-swing', // Efecto en la navegación, /none/fade/slide-horizontal/slide-vertical/slide-swing
+      speed: '400', // Velocidad de animación Transion
+      easing: '' // Aceleración de la animación de transición. No es compatible con un plugin de aceleración de jQuery
+    },
+    toolbarSettings: {
+      toolbarPosition: 'bottom', // ninguno, superior, inferior, ambos - none, top, bottom, both
+      toolbarButtonPosition: 'center', // izquierda, derecha, centro - left, right, center
+      showNextButton: true, // show/hide a Next button
+      showPreviousButton: false // show/hide a Previous button
+      //toolbarExtraButtons: [$("<button class=\"btn btn-submit btn-primary\" type=\"button\">Finish</button>")] // Botones adicionales para mostrar en la barra de herramientas, matriz de elementos de entrada/botones jQuery
+    },
+    anchorSettings: {
+      anchorClickable: true, // Activar/Desactivar la navegación del ancla
+      enableAllAnchors: false, // Activa todos los anclajes en los que se puede hacer clic todas las veces
+      markDoneStep: true, // Añadir estado hecho en la navegación
+      markAllPreviousStepsAsDone: true, // Cuando un paso seleccionado por url hash, todos los pasos anteriores se marcan hecho
+      removeDoneStepOnNavigateBack: false, // Mientras navega hacia atrás paso después de paso activo se borrará
+      enableAnchorOnDoneStep: true // Habilitar/Deshabilitar los pasos de navegación
+    },
+    keyboardSettings: {
+      keyNavigation: true, // Activar/Desactivar la navegación del teclado (las teclas izquierda y derecha se utilizan si está habilitada)
+      keyLeft: [37], // Código de tecla izquierdo
+      keyRight: [39] // Código de tecla derecha
+    },
+    lang: {
+      //   Variables de idioma para el botón
+      next: 'Siguiente',
+      previous: 'Anterior'
+    },
+    disabledSteps: [], // Pasos de matriz desactivados
+    errorSteps: [], // Paso de resaltado con errores
+    hiddenSteps: [] // Pasos ocultos
+  })
+  .on('leaveStep', (e, anchorObject, currentStepNumber, nextStepNumber, stepDirection) => {
+    //$('.h').attr("disabled", false);
+    //return true
+    var fd = $('form').serialize();
+    let skdt;
+    $.ajax({
+      url: '/links/id',
+      data: fd,
+      type: 'POST',
+      async: false,
+      success: function (data) {
+        if (data != 'Pin de registro invalido, comuniquese con su distribuidor!') {
+          $('.h').attr('disabled', false);
+          skdt = true;
+        } else if ($('#ipin').val() != '') {
+          $('.alert').show();
+          $('.alert-message').html('<strong>Error!</strong> ' + data);
+          setTimeout(function () {
+            $('.alert').fadeOut(3000);
+          }, 2000);
+          skdt = false;
+        }
+      }
+    });
+    return skdt;
+  });
+
 //////////////////////////* INICIO *///////////////////////////////////////
 if (window.location.pathname == `/`) {
   $(document).ready(function () {
@@ -17497,4 +17571,3 @@ if (window.location == `${window.location.origin}/links/preventas`) {
 ////////////////////////////* PRUEBAS *//////////////////////////////////////////////////////////////////////
 if (window.location == `${window.location.origin}/links/prueba`) {
 }
-

@@ -484,6 +484,8 @@ prices_combo.on('click', 'td .eliminar', function () {
     $.ajax({
       url: '/products/' + $(this).prop('id'),
       type: 'DELETE',
+      contentType: 'application/json',
+      data: JSON.stringify([]),
       success: function (data) {
         if (data) {
           prices_combo.ajax.reload(null, false);

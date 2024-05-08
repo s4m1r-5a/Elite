@@ -127,10 +127,28 @@
           </div>
         </div>
         <div class='modal-header'>
-          <h3 class='modal-title'>Orden de venta</h3>
-          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
-            <i class='feather-lg' data-feather='x-circle'></i>
-          </a>
+          <div class='w-100 d-flex justify-content-between align-items-center flex-wrap'>
+            <div class='p-1 flex-grow-1'>
+              <h3 class='modal-title'>ORDEN</h3>
+            </div>
+            <div class='p-0'>
+              <a class='r border-right px-2'><i class='feather-md' data-feather='printer'></i></a>
+              <a class='r border-right px-2'>
+                <i class='feather-md' data-feather='shopping-bag'></i>
+              </a>
+              <a class='r border-right px-2'><i class='feather-md' data-feather='slash'></i></a>
+              <a id='edit' class='r border-right px-2'>
+                <i class='feather-md' data-feather='edit-3'></i>
+              </a>
+              <a class='r border-right px-2' hidden><i
+                  class='feather-md'
+                  data-feather='trash-2'
+                ></i></a>
+              <a class='r' data-dismiss='modal' aria-label='Close'>
+                <i class='feather-lg' data-feather='x-circle'></i>
+              </a>
+            </div>
+          </div>
         </div>
         <div class='modal-body p-3 bg-light'>
           <div class='form-row'>
@@ -153,25 +171,69 @@
               </div>
             </div>
           </div>
-
-          <div class='form-row pedido'>
-            <div class='form-group col-9 col-md-4'>
+          <div class='ini'></div>
+          {{! <div class='form-row pedido position-relative unico'>
+            <div
+              class='position-absolute ocu w-100'
+              style='left: 0; top: 0; z-index: 1000; display: none;'
+            >
+              <div class='input-group w-100'>
+                <input class='form-control nota' type='text' name='nota' placeholder='Nota producto' />
+                <div class='input-group-append'>
+                  <button type='button' class='btn btn-dark' onclick='setNote(this, false)'>
+                    <i class='fas fa-angle-up'></i>
+                  </button>
+                </div>
+              </div>
+            </div>
+            <div class='form-group col-1 d-block d-sm-none'>
+              <div class='btn-group'>
+                <button
+                  type='button'
+                  class='btn btn-light p-1 extra'
+                  data-toggle='dropdown'
+                  aria-expanded='false'
+                >
+                  <i class='fas fa-fw fa-ellipsis-v'></i>
+                </button>
+                <div class='dropdown-menu'>
+                  <a class='dropdown-item' href='#' onclick='setNote(this)'>Nota producto</a>
+                  <div class='dropdown-divider eli' style='display: none;'></div>
+                  <a
+                    class='dropdown-item eli'
+                    style='display: none;'
+                    onclick='deleteProduct(this)'
+                  >Eliminar</a>
+                </div>
+              </div>
+            </div>
+            <div class='form-group col-7 col-md-4'>
               <input class='code' type='hidden' name='code' />
               <input type='hidden' name='unitario' />
               <input type='hidden' name='monto' />
               <select class='form-control products' name='producto' required></select>
             </div>
-            <div class='form-group col-3 col-md-2'>
-              <input
-                type='text'
-                class='form-control cantidad edi'
-                name='cantidad'
-                value='1'
-                placeholder='Cant.'
-                required
-              />
+            <div class='form-group col-4 col-md-2'>
+              <div class='input-group'>
+                <input
+                  type='text'
+                  class='form-control cantidad edi'
+                  name='cantidad'
+                  placeholder='Cant.'
+                  required
+                />
+                <div class='input-group-append d-block d-sm-none'>
+                  <button
+                    class='btn btn-outline-primary px-2'
+                    type='button'
+                    onclick='setProduct(this)'
+                  >
+                    <i class='fas fa-fw fa-plus'></i>
+                  </button>
+                </div>
+              </div>
             </div>
-            <div class='form-group col-12 col-md-6'>
+            <div class='form-group col-12 col-md-6 d-none d-md-block'>
               <div class='input-group'>
                 <input
                   class='form-control edi'
@@ -193,7 +255,7 @@
                 </div>
               </div>
             </div>
-          </div>
+          </div> }}
 
           <div id='sesion' class='row mt-3'>
             <div class='form-group col-6 col-md-3'>
@@ -215,11 +277,11 @@
             <div class='form-group col-6 col-md-9'>
               <div class='btn-group btn-group-toggle float-right' data-toggle='buttons'>
                 <label class='btn btn-outline-primary'>
-                  <input type='radio' name='type' id='domicilio' value='domicilio' />
+                  <input type='radio' name='type' id='domicilio' value='domicilio' required />
                   Domicilio
                 </label>
                 <label class='btn btn-outline-primary'>
-                  <input type='radio' name='type' id='mesas' value='mesa' />
+                  <input type='radio' name='type' id='mesas' value='mesa' required />
                   Mesas
                 </label>
               </div>
