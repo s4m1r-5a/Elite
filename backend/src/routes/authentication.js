@@ -49,6 +49,7 @@ router.post('/signin', (req, res, next) => {
     req.flash('error', errors[0].msg);
     res.redirect('/signin');
   }
+  
   passport.authenticate('local.signin', {
     successRedirect: '/tablero',
     failureRedirect: '/signin',

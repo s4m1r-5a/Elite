@@ -45,6 +45,7 @@
     "passport-google-oauth": "^2.0.0",
     "passport-local": "^1.0.0",
     "pdfmake": "^0.1.71",
+    "psl": "^1.9.0",
     "request": "^2.88.0",
     "socket.io": "^3.1.0",
     "timeago.js": "^4.0.0-beta.1",

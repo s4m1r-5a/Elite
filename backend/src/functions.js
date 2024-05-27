@@ -15,7 +15,7 @@ const transpoter = nodemailer.createTransport({
   port: 80,
   secure: false,
   auth: {
-    user: 'info@grupoelitefincaraiz.co',
+    user: 'info@inmovili.co',
     pass: 'C0l0mb1@1q2w3e4r5t*'
   },
   tls: {
@@ -691,7 +691,7 @@ function NumeroALetras(num, centavos) {
 //////////////* EMAILS *////////////////////////////////
 async function EnviarEmail(email, asunto, destinatario, html, texto, archivos) {
   let data = {
-    from: "'GRUPO ELITE' <info@grupoelitefincaraiz.co>",
+    from: "'GRUPO ELITE' <info@inmovili.co>",
     to: email,
     subject: asunto
   };
@@ -1002,7 +1002,7 @@ async function EstadoCuenta(movil, nombre, author) {
           columns: [
             {
               width: 100,
-              qr: 'https://grupoelitefincaraiz.com',
+              qr: 'https://inmovili.com',
               fit: '50',
               foreground: 'yellow',
               background: 'black'
@@ -1016,8 +1016,8 @@ async function EstadoCuenta(movil, nombre, author) {
                 columns: [
                   { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
                   {
-                    text: 'https://grupoelitefincaraiz.com',
-                    link: 'https://grupoelitefincaraiz.com'
+                    text: 'https://inmovili.com',
+                    link: 'https://inmovili.com'
                   }
                 ]
               },
@@ -1026,7 +1026,7 @@ async function EstadoCuenta(movil, nombre, author) {
                 italics: true,
                 color: 'gray',
                 fontSize: 10,
-                columns: [{ text: 'Nit: 901311748-3' }, { text: 'info@grupoelitefincaraiz.co' }]
+                columns: [{ text: 'Nit: 901311748-3' }, { text: 'info@inmovili.co' }]
               },
               {
                 alignment: 'justify',
@@ -1079,7 +1079,7 @@ async function EstadoCuenta(movil, nombre, author) {
 
     var dataFile = {
       phone: author,
-      body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${estado[0].cparacion}.pdf`,
+      body: `https://inmovili.com/uploads/estadodecuenta-${estado[0].cparacion}.pdf`,
       filename: `ESTADO DE CUENTA ${estado[0].cparacion}.pdf`
     };
     let r = await apiChatApi('sendFile', dataFile);
@@ -1215,10 +1215,10 @@ async function FacturaDeCobro(ids) {
                 fontSize: 8,
                 columns: [
                   { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
-                  { text: 'info@grupoelitefincaraiz.co' },
+                  { text: 'info@inmovili.co' },
                   {
-                    text: 'https://grupoelitefincaraiz.com',
-                    link: 'https://grupoelitefincaraiz.com'
+                    text: 'https://inmovili.com',
+                    link: 'https://inmovili.com'
                   }
                 ]
               },
@@ -1620,7 +1620,7 @@ async function Facturar(numFactura) {
 
     /* var dataFile = {
             phone: '573012673944', //Proyeccion[0].movil,
-            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            body: `https://inmovili.com/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
             filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
         };
         let r = await apiChatApi('sendFile', dataFile);
@@ -1793,7 +1793,7 @@ async function Lista(proyect = null) {
 
     /* var dataFile = {
             phone: '573012673944', //Proyeccion[0].movil,
-            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            body: `https://inmovili.com/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
             filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
         };
         let r = await apiChatApi('sendFile', dataFile);
@@ -1822,8 +1822,6 @@ async function ListaLotes(proyectId = null) {
     )) || [];
 
   const proyect = lista[0];
-
-  console.log({ lista, proyect, proyectId }, !lista);
 
   if (!proyect) return { sent: false };
 
@@ -2016,7 +2014,7 @@ async function ListaLotes(proyectId = null) {
   }
 }
 
-async function Montos(Orden) {
+async function Montos(Orden, ia = false) {
   const Proyeccion = await pool.query(
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
@@ -2044,6 +2042,9 @@ async function Montos(Orden) {
     let p = false;
     let IDs = [];
     let IdCuotas = [];
+    let totalCuotas = 0;
+    let cuotasAtrsadas = 0;
+    let totalCuotasPendientes = 0;
 
     let acuerdoActual = 0; // variable que determina desde que acuerdo empezara la logica del algoritmo para generar los descuentos
     let totalAcuerdos = acuerdos.length - 1; // se determina el numero de acuerdo vigentes o activos que el cliente a echo con la empresa a lo largo del tiempo
@@ -2055,6 +2056,13 @@ async function Montos(Orden) {
     Proyeccion.map((e, i) => {
       const IDs2 = IDs.some(s => s === e.ids);
       const idCqt = IdCuotas.some(s => s === e.idcuota);
+      if (!idCqt) {
+        totalCuotas++;
+        if (e.estado === 3) {
+          totalCuotasPendientes++;
+          if (moment().format('YYYY-MM-DD') > e.fechs) cuotasAtrsadas++;
+        }
+      }
       const actoAmora =
         acuerdos[acuerdoActual]?.end === undefined
           ? e.estado === 3 && !idCqt
@@ -2106,6 +2114,18 @@ async function Montos(Orden) {
       PagosPendientes.map((e, i) => (totalAbonado += e.stado != 4 ? 0 : e.monto));
       totalDeuda = Proyeccion[0].valor - Proyeccion[0].ahorro + totalMora - totalAbonado;
     }
+
+    if (ia)
+      return {
+        totalInstallments: totalCuotas,
+        totalOverdueInstallments: cuotasAtrsadas,
+        totalOutstandingInstallments: totalCuotasPendientes,
+        totalPayMade: totalAbonado,
+        totalInterestAmount: moraAdeudada,
+        capitalBalance: totalSaldo,
+        totalBalance: totalDeuda
+      };
+
     return {
       montos: totalAbonado,
       mora: totalMora,
@@ -2120,7 +2140,7 @@ async function Montos(Orden) {
   }
 }
 
-async function EstadoDeCuenta(Orden) {
+async function EstadoDeCuenta(Orden, ia = false) {
   const Proyeccion = await pool.query(
     `SELECT c.id idcuota, c.tipo, c.ncuota, c.fechs, r.montocuota, r.dias, r.tasa, r.dcto, s.fecharcb, r.fechaLMT, 
     r.totalmora, r.montocuota + r.totalmora totalcuota, s.fech, s.monto, r.saldocuota, l.valor - p.ahorro AS total, 
@@ -2141,7 +2161,16 @@ async function EstadoDeCuenta(Orden) {
 
   if (Proyeccion.length) {
     const cuerpo = [];
-    const bodi = [['Fecha', 'Recibo', 'Estado', 'Forma de pago', 'Tipo', 'Monto']];
+    const bodi = [
+      [
+        { text: 'Fecha' },
+        { text: 'Recibo' },
+        { text: 'Estado' },
+        { text: 'Forma de pago' },
+        { text: 'Tipo' },
+        { text: 'Monto' }
+      ]
+    ];
     let totalAbonado = 0;
     let totalMora = 0;
     let moraAdeudada = 0;
@@ -2198,18 +2227,78 @@ async function EstadoDeCuenta(Orden) {
       if (!i) {
         cuerpo.push(
           [
-            { text: `Tipo`, style: 'tableHeader', alignment: 'center' },
-            { text: 'F.Limite', style: 'tableHeader', alignment: 'center' },
-            { text: 'Cuota', style: 'tableHeader', alignment: 'center' },
-            { text: 'Dias', style: 'tableHeader', alignment: 'center' },
-            { text: 'T.Usr', style: 'tableHeader', alignment: 'center' },
-            { text: 'Dcto.', style: 'tableHeader', alignment: 'center' },
-            { text: 'Mora', style: 'tableHeader', alignment: 'center' },
-            { text: 'T.Cuota', style: 'tableHeader', alignment: 'center' },
-            { text: 'F.Pago', style: 'tableHeader', alignment: 'center' },
-            { text: 'Monto', style: 'tableHeader', alignment: 'center' },
-            { text: 'C.Saldo', style: 'tableHeader', alignment: 'center' },
-            { text: 'M.Saldo', style: 'tableHeader', alignment: 'center' }
+            {
+              text: `Tipo`,
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Is the nomenclature that identifies a quota'
+            },
+            {
+              text: 'F.Limite',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'It is the period that the client has to make the payment of the fee.'
+            },
+            {
+              text: 'Cuota',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Is the value of the fee to pay'
+            },
+            {
+              text: 'Dias',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Days late in payment of the fee from the deadline.'
+            },
+            {
+              text: 'T.Usr',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Usury rate, percentage of interest that will be imposed on the amount for late payment'
+            },
+            {
+              text: 'Dcto.',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Discount percentage to be applied to late payment interest'
+            },
+            {
+              text: 'Mora',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Calculated amount of interest in the days of late payment'
+            },
+            {
+              text: 'T.Cuota',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Total of the calculated installment plus late payment interest'
+            },
+            {
+              text: 'F.Pago',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Date on which the client made partial or total payment of the fee.'
+            },
+            {
+              text: 'Monto',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'amount paid by the client'
+            },
+            {
+              text: 'C.Saldo',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Capital balance of the installment after payment'
+            },
+            {
+              text: 'M.Saldo',
+              style: 'tableHeader',
+              alignment: 'center',
+              note: 'Delinquent balance of the installment after payment'
+            }
           ],
           [
             e.tipo + '-' + e.ncuota,
@@ -2274,7 +2363,7 @@ async function EstadoDeCuenta(Orden) {
     });
 
     const PagosPendientes = await pool.query(
-      `SELECT s.fecharcb, s.fech, s.monto, s.stado, s.ids, s.formap, s.descp 
+      `SELECT s.fecharcb, s.fech, s.monto, s.stado, s.ids, s.formap, s.descp, s.pdf 
       FROM solicitudes s INNER JOIN preventa p ON s.orden = p.id        
       WHERE s.concepto IN('PAGO', 'ABONO', 'BONO') AND p.id = ? 
       AND s.stado IN(3, 4) ORDER BY TIMESTAMP(s.fecharcb) ASC, TIMESTAMP(s.fech) ASC;`,
@@ -2286,7 +2375,7 @@ async function EstadoDeCuenta(Orden) {
         totalAbonado += e.stado != 4 ? 0 : e.monto;
         bodi.push([
           e.fecharcb ? moment(e.fecharcb).format('L') : '--/--/----',
-          `RC${e.ids}`,
+          { text: `RC${e.ids}`, link: e.pdf },
           {
             text: e.stado === 4 ? 'Aprobado' : 'Pendiente',
             color: e.stado === 4 ? 'green' : 'blue'
@@ -2306,9 +2395,6 @@ async function EstadoDeCuenta(Orden) {
         return new Date(a[0]).getTime() - new Date(b[0]).getTime();
       });
       totalDeuda = Proyeccion[0].valor - Proyeccion[0].ahorro + totalMora - totalAbonado;
-
-      /* const indx = bodi.findIndex(e => e[1] == 'RCnull');
-      if (indx > -1) bodi.splice(indx, 1); */
     }
 
     //console.log(cuerpo);
@@ -2391,10 +2477,10 @@ async function EstadoDeCuenta(Orden) {
                 fontSize: 8,
                 columns: [
                   { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
-                  { text: 'info@grupoelitefincaraiz.co' },
+                  { text: 'info@inmovili.co' },
                   {
-                    text: 'https://grupoelitefincaraiz.com',
-                    link: 'https://grupoelitefincaraiz.com'
+                    text: 'https://inmovili.com',
+                    link: 'https://inmovili.com'
                   }
                 ]
               },
@@ -2776,7 +2862,7 @@ async function EstadoDeCuenta(Orden) {
 
     /* var dataFile = {
             phone: '573012673944', //Proyeccion[0].movil,
-            body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
+            body: `https://inmovili.com/uploads/estadodecuenta-${Proyeccion[0].cparacion}.pdf`,
             filename: `ESTADO DE CUENTA ${Proyeccion[0].cparacion}.pdf`
         };
         let r = await apiChatApi('sendFile', dataFile);
@@ -2790,6 +2876,25 @@ async function EstadoDeCuenta(Orden) {
             [{ fileName: `Estado de cuenta ${Proyeccion[0].cparacion}.pdf`, ruta }]
         ); */
     console.log(ruta);
+
+    if (ia) {
+      return {
+        link: ruta,
+        paymentHistoryTable: bodi
+          .map((a, i) => {
+            let img = '';
+            return [
+              ...a.map(e => {
+                if (e?.link) img = e.link;
+                return typeof e === 'string' ? e : e?.text ?? null;
+              }),
+              !i ? 'linkreceiptLink' : img
+            ];
+          })
+          .slice(0, -4)
+      };
+    }
+
     return ruta; //JSON.stringify(estado);
   } else {
     return { sent: false };
@@ -3074,7 +3179,7 @@ async function informes(data) {
         : a.extr;
 
     cuerpo.push([
-      { text: a.ids, link: 'https://grupoelitefincaraiz.com' + a.img, color: 'blue' },
+      { text: a.ids, link: 'https://inmovili.com' + a.img, color: 'blue' },
       a.proyect,
       a.mz,
       a.n,
@@ -3120,10 +3225,10 @@ async function informes(data) {
               fontSize: 8,
               columns: [
                 { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
-                { text: 'info@grupoelitefincaraiz.co' },
+                { text: 'info@inmovili.co' },
                 {
-                  text: 'https://grupoelitefincaraiz.com',
-                  link: 'https://grupoelitefincaraiz.com'
+                  text: 'https://inmovili.com',
+                  link: 'https://inmovili.com'
                 }
               ]
             },
@@ -3643,7 +3748,7 @@ async function ReciboDeCaja(movil, nombre, author) {
           columns: [
             {
               width: 100,
-              qr: 'https://grupoelitefincaraiz.com',
+              qr: 'https://inmovili.com',
               fit: '50',
               foreground: 'yellow',
               background: 'black'
@@ -3657,8 +3762,8 @@ async function ReciboDeCaja(movil, nombre, author) {
                 columns: [
                   { text: 'GRUPO ELITE FINCA RAÍZ S.A.S.' },
                   {
-                    text: 'https://grupoelitefincaraiz.com',
-                    link: 'https://grupoelitefincaraiz.com'
+                    text: 'https://inmovili.com',
+                    link: 'https://inmovili.com'
                   }
                 ]
               },
@@ -3667,7 +3772,7 @@ async function ReciboDeCaja(movil, nombre, author) {
                 italics: true,
                 color: 'gray',
                 fontSize: 10,
-                columns: [{ text: 'Nit: 901311748-3' }, { text: 'info@grupoelitefincaraiz.co' }]
+                columns: [{ text: 'Nit: 901311748-3' }, { text: 'info@inmovili.co' }]
               },
               {
                 alignment: 'justify',
@@ -3720,7 +3825,7 @@ async function ReciboDeCaja(movil, nombre, author) {
 
     var dataFile = {
       phone: author,
-      body: `https://grupoelitefincaraiz.co/uploads/estadodecuenta-${estado[0].cparacion}.pdf`,
+      body: `https://inmovili.com/uploads/estadodecuenta-${estado[0].cparacion}.pdf`,
       filename: `ESTADO DE CUENTA ${estado[0].cparacion}.pdf`
     };
     let r = await apiChatApi('sendFile', dataFile);
@@ -3831,12 +3936,12 @@ async function RecibosCaja(movil, nombre, author, reci) {
                         alignment: 'center'
                       },
                       {
-                        text: 'info@grupoelitefincaraiz.co',
+                        text: 'info@inmovili.co',
                         alignment: 'center'
                       },
                       {
-                        text: 'https://grupoelitefincaraiz.com',
-                        link: 'https://grupoelitefincaraiz.com',
+                        text: 'https://inmovili.com',
+                        link: 'https://inmovili.com',
                         alignment: 'center'
                       }
                     ]
@@ -3865,7 +3970,7 @@ async function RecibosCaja(movil, nombre, author, reci) {
                   margin: [0, 0, 0, 7],
                   alignment: 'center',
                   width: 50,
-                  qr: 'https://grupoelitefincaraiz.com',
+                  qr: 'https://inmovili.com',
                   fit: '40',
                   foreground: 'yellow',
                   background: 'black'
@@ -4030,7 +4135,7 @@ async function RecibosCaja(movil, nombre, author, reci) {
 
       var dataFile = {
         phone: author,
-        body: `https://grupoelitefincaraiz.co/uploads/recibocaja-${e.ids}.pdf`,
+        body: `https://inmovili.com/uploads/recibocaja-${e.ids}.pdf`,
         filename: `RECIBO DE CAJA ${e.ids}.pdf`
       };
       let r = await apiChatApi('sendFile', dataFile);

@@ -72,6 +72,30 @@ $validationForm
     return skdt;
   });
 
+$('.fechas').daterangepicker({
+  locale: {
+    format: 'YYYY-MM-DD',
+    daysOfWeek: ['Do', 'Lu', 'Ma', 'Mi', 'Ju', 'Vi', 'Sa'],
+    monthNames: [
+      'Enero',
+      'Febrero',
+      'Marzo',
+      'Abril',
+      'Mayo',
+      'Junio',
+      'Julio',
+      'Agosto',
+      'Septiembre',
+      'Octubre',
+      'Noviembre',
+      'Diciembre'
+    ],
+    firstDay: 1
+  },
+  singleDatePicker: true,
+  showDropdowns: true,
+  opens: 'right'
+});
 //////////////////////////* INICIO *///////////////////////////////////////
 if (window.location.pathname == `/`) {
   $(document).ready(function () {

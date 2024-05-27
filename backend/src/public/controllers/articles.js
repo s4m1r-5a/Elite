@@ -2,6 +2,7 @@ $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 
 $(document).ready(function () {
+  $('#hidelecte, .public, #carga').hide();
   $('input').prop('autocomplete', 'off');
   measuring.map(e => $('.measuring').append(new Option(e.tag, e.val, false, false)));
 
@@ -71,9 +72,11 @@ const products = $('#products').DataTable({
       ]
     },
     {
-      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Medicamento</span>`,
+      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Articulo</span>`,
       attr: {
-        title: 'Agregar-Medicamento',
+        'data-toggle': 'modal',
+        'data-target': '#AddProduct',
+        title: 'Agregar Articulo',
         id: 'addProd'
       },
       className: 'btn btn-outline-dark',

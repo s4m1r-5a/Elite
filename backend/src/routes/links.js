@@ -40,9 +40,7 @@ const {
   Lista,
   Montos
 } = require('../functions.js');
-const { Console } = require('console');
 const helpers = require('../lib/helpers');
-const { constants } = require('http2');
 //DELETE
 const tokenWtsp =
   'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ0cmFkZSI6IlNhbXlyIiwid2ViaG9vayI6Imh0dHBzOi8vYzE4YS0yODAwLTQ4NC1hYzgyLTFhMGMtMjk5Ni1iZGUyLTI4NWUtMzgyYS5uZ3Jvay5pby93dHNwL3dlYmhvb2siLCJpYXQiOjE2NDg4MjYxNTR9.o-aWCOLCowGoJdqnUQnKpNrtJFWYrNqZ8LpPycQH7U0';
@@ -2485,8 +2483,7 @@ router.post('/extractos', async (req, res) => {
 });
 ////////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
-  const proveedores = await pool.query(`SELECT id, empresa FROM proveedores`);
-  res.render('links/productos', { proveedores });
+  res.render('links/productos');
 });
 router.post('/productos', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
@@ -8008,8 +8005,8 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
 router.post('/afiliado', noExterno, async (req, res) => {
   const { movil, cajero } = req.body;
   var pin = ID(13);
-  var cel = movil.replace(/-/g, '');
-  if (req.user.admin && req.user.empresa) {
+  var cel = movil.replace(/-| /g, '');
+  if (req.user.admin) {
     const h = await pool.query('SELECT * FROM pines WHERE celular = ? ', cel);
 
     if (h.length) pin = h[0].id;
@@ -8018,12 +8015,22 @@ router.post('/afiliado', noExterno, async (req, res) => {
         id: pin,
         categoria: 1,
         usuario: req.user.id,
-        celular: cel
+        celular: cel,
+        empresa: req.user.empresa
       };
       await pool.query('INSERT INTO pines SET ? ', nuevoPin);
     }
     //WspNewUser(cel, req.user.titulo, req.headers.origin + req.user.logo, pin);
-    WspNewUser(movil, req.user.titulo, 'https://inmovili.com' + req.user.logo, pin);
+    console.log(
+      'Se esta enviando a la funcion de whatsapp',
+      movil,
+      req.user.nombre,
+      'https://inmovili.com' + req.user.logo,
+      pin
+    );
+
+    const msg = `_Hola, *${req.user.nombre}* te da la buenvenida._\n_Tu pin de registro es: *${pin}*_`;
+    WspNewUser(req.user.empresa, cel, msg, { media: 'https://inmovili.com' + req.user.logo });
 
     req.flash(
       'success',
@@ -8964,7 +8971,7 @@ async function Desendentes(user, stados, pasado) {
   return true;
 }
 async function Eli(img) {
-  path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf')
+  path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf');
   fs.exists(img, function (exists) {
     if (exists) {
       fs.unlink(img, function (err) {
@@ -8988,7 +8995,7 @@ function Moneda(valor) {
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
 }
-async function WspNewUser(movil, company, img, id) {
+async function WspNewUser(empresa, movil, msg, options) {
   const cel =
     movil.indexOf('-') > 0
       ? '57' + movil.replace(/-/g, '')
@@ -8996,71 +9003,42 @@ async function WspNewUser(movil, company, img, id) {
       ? movil.replace(/ /g, '')
       : '57' + movil;
 
-  var data = JSON.stringify({
-    messaging_product: 'whatsapp',
-    to: cel,
-    type: 'template',
-    template: {
-      name: 'new_user',
-      language: {
-        code: 'es'
-      },
-      components: [
-        {
-          type: 'header',
-          parameters: [
-            {
-              type: 'image',
-              image: {
-                link: img
-              }
-            }
-          ]
-        },
-        {
-          type: 'body',
-          parameters: [
-            {
-              type: 'text',
-              text: company
-            },
-            {
-              type: 'text',
-              text: id
-            }
-          ]
-        },
-        {
-          type: 'button',
-          sub_type: 'url',
-          index: '0',
-          parameters: [
-            {
-              type: 'text',
-              text: id
-            }
-          ]
-        }
-      ]
-    }
-  });
+  const rows = await pool.query(
+    `SELECT c.url, c.token, b.routes 
+    FROM chatbots c 
+    INNER JOIN bots b ON c.id = b.chatbot 
+    WHERE b.category = 'SISTEMAS' AND c.empresa = ?`,
+    [empresa]
+  );
+
+  if (!rows.length) return false;
+
+  const row = rows[0];
+
+  const route = JSON.parse(row.routes).find(e => e.name === 'messages')?.path;
+
+  console.log({ row, cel, msg, route, options });
 
   var config = {
     method: 'post',
-    url: 'https://graph.facebook.com/v14.0/100312482788649/messages',
+    url: row?.url + route,
     headers: {
-      Authorization: 'Bearer ' + wasb,
+      token: row?.token,
       'Content-Type': 'application/json'
     },
-    data: data
+    data: JSON.stringify({
+      number: cel,
+      message: msg,
+      urlMedia: 'https://www.imprentaonline.net/blog/wp-content/webpc-passthru.php?src=https://www.imprentaonline.net/blog/wp-content/uploads/DALL%C2%B7E-2023-10-16-10.41.49-Illustration-depicting-a-humanoid-robot-with-half-of-its-face-transparent-revealing-intricate-circuits-and-gears-inside.-The-robot-is-holding-a-light-1.png&nocache=1' //options?.media
+    })
   };
 
   axios(config)
     .then(function (response) {
-      console.log(JSON.stringify(response.data));
+      console.log(JSON.stringify(response.data), 'Respuesta de la api de whatsapp WspNewUser');
     })
     .catch(function (error) {
-      console.log(error);
+      console.log(error.response, 'Error de la api de whatsapp WspNewUser');
     });
 }
 async function WspRcb(movil, url, filename) {
