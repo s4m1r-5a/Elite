@@ -32,7 +32,6 @@ const analizarDominio = async origin => {
     }
 
     const { sld: domain, subdomain } = parsedDomain;
-    console.log({ origin, rawDomain, domain, subdomain, parsedDomain }, 'origen del sistema');
 
     return { domain: domain || rawDomain, subdomain };
   } catch (error) {

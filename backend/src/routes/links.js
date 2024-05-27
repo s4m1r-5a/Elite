@@ -4521,7 +4521,10 @@ router.post('/bonus', async (req, res) => {
     await pool.query('UPDATE productosd SET estado = 8 WHERE id = ?', lt);
     await pool.query('UPDATE cupones SET ? WHERE id = ?', [{ producto: orden, estado: 14 }, pin]);
     const P = await pool.query('INSERT INTO solicitudes SET ? ', pago);
-    const R = await PagosAbonos(P.insertId, '', 'GRUPO ELITE SISTEMA');
+    const R = await PagosAbonos(P.insertId, '', {
+      fullname: 'GRUPO ELITE SISTEMA',
+      empresa: req.user.empresa
+    });
     res.send(R);
   } else {
     res.send(false);
@@ -7771,8 +7774,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
       msg: `No tienes permiso para realizar esta accion`
     });
   }
-  //console.log(req.body, req.files)
-  //return res.send(true);
+
   if (id === 'Declinar') {
     const { Orden, ids, img, por, cel, fullname, mz, n, proyect, nombre } = req.body;
     const r = await Estados(Orden);
@@ -7821,10 +7823,11 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
       pdf = req.headers.origin + '/uploads/' + req.files[0].filename;
       await pool.query('UPDATE solicitudes SET ? WHERE ids = ?', [{ pdf }, ids]);
     }
-    //console.log(pdf)
-    //var bod = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_GRUPO ELITE FINCA RAÍZ_*\n\n${pdf}`;
-    //await EnviarWTSAP(movil, bod);
-    await WspRcb(movil, pdf, ids);
+
+    const msg = `_*${nombre}*. Hemos procesado tu *PAGO* de manera exitoza. Adjuntamos recibo de pago *#${ids}*_\n\n*_${req.user.nombre}_*\n\n${pdf}`;
+
+    // await WspRcb(movil, pdf, ids);
+    await WspNewUser(req.user.empresa, movil, msg, { media: pdf });
     const r = { std: true, msg: `Solicitud procesada correctamente` };
     res.send(r);
   } else if (id === 'Asociar') {
@@ -7992,7 +7995,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     const { ids, ahora, idExtracto, enviaRcb } = req.body;
 
     const pdf = req.headers.origin + '/uploads/' + req.files[0]?.filename;
-    const R = await PagosAbonos(ids, pdf, req.user.fullname, idExtracto, parseInt(enviaRcb));
+    const R = await PagosAbonos(ids, pdf, req.user, idExtracto, parseInt(enviaRcb));
     var w = { aprobado: ahora };
     idExtracto && (w.extrato = idExtracto);
     if (R) {
@@ -8020,17 +8023,9 @@ router.post('/afiliado', noExterno, async (req, res) => {
       };
       await pool.query('INSERT INTO pines SET ? ', nuevoPin);
     }
-    //WspNewUser(cel, req.user.titulo, req.headers.origin + req.user.logo, pin);
-    console.log(
-      'Se esta enviando a la funcion de whatsapp',
-      movil,
-      req.user.nombre,
-      'https://inmovili.com' + req.user.logo,
-      pin
-    );
 
     const msg = `_Hola, *${req.user.nombre}* te da la buenvenida._\n_Tu pin de registro es: *${pin}*_`;
-    WspNewUser(req.user.empresa, cel, msg, { media: 'https://inmovili.com' + req.user.logo });
+    WspNewUser(req.user.empresa, cel, msg, { media: req.get('origin') + req.user.logo });
 
     req.flash(
       'success',
@@ -8042,6 +8037,7 @@ router.post('/afiliado', noExterno, async (req, res) => {
 
   res.redirect('/tablero');
 });
+
 router.post('/id', async (req, res) => {
   const { pin } = req.body;
   const rows = await pool.query('SELECT * FROM pines WHERE id = ?', pin);
@@ -8823,7 +8819,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
         concepto: 'ABONO',
         descp: Cuotas.length ? Cuotas[0].tipo : 'ABONO',
         stado: 4,
-        aprueba: user
+        aprueba: user.fullname
       },
       Tid
     ]);
@@ -8862,7 +8858,8 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
   console.log(S.movil, pdf, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', enviaRcb);
   //enviaRcb && (await EnviarWTSAP(S.movil, bod));
   if (enviaRcb) {
-    await WspRcb(S.movil, pdf, Tid);
+    // await WspRcb(S.movil, pdf, Tid);
+    await WspNewUser(user.empresa, S.movil, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', { media: pdf });
   }
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
@@ -9017,7 +9014,7 @@ async function WspNewUser(empresa, movil, msg, options) {
 
   const route = JSON.parse(row.routes).find(e => e.name === 'messages')?.path;
 
-  console.log({ row, cel, msg, route, options });
+  // console.log({ row, cel, msg, route, options });
 
   var config = {
     method: 'post',
@@ -9029,7 +9026,9 @@ async function WspNewUser(empresa, movil, msg, options) {
     data: JSON.stringify({
       number: cel,
       message: msg,
-      urlMedia: 'https://www.imprentaonline.net/blog/wp-content/webpc-passthru.php?src=https://www.imprentaonline.net/blog/wp-content/uploads/DALL%C2%B7E-2023-10-16-10.41.49-Illustration-depicting-a-humanoid-robot-with-half-of-its-face-transparent-revealing-intricate-circuits-and-gears-inside.-The-robot-is-holding-a-light-1.png&nocache=1' //options?.media
+      urlMedia: options?.media.indexOf('localhost')
+        ? 'https://www.imprentaonline.net/blog/wp-content/webpc-passthru.php?src=https://www.imprentaonline.net/blog/wp-content/uploads/DALL%C2%B7E-2023-10-16-10.41.49-Illustration-depicting-a-humanoid-robot-with-half-of-its-face-transparent-revealing-intricate-circuits-and-gears-inside.-The-robot-is-holding-a-light-1.png&nocache=1'
+        : options?.media || null
     })
   };
 
