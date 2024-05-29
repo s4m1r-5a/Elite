@@ -8005,7 +8005,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
   }
 });
 /////////////////////////* AFILIACION *////////////////////////////////////////
-router.post('/afiliado', noExterno, async (req, res) => {
+router.post('/afiliado', isLoggedIn, async (req, res) => {
   const { movil, cajero } = req.body;
   var pin = ID(13);
   var cel = movil.replace(/-| /g, '');

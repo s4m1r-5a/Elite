@@ -934,7 +934,7 @@ function urltoFile(url, filename, mimeType) {
     });
 }
 function ID(lon) {
-  let chars = '0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z',
+  let chars = 'wB9XyUfZ2nR3K1Am5MoH7h8EqsbcLeFjDPa0uGrzTVlQgtW6NpSJivCYkdIx4OM',
     code = '';
   for (x = 0; x < lon; x++) {
     let rand = Math.floor(Math.random() * chars.length);

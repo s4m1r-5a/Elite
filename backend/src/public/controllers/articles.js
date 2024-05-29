@@ -1,10 +1,98 @@
 $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
+const placeholder = { id: null, text: 'Slec. parametro', selected: true };
+const options = [
+  { id: 'Cantidad', text: 'Cantidad' },
+  { id: 'Talla', text: 'Talla' },
+  { id: 'Color', text: 'Color' },
+  { id: 'Marca', text: 'Marca' },
+  { id: 'Clase', text: 'Clase' },
+  { id: 'Laboratorio', text: 'Laboratorio' },
+  { id: 'Modelo', text: 'Modelo' },
+  { id: 'Material', text: 'Material' },
+  { id: 'Sabor', text: 'Sabor' },
+  { id: 'Fragancia', text: 'Fragancia' },
+  { id: 'Capacidad', text: 'Capacidad' },
+  { id: 'Durabilidad', text: 'Durabilidad' },
+  { id: 'Estilo', text: 'Estilo' },
+  { id: 'Eficiencia', text: 'Eficiencia' },
+  { id: 'Serie', text: 'Serie' },
+  { id: 'Tipo', text: 'Tipo' }
+];
+
+const fields = `<div class='d-flex flex-row align-items-center align-content-center flex-wrap ref' style="display: none;">
+<div class='p-2 col-6 col-md-6'>
+  <input type='hidden' name='code' />
+  <select class='form-control params' name='ref.key' required></select>
+</div>
+<div class='p-2 col-6 col-md-6'>
+  <div class='input-group'>
+    <input
+      class='form-control edi'
+      type='text'
+      name='ref.value'
+      placeholder='Nota producto'
+    />
+    <div class='input-group-append'>
+      <div class='dropdown'>
+        <button class='btn btn-primary plus' data-toggle='dropdown' aria-expanded='false'>
+          <i class='feather-lg' data-feather='more-vertical'></i>
+          <i class='fas fa-fw fa-ellipsis-v' style="font-size: 11px;"></i>
+        </button>
+
+        <div class='dropdown-menu'>
+          <a class='dropdown-item' href='#' onclick='setProduct(this)'>
+            <i class='fas fa-fw fa-plus'></i>
+            Nuevo
+          </a>
+          <a class='dropdown-item' href='#' onclick='deleteProduct(this)'>
+            <i class='fas fa-fw fa-trash-alt'></i>
+            Eliminar
+          </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>`;
+
+const ref = ref => {
+  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia' style="display: none;">
+  <div
+    class='d-flex align-items-center align-content-center flex-wrap'
+    type='button'
+    data-toggle='collapse'
+    data-target='#referencia_${ref}'
+    aria-expanded='false'
+    aria-controls='referencia_${ref}'
+    style='background-color: #FCF3CF !important;'
+  >
+    <div class='p-2 flex-grow-1 bd-highlight'>---Referencia #${ref}--------------</div>
+    <div class='p-2 bd-highlight'>
+      <a><i class='fas fa-fw fa-angle-down'></i></a>
+    </div>
+  </div>
+
+  <div
+    id='referencia_${ref}'
+    class='collapse show px-2'
+    aria-labelledby='headingOne'
+    data-parent='#referencias'
+  >
+    ${fields}
+  </div>
+</div>`;
+};
 
 $(document).ready(function () {
   $('#hidelecte, .public, #carga').hide();
   $('input').prop('autocomplete', 'off');
   measuring.map(e => $('.measuring').append(new Option(e.tag, e.val, false, false)));
+
+  $('.params')
+    .select2({ allowClear: true, data: options, placeholder })
+    .val(null)
+    .trigger('change');
 
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
@@ -171,6 +259,10 @@ products.on('click', 'td .editar', function () {
   });
 });
 
+$('#AddProduct').on('shown.bs.modal', function (e) {
+  if (!$('#id').val()) $('.title').text(`---Referencia #${ID(5)}--------------`);
+});
+
 var listaPrecio = () => {
   $.ajax({
     url: '/links/listadeprecio',
@@ -182,3 +274,146 @@ var listaPrecio = () => {
     }
   });
 };
+
+function setRef(elem) {
+  const code = ID(5);
+  const element = !elem ? '.card:last' : $(elem).parents('#referencias').find('.card:last');
+  const newElemnt = $(ref(code)).insertAfter(element).show('slow');
+
+  if (elem || check) {
+    newElemnt
+      .find('.ref')
+      .show('slow')
+      .find('.params')
+      .select2({ allowClear: true, data: options, placeholder })
+      .val(null)
+      .trigger('change');
+
+    $('.params')
+      .not(newElemnt.find('.params'))
+      .each(() => {
+        if (this.value)
+          newElemnt.find(`.params option[value="${this.value}"]`).prop('disabled', true);
+      });
+  }
+
+  newElemnt.find('.params').on('change', function () {
+    setOptions(this);
+  });
+
+  $('.select2-container').css('width', '100%', 'important');
+
+  $('.collapse').not(`#referencia_${code}`).collapse('hide');
+
+  $(`#referencia_${code}`).collapse('show');
+
+  return newElemnt;
+}
+
+function setProduct(elem, ref = 'krt') {
+  const element = !elem ? $(`.${ref} .ref:last`) : $(elem).parents('.ref');
+  const newElemnt = $(fields).insertAfter(element).show('slow');
+  const card = element.parents('.referencia');
+
+  if (elem || check) {
+    newElemnt
+      .find('.params')
+      .select2({ allowClear: true, data: options, placeholder })
+      .val(null)
+      .trigger('change');
+
+    card
+      .find('.params')
+      .not(newElemnt.find('.params'))
+      .each(function () {
+        console.log(this.value, this.name, this.type);
+        if (this.value)
+          newElemnt.find(`.params option[value="${this.value}"]`).prop('disabled', true);
+      });
+  }
+
+  newElemnt.find('.params').on('change', function () {
+    setOptions(this);
+  });
+
+  $('.select2-container').css('width', '100%', 'important');
+
+  return newElemnt;
+}
+
+function setParams(elem) {
+  const { value } = elem;
+  check = value || null;
+  if (value === 'COMBO') {
+    $('.public').hide('slow');
+    $('.plus').prop('disabled', false);
+  } else if (value === 'RECETA') {
+    $('.public').show('slow');
+    $('.plus').prop('disabled', false);
+  } else {
+    $('.public').hide('slow');
+    $('.plus').prop('disabled', true);
+    $('.rows_products, .hrs_products').remove();
+  }
+
+  $('.select2')
+    .each(function () {
+      if (value === 'COMBO') this.name = 'receta';
+      else this.name = 'articulo';
+
+      $(this)
+        .empty()
+        .select2({
+          dropdownParent: $(this).parent(),
+          allowClear: true,
+          data: value === 'COMBO' ? optionsCombos : options,
+          placeholder: {
+            id: null,
+            text: 'SELECCIONE UN PRODUCTO',
+            selected: true
+          }
+        });
+    })
+    .val(null)
+    .trigger('change');
+}
+
+function setOptions(elem) {
+  const oldVal = $(elem).data('oldVal') ?? null;
+  const card = $(elem).parents('.referencia');
+
+  if (elem.value)
+    card.find('.params').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
+  if (oldVal)
+    card.find('.params').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
+  else $(elem).data('oldVal', elem.value);
+}
+
+function changeOptions() {
+  optionsCombos = [];
+  prices
+    .rows()
+    .data()
+    .map(e =>
+      optionsCombos.push({
+        id: e.id,
+        text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name}`
+      })
+    );
+}
+
+function deleteProduct(elem) {
+  const element = $(elem).parents('.ref');
+  const card = element.parents('.referencia');
+  const check = card.hasClass('krt');
+  const value = element.find('.params').val();
+
+  card.find('.ref').length === 1 && !check
+    ? card.hide('slow', function () {
+        $(this).remove();
+      })
+    : element.hide('slow', function () {
+        if (value) card.find(`.params option[value="${value}"]`).prop('disabled', false);
+        $(this).remove();
+      });
+}

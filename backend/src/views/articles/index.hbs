@@ -22,6 +22,44 @@
               <option>Seleccione unid medida</option>
             </select>
           </div>
+          <div class='form-group col-md-3'>
+            <label for=''>Categoria</label>
+            <select class='form-control measuring' name='categoria' required>
+              <option>Seleccione categoria</option>
+              <option value='Medicamentos'>Medicamentos</option>
+              <option value='Abarrotes'>Abarrotes</option>
+              <option value='Textiles'>Textiles</option>
+              <option value='Ferretería'>Ferretería</option>
+              <option value='Licores'>Licores</option>
+              <option value='Jardinería'>Jardinería</option>
+              <option value='Electrónica'>Electrónica</option>
+              <option value='Electrodomésticos'>Electrodomésticos</option>
+              <option value='Juguetería'>Juguetería</option>
+              <option value='Papelería'>Papelería</option>
+              <option value='Cosméticos'>Cosméticos</option>
+              <option value='Higiene'>Higiene</option>
+              Personal
+              <option value='Alimentos'>Alimentos</option>
+              y Bebidas
+              <option value='Bebidas'>Bebidas</option>
+              No Alcohólicas
+              <option value='Muebles'>Muebles</option>
+              <option value='Ropa'>Ropa</option>
+              y Accesorios
+              <option value='Calzado'>Calzado</option>
+              <option value='Artículos'>Artículos</option>
+              de Oficina
+              <option value='Deportes'>Deportes</option>
+              <option value='Automotriz'>Automotriz</option>
+              <option value='Productos'>Productos</option>
+              de Limpieza
+              <option value='Joyería'>Joyería</option>
+              <option value='Material'>Material</option>
+              de Construcción
+              <option value='Mascotas'>Mascotas</option>
+              <option value='Herramientas'>Herramientas</option>
+            </select>
+          </div>
           <div class='form-group col-md-1'>
             <label for=''>Cant</label>
             <input type='text' class='form-control' name='cantidad' placeholder='###' required />
@@ -112,10 +150,10 @@
             <div class='card-body'>
               <h5 class='card-title'>Datos del grupo</h5>
               <div class='form-row'>
-                <div class='form-group col-md-2 col-2'>
+                <div class='form-group col-md-1 col-2'>
                   <input type='text' class='form-control' name='id' readonly />
                 </div>
-                <div class='form-group col-md-6 col-10'>
+                <div class='form-group col-md-5 col-10'>
                   <input
                     type='text'
                     class='form-control edi'
@@ -124,9 +162,46 @@
                     required
                   />
                 </div>
-                <div class='form-group col-md-4'>
+                <div class='form-group col-md-3'>
                   <select class='form-control measuring edi' name='umedida' required>
-                    <option>Seleccione unid medida</option>
+                    <option>Und.Medida</option>
+                  </select>
+                </div>
+                <div class='form-group col-md-3'>
+                  <select class='form-control edi' name='categoria' required>
+                    <option>Categorias</option>
+                    <option value='Medicamentos'>Medicamentos</option>
+                    <option value='Abarrotes'>Abarrotes</option>
+                    <option value='Textiles'>Textiles</option>
+                    <option value='Ferretería'>Ferretería</option>
+                    <option value='Licores'>Licores</option>
+                    <option value='Jardinería'>Jardinería</option>
+                    <option value='Electrónica'>Electrónica</option>
+                    <option value='Electrodomésticos'>Electrodomésticos</option>
+                    <option value='Juguetería'>Juguetería</option>
+                    <option value='Papelería'>Papelería</option>
+                    <option value='Cosméticos'>Cosméticos</option>
+                    <option value='Higiene'>Higiene</option>
+                    Personal
+                    <option value='Alimentos'>Alimentos</option>
+                    y Bebidas
+                    <option value='Bebidas'>Bebidas</option>
+                    No Alcohólicas
+                    <option value='Muebles'>Muebles</option>
+                    <option value='Ropa'>Ropa</option>
+                    y Accesorios
+                    <option value='Calzado'>Calzado</option>
+                    <option value='Artículos'>Artículos</option>
+                    de Oficina
+                    <option value='Deportes'>Deportes</option>
+                    <option value='Automotriz'>Automotriz</option>
+                    <option value='Productos'>Productos</option>
+                    de Limpieza
+                    <option value='Joyería'>Joyería</option>
+                    <option value='Material'>Material</option>
+                    de Construcción
+                    <option value='Mascotas'>Mascotas</option>
+                    <option value='Herramientas'>Herramientas</option>
                   </select>
                 </div>
                 <div class='form-group col-md-12'>
@@ -138,90 +213,105 @@
                   ></textarea>
                 </div>
               </div>
+            </div>
+          </div>
 
-              <div class='form-row'>
-                <div class='form-group col-md-12 text-right'>
-                  <div class='form-check form-check-inline'>
-                    <input
-                      id='a'
-                      class='form-check-input'
-                      type='radio'
-                      name='type'
-                      value='UNITARIO'
-                      checked
-                      required
-                    />
-                    <label class='form-check-label' for='a'>Unitario</label>
+          <div class='accordion' id='referencias'>
+            <div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
+              <div
+                class='d-flex align-items-center align-content-center flex-wrap'
+                type='button'
+                data-toggle='collapse'
+                data-target='#referencia_1'
+                aria-expanded='true'
+                aria-controls='referencia_1'
+                style='background-color: #FCF3CF !important;'
+              >
+                <div class='p-2 flex-grow-1 title'>---Referencia #1----------------------</div>
+                <div class='p-2'>
+                  <a class=''><i class='' data-feather='chevron-down'></i></a>
+                </div>
+              </div>
+
+              <div
+                id='referencia_1'
+                class='collapse show px-2'
+                aria-labelledby='headingOne'
+                data-parent='#referencias'
+              >
+                <div class='d-flex flex-row align-items-center align-content-center flex-wrap ref'>
+                  <div class='p-2 col-6'>
+                    <input type='hidden' name='code' />
+                    <input type='hidden' name='ref.key' value='Cantidad' />
+                    Cantidad
                   </div>
-                  <div class='form-check form-check-inline'>
-                    <input
-                      id='b'
-                      class='form-check-input'
-                      type='radio'
-                      name='type'
-                      value='COMBO'
-                      required
-                    />
-                    <label class='form-check-label' for='b'>Combo</label>
-                  </div>
-                  <div class='form-check form-check-inline'>
-                    <input
-                      id='c'
-                      class='form-check-input'
-                      type='radio'
-                      name='type'
-                      value='RECETA'
-                      required
-                    />
-                    <label class='form-check-label' for='c'>Receta</label>
+                  <div class='p-2 col-6'>
+                    <div class='input-group'>
+                      <input
+                        class='form-control edi'
+                        type='text'
+                        name='ref.value'
+                        placeholder='Valor'
+                      />
+                      <div class='input-group-append'>
+                        <div class='dropdown'>
+                          <button
+                            class='btn btn-primary plus'
+                            data-toggle='dropdown'
+                            aria-expanded='false'
+                          >
+                            <i class='feather-lg' data-feather='more-vertical'></i>
+                          </button>
+
+                          <div class='dropdown-menu'>
+                            <a class='dropdown-item' href='#' onclick='setProduct(this)'>
+                              <i data-feather='plus'></i>
+                              Nuevo
+                            </a>
+                            <a
+                              class='dropdown-item disabled'
+                              href='#'
+                              onclick='deleteProduct(this)'
+                            >
+                              <i data-feather='trash-2'></i>
+                              Eliminar
+                            </a>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <hr class='mt-0' />
+
+            <div class='d-flex align-items-center align-content-center flex-wrap'>
+              <div class='px-2 flex-grow-1'>Referencias</div>
+              <div class='px-2'>
+                <button class='btn btn-sm btn-outline-primary' onclick='setRef(this)'>
+                  <i class='fas fa-fw fa-plus'></i>
+                  Referencia
+                </button>
+              </div>
+              <div class='px-2'>
+                <button class='btn btn-sm btn-outline-primary' onclick='setProduct()'>
+                  <i class='fas fa-fw fa-plus'></i>
+                  Caracteristica
+                </button>
               </div>
             </div>
           </div>
 
-          <div class='form-row'>
-            <div class='form-group col-9 col-md-4'>
-              <input type='hidden' name='code' />
-              <select class='form-control select2 droga' name='articulo' required></select>
-            </div>
-            <div class='form-group col-3 col-md-2'>
-              <input
-                type='text'
-                class='form-control edi'
-                name='cantidad'
-                placeholder='Cant.'
-                required
-              />
-            </div>
-            <div class='form-group col-12 col-md-6'>
-              <div class='input-group'>
-                <div class='input-group-prepend' title='publicar este item'>
-                  <div class='input-group-text'>
-                    <input type='checkbox' class='public' onclick='publicProduct(this)' />
-                    <input type='hidden' name='visible' value='0' />
-                  </div>
-                </div>
-                <input
-                  class='form-control edi'
-                  type='text'
-                  name='nota'
-                  placeholder='Nota producto'
-                />
-                <div class='input-group-append'>
-                  <button
-                    class='btn btn-outline-danger'
-                    id='hidelecte'
-                    onclick='deleteProduct(this)'
-                  >
-                    <i class='fas fa-fw fa-trash'></i>
-                  </button>
-                  <button class='btn btn-outline-primary plus' onclick='setProduct(this)' disabled>
-                    <i class='fas fa-fw fa-plus'></i>
-                  </button>
-                </div>
-              </div>
-            </div>
+          <hr />
+
+          <div class='d-flex align-items-center align-content-center flex-wrap'>
+            <div class='p-2 flex-grow-1'>--- Caracteristicas --------------</div>
+            <div class='p-2'><i data-feather='plus'></i></div>
+          </div>
+
+          <div class='krt referencia'>
+            <div class='ref'></div>
           </div>
         </div>
         <div class='modal-footer'>
