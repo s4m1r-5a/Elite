@@ -485,10 +485,7 @@ const Enviodecartasclientes = async () => {
 };
 
 var co = 0; // 12,15,27,30,31
-/* cron.schedule('* * * * *', async () => {
-  console.log('se ejecuto cron ', Date);
-  //pruebe()
-}); */
+
 cron.schedule('0 10 13,15,27,30,31 * *', async () => {
   const sql = `SELECT l.mz, l.n, d.proyect, c.nombre, c.movil, c.email    
     FROM preventa p INNER JOIN productosd l ON p.lote = l.id 
@@ -8058,7 +8055,9 @@ router.post('/afiliado', isLoggedIn, async (req, res) => {
         categoria: 1,
         usuario: req.user.id,
         celular: cel,
-        empresa: req.user.empresa
+        empresa: req.user.empresa,
+        paths:
+          '[{"new":false,"link":"/tablero","name":"Tablero","icono":"sliders","activo":true},{"new":false,"link":"/links/productos","name":"Productos","todo":true,"icono":"bell","activo":true,"anular":true,"aprobar":true,"asociar":true,"ctaCobro":true,"declinar":true,"eliminar":true,"productos":[],"actualizar":true,"desasociar":true},{"new":false,"link":"/links/reportes","name":"Reportes","todo":true,"excel":false,"icono":"layers","activo":true,"anular":false,"editar":true,"estados":false,"acuerdos":false,"eliminar":true,"productos":[],"comisiones":false,"proyeccion":false,"estadodecuentas":false},{"new":false,"link":"/links/comisiones","name":"Comisiones","todo":true,"icono":"pocket","pagar":false,"activo":false,"anular":false,"asociar":false,"ctaCobro":false,"declinar":false,"eliminar":false,"productos":[],"actualizar":false,"desasociar":false},{"name":"Solicitudes","new":true,"link":"/links/solicitudes","activo":true,"todo":false,"aprobar":false,"eliminar":false,"extracto":true,"enviar":false,"actualizar":false,"anular":false,"declinar":false,"asociar":false,"desasociar":false,"desanular":false,"ctaCobro":false,"productos":[],"icono":"bell"},{"new":false,"link":"/links/pagos","name":"Pagos","icono":"dollar-sign","activo":true},{"new":false,"link":"/links/cupones","name":"Cupones","icono":"tag","activo":false},{"new":false,"link":"/links/clientes","name":"Clientes","todo":true,"icono":"users","activo":true,"anular":false,"aprobar":false,"asociar":false,"ctaCobro":false,"declinar":false,"eliminar":false,"productos":[],"actualizar":false,"desasociar":false},{"new":false,"link":"/links/asesores","name":"Asesores","todo":true,"icono":"users","activo":false,"anular":false,"aprobar":false,"asociar":false,"ctaCobro":false,"declinar":false,"eliminar":false,"productos":[],"actualizar":false,"desasociar":false},{"new":false,"link":"/links/red","name":"Red","icono":"users","activo":false},{"new":false,"link":"/links/cartera","name":"Cartera","icono":"file-text","activo":false}]'
       };
       await pool.query('INSERT INTO pines SET ? ', nuevoPin);
     }

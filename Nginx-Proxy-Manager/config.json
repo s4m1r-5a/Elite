@@ -1,10 +1,10 @@
 {
   "database": {
     "engine": "mysql",
-    "host": "db",
-    "name": "npm",
-    "user": "npm",
-    "password": "npm",
+    "host": "144.126.212.222",
+    "name": "nginx-proxy",
+    "user": "root",
+    "password": "C0l0mb1@",
     "port": 3306
   },
   "jwt": {

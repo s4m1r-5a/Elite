@@ -21,7 +21,7 @@ const Empresa = sequelize.define(
       defaultValue: 'COL'
     },
     tipodoc: {
-      type: DataTypes.ENUM('NIT', 'CC', 'TI', '  /'),
+      type: DataTypes.ENUM('NIT', 'CC', 'TI'),
       allowNull: false,
       defaultValue: 'NIT'
     },
@@ -61,6 +61,11 @@ const Empresa = sequelize.define(
     rutas: {
       type: DataTypes.JSON,
       allowNull: true
+    },
+    valoracion_inv: {
+      type: DataTypes.ENUM('PEPS', 'UEPS', 'PROMEDIO'),
+      allowNull: false,
+      defaultValue: 'PROMEDIO'
     },
     admin: {
       type: DataTypes.CHAR(100),
