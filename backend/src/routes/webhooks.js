@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const { pool } = require('../database');
 const { verifyToken } = require('../lib/auth');
 const { wasb, registro, dataSet, Contactos } = require('../keys');
 const axios = require('axios');

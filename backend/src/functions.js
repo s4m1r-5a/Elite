@@ -1,5 +1,5 @@
 const nodemailer = require('nodemailer');
-const pool = require('./database');
+const { pool } = require('./database');
 const axios = require('axios');
 const fs = require('fs');
 const path = require('path');

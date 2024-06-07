@@ -1,5 +1,5 @@
 const mysql = require('mysql');
-const { promisify }= require('util');
+const { promisify } = require('util');
 
 const { database } = require('./keys');
 
@@ -27,4 +27,18 @@ pool.getConnection((err, connection) => {
 // Promisify Pool Querys
 pool.query = promisify(pool.query);
 
-module.exports = pool;
+const { Sequelize, DataTypes, Transaction } = require('sequelize');
+
+const sequelize = new Sequelize(database.database, database.user, database.password, {
+  host: database.host,
+  dialect: 'mysql'
+});
+
+(async () => {
+  await sequelize.sync({ force: false }); // Forzar la creación de tablas, eliminando primero si ya existen
+  console.log('Todas las tablas se han creado exitosamente.');
+})();
+
+module.exports = { sequelize, pool };
+
+// module.exports = pool;

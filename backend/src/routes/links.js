@@ -2,7 +2,7 @@ const express = require('express');
 //const {Builder, By, Key, until} = require('selenium-webdriver');
 const router = express.Router();
 const crypto = require('crypto');
-const pool = require('../database');
+const { pool } = require('../database');
 const { isLoggedIn, noExterno, isLogged, Admins } = require('../lib/auth');
 const sms = require('../sms.js');
 const { wasb, registro, dataSet, Contactos } = require('../keys');
@@ -1096,6 +1096,45 @@ cron.schedule('0 1 1 1,4,7,10 *', async () => {
   var bod = `_Hemos realizado el *Corte* del pasado trimestre *PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
   await EnviarWTSAP('57 3007753983', bod);
 });
+
+// cron.schedule('*/3 * * * * *', async () => {
+cron.schedule('*/30 * * * *', async () => {
+  const rows = await pool.query(
+    `SELECT c.url, c.token, b.code, b.routes FROM chatbots c INNER JOIN bots b ON c.id = b.chatbot`
+  );
+
+  if (!rows.length) return false;
+
+  for (const row of rows) {
+    const route = JSON.parse(row.routes).find(e => e.name === 'assistants')?.path;
+
+    var config = {
+      method: 'get',
+      url: row?.url + route,
+      headers: {
+        token: row?.token,
+        'Content-Type': 'application/json'
+      }
+    };
+    try {
+      const { data } = await axios(config);
+      console.log({ data });
+    } catch ({ response: { status } }) {
+      if (status === 404) {
+        let reqOptions = {
+          url: row?.url + '/api/chatbot/run/' + row?.code,
+          method: 'GET',
+          headers: config?.headers
+        };
+
+        let response = await axios.request(reqOptions);
+        console.log(response.data, 'Se mando arrancar el bot');
+      }
+      console.log({ status }, 'todo esta bien');
+    }
+  }
+});
+
 let rt = [],
   t = 1;
 cron.schedule('*/20 * * * *', async () => {
@@ -8859,7 +8898,9 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
   //enviaRcb && (await EnviarWTSAP(S.movil, bod));
   if (enviaRcb) {
     // await WspRcb(S.movil, pdf, Tid);
-    await WspNewUser(user.empresa, S.movil, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', { media: pdf });
+    await WspNewUser(user.empresa, S.movil, 'RECIBO DE CAJA ' + Tid, 'PAGO EXITOSO', {
+      media: pdf
+    });
   }
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
@@ -9026,9 +9067,10 @@ async function WspNewUser(empresa, movil, msg, options) {
     data: JSON.stringify({
       number: cel,
       message: msg,
-      urlMedia: options?.media.indexOf('localhost') >= 0
-        ? 'https://www.imprentaonline.net/blog/wp-content/webpc-passthru.php?src=https://www.imprentaonline.net/blog/wp-content/uploads/DALL%C2%B7E-2023-10-16-10.41.49-Illustration-depicting-a-humanoid-robot-with-half-of-its-face-transparent-revealing-intricate-circuits-and-gears-inside.-The-robot-is-holding-a-light-1.png&nocache=1'
-        : options?.media || null
+      urlMedia:
+        options?.media.indexOf('localhost') >= 0
+          ? 'https://www.imprentaonline.net/blog/wp-content/webpc-passthru.php?src=https://www.imprentaonline.net/blog/wp-content/uploads/DALL%C2%B7E-2023-10-16-10.41.49-Illustration-depicting-a-humanoid-robot-with-half-of-its-face-transparent-revealing-intricate-circuits-and-gears-inside.-The-robot-is-holding-a-light-1.png&nocache=1'
+          : options?.media || null
     })
   };
 

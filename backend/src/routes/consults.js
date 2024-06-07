@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const { pool } = require('../database');
 const axios = require('axios');
 const moment = require('moment');
 const { isLoggedIn, noExterno } = require('../lib/auth');

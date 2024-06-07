@@ -37,7 +37,7 @@ const addProduct = `
     </div>`;
 
 $.ajax({
-  url: '/articles/medicamentos',
+  url: '/articles/list',
   type: 'GET',
   processData: false,
   contentType: false,
@@ -45,7 +45,7 @@ $.ajax({
     if (data.length) {
       options = data.map(e => ({
         id: e.id,
-        text: `${e.nombre} - ${e.laboratorio} - ${e.clase}`
+        text: `${e.nombre} - ${e.categoria} - ${e.ref}`
       }));
 
       $('.select2')

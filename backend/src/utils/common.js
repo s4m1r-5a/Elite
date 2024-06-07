@@ -69,11 +69,11 @@ module.exports.accountingAccountNumber = string => {
   return account;
 };
 
-module.exports.DeleteFile = (img) => {
+module.exports.DeleteFile = img => {
   const url = img.split('/uploads/')[1] ?? 'kdk.jpg';
 
   const route = path.join(__dirname, '../public/uploads/', url);
-  console.log(img, url, route)
+  console.log(img, url, route);
   fs.exists(route, function (exists) {
     if (exists) {
       fs.unlink(route, function (err) {
@@ -86,4 +86,5 @@ module.exports.DeleteFile = (img) => {
       return 'El archivo no exise';
     }
   });
-}
+};
+

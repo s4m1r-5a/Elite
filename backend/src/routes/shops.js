@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const { pool } = require('../database');
 const { isLoggedIn, noExterno } = require('../lib/auth');
 const { DeleteFile } = require('../utils/common');
 

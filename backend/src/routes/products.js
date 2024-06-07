@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const pool = require('../database');
+const { pool } = require('../database');
 const { isLoggedIn, noExterno } = require('../lib/auth');
 const { DeleteFile } = require('../utils/common');
 
@@ -12,7 +12,20 @@ router.get('/', isLoggedIn, async (req, res) => {
 router.get('/table/:combo?', noExterno, async (req, res) => {
   const { combo } = req.params;
   const prices = await pool.query(
-    `SELECT p.*, r.*, m.nombre, m.laboratorio, 
+    `SELECT p.*, r.*, a.nombre, a.categoria, a.estado, a.caracteristicas,	
+      a.umedida, ar.ref, ar.obj, p_combo.name As tipo, p_combo.precio As valor, 
+      r_combo.cantidad As quantity, a_combo.nombre As nam, a_combo.caracteristicas krt, ar_combo.ref referencia,         ar_combo.obj objeto
+    FROM products AS p 
+        INNER JOIN recetas AS r ON p.id = r.grupo 
+        LEFT JOIN articulo_ref AS ar ON ar.id = r.articulo 
+        LEFT JOIN articulos AS a ON a.id = ar.articulo 
+        LEFT JOIN products AS p_combo ON p_combo.id = r.receta
+        LEFT JOIN recetas AS r_combo ON p_combo.id = r_combo.grupo
+        LEFT JOIN articulo_ref AS ar_combo ON ar_combo.id = r_combo.articulo  
+        LEFT JOIN articulos AS a_combo ON a_combo.id = ar_combo.articulo   
+    WHERE ${combo !== 'all' ? 'p.combo = ?' : 'p.combo IS NOT NULL'} 
+    ORDER BY p.name ASC`,
+    /* `SELECT p.*, r.*, m.nombre, m.laboratorio, 
         m.clase, m.medida, p_combo.name As tipo, p_combo.precio As valor, 
         r_combo.cantidad As quantity, m_combo.nombre As nam,
         m_combo.laboratorio As laboratory, m_combo.clase As class
@@ -23,7 +36,7 @@ router.get('/table/:combo?', noExterno, async (req, res) => {
         LEFT JOIN recetas AS r_combo ON p_combo.id = r_combo.grupo
         LEFT JOIN medicamentos AS m_combo ON m_combo.id = r_combo.articulo   
     WHERE ${combo !== 'all' ? 'p.combo = ?' : 'p.combo IS NOT NULL'} 
-    ORDER BY p.name ASC`,
+    ORDER BY p.name ASC` */
     combo ?? 0
   );
   // console.log(prices);
