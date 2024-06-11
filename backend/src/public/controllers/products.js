@@ -3,7 +3,6 @@ $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 const product = $('.select2');
 let options = [];
 let optionsCombos = [];
-let caritems = [];
 let check = null;
 const addProduct = `
     <hr class="mt-0 hrs_products" />
@@ -119,7 +118,7 @@ const producto = data => {
           <div class='flex-row row h-100'>
             <div class='col-12 col-md-4'>  
               <h5 class='card-title float-right m-0 precio'>
-                ${!precio ? '<small class="text-muted">Desde </small>' : ''}
+                ${!precio && items.length > 1 ? '<small class="text-muted">Desde </small>' : ''}
                 $${Moneda(precio || Math.min(...items.map(e => e.valor)))}
               </h5>
             </div>
@@ -171,18 +170,16 @@ const producto = data => {
               <div>
                 <div class='input-group input-group-sm'>
                   <div class='input-group-prepend' title='Disminuir cantidad'>
-                    <button ${
-                      !precio ? 'disabled' : ''
-                    } type="button" class='btn btn-outline-primary minctd'>
+                    <button disabled type="button" class='btn btn-outline-primary minctd'>
                       <i class='fas fa-fw fa-minus'></i>
                     </button>
                   </div>
                   <input ${
-                    !precio ? 'disabled' : ''
+                    !precio && items.length > 1 ? 'disabled' : ''
                   } class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
                   <div class='input-group-append' title='Aumentar cantidad'>
                     <button ${
-                      !precio ? 'disabled' : ''
+                      !precio && items.length > 1 ? 'disabled' : ''
                     } type="button" class='btn btn-outline-primary maxctd'>
                       <i class='fas fa-fw fa-plus'></i>
                     </button>
@@ -214,67 +211,6 @@ const producto = data => {
   </div>`;
 };
 
-const ref = ref => {
-  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
-    <div
-      class='d-flex align-items-center align-content-center flex-wrap'      
-      style='background-color: #FCF3CF !important;'
-    >
-      <div class='p-1 flex-grow-1 w-50'>
-        <h4 class='m-0 text-truncate' title='name' style="max-width: 95%;"></h4>
-        <span class='badge badge-info' title='ref'></span>
-        <span title='precio'></span>        
-      </div>
-      <div 
-        class='p-1'
-        type='button'
-        data-toggle='collapse'
-        data-target='#referencia_${ref}'
-        aria-expanded='false'
-        aria-controls='referencia_${ref}'
-      >
-        x <span class='badge badge-info' title='cantidad'></span>
-        <a><i class='fas fa-fw fa-angle-down'></i></a>
-        <br class='d-block d-md-none'/> 
-        <span class='d-block d-md-none' title='total'></span>
-      </div>
-      <div class='p-1 d-none d-md-block'>
-        <span title='total'></span>
-      </div>
-      <div class='py-1 px-2'>
-        <a class="deleteProduct">
-          <i class='far fa-times-circle fa-2x'></i>          
-        </a>
-      </div>      
-    </div>
-
-    <div
-      id='referencia_${ref}'
-      class='collapse show px-2'
-      aria-labelledby='headingOne'
-      data-parent='#referencias'
-    >
-      <div class='d-flex align-items-center align-content-center flex-wrap'> 
-        <div class='p-1 flex-grow-1 w-50 text-truncate'>Agrega mas al carrito</div>
-        <div class='p-2'>
-          <div class='input-group input-group-sm'>
-            <div class='input-group-prepend' title='Disminuir cantidad'>
-              <button type="button" class='btn btn-outline-primary minctd'>
-                <i class='fas fa-fw fa-minus'></i>
-              </button>
-            </div>
-            <input class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
-            <div class='input-group-append' title='Aumentar cantidad'>
-              <button type="button" class='btn btn-outline-primary maxctd'>
-                <i class='fas fa-fw fa-plus'></i>
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>`;
-};
 
 $(document).ready(function () {
   $('#hidelecte, .public, #carga').hide();
@@ -354,6 +290,16 @@ $(document).ready(function () {
   $('#deleteImage').on('click', function () {
     $('#inputFile').val(null);
     $('#imagen').prop('src', '/img/subir.png');
+  });
+
+  $('#deleteCar').on('click', function () {
+    if (confirm('Seguro deseas eliminar el carrito de compras?')) {
+      $('#referencias .referencia').hide('slow', function () {
+        caritems = [];
+        $(this).remove();
+        addItemsCar();
+      });
+    }
   });
 });
 
@@ -542,7 +488,7 @@ prices.on('click', 'td .addcar', function () {
 
   const { id, name, precio, items, ...rest } = prices.row(fila).data();
   const ref = padre.find('.linkSelect').val() ?? null;
-  const referencia = items.find(e => e.ref === ref) ?? null;
+  const referencia = items.find(e => e.ref === ref) ?? items[0];
   const cantidad = parseInt(padre.find('.cantidad').val() ?? 0);
 
   const price = precio ? precio : referencia?.valor ?? 0;
@@ -570,6 +516,8 @@ prices.on('click', 'td .addcar', function () {
 
   console.log({ id, name, precio, items, ...rest, caritems });
 
+ /*  ESTA FUNCION YA ESTA EN EL ARCHIVO COMMON.JS
+
   const setRowss = (productos, data) => {
     productos.each(function () {
       if ($(this).is('input')) this.value = data[this.name] ?? null;
@@ -578,14 +526,16 @@ prices.on('click', 'td .addcar', function () {
           ? Moneda(data[this.title], true)
           : data[this.title] ?? '';
     });
-  };
+  }; */
 
   caritems.forEach(row => {
-    const elements = setRef(row?.idref ?? row.id).find('input, span, h4, h5');
+    const elements = setRef(row?.idref).find('input, span, h4, h5');
     return setRowss(elements, row);
   });
 
+
   $('#AddCar').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  addItemsCar();
 });
 
 $('#AddCar').on('hidden.bs.modal', function (e) {
@@ -611,36 +561,6 @@ $('#AddProduct').on('hidden.bs.modal', function (e) {
 
   $('.select2').find('option').prop('disabled', false).data('oldVal', null);
 });
-
-function setRef(id) {
-  const code = id ?? ID(5);
-
-  $('#referencias').append(ref(code));
-
-  const newElemnt = $('#referencias').find('.card:last');
-
-  $('.collapse').not(`#referencia_${code}`).collapse('hide');
-
-  $(`#referencia_${code}`).collapse('show');
-
-  /* newElemnt
-    .find('.deleteProduct span')
-    .html('<i class="far fa-circle fa-stack-2x"></i>')
-    .append('<i class="fas fa-trash fa-stack-1x"></i>'); */
-
-  $('.deleteProduct')
-    .hover(
-      function () {
-        $(this).css('color', '#000000');
-      },
-      function () {
-        $(this).css('color', '#bfbfbf');
-      }
-    )
-    .css('color', '#bfbfbf');
-
-  return newElemnt;
-}
 
 function imgenClick(elem) {
   const element = $(elem).parents('.dropdown');

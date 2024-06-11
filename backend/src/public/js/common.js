@@ -53,6 +53,188 @@ $.jMaskGlobals = {
   }
 };
 
+///////////////////* CARRITO DE COMPRAS *////////////////////////
+let caritems = JSON.parse(localStorage.getItem('caritems') ?? '[]');
+
+const ref = ref => {
+  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
+    <div
+      class='d-flex align-items-center align-content-center flex-wrap'      
+      style='background-color: #FCF3CF !important;'
+    >
+      <div class='p-1 flex-grow-1 w-50'>
+        <h4 class='m-0 text-truncate' title='name' style="max-width: 95%;"></h4>
+        <span class='badge badge-info' title='ref'></span>
+        <span title='precio'></span>        
+      </div>
+      <div 
+        class='p-1'
+        type='button'
+        data-toggle='collapse'
+        data-target='#referencia_${ref}'
+        aria-expanded='false'
+        aria-controls='referencia_${ref}'
+      >
+        x <span class='badge badge-info ctd' title='cantidad'></span>
+        <a><i class='fas fa-fw fa-angle-down'></i></a>
+        <br class='d-block d-md-none'/> 
+        <span class='d-block d-md-none total' title='total'></span>
+      </div>
+      <div class='p-1 d-none d-md-block'>
+        <span class='total' title='total'></span>
+      </div>
+      <div class='py-1 px-2'>
+        <a class="deleteProduct">
+          <i class='far fa-times-circle fa-2x'></i>          
+        </a>
+      </div>      
+    </div>
+
+    <div
+      id='referencia_${ref}'
+      class='collapse show px-2'
+      aria-labelledby='headingOne'
+      data-parent='#referencias'
+    >
+      <div class='d-flex align-items-center align-content-center flex-wrap'> 
+        <div class='p-1 flex-grow-1 w-50 text-truncate'>Agrega mas al carrito</div>
+        <div class='p-2'>
+          <div class='input-group input-group-sm'>
+            <div class='input-group-prepend' title='Disminuir cantidad'>
+              <button type="button" class='btn btn-outline-primary minctd'>
+                <i class='fas fa-fw fa-minus'></i>
+              </button>
+            </div>
+            <input class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
+            <div class='input-group-append' title='Aumentar cantidad'>
+              <button type="button" class='btn btn-outline-primary maxctd'>
+                <i class='fas fa-fw fa-plus'></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>`;
+};
+
+const setRowss = (productos, data) => {
+  productos.each(function () {
+    if ($(this).is('input')) this.value = data[this.name] ?? null;
+    else
+      this.innerText = /precio|total/.test(this.title)
+        ? Moneda(data[this.title], true)
+        : data[this.title] ?? '';
+  });
+};
+
+const addItemsCar = () => {
+  if (caritems.length) {
+    console.log('entro por aqui', caritems);
+    $('#itemsCar').text(caritems.length).show();
+    $('#msgCar').text(`${caritems.length} En Carrito`);
+    $('#listCar').html(
+      caritems
+        .map(
+          e => `
+      <a href='#' class='list-group-item'>
+        <div class='row no-gutters align-items-center'>
+          <div class='col-2'>
+            <img
+              src='/img/avatars/avatar-5.jpg'
+              class='avatar img-fluid rounded-circle'
+              alt='Ashley Briggs'
+            />
+          </div>
+          <div class='col-10 pl-2'>
+            <div class='text-dark'>Ashley Briggs</div>
+            <div class='text-muted small mt-1'>Nam pretium turpis et arcu. Duis arcu tortor.
+            </div>
+            <div class='text-muted small mt-1'>15m ago</div>
+          </div>
+        </div>
+      </a>`
+        )
+        .join('')
+    );
+
+    localStorage.setItem('caritems', JSON.stringify(caritems));
+  }
+};
+
+$(document).ready(function () {
+  caritems.forEach(row => {
+    const elements = setRef(row?.idref).find('input, span, h4, h5');
+    return setRowss(elements, row);
+  });
+  addItemsCar();
+});
+
+function setRef(id) {
+  const code = id ?? ID(5);
+
+  $('#referencias').append(ref(code));
+
+  const newElemnt = $('#referencias').find('.card:last');
+
+  $('.collapse').not(`#referencia_${code}`).collapse('hide');
+
+  $(`#referencia_${code}`).collapse('show');
+
+  newElemnt
+    .find('.deleteProduct')
+    .hover(
+      function () {
+        $(this).css('color', '#000000');
+      },
+      function () {
+        $(this).css('color', '#bfbfbf');
+      }
+    )
+    .click(function () {
+      newElemnt.hide('slow', function () {
+        caritems = caritems.filter(e => e.idref === code);
+        addItemsCar();
+        $(this).remove();
+      });
+    })
+    .css('color', '#bfbfbf');
+
+  newElemnt.on('click', '.minctd', function () {
+    const input = $(this).parent().siblings('input.cantidad');
+    input.val(parseInt(input.val() || 0) - 1).trigger('change');
+  });
+
+  newElemnt.on('click', '.maxctd', function () {
+    const input = $(this).parent().siblings('input.cantidad');
+    input.val(parseInt(input.val() || 0) + 1).trigger('change');
+  });
+
+  newElemnt.on('change', '.cantidad', function () {
+    if (this.value < 1) {
+      newElemnt.hide('slow', function () {
+        caritems = caritems.filter(e => e.idref === code);
+        $(this).remove();
+      });
+    } else {
+      caritems = caritems.map(e => {
+        if (e.idref === code) {
+          data = { cantidad: parseInt(this.value), total: e.precio * this.value };
+          newElemnt.find('span.ctd, span.total').each(function () {
+            this.innerText = this.title === 'total' ? Moneda(data[this.title]) : data[this.title];
+          });
+          return { ...e, ...data };
+        }
+        return e;
+      });
+    }
+
+    addItemsCar();
+  });
+
+  return newElemnt;
+}
+
 const measuring = [
   { tag: 'Metros', val: 'm' },
   { tag: 'Metros cuadrados', val: 'm²' },

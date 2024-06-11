@@ -238,52 +238,5 @@
 </div>
 <!-- END primary modal -->
 
-<!-- BEGIN primary modal -->
-<div class='modal fade' id='AddCar' tabindex='-1' role='dialog' aria-hidden='true'>
-  <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
-    <form id='crearproducto' enctype='multipart/form-data' class='w-100'>
-      <div class='modal-content card position-relative'>
-        <div
-          class='position-absolute w-100 h-100'
-          id='carga'
-          style='left: 0; top: 0; z-index: 1000; background-color: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;'
-        >
-          <div class='text-white' style='text-align: center;'>
-            <i class='fas fa-spinner fa-pulse fa-2x'></i>
-            <strong class='mt-2'>Cargando...</strong>
-          </div>
-        </div>
-        <div class='modal-header'>
-          <h3 class='modal-title'>Carrito de compras</h3>
-          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
-            <i class='feather-lg' data-feather='x-circle'></i>
-          </a>
-        </div>
-        <div class='modal-body p-3 bg-light'>
-          <div class='accordion' id='referencias'></div>
-        </div>
-        <div class='modal-footer'>
-          <button
-            class='btn btn-outline-danger d-flex align-items-center'
-            data-dismiss='modal'
-            aria-label='Close'
-          >
-            <i class='fas fa-fw fa-trash'></i>
-            <span class='d-none d-md-block'>Eliminar</span>
-          </button>
-          <button class='btn btn-outline-primary'>
-            <i class='fas fa-fw fa-cart-plus'></i>
-            Seguir buscando
-          </button>
-          <button class='btn btn-outline-primary'>
-            <i class='fas fa-fw fa-tags'></i>
-            Crear orden
-          </button>
-        </div>
-      </div>
-    </form>
-  </div>
-</div>
-<!-- END primary modal -->
 
 <script src='/controllers/products.js'></script>
