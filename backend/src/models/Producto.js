@@ -19,7 +19,8 @@ const Producto = sequelize.define(
     },
     precio: {
       type: DataTypes.DECIMAL(11, 4),
-      allowNull: false
+      allowNull: false,
+      defaultValue: 0
     },
     descripcion: {
       type: DataTypes.TEXT,

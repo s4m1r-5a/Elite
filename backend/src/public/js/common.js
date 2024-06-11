@@ -175,7 +175,7 @@ const Percent = valor => {
         maximumFractionDigits: 2
       });
 };
-function Moneda(valor) {
+function Moneda(valor, sng = false) {
   valor = valor
     .toString()
     .split('')
@@ -183,7 +183,7 @@ function Moneda(valor) {
     .join('')
     .replace(/(?=\d*\.?)(\d{3})/g, '$1.');
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
-  return valor;
+  return sng ? '$ ' + valor : valor;
 }
 //Leva a mayúsculas la primera letra de cada palabra
 function titleCase(texto) {

@@ -27,6 +27,24 @@
   <link href="/css/carousel.css" rel="stylesheet">
    
   <style type="text/css">
+  /* Reset default select styling */
+    .linkSelect {
+        /*-moz-appearance: none;*/
+        background: none;
+        cursor: pointer;
+        font-size: 12px; 
+        color: rgba(0, 21, 255, 0.522);
+        position: relative;
+        /*padding-right: 20px; */
+        border-top: none;
+        border-left: none;
+        border-right: none;
+    }  
+
+    /* Add additional styling to make it look like a link */
+    .linkSelect:focus {
+        outline: none;
+    }
     .feather-md2 {
       width: 25px; /* Cambia el ancho del SVG según sea necesario */
       height: 25px; /* Cambia la altura del SVG según sea necesario */

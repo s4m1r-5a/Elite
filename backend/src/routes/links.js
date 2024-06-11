@@ -501,6 +501,7 @@ cron.schedule('0 10 13,15,27,30,31 * *', async () => {
     const tt = await EnviarWTSAP(data.movil, body);
   }
 });
+
 cron.schedule('0 10 13,28 * *', async () => {
   const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
     (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
@@ -573,6 +574,7 @@ const usuras = async fecha => {
   const tasa = { id, annualRate, date };
   return tasa;
 };
+
 cron.schedule('0 2 * * *', async () => {
   const finmes = moment().endOf('month').format('DD');
   const dia = moment().format('DD');
@@ -621,6 +623,7 @@ cron.schedule('0 2 * * *', async () => {
         s.stado = 9 WHERE s.concepto = 'GESTION ADMINISTRATIVA' AND s.stado = 8 AND s.orden IN(${ids})`);
   }
 });
+
 cron.schedule('*/10 * 5 5 * *', async () => {
   function authorize(credentials, callback) {
     const { client_secret, client_id, redirect_uris } = credentials.installed;
@@ -817,6 +820,7 @@ cron.schedule('*/10 * 5 5 * *', async () => {
   }
   await EnviarWTSAP('57 3007753983', desarrollo);
 });
+
 cron.schedule('7 10 * * *', async () => {
   if (desarrollo && desarrollo !== 'http://localhost:5000') {
     var Dia = moment().subtract(1, 'days').endOf('days').format('YYYY-MM-DD HH:mm');
@@ -830,6 +834,7 @@ cron.schedule('7 10 * * *', async () => {
     //await EnviarWTSAP(0, body, 0, '573002851046-1593217257@g.us');
   }
 });
+
 cron.schedule('0 0 * * *', async () => {
   mysqldump({
     connection: {
@@ -917,6 +922,7 @@ cron.schedule('0 0 * * *', async () => {
     var diacupon = moment().subtract(3, 'days').endOf('days').format('YYYY-MM-DD HH:mm:ss');
   } */
 });
+
 cron.schedule('0 0 1 * *', async () => {
   let m = new Date();
   var mes = m.getMonth() + 1;
@@ -1020,6 +1026,7 @@ cron.schedule('0 0 1 * *', async () => {
   var bod = `_Hemos procesado todos los *BONOS* de este mes *${hoy}* _\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
   await EnviarWTSAP('57 3007753983', bod);
 });
+
 cron.schedule('0 0 2,17 * *', async () => {
   await pool.query(
     `UPDATE solicitudes SET stado = 9 WHERE concepto IN('COMISION DIRECTA','COMISION INDIRECTA', 'BONOS', 'PREMIACION', 'BONO EXTRA') AND stado = 15`
@@ -1027,6 +1034,7 @@ cron.schedule('0 0 2,17 * *', async () => {
   var bod = `_Hemos *Desbloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
   await EnviarWTSAP('57 3007753983', bod);
 });
+
 cron.schedule('0 0 3,18 * *', async () => {
   /*const finmes = moment().endOf('month').format('DD');
     const dia = moment().endOf('month').format('DD');
@@ -1041,6 +1049,7 @@ cron.schedule('0 0 3,18 * *', async () => {
   var bod = `_Hemos *Bloqueado* todas las *COMISIONES O BONOS Y PREMIOS*_\n\n*_GRUPO ELITE FINCA RAÍZ_*`;
   await EnviarWTSAP('57 3007753983', bod);
 });
+
 cron.schedule('0 1 1 1,4,7,10 *', async () => {
   var hoy = moment().format('YYYY-MM-DD');
   const asesor = await pool.query(`SELECT u.*, r.venta, r.ventas FROM users u 
@@ -1339,6 +1348,7 @@ cron.schedule('*/20 * * * *', async () => {
             }
         ] */
 });
+
 router.get('/msg', async (req, res) => {
   ////////////////////////* CREAR PDF *//////////////////////////////
   const printer = new PdfPrinter(Roboto);
@@ -1998,6 +2008,7 @@ router.get('/msg', async (req, res) => {
 
   res.send(true);
 });
+
 router.get('/roles', isLoggedIn, async (req, res) => {
   /* const tasa = await tasaUsura();
   const newTasa = { teano: tasa / 100, fecha: "2021-10-01" };
@@ -2008,9 +2019,11 @@ router.get('/roles', isLoggedIn, async (req, res) => {
   //console.log(req.user);
   res.send(req.user);
 });
+
 router.get('/add', isLoggedIn, (req, res) => {
   res.render('links/add');
 });
+
 router.get('/authorize', isLoggedIn, async (req, res) => {
   /*
         var data = JSON.stringify({
@@ -2065,6 +2078,7 @@ router.get('/authorize', isLoggedIn, async (req, res) => {
 
   //res.send(datos);
 });
+
 router.get('/download-imgs-documents', async (req, res) => {
   const resi = await pool.query(`SELECT imags  FROM clientes WHERE imags IS NOT NULL`);
   const urls = [];
@@ -2093,6 +2107,7 @@ router.get('/download-imgs-documents', async (req, res) => {
     }
   }
 });
+
 router.get('/download-imgs-solicitudes', async (req, res) => {
   const resi = await pool.query(
     `SELECT pdf, img  FROM solicitudes WHERE img IS NOT NULL ORDER BY fech`
@@ -2140,6 +2155,7 @@ router.get('/download-imgs-solicitudes', async (req, res) => {
     }
   }
 });
+
 router.get('/download-imgs-cuentas-de-cobro', async (req, res) => {
   const pdfs = await pool.query(`SELECT cuentacobro, rcbs  FROM pagos`);
   const urls = [];
@@ -2164,6 +2180,7 @@ router.get('/download-imgs-cuentas-de-cobro', async (req, res) => {
     }
   }
 });
+
 router.get('/prueba2', async (req, res) => {
   const ruta = path.join(__dirname, '../public/uploads/libroej.json');
   const ruta2 = path.join(__dirname, '../public/uploads/lista de clientes.xlsx');
@@ -2266,6 +2283,7 @@ router.get('/prueba2', async (req, res) => {
             console.log(error);
         }); */
 });
+
 router.get('/prueba3', async (req, res) => {
   const ruta = path.join(__dirname, '../public/uploads/extractos.xlsx');
 
@@ -2278,9 +2296,11 @@ router.get('/prueba3', async (req, res) => {
   XLSX.writeFile(newWB, ruta);
   res.redirect('/uploads/extractos.xlsx');
 });
+
 router.post('/callback', async (req, res) => {
   console.log(req.body);
 });
+
 router.get('/whatsapp', async (req, res) => {
   /* const ruta = path.join(__dirname, '../../screenshot.png');
   console.log(ruta);
@@ -2295,6 +2315,7 @@ router.get('/whatsapp', async (req, res) => {
     })
     .catch(err => console.error(err));
 });
+
 router.post('/conection', async (req, res) => {
   const url = 'https://inmovili.com.co/api/wtsp/conection';
   const url2 = 'https://inmovili.com.co/api/wtsp/qr';
@@ -2305,9 +2326,11 @@ router.post('/conection', async (req, res) => {
   console.log(img.data);
   res.json(img.data);
 });
+
 router.post('/prueba2', async (req, res) => {
   console.log(req.body);
 });
+
 router.post('/authorize', isLoggedIn, async (req, res) => {
   console.log(req.body);
   const options = {
@@ -2363,6 +2386,7 @@ router.post('/authorize', isLoggedIn, async (req, res) => {
                 console.log(error);
             });*/
 });
+
 router.get('/proyecciones', async (req, res) => {
   var W = await pool.query(`SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
     p.cuotaextraordinaria, p.extran, p.separar, p.vrmt2, p.iniciar, p.inicialdiferida,
@@ -2440,6 +2464,7 @@ router.get('/proyecciones', async (req, res) => {
   await pool.query(sql);
   res.send(true);
 });
+
 //////////////////* CHATS */////////////////////
 router.get('/chats', isLoggedIn, async (req, res) => {
   const cliente = await pool.query(`SELECT movil FROM clientes`);
@@ -2484,6 +2509,7 @@ router.get('/chats/:id', isLoggedIn, async (req, res) => {
     res.send(b);
   }
 });
+
 //////////////////* BANCO */////////////////////
 router.post('/extrabank', async (req, res) => {
   const { date, description, lugar, concpt1, concpt2, otro, consignado, cont } = req.body;
@@ -2502,6 +2528,7 @@ router.post('/extrabank', async (req, res) => {
   //res.send(cont);                                     Actualizar estado fallecido - bogota 031- 4261111
   res.send(consignado);
 });
+
 router.post('/extractos', async (req, res) => {
   console.log(req.body);
   const solicitudes =
@@ -2517,10 +2544,12 @@ router.post('/extractos', async (req, res) => {
   //res.json(e);
   res.send(e);
 });
+
 ////////////////////* PRODUCTOS */////////////////////
 router.get('/productos', isLoggedIn, async (req, res) => {
   res.render('links/productos');
 });
+
 router.post('/productos', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
   const params = pdo ? `AND p.id IN(${pdo})` : '';
@@ -2528,6 +2557,7 @@ router.post('/productos', isLoggedIn, async (req, res) => {
   respuesta = { data: fila };
   res.send(respuesta);
 });
+
 router.post('/products/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const fi = await pool.query(
@@ -2537,6 +2567,7 @@ router.post('/products/:id', isLoggedIn, async (req, res) => {
   respuesta = { data: fi };
   res.send(respuesta);
 });
+
 router.post('/productos/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id === 'eliminar') {
@@ -2686,6 +2717,7 @@ router.post('/productos/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.put('/produc/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const { valor } = req.body;
@@ -2694,6 +2726,7 @@ router.put('/produc/:id', isLoggedIn, async (req, res) => {
     WHERE pd.producto = ${id} AND pd.estado = 9`);
   res.send(true);
 });
+
 router.put('/productos/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const { valor } = req.body;
@@ -2702,6 +2735,7 @@ router.put('/productos/:id', isLoggedIn, async (req, res) => {
     p.valproyect = p.totalmtr2 * ${valor}, pd.mtr = ${valor} WHERE pd.producto = ${id} AND pd.estado IN(9, 15)`);
   res.send(respuesta);
 });
+
 router.post('/regispro', isLoggedIn, async (req, res) => {
   const {
     categoria,
@@ -2776,10 +2810,12 @@ router.post('/regispro', isLoggedIn, async (req, res) => {
   req.flash('success', 'Producto registrado exitosamente');
   res.redirect('/links/productos');
 });
+
 router.post('/regisubpro', async (req, res) => {
   pool.query('INSERT INTO productosd SET ? ', req.body);
   res.send(true);
 });
+
 router.post('/excelprod', async (req, res) => {
   const pro = await pool.query(`SELECT * FROM productos`);
   let e = pro.map(x => {
@@ -2788,6 +2824,7 @@ router.post('/excelprod', async (req, res) => {
   //res.json(e);
   res.send(e);
 });
+
 router.get('/excelformato', async (req, res) => {
   //res.redirect('/uploads/Libro de ejemplo.xlsx')
   res.send('/uploads/Libro de ejemplo.xlsx');
@@ -3458,6 +3495,7 @@ router.get('/excelformato', async (req, res) => {
   //XLSX.writeFile(newWB, ruta)
   //res.send('/uploads/CUOTAS.xlsx');
 });
+
 router.post('/excelcrearproducto', async (req, res) => {
   //console.log(req.files)
   const fil = req.files[0];
@@ -3554,10 +3592,12 @@ router.post('/excelcrearproducto', async (req, res) => {
   //console.log('quien va primero')
   res.send(resp);
 });
+
 /////////////////////* RED *////////////////////////
 router.get('/red', noExterno, async (req, res) => {
   res.render('links/red');
 });
+
 router.post('/red', noExterno, async (req, res) => {
   /*SELECT p.acreedor , p.usuario, p1.acreedor, p1.usuario, p2.acreedor, p2.usuario 
     FROM pines p LEFT JOIN pines p1 ON p.usuario = p1.acreedor LEFT JOIN pines p2 ON p1.usuario = p2.acreedor;*/
@@ -3573,6 +3613,7 @@ router.post('/red', noExterno, async (req, res) => {
   respuesta = { data: red };
   res.send(respuesta);
 });
+
 router.post('/reds', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const red = await pool.query(`SELECT u.*, r.*, p.acreedor , p.usuario idpapa, 
@@ -3590,6 +3631,7 @@ router.post('/reds', noExterno, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.put('/red', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
@@ -3605,6 +3647,7 @@ router.put('/red', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 router.put('/reds', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
@@ -3620,10 +3663,12 @@ router.put('/reds', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 /////////////////////* ASESORES *////////////////////////
 router.get('/asesores', noExterno, async (req, res) => {
   res.render('links/asesores');
 });
+
 router.post('/asesores', noExterno, async (req, res) => {
   if (req.user.subadmin == 1) {
     const red = await pool.query(`SELECT u.id, u.pin, u.fullname, u.document, u.cel, u.username, 
@@ -3634,6 +3679,7 @@ router.post('/asesores', noExterno, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.post('/asesores/:accion', noExterno, async (req, res) => {
   if (req.user.subadmin == 1) {
     const { accion } = req.params;
@@ -3664,6 +3710,7 @@ router.post('/asesores/:accion', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 router.post('/asignarcomiproductos/:user', noExterno, async (req, res) => {
   if (req.user.subadmin == 1) {
     const { user } = req.params;
@@ -3674,6 +3721,7 @@ router.post('/asignarcomiproductos/:user', noExterno, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.put('/red', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
@@ -3689,6 +3737,7 @@ router.put('/red', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 router.put('/reds', noExterno, async (req, res) => {
   if (req.user.admin == 1) {
     const { S, U, F } = req.body;
@@ -3704,6 +3753,7 @@ router.put('/reds', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 ///////////////////* PREVENTAS *///////////////////////////
 router.get('/preventas', noExterno, (req, res) => {
   res.render('links/preventas');
@@ -3872,11 +3922,13 @@ router.post('/generarfactura', isLoggedIn, async (req, res) => {
 
   res.send(ruta);
 });
+
 ///////////////////* CLIENTES *///////////////////////////
 router.get('/clientes', isLoggedIn, (req, res) => {
   console.log(req.user);
   res.render('links/clientes');
 });
+
 router.post('/clientes', isLoggedIn, async (req, res) => {
   //console.log(req.user)
   const cliente = await pool.query(`SELECT * FROM clientes c 
@@ -3891,6 +3943,7 @@ router.post('/clientes', isLoggedIn, async (req, res) => {
   respuesta = { data: cliente };
   res.send(respuesta);
 });
+
 router.put('/clientes/:id', isLoggedIn, async (req, res) => {
   const {
     ahora,
@@ -4018,6 +4071,7 @@ router.put('/clientes/:id', isLoggedIn, async (req, res) => {
     });
   }
 });
+
 router.put('/editclientes', isLoggedIn, async (req, res) => {
   const { idc, name, tipod, docu, lugarex, fehex, fnaci, ecivil, email, pais, Movil, adres } =
     req.body;
@@ -4039,6 +4093,7 @@ router.put('/editclientes', isLoggedIn, async (req, res) => {
   await pool.query('UPDATE clientes SET ? WHERE idc = ?', [clit, idc]);
   res.send(true);
 });
+
 router.post('/adjuntar', isLoggedIn, async (req, res) => {
   var imagenes = '';
   req.files.map(e => {
@@ -4047,6 +4102,7 @@ router.post('/adjuntar', isLoggedIn, async (req, res) => {
   await pool.query('UPDATE clientes SET ? WHERE idc = ?', [{ imags: imagenes }, req.body.idc]);
   res.send(true);
 });
+
 router.post('/elicliente', noExterno, async (req, res) => {
   const { id } = req.body;
   try {
@@ -4056,11 +4112,13 @@ router.post('/elicliente', noExterno, async (req, res) => {
     res.send(false);
   }
 });
+
 router.post('/movil', isLoggedIn, async (req, res) => {
   const { movil } = req.body;
   const cliente = await pool.query('SELECT * FROM clientes WHERE movil = ?', movil);
   res.send(cliente);
 });
+
 /////////////////////////////////////////////////////
 router.get('/social', noExterno, (req, res) => {
   var options = {
@@ -4086,6 +4144,7 @@ router.get('/social', noExterno, (req, res) => {
   });
   res.render('links/social');
 });
+
 //////////////* BONOS *//////////////////////////////////
 router.post('/bonos/:id', isLoggedIn, (req, res) => {
   const { monto, ahora, pin, client, motivo } = req.body;
@@ -4105,13 +4164,16 @@ router.post('/bonos/:id', isLoggedIn, (req, res) => {
   pool.query('INSERT INTO cupones SET ? ', datos);
   res.send(true);
 });
+
 //////////////* PAGOS *//////////////////////////////////
 router.get('/pay', async (req, res) => {
   res.render('links/pay');
 });
+
 router.get('/pagos', async (req, res) => {
   res.render('links/pagos');
 });
+
 router.post('/pay/:id', async (req, res) => {
   const datos = await pool.query(
     `SELECT p.id orden, c.idc, c.nombre, c.movil, c.email, l.id lt, l.mz, l.n, d.id pyt, d.proyect, 
@@ -4153,6 +4215,7 @@ router.post('/pay/:id', async (req, res) => {
     });
   }
 });
+
 router.get('/pagos/:id', async (req, res) => {
   const cliente = await pool.query('SELECT * FROM clientes WHERE documento = ?', req.params.id);
   if (cliente.length > 0) {
@@ -4191,6 +4254,7 @@ router.get('/pagos/:id', async (req, res) => {
     });
   }
 });
+
 router.post('/pagos', async (req, res) => {
   const { merchantId, amount, referenceCode, proyecto } = req.body;
   const codes = await pool.query(`SELECT key FROM prodrecauds p INNER JOIN recaudadores r 
@@ -4204,6 +4268,7 @@ router.post('/pagos', async (req, res) => {
   }
   res.send(false);
 });
+
 router.post('/boton', async (req, res) => {
   const { pyt, mora, transferAmount, transferReference, transferDescription } = req.body;
   console.log(req.body);
@@ -4245,6 +4310,7 @@ router.post('/boton', async (req, res) => {
       res.send({ std: false, msj: error, href: '/' });
     });
 });
+
 router.post('/rcbs', async (req, res) => {
   const { ahora, lt, formap, namercb, nrecibo, montos, feh, orden } = req.body;
 
@@ -4299,6 +4365,7 @@ router.post('/rcbs', async (req, res) => {
     return res.redirect('/links/pagos');
   } */
 });
+
 router.post('/recibos', async (req, res) => {
   const { factura, formas, names, recibos, montos, fechas } = req.body;
   console.log(req.body, req.files);
@@ -4330,6 +4397,7 @@ router.post('/recibos', async (req, res) => {
   await pool.query('UPDATE facturas SET status = 1 WHERE id = ?', factura);
   res.json({ std: true, msj: 'Solicitud de pago enviada correctamente' });
 });
+
 router.post('/recibo', async (req, res) => {
   const {
     total,
@@ -4523,6 +4591,7 @@ router.post('/recibo', async (req, res) => {
     return res.redirect('/links/pagos');
   }
 });
+
 router.post('/bonus', async (req, res) => {
   const { factrs, id, ahora, concpto, lt, bonomonto, bono, pin, orden } = req.body;
   const a = await Bonos(bono, lt);
@@ -4566,15 +4635,18 @@ router.post('/bonus', async (req, res) => {
     res.send(false);
   }
 });
+
 /////////////* CARTERAS */////////////////////////////////////
 router.get('/cartera', isLoggedIn, async (req, res) => {
   res.render('links/cartera');
 });
+
 router.post('/cartera/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const fila = await pool.query('SELECT * FROM productosd WHERE id = ?', id);
   res.send(fila[0]);
 });
+
 router.post('/cartera', isLoggedIn, async (req, res) => {
   const { h } = req.body;
   let prd;
@@ -4617,6 +4689,7 @@ router.post('/cartera', isLoggedIn, async (req, res) => {
   respuesta = { data: cuotas };
   res.send(respuesta);
 });
+
 router.post('/rcb', noExterno, async (req, res) => {
   const { rcb } = req.body;
   console.log(req.body);
@@ -4628,6 +4701,7 @@ router.post('/rcb', noExterno, async (req, res) => {
     res.send(true);
   }
 });
+
 router.post('/prodlotes', noExterno, async (req, res) => {
   const productos =
     await pool.query(`SELECT p.*, l.* FROM productos p INNER JOIN productosd l ON l.producto = p.id LEFT JOIN preventa v ON v.lote = l.id 
@@ -4636,6 +4710,7 @@ router.post('/prodlotes', noExterno, async (req, res) => {
   const clientes = await pool.query(`SELECT * FROM clientes ORDER BY nombre ASC`);
   res.send({ productos, asesores, clientes });
 });
+
 router.post('/crearcartera', noExterno, async (req, res) => {
   const {
     idbono,
@@ -4780,6 +4855,7 @@ router.post('/crearcartera', noExterno, async (req, res) => {
   req.flash('success', 'Cartera creada correctamente, producto en estado ' + S.estado);
   res.redirect('/links/cartera');
 });
+
 //////////////* CUPONES *//////////////////////////////////
 router.get('/saluda', noExterno, async (req, res) => {
   const r = await pool.query(`SELECT SUM(s.monto) + 
@@ -4794,9 +4870,11 @@ router.get('/saluda', noExterno, async (req, res) => {
   console.log(r);
   res.send('samir todo biaen');
 });
+
 router.get('/cupones', isLoggedIn, async (req, res) => {
   res.render('links/cupones');
 });
+
 router.post('/cupon', isLoggedIn, async (req, res) => {
   const { dto, std, cliente, ctn } = req.body;
   if (ctn < 1) {
@@ -4832,6 +4910,7 @@ router.post('/cupon', isLoggedIn, async (req, res) => {
     });
   }
 });
+
 router.post('/cupones', isLoggedIn, async (req, res) => {
   var d = req.user.auxicontbl > 0 ? '' : 'WHERE c.clients = ?';
   var sql = `SELECT c.id, c.pin, c.descuento, c.fecha, c.estado, v.ahorro, p.mz, p.n, t.proyect, cl.nombre, cl.movil, 
@@ -4842,6 +4921,7 @@ router.post('/cupones', isLoggedIn, async (req, res) => {
   respuesta = { data: cupones };
   res.send(respuesta);
 });
+
 router.post('/cupones/:d', isLoggedIn, async (req, res) => {
   const { d } = req.params;
   if (d === 'BONO' && !req.user.externo) {
@@ -4880,10 +4960,12 @@ router.post('/cupones/:d', isLoggedIn, async (req, res) => {
     }
   }
 });
+
 router.get('/bono/:id', isLoggedIn, async (req, res) => {
   const bono = await pool.query('SELECT * FROM cupones WHERE pin = ?', req.params.id);
   res.send(bono);
 });
+
 ///////////////////////* ORDEN *//////////////////////////////////
 router.get('/orden', isLoggedIn, async (req, res) => {
   moment.locale('es');
@@ -4901,6 +4983,7 @@ router.get('/orden', isLoggedIn, async (req, res) => {
 
   res.render('links/orden', { lote: lt, usrs, orden: null });
 });
+
 router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const usrs = req.user.id;
@@ -4930,6 +5013,7 @@ router.get('/orden/edit/:id', isLoggedIn, async (req, res) => {
 
   res.render('links/orden', { lote: null, usrs, orden: id });
 });
+
 router.post('/orden/save', isLoggedIn, async (req, res) => {
   const { proyeccion, ordenAnt, producto, cupon, historyQuota } = req.body;
   const { id, mtr, mtr2, inicial, valor } = producto;
@@ -5159,6 +5243,7 @@ router.post('/orden/save', isLoggedIn, async (req, res) => {
   }
   res.send(true);
 });
+
 router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   const { accion } = req.params;
   let orden = [];
@@ -5184,6 +5269,7 @@ router.post('/orden/:accion', isLoggedIn, async (req, res) => {
   //console.log(orden, ordnId, !isNaN(ordnId));
   res.send({ productos, asesores, clientes, descuentos, orden, historiales });
 });
+
 router.post('/orden', isLoggedIn, async (req, res) => {
   const {
     numerocuotaspryecto,
@@ -5268,6 +5354,7 @@ router.post('/orden', isLoggedIn, async (req, res) => {
     res.redirect('/links/reportes');
   }
 });
+
 router.get('/cel/:id', async (req, res) => {
   const { id } = req.params;
   const datos = await pool.query(
@@ -5275,6 +5362,7 @@ router.get('/cel/:id', async (req, res) => {
   );
   res.send(datos);
 });
+
 router.post('/codigo', isLoggedIn, async (req, res) => {
   const { movil } = req.body;
   const codigo = ID2(5);
@@ -5286,6 +5374,7 @@ router.post('/codigo', isLoggedIn, async (req, res) => {
   );
   res.send(codigo);
 });
+
 router.post('/tabla/:id', isLoggedIn, async (req, res) => {
   if (req.params.id == 1) {
     var data = new Array();
@@ -5413,6 +5502,7 @@ router.post('/tabla/:id', isLoggedIn, async (req, res) => {
     res.send(dataSet);
   }
 });
+
 router.get('/ordendeseparacion/:id/:tp', isLoggedIn, async (req, res) => {
   //console.log(req.params)
   const { id, tp } = req.params;
@@ -5453,6 +5543,7 @@ router.get('/ordendeseparacion/:id/:tp', isLoggedIn, async (req, res) => {
   //console.log(orden)
   res.render('links/ordendeseparacion', { orden, id, total });
 });
+
 router.get('/ordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   sql = `SELECT p.id, p.lote, p.cliente, p.cliente2, p.cliente3, p.cliente4, p.numerocuotaspryecto,
@@ -5480,6 +5571,7 @@ router.get('/ordn/:id', isLoggedIn, async (req, res) => {
     res.render('links/ordn', { orden, id });
   }
 });
+
 router.get('/editordn2/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
@@ -5519,6 +5611,7 @@ router.get('/editordn2/:id', isLoggedIn, async (req, res) => {
     res.render('links/editordn2', { iD, orden, cuotas });
   }
 });
+
 router.get('/editordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const iD = id.indexOf('*') > 0 ? id.split('*')[0] : id;
@@ -5558,6 +5651,7 @@ router.get('/editordn/:id', isLoggedIn, async (req, res) => {
     res.render('links/editordn', { iD, orden, cuotas });
   }
 });
+
 router.post('/ordn/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   sql = `SELECT * FROM cuotas WHERE separacion = ? ORDER BY fechs ASC`;
@@ -5565,6 +5659,7 @@ router.post('/ordn/:id', isLoggedIn, async (req, res) => {
   body = { data: orden };
   res.send(body);
 });
+
 router.post('/ordne/', isLoggedIn, async (req, res) => {
   const {
     cuot,
@@ -5722,6 +5817,7 @@ router.post('/ordne/', isLoggedIn, async (req, res) => {
   }
   res.send(true);
 });
+
 router.post('/separacion/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const fila = await pool.query(
@@ -5732,6 +5828,7 @@ router.post('/separacion/:id', isLoggedIn, async (req, res) => {
   );
   res.send(fila[0]);
 });
+
 router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   const productos = await pool.query(
@@ -5747,6 +5844,7 @@ router.post('/prodlotes/:id', isLoggedIn, async (req, res) => {
   );
   res.send({ productos, asesores, clientes, orden });
 });
+
 router.post('/editarorden', isLoggedIn, async (req, res) => {
   //console.log(req.body);
   const {
@@ -5820,6 +5918,7 @@ router.post('/editarorden', isLoggedIn, async (req, res) => {
   //console.log(ordn)
   res.send(ordn);
 });
+
 router.post('/ordendeseparacion/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   let { p, i } = req.body;
@@ -6033,6 +6132,7 @@ router.get('/comisiones', isLoggedIn, async (req, res) => {
 
   res.render('links/comisiones');
 });
+
 router.post('/comisiones', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
   const params = pdo ? `AND p.id IN (${pdo})` : '';
@@ -6050,6 +6150,7 @@ router.post('/comisiones', isLoggedIn, async (req, res) => {
   respuesta = { data: solicitudes };
   res.send(respuesta);
 });
+
 router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
 
@@ -6074,6 +6175,7 @@ router.post('/comisiones/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.post('/comision/:item', isLoggedIn, async (req, res) => {
   const { item } = req.params;
   if (item === 'pdf') {
@@ -6085,6 +6187,7 @@ router.post('/comision/:item', isLoggedIn, async (req, res) => {
     res.send(r);
   }
 });
+
 //////////////////////* ACUERDOS *//////////////////////////////////
 router.post('/acuerdos/:orden', isLoggedIn, async (req, res) => {
   const { orden } = req.params;
@@ -6105,6 +6208,7 @@ router.post('/acuerdos/:orden', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 //////////////////////* REPORTES *//////////////////////////////////
 router.get('/reportes', isLoggedIn, async (req, res) => {
   /* await pool.query(
@@ -6113,6 +6217,7 @@ router.get('/reportes', isLoggedIn, async (req, res) => {
   res.render('links/reportes');
 });
 var CODE = null;
+
 router.post('/anular', noExterno, async (req, res) => {
   const {
     id,
@@ -7506,6 +7611,7 @@ router.post('/reportes/:id', isLoggedIn, async (req, res) => {
     res.send(`/uploads/estadodecuenta-${orden}.pdf`);
   }
 });
+
 router.post('/rcb/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id !== 'nada') {
@@ -7521,6 +7627,7 @@ router.post('/rcb/:id', isLoggedIn, async (req, res) => {
     res.send(respuesta);
   }
 });
+
 router.post('/std/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id === 'bank') {
@@ -7528,6 +7635,7 @@ router.post('/std/:id', isLoggedIn, async (req, res) => {
     res.send(true);
   }
 });
+
 router.get('/cedula/:id', isLoggedIn, async (req, res) => {
   /* const { id } = req.params;
   const datos = await consultarDocumentos('1', id);
@@ -7621,11 +7729,13 @@ router.post('/desendentes', noExterno, async (req, res) => {
 
   res.send(true);
 });
+
 ////////////////////////* SOLICITUDES || CONSULTAS *//////////////////////////////////
 router.get('/solicitudes', isLoggedIn, (req, res) => {
   console.log(req.user);
   res.render('links/solicitudes');
 });
+
 router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (id === 'pago') {
@@ -7802,6 +7912,7 @@ router.post('/solicitudes/:id', isLoggedIn, async (req, res) => {
     res.send({ r: true, m: 'todo salio bien', data: `/uploads/informes.pdf` });
   }
 });
+
 router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
   if (!req.user.contador) {
@@ -8040,6 +8151,7 @@ router.put('/solicitudes/:id', isLoggedIn, async (req, res) => {
     res.send(R);
   }
 });
+
 /////////////////////////* AFILIACION *////////////////////////////////////////
 router.post('/afiliado', isLoggedIn, async (req, res) => {
   const { movil, cajero } = req.body;
@@ -8086,6 +8198,7 @@ router.post('/id', async (req, res) => {
     res.send('Pin de registro invalido, comuniquese con su distribuidor!');
   }
 });
+
 //"a0Ab1Bc2Cd3De4Ef5Fg6Gh7Hi8Ij9Jk0KLm1Mn2No3Op4Pq5Qr6Rs7St8Tu9Uv0Vw1Wx2Xy3Yz4Z"
 function ID(lon) {
   let chars = '0A1B2C3D4E5F6G7H8I9J0KL1M2N3O4P5Q6R7S8T9U0V1W2X3Y4Z',
@@ -8096,6 +8209,7 @@ function ID(lon) {
   }
   return code;
 }
+
 //Eli('uploads/3xcy-02nj3ptv8wt7r5-7235y48fk7ihmz.pdf');
 function ID2(lon) {
   let chars = '1234567890',
@@ -8106,6 +8220,7 @@ function ID2(lon) {
   }
   return code;
 }
+
 async function usuario(user, pin) {
   return user.externo
     ? (await pool.query('SELECT producto FROM externos WHERE usuario = ?', pin)).map(
@@ -8113,6 +8228,7 @@ async function usuario(user, pin) {
       )
     : false;
 }
+
 async function saldo(producto, rango, id, monto) {
   var operacion;
   if (!producto && monto) {
@@ -8133,6 +8249,7 @@ async function saldo(producto, rango, id, monto) {
   );
   return saldo[0].Respuesta;
 }
+
 async function Rango(id) {
   /*if (id == 15) { return 1 }
     let m = new Date(),
@@ -8240,6 +8357,7 @@ async function Rango(id) {
     };
     return 4;*/
 }
+
 async function Estados(S) {
   // S = id de separacion
 
@@ -8363,6 +8481,7 @@ async function RestablecerCupon(S) {
     return r.affectedRows;
   }
 }
+
 async function QuitarCupon(S) {
   const W = await pool.query(
     `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses,
@@ -8452,6 +8571,7 @@ async function QuitarCupon(S) {
     return r.affectedRows;
   }
 }
+
 async function ProyeccionPagos(S) {
   let W = await pool.query(
     `SELECT c.id, p.numerocuotaspryecto, p.extraordinariameses, p.dto, e.descuento,
@@ -8813,6 +8933,7 @@ async function ProyeccionPagos(S) {
   //////////////////////////* ENVIAR PDF *///////////////////////////
   //await EstadoDeCuenta(S)
 }
+
 async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
   //u. obsevacion pr
   const SS = await pool.query(`SELECT s.fech, s.monto, u.pin, u.nrango, pd.valor, pr.ahorro, 
@@ -8903,6 +9024,7 @@ async function PagosAbonos(Tid, pdf, user, extr = false, enviaRcb) {
   }
   return { std: true, msg: `Solicitud procesada correctamente` };
 }
+
 async function Bonos(pin, lote) {
   const recibe = await pool.query(
     `SELECT pr.id, c.* FROM cupones c
@@ -8920,6 +9042,7 @@ async function Bonos(pin, lote) {
     return false;
   }
 }
+
 var normalize = (function () {
   var from = 'ÃÀÁÄÂÈÉËÊÌÍÏÎÒÓÖÔÙÚÜÛãàáäâèéëêìíïîòóöôùúüûÑñÇç',
     to = 'AAAAAEEEEIIIIOOOOUUUUaaaaaeeeeiiiioooouuuuNnCc',
@@ -8937,6 +9060,7 @@ var normalize = (function () {
     return ret.join('');
   };
 })();
+
 //Desendentes('97890290003800000154', 10) 82113863080099902022
 async function Desendentes(user, stados, pasado) {
   if (stados != 10) return false;
@@ -9007,6 +9131,7 @@ async function Desendentes(user, stados, pasado) {
 
   return true;
 }
+
 async function Eli(img) {
   path.join(__dirname, '../public/uploads/0y6or--pfxay07e4332144q2zs-90v9w91.pdf');
   fs.exists(img, function (exists) {
@@ -9022,6 +9147,7 @@ async function Eli(img) {
     }
   });
 }
+
 function Moneda(valor) {
   valor = valor
     .toString()
@@ -9032,6 +9158,7 @@ function Moneda(valor) {
   valor = valor.split('').reverse().join('').replace(/^[\.]/, '');
   return valor;
 }
+
 async function WspNewUser(empresa, movil, msg, options) {
   const cel =
     movil.indexOf('-') > 0
@@ -9081,6 +9208,7 @@ async function WspNewUser(empresa, movil, msg, options) {
       console.log(error.response, 'Error de la api de whatsapp WspNewUser');
     });
 }
+
 async function WspRcb(movil, url, filename) {
   const cel =
     movil.indexOf('-') > 0
@@ -9145,6 +9273,7 @@ async function WspRcb(movil, url, filename) {
   //console.log(resp.data);
   return true;
 }
+
 //EnviarWTSAP('57 3012673944', 'esto es una prueba de grupo elite');
 async function EnviarWTSAP(movil, body, smsj, chatid, q) {
   const cel =
@@ -9173,6 +9302,7 @@ async function EnviarWTSAP(movil, body, smsj, chatid, q) {
   return tt.data;
   //return true;
 }
+
 async function EnvWTSAP_FILE(movil, body, filename, caption) {
   const cel =
     movil.indexOf('-') > 0

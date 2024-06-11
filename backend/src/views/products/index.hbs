@@ -1,50 +1,32 @@
 <main class='content px-1 px-md-4'>
   <div class='card shadow-lg mb-5 rounded'>
-    <div class='card-header bg-dark rounded-top'>
-      <h3 class='text-white'>Tabla de precios</h3>
-    </div>
-    <div class='card-body rounded-bottom px-2 px-md-4'>
-      <table id='prices' class='table table-sm table-striped display nowrap w-100'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Id</th>
-            <th>Medicamento</th>
-            <th>Laboratorio</th>
-            <th>Clase</th>
-            <th>Cant.</th>
-            <th>Tipo</th>
-            <th>Precio</th>
-            <th>Accion</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-  </div>
-
-  <div class='card shadow-lg mb-5 rounded'>
-    <div class='card-header bg-dark rounded-top'>
-      <h3 class='text-white'>Tabla de combos</h3>
-    </div>
-    <div class='card-body rounded-bottom'>
-      <table id='prices_combo' class='table table-sm table-striped display nowrap w-100'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Id</th>
-            <th>Nombre</th>
-            <th>Precio</th>
-            <th>Meicamento</th>
-            <th>Laboratorio</th>
-            <th>Clase</th>
-            <th>Cantidad</th>
-            <th>Tipo</th>
-            <th>Precio</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
+    <div class='card-body rounded-top rounded-bottom px-2 px-md-4'>
+      <div class='row'>
+        <div class='col-12 col-md-8'>
+          <table id='prices' class='table table-striped display nowrap w-100'>
+            <tbody></tbody>
+          </table>
+        </div>
+        <div class='col-12 col-md-4'>
+          <div class='card' style='width: 18rem;'>
+            <img src='/img/avatars/avatar.svg' class='card-img-top' alt='...' />
+            <div class='card-body'>
+              <h5 class='card-title'>INMOVILII</h5>
+              <p class='card-text'>La plataforma ideal para grandes y pequeños negocios, no esperes
+                mas ven y registra tu negocio es gratis</p>
+            </div>
+            <ul class='list-group list-group-flush'>
+              <li class='list-group-item'>Manejo de inventario</li>
+              <li class='list-group-item'>Control de usuarios</li>
+              <li class='list-group-item'>ChatBot con IA ChatGPT</li>
+            </ul>
+            <div class='card-body'>
+              <a href='/signup' class='card-link'>Reguitrate aqui</a>
+              <a href='/signin' class='card-link'>Iniciar sesion</a>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </main>
@@ -52,7 +34,7 @@
 <!-- BEGIN primary modal -->
 <div class='modal fade' id='AddProduct' tabindex='-1' role='dialog' aria-hidden='true'>
   <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
-    <form id='crearproducto' enctype='multipart/form-data' class="w-100">
+    <form id='crearproducto' enctype='multipart/form-data' class='w-100'>
       <div class='modal-content card position-relative'>
         <div
           class='position-absolute w-100 h-100'
@@ -77,7 +59,7 @@
                 <a class='r atras position-absolute' id='deleteImage' style='top: 5%; left: 5%;'>
                   <i class='feather-md' data-feather='x-circle'></i>
                 </a>
-                <img id='imagen' type='img' src='/img/subir.png' class='img-fluid' alt='...' />
+                <img id='imagen' type='img' src='/img/subir.png' class='img-fluid' alt='imagen' />
                 <button
                   type='button'
                   class='position-absolute btn btn-sm btn-outline-primary img'
@@ -105,10 +87,12 @@
                     </div>
                     <div class='form-group col-md-4'>
                       <input
+                        id='precio'
                         type='text'
                         class='form-control valor edi'
                         name='precio'
                         placeholder='Precio'
+                        disabled
                         required
                       />
                     </div>
@@ -186,23 +170,46 @@
                   <div class='input-group-text'>
                     <input type='checkbox' class='public' onclick='publicProduct(this)' />
                     <input type='hidden' name='visible' value='0' />
+                    <div class='dropdown imgref'>
+                      <a class='img2' type='button' data-toggle='dropdown' aria-expanded='false'>
+                        <i class='fas fa-image'></i>
+                      </a>
+                      <input class='imagen' type='file' name='imagen-0' style='display: none;' />
+
+                      <div class='dropdown-menu p-2'>
+                        <div class='d-flex align-items-start flex-column'>
+                          <a class='r atras deleteImage'>
+                            <i class='fas fa-fw fa-trash'></i>
+                          </a>
+                          <div class=''>
+                            <img src='/img/subir.png' class='img-fluid imagen' alt='img' />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
                 </div>
                 <input
-                  class='form-control edi'
+                  class='form-control edi nota'
                   type='text'
-                  name='nota'
-                  placeholder='Nota producto'
+                  name='valor'
+                  placeholder='Precio'
                 />
                 <div class='input-group-append'>
                   <button
+                    type='button'
                     class='btn btn-outline-danger'
                     id='hidelecte'
                     onclick='deleteProduct(this)'
                   >
                     <i class='fas fa-fw fa-trash'></i>
                   </button>
-                  <button class='btn btn-outline-primary plus' onclick='setProduct(this)' disabled>
+                  <button
+                    type='button'
+                    class='btn btn-outline-primary plus'
+                    onclick='setProduct(this)'
+                    disabled
+                  >
                     <i class='fas fa-fw fa-plus'></i>
                   </button>
                 </div>
@@ -223,6 +230,54 @@
           <button type='submit' class='btn btn-outline-primary'>
             <i class='fas fa-fw fa-plus'></i>
             Guardar
+          </button>
+        </div>
+      </div>
+    </form>
+  </div>
+</div>
+<!-- END primary modal -->
+
+<!-- BEGIN primary modal -->
+<div class='modal fade' id='AddCar' tabindex='-1' role='dialog' aria-hidden='true'>
+  <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
+    <form id='crearproducto' enctype='multipart/form-data' class='w-100'>
+      <div class='modal-content card position-relative'>
+        <div
+          class='position-absolute w-100 h-100'
+          id='carga'
+          style='left: 0; top: 0; z-index: 1000; background-color: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;'
+        >
+          <div class='text-white' style='text-align: center;'>
+            <i class='fas fa-spinner fa-pulse fa-2x'></i>
+            <strong class='mt-2'>Cargando...</strong>
+          </div>
+        </div>
+        <div class='modal-header'>
+          <h3 class='modal-title'>Carrito de compras</h3>
+          <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
+            <i class='feather-lg' data-feather='x-circle'></i>
+          </a>
+        </div>
+        <div class='modal-body p-3 bg-light'>
+          <div class='accordion' id='referencias'></div>
+        </div>
+        <div class='modal-footer'>
+          <button
+            class='btn btn-outline-danger d-flex align-items-center'
+            data-dismiss='modal'
+            aria-label='Close'
+          >
+            <i class='fas fa-fw fa-trash'></i>
+            <span class='d-none d-md-block'>Eliminar</span>
+          </button>
+          <button class='btn btn-outline-primary'>
+            <i class='fas fa-fw fa-cart-plus'></i>
+            Seguir buscando
+          </button>
+          <button class='btn btn-outline-primary'>
+            <i class='fas fa-fw fa-tags'></i>
+            Crear orden
           </button>
         </div>
       </div>

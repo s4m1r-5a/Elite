@@ -30,6 +30,16 @@ const Recetas = sequelize.define(
       allowNull: false,
       defaultValue: 0.0
     },
+    valor: {
+      type: DataTypes.DECIMAL(11, 4),
+      allowNull: false,
+      defaultValue: 0.0
+    },
+    img: {
+      type: DataTypes.CHAR(100),
+      allowNull: true,
+      defaultValue: null
+    },
     nota: {
       type: DataTypes.STRING(255),
       defaultValue: null
