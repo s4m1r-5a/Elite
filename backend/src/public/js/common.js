@@ -56,7 +56,7 @@ $.jMaskGlobals = {
 ///////////////////* CARRITO DE COMPRAS *////////////////////////
 let caritems = JSON.parse(localStorage.getItem('caritems') ?? '[]');
 
-const ref = ref => {
+const refCar = refCar => {
   return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
     <div
       class='d-flex align-items-center align-content-center flex-wrap'      
@@ -64,16 +64,16 @@ const ref = ref => {
     >
       <div class='p-1 flex-grow-1 w-50'>
         <h4 class='m-0 text-truncate' title='name' style="max-width: 95%;"></h4>
-        <span class='badge badge-info' title='ref'></span>
+        <span class='badge badge-info' title='refCar'></span>
         <span title='precio'></span>        
       </div>
       <div 
         class='p-1'
         type='button'
         data-toggle='collapse'
-        data-target='#referencia_${ref}'
+        data-target='#referencia_${refCar}'
         aria-expanded='false'
-        aria-controls='referencia_${ref}'
+        aria-controls='referencia_${refCar}'
       >
         x <span class='badge badge-info ctd' title='cantidad'></span>
         <a><i class='fas fa-fw fa-angle-down'></i></a>
@@ -91,7 +91,7 @@ const ref = ref => {
     </div>
 
     <div
-      id='referencia_${ref}'
+      id='referencia_${refCar}'
       class='collapse show px-2'
       aria-labelledby='headingOne'
       data-parent='#referencias'
@@ -129,14 +129,13 @@ const setRowss = (productos, data) => {
 };
 
 const addItemsCar = () => {
-  if (caritems.length) {
-    console.log('entro por aqui', caritems);
-    $('#itemsCar').text(caritems.length).show();
-    $('#msgCar').text(`${caritems.length} En Carrito`);
-    $('#listCar').html(
-      caritems
-        .map(
-          e => `
+  console.log('entro por aqui', caritems);
+  $('#itemsCar').text(caritems.length)[caritems.length ? 'show' : 'hide']();
+  $('#msgCar').text(`${caritems.length} Productos En Carrito`);
+  $('#listCar').html(
+    caritems
+      .map(
+        e => `
       <a href='#' class='list-group-item'>
         <div class='row no-gutters align-items-center'>
           <div class='col-2'>
@@ -154,26 +153,26 @@ const addItemsCar = () => {
           </div>
         </div>
       </a>`
-        )
-        .join('')
-    );
+      )
+      .join('')
+  );
+  console.log('caritems', JSON.stringify(caritems), caritems);
 
-    localStorage.setItem('caritems', JSON.stringify(caritems));
-  }
+  localStorage.setItem('caritems', JSON.stringify(caritems));
 };
 
 $(document).ready(function () {
   caritems.forEach(row => {
-    const elements = setRef(row?.idref).find('input, span, h4, h5');
+    const elements = setItemsCar(row?.idref).find('input, span, h4, h5');
     return setRowss(elements, row);
   });
   addItemsCar();
 });
 
-function setRef(id) {
+function setItemsCar(id) {
   const code = id ?? ID(5);
 
-  $('#referencias').append(ref(code));
+  $('#referencias').append(refCar(code));
 
   const newElemnt = $('#referencias').find('.card:last');
 
@@ -212,8 +211,8 @@ function setRef(id) {
 
   newElemnt.on('change', '.cantidad', function () {
     if (this.value < 1) {
+      caritems = caritems.filter(e => e.idref !== code);
       newElemnt.hide('slow', function () {
-        caritems = caritems.filter(e => e.idref === code);
         $(this).remove();
       });
     } else {

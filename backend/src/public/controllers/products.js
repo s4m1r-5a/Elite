@@ -211,7 +211,6 @@ const producto = data => {
   </div>`;
 };
 
-
 $(document).ready(function () {
   $('#hidelecte, .public, #carga').hide();
   $('input').prop('autocomplete', 'off');
@@ -294,10 +293,10 @@ $(document).ready(function () {
 
   $('#deleteCar').on('click', function () {
     if (confirm('Seguro deseas eliminar el carrito de compras?')) {
+      caritems = [];
+      addItemsCar();
       $('#referencias .referencia').hide('slow', function () {
-        caritems = [];
         $(this).remove();
-        addItemsCar();
       });
     }
   });
@@ -516,7 +515,7 @@ prices.on('click', 'td .addcar', function () {
 
   console.log({ id, name, precio, items, ...rest, caritems });
 
- /*  ESTA FUNCION YA ESTA EN EL ARCHIVO COMMON.JS
+  /*  ESTA FUNCION YA ESTA EN EL ARCHIVO COMMON.JS
 
   const setRowss = (productos, data) => {
     productos.each(function () {
@@ -529,10 +528,9 @@ prices.on('click', 'td .addcar', function () {
   }; */
 
   caritems.forEach(row => {
-    const elements = setRef(row?.idref).find('input, span, h4, h5');
+    const elements = setItemsCar(row?.idref).find('input, span, h4, h5');
     return setRowss(elements, row);
   });
-
 
   $('#AddCar').modal({ toggle: true, backdrop: 'static', keyboard: true });
   addItemsCar();
