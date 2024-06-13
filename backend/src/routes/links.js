@@ -1106,13 +1106,15 @@ cron.schedule('0 1 1 1,4,7,10 *', async () => {
 // cron.schedule('*/3 * * * * *', async () => {
 cron.schedule('*/30 * * * *', async () => {
   const rows = await pool.query(
-    `SELECT c.url, c.token, b.code, b.routes FROM chatbots c INNER JOIN bots b ON c.id = b.chatbot`
+    `SELECT c.url, c.token, b.code, b.routes, b.status FROM chatbots c INNER JOIN bots b ON c.id = b.chatbot`
   );
 
   if (!rows.length) return false;
 
   for (const row of rows) {
     const route = JSON.parse(row.routes).find(e => e.name === 'assistants')?.path;
+
+    if (!row?.status) continue;
 
     var config = {
       method: 'get',
@@ -1138,6 +1140,7 @@ cron.schedule('*/30 * * * *', async () => {
       }
       console.log({ status }, 'todo esta bien');
     }
+    await new Promise(resolve => setTimeout(resolve, 5000)); // Espera 1/2 segundo
   }
 });
 
