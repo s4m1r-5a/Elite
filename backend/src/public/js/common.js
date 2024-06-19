@@ -35,6 +35,7 @@ async function connectToSerialPort() {
     console.error('Error de conexión:', error);
   }
 }
+
 ////////////////////* FUNCIONES GLOBALES *///////////////////////
 $.jMaskGlobals = {
   maskElements: 'input,td,span,div',
@@ -167,6 +168,31 @@ $(document).ready(function () {
     return setRowss(elements, row);
   });
   addItemsCar();
+
+  $('.cifra')
+    .keyup(function () {
+      this.value = currency(this.value, true);
+    })
+    .change(function () {
+      if (!/[0-9]/.test(this.value)) this.value = null;
+    })
+    .focus(function () {
+      this.select();
+    });
+
+  $('.num')
+    .keyup(function () {
+      if (isNaN(this.value) || this.value.startsWith('0')) {
+        this.value = null;
+        return;
+      }
+    })
+    .change(function () {
+      if (!/[0-9]/.test(this.value)) this.value = null;
+    })
+    .focus(function () {
+      this.select();
+    });
 });
 
 function setItemsCar(id) {
@@ -318,24 +344,38 @@ const Cifra = valor => {
     : num.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 2 });
 };
 
-const currency = (value, coin = false) => {
+const currency = (value, coin = false, mul = false, neg = false) => {
   if (!value) return value;
-  if (!/[0-9]/g.test(value)) return value.replace(/[^0-9.]/g, '');
+
+  if (!/[-0-9$]/g.test(value)) return 0;
+  if (/\d\s$/g.test(value) && value < 1) value = value.slice(0, -2);
+  if (!value || !/[0-9]/g.test(value)) return value;
   let symbol = '';
-  const punto = /\.$/.test(value);
-  const num = /[^0-9.-]/g.test(value)
-    ? parseFloat(value.replace(/[^0-9.]/g, ''))
+  const punto = /\s%\.$|\.%$|\.$/.test(value);
+
+  if (neg && /^-/g.test(value)) neg = true;
+  else neg = false;
+  //console.log(value);
+  const num = /[^0-9.]/g.test(value)
+    ? parseFloat(value.toString().replace(/[^0-9.]/g, ''))
     : parseFloat(value);
   if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
 
-  if (coin) symbol = num > 0 && num < 1 ? '%' : num > 0 ? '$ ' : '';
+  if (coin) symbol = num > 0 && num < 1 ? ' %' : num > 0 ? '$ ' : '';
 
   const number = num.toLocaleString('en-US', {
     minimumFractionDigits: 0,
-    maximumFractionDigits: 2
+    maximumFractionDigits: num < 1 ? 4 : 2
   });
   const amount = punto ? number + '.' : number;
-  return symbol === '%' ? amount + symbol : symbol + amount;
+  const amount2 = neg ? '-' + amount : amount;
+  return symbol === ' %' && mul
+    ? Math.round((amount2 * 100 + Number.EPSILON) * 100) / 100 + symbol //amount2 * 100 + symbol
+    : symbol === ' %'
+    ? amount2 + symbol
+    : neg
+    ? '-' + symbol + amount
+    : symbol + amount;
 };
 
 const Percent = valor => {
@@ -851,9 +891,7 @@ $(document).ready(function () {
       $(this).attr('input') ? this.select() : '';
     },
     blur: function () {
-      $(this).css({
-        'background-color': 'transparent'
-      });
+      $(this).css('background-color', '');
       $('.reditarh').hide('slow');
       $('.item').hide('slow');
     },

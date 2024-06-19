@@ -2,7 +2,6 @@ $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 const placeholder = { id: null, text: 'Slec. parametro', selected: true };
 const options = [
-  { id: 'Cantidad', text: 'Cantidad' },
   { id: 'Talla', text: 'Talla' },
   { id: 'Color', text: 'Color' },
   { id: 'Marca', text: 'Marca' },
@@ -21,15 +20,10 @@ const options = [
 ];
 
 const fields = ref => {
-  const first = $('#referencias .card:first .ref:first').length;
-  const id = !!$('#id').val();
+  const first = $('#references .card:first .ref:first').length;
   return `<div class='d-flex flex-row align-items-center align-content-center flex-wrap ref' style="display: none;">
     <div class='p-2 col-6 col-md-6'>
-      ${
-        first || id
-          ? `<select class='form-control params' name='key_${ref}' required></select>`
-          : `<input type='hidden' name='key_${ref}' value='Cantidad' /> Cantidad`
-      }      
+      <select class='form-control params' name='key_${ref}' required></select>   
     </div>
     <div class='p-2 col-6 col-md-6'>
       <div class='input-group'>
@@ -51,9 +45,7 @@ const fields = ref => {
                 <i class='fas fa-fw fa-plus'></i>
                 Nuevo
               </a>
-              <a class='dropdown-item ${
-                first ? '' : 'disabled'
-              }' href='#' onclick='deleteProduct(this)'>
+              <a class='dropdown-item' href='#' onclick='deleteProduct(this)'>
                 <i class='fas fa-fw fa-trash-alt'></i>
                 Eliminar
               </a>
@@ -65,8 +57,8 @@ const fields = ref => {
   </div>`;
 };
 
-const ref = ref => {
-  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia' style="display: none;">
+const ref = (ref, newRef = true) => {
+  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
     <div
       class='d-flex align-items-center align-content-center flex-wrap'
       type='button'
@@ -86,16 +78,47 @@ const ref = ref => {
       id='referencia_${ref}'
       class='collapse show px-2'
       aria-labelledby='headingOne'
-      data-parent='#referencias'
+      data-parent='#references'
     >
+      ${
+        newRef
+          ? `<div class='d-flex flex-row align-items-center align-content-center flex-wrap'>
+              <div class='p-2 col-6'>
+                <input
+                  class='form-control edi text-center num'
+                  type='text'
+                  name='ctd_${ref}'
+                  placeholder='Ctd inicial'
+                  required
+                />
+              </div>
+              <div class='p-2 col-6'>
+                <input
+                  class='form-control edi text-center cifra'
+                  type='text'
+                  name='cost_${ref}'
+                  placeholder='Coste inicial'
+                  required
+                />
+              </div>
+            </div>`
+          : ''
+      }
+      
       <input type='hidden' name='ref' class="ref_id" value='${ref}' />
       ${fields(ref)}
     </div>
   </div>`;
 };
 
+const cant =
+  num => `<a class="toolt" data-toggle="tooltip" data-html="true" title="<em>Doble</em> <u>click</u> para <b>ELIMINAR</b>">
+  <input type='hidden' name='cantidades' value='${num}' />
+  <span class="badge badge-primary">${num}</span>
+</a>`;
+
 $(document).ready(function () {
-  $('#hidelecte, .public, #carga').hide();
+  $('#loading').hide();
   $('input').prop('autocomplete', 'off');
   measuring.map(e => $('.measuring').append(new Option(e.tag, e.val, false, false)));
 
@@ -104,167 +127,71 @@ $(document).ready(function () {
     .val(null)
     .trigger('change');
 
-  $('#crearproducto').submit(function (e) {
+  $('.cantidad')
+    .keyup(function () {
+      if (isNaN(this.value) || this.value.startsWith('0')) {
+        this.value = null;
+        $('#cantidad').prop('disabled', true);
+        return;
+      }
+      $('#cantidad').prop('disabled', false);
+    })
+    .change(function () {
+      const value = this.value;
+      const isExist = $(`#cantidades input[value="${value}"]`).length;
+      if (isExist) this.value = null;
+
+      $(this).prop('required', !$(`#cantidades input`).length);
+    });
+
+  $('#cantidad').click(function () {
+    $(this).prop('disabled', true);
+    const value = $('.cantidad').val();
+    const isExist = $(`#cantidades input[value="${value}"]`).length;
+    $('input.cantidad').val(null).focus();
+    if (!isExist) $('#cantidades').append(cant(value));
+    $('.toolt')
+      .tooltip({ boundary: 'window' })
+      .dblclick(function () {
+        $(this).tooltip('hide').remove();
+      });
+  });
+
+  $('#creararticulo').submit(function (e) {
     e.preventDefault();
-    var formData = new FormData(document.getElementById('crearproducto'));
+    $('#creararticulo .cifra').each(function () {
+      this.value = noCifra(this.value);
+    });
+
+    const formData = $(this).find('input, select, textarea').serialize();
 
     $.ajax({
       url: '/articles',
       data: formData,
       type: 'POST',
-      processData: false,
-      contentType: false,
-      beforeSend: function (xhr) {
-        $('#ModalEventos').modal({
-          toggle: true,
-          backdrop: 'static',
-          keyboard: true
+      beforeSend: function () {
+        $('#loading').show('slow');
+      },
+      success: function () {
+        $('#AddProduct').modal('hide');
+        articulos.ajax.reload(function () {
+          SMSj('success', 'Articulo creado exitosamente');
+          $('#creararticulo .data-basic')
+            .find('input, textarea, select')
+            .each(function () {
+              return (this.value = null);
+            });
         });
       },
-      success: function (data) {
-        if (data) {
-          products.ajax.reload(null, false);
-          SMSj('success', 'Producto creado exitosamente');
-          $('#crearproducto input, select').val(null);
-          $('#ModalEventos').modal('hide');
-          $('#addProd').show('slow');
-          $('#addProduct').hide('slow');
-        }
+      error: function () {
+        SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
+      },
+      complete: function () {
+        $('#loading').hide('slow');
       }
     });
   });
 
-  $('#cerrarproducto').click(function () {
-    $('#addProd').show('slow');
-    $('#addProduct').hide('slow');
-    $('#crearproducto').trigger('reset');
-  });
-});
-
-const products = $('#products').DataTable({
-  dom: 'Bfrtip',
-  lengthMenu: [
-    [10, 25, 50, -1],
-    ['10 filas', '25 filas', '50 filas', 'Ver todo']
-  ],
-  buttons: [
-    {
-      text: `<i class="align-middle mr-2" data-feather="file"></i>`,
-      attr: {
-        title: 'Listas de precios'
-      },
-      className: 'btn btn-outline-dark',
-      action: function () {
-        listaPrecio();
-      }
-    },
-    {
-      extend: 'collection',
-      text: '<i class="align-middle feather-md" data-feather="menu"></i>',
-      orientation: 'landscape',
-      buttons: [
-        {
-          text: '<i class="align-middle feather-md" data-feather="copy"></i> Copiar',
-          extend: 'copy'
-        }
-      ]
-    },
-    {
-      text: `<i class="align-middle mr-2" data-feather="plus"></i> <span class="align-middle">Crear Medicamento</span>`,
-      attr: {
-        title: 'Agregar Medicamento',
-        id: 'addProd'
-      },
-      className: 'btn btn-outline-dark',
-      action: function () {
-        $('#addProd').hide('slow');
-        $('#addProduct').show('slow');
-        $('#cerrarcompra, #cerrarfactura').trigger('click');
-      }
-    }
-  ],
-  deferRender: true,
-  paging: true,
-  autoWidth: true,
-  search: {
-    regex: true,
-    caseInsensitive: true
-  },
-  responsive: {
-    details: {
-      type: 'column'
-    }
-  },
-  columnDefs: [
-    { className: 'control', orderable: true, targets: 0 },
-    { responsivePriority: 1, targets: [2, 3, 4, -1] }
-  ],
-  order: [[2, 'asc']],
-  language: languag2,
-  ajax: {
-    method: 'GET',
-    url: '/articles/medicamentos',
-    dataSrc: 'data'
-  },
-  columns: [
-    {
-      data: null,
-      defaultContent: ''
-    },
-    { data: 'id' },
-    { data: 'nombre' },
-    { data: 'tipo' },
-    { data: 'medida' },
-    {
-      data: 'cantidad',
-      defaultContent: '1'
-    },
-    { data: 'laboratorio' },
-    { data: 'clase' },
-    { data: 'invima' },
-    {
-      data: 'creado',
-      render: function (data, method, row) {
-        return data ? moment(data).format('YYYY-MM-DD') : '';
-      }
-    },
-    {
-      data: 'id',
-      render: function (data, method, row) {
-        return `<a class="eliminar"><i class="fas fa-trash"></i></a>
-          <a class="editar"><i class="fas fa-edit"></i></a>`;
-      }
-    }
-  ]
-});
-
-products.on('click', 'td .eliminar', function () {
-  const fila = $(this).parents('tr');
-  const { id } = products.row(fila).data();
-  if (confirm('Seguro deseas eliminar este medicamento?')) {
-    $.ajax({
-      url: '/links/medicamentos/' + id,
-      type: 'DELETE',
-      success: function (data) {
-        if (data) {
-          products.ajax.reload(null, false);
-          SMSj('success', 'Medicamento eliminado exitosamente');
-        } else {
-          SMSj('error', 'No es posible eliminar este medicamento.');
-        }
-      }
-    });
-  }
-});
-
-products.on('click', 'td .editar', function () {
-  const fila = $(this).parents('tr');
-  const data = products.row(fila).data();
-  const editProducto = $('#crearproducto').find('input, select');
-  $('#addProd').trigger('click');
-  editProducto.each(function (e, i, a) {
-    this.value = data[this.name];
-  });
 });
 
 const articulos = $('#articulos').DataTable({
@@ -356,18 +283,28 @@ const articulos = $('#articulos').DataTable({
 
 articulos.on('click', 'td .eliminar', function () {
   const fila = $(this).parents('tr');
-  const { id } = products.row(fila).data();
-  if (confirm('Seguro deseas eliminar este medicamento?')) {
+  const { id } = articulos.row(fila).data();
+  if (confirm('Seguro deseas eliminar este articulo?')) {
     $.ajax({
-      url: '/links/medicamentos/' + id,
+      url: '/articles/' + id,
       type: 'DELETE',
-      success: function (data) {
-        if (data) {
-          products.ajax.reload(null, false);
-          SMSj('success', 'Medicamento eliminado exitosamente');
-        } else {
-          SMSj('error', 'No es posible eliminar este medicamento.');
-        }
+      beforeSend: function (xhr) {
+        $('#ModalEventos').modal({
+          toggle: true,
+          backdrop: 'static',
+          keyboard: true
+        });
+      },
+      success: function () {
+        articulos.ajax.reload(function () {
+          SMSj('success', 'Articulo eliminado exitosamente');
+        });
+      },
+      error: function () {
+        SMSj('error', 'No es posible eliminar el articulo.');
+      },
+      complete: function () {
+        $('#ModalEventos').modal('hide');
       }
     });
   }
@@ -376,10 +313,19 @@ articulos.on('click', 'td .eliminar', function () {
 articulos.on('click', 'td .editar', async function () {
   const fila = $(this).parents('tr');
   const data = articulos.row(fila).data();
-  const articulo = $('#crearproducto .data-basic').find('input, select');
+  // console.log(data, 'data');
+  const articulo = $('#creararticulo .data-basic').find('input, textarea, select');
   articulo.each(function () {
     this.value = data[this.name];
   });
+
+  data.cantidades.forEach(e => (e ? $('#cantidades').append(cant(e)) : ''));
+  $('input.cantidad').val(null).prop('required', !data.cantidades.length).trigger('change');
+  $('.toolt')
+    .tooltip({ boundary: 'window' })
+    .dblclick(function () {
+      $(this).tooltip('hide').remove();
+    });
 
   if (data.referencias.length) {
     for (const referencia of data.referencias) {
@@ -406,14 +352,14 @@ articulos.on('click', 'td .editar', async function () {
 });
 
 $('#AddProduct').on('shown.bs.modal', function (e) {
-  if (!$('#id').val()) setRef();
+  if ($('#id').val()) $('.ini').hide();
 });
 
 $('#AddProduct').on('hidden.bs.modal', function (e) {
-  $('#referencias .referencia').remove();
+  $('#references .referencia, .toolt').remove();
   $('.referencia').find('.ref_id.ref').siblings().remove();
 
-  $('#crearproducto .data-basic')
+  $('#creararticulo .data-basic')
     .find('input, textarea, select')
     .each(function () {
       return (this.value = null);
@@ -423,35 +369,21 @@ $('#AddProduct').on('hidden.bs.modal', function (e) {
 const setRows = (orders, data) => {
   orders.each(function () {
     switch (this.type) {
-      case 'select-one':
-        return $(this).val(data[this.name]).trigger('change');
-      default:
-        this.value = data?.[this.name] ?? '';
-        if (this.name === 'cantidad') return calcTotal(this);
-        if (this.name === 'movil') return $(this).mask('### ### ####');
+      case 'select-one' || 'select':
+        $(this).val(data[this.name]).trigger('change');
         return;
-    }
-  });
-};
-
-var listaPrecio = () => {
-  $.ajax({
-    url: '/links/listadeprecio',
-    type: 'POST',
-    success: function (data) {
-      if (data) {
-        window.open(data, '_blank');
-      }
+      default:
+        this.value = data?.[this.name] ?? null;
+        return;
     }
   });
 };
 
 function setRef(id) {
   const code = id ?? ID(5);
-  $('#referencias').append(ref(code));
-  const newElemnt = $('#referencias').find('.card:last').show('slow');
-
-  newElemnt
+  $('#references').append(ref(code, !id));
+  const newElement = $('#references').find('.card:last').show('slow');
+  newElement
     .find('.ref')
     .show('slow')
     .find('.params')
@@ -459,14 +391,14 @@ function setRef(id) {
     .val(null)
     .trigger('change');
 
-  $('.params')
-    .not(newElemnt.find('.params'))
-    .each(function () {
-      if (this.value)
-        newElemnt.find(`.params option[value="${this.value}"]`).prop('disabled', true);
-    });
+  // $('.params')
+  //   .not(newElement.find('.params'))
+  //   .each(function () {
+  //     if (this.value)
+  //       newElement.find(`.params option[value="${this.value}"]`).prop('disabled', true);
+  //   });
 
-  newElemnt.find('.params').on('change', function () {
+  newElement.find('.params').on('change', function () {
     setOptions(this);
   });
 
@@ -476,16 +408,54 @@ function setRef(id) {
 
   $(`#referencia_${code}`).collapse('show');
 
-  return newElemnt.find('.ref');
+  $('.ini input').prop({ disabled: true, required: false, value: null });
+
+  newElement
+    .find('.cifra')
+    .keyup(function () {
+      this.value = currency(this.value, true);
+    })
+    .change(function () {
+      if (!/[0-9]/.test(this.value)) this.value = null;
+    })
+    .focus(function () {
+      this.select();
+    });
+
+  newElement
+    .find('.num')
+    .keyup(function () {
+      if (isNaN(this.value) || this.value.startsWith('0')) {
+        this.value = null;
+        return;
+      }
+    })
+    .change(function () {
+      if (!/[0-9]/.test(this.value)) this.value = null;
+    })
+    .focus(function () {
+      this.select();
+    });
+
+  newElement.find('.edi').on({
+    focus: function () {
+      $(this).css('background-color', '#FFFFCC');
+    },
+    blur: function () {
+      $(this).css('background-color', '');
+    }
+  });
+
+  return newElement.find('.ref');
 }
 
 function setProduct(elem, ref = 'krt') {
   const element = !elem ? $(`.${ref} .ref:last`) : $(elem).parents('.ref');
   const card = element.parents('.referencia');
-  const code = card.find('.ref_id').val();
-  const newElemnt = $(fields(code)).insertAfter(element).show('slow');
+  const code = card.find('.ref_id').val() ?? 'krt';
+  const newElement = $(fields(code)).insertAfter(element).show('slow');
 
-  newElemnt
+  newElement
     .find('.params')
     .select2({ allowClear: true, data: options, placeholder })
     .val(null)
@@ -493,19 +463,28 @@ function setProduct(elem, ref = 'krt') {
 
   card
     .find('.params')
-    .not(newElemnt.find('.params'))
+    .not(newElement.find('.params'))
     .each(function () {
       if (this.value)
-        newElemnt.find(`.params option[value="${this.value}"]`).prop('disabled', true);
+        newElement.find(`.params option[value="${this.value}"]`).prop('disabled', true);
     });
 
-  newElemnt.find('.params').on('change', function () {
+  newElement.find('.params').on('change', function () {
     setOptions(this);
+  });
+
+  newElement.find('.edi').on({
+    focus: function () {
+      $(this).css('background-color', '#FFFFCC');
+    },
+    blur: function () {
+      $(this).css('background-color', '');
+    }
   });
 
   $('.select2-container').css('width', '100%', 'important');
 
-  return newElemnt;
+  return newElement;
 }
 
 function setOptions(elem) {
@@ -527,6 +506,8 @@ function deleteProduct(elem) {
 
   card.find('.ref').length === 1 && !check
     ? card.hide('slow', function () {
+        if ($('#references .referencia').length < 2)
+          $('.ini input').prop({ disabled: false, required: true, value: null });
         $(this).remove();
       })
     : element.hide('slow', function () {
@@ -534,3 +515,15 @@ function deleteProduct(elem) {
         $(this).remove();
       });
 }
+
+const listaPrecios = () => {
+  $.ajax({
+    url: '/links/listadeprecio',
+    type: 'POST',
+    success: function (data) {
+      if (data) {
+        window.open(data, '_blank');
+      }
+    }
+  });
+};

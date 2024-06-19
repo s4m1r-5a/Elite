@@ -3,99 +3,81 @@ const router = express.Router();
 const { pool } = require('../database');
 const { isLoggedIn, noExterno } = require('../lib/auth');
 const { DeleteFile } = require('../utils/common');
+const axios = require('axios');
+const request = require('request');
 
 //ALTER TABLE medicamentos ADD `empresa` INT NULL
 router.get('/', isLoggedIn, async (req, res) => {
-  res.render('products');
+  res.render('whatsapp');
 });
 
-router.get('/table', isLoggedIn, async (req, res) => {
-  const prices = (
-    await pool.query(
-      `SELECT p.*, 
-        JSON_ARRAYAGG(
-          JSON_OBJECT(
-            'refId', r.ref,
-            'code', r.code,
-            'articulo', r.articulo,
-            'grupo', r.grupo,
-            'receta', r.receta,
-            'nota', r.nota,
-            'visible', r.visible,
-            'categorias', r.categorias,
-            'cantidad', r.cantidad,                
-            'valor', r.valor,                
-            'img', r.img,                
-            'quantity', r_combo.cantidad, 
-            'nombre', IFNULL(a.nombre, a_combo.nombre),
-            'caracteristicas', IFNULL(a.caracteristicas, a_combo.caracteristicas), 
-            'umedida', IFNULL(a.umedida, a_combo.umedida), 
-            'ref', IFNULL(ar.ref, ar_combo.ref), 
-            'obj', IFNULL(ar.obj, ar_combo.obj),                
-            'name', p_combo.name, 
-            'precio', p_combo.precio
-          )
-        ) AS items
-      FROM products AS p 
-        INNER JOIN recetas AS r ON p.id = r.grupo 
-        LEFT JOIN articulos AS a ON a.id = r.articulo
-        LEFT JOIN articulo_ref AS ar ON ar.id = r.ref  
-        
-        LEFT JOIN products AS p_combo ON p_combo.id = r.receta
-        LEFT JOIN recetas AS r_combo ON p_combo.id = r_combo.grupo  
-        LEFT JOIN articulos AS a_combo ON a_combo.id = r_combo.articulo 
-        LEFT JOIN articulo_ref AS ar_combo ON ar_combo.id = r_combo.ref  
-      GROUP BY p.id
-      ORDER BY p.name ASC;`
-    )
-  ).map(e => ({ ...e, items: JSON.parse(e.items) }));
-  // console.log(prices);
-  res.json({ data: prices });
+router.get('/qr/:bot', isLoggedIn, async (req, res) => {
+  const { bot } = req.params;
+  const [Bot] = await pool.query(`SELECT * FROM bots AS b WHERE b.code = ?`, bot);
+
+  if (!Bot) return;
+
+  request(Bot?.qr).pipe(res);
+});
+
+router.get('/run/:bot', isLoggedIn, async (req, res) => {
+  const { bot } = req.params;
+  const [chatBot] = await pool.query(
+    `SELECT * FROM chatbots AS c INNER JOIN bots AS b ON c.id = b.chatbot WHERE b.code = ?`,
+    bot
+  );
+
+  if (!chatBot) return;
+
+  const reqOptions = {
+    url: chatBot?.url + '/api/chatbot/run/' + bot,
+    method: 'GET',
+    headers: {
+      token: chatBot?.token
+    }
+  };
+  try {
+    const response = await axios.request(reqOptions);
+    console.log(response.data);
+
+    res.json({ data: response.data });
+  } catch (error) {
+    console.log(error.response.data);
+    res.json({ data: null });
+  }
+});
+
+router.get('/table', noExterno, async (req, res) => {
+  const [chatBot] = await pool.query(
+    `SELECT * FROM chatbots AS c WHERE c.empresa = ?`,
+    req.user.empresa
+  );
+
+  if (!chatBot) return;
+
+  const reqOptions = {
+    url: chatBot?.url + '/api/chatbot/',
+    method: 'GET',
+    headers: {
+      token: chatBot?.token
+    }
+  };
+
+  const response = await axios.request(reqOptions);
+  console.log(response.data);
+
+  res.json({ data: response.data });
 });
 
 router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
-  let ref = [];
-  const setRef = arr => {
-    if (Array.isArray(arr))
-      return arr.map(e => {
-        if (e.indexOf('-')) {
-          const ids = e.split('-');
-          ref.push({ id: ids[0], ref: ids[1] });
-          return ids[0];
-        }
-        return e;
-      });
-    else if (arr.indexOf('-')) {
-      const ids = arr.split('-');
-      ref = [{ id: ids[0], ref: ids[1] }];
-      return ids[0];
-    }
-
-    return arr;
-  };
-
-  const diff = val => {
-    let index = null;
-    const reff =
-      ref.find((e, i) => {
-        if (e.id == val) index = i;
-        return e.id == val;
-      })?.ref ?? null;
-
-    if (/[0-9]/.test(index)) ref.splice(index, 1);
-
-    return reff;
-  };
-
   const { id, name, descripcion, cantidad, type, code, visible } = body;
   const field = body?.articulo ? 'articulo' : 'receta';
   const notVal = body?.nota ? 'nota' : 'valor';
   const valNot = body?.nota ?? body?.valor;
-  const value = setRef(body?.articulo ?? body?.receta);
-  // const ref = body?.refId ?? null;
+  const value = body?.articulo ?? body?.receta;
   let inset = null;
 
-  console.log({ body, ref, field, value });
+  console.log(body, body?.visible, files);
   // return res.send(true);
 
   const price = {
@@ -120,7 +102,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     }
     const data = Array.isArray(value)
       ? price
-      : { ...price, ref, [field]: value, cantidad, [notVal]: valNot };
+      : { ...price, [field]: value, cantidad, [notVal]: valNot };
 
     if (data?.cantidad && img1) {
       data.img = headers.origin + '/uploads/' + img1;
@@ -142,10 +124,8 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     );
 
     imgss = await pool.query(
-      `SELECT img FROM recetas WHERE img IS NOT NULL AND grupo = ? AND (${
-        ref.length ? `ref NOT IN (?) OR ${field}` : field
-      } NOT IN (?) OR ${field} IS NULL)`,
-      [id, ref.length ? ref.map(e => e.ref) : value, value]
+      `SELECT img FROM recetas WHERE img IS NOT NULL AND grupo = ? AND (${field} NOT IN (?) OR ${field} IS NULL)`,
+      [id, value]
     );
     if (imgss.length) {
       for (const u of imgss) {
@@ -153,10 +133,8 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
       }
     }
     await pool.query(
-      `DELETE FROM recetas WHERE grupo = ? AND (${
-        ref.length ? `ref NOT IN (?) OR ${field}` : field
-      } NOT IN (?) OR ${field} IS NULL)`,
-      [id, ref.length ? ref.map(e => e.ref) : value, value]
+      `DELETE FROM recetas WHERE grupo = ? AND (${field} NOT IN (?) OR ${field} IS NULL)`,
+      [id, value]
     );
   } else inset = (await pool.query('INSERT INTO products SET ? ', price))?.insertId;
 
@@ -164,12 +142,11 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     const items = code.map((e, i) => {
       const img = files.find(e => e.fieldname === `imagen-${i}`)?.filename ?? null;
       const obj = {
-        ref: diff(value[i]),
         [field]: value[i],
         cantidad: cantidad[i],
         [notVal]: valNot[i],
         code: e || null,
-        visible: visible[i] || 0
+        visible: visible[i]
       };
 
       if (img) obj.img = headers.origin + '/uploads/' + img;
@@ -197,7 +174,6 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     }
   } else if (!id) {
     await pool.query('INSERT INTO recetas SET ? ', {
-      ref: diff(value),
       [field]: value,
       grupo: inset,
       cantidad,
@@ -209,7 +185,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
   res.send(true);
 });
 
-router.delete('/:id', isLoggedIn, async (req, res) => {
+router.delete('/:id', noExterno, async (req, res) => {
   const { id } = req.params;
   const ids = req.body || [];
   console.log({ id, ids }, req.body);

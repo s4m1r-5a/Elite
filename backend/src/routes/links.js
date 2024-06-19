@@ -38,7 +38,8 @@ const {
   consultCompany,
   consultDocument,
   Lista,
-  Montos
+  Montos,
+  currency
 } = require('../functions.js');
 const helpers = require('../lib/helpers');
 //DELETE
@@ -497,56 +498,74 @@ cron.schedule('0 10 13,15,27,30,31 * *', async () => {
 
   for (i = 0; i < yt.length; i++) {
     let data = yt[i]; //'57 3012673944',
-    let body = `_Estimado *${data.nombre}* es un placer para nosotros saludarlo, y a la vez recordarle el pago de sus cuotas mensules por el lote *${data.n}* adquirido en el condominio *${data.proyect}* la nueva cuenta creada por reestructuración empresarial a nombre de *RED ELITE S.A.S 08522647013*  cuenta Bancolombia de *ahorros* con Nit : 901.394.949 . Gracias por su comprensión  Att: *Grupo elite finca raiz.*`;
+    let body = `_Estimado *${data.nombre}* es un placer para nosotros saludarle, y a la vez recordarle el pago de su cuota del lote *${data.n}* en *${data.proyect}*_\n\n_*RED ELITE S.A.S*_\n_Nit : *901.394.949*_\n_Cuenta : **08522647013**_\n_tipo : *AHORROS*_\n_Banco : *Bancolombia*_`;
     const tt = await EnviarWTSAP(data.movil, body);
   }
 });
 
-cron.schedule('0 10 13,28 * *', async () => {
-  const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, 
-    (SELECT SUM(cuota) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
-    ORDER BY fechs ASC) as deuda, (SELECT SUM(mora) FROM cuotas 
-    WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 ORDER BY fechs ASC) as mora,  
-    (SELECT COUNT(*) FROM cuotas WHERE separacion = p.id AND fechs <= CURDATE() AND estado = 3 
-    ORDER BY fechs ASC) as meses
-    FROM preventa p INNER JOIN productosd l ON p.lote = l.id INNER JOIN productos d ON l.producto = d.id 
-    INNER JOIN clientes c ON p.cliente = c.idc 
-    WHERE p.tipobsevacion IS NULL AND d.proyect IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE') GROUP BY p.id
-    HAVING meses > 1 AND deuda > 0 ORDER BY meses DESC`; // LIMIT 5
-  const yt = await pool.query(sql);
+cron.schedule('0 9,15 * * 1,3,5', async () => {
+  const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, d.empresa, 
+      SUM(q.cuota) as deuda,  
+      COUNT(q.id) as meses
+    FROM preventa p 
+     INNER JOIN cuotas q ON q.separacion = p.id
+     INNER JOIN productosd l ON p.lote = l.id 
+     INNER JOIN productos d ON l.producto = d.id 
+     INNER JOIN clientes c ON p.cliente = c.idc 
+    WHERE 
+     p.pys = 0 AND p.tipobsevacion IS NULL AND d.proyect IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE') 
+     AND q.fechs <= CURDATE() AND q.estado = 3  
+    GROUP BY p.id
+    HAVING meses > 1 AND deuda > 0 
+    ORDER BY q.fechs ASC, meses DESC`; // LIMIT 5
+  const deudores = await pool.query(sql);
 
-  let cont = 0,
-    deuda = 0,
-    mora = 0;
-  for (i = 0; i < yt.length; i++) {
-    let data = yt[i];
-    //if (i === 3) { continue; } \n
-    cont = i + 1;
-    let body = `_Apreciado *${
-      data.nombre
-    }*, queremos informarle que, a la fecha, en nuestro sistema presenta un saldo en mora de *${
-      data.meses
-    } mes(es)* por *$${Moneda(data.deuda)}* correspondiente a la compra de su lote campestre *${
-      data.proyect
-    }* *Lt-${
+  let deuda = 0;
+  let mora = 0;
+  let cuotasAtrasadas = 0;
+  for (const data of deudores) {
+    const totals = await Montos(data.id, true);
+    const messagge = `_*${data.nombre}*._ 
+    \n_Queremos informarle que, a la fecha, nuestro sistema registra un retraso en el pago de sus cuotas correspondientes a la orden de compra *${
+      data.id
+    }* de *${data.proyect} Lt-${
       data.n
-    }* según el cronograma pactado inicialmente, recuerde que este saldo en mora está generando intereses moratorios por un valor de *${Moneda(
-      data.mora
-    )}*. Evite futuros cobros jurídicos. Para ponerse al día con tu obligación comunícate al celular *300-285-1046* o al correo electrónico cobranzasgrupoelite@gmail.com_\n
-        \n_Ahora puedes realizar tus pagos en linea o subir tus constancias de pago por transferencia o consignación bancaria al siguiente link https://grupoelitefincaraiz.com/links/pagos, solo debes ingresar tu numero de documento y listo_\n
-        \n_*GRUPO ELITE FINCA RAÍZ S.A.S*_`;
-    const tt = await EnviarWTSAP(data.movil, body);
+    }* según el cronograma pactado inicialmente. Le recordamos que este saldo en mora está generando intereses moratorios._
+    \n_*Desglose de la obligación:*_
+    _Cuotas Atrasadas: *${totals?.totalOverdueInstallments}*_
+    _Cuotas Pendientes: *${totals?.totalOutstandingInstallments}*_
+    _Cuotas Financiacion: *${totals?.totalInstallments}*_
+    _Deuda: *${currency(data?.deuda, true)}*_
+    _Mora: *${currency(totals?.totalInterestAmount, true)}*_
+    _Abonos: *${currency(totals?.totalPayMade, true)}*_
+    _Saldo Capital: *${currency(totals?.capitalBalance, true)}*_
+    _Total Saldo: *${currency(totals?.totalBalance, true)}*_
+    \n_Para ponerse al día con su obligación, comuníquese al *300 2851046*_
+    \n_Ahora puede subir sus constancias de pago, de transferencia o consignación bancaria al siguiente enlace: https://inmovili.com/links/pagos. Solo debe ingresar su número de documento y listo._
+    \n_*RED ELITE S.A.S*_`;
+
+    console.log({ messagge, totals });
     deuda += data.deuda;
-    mora += data.mora;
+    mora += totals?.totalInterestAmount ?? 0;
+    cuotasAtrasadas += totals?.totalOverdueInstallments ?? 0;
+
+    await WspNewUser(data.empresa, data.movil, messagge);
   }
-  await EnviarWTSAP(
-    '57 3012673944',
-    `_Hoy *${moment().format('llll')}*, el sistema detecto *${
-      yt.length
-    } Deudores* morosos, y envio *${cont}* mensajes de cobro. Exixte uma *mora total* de *$${Moneda(
-      mora
-    )}* y una *deuda total* de *$${Moneda(deuda)}*_`
-  );
+  
+  const movilesAdmin = ['57 3012673944', '57 3002851046', '57 3024312253'];
+
+  for (const movil of movilesAdmin) {
+    await WspNewUser(
+      1,
+      movil,
+      `_Hoy *${moment().format('llll')}*, el sistema envio a *${
+        deudores.length
+      } Deudores* morosos un mensajes de cobro._ 
+    _Total Mora: *$ ${currency(mora, true)}*_
+    _Total Deuda: *$ ${currency(deuda, true)}*_
+    _Total Cuotas Atrasadas: *${cuotasAtrasadas}*_`
+    );
+  }
 });
 
 const usuras = async fecha => {

@@ -146,6 +146,7 @@ app.use('/orders', require('./routes/orders'));
 app.use('/products', require('./routes/products'));
 app.use('/consults', require('./routes/consults'));
 app.use('/webhook', require('./routes/webhooks'));
+app.use('/whatsapp', require('./routes/whatsapp'));
 //app.use(require('../navegacion'));
 
 // Public

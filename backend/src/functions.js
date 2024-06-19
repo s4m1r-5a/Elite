@@ -23,6 +23,40 @@ const transpoter = nodemailer.createTransport({
   }
 });
 
+const currency = (value, coin = false, mul = false, neg = false) => {
+  if (!value) return value;
+
+  if (!/[-0-9$]/g.test(value)) return 0;
+  if (/\d\s$/g.test(value) && value < 1) value = value.slice(0, -2);
+  if (!value || !/[0-9]/g.test(value)) return value;
+  let symbol = '';
+  const punto = /\s%\.$|\.%$|\.$/.test(value);
+
+  if (neg && /^-/g.test(value)) neg = true;
+  else neg = false;
+  //console.log(value);
+  const num = /[^0-9.]/g.test(value)
+    ? parseFloat(value.toString().replace(/[^0-9.]/g, ''))
+    : parseFloat(value);
+  if (typeof num != 'number') throw TypeError('El argumento no puede ser de tipo string');
+
+  if (coin) symbol = num > 0 && num < 1 ? ' %' : num > 0 ? '$ ' : '';
+
+  const number = num.toLocaleString('en-US', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: num < 1 ? 4 : 2
+  });
+  const amount = punto ? number + '.' : number;
+  const amount2 = neg ? '-' + amount : amount;
+  return symbol === ' %' && mul
+    ? Math.round((amount2 * 100 + Number.EPSILON) * 100) / 100 + symbol //amount2 * 100 + symbol
+    : symbol === ' %'
+    ? amount2 + symbol
+    : neg
+    ? '-' + symbol + amount
+    : symbol + amount;
+};
+
 const noCifra = valor => {
   if (!valor) return 0;
   const num = /[^0-9.-]/g.test(valor)
@@ -4236,5 +4270,6 @@ module.exports = {
   consultCompany,
   consultDocument,
   Lista,
-  ListaLotes
+  ListaLotes,
+  currency
 };

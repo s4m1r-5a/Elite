@@ -25,7 +25,7 @@ const Movimiento = sequelize.define(
     },
     referencia: {
       type: DataTypes.INTEGER,
-      allowNull: false,
+      allowNull: true,
       references: {
         model: 'articulo_ref',
         key: 'id'

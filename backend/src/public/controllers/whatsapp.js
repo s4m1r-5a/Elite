@@ -1,7 +1,6 @@
 $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 const product = $('.select2');
-let articles = [];
 let options = [];
 let optionsCombos = [];
 let check = null;
@@ -10,8 +9,7 @@ const addProduct = `
     <div class='form-row rows_products'>
       <div class='form-group col-9 col-md-4'>
         <input type="hidden" name="code">
-        <select class='form-control select2' placeholder='Slec. producto' name='articulo' required>        
-        <input type="hidden" name="refId">
+        <select class='form-control select2' placeholder='Slec. producto' name='articulo' required>
         </select>
       </div>
       <div class='form-group col-3 col-md-2'>
@@ -57,34 +55,6 @@ const addProduct = `
       </div>
     </div>`;
 
-$.ajax({
-  url: '/articles/list',
-  type: 'GET',
-  processData: false,
-  contentType: false,
-  success: function ({ data }) {
-    if (data.length) {
-      articles = data;
-      options = articles.map(e => ({
-        id: e.refId ? e.id + '-' + e.refId : e.id,
-        text: `${e.nombre} - ${e.categoria} - ${e.ref}`
-      }));
-
-      $('.select2')
-        .select2({
-          allowClear: true,
-          data: options,
-          placeholder: { id: null, text: 'Slec. producto', selected: true }
-        })
-        .val(null)
-        .trigger('change');
-
-      // $('#crearcompra').trigger('reset');
-      // droga.val(null).trigger('change');
-    }
-  }
-});
-
 const selects = element => {
   if (Array.isArray(element))
     return `<select class="linkSelect">
@@ -95,97 +65,39 @@ const selects = element => {
 };
 
 const producto = data => {
-  const { name, imagen, precio, items, descripcion, type, id } = data;
-  const diff = type !== 'UNITARIO';
-  const rcta = type === 'RECETA';
-
-  const caracteristicas = diff
-    ? {}
-    : items.reduce((acc, { ref, obj, caracteristicas }) => {
-        if (ref)
-          Object.entries(obj).map(([key, value]) => {
-            if (!acc[key]) {
-              const diff = items.some(e => e.obj?.[key] !== value);
-              acc[key] = diff ? [{ ref, value }] : value;
-            } else if (Array.isArray(acc[key])) acc[key].push({ ref, value });
-          });
-        return { ...caracteristicas, ...acc };
-      }, {});
-
-  // console.log({ items });
+  const { code, name, phone, routes } = data;
 
   return `<div class='card m-0 rounded-top'>
     <div class='row no-gutters'>
       <div class='col-md-3 text-center'>
-        <img id='img' type='img' src='${
-          imagen || '/img/subir.png'
-        }' class='img-fluid rounded' width='250' height='250' alt='...' />
+        <img id='img' type='img' src='/whatsapp/qr/${code}' class='img-fluid rounded' width='250' height='250' alt='...' />
       </div>
       <div class='col-md-9'>
         <div class='card-body h-100'>
           <div class='flex-row row h-100'>
             <div class='col-12 col-md-4'>  
-              <h5 class='card-title float-right m-0 precio'>
-                ${!precio && items.length > 1 ? '<small class="text-muted">Desde </small>' : ''}
-                $${Moneda(precio || Math.min(...items.map(e => e.valor)))}
-              </h5>
+              <h5 class='card-title float-right m-0 precio'>${phone}</h5>
             </div>
             <div class='col-12 col-md-8 order-md-first'>
-              <h4 class='m-0'>${name} ${diff ? '' : items[0].nombre}</h4>
+              <h4 class='m-0'>${name}</h4>
             </div>
             <div class='col-12'>
-              <h5 class='mb-2'>
-                ${diff ? descripcion : items[0].cantidad} 
-                ${diff ? '' : measuring.find(e => e.val === items[0].umedida)?.tag ?? 'Sin info'}
-              </h5>
+              <h5 class='mb-2'>nada</h5>
             </div>
-            ${diff ? '' : `<div class='col-md-12 float-right'>${descripcion}</div>`}
             <div class="container col-12">
               <div class="row">
-                ${
-                  !diff
-                    ? Object.entries(caracteristicas)
-                        .filter((e, i) => i < 6)
-                        .map(
-                          e =>
-                            `<div class="col-6 col-md-4">
-                          <i class="fa fa-circle fa-xs mr-1"></i>
-                          <span class="text-capitalize">
-                            ${e[0]}: ${selects(e[1])}
-                          </span>                              
-                        </div>`
-                        )
-                        .join('')
-                    : rcta
-                    ? items
-                        .filter(e => e.visible)
-                        .filter((_, i) => i < 4)
-                        .map(
-                          e =>
-                            `<div class="col-12 col-md-6">
-                                <i class="fa fa-circle fa-xs"></i>                              
-                                <span class="text-capitalize">
-                                  ${e.ref ? `${e.nombre} ${e.ref}` : e.nombre}
-                                </span> *${e.cantidad} 
-                                  ${measuring.find(a => a.val === e.umedida)?.val ?? '/n'}
-                              </div>`
-                        )
-                        .join('')
-                    : items
-                        .filter((_, i) => i < 4)
-                        .map(
-                          e =>
-                            `<div class="col-12 col-md-6">
-                              <i class="fa fa-circle fa-xs"></i>                              
+                ${routes
+                  .filter((e, i) => i < 6)
+                  .map(
+                    e =>
+                      `<div class="col-6 col-md-4">
+                              <i class="fa fa-circle fa-xs mr-1"></i>
                               <span class="text-capitalize">
-                                ${e.cantidad} ${e.name} 
-                                ${e.ref ? `${e.nombre} ${e.ref}` : e.nombre}
-                              </span> *${e.quantity} 
-                                ${measuring.find(a => a.val === e.umedida)?.val ?? '/n'}
+                                ${e}
+                              </span>                              
                             </div>`
-                        )
-                        .join('')
-                }                      
+                  )
+                  .join('')}                      
               </div>
             </div>
              
@@ -198,13 +110,9 @@ const producto = data => {
                       <i class='fas fa-fw fa-minus'></i>
                     </button>
                   </div>
-                  <input ${
-                    !precio && items.length > 1 ? 'disabled' : ''
-                  } class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
+                  <input class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
                   <div class='input-group-append' title='Aumentar cantidad'>
-                    <button ${
-                      !precio && items.length > 1 ? 'disabled' : ''
-                    } type="button" class='btn btn-outline-primary maxctd'>
+                    <button type="button" class='btn btn-outline-primary maxctd'>
                       <i class='fas fa-fw fa-plus'></i>
                     </button>
                   </div>
@@ -217,8 +125,8 @@ const producto = data => {
                     <input type="checkbox"> <i class='fas fa-fw fa-heart'></i>
                   </label>
                 </div> 
-                <button type="button" class='btn btn-sm btn-outline-primary ml-2 addcar' disabled>
-                  <i class='fas fa-fw fa-cart-plus'></i>
+                <button type="button" class='btn btn-sm btn-outline-primary ml-2 conectar'>
+                  <i class='fas fa-fw fa-sync-alt'></i>
                 </button>
                 <button type="button" class='btn btn-sm btn-outline-danger ml-2 eliminar'>
                   <i class="fas fa-trash"></i>
@@ -242,6 +150,10 @@ $(document).ready(function () {
   $('#crearproducto').submit(function (e) {
     e.preventDefault();
 
+    /* $('#recibos1 .montos').each(function () {
+          $(this).val(noCifra($(this).val()));
+        }); */
+    // document.getElementById('crearproducto')
     var formData = new FormData(this);
 
     $.ajax({
@@ -275,7 +187,8 @@ $(document).ready(function () {
   });
 
   $('.select2').on('change', function () {
-    if (this.value) $(this).parents('.form-row').find('.plus').prop('disabled', false);
+    if (!/COMBO|RECETA/.test(check) && this.value)
+      $(this).parents('.form-row').find('.plus').prop('disabled', false);
     else $(this).parents('.form-row').find('.plus').prop('disabled', true);
     setOptions(this);
   });
@@ -321,7 +234,7 @@ $(document).ready(function () {
   });
 });
 
-const prices = $('#prices').DataTable({
+const whatsapp = $('#whatsapp').DataTable({
   dom: 'Bfrtip',
   lengthMenu: [
     [10, 25, 50, -1],
@@ -379,7 +292,7 @@ const prices = $('#prices').DataTable({
   language: languag2,
   ajax: {
     method: 'GET',
-    url: '/products/table',
+    url: 'whatsapp/table',
     dataSrc: 'data'
   },
   columns: [
@@ -387,6 +300,7 @@ const prices = $('#prices').DataTable({
       data: 'id',
       className: 'p-0',
       render: (data, method, row) => {
+        console.log(row);
         return producto(row);
       }
     },
@@ -402,7 +316,7 @@ const prices = $('#prices').DataTable({
   }
 });
 
-prices.on('click', 'td .eliminar', function () {
+whatsapp.on('click', 'td .eliminar', function () {
   const fila = $(this).parents('tr');
   const { id, combo } = prices.row(fila).data();
   let delets = [];
@@ -446,7 +360,7 @@ prices.on('click', 'td .eliminar', function () {
   }
 });
 
-prices.on('click', 'td .editar', function () {
+whatsapp.on('click', 'td .editar', function () {
   const fila = $(this).parents('tr');
   const data = prices.row(fila).data();
   const productos = $('#crearproducto').find('input, select, textarea, img');
@@ -465,7 +379,7 @@ prices.on('click', 'td .editar', function () {
   $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
 });
 
-prices.on('change', 'td .linkSelect', function () {
+whatsapp.on('change', 'td .linkSelect', function () {
   const fila = $(this).parents('tr');
   const padre = $(this).parents('.no-gutters');
   const { precio, items } = prices.row(fila).data();
@@ -483,76 +397,33 @@ prices.on('change', 'td .linkSelect', function () {
   }
 });
 
-prices.on('click', 'td .minctd', function () {
+whatsapp.on('click', 'td .minctd', function () {
   const input = $(this).parent().siblings('input.cantidad');
   input.val(parseInt(input.val() || 0) - 1).trigger('change');
 });
 
-prices.on('click', 'td .maxctd', function () {
+whatsapp.on('click', 'td .maxctd', function () {
   const input = $(this).parent().siblings('input.cantidad');
   input.val(parseInt(input.val() || 0) + 1).trigger('change');
 });
 
-prices.on('change', 'td .cantidad', function () {
+whatsapp.on('change', 'td .cantidad', function () {
   const padre = $(this).parents('.no-gutters');
   const elements = padre.find('.minctd, .addcar');
   if (this.value < 1) elements.prop('disabled', true);
   else elements.prop('disabled', false);
 });
 
-prices.on('click', 'td .addcar', function () {
+whatsapp.on('click', 'td .conectar', function () {
   const fila = $(this).parents('tr');
-  const padre = $(this).parents('.no-gutters');
-
-  const { id, name, precio, items, ...rest } = prices.row(fila).data();
-  const ref = padre.find('.linkSelect').val() ?? null;
-  const referencia = items.find(e => e.ref === ref) ?? items[0];
-  const cantidad = parseInt(padre.find('.cantidad').val() ?? 0);
-
-  const price = precio ? precio : referencia?.valor ?? 0;
-  const nombre = referencia ? name + ' ' + referencia?.nombre : name;
-
-  let data = {
-    id,
-    name: nombre,
-    precio: price,
-    total: price * cantidad,
-    cantidad,
-    idref: id
-  };
-
-  if (referencia) data = { ...data, ref: referencia?.ref, idref: id + referencia?.ref };
-
-  caritems = caritems.filter(e => {
-    if (e.idref === data.idref)
-      data = { ...data, cantidad: cantidad + e.cantidad, total: price * (cantidad + e.cantidad) };
-    return e.idref !== data.idref;
+  const { code, ...rest } = whatsapp.row(fila).data();
+  $.ajax({
+    url: 'whatsapp/run/' + code,
+    type: 'GET',
+    success: function ({ data }) {
+      console.log(data);
+    }
   });
-  caritems.push(data);
-
-  padre.find('.cantidad, .linkSelect').val(null).trigger('change');
-
-  console.log({ id, name, precio, items, ...rest, caritems });
-
-  /*  ESTA FUNCION YA ESTA EN EL ARCHIVO COMMON.JS
-
-  const setRowss = (productos, data) => {
-    productos.each(function () {
-      if ($(this).is('input')) this.value = data[this.name] ?? null;
-      else
-        this.innerText = /precio|total/.test(this.title)
-          ? Moneda(data[this.title], true)
-          : data[this.title] ?? '';
-    });
-  }; */
-
-  caritems.forEach(row => {
-    const elements = setItemsCar(row?.idref).find('input, span, h4, h5');
-    return setRowss(elements, row);
-  });
-
-  $('#AddCar').modal({ toggle: true, backdrop: 'static', keyboard: true });
-  addItemsCar();
 });
 
 $('#AddCar').on('hidden.bs.modal', function (e) {
@@ -607,10 +478,6 @@ function setRows(productos, data) {
   productos.each(function (index) {
     switch (this.type) {
       case 'select-one':
-        if (this.name === 'articulo' && data?.refId)
-          return $(this)
-            .val(data[this.name] + '-' + data.refId)
-            .trigger('change');
         return $(this).val(data[this.name]).trigger('change');
       case 'checkbox':
         return $(this).prop('checked', !!data.visible);
@@ -754,19 +621,8 @@ function changeOptions() {
   prices
     .rows()
     .data()
-    .filter(e => e.type === 'UNITARIO')
-    .each(
-      e =>
-        (optionsCombos = [
-          ...optionsCombos,
-          ...(e.items.length > 1
-            ? e.items.map(a => ({
-                id: `${e.id}-${a.refId}`,
-                text: `${e.name} ${a.nombre} ${a.ref}`
-              }))
-            : [{ id: e.id, text: `${e.name} ${e.items[0].nombre}` }])
-        ])
-    );
+    .filter(e => !e.combo)
+    .each(e => optionsCombos.push({ id: e.id, text: `${e.name} ${e.items[0].nombre}` }));
 }
 
 function publicProduct(elem) {
