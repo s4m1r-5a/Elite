@@ -65,7 +65,7 @@ const refCar = refCar => {
     >
       <div class='p-1 flex-grow-1 w-50'>
         <h4 class='m-0 text-truncate' title='name' style="max-width: 95%;"></h4>
-        <span class='badge badge-info' title='refCar'></span>
+        <span class='badge badge-info' title='ref'></span>
         <span title='precio'></span>        
       </div>
       <div 
@@ -164,7 +164,7 @@ const addItemsCar = () => {
 
 $(document).ready(function () {
   caritems.forEach(row => {
-    const elements = setItemsCar(row?.idref).find('input, span, h4, h5');
+    const elements = setItemsCar(row?.id).find('input, span, h4, h5');
     return setRowss(elements, row);
   });
   addItemsCar();

@@ -42,7 +42,7 @@ router.get('/table', isLoggedIn, async (req, res) => {
         LEFT JOIN articulo_ref AS ar ON ar.id = r.ref  
         
         LEFT JOIN products AS p_combo ON p_combo.id = r.receta
-        LEFT JOIN recetas AS r_combo ON p_combo.id = r_combo.grupo  
+        LEFT JOIN recetas AS r_combo ON p_combo.id = r_combo.grupo && (r_combo.ref = r.ref || r_combo.ref IS NULL)  
         LEFT JOIN articulos AS a_combo ON a_combo.id = r_combo.articulo 
         LEFT JOIN articulo_ref AS ar_combo ON ar_combo.id = r_combo.ref  
       GROUP BY p.id
@@ -92,10 +92,10 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
   const notVal = body?.nota ? 'nota' : 'valor';
   const valNot = body?.nota ?? body?.valor;
   const value = setRef(body?.articulo ?? body?.receta);
-  // const ref = body?.refId ?? null;
+  const refOrigin = ref.map(e => e);
   let inset = null;
 
-  console.log({ body, ref, field, value });
+  console.log({ body, ref, field, value, refOrigin });
   // return res.send(true);
 
   const price = {
@@ -120,7 +120,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     }
     const data = Array.isArray(value)
       ? price
-      : { ...price, ref, [field]: value, cantidad, [notVal]: valNot };
+      : { ...price, ref: diff(value), [field]: value, cantidad, [notVal]: valNot };
 
     if (data?.cantidad && img1) {
       data.img = headers.origin + '/uploads/' + img1;
@@ -137,26 +137,36 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
     }
 
     await pool.query(
-      'UPDATE products p INNER JOIN recetas r ON p.id = r.grupo SET ? WHERE p.id = ?',
-      [data, id]
+      'UPDATE products p INNER JOIN recetas r ON p.id = r.grupo SET ? WHERE p.id = ? AND r.code = ?',
+      [data, id, code[0] ?? code]
     );
 
-    imgss = await pool.query(
-      `SELECT img FROM recetas WHERE img IS NOT NULL AND grupo = ? AND (${
-        ref.length ? `ref NOT IN (?) OR ${field}` : field
-      } NOT IN (?) OR ${field} IS NULL)`,
-      [id, ref.length ? ref.map(e => e.ref) : value, value]
-    );
+    imgss =
+      type === 'UNITARIO'
+        ? await pool.query(
+            `SELECT img, grupo, ref FROM recetas WHERE img IS NOT NULL AND grupo = ? AND (${
+              refOrigin.length ? `ref NOT IN (?) OR ${field}` : field
+            } NOT IN (?) OR ${field} IS NULL)`,
+            [id, refOrigin.length ? refOrigin.map(e => e.ref) : value, value]
+          )
+        : [];
+
     if (imgss.length) {
       for (const u of imgss) {
-        await DeleteFile(u.img);
+        if (u.img) await DeleteFile(u.img);
       }
+
+      await pool.query(`DELETE FROM recetas WHERE receta IN (?) AND (ref IN (?) OR ref IS NULL)`, [
+        imgss.map(e => e.grupo),
+        imgss.map(e => e.ref)
+      ]);
     }
+
     await pool.query(
       `DELETE FROM recetas WHERE grupo = ? AND (${
-        ref.length ? `ref NOT IN (?) OR ${field}` : field
+        refOrigin.length ? `ref NOT IN (?) OR ${field}` : field
       } NOT IN (?) OR ${field} IS NULL)`,
-      [id, ref.length ? ref.map(e => e.ref) : value, value]
+      [id, refOrigin.length ? refOrigin.map(e => e.ref) : value, value]
     );
   } else inset = (await pool.query('INSERT INTO products SET ? ', price))?.insertId;
 
@@ -211,10 +221,18 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
 
 router.delete('/:id', isLoggedIn, async (req, res) => {
   const { id } = req.params;
-  const ids = req.body || [];
-  console.log({ id, ids }, req.body);
+  const { ref, type, indexes } = req.body;
+  console.log({ id, ref, type, indexes }, req.body);
+  // return res.send(true);
   try {
-    await pool.query(`DELETE FROM products WHERE id IN (?)`, [[...ids, id]]);
+    await pool.query(`DELETE FROM products WHERE id IN(?)`, [[...indexes, id]]);
+
+    if (type === 'UNITARIO')
+      await pool.query(`DELETE FROM recetas WHERE receta = ? AND (ref IN(?) OR ref IS NULL)`, [
+        id,
+        ref
+      ]);
+
     res.send(true);
   } catch (e) {
     console.log(e);

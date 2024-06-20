@@ -85,34 +85,54 @@ $.ajax({
   }
 });
 
-const selects = element => {
-  if (Array.isArray(element))
-    return `<select class="linkSelect">
-      <option value="" selected>seleccione</option>
-      ${element.map(e => `<option value="${e.ref}">${e.value}</option>`)}
-    </select>`;
-  return element;
+const selects = (items, tex) => {
+  const groups = items.reduce((acc, { ref, obj }) => {
+    if (ref)
+      Object.entries(obj).map(([key, value]) => {
+        if (!acc[key]) {
+          acc[key] = [{ ref, value }];
+        } else acc[key].push({ ref, value });
+      });
+    return acc;
+  }, {});
+
+  if (groups) {
+    const $select = $('<select class="linkSelect"></select>');
+    $select.append('<option value="" selected>seleccione</option>');
+    $.each(groups, function (group, options) {
+      const $optgroup = $('<optgroup></optgroup>').attr('label', group);
+      options.forEach(item => {
+        const $option = $('<option></option>').attr({ value: item.ref }).text(item.value);
+        $optgroup.append($option);
+      });
+      $select.append($optgroup);
+    });
+
+    return `<div class='d-flex align-items-end justify-content-between'>
+              <span class="text-capitalize">${tex}</span>
+              <span class="text-capitalize">
+                Opciones: ${$select.prop('outerHTML')}
+              </span>                              
+            </div>`;
+  }
+  return '';
 };
 
 const producto = data => {
   const { name, imagen, precio, items, descripcion, type, id } = data;
   const diff = type !== 'UNITARIO';
   const rcta = type === 'RECETA';
+  let krctrs = '';
 
-  const caracteristicas = diff
-    ? {}
-    : items.reduce((acc, { ref, obj, caracteristicas }) => {
-        if (ref)
-          Object.entries(obj).map(([key, value]) => {
-            if (!acc[key]) {
-              const diff = items.some(e => e.obj?.[key] !== value);
-              acc[key] = diff ? [{ ref, value }] : value;
-            } else if (Array.isArray(acc[key])) acc[key].push({ ref, value });
-          });
-        return { ...caracteristicas, ...acc };
-      }, {});
-
-  // console.log({ items });
+  if (!diff)
+    $.each(items[0].caracteristicas, function (group, options) {
+      krctrs += `<div class="col-6 col-md-4">
+      <i class="fa fa-circle fa-xs mr-1"></i>
+      <span class="text-capitalize">
+        ${group}: ${options}
+      </span>                              
+    </div>`;
+    });
 
   return `<div class='card m-0 rounded-top'>
     <div class='row no-gutters'>
@@ -135,8 +155,15 @@ const producto = data => {
             </div>
             <div class='col-12'>
               <h5 class='mb-2'>
-                ${diff ? descripcion : items[0].cantidad} 
-                ${diff ? '' : measuring.find(e => e.val === items[0].umedida)?.tag ?? 'Sin info'}
+                ${
+                  diff
+                    ? descripcion
+                    : selects(
+                        items,
+                        items[0].cantidad + measuring.find(e => e.val === items[0].umedida)?.tag ??
+                          'Sin info'
+                      )
+                }
               </h5>
             </div>
             ${diff ? '' : `<div class='col-md-12 float-right'>${descripcion}</div>`}
@@ -144,18 +171,7 @@ const producto = data => {
               <div class="row">
                 ${
                   !diff
-                    ? Object.entries(caracteristicas)
-                        .filter((e, i) => i < 6)
-                        .map(
-                          e =>
-                            `<div class="col-6 col-md-4">
-                          <i class="fa fa-circle fa-xs mr-1"></i>
-                          <span class="text-capitalize">
-                            ${e[0]}: ${selects(e[1])}
-                          </span>                              
-                        </div>`
-                        )
-                        .join('')
+                    ? krctrs
                     : rcta
                     ? items
                         .filter(e => e.visible)
@@ -236,7 +252,7 @@ const producto = data => {
 };
 
 $(document).ready(function () {
-  $('#hidelecte, .public, #carga').hide();
+  $('#hidelecte, .public, #loading').hide();
   $('input').prop('autocomplete', 'off');
 
   $('#crearproducto').submit(function (e) {
@@ -252,9 +268,10 @@ $(document).ready(function () {
       processData: false,
       contentType: false,
       beforeSend: function () {
-        $('#carga').show('slow');
+        $('#loading').show('slow');
       },
       success: function (data) {
+        $('#AddProduct').modal('hide');
         prices.ajax.reload(function (json) {
           SMSj('success', 'Producto creado exitosamente');
           $('#ModalEventos').modal('hide');
@@ -265,7 +282,7 @@ $(document).ready(function () {
         SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
       },
       complete: function () {
-        $('#carga').hide('slow');
+        $('#loading').hide('slow');
       }
     });
   });
@@ -398,27 +415,33 @@ const prices = $('#prices').DataTable({
     }
   ],
   initComplete: function (settings, { data }) {
+    console.log({ data });
     changeOptions();
   }
 });
 
 prices.on('click', 'td .eliminar', function () {
   const fila = $(this).parents('tr');
-  const { id, combo } = prices.row(fila).data();
+  const padre = $(this).parents('.no-gutters');
+  const { id, items, type } = prices.row(fila).data();
+  const val = padre.find('.linkSelect').val() || null;
+  const ref = items.filter(e => (val ? e.ref === val : e.refId)).map(e => e.refId);
   let delets = [];
 
-  if (!combo)
+  if (type === 'UNITARIO')
     prices
       .rows()
       .data()
-      .filter(e => e.combo)
+      .filter(e => e.type === 'COMBO')
       .each(row => {
-        const exist = row.items.some(e => e.receta == id);
-        if (exist) delets.push({ grupo: row.id, name: row.name });
+        const exist = row.items.filter(
+          e => e.receta == id && (ref.length ? ref.some(a => a == e.refId) : !e.refId)
+        ).length;
+        if (exist) delets.push({ grupo: row.id, name: row.name, exist, ctd: row.items.length });
       });
 
   delets.map(e => {
-    if (delets.length < 3)
+    if (e.ctd - e.exist < 2)
       return alert(
         `El combo ${e.name} tambien seria eliminado, ya que contendra 1 solo articulo, y no esta permitido`
       );
@@ -431,7 +454,11 @@ prices.on('click', 'td .eliminar', function () {
       url: '/products/' + id,
       type: 'DELETE',
       contentType: 'application/json',
-      data: JSON.stringify(delets.map(e => e.grupo)),
+      data: JSON.stringify({
+        ref,
+        type,
+        indexes: delets.filter(e => e.ctd - e.exist < 2).map(e => e?.grupo)
+      }),
       success: function (data) {
         if (data) {
           prices.ajax.reload(function (json) {
@@ -504,50 +531,39 @@ prices.on('click', 'td .addcar', function () {
   const fila = $(this).parents('tr');
   const padre = $(this).parents('.no-gutters');
 
-  const { id, name, precio, items, ...rest } = prices.row(fila).data();
+  const { id, name, precio, items, type, ...rest } = prices.row(fila).data();
   const ref = padre.find('.linkSelect').val() ?? null;
-  const referencia = items.find(e => e.ref === ref) ?? items[0];
+  const referencia = type === 'UNITARIO' ? items.find(e => e.ref === ref) ?? items[0] : null;
   const cantidad = parseInt(padre.find('.cantidad').val() ?? 0);
 
   const price = precio ? precio : referencia?.valor ?? 0;
   const nombre = referencia ? name + ' ' + referencia?.nombre : name;
 
   let data = {
-    id,
+    id: id + (referencia?.refId ? '-' + referencia?.refId : ''),
+    product: id,
+    ref: referencia?.ref,
+    refId: referencia?.refId,
     name: nombre,
     precio: price,
     total: price * cantidad,
-    cantidad,
-    idref: id
+    cantidad
   };
 
-  if (referencia) data = { ...data, ref: referencia?.ref, idref: id + referencia?.ref };
+  // if (referencia) data = { ...data, ref: referencia?.ref, idref: id + referencia?.ref };
 
   caritems = caritems.filter(e => {
-    if (e.idref === data.idref)
+    if (e.id === data.id)
       data = { ...data, cantidad: cantidad + e.cantidad, total: price * (cantidad + e.cantidad) };
-    return e.idref !== data.idref;
+    return e.id !== data.id;
   });
   caritems.push(data);
 
   padre.find('.cantidad, .linkSelect').val(null).trigger('change');
 
-  console.log({ id, name, precio, items, ...rest, caritems });
-
-  /*  ESTA FUNCION YA ESTA EN EL ARCHIVO COMMON.JS
-
-  const setRowss = (productos, data) => {
-    productos.each(function () {
-      if ($(this).is('input')) this.value = data[this.name] ?? null;
-      else
-        this.innerText = /precio|total/.test(this.title)
-          ? Moneda(data[this.title], true)
-          : data[this.title] ?? '';
-    });
-  }; */
 
   caritems.forEach(row => {
-    const elements = setItemsCar(row?.idref).find('input, span, h4, h5');
+    const elements = setItemsCar(row?.id).find('input, span, h4, h5');
     return setRowss(elements, row);
   });
 
@@ -607,7 +623,7 @@ function setRows(productos, data) {
   productos.each(function (index) {
     switch (this.type) {
       case 'select-one':
-        if (this.name === 'articulo' && data?.refId)
+        if (data?.refId)
           return $(this)
             .val(data[this.name] + '-' + data.refId)
             .trigger('change');
@@ -759,18 +775,15 @@ function changeOptions() {
       e =>
         (optionsCombos = [
           ...optionsCombos,
-          ...(e.items.length > 1
-            ? e.items.map(a => ({
-                id: `${e.id}-${a.refId}`,
-                text: `${e.name} ${a.nombre} ${a.ref}`
-              }))
-            : [{ id: e.id, text: `${e.name} ${e.items[0].nombre}` }])
+          ...e.items.map(a => ({
+            id: e.id + (a.refId ? `-${a.refId}` : ''),
+            text: `${e.name} ${a.nombre} ${a.ref ? a.ref : ''}`
+          }))
         ])
     );
 }
 
 function publicProduct(elem) {
-  console.log($(elem).is(':checked'), 'si entro');
   const element = $(elem).next('input');
   element.val($(elem).is(':checked') ? 1 : 0);
 }
