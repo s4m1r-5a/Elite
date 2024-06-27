@@ -1,112 +1,42 @@
-<main class='content px-1 px-md-4'>
-  <input type='hidden' id='idType' value='{{idType}}' />
-  <input type='hidden' id='type' value='{{type}}' />
+<main class='content px-0 px-md-2 py-3'>
+  <div class='container-fluid'>
+    <input type='hidden' id='idType' value='{{idType}}' />
+    <input type='hidden' id='type' value='{{type}}' />
 
-  <div class='accordion' id='accordionExample' hidden>
-    <div class='card shadow-lg rounded'>
-      <div class='card-header bg-dark' id='headingOne'>
-        <h2 class='mb-0'>
-          <button
-            class='btn btn-link btn-block text-left'
-            type='button'
-            data-toggle='collapse'
-            data-target='#collapseOne'
-            aria-expanded='true'
-            aria-controls='collapseOne'
-          >
-            Collapsible Group Item #1
-          </button>
-        </h2>
-      </div>
-
-      <div
-        id='collapseOne'
-        class='collapse show'
-        aria-labelledby='headingOne'
-        data-parent='#accordionExample'
-      >
-        <div class='card-body'>
-          Some placeholder content for the first accordion panel. This panel is shown by default,
-          thanks to the
-          <code>.show</code>
-          class.
+    <div class='d-flex w-100 justify-content-between shadow-lg rounded'>
+      <div class='flex-grow-1 p-2 p-md-4'>
+        <div class='accordion' id='productos'>
+          <table id='ordenes' class='display nowrap w-100'>
+            <tbody></tbody>
+          </table>
         </div>
       </div>
-    </div>
-    <div class='card shadow-lg rounded'>
-      <div class='card-header' id='headingTwo'>
-        <h2 class='mb-0'>
-          <button
-            class='btn btn-link btn-block text-left collapsed'
-            type='button'
-            data-toggle='collapse'
-            data-target='#collapseTwo'
-            aria-expanded='false'
-            aria-controls='collapseTwo'
-          >
-            Collapsible Group Item #2
-          </button>
-        </h2>
-      </div>
-      <div
-        id='collapseTwo'
-        class='collapse'
-        aria-labelledby='headingTwo'
-        data-parent='#accordionExample'
-      >
-        <div class='card-body'>
-          Some placeholder content for the second accordion panel. This panel is hidden by default.
+      <div class="d-none d-md-block" style='width: 18rem;'>
+        <div id='myHeader'>
+          <div class='card shadow-lg rounded mt-2' style='width: 18rem;'>
+            <div class='card-body'>
+              <h5 class='card-title'>INMOVILII</h5>
+              <p class='card-text'>La plataforma ideal para grandes y pequeños negocios, no esperes
+                mas ven y registra tu negocio es gratis</p>
+            </div>
+            <ul class='list-group list-group-flush'>
+              <li class='list-group-item d-flex justify-content-between align-items-center'>
+                <div><span class="font-weight-light">A list item</span> </br> <small class="text-muted text-monospace">$ 1,000.00</small> </div>
+                <div><span class='badge badge-primary badge-pill float-right'>14</span> </br> <small class="text-muted text-monospace">$ 14,000.00</small> </div>
+                
+              </li>
+              <li class='list-group-item d-flex justify-content-between align-items-center'>
+                <div>Art. <small class="text-monospace">10-58</small> Total:</div>
+                <small class="text-muted text-monospace">$ 140,000.00</small>
+              </li>
+            </ul>
+            <div class='card-footer'>
+              <a href='javascript:void 0' class='card-link'>Revisar orden</a>
+              <a href='javascript:void 0' class='card-link'>Imprimir</a>
+            </div>
+          </div>
         </div>
       </div>
-    </div>
-    <div class='card shadow-lg rounded'>
-      <div class='card-header' id='headingThree'>
-        <h2 class='mb-0'>
-          <button
-            class='btn btn-link btn-block text-left collapsed'
-            type='button'
-            data-toggle='collapse'
-            data-target='#collapseThree'
-            aria-expanded='false'
-            aria-controls='collapseThree'
-          >
-            Collapsible Group Item #3
-          </button>
-        </h2>
-      </div>
-      <div
-        id='collapseThree'
-        class='collapse'
-        aria-labelledby='headingThree'
-        data-parent='#accordionExample'
-      >
-        <div class='card-body'>
-          And lastly, the placeholder content for the third and final accordion panel. This panel is
-          hidden by default.
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <div class='card shadow-lg mb-5 rounded'>
-    <div class='card-header bg-dark rounded-top'>
-      <h3 class='text-white'>Tabla de ordenes</h3>
-    </div>
-    <div class='card-body rounded-bottom px-2 px-md-4'>
-      <table id='ordenes' class='table table-sm table-striped display nowrap w-100'>
-        <thead>
-          <tr>
-            <th></th>
-            <th>Id</th>
-            <th>Producto</th>
-            <th>Nota</th>
-            <th>Ctd</th>
-            <th>Precio</th>
-            <th>Total</th>
-          </tr>
-        </thead>
-        <tbody></tbody>
-      </table>
     </div>
   </div>
 </main>
@@ -118,7 +48,7 @@
       <div class='modal-content card position-relative'>
         <div
           class='position-absolute w-100 h-100'
-          id='carga'
+          id='loading'
           style='left: 0; top: 0; z-index: 1000; background-color: rgba(0,0,0,0.4); display: flex; justify-content: center; align-items: center;'
         >
           <div class='text-white' style='text-align: center;'>
@@ -134,7 +64,7 @@
             <div class='p-0'>
               <a class='r border-right px-2'><i class='feather-md' data-feather='printer'></i></a>
               <a class='r border-right px-2'>
-                <i class='feather-md' data-feather='shopping-bag'></i>
+                <i class='feather-md' data-feather='dollar-sign'></i>
               </a>
               <a class='r border-right px-2'><i class='feather-md' data-feather='slash'></i></a>
               <a id='edit' class='r border-right px-2'>
@@ -153,7 +83,13 @@
         <div class='modal-body p-3 bg-light'>
           <div class='form-row'>
             <div class='form-group col-7 col-md-9'>
-              <input type='hidden' name='tipo' value='VENTA' />
+              <div style='width: 9rem;'>
+                <select id='tipo' class='form-control' name='tipo' required>
+                  <option value='VENTA' selected>VENTA</option>
+                  <option value='COMPRA'>COMPRA</option>
+                  <option value='DEVOLUCION'>DEVOLUCION</option>
+                </select>
+              </div>
             </div>
             <div class='form-group col-5 col-md-3'>
               <div class='input-group'>
@@ -275,17 +211,29 @@
               </div>
             </div>
             <div class='form-group col-6 col-md-9'>
-              <div class='btn-group btn-group-toggle float-right' data-toggle='buttons'>
-                <label class='btn btn-outline-primary'>
-                  <input type='radio' name='type' id='domicilio' value='domicilio' required />
-                  Domicilio
-                </label>
-                <label class='btn btn-outline-primary'>
-                  <input type='radio' name='type' id='mesas' value='mesa' required />
-                  Mesas
-                </label>
+
+              <div class='input-group justify-content-end'>
+                <div class='input-group-prepend'>
+                  <div class='btn-group btn-group-toggle' data-toggle='buttons'>
+                    <label class='btn btn-outline-primary'>
+                      <input type='radio' name='type' id='domicilio' value='domicilio' required />
+                      Domicilio
+                    </label>
+                    <label class='btn btn-outline-primary'>
+                      <input type='radio' name='type' id='mesas' value='mesa' required />
+                      Mesas
+                    </label>
+                  </div>
+                </div>
+                <div class='d-none d-md-block'>
+                  <select class='form-control mesa mesa_uno' name='mesa'></select>
+                </div>
               </div>
             </div>
+          </div>
+
+          <div class='form-row d-md-none d-sm-block mt-3'>
+            <select class='form-control mesa mesa_dos' name='mesa'></select>
           </div>
 
         </div>

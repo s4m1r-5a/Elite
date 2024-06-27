@@ -92,7 +92,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
   const notVal = body?.nota ? 'nota' : 'valor';
   const valNot = body?.nota ?? body?.valor;
   const value = setRef(body?.articulo ?? body?.receta);
-  const refOrigin = ref.map(e => e);
+  const refOrigin = ref.map(e => e.ref)
   let inset = null;
 
   console.log({ body, ref, field, value, refOrigin });
@@ -147,7 +147,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
             `SELECT img, grupo, ref FROM recetas WHERE img IS NOT NULL AND grupo = ? AND (${
               refOrigin.length ? `ref NOT IN (?) OR ${field}` : field
             } NOT IN (?) OR ${field} IS NULL)`,
-            [id, refOrigin.length ? refOrigin.map(e => e.ref) : value, value]
+            [id, refOrigin.length ? refOrigin : value, value]
           )
         : [];
 
@@ -166,7 +166,7 @@ router.post('/', isLoggedIn, async ({ body, files, headers }, res) => {
       `DELETE FROM recetas WHERE grupo = ? AND (${
         refOrigin.length ? `ref NOT IN (?) OR ${field}` : field
       } NOT IN (?) OR ${field} IS NULL)`,
-      [id, refOrigin.length ? refOrigin.map(e => e.ref) : value, value]
+      [id, refOrigin.length ? refOrigin : value, value]
     );
   } else inset = (await pool.query('INSERT INTO products SET ? ', price))?.insertId;
 

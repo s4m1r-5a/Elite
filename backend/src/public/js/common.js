@@ -130,7 +130,7 @@ const setRowss = (productos, data) => {
 };
 
 const addItemsCar = () => {
-  console.log('entro por aqui', caritems);
+  // console.log('entro por aqui', caritems);
   $('#itemsCar').text(caritems.length)[caritems.length ? 'show' : 'hide']();
   $('#msgCar').text(`${caritems.length} Productos En Carrito`);
   $('#listCar').html(
@@ -157,10 +157,25 @@ const addItemsCar = () => {
       )
       .join('')
   );
-  console.log('caritems', JSON.stringify(caritems), caritems);
+  // console.log('caritems', JSON.stringify(caritems), caritems);
 
   localStorage.setItem('caritems', JSON.stringify(caritems));
 };
+
+document.addEventListener('DOMContentLoaded', function () {
+  var header = document.getElementById('myHeader');
+  var sticky = header.offsetTop;
+  // console.log({ scrollY: window.scrollY, sticky });
+
+  window.onscroll = function () {
+    // console.log({ scrollY: window.scrollY, sticky });
+    if (window.scrollY > 83) {
+      header.classList.add('sticky');
+    } else {
+      header.classList.remove('sticky');
+    }
+  };
+});
 
 $(document).ready(function () {
   caritems.forEach(row => {

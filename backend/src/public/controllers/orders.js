@@ -2,9 +2,9 @@ $('.sidebar-item').removeClass('active');
 $(`a[href='${window.location.pathname}']`).parent().addClass('active');
 $('#row_domicilio').hide();
 
-const product = $('.products');
 const type = $('#type').val() ?? null;
 const idType = $('#idType').val() ?? null;
+const admin = false;
 
 let size = getScreenSize();
 let edit = false;
@@ -13,77 +13,163 @@ let domicilio = type === 'domicilio' ? idType : null;
 let comercios = [];
 let visible = false;
 let products = [];
+let articles = [];
 let mesas = [];
 let comercio = [];
-let options = [];
 let optionsCombos = [];
 let check = null;
-const addProduct = `
-    <div class='form-row rows_products pedido position-relative' style="display: none;">
-      <div class='position-absolute ocu w-100' style='left: 0; top: 0; z-index: 1000; display: none;'>
-        <div class='input-group w-100'>
-          <input class='form-control nota' type='text' name='nota' placeholder='Nota producto' />
-          <div class='input-group-append'>
-            <button type='button' class='btn btn-dark extra' onclick='setNote(this, false)'>
-              <i class='fas fa-angle-up'></i>
-            </button>
-          </div>
-        </div>
-      </div>
-      <div class='form-group col-1 d-block d-sm-none'>
-        <div class='btn-group'>
-          <button
-            type='button'
-            class='btn btn-light p-1 extra'
-            data-toggle='dropdown'
-            aria-expanded='false'
-          >
-            <i class='fas fa-fw fa-ellipsis-v'></i>
+
+const addProduct = `<div class='form-row rows_products pedido position-relative' style="display: none;">
+    <div class='position-absolute ocu w-100' style='left: 0; top: 0; z-index: 1000; display: none;'>
+      <div class='input-group w-100'>
+        <input class='form-control nota' type='text' name='nota' placeholder='Nota producto' />
+        <div class='input-group-append'>
+          <button type='button' class='btn btn-dark extra' onclick='setNote(this, false)'>
+            <i class='fas fa-angle-up'></i>
           </button>
-          <div class='dropdown-menu'>
-            <a class='dropdown-item' onclick='setNote(this)'>Nota producto</a>    
-            <div class='dropdown-divider emi' style="display: none;"></div>
-            <a class='dropdown-item emi' style="display: none;" onclick='deleteProduct(this)'>Eliminar</a>        
-          </div>
         </div>
       </div>
-      <div class='form-group col-7 col-md-4'>
-        <input class='code' type='hidden' name='code' />
-        <input type='hidden' name='unitario' />
-        <input type='hidden' name='monto' />
-        <select class='form-control products' placeholder='Slec. producto' name='producto' required>
-        </select>
-      </div>
-      <div class='form-group col-4 col-md-2'>
-        <div class='input-group'>
-          <input type='text' class='form-control cantidad edi' name='cantidad' placeholder='Cant.' required />
-          <div class='input-group-append d-block d-sm-none'>
-            <button class='btn btn-outline-primary px-2' type="button" onclick='setProduct(this)'>
-              <i class='fas fa-fw fa-plus'></i>
-            </button>
-          </div>
+    </div>
+    <div class='form-group col-1 d-block d-sm-none'>
+      <div class='btn-group'>
+        <button
+          type='button'
+          class='btn btn-light p-1 extra'
+          data-toggle='dropdown'
+          aria-expanded='false'
+        >
+          <i class='fas fa-fw fa-ellipsis-v'></i>
+        </button>
+        <div class='dropdown-menu'>
+          <a class='dropdown-item' onclick='setNote(this)'>Nota producto</a>    
+          <div class='dropdown-divider emi' style="display: none;"></div>
+          <a class='dropdown-item emi delet' style="display: none;" onclick='deleteProduct(this)'>Eliminar</a>        
         </div>
       </div>
-      <div class='form-group col-12 col-md-6 d-none d-md-block'>
-        <div class='input-group'>
-          <input class='form-control edi' type='text' name='nota' placeholder='Nota del producto' />
-          <div class='input-group-append'>
-            <button class='btn btn-outline-danger' type="button" onclick='deleteProduct(this)'>
-              <i class='fas fa-fw fa-trash'></i>
-            </button>
-            <button class='btn btn-outline-primary' type="button" onclick='setProduct(this)'>
-              <i class='fas fa-fw fa-plus'></i>
-            </button>
-          </div>
+    </div>
+    <div class='form-group col-7 col-md-4'>
+      <input class='name' type='hidden' name='name' value='' />
+      <input class='code' type='hidden' name='code' value='' />
+      <input type='hidden' name='unitario' class='unitario' />
+      <select class='form-control products' placeholder='Slec. producto' name='producto' required>
+      </select>
+    </div>
+    <div class='form-group col-4 col-md-2'>
+      <div class='input-group'>
+        <input type='text' class='form-control cantidad edi' name='cantidad' placeholder='Cant.' required />
+        <div class='input-group-append d-block d-sm-none'>
+          <button class='btn btn-outline-primary px-2' type="button" onclick='setProduct(this)'>
+            <i class='fas fa-fw fa-plus'></i>
+          </button>
         </div>
       </div>
-    </div>`;
+    </div>
+    <div class='form-group col-12 col-md-6 d-none d-md-block'>
+      <div class='input-group'>
+        <input class='form-control edi note' type='text' name='nota' placeholder='Nota del producto' />
+        <div class='input-group-append'>
+          <button class='btn btn-outline-danger delet' type="button" onclick='deleteProduct(this)'>
+            <i class='fas fa-fw fa-trash'></i>
+          </button>
+          <button class='btn btn-outline-primary add' type="button" onclick='setProduct(this)'>
+            <i class='fas fa-fw fa-plus'></i>
+          </button>
+        </div>
+      </div>
+    </div>
+</div>`;
+
+const addDelivery = `<div id='row_domicilio' class='form-row' style="display: none;">
+  <div class='form-group col-12 col-md-4'>
+    <input type='hidden' name='latitud' />
+    <input type='hidden' name='longitud' />
+    <input type='hidden' name='domi' />
+    <input type='hidden' name='recibe' />
+    <select id='comercio' class='form-control' name='comercio' required></select>
+  </div>
+  <div class='form-group col-12 col-md-3'>
+    <div class='input-group'>
+      <div class='input-group-prepend'>
+        <span class='input-group-text' id='Movl'>+57</span>
+      </div>
+      <input type='text' class='form-control edi movil' placeholder='Telefono' name='movil' data-mask='000 000 0000' required/>
+    </div>
+  </div>
+  <div class='form-group col-12 col-md-5'>
+    <input type='text' class='form-control' name='direccion' placeholder='Direccion' required/>
+  </div>
+  <div class='form-group col-12'>
+    <input type='text' class='form-control' name='referencia' placeholder='Referencia para llegar al domicilio'/>
+  </div>
+</div>`;
+
+const list = items => {
+  return items
+    .map(
+      e => `<li class='list-group-item d-flex justify-content-between align-items-center' style="background-color: unset;">
+              <div>
+                <span class="font-weight-light text-capitalize">${
+                  e?.name?.toLowerCase() ?? ''
+                }</span>
+                </br> 
+                <small class="text-muted text-monospace">${currency(e.unitario, true)}</small> 
+              </div>
+              <div>
+                <span class='badge badge-primary badge-pill float-right'>${e.cantidad}</span>
+                </br> 
+                <small class="text-muted text-monospace">${currency(e.monto, true)}</small> 
+              </div>              
+            </li>`
+    )
+    .join('');
+};
+
+const producto = ({ id, total, tipo, items, comercio, meza, domicilio, ...r }) => {
+  const mexa = () => (meza.name ? meza.name + '-' + meza.numero : '');
+
+  return `<div class='list-group shadow-lg mb-2'>
+    <a class="list-group-item list-group-item-action rounded" role="button" href="javascript:void 0">
+      <div class="d-flex w-100 justify-content-between op">
+        <h4 class="mb-1" style="font-weight: bold; font-family: cursive; color: unset;">
+          Orden #${id} ${mexa()}
+        </h4>
+        <small>${currency(total, true)}</small>
+      </div>
+      <p class="mb-1 ml-0 text-left op">
+        Orden de ${tipo.toLowerCase()} con 
+        ${r.ctd_total} ${tipo === 'VENTA' ? 'productos' : 'articulos'} agregados
+      </p>
+      <div class="d-flex w-100 justify-content-between">
+        <small class="op">Accione requeridas a continuacion.</small>
+        <div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-file-text mr-3 editar"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-printer"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>
+        </div>
+      </div>
+
+      <div
+        id='referencia_${id}'
+        class='collapse py-2'
+        aria-labelledby='heading_${id}'
+        data-parent='#productos'
+      >   
+        <ul class='list-group list-group-flush'>
+          ${list(items)}            
+          <li class='list-group-item d-flex justify-content-between align-items-center' style="background-color: unset;">
+            <div>
+              Art. <small class="text-monospace">${r.ctd_total}</small> Total:
+            </div>
+            <small class="text-muted text-monospace">${currency(total, true)}</small>
+          </li>
+        </ul>
+      </div>
+    </a>  
+  </div>`;
+};
 
 $.ajax({
   url: '/shops/table',
   type: 'GET',
-  processData: false,
-  contentType: false,
   success: function ({ data }) {
     if (data.length) {
       comercios = data;
@@ -98,164 +184,29 @@ $.ajax({
   async: !type,
   success: function ({ data }) {
     mesas = data;
-  }
-});
 
-$.ajax({
-  url: '/products/table/all',
-  type: 'GET',
-  processData: false,
-  contentType: false,
-  success: function ({ data }) {
-    if (data.length) {
-      products = data.filter((obj, i, self) => i === self.findIndex(e => e.id === obj.id));
-
-      options = products.map(e => {
-        if (e.combo) return { id: e.id, text: `${e.name}` };
-        return {
-          id: e.id,
-          text: `${e.nombre} - ${e.laboratorio} - ${e.clase} - ${e.name} X ${e.cantidad}`
-        };
-      });
-
-      product
-        .select2({
-          allowClear: true,
-          data: options,
-          placeholder: { id: null, text: 'Slec. producto', selected: true }
-        })
-        .val(null)
-        .trigger('change');
-
-      console.log(products);
-    }
-  }
-});
-
-$(document).ready(function () {
-  $('#hidelecte, .public, #carga, #edit').hide();
-  $('input').prop('autocomplete', 'off');
-
-  $(window).resize(function (event) {
-    size = getScreenSize();
-  });
-
-  $('#crearproducto').submit(function (e) {
-    e.preventDefault();
-
-    $('#total').val(noCifra($('#total').val()));
-
-    const formData = $(this)
-      .find(`input:visible, select:visible${size.tag === 'xs' ? ', .nota:hidden' : ''}`)
-      .serialize();
-
-    console.log(formData, 'formData');
-    $.ajax({
-      url: '/orders',
-      data: formData,
-      type: 'POST',
-      beforeSend: function () {
-        $('#carga').show('slow');
-      },
-      success: function (data) {
-        ordenes.ajax.reload(function ({ data }) {
-          console.log(data);
-          SMSj('success', 'Orden creada exitosamente');
-          $('#AddProduct').modal('hide');
-          data
-            .filter((obj, i, self) => obj.mesa && i === self.findIndex(e => e.id === obj.id))
-            .forEach(e => {
-              mesas = mesas.map(m => (m.id == e.mesa ? { ...m, orden: e.id } : m));
-            });
-        });
-      },
-      error: function (data) {
-        SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
-      },
-      complete: function () {
-        $('#carga').hide('slow');
-      }
-    });
-  });
-
-  $('#edit').on('click', function () {
-    edit = $('#id').val();
-    const m = mesas.find(e => e.orden == edit);
-    $('.pedido').find('input').prop('readonly', false);
-    $('.pedido').find('button:not(.extra)').show('slow');
-    $('.order').not(`:has(input[value="${m?.id}"])`).hide('slow');
-    $('.products, .mesa').off('select2:opening select2:closing');
-    $('.eli, .emi').show();
-    // $('.unico')
-    //   .not(':has(select option:selected)')
-    //   .hide('slow', function () {
-    //     $(this).find('.products, .cantidad').prop('required', false);
-    //   });
-  });
-
-  $('#domicilio').on('change', function () {
-    if (edit) $('#row_mesas').hide();
-    else $('#row_mesas').remove();
-    if ($('#row_domicilio').length) return $('#row_domicilio').show('slow');
-
-    $(`<div id='row_domicilio' class='form-row' style="display: none;">
-        <div class='form-group col-12 col-md-4'>
-          <input type='hidden' name='latitud' />
-          <input type='hidden' name='longitud' />
-          <input type='hidden' name='di' />
-          <input type='hidden' name='recibe' />
-          <select id='comercio' class='form-control' name='comercio' required></select>
-        </div>
-        <div class='form-group col-12 col-md-3'>
-          <div class='input-group'>
-            <div class='input-group-prepend'>
-              <span class='input-group-text' id='Movl'>+57</span>
-            </div>
-            <input type='text' class='form-control edi movil' placeholder='Telefono' name='movil' data-mask='000 000 0000' required/>
-          </div>
-        </div>
-        <div class='form-group col-12 col-md-5'>
-          <input type='text' class='form-control' name='direccion' placeholder='Direccion' required/>
-        </div>
-        <div class='form-group col-12'>
-          <input type='text' class='form-control' name='referencia' placeholder='Referencia para llegar al domicilio' required/>
-        </div>
-      </div>`)
-      .insertAfter('#sesion')
-      .show('slow');
-
-    $('#comercio')
+    $('.mesa')
       .select2({
-        tags: true,
-        allowClear: true,
-        data: comercio,
-        placeholder: { id: null, text: 'Sleccione cliente', selected: true }
+        allowClear: false, // edit || !mesa,
+        placeholder: { id: null, text: 'Sleccione una mesa', selected: true },
+        data: mesas.map(e => ({
+          text: `${e.name} ${e.numero} ${e.orden ? ' - ocupa' : ' - dispo'}`.toUpperCase(),
+          disabled: mesa && e.orden && e.id != mesa,
+          selected: e.id == mesa,
+          id: e.id
+        }))
       })
       .val(null)
-      .css('width', '100%')
-      .trigger('change');
+      .trigger('change')
+      .on('change', changeMesa)
+      .on('select2:opening select2:closing', function (e) {
+        if (mesa && !edit) e.preventDefault();
+      })
+      .next('.select2-container')
+      .css('width', '100%', 'important')
+      .hide();
 
-    $('.select2-container').css('width', '100%', 'important');
-    $('.movil').mask('*** *** ****');
-
-    $('#comercio').on('change', function () {
-      const text = $(this).find('option:selected').text();
-      $(this).siblings('input[name="recibe"]').val(text);
-      const shop = comercios.find(e => e.id == this.value);
-      setRows($('#row_domicilio').find('input'), shop);
-    });
-  });
-
-  $('#mesas').on('change', function () {
-    if (edit) $('#row_domicilio').hide();
-    else $('#row_domicilio').remove();
-
-    if ($('#row_mesas').length) return $('#row_mesas').show('slow');
-
-    let html = '';
-
-    if (size.tag !== 'xs') {
-      html = mesas
+    /* html = mesas
         .map(
           e => `<div class="col-6 col-md-2 mb-2 ${e.orden ? ' order' : ''}">
             <div 
@@ -280,55 +231,129 @@ $(document).ready(function () {
             </div>
           </div>`
         )
-        .join('\n');
-    } else html = "<select class='form-control mesa' placeholder='Slec. producto' name='mesa' required></select>";
+        .join('\n'); 
+        
+        $('.mesa:checked').trigger('change') 
 
-    $(`<div class='form-row mt-3' id='row_mesas' style="display: none;">` + html + `</div>`)
-      .insertAfter('#sesion')
-      .show('slow');
+        const pad = $(this).parents('.mesas');
+        $('.mesa').off('change');
+        $('.mesas').not(pad).button('toggle');
+        $('.mesa').on('change', changeMesa);
+        */
+  }
+});
 
-    $('.mesa').on('change', changeMesa);
+$.ajax({
+  url: '/products/table',
+  type: 'GET',
+  success: function ({ data }) {
+    if (data.length) {
+      data.forEach(({ id, name, type, items, precio }) => {
+        if (type === 'UNITARIO') {
+          products = [
+            ...products,
+            ...items
+              .filter(a => a.refId)
+              .map(a => ({
+                id: `${id}-${a.refId}`,
+                text: `${name} ${a.nombre} ${a.ref}`,
+                precio: a.valor
+              }))
+              .reduce(
+                (a, e, i) => (!i ? (a = [e]) : (a = [...a, e])),
+                [{ id, text: `${name} ${items[0].nombre}`, precio: items[0].valor }]
+              )
+          ];
+        } else products = [...products, { id, text: name, precio }];
+      });
 
-    if (size.tag === 'xs') {
-      $('.mesa')
+      $('.products')
         .select2({
-          allowClear: edit || !mesa,
-          placeholder: { id: null, text: 'Sleccione una mesa', selected: true },
-          data: mesas.map(e => ({
-            text: `${e.name} ${e.numero} ${e.orden ? ' - ocupa' : ' - dispo'}`.toUpperCase(),
-            disabled: mesa && e.orden && e.id != mesa,
-            selected: e.id == mesa,
-            id: e.id
-          }))
+          allowClear: true,
+          data: products,
+          placeholder: { id: null, text: 'Slec. producto', selected: true }
         })
-        .css('width', '100%')
-        .trigger('change')
-        .on('select2:opening select2:closing', function (e) {
-          if (mesa) e.preventDefault();
-        });
+        .val(null)
+        .trigger('change');
 
-      $('.select2-container').css('width', '100%', 'important');
-    } else $('.mesa:checked').trigger('change');
+      console.log(products, 'productos');
+    }
+  }
+});
+
+$(document).ready(function () {
+  $('#hidelecte, .public, #loading, #edit').hide();
+  $('input').prop('autocomplete', 'off');
+
+  $('#tipo')
+    .select2({ allowClear: admin })
+    .on('select2:opening select2:closing', function (e) {
+      if (!admin) e.preventDefault();
+    });
+
+  $(window).resize(function (event) {
+    size = getScreenSize();
+
+    if (size.tag === 'xs') $(`.mesa_uno`).prop('required', false);
+    else $(`.mesa_dos`).prop('required', false);
   });
 
-  // $('.unico .products, .unico .cantidad').on('change', function () {
-  //   if (this.name === 'producto') {
-  //     const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
-  //     $(this).siblings('input[name="unitario"]').val(unitario);
-  //     setOptions(this);
-  //   }
+  $('#crearproducto').submit(function (e) {
+    e.preventDefault();
 
-  //   console.log(this.name, this.value, 'change2');
+    $('#total').val(noCifra($('#total').val()));
 
-  //   calcTotal(this);
-  // });
+    const formData = $(this)
+      .find(`input, select:visible`)
+      .not(`${size.tag === 'xs' ? '.note' : '.nota'}`)
+      .serialize();
+
+    console.log(formData, 'formData');
+    $.ajax({
+      url: '/orders',
+      data: formData,
+      type: 'POST',
+      beforeSend: function () {
+        $('#loading').show('slow');
+      },
+      success: function (data) {
+        ordenes.ajax.reload(function ({ data }) {
+          SMSj('success', 'Orden creada exitosamente');
+          $('#AddProduct').modal('hide');
+          data.forEach(e => {
+            mesas = mesas.map(m => (m.id == e.mesa ? { ...m, orden: e.id } : m));
+          });
+        });
+      },
+      error: function (data) {
+        SMSj('error', 'A ocurrido un error alintentar enviar el formulario');
+      },
+      complete: function () {
+        $('#loading').hide('slow');
+      }
+    });
+  });
+
+  $('#edit').on('click', function () {
+    edit = $('#id').val();
+    const m = mesas.find(e => e.orden == edit);
+    $('.pedido').find('input').prop('readonly', false);
+    $('.pedido').find('button:not(.extra)').show('slow');
+    $('.order').not(`:has(input[value="${m?.id}"])`).hide('slow');
+    $('.eli, .emi').show();
+    $('.btn-group-toggle label').show('slow');
+    $('#row_domicilio input').prop('readonly', false);
+  });
+
+  $('#domicilio').on('change', changeDomicilio);
+  $('#mesas').on('change', changeMesas);
 });
 
 const ordenes = $('#ordenes').DataTable({
   dom: 'Bfrtip',
   lengthMenu: [
-    [10, 25, 50, -1],
-    ['10 filas', '25 filas', '50 filas', 'Ver todo']
+    [5, 10, 25, 50, -1],
+    ['5 filas', '10 filas', '25 filas', '50 filas', 'Ver todo']
   ],
   buttons: [
     {
@@ -369,6 +394,8 @@ const ordenes = $('#ordenes').DataTable({
   ],
   deferRender: true,
   paging: true,
+  // scrollCollapse: true,
+  // scrollY: '60vh',
   autoWidth: true,
   search: {
     regex: true,
@@ -380,16 +407,16 @@ const ordenes = $('#ordenes').DataTable({
     }
   },
   columnDefs: [
-    { className: 'control', orderable: true, targets: 0 },
-    { responsivePriority: 1, targets: [2, 4, 6] },
-    { responsivePriority: 2, targets: [5] },
-    { visible: false, orderable: true, targets: [1] }
+    // { className: 'control', orderable: true, targets: 0 },
+    // { responsivePriority: 1, targets: [2, 4, 6] },
+    // { responsivePriority: 2, targets: [5] },
+    // { visible: false, orderable: true, targets: [1] }
   ],
   fixedColumns: {
     leftColumns: 0
   },
-  displayLength: 25,
-  order: [[1, 'desc']],
+  displayLength: 5,
+  order: [[0, 'desc']],
   language: languag2,
   ajax: {
     method: 'GET',
@@ -397,25 +424,11 @@ const ordenes = $('#ordenes').DataTable({
     dataSrc: 'data'
   },
   columns: [
-    { data: null, defaultContent: '' },
-    { data: 'id' },
     {
-      data: 'producto',
+      data: 'id',
       render: function (data, method, row) {
-        return products.find(e => e.id == data)?.name ?? 'sin nombre';
+        return producto(row);
       }
-    },
-    { data: 'nota', defaultContent: 'Sin nota' },
-    { data: 'cantidad', defaultContent: '1' },
-    {
-      data: 'unitario',
-      defaultContent: '$0',
-      render: $.fn.dataTable.render.number('.', '.', 0, '$')
-    },
-    {
-      data: 'monto',
-      defaultContent: '$0',
-      render: $.fn.dataTable.render.number('.', '.', 0, '$')
     }
   ],
   drawCallback: function (settings) {
@@ -494,13 +507,58 @@ const ordenes = $('#ordenes').DataTable({
   }
 });
 
-ordenes.on('click', 'td .editar', function () {
-  var fila = $(this).parents('tr').next('tr').index();
+ordenes.on('click', 'td .op', function (a, b, c) {
+  var fila = $(this).parents('tr');
   var data = ordenes.row(fila).data();
+  console.log(data, 'data', { a, b, c });
+
+  const isVisible = $('#myHeader').is(':visible');
+
+  if (isVisible) {
+    $('#myHeader .card-title').text(`Orden #${data.id}`);
+    $('#myHeader .card-text').text(`Orden de ${data.tipo.toLowerCase()} con 
+        ${data.items.length} ${data.tipo === 'VENTA' ? 'productos' : 'articulos'} agregados`);
+    $('#myHeader ul').html(`${list(data.items)}
+      <li class='list-group-item d-flex justify-content-between align-items-center' style="background-color: unset;">
+        <div>
+          Art. <small class="text-monospace">${data.ctd_total}</small> Total:
+        </div>
+        <small class="text-muted text-monospace">${currency(data.total, true)}</small>
+      </li>`);
+  } else $(`#referencia_${data?.id}`).collapse('toggle');
+});
+
+ordenes.on('click', 'td .editar', function () {
+  var fila = $(this).parents('tr'); //.next('tr').index();
+  var data = ordenes.row(fila).data();
+
+  $('#edit').show();
+
+  const productos = $('#crearproducto').find('input, select');
+  setRows(productos, data);
+
   console.log(data, 'data');
 
-  if (data?.mesa) mesa = data?.mesa;
-  else if (data?.comercio) domicilio = data?.comercio;
+  if (data?.comercio || data?.domicilio) {
+    domicilio = data?.comercio;
+    $('#domicilio').prop('checked', true).parent().addClass('active');
+    $('#mesas').prop({ checked: false, disabled: true }).parent().removeClass('active').hide();
+    data.items.forEach((row, i) => {
+      const elements = setProduct(false, false, true).find('input, select');
+      return setRows(elements, row);
+    });
+    const elements = setDelivery(true).find('input, select');
+    setRows(elements, {
+      ...data.domicilio,
+      comercio: data?.comercio || data.domicilio?.recibe
+    });
+  } else {
+    $('#mesas').prop('checked', true).parent('label').addClass('active');
+    $('#domicilio').prop({ checked: false, disabled: true }).parent().removeClass('active').hide();
+    const table = $(size.tag === 'xs' ? '.mesa_dos' : '.mesa_uno');
+    table.val(data?.mesa).trigger('change').next('.select2-container').show('slow');
+    mesa = data?.mesa;
+  }
 
   $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });
 });
@@ -524,38 +582,40 @@ ordenes.on('click', 'td .eliminar', function () {
 });
 
 $('#AddProduct').on('shown.bs.modal', function (e) {
-  setProduct();
-  if (mesa) {
+  if (!mesa && !domicilio) setProduct();
+  /* if (mesa) {
     $('#edit').show();
     const element = $('#mesas');
     element.prop('checked', true).parent('label').addClass('active');
     element.trigger('change');
-  }
+  } else if (domicilio) {
+    $('#edit').show();
+    const element = $('#domicilio');
+    element.prop('checked', true).parent('label').addClass('active');
+    element.trigger('change');
+  } */
 });
 
 $('#AddProduct').on('hidden.bs.modal', function (e) {
+  domicilio = null;
+  mesa = null;
   edit = false;
-  $('#hidelecte, .eli, #edit').hide();
-  $('.mesa').button('toggle');
-  $('#row_domicilio, #row_mesas, .rows_products').remove();
-  $('.unico').show(function () {
-    $(this).find('.products, .cantidad').prop('required', true);
-  });
+  $('#hidelecte, .eli, #edit, #loading').hide();
+  $('.mesa').val(null).trigger('change').next('.select2-container').hide('slow');
+  $('#row_domicilio, .rows_products').remove();
+  $('.btn-group-toggle label')
+    .show('slow')
+    .removeClass('active')
+    .find('input')
+    .prop({ checked: false, disabled: false });
 
   $('#crearproducto')
     .find('input, textarea')
     .each(function () {
       console.log(this.type, this.id, this.name, this.value, 'input');
-      if (this.type === 'radio') return $(this).prop({ checked: this.id === 'a', disabled: false });
+      if (this.type === 'radio') return $(this).prop({ checked: false, disabled: false });
       return (this.value = null);
     });
-
-  // $('.products')
-  // .val(null)
-  // .trigger('change')
-  // .find('option')
-  // .prop('disabled', false)
-  // .data('oldVal', null);
 });
 
 const setRows = (orders, data) => {
@@ -565,7 +625,7 @@ const setRows = (orders, data) => {
         return $(this).val(data[this.name]).trigger('change');
       default:
         this.value = data?.[this.name] ?? '';
-        if (this.name === 'cantidad') return calcTotal(this);
+        if (this.name === 'cantidad') return calcTotal();
         if (this.name === 'movil') return $(this).mask('### ### ####');
         return;
     }
@@ -579,60 +639,124 @@ const setNote = (elem, rt = true) => {
   else element.find('.ocu').hide('slow');
 };
 
-function changeMesa() {
-  if (size.tag !== 'xs') {
-    const pad = $(this).parents('.mesas');
-    $('.mesa').off('change');
-    $('.mesas').not(pad).button('toggle');
-    $('.mesa').on('change', changeMesa);
+function changeDomicilio() {
+  if (!edit) {
+    $('input.code[value!=""]')
+      .parents('.rows_products')
+      .hide('slow', function () {
+        $(this).remove();
+        calcTotal();
+      });
   }
 
+  console.log(this, 'cambio');
+
+  $('.mesa')
+    .val(null)
+    .trigger('change')
+    .prop('required', false)
+    .next('.select2-container')
+    .hide('slow');
+
+  if ($('#row_domicilio').length) return $('#row_domicilio').show('slow');
+
+  setDelivery();
+}
+
+function changeMesas() {
+  $('#row_domicilio').hide('slow', function () {
+    if (!edit) $(this).remove();
+  });
+
+  if (size.tag === 'xs')
+    $(`.mesa_dos`).prop('required', true).next('.select2-container').show('slow');
+  else $(`.mesa_uno`).prop('required', true).next('.select2-container').show('slow');
+}
+
+function changeMesa() {
   const value = this.value;
   const order = !edit ? mesas.find(e => e.id == value)?.orden ?? null : null;
-  // if (!edit) $('input.code[value!=""]').parents('.rows_products').remove();
+  if (!edit) {
+    $('input.code[value!=""]')
+      .parents('.rows_products')
+      .hide('slow', function () {
+        $(this).remove();
+        calcTotal();
+      });
+  }
   $('#id').val(edit || order);
-  calcTotal(this);
 
   if (order)
     ordenes
       .rows()
       .data()
       .filter(e => e.id == order)
-      .each((row, i) => {
-        const elements = setProduct(false, false, true).find('input, select');
-        setRows(elements, row);
+      .each(row => {
+        row.items.forEach(data => {
+          const elements = setProduct(false, false, true).find('input, select');
+          setRows(elements, data);
+        });
       });
+
+  return calcTotal();
 }
 
-function calcTotal(elem) {
-  const element = $(elem).parents('form').serializeArray();
-  console.log(element, elem, $(elem).parents('form').serialize(), 'element');
-  let result = element
-    .filter(e => /producto|cantidad/.test(e.name))
-    .map(e => ({ [e.name]: e.value }))
-    .map((e, i, obj) =>
-      e?.cantidad
-        ? { ...obj.findLast((o, n) => !!o?.producto && n < i && i - n < 2), cantidad: e.cantidad }
-        : false
-    )
-    .filter(e => e?.producto && e?.cantidad)
-    .reduce((acc, e) => {
-      const product = products.find(o => o.id == e.producto);
-      return acc + e.cantidad * product?.precio;
-    }, 0);
+function calcTotal() {
+  let sum = 0;
+  $('.pedido').each(function () {
+    const calc = { unitario: 0, cantidad: 0 };
+    $(this)
+      .find('.unitario, .cantidad')
+      .each(function () {
+        calc[this.name] = parseFloat(this.value || 0);
+      });
 
-  // console.log(element, result, 'result');
+    sum += calc.unitario * calc.cantidad;
+  });
 
-  $('#total').val(Cifra(result));
+  $('#total').val(currency(sum, true));
+}
+
+function setDelivery(read = false) {
+  const element = $(addDelivery).insertAfter('#sesion').show('slow');
+
+  if (read) element.find('input').prop('readonly', true);
+
+  $('#comercio')
+    .select2({
+      tags: true,
+      allowClear: !read,
+      data: comercio,
+      placeholder: { id: null, text: 'Sleccione cliente', selected: true }
+    })
+    .val(null)
+    .css('width', '100%')
+    .trigger('change')
+    .on('select2:opening select2:closing', function (e) {
+      if (read && !edit) e.preventDefault();
+    });
+
+  $('.select2-container').css('width', '100%', 'important');
+  $('.movil').mask('*** *******');
+
+  $('#comercio').on('change', function () {
+    const text = $(this).find('option:selected').text();
+    $(this).siblings('input[name="recibe"]').val(text);
+    const shop = comercios.find(e => e.id == this.value);
+    setRows($('#row_domicilio').find('input'), shop);
+  });
+
+  return element;
 }
 
 function setProduct(elem, after = true, read = false) {
-  // if (!$('.unico').is(':visible'))
-  //   return $('.unico').show('slow', function () {
-  //     $(this).find('.products, .cantidad').prop('required', true);
-  //   });
-
-  const element = elem ? $(elem).parents('.pedido') : $('.pedido').length ? '.pedido:last' : '.ini';
+  const element = elem
+    ? $(elem).parents('.pedido')
+    : !$('.pedido').length
+    ? '.ini'
+    : after
+    ? '.pedido:last'
+    : '.pedido:first';
 
   console.log(element, 'element');
 
@@ -643,7 +767,7 @@ function setProduct(elem, after = true, read = false) {
   if (read)
     newElemnt.each(function () {
       $(this).find('input').prop('readonly', true);
-      $(this).find('button:not(.extra)').hide(); //.prop('disabled', true);
+      $(this).find('button:not(.extra), .emi').hide(); //.prop('disabled', true);
     });
   else newElemnt.find('.emi').show();
 
@@ -651,13 +775,13 @@ function setProduct(elem, after = true, read = false) {
     .find('.products')
     .select2({
       allowClear: !read,
-      data: options,
+      data: products,
       placeholder: { id: null, text: 'Slec. producto', selected: true }
     })
     .val(null)
     .trigger('change')
     .on('select2:opening select2:closing', function (e) {
-      if (read) e.preventDefault();
+      if (read && !edit) e.preventDefault();
     });
 
   $('.products')
@@ -669,17 +793,33 @@ function setProduct(elem, after = true, read = false) {
 
   newElemnt.find('.products, .cantidad').on('change', function () {
     if (this.name === 'producto') {
-      const unitario = products.find(e => e.id == this.value)?.precio ?? 0;
-      $(this).siblings('input[name="unitario"]').val(unitario);
+      const prod = products.find(e => e.id == this.value);
+      $(this)
+        .siblings('input.unitario')
+        .val(prod?.precio ?? 0)
+        .siblings('input.name')
+        .val(prod?.text ?? '');
+
       if (!read) setOptions(this);
     }
 
     console.log(this.name, 'change');
 
-    calcTotal(this);
+    calcTotal();
   });
 
   $('.select2-container').css('width', '100%', 'important');
+
+  const elements = edit
+    ? $('.pedido')
+    : $('.pedido input.code[value=""]')
+        .parents('.pedido')
+        .not(read ? newElemnt : '');
+
+  if (elements.length < 2) elements.find('.delet').prop('disabled', true).hide();
+  else elements.find('.delet').prop('disabled', false).show();
+
+  // $('.pedido:last').find('.add').prop('disabled', false).show()
 
   return newElemnt;
 }
@@ -690,20 +830,25 @@ function setOptions(elem) {
   if (elem.value)
     $('input.code[value=""]')
       .siblings('.products')
+      .not($(elem))
       .find(`option[value="${elem.value}"]`)
       .prop('disabled', true);
   // $('.products').not($(elem)).find(`option[value="${elem.value}"]`).prop('disabled', true);
 
-  if (oldVal) $('.products').not($(elem)).find(`option[value="${oldVal}"]`).prop('disabled', false);
-  else $(elem).data('oldVal', elem.value);
+  if (oldVal) $('.products').find(`option[value="${oldVal}"]`).prop('disabled', false);
+  $(elem).data('oldVal', elem.value);
 }
 
 function deleteProduct(elem) {
   const element = $(elem).parents('.form-row');
-  if (element.has('unico')) element.hide('slow');
-  else
-    element.hide('slow', function () {
-      $(this).remove();
-    });
-  calcTotal('.products');
+  const cod = element.find('input.code').val();
+  const elements = cod ? $('.pedido input.code[value!=""]') : $('.pedido input.code[value=""]');
+
+  if (elements.length < 3)
+    elements.parents('.form-row').find('.delet').prop('disabled', true).hide();
+
+  return element.hide('slow', function () {
+    $(this).remove();
+    calcTotal();
+  });
 }
