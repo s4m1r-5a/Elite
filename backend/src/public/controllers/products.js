@@ -118,7 +118,83 @@ const selects = (items, tex) => {
   return '';
 };
 
-const producto = data => {
+const producto = ({ name, imagen, precio, items, descripcion, type, id }) => {
+  const diff = type !== 'UNITARIO';
+  const rcta = type === 'RECETA';
+  const car = caritems.find(e => e.id == id) ?? null;
+
+  return `<div class='list-group shadow-lg mb-2'>
+    <a class='list-group-item list-group-item-action rounded d-flex align-items-center pl-1' role='button' href='javascript:void 0'>
+      <img 
+        src='${imagen || '/img/subir.png'}' 
+        class='img-thumbnail avatar img-fluid rounded select-none' 
+        alt='image' style='width: 90px; height: 90px;'
+      />
+      <div class='flex-grow-1 pl-2'>
+        <div class='d-flex w-100 justify-content-between op'>
+          <h4 class='mb-1 d-inline-block text-truncate' style='font-weight: bold; font-family: cursive; color: unset; max-width: 40vw;'>
+            ${name} ${diff ? '' : items[0].nombre}
+          </h4>
+          <small style='font-weight: bold; color: unset;'>
+            ${!precio && items.length > 1 ? '+-' : ''}
+            ${currency(precio || Math.min(...items.map(e => e.valor)), true)}
+          </small>
+        </div>
+        <p class='d-inline-block text-truncate mb-1 ml-0 text-left op' style='max-width: 60vw;'>
+          ${
+            diff
+              ? descripcion
+              : items[0].cantidad + measuring.find(e => e.val === items[0].umedida)?.tag ??
+                'Sin info'
+          }
+        </p>
+        <div class='d-flex w-100 justify-content-between align-items-center'>
+          <small class='op'>Saber mas aqui</small>
+          <div class='d-flex align-items-center'>
+            ${
+              !precio && items.length > 1
+                ? ''
+                : '<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-heart mr-3"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path></svg>'
+            }
+
+            ${
+              !precio && items.length > 1
+                ? `<button type='button' class='btn btn-outline-primary btn-sm' style='border-radius: 1rem;'>
+                      Seleccionar
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-slack"><path d="M14.5 10c-.83 0-1.5-.67-1.5-1.5v-5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5z"></path><path d="M20.5 10H19V8.5c0-.83.67-1.5 1.5-1.5s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"></path><path d="M9.5 14c.83 0 1.5.67 1.5 1.5v5c0 .83-.67 1.5-1.5 1.5S8 21.33 8 20.5v-5c0-.83.67-1.5 1.5-1.5z"></path><path d="M3.5 14H5v1.5c0 .83-.67 1.5-1.5 1.5S2 16.33 2 15.5 2.67 14 3.5 14z"></path><path d="M14 14.5c0-.83.67-1.5 1.5-1.5h5c.83 0 1.5.67 1.5 1.5s-.67 1.5-1.5 1.5h-5c-.83 0-1.5-.67-1.5-1.5z"></path><path d="M15.5 19H14v1.5c0 .83.67 1.5 1.5 1.5s1.5-.67 1.5-1.5-.67-1.5-1.5-1.5z"></path><path d="M10 9.5C10 8.67 9.33 8 8.5 8h-5C2.67 8 2 8.67 2 9.5S2.67 11 3.5 11h5c.83 0 1.5-.67 1.5-1.5z"></path><path d="M8.5 5H10V3.5C10 2.67 9.33 2 8.5 2S7 2.67 7 3.5 7.67 5 8.5 5z"></path></svg>
+                    </button>`
+                : `<span class='badge badge-primary d-flex justify-content-between' style='border-radius: 10rem;'>
+                    <div class='minctd pr-2' style='display: ${car ? 'block' : 'none'};'>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                        class="feather feather-20 feather-trash-2" 
+                        style='display: ${car?.cantidad < 2 ? 'block' : 'none'};'
+                      >
+                        <polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line>
+                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" 
+                        class="feather feather-20 feather-minus-circle" 
+                        style='display: ${car?.cantidad > 1 ? 'block' : 'none'};'
+                      >
+                        <circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line>
+                      </svg>
+                    </div>
+                    <input 
+                      class='cantidad invisible-input text-center' type='text' name='cantidad' 
+                      value='${car?.cantidad ?? ''}'  style='display: ${car ? 'block' : 'none'};'
+                    />
+                    <div class='maxctd pl-2'>
+                      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-20 feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>
+                    </div>
+                  </span>`
+            } 
+          </div>
+        </div>
+      </div>
+    </a>
+  </div>`;
+};
+
+const producto2 = data => {
   const { name, imagen, precio, items, descripcion, type, id } = data;
   const diff = type !== 'UNITARIO';
   const rcta = type === 'RECETA';
@@ -403,9 +479,7 @@ const prices = $('#prices').DataTable({
     {
       data: 'id',
       className: 'p-0',
-      render: (data, method, row) => {
-        return producto(row);
-      }
+      render: (data, method, row) => producto(row)
     },
     { data: 'name' },
     {
@@ -417,12 +491,15 @@ const prices = $('#prices').DataTable({
   initComplete: function (settings, { data }) {
     console.log({ data });
     changeOptions();
+    $('.feather-heart').click(function () {
+      $(this).toggleClass('filled');
+    });
   }
 });
 
 prices.on('click', 'td .eliminar', function () {
   const fila = $(this).parents('tr');
-  const padre = $(this).parents('.no-gutters');
+  const padre = $(this).parents('.list-group');
   const { id, items, type } = prices.row(fila).data();
   const val = padre.find('.linkSelect').val() || null;
   const ref = items.filter(e => (val ? e.ref === val : e.refId)).map(e => e.refId);
@@ -494,7 +571,7 @@ prices.on('click', 'td .editar', function () {
 
 prices.on('change', 'td .linkSelect', function () {
   const fila = $(this).parents('tr');
-  const padre = $(this).parents('.no-gutters');
+  const padre = $(this).parents('.list-group');
   const { precio, items } = prices.row(fila).data();
 
   if (!this.value) {
@@ -511,27 +588,58 @@ prices.on('change', 'td .linkSelect', function () {
 });
 
 prices.on('click', 'td .minctd', function () {
-  const input = $(this).parent().siblings('input.cantidad');
+  const padre = $(this).parents('.list-group');
+  const input = padre.find('input.cantidad');
   input.val(parseInt(input.val() || 0) - 1).trigger('change');
 });
 
 prices.on('click', 'td .maxctd', function () {
-  const input = $(this).parent().siblings('input.cantidad');
+  const padre = $(this).parents('.list-group');
+  $(this).siblings().show('slow');
+  const input = padre.find('input.cantidad');
   input.val(parseInt(input.val() || 0) + 1).trigger('change');
 });
 
 prices.on('change', 'td .cantidad', function () {
-  const padre = $(this).parents('.no-gutters');
-  const elements = padre.find('.minctd, .addcar');
-  if (this.value < 1) elements.prop('disabled', true);
-  else elements.prop('disabled', false);
+  const fila = $(this).parents('tr');
+  const padre = $(this).parents('.list-group');
+  const { id, name, precio, items, type, imagen, ...rest } = prices.row(fila).data();
+
+  if (this.value < 1) padre.find('.maxctd').siblings().hide('slow');
+  else if (this.value == 1)
+    padre.find('.minctd .feather-trash-2').show().next('.feather-minus-circle').hide();
+  else padre.find('.minctd .feather-trash-2').hide().next('.feather-minus-circle').show();
+
+  const ref = null;
+  const referencia = type === 'UNITARIO' ? items.find(e => e.ref === ref) ?? items[0] : null;
+  const cantidad = parseInt(this.value ?? 0);
+
+  const price = precio ? precio : referencia?.valor ?? 0;
+  const nombre = referencia ? name + ' ' + referencia?.nombre : name;
+
+  let data = {
+    id: id + (referencia?.refId ? '-' + referencia?.refId : ''),
+    product: id,
+    ref: referencia?.ref,
+    refId: referencia?.refId,
+    image: referencia?.img ?? (imagen || '/img/subir.png'),
+    name: nombre?.toLowerCase(),
+    precio: price,
+    total: price * cantidad,
+    cantidad
+  };
+
+  caritems = caritems.filter(e => e.id !== data.id);
+  caritems.push(data);
+
+  return addItemsCar();
 });
 
 prices.on('click', 'td .addcar', function () {
   const fila = $(this).parents('tr');
-  const padre = $(this).parents('.no-gutters');
+  const padre = $(this).parents('.list-group');
 
-  const { id, name, precio, items, type, ...rest } = prices.row(fila).data();
+  const { id, name, precio, items, type, imagen, ...rest } = prices.row(fila).data();
   const ref = padre.find('.linkSelect').val() ?? null;
   const referencia = type === 'UNITARIO' ? items.find(e => e.ref === ref) ?? items[0] : null;
   const cantidad = parseInt(padre.find('.cantidad').val() ?? 0);
@@ -544,7 +652,8 @@ prices.on('click', 'td .addcar', function () {
     product: id,
     ref: referencia?.ref,
     refId: referencia?.refId,
-    name: nombre,
+    image: referencia?.img ?? (imagen || '/img/subir.png'),
+    name: nombre?.toLowerCase(),
     precio: price,
     total: price * cantidad,
     cantidad
@@ -561,18 +670,8 @@ prices.on('click', 'td .addcar', function () {
 
   padre.find('.cantidad, .linkSelect').val(null).trigger('change');
 
-
-  caritems.forEach(row => {
-    const elements = setItemsCar(row?.id).find('input, span, h4, h5');
-    return setRowss(elements, row);
-  });
-
-  $('#AddCar').modal({ toggle: true, backdrop: 'static', keyboard: true });
+  // $('#AddCar').modal({ toggle: true, backdrop: 'static', keyboard: true });
   addItemsCar();
-});
-
-$('#AddCar').on('hidden.bs.modal', function (e) {
-  $('#referencias .referencia').remove();
 });
 
 $('#AddProduct').on('hidden.bs.modal', function (e) {

@@ -1,19 +1,151 @@
-<main class='content px-1 px-md-4'>
-  <div class='card shadow-lg mb-5 rounded'>
-    <div class='card-body rounded-top rounded-bottom px-2 px-md-4'>
-      <div class='row'>
-        <div class='col-12 col-md-8'>
-          <table id='prices' class='table table-striped display nowrap w-100'>
-            <tbody></tbody>
-          </table>
-        </div>
-        <div class='col-12 col-md-4'>
-          <div class='card' style='width: 18rem;'>
-            <img src='/img/avatars/avatar.svg' class='card-img-top' alt='...' />
+<main class='content px-0 px-md-2 py-3'>
+  <div class='container-fluid'>
+    <div class='d-flex w-100 justify-content-between shadow-lg rounded'>
+      <div class='flex-grow-1 p-2 p-md-4'>
+
+        <table id='prices' class='table display nowrap w-100' style='font-size: inherit;'>
+          <tbody></tbody>
+        </table>
+      </div>
+      <div class='d-none d-md-block' style='width: 30rem;'>
+        <div id='myHeader'>
+          <div class='card shadow-lg rounded mt-2' style='width: 30rem; max-height: 33rem'>
+            <div class='card-header rounded d-flex'>
+              <img src='/img/subir.png' class='img-thumbnail img-fluid rounded' width='150' />
+              <div class='flex-grow-1 pl-3 row'>
+                <div class='col-12'>
+                  <h3 class='mt-3 float-right' style='font-weight: bold;'>
+                    $ 13,000.86
+                  </h3>
+                </div>
+                <div class='col-12'>
+                  <h2 class='' style='font-weight: bold; font-family: cursive;'>
+                    ljslkfjsd;ljfsljflsdfs
+                  </h2>
+                </div>
+                <div class='col-12 d-flex align-items-center'>
+                  <svg
+                    xmlns='http://www.w3.org/2000/svg'
+                    width='24'
+                    height='24'
+                    viewBox='0 0 24 24'
+                    fill='none'
+                    stroke='currentColor'
+                    stroke-width='2'
+                    stroke-linecap='round'
+                    stroke-linejoin='round'
+                    class='feather feather-heart mr-3'
+                  >
+                    <path
+                      d='M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z'
+                    ></path>
+                  </svg>
+                  <span
+                    class='badge badge-primary d-flex justify-content-between'
+                    style='border-radius: 10rem;'
+                  >
+                    <div class='minctd pr-2'>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='24'
+                        height='24'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        stroke-width='2'
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                        class='feather feather-20 feather-trash-2'
+                        style='display: none;'
+                      >
+                        <polyline points='3 6 5 6 21 6'></polyline><path
+                          d='M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2'
+                        ></path><line x1='10' y1='11' x2='10' y2='17'></line><line
+                          x1='14'
+                          y1='11'
+                          x2='14'
+                          y2='17'
+                        ></line>
+                      </svg>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='24'
+                        height='24'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        stroke-width='2'
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                        class='feather feather-20 feather-minus-circle'
+                      >
+                        <circle cx='12' cy='12' r='10'></circle><line
+                          x1='8'
+                          y1='12'
+                          x2='16'
+                          y2='12'
+                        ></line>
+                      </svg>
+                    </div>
+                    <input
+                      class='cantidad invisible-input text-center'
+                      type='text'
+                      name='cantidad'
+                      value='2'
+                    />
+                    <div class='maxctd pl-2'>
+                      <svg
+                        xmlns='http://www.w3.org/2000/svg'
+                        width='24'
+                        height='24'
+                        viewBox='0 0 24 24'
+                        fill='none'
+                        stroke='currentColor'
+                        stroke-width='2'
+                        stroke-linecap='round'
+                        stroke-linejoin='round'
+                        class='feather feather-20 feather-plus-circle'
+                      ><circle cx='12' cy='12' r='10'></circle><line
+                          x1='12'
+                          y1='8'
+                          x2='12'
+                          y2='16'
+                        ></line><line x1='8' y1='12' x2='16' y2='12'></line></svg>
+                    </div>
+                  </span>
+                </div>
+              </div>
+            </div>
             <div class='card-body'>
-              <h5 class='card-title'>INMOVILII</h5>
-              <p class='card-text'>La plataforma ideal para grandes y pequeños negocios, no esperes
-                mas ven y registra tu negocio es gratis</p>
+              <small class='text-muted'>Descripcion:</small>
+              <p class='card-text'>La plataforma ideal para grandes y pequeños negocios.</p>
+              <small class='text-muted'>Caracteristicas:</small>
+              <div class='row'>
+                <div class='col-6'>
+                  <i class='fa fa-circle fa-xs mr-1'></i>
+                  <span class='text-capitalize'>
+                    Modelo: Gtrps
+                  </span>
+                </div>
+                <div class='col-6'>
+                  <i class='fa fa-circle fa-xs mr-1'></i>
+                  <span class='text-capitalize'>
+                    Referencia: Gtrps
+                  </span>
+                </div>
+                <div class='col-6'>
+                  <i class='fa fa-circle fa-xs mr-1'></i>
+                  <span class='text-capitalize'>
+                    Clase: Generica
+                  </span>
+                </div>
+                <div class='col-6'>
+                  <i class='fa fa-circle fa-xs mr-1'></i>
+                  <span class='text-capitalize'>
+                    Serie: Andjfoieee
+                  </span>
+                </div>
+              </div>
             </div>
             <ul class='list-group list-group-flush'>
               <li class='list-group-item'>Manejo de inventario</li>

@@ -1,3 +1,78 @@
+.feather-heart {
+  transition: fill 0.3s ease;
+}
+
+.feather-heart:hover {
+  fill: red; /* Cambia a tu color deseado */
+}
+
+.feather-heart.filled {
+  fill: red; /* Cambia a tu color deseado */
+}
+
+.select-auto {
+  user-select: auto;
+}
+
+.select-none {
+  -webkit-user-select: none; /* Safari */
+  -moz-user-select: none; /* Firefox */
+  -ms-user-select: none; /* Internet Explorer/Edge */
+  user-select: none; /* Standard */
+}
+
+.select-text {
+  user-select: text;
+}
+
+.select-all {
+  -webkit-user-select: all; /* Safari */
+  -moz-user-select: all; /* Firefox */
+  -ms-user-select: all; /* Internet Explorer/Edge */
+  user-select: all; /* Standard */
+}
+
+.select-contain {
+  user-select: contain;
+}
+
+.badge-input {
+  position: relative;
+}
+
+.badge-input input {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.badge-input .badge {
+  display: inline-block;
+  cursor: pointer;
+}
+
+.invisible-input {
+  border: none;
+  background: transparent;
+  color: inherit; /* Heredar el color del texto del contenedor */
+  font-size: inherit; /* Heredar el tamaño de fuente del contenedor */
+  font-weight: bold;
+  outline: none; /* Eliminar el borde del enfoque */
+  width: 40px; /* O ajustar según sea necesario */
+}
+
+.invisible-input::placeholder {
+  color: #ccc; /* Color del texto del placeholder */
+}
+
+.input-container {
+  display: inline-block;
+  border-bottom: 1px solid #ccc; /* Línea inferior para dar contexto */
+}
+
 a:link,
 a:hover,
 a:active,
@@ -40,6 +115,26 @@ a:hover {
 .feather-md2 {
   width: 25px; /* Cambia el ancho del SVG según sea necesario */
   height: 25px; /* Cambia la altura del SVG según sea necesario */
+}
+
+.feather-20 {
+  width: 20px; /* Cambia el ancho del SVG según sea necesario */
+  height: 20px; /* Cambia la altura del SVG según sea necesario */
+}
+
+.feather-24 {
+  width: 24px; /* Cambia el ancho del SVG según sea necesario */
+  height: 24px; /* Cambia la altura del SVG según sea necesario */
+}
+
+.feather-28 {
+  width: 28px; /* Cambia el ancho del SVG según sea necesario */
+  height: 28px; /* Cambia la altura del SVG según sea necesario */
+}
+
+.feather-32 {
+  width: 32px; /* Cambia el ancho del SVG según sea necesario */
+  height: 32px; /* Cambia la altura del SVG según sea necesario */
 }
 
 table {

@@ -58,131 +58,90 @@ $.jMaskGlobals = {
 let caritems = JSON.parse(localStorage.getItem('caritems') ?? '[]');
 
 const refCar = refCar => {
-  return `<div class='card shadow-lg mb-2 rounded position-relative overflow-auto referencia'>
-    <div
-      class='d-flex align-items-center align-content-center flex-wrap'      
-      style='background-color: #FCF3CF !important;'
-    >
-      <div class='p-1 flex-grow-1 w-50'>
-        <h4 class='m-0 text-truncate' title='name' style="max-width: 95%;"></h4>
-        <span class='badge badge-info' title='ref'></span>
-        <span title='precio'></span>        
-      </div>
-      <div 
-        class='p-1'
-        type='button'
-        data-toggle='collapse'
-        data-target='#referencia_${refCar}'
-        aria-expanded='false'
-        aria-controls='referencia_${refCar}'
-      >
-        x <span class='badge badge-info ctd' title='cantidad'></span>
-        <a><i class='fas fa-fw fa-angle-down'></i></a>
-        <br class='d-block d-md-none'/> 
-        <span class='d-block d-md-none total' title='total'></span>
-      </div>
-      <div class='p-1 d-none d-md-block'>
-        <span class='total' title='total'></span>
-      </div>
-      <div class='py-1 px-2'>
-        <a class="deleteProduct">
-          <i class='far fa-times-circle fa-2x'></i>          
-        </a>
-      </div>      
+  return `<li class='list-group-item list-group-item-action d-flex align-items-center referencia'>
+    <img
+      src='/img/avatars/avatar-5.jpg'
+      class='avatar img-fluid rounded-circle select-none'
+      alt='image'
+    />
+    <div class='flex-grow-1 px-2 w-50'>
+      <span class="font-weight-light text-truncate text-capitalize select-none" title='name'></span> </br> 
+      <small class="text-muted text-monospace select-none" title='precio'></small> 
+      <span class='badge badge-info select-all' title='ref'></span> 
     </div>
-
-    <div
-      id='referencia_${refCar}'
-      class='collapse show px-2'
-      aria-labelledby='headingOne'
-      data-parent='#referencias'
-    >
-      <div class='d-flex align-items-center align-content-center flex-wrap'> 
-        <div class='p-1 flex-grow-1 w-50 text-truncate'>Agrega mas al carrito</div>
-        <div class='p-2'>
-          <div class='input-group input-group-sm'>
-            <div class='input-group-prepend' title='Disminuir cantidad'>
-              <button type="button" class='btn btn-outline-primary minctd'>
-                <i class='fas fa-fw fa-minus'></i>
-              </button>
-            </div>
-            <input class='form-control text-center cantidad' type='text' name='cantidad' placeholder='Ctd.' style="width: 50px;" />
-            <div class='input-group-append' title='Aumentar cantidad'>
-              <button type="button" class='btn btn-outline-primary maxctd'>
-                <i class='fas fa-fw fa-plus'></i>
-              </button>
-            </div>
-          </div>
+    <div> 
+      <small class="text-muted text-monospace float-right total" title='total'></small> </br>
+      <div class='input-group input-group-sm'>
+        <div class='input-group-prepend' title='Disminuir cantidad'>
+          <a class="minctd px-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-minus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="8" y1="12" x2="16" y2="12"></line></svg>  
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-trash-2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path><line x1="10" y1="11" x2="10" y2="17"></line><line x1="14" y1="11" x2="14" y2="17"></line></svg>        
+          </a>
+        </div>
+        <div class="badge-input">
+          <span class="badge badge-primary badge-pill select-all" title='cantidad' style='width: 42px;'></span>
+          <input class='cantidad' type="text" name='cantidad' value="0" style='width: 42px;'>
+        </div>
+        <div class='input-group-append' title='Aumentar cantidad'>
+          <a class="maxctd px-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="feather feather-plus-circle"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="16"></line><line x1="8" y1="12" x2="16" y2="12"></line></svg>          
+          </a>
         </div>
       </div>
-    </div>
-  </div>`;
+    </div>    
+  </li>`;
 };
 
 const setRowss = (productos, data) => {
   productos.each(function () {
     if ($(this).is('input')) this.value = data[this.name] ?? null;
+    else if ($(this).is('img')) $(this).prop('src', data[this.alt]);
     else
       this.innerText = /precio|total/.test(this.title)
-        ? Moneda(data[this.title], true)
+        ? currency(data[this.title], true)
         : data[this.title] ?? '';
   });
 };
 
 const addItemsCar = () => {
   // console.log('entro por aqui', caritems);
-  $('#itemsCar').text(caritems.length)[caritems.length ? 'show' : 'hide']();
-  $('#msgCar').text(`${caritems.length} Productos En Carrito`);
-  $('#listCar').html(
-    caritems
-      .map(
-        e => `
-      <a href='#' class='list-group-item'>
-        <div class='row no-gutters align-items-center'>
-          <div class='col-2'>
-            <img
-              src='/img/avatars/avatar-5.jpg'
-              class='avatar img-fluid rounded-circle'
-              alt='Ashley Briggs'
-            />
-          </div>
-          <div class='col-10 pl-2'>
-            <div class='text-dark'>Ashley Briggs</div>
-            <div class='text-muted small mt-1'>Nam pretium turpis et arcu. Duis arcu tortor.
-            </div>
-            <div class='text-muted small mt-1'>15m ago</div>
-          </div>
-        </div>
-      </a>`
-      )
-      .join('')
-  );
-  // console.log('caritems', JSON.stringify(caritems), caritems);
 
+  $('#itemsCar').text(caritems.length)[caritems.length ? 'show' : 'hide']();
+  // console.log('caritems', JSON.stringify(caritems), caritems);
   localStorage.setItem('caritems', JSON.stringify(caritems));
 };
 
 document.addEventListener('DOMContentLoaded', function () {
   var header = document.getElementById('myHeader');
-  var sticky = header.offsetTop;
+  var sticky = header?.offsetTop;
   // console.log({ scrollY: window.scrollY, sticky });
 
   window.onscroll = function () {
     // console.log({ scrollY: window.scrollY, sticky });
-    if (window.scrollY > 83) {
-      header.classList.add('sticky');
+    if (window.scrollY > sticky) {
+      header?.classList?.add('sticky');
     } else {
-      header.classList.remove('sticky');
+      header?.classList?.remove('sticky');
     }
   };
 });
 
 $(document).ready(function () {
-  caritems.forEach(row => {
-    const elements = setItemsCar(row?.id).find('input, span, h4, h5');
-    return setRowss(elements, row);
-  });
+  $('#carga').hide();
   addItemsCar();
+
+  $('#AddCar').on('hidden.bs.modal', function (e) {
+    $('#carga').hide();
+    $('#referencias .referencia').remove();
+  });
+
+  $('#AddCar').on('show.bs.modal', function (e) {
+    caritems.forEach(row => {
+      const elements = setItemsCar(row?.id).find('input, span, small, img');
+      setRowss(elements, row);
+      return elements.trigger('change');
+    });
+  });
 
   $('.cifra')
     .keyup(function () {
@@ -215,14 +174,9 @@ function setItemsCar(id) {
 
   $('#referencias').append(refCar(code));
 
-  const newElemnt = $('#referencias').find('.card:last');
-
-  $('.collapse').not(`#referencia_${code}`).collapse('hide');
-
-  $(`#referencia_${code}`).collapse('show');
-
+  const newElemnt = $('#referencias').find('li:last');
   newElemnt
-    .find('.deleteProduct')
+    .find('a')
     .hover(
       function () {
         $(this).css('color', '#000000');
@@ -231,45 +185,62 @@ function setItemsCar(id) {
         $(this).css('color', '#bfbfbf');
       }
     )
-    .click(function () {
-      newElemnt.hide('slow', function () {
-        caritems = caritems.filter(e => e.idref === code);
-        addItemsCar();
-        $(this).remove();
-      });
-    })
     .css('color', '#bfbfbf');
 
+  newElemnt.find('.deleteProduct').click(function () {
+    newElemnt.hide('slow', function () {
+      caritems = caritems.filter(e => e.id === code);
+      addItemsCar();
+      $(this).remove();
+    });
+  });
+
   newElemnt.on('click', '.minctd', function () {
-    const input = $(this).parent().siblings('input.cantidad');
+    const input = $(this).parents('.input-group').find('input.cantidad');
     input.val(parseInt(input.val() || 0) - 1).trigger('change');
   });
 
   newElemnt.on('click', '.maxctd', function () {
-    const input = $(this).parent().siblings('input.cantidad');
+    const input = $(this).parents('.input-group').find('input.cantidad');
     input.val(parseInt(input.val() || 0) + 1).trigger('change');
   });
 
   newElemnt.on('change', '.cantidad', function () {
     if (this.value < 1) {
-      caritems = caritems.filter(e => e.idref !== code);
+      caritems = caritems.filter(e => e.id !== code);
       newElemnt.hide('slow', function () {
         $(this).remove();
       });
     } else {
       caritems = caritems.map(e => {
-        if (e.idref === code) {
+        if (e.id === code) {
           data = { cantidad: parseInt(this.value), total: e.precio * this.value };
-          newElemnt.find('span.ctd, span.total').each(function () {
-            this.innerText = this.title === 'total' ? Moneda(data[this.title]) : data[this.title];
-          });
+          newElemnt.find('small.total').text(currency(data.total, true));
           return { ...e, ...data };
         }
         return e;
       });
+      if (this.value == 1)
+        newElemnt.find('.feather-minus-circle').hide().next('.feather-trash-2').show('slow');
+      else newElemnt.find('.feather-trash-2').hide().prev('.feather-minus-circle').show('slow');
     }
 
+    $(this).prev('.badge').text(this.value);
+
     addItemsCar();
+  });
+
+  // Sincronizar el valor del input con el badge
+  newElemnt.find('.cantidad').on('input', function () {
+    $(this).prev('.badge').text($(this).val());
+    if (this.value == 1)
+      newElemnt.find('.feather-minus-circle').hide().next('.feather-trash-2').show('slow');
+    else newElemnt.find('.feather-trash-2').hide().prev('.feather-minus-circle').show('slow');
+  });
+
+  // Mostrar el input al hacer clic en el badge
+  newElemnt.find('.badge-input .badge').on('click', function () {
+    $(this).next('input').focus().select();
   });
 
   return newElemnt;

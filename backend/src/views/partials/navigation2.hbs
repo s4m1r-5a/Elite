@@ -15,11 +15,11 @@
 
     <div class='navbar-collapse collapse'>
       <ul class='navbar-nav ml-auto'>
-        <li class='nav-item dropdown'>
+        {{! <li class='nav-item dropdown'>
           <a class='nav-icon dropdown-toggle' href='#' id='messagesDropdown' data-toggle='dropdown'>
             <div class='position-relative'>
-              <i class='align-middle' data-feather='shopping-cart'></i>
-              <span id='itemsCar' class='indicator' style='display: none;'>4</span>
+              <i class='align-middle' data-feather='message-circle'></i>
+              <span class='indicator'>4</span>
             </div>
           </a>
           <div
@@ -27,11 +27,11 @@
             aria-labelledby='messagesDropdown'
           >
             <div class='dropdown-menu-header'>
-              <div id='msgCar' class='position-relative'>
-                Carrito vacio
+              <div class='position-relative'>
+                4 New Messages
               </div>
             </div>
-            <div id='listCar' class='list-group'>
+            <div class='list-group'>
               <a href='#' class='list-group-item'>
                 <div class='row no-gutters align-items-center'>
                   <div class='col-2'>
@@ -49,12 +49,68 @@
                   </div>
                 </div>
               </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-2.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Carl Jenkins'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Carl Jenkins</div>
+                    <div class='text-muted small mt-1'>Curabitur ligula sapien euismod vitae.</div>
+                    <div class='text-muted small mt-1'>2h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-4.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Stacie Hall'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Stacie Hall</div>
+                    <div class='text-muted small mt-1'>Pellentesque auctor neque nec urna.</div>
+                    <div class='text-muted small mt-1'>4h ago</div>
+                  </div>
+                </div>
+              </a>
+              <a href='#' class='list-group-item'>
+                <div class='row no-gutters align-items-center'>
+                  <div class='col-2'>
+                    <img
+                      src='/img/avatars/avatar-3.jpg'
+                      class='avatar img-fluid rounded-circle'
+                      alt='Bertha Martin'
+                    />
+                  </div>
+                  <div class='col-10 pl-2'>
+                    <div class='text-dark'>Bertha Martin</div>
+                    <div class='text-muted small mt-1'>Aenean tellus metus, bibendum sed, posuere
+                      ac, mattis non.</div>
+                    <div class='text-muted small mt-1'>5h ago</div>
+                  </div>
+                </div>
+              </a>
             </div>
             <div class='dropdown-menu-footer'>
-              <a href='#' data-toggle='modal' data-target='#AddCar' class='text-muted'>Mostrar
-                carrito</a>
+              <a href='#' class='text-muted'>Show all messages</a>
             </div>
           </div>
+        </li> }}
+        <li class='nav-item dropdown'>
+          <a class='nav-icon' href='#' data-toggle='modal' data-target='#AddCar'>
+            <div class='position-relative'>
+              <i class='align-middle' data-feather='shopping-cart'></i>
+              <span id='itemsCar' class='indicator' style='display: none;'>4</span>
+            </div>
+          </a>
         </li>
         <li class='nav-item dropdown'>
           <a class='nav-icon dropdown-toggle' href='#' id='alertsDropdown' data-toggle='dropdown'>
@@ -757,7 +813,7 @@
 
 <!-- BEGIN CARRITO DE COMPRAS modal -->
 <div class='modal fade' id='AddCar' tabindex='-1' role='dialog' aria-hidden='true'>
-  <div class='modal-dialog modal-dialog-centered modal-md' role='document'>
+  <div class='modal-dialog modal-dialog-centered modal-sm' role='document'>
     <form id='carrito' enctype='multipart/form-data' class='w-100'>
       <div class='modal-content card position-relative'>
         <div
@@ -770,24 +826,25 @@
             <strong class='mt-2'>Cargando...</strong>
           </div>
         </div>
-        <div class='modal-header'>
-          <h3 class='modal-title'>Carrito de compras</h3>
+        <div class='modal-header d-flex'>
+          <div>
+            <h3 class='modal-title'>Carrito de compras</h3>
+            <small class='text-muted'>Aqui encontraras todos los productos proxiomos a genera una orden
+              de compra</small>
+          </div>
           <a class='r atras close float-right' data-dismiss='modal' aria-label='Close'>
             <i class='feather-lg' data-feather='x-circle'></i>
           </a>
         </div>
-        <div class='modal-body p-3 bg-light'>
-          <div class='accordion' id='referencias'></div>
-        </div>
+        <ul class='list-group list-group-flush my-3' id='referencias'></ul>
         <div class='modal-footer'>
           <button
-            class='btn btn-outline-danger d-flex align-items-center'
+            class='btn btn-outline-danger'
             id='deleteCar'
             data-dismiss='modal'
             aria-label='Close'
           >
             <i class='fas fa-fw fa-trash'></i>
-            <span class='d-none d-md-block'>Eliminar</span>
           </button>
           <button class='btn btn-outline-primary' data-dismiss='modal' aria-label='Close'>
             <i class='fas fa-fw fa-cart-plus'></i>
