@@ -107,7 +107,7 @@
                     placeholder='Describe tu producto de forma general'
                   ></textarea>
                 </div>
-                <div class='form-group col-6 ini inic'>
+                {{!-- <div class='form-group col-6 ini inic'>
                   <input
                     class='form-control edi text-center num'
                     type='text'
@@ -124,7 +124,7 @@
                     placeholder='Coste inicial'
                     required
                   />
-                </div>
+                </div> --}}
                 <div class='form-group col-md-12 d-flex justify-content-between align-items-center'>
                   <div>
                     <small>Cantidades:</small>
@@ -152,7 +152,7 @@
           <div class='accordion' id='references'></div>
 
           <hr class='mt-0' />
-          <div class='d-flex align-items-center align-content-center flex-wrap'>
+          {{!-- <div class='d-flex align-items-center align-content-center flex-wrap'>
             <div class='px-2 flex-grow-1'>Referencias</div>
             <div class='px-2'>
               <button type='button' class='btn btn-sm btn-outline-primary' onclick='setRef()'>
@@ -166,13 +166,18 @@
                 Caracteristica
               </button>
             </div>
-          </div>
+          </div> --}}
 
           <hr />
 
           <div class='d-flex align-items-center align-content-center flex-wrap'>
             <div class='p-2 flex-grow-1'>--- Caracteristicas --------------</div>
-            <div class='p-2'><i data-feather='plus'></i></div>
+            <div class='p-2'>
+              <button type='button' class='btn btn-sm btn-outline-primary' onclick='setProduct()'>
+                <i class='fas fa-fw fa-plus'></i>
+                Caracteristica
+              </button>
+            </div>
           </div>
 
           <ul class='list-group list-group-flush my-3 krt referencia'>

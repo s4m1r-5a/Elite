@@ -222,6 +222,7 @@ $(document).ready(function () {
     .keypress(function (event) {
       if (event.which == 13) {
         event.preventDefault();
+        $(this).trigger('change');
         $('#cantidad').trigger('click');
       }
     })
@@ -417,19 +418,33 @@ articulos.on('click', 'td .editar', async function () {
       $(this).tooltip('hide').remove();
     });
 
-  if (data?.referencias?.length) {
-    for (const referencia of data.referencias) {
-      const { ref, obj } = referencia;
-      let elements = await setRef(ref).find('input, select');
-      const arr = await Object.entries(obj).map(e => ({
-        ['key_' + ref]: e[0],
-        ['value_' + ref]: e[1]
-      }));
+  // if (data?.referencias?.length) {
+  //   for (const referencia of data.referencias) {
+  //     const { ref, obj } = referencia;
+  //     let elements = await setRef(ref).find('input, select');
+  //     const arr = await Object.entries(obj).map(e => ({
+  //       ['key_' + ref]: e[0],
+  //       ['value_' + ref]: e[1]
+  //     }));
 
-      for (const [i, e] of arr.entries()) {
-        elements = !i ? elements : await setProduct(elements[1], ref).find('input, select');
-        await setRows(elements, e);
-      }
+  //     for (const [i, e] of arr.entries()) {
+  //       elements = !i ? elements : await setProduct(elements[1], ref).find('input, select');
+  //       await setRows(elements, e);
+  //     }
+  //   }
+  // }
+
+  if (data.caracteristicas) {
+    const obj = data.caracteristicas;
+    for (let prop in obj) {
+      const ref = ID(5);
+      options = [...options.filter(e => e.id !== prop), { id: prop, text: prop }];
+      console.log({ options });
+      element = setProduct(null, ref);
+      setRows(element.find('select, input'), {
+        [`tag_${ref}`]: prop,
+        [`values_${ref}`]: obj[prop]
+      });
     }
   }
 
@@ -440,18 +455,14 @@ articulos.on('click', 'td .editar', async function () {
     data.opciones.forEach(({ code, tag, value }) => {
       if (item !== tag) {
         ref = ID(5);
-        options = [...options.filter(e => e.id === tag), { id: tag, text: tag }];
+        options = [...options.filter(e => e.id !== tag), { id: tag, text: tag }];
+        console.log({ options });
         element = setProduct(null, ref);
         setRows(element.find('select'), { [`tag_${ref}`]: tag });
       }
       setItems(element, ref, value, code);
       item = tag;
     });
-  }
-
-  if (data.caracteristicas) {
-    const krt = Object.entries(data.caracteristicas).map(e => ({ key_krt: e[0], value_krt: e[1] }));
-    krt.forEach(e => setRows(setProduct().find('input, select'), e));
   }
 
   $('#AddProduct').modal({ toggle: true, backdrop: 'static', keyboard: true });

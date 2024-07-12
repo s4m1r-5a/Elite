@@ -16,32 +16,32 @@ const Movimiento = sequelize.define(
     articulo: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      references: {
+      /* references: {
         model: 'articulos',
         key: 'id'
       },
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE' */
     },
     referencia: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
+      /* references: {
         model: 'articulo_ref',
         key: 'id'
       },
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE' */
     },
     orden: {
       type: DataTypes.INTEGER,
       allowNull: true,
-      references: {
+      /* references: {
         model: 'ordenes',
         key: 'id'
       },
       onDelete: 'CASCADE',
-      onUpdate: 'CASCADE'
+      onUpdate: 'CASCADE' */
     },
     tipo: {
       type: DataTypes.ENUM('VENTA', 'COMPRA', 'DEVOLUCION', 'AJUSTE', 'TRASLADO', 'PRODUCCION'),
