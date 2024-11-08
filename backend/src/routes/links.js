@@ -503,7 +503,24 @@ cron.schedule('0 10 13,15,27,30,31 * *', async () => {
   }
 });
 
-cron.schedule('0 9,15 * * 1,3,5', async () => {
+// cron.schedule('0 7 * * 1,3,5', async () => {
+//   const sql = `SELECT c.movil, d.empresa
+//     FROM preventa p
+//      INNER JOIN productosd l ON p.lote = l.id
+//      INNER JOIN productos d ON l.producto = d.id
+//      INNER JOIN clientes c ON p.cliente = c.idc
+//     WHERE
+//      p.tipobsevacion IS NULL AND d.proyect IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE')
+//     GROUP BY p.id`;
+//   const deudores = await pool.query(sql);
+
+//   for (const data of deudores) {
+//     const messagge = `COMUNICADO URGENTE: Estimado cliente proyectos Cañaveral Campestre y Altos de Cañaveral, la presente es con el fin de informarles, que debido a una circunstancia ajena a nuestra empresa, en estos momentos no podemos recibir dineros en las cuentas de ahorro número 085-226470-13 y 085-333552-94, por esta razón les informamos que los pagos por concepto de administración y pago de lotes, se estarán recibiendo en la cuenta de ahorros Bancolombia numero 085-386413-33  a nombre de David Saldarriaga Vanegas, identificado con C.C 1043641960, si tiene dudas acerca de este mensaje, puede comunicarse al número  de WhatsApp 3002851046 con el señor Habib Saldarriaga, para que corrobore la información.`;
+//     await WspNewUser(data.empresa, data.movil, messagge);
+//   }
+// });
+
+cron.schedule('0 15 * * 1,3,5', async () => {
   const sql = `SELECT p.id, l.mz, l.n, d.id idp, d.proyect, c.nombre, c.movil, c.email, d.empresa, 
       SUM(q.cuota) as deuda,  
       COUNT(q.id) as meses
@@ -567,6 +584,24 @@ cron.schedule('0 9,15 * * 1,3,5', async () => {
     );
   }
 });
+
+// cron.schedule('46 22 * * *', async () => {
+//   const sql = `SELECT c.movil, d.empresa
+//     FROM preventa p
+//      INNER JOIN productosd l ON p.lote = l.id
+//      INNER JOIN productos d ON l.producto = d.id
+//      INNER JOIN clientes c ON p.cliente = c.idc
+//     WHERE
+//      p.tipobsevacion IS NULL AND d.proyect IN('ALTOS DE CAÑAVERAL', 'CAÑAVERAL CAMPESTRE')
+//     GROUP BY p.id`;
+//   const deudores = await pool.query(sql);
+
+//   for (const data of deudores) {
+//     const messagge = `COMUNICADO URGENTE: Estimado cliente proyectos Cañaveral Campestre y Altos de Cañaveral, la presente es con el fin de informarles, que debido a una circunstancia ajena a nuestra empresa, en estos momentos no podemos recibir dineros en las cuentas de ahorro número 085-226470-13 y 085-333552-94, por esta razón les informamos que los pagos por concepto de administración y pago de lotes, se estarán recibiendo en la cuenta de ahorros Bancolombia numero 085-386413-33  a nombre de David Saldarriaga Vanegas, identificado con C.C 1043641960, si tiene dudas acerca de este mensaje, puede comunicarse al número  de WhatsApp 3002851046 con el señor Habib Saldarriaga, para que corrobore la información.`;
+//     await WspNewUser(data.empresa, data.movil, messagge);
+//   }
+//   console.log('se enviaron los mensaes');
+// });
 
 const usuras = async fecha => {
   const options = {
@@ -2649,7 +2684,9 @@ router.get('/productos', isLoggedIn, async (req, res) => {
 router.post('/productos', isLoggedIn, async (req, res) => {
   const pdo = await usuario(req.user, req.user.pin);
   const params = pdo ? `AND p.id IN(${pdo})` : '';
-  const fila = await pool.query('SELECT * FROM productos p WHERE p.estados != 15 ' + params);
+  const fila = await pool.query(
+    'SELECT * FROM productos p WHERE p.estados NOT IN(15, 16) ' + params
+  );
   respuesta = { data: fila };
   res.send(respuesta);
 });

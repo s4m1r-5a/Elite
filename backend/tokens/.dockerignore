@@ -1,0 +1,5 @@
+**/nginx-proxy-manager
+**/node_modules
+**/uploads
+**/mysql
+**/*.env
